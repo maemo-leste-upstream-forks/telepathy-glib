@@ -141,7 +141,7 @@ channel_request_cancel (gpointer data, gpointer user_data)
   channel_request_free (request);
 }
 
-typedef struct _TpBaseConnectionPrivate
+struct _TpBaseConnectionPrivate
 {
   /* Telepathy properties */
   gchar *protocol;
@@ -162,7 +162,16 @@ typedef struct _TpBaseConnectionPrivate
    * Note that this is a GArray of gchar*, not a GPtrArray,
    * so that we can use GArray's convenient auto-null-termination. */
   GArray *interfaces;
-} TpBaseConnectionPrivate;
+
+  /* Array of DBusGMethodInvocation * representing Disconnect calls.
+   * If NULL and we are in a state != DISCONNECTED, then we have not started
+   * shutting down yet.
+   * If NULL and we are in state DISCONNECTED, then we have finished shutting
+   * down.
+   * If not NULL, we are trying to shut down (and must be in state
+   * DISCONNECTED). */
+  GPtrArray *disconnect_requests;
+};
 
 static void
 tp_base_connection_get_property (GObject *object,
@@ -464,6 +473,10 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
   DEBUG("Post-construction: (TpBaseConnection *)%p", self);
 
   g_assert (cls->create_handle_repos != NULL);
+  g_assert (cls->create_channel_factories != NULL);
+  g_assert (cls->shut_down != NULL);
+  g_assert (cls->start_connecting != NULL);
+
   (cls->create_handle_repos) (self, priv->handles);
 
   /* a connection that doesn't support contacts is no use to anyone */
@@ -477,7 +490,6 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
       }
     }
 
-  g_assert (cls->create_channel_factories);
   priv->channel_factories = cls->create_channel_factories (self);
 
   for (i = 0; i < priv->channel_factories->len; i++)
@@ -789,11 +801,26 @@ tp_base_connection_disconnect (TpSvcConnection *iface,
 
   g_assert (TP_IS_BASE_CONNECTION (self));
 
+  if (self->priv->disconnect_requests != NULL)
+    {
+      g_assert (self->status == TP_CONNECTION_STATUS_DISCONNECTED);
+      g_ptr_array_add (self->priv->disconnect_requests, context);
+      return;
+    }
+
+  if (self->status == TP_CONNECTION_STATUS_DISCONNECTED)
+    {
+      /* status DISCONNECTED and disconnect_requests NULL => already dead */
+      tp_svc_connection_return_from_disconnect (context);
+      return;
+    }
+
+  self->priv->disconnect_requests = g_ptr_array_sized_new (1);
+  g_ptr_array_add (self->priv->disconnect_requests, context);
+
   tp_base_connection_change_status (self,
       TP_CONNECTION_STATUS_DISCONNECTED,
       TP_CONNECTION_STATUS_REASON_REQUESTED);
-
-  tp_svc_connection_return_from_disconnect (context);
 }
 
 /**
@@ -1412,6 +1439,22 @@ tp_base_connection_get_handles (TpBaseConnection *self,
  */
 void tp_base_connection_finish_shutdown (TpBaseConnection *self)
 {
+  GPtrArray *contexts = self->priv->disconnect_requests;
+  guint i;
+
+  g_return_if_fail (self->status == TP_CONNECTION_STATUS_DISCONNECTED);
+  g_return_if_fail (contexts != NULL);
+
+  self->priv->disconnect_requests = NULL;
+
+  for (i = 0; i < contexts->len; i++)
+    {
+      tp_svc_connection_return_from_disconnect (g_ptr_array_index (contexts,
+            i));
+    }
+
+  g_ptr_array_free (contexts, TRUE);
+
   g_signal_emit (self, signals[SHUTDOWN_FINISHED], 0);
 }
 
@@ -1520,6 +1563,10 @@ tp_base_connection_change_status (TpBaseConnection *self,
 
   if (status == TP_CONNECTION_STATUS_DISCONNECTED)
     {
+      /* the presence of this array indicates that we are shutting down */
+      if (self->priv->disconnect_requests == NULL)
+        self->priv->disconnect_requests = g_ptr_array_sized_new (0);
+
       /* remove all channels and shut down all factories, so we don't get
        * any race conditions where method calls are delivered to a channel
        * after we've started disconnecting
@@ -1568,7 +1615,6 @@ tp_base_connection_change_status (TpBaseConnection *self,
             (klass->disconnected) (self);
           g_ptr_array_foreach (priv->channel_factories, (GFunc)
               tp_channel_factory_iface_disconnected, NULL);
-          g_assert (klass->shut_down);
         }
       (klass->shut_down) (self);
       break;

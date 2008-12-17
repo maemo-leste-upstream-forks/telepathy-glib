@@ -51,6 +51,7 @@ G_BEGIN_DECLS
 
 typedef struct _TpBaseConnection TpBaseConnection;
 typedef struct _TpBaseConnectionClass TpBaseConnectionClass;
+typedef struct _TpBaseConnectionPrivate TpBaseConnectionPrivate;
 
 /**
  * TpBaseConnectionProc:
@@ -162,7 +163,7 @@ typedef gchar *(*TpBaseConnectionGetUniqueConnectionNameImpl) (
  *  be left as %NULL.
  * @start_connecting: Asynchronously start connecting - called to implement
  *  the Connect D-Bus method. See #TpBaseConnectionStartConnectingImpl for
- *  details.
+ *  details. May not be left as %NULL.
  * @interfaces_always_present: A strv of extra D-Bus interfaces which are
  *  always implemented by instances of this class, which may be filled in
  *  by subclasses. The default is to list no additional interfaces.
@@ -256,7 +257,7 @@ struct _TpBaseConnection {
     gpointer _future3;
     gpointer _future4;
 
-    gpointer priv;
+    TpBaseConnectionPrivate *priv;
 };
 
 GType tp_base_connection_get_type (void);
