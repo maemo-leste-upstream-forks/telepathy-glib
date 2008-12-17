@@ -22,6 +22,9 @@
 #include &lt;telepathy-glib/debug.h&gt;
 
 
+<link linkend="void">void</link>                <link linkend="tp-debug-set-flags">tp_debug_set_flags</link>                  (const <link linkend="gchar">gchar</link> *flags_string);
+<link linkend="void">void</link>                <link linkend="tp-debug-set-persistent">tp_debug_set_persistent</link>             (<link linkend="gboolean">gboolean</link> persistent);
+
 <link linkend="void">void</link>                <link linkend="tp-debug-set-flags-from-string">tp_debug_set_flags_from_string</link>      (const <link linkend="gchar">gchar</link> *flags_string);
 <link linkend="void">void</link>                <link linkend="tp-debug-set-flags-from-env">tp_debug_set_flags_from_env</link>         (const <link linkend="gchar">gchar</link> *var);
 <link linkend="void">void</link>                <link linkend="tp-debug-set-all-flags">tp_debug_set_all_flags</link>              (void);
@@ -46,28 +49,11 @@ is activated, it should call <link linkend="tp-debug-set-flags-from-string"><fun
 <link linkend="tp-debug-set-flags-from-env"><function>tp_debug_set_flags_from_env()</function></link> or <link linkend="tp-debug-set-all-flags"><function>tp_debug_set_all_flags()</function></link>.
 </para>
 <para>
-For example, at the time of writing Gabble has the following behaviour:
-</para>
-<para>
-<itemizedlist>
-<listitem>The environment variable $GABBLE_DEBUG contains a comma-separated
-list of debug modes to activate. In addition to parsing this variable
-itself, Gabble calls
-<literal>tp_debug_set_flags_from_env ("GABBLE_DEBUG")</literal>.</listitem>
-<listitem>The environment variable $GABBLE_PERSIST activates all possible
-debug modes. If this variable is set, in addition to activating all of
-its own debug modes, Gabble calls <link linkend="tp-debug-set-all-flags"><function>tp_debug_set_all_flags()</function></link> to activate
-all possible debug output in telepathy-glib.</listitem>
-</itemizedlist>
-</para>
-<para>
 The supported debug-mode keywords are subject to change, but currently
 include:
 </para>
 <para>
 <itemizedlist>
-<listitem><literal>persist</literal> - keep running even if there are no
-connections for a while</listitem>
 <listitem><literal>connection</literal> - output debug messages regarding
 <link linkend="TpBaseConnection"><type>TpBaseConnection</type></link></listitem>
 <listitem><literal>im</literal> - output debug messages regarding
@@ -86,14 +72,68 @@ connection manager parameters</listitem>
 <refsect1 role="details">
 <title role="details.title">Details</title>
 <refsect2>
-<title><anchor id="tp-debug-set-flags-from-string" role="function"/>tp_debug_set_flags_from_string ()</title>
-<indexterm><primary>tp_debug_set_flags_from_string</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_flags_from_string      (const <link linkend="gchar">gchar</link> *flags_string);</programlisting>
+<title><anchor id="tp-debug-set-flags" role="function"/>tp_debug_set_flags ()</title>
+<indexterm><primary>tp_debug_set_flags</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_flags                  (const <link linkend="gchar">gchar</link> *flags_string);</programlisting>
 <para>
 Set the debug flags indicated by <parameter>flags_string</parameter>, in addition to any already
 set.
 </para>
 <para>
-The parsing matches that of <link linkend="g-parse-debug-string"><function>g_parse_debug_string()</function></link>.</para>
+The parsing matches that of <link linkend="g-parse-debug-string"><function>g_parse_debug_string()</function></link>.
+</para>
+<para>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</para>
+<para>
+<parameter>since</parameter> 0.6.1</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>flags_string</parameter>&nbsp;:</term>
+<listitem><simpara> The flags to set, comma-separated. If <link linkend="NULL:CAPS"><literal>NULL</literal></link> or empty,
+ no additional flags are set.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-debug-set-persistent" role="function"/>tp_debug_set_persistent ()</title>
+<indexterm><primary>tp_debug_set_persistent</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_persistent             (<link linkend="gboolean">gboolean</link> persistent);</programlisting>
+<para>
+Used to enable persistent operation of the connection manager process for
+debugging purposes.
+</para>
+<para>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>persistent</parameter>&nbsp;:</term>
+<listitem><simpara> TRUE prevents the connection manager mainloop from exiting,
+             FALSE enables exiting if there are no connections
+             (the default behavior).
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-debug-set-flags-from-string" role="function"/>tp_debug_set_flags_from_string ()</title>
+<indexterm><primary>tp_debug_set_flags_from_string</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_flags_from_string      (const <link linkend="gchar">gchar</link> *flags_string);</programlisting>
+<para>
+Set the debug flags indicated by <parameter>flags_string</parameter>, in addition to any already
+set. Unlike <link linkend="tp-debug-set-flags"><function>tp_debug_set_flags()</function></link>, this enables persistence like
+<link linkend="tp-debug-set-persistent"><function>tp_debug_set_persistent()</function></link> if the "persist" flag is present or the string
+is "all" - this turns out to be unhelpful, as persistence should be
+orthogonal.
+</para>
+<para>
+The parsing matches that of <link linkend="g-parse-debug-string"><function>g_parse_debug_string()</function></link>.
+</para>
+<para>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</para>
+<para>
+<parameter>deprecated</parameter> since 0.6.1. Use <link linkend="tp-debug-set-flags"><function>tp_debug_set_flags()</function></link> and
+<link linkend="tp-debug-set-persistent"><function>tp_debug_set_persistent()</function></link> instead</para>
 <para>
 
 </para><variablelist role="params">
@@ -106,9 +146,17 @@ The parsing matches that of <link linkend="g-parse-debug-string"><function>g_par
 <title><anchor id="tp-debug-set-flags-from-env" role="function"/>tp_debug_set_flags_from_env ()</title>
 <indexterm><primary>tp_debug_set_flags_from_env</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_flags_from_env         (const <link linkend="gchar">gchar</link> *var);</programlisting>
 <para>
-Set the debug flags indicated by the given environment variable, in
-addition to any already set. Equivalent to
-<literal>tp_debug_set_flags_from_string (g_getenv (var))</literal>.</para>
+Equivalent to
+<literal>tp_debug_set_flags_from_string (g_getenv (var))</literal>,
+and has the same problem with persistence being included in "all".
+</para>
+<para>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</para>
+<para>
+<parameter>deprecated</parameter> since 0.6.1. Use tp_debug_set_flags(g_getenv(...)) and
+<link linkend="tp-debug-set-persistent"><function>tp_debug_set_persistent()</function></link> instead</para>
 <para>
 
 </para><variablelist role="params">
@@ -120,7 +168,16 @@ addition to any already set. Equivalent to
 <title><anchor id="tp-debug-set-all-flags" role="function"/>tp_debug_set_all_flags ()</title>
 <indexterm><primary>tp_debug_set_all_flags</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_all_flags              (void);</programlisting>
 <para>
-Activate all possible debug modes.</para>
+Activate all possible debug modes. This also activates persistent mode,
+which should have been orthogonal.
+</para>
+<para>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</para>
+<para>
+<parameter>deprecated</parameter> since 0.6.1. Use tp_debug_set_flags ("all") and
+<link linkend="tp-debug-set-persistent"><function>tp_debug_set_persistent()</function></link> instead.</para>
 <para>
 
 </para></refsect2>
@@ -130,4 +187,6 @@ Activate all possible debug modes.</para>
 
 
 
+
+<refsect1><refsect2 /><refsect2 /></refsect1>
 </refentry>

@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Common debug support</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.71.0">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-utilities.html" title="Utilities">
 <link rel="prev" href="telepathy-glib-debug-ansi.html" title="ANSI codes for debug messages">
 <link rel="next" href="telepathy-glib-handle.html" title="TpHandle">
-<meta name="generator" content="GTK-Doc V1.8 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.9 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 <link rel="chapter" href="ch-dbus.html" title="D-Bus interfaces">
 <link rel="chapter" href="base-classes.html" title="Connections and channels">
@@ -25,16 +25,16 @@
 <th width="100%" align="center">telepathy-glib Reference Manual</th>
 <td><a accesskey="n" href="telepathy-glib-handle.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
-<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2577073" class="shortcut">Top</a>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2582801" class="shortcut">Top</a>
                   &#160;|&#160;
-                  <a href="#id2666748" class="shortcut">Description</a></nobr></td></tr>
+                  <a href="#id2699165" class="shortcut">Description</a></nobr></td></tr>
 </table>
 <div class="refentry" lang="en">
 <a name="telepathy-glib-debug"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
 <h2>
-<a name="id2577073"></a><span class="refentrytitle">Common debug support</span>
+<a name="id2582801"></a><span class="refentrytitle">Common debug support</span>
 </h2>
 <p>Common debug support &#8212; API to activate debugging messages from telepathy-glib</p>
 </td>
@@ -47,36 +47,22 @@
 #include &lt;telepathy-glib/debug.h&gt;
 
 
-void                <a href="telepathy-glib-debug.html#tp-debug-set-flags-from-string">tp_debug_set_flags_from_string</a>      (const gchar *flags_string);
-void                <a href="telepathy-glib-debug.html#tp-debug-set-flags-from-env">tp_debug_set_flags_from_env</a>         (const gchar *var);
-void                <a href="telepathy-glib-debug.html#tp-debug-set-all-flags">tp_debug_set_all_flags</a>              (void);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags">tp_debug_set_flags</a>                  (const gchar *flags_string);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent">tp_debug_set_persistent</a>             (gboolean persistent);
+
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-string">tp_debug_set_flags_from_string</a>      (const gchar *flags_string);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-env">tp_debug_set_flags_from_env</a>         (const gchar *var);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-all-flags">tp_debug_set_all_flags</a>              (void);
 </pre>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2666748"></a><h2>Description</h2>
+<a name="id2699165"></a><h2>Description</h2>
 <p>
 telepathy-glib has an internal mechanism for debug messages and filtering.
 Connection managers written with telepathy-glib are expected to connect
 this to their own debugging mechanisms: when the CM's debugging mechanism
-is activated, it should call <a href="telepathy-glib-debug.html#tp-debug-set-flags-from-string"><code class="function">tp_debug_set_flags_from_string()</code></a>,
-<a href="telepathy-glib-debug.html#tp-debug-set-flags-from-env"><code class="function">tp_debug_set_flags_from_env()</code></a> or <a href="telepathy-glib-debug.html#tp-debug-set-all-flags"><code class="function">tp_debug_set_all_flags()</code></a>.
-</p>
-<p>
-For example, at the time of writing Gabble has the following behaviour:
-</p>
-<p>
-</p>
-<div class="itemizedlist"><ul type="disc">
-<li>The environment variable $GABBLE_DEBUG contains a comma-separated
-list of debug modes to activate. In addition to parsing this variable
-itself, Gabble calls
-<code class="literal">tp_debug_set_flags_from_env ("GABBLE_DEBUG")</code>.</li>
-<li>The environment variable $GABBLE_PERSIST activates all possible
-debug modes. If this variable is set, in addition to activating all of
-its own debug modes, Gabble calls <a href="telepathy-glib-debug.html#tp-debug-set-all-flags"><code class="function">tp_debug_set_all_flags()</code></a> to activate
-all possible debug output in telepathy-glib.</li>
-</ul></div>
-<p>
+is activated, it should call <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-string"><code class="function">tp_debug_set_flags_from_string()</code></a>,
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-env"><code class="function">tp_debug_set_flags_from_env()</code></a> or <a class="link" href="telepathy-glib-debug.html#tp-debug-set-all-flags"><code class="function">tp_debug_set_all_flags()</code></a>.
 </p>
 <p>
 The supported debug-mode keywords are subject to change, but currently
@@ -86,18 +72,15 @@ include:
 </p>
 <div class="itemizedlist"><ul type="disc">
 <li>
-<code class="literal">persist</code> - keep running even if there are no
-connections for a while</li>
-<li>
 <code class="literal">connection</code> - output debug messages regarding
-<a href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>
+<a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>
 </li>
 <li>
 <code class="literal">im</code> - output debug messages regarding
 (text) instant messaging</li>
 <li>
 <code class="literal">properties</code> - output debug messages regarding
-<a href="telepathy-glib-TpPropertiesMixin.html#TpPropertiesMixin"><span class="type">TpPropertiesMixin</span></a>
+<a class="link" href="telepathy-glib-TpPropertiesMixin.html#TpPropertiesMixin"><span class="type">TpPropertiesMixin</span></a>
 </li>
 <li>
 <code class="literal">params</code> - output debug messages regarding
@@ -110,24 +93,31 @@ connection manager parameters</li>
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2667365"></a><h2>Details</h2>
+<a name="id2699281"></a><h2>Details</h2>
 <div class="refsect2" lang="en">
-<a name="id2667375"></a><h3>
-<a name="tp-debug-set-flags-from-string"></a>tp_debug_set_flags_from_string ()</h3>
-<a class="indexterm" name="id2667386"></a><pre class="programlisting">void                tp_debug_set_flags_from_string      (const gchar *flags_string);</pre>
+<a name="id2699292"></a><h3>
+<a name="tp-debug-set-flags"></a>tp_debug_set_flags ()</h3>
+<a class="indexterm" name="id2699304"></a><pre class="programlisting">void                tp_debug_set_flags                  (const gchar *flags_string);</pre>
 <p>
 Set the debug flags indicated by <em class="parameter"><code>flags_string</code></em>, in addition to any already
 set.
 </p>
 <p>
-The parsing matches that of <code class="function">g_parse_debug_string()</code>.</p>
+The parsing matches that of <code class="function">g_parse_debug_string()</code>.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>since</code></em> 0.6.1</p>
 <p>
 
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody><tr>
-<td><span class="term"><em class="parameter"><code>flags_string</code></em>&#160;:</span></td>
+<td><p><span class="term"><em class="parameter"><code>flags_string</code></em>&#160;:</span></p></td>
 <td> The flags to set, comma-separated. If <code class="literal">NULL</code> or empty,
  no additional flags are set.
 </td>
@@ -136,20 +126,89 @@ The parsing matches that of <code class="function">g_parse_debug_string()</code>
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2667461"></a><h3>
-<a name="tp-debug-set-flags-from-env"></a>tp_debug_set_flags_from_env ()</h3>
-<a class="indexterm" name="id2667472"></a><pre class="programlisting">void                tp_debug_set_flags_from_env         (const gchar *var);</pre>
+<a name="id2693006"></a><h3>
+<a name="tp-debug-set-persistent"></a>tp_debug_set_persistent ()</h3>
+<a class="indexterm" name="id2693017"></a><pre class="programlisting">void                tp_debug_set_persistent             (gboolean persistent);</pre>
 <p>
-Set the debug flags indicated by the given environment variable, in
-addition to any already set. Equivalent to
-<code class="literal">tp_debug_set_flags_from_string (g_getenv (var))</code>.</p>
+Used to enable persistent operation of the connection manager process for
+debugging purposes.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.</p>
 <p>
 
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody><tr>
-<td><span class="term"><em class="parameter"><code>var</code></em>&#160;:</span></td>
+<td><p><span class="term"><em class="parameter"><code>persistent</code></em>&#160;:</span></p></td>
+<td> TRUE prevents the connection manager mainloop from exiting,
+             FALSE enables exiting if there are no connections
+             (the default behavior).
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2693076"></a><h3>
+<a name="tp-debug-set-flags-from-string"></a>tp_debug_set_flags_from_string ()</h3>
+<a class="indexterm" name="id2693087"></a><pre class="programlisting">void                tp_debug_set_flags_from_string      (const gchar *flags_string);</pre>
+<p>
+Set the debug flags indicated by <em class="parameter"><code>flags_string</code></em>, in addition to any already
+set. Unlike <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags"><code class="function">tp_debug_set_flags()</code></a>, this enables persistence like
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent"><code class="function">tp_debug_set_persistent()</code></a> if the "persist" flag is present or the string
+is "all" - this turns out to be unhelpful, as persistence should be
+orthogonal.
+</p>
+<p>
+The parsing matches that of <code class="function">g_parse_debug_string()</code>.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>deprecated</code></em> since 0.6.1. Use <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags"><code class="function">tp_debug_set_flags()</code></a> and
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent"><code class="function">tp_debug_set_persistent()</code></a> instead</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>flags_string</code></em>&#160;:</span></p></td>
+<td> The flags to set, comma-separated. If <code class="literal">NULL</code> or empty,
+ no additional flags are set.
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2693218"></a><h3>
+<a name="tp-debug-set-flags-from-env"></a>tp_debug_set_flags_from_env ()</h3>
+<a class="indexterm" name="id2693229"></a><pre class="programlisting">void                tp_debug_set_flags_from_env         (const gchar *var);</pre>
+<p>
+Equivalent to
+<code class="literal">tp_debug_set_flags_from_string (g_getenv (var))</code>,
+and has the same problem with persistence being included in "all".
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>deprecated</code></em> since 0.6.1. Use tp_debug_set_flags(g_getenv(...)) and
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent"><code class="function">tp_debug_set_persistent()</code></a> instead</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>var</code></em>&#160;:</span></p></td>
 <td> The name of the environment variable to parse
 </td>
 </tr></tbody>
@@ -157,15 +216,29 @@ addition to any already set. Equivalent to
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2673239"></a><h3>
+<a name="id2693312"></a><h3>
 <a name="tp-debug-set-all-flags"></a>tp_debug_set_all_flags ()</h3>
-<a class="indexterm" name="id2673250"></a><pre class="programlisting">void                tp_debug_set_all_flags              (void);</pre>
+<a class="indexterm" name="id2693323"></a><pre class="programlisting">void                tp_debug_set_all_flags              (void);</pre>
 <p>
-Activate all possible debug modes.</p>
+Activate all possible debug modes. This also activates persistent mode,
+which should have been orthogonal.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>deprecated</code></em> since 0.6.1. Use tp_debug_set_flags ("all") and
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent"><code class="function">tp_debug_set_persistent()</code></a> instead.</p>
 <p>
 
 </p>
 </div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2693375"></a><div class="refsect2" lang="en"><a name="id2693376"></a></div>
+<hr>
+<div class="refsect2" lang="en"><a name="id2693377"></a></div>
 </div>
 </div>
 </body>

@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [6])
-m4_define([tp_glib_micro_version], [0])
+m4_define([tp_glib_micro_version], [1])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -61,6 +61,11 @@ AC_SUBST([LT_AGE])
 dnl decide error flags
 AS_COMPILER_FLAG(-Wall, ERROR_CFLAGS="-Wall", ERROR_CFLAGS="")
 AS_COMPILER_FLAG(-Werror, werror=yes, werror=no)
+
+AC_ARG_ENABLE(Werror,
+  AC_HELP_STRING([--disable-Werror],[compile without -Werror (normally enabled in development builds)]),
+    werror=$enableval, :)
+
 AS_COMPILER_FLAG(-Wextra, wextra=yes, wextra=no)
 AS_COMPILER_FLAG(-Wno-missing-field-initializers,
         wno_missing_field_initializers=yes,
