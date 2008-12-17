@@ -7,14 +7,16 @@
 <link rel="start" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-utilities.html" title="Utilities">
 <link rel="prev" href="telepathy-glib-debug-ansi.html" title="ANSI codes for debug messages">
-<link rel="next" href="telepathy-glib-handle.html" title="TpHandle">
+<link rel="next" href="telepathy-glib-TpIntSet.html" title="TpIntSet">
 <meta name="generator" content="GTK-Doc V1.9 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
-<link rel="chapter" href="ch-dbus.html" title="D-Bus interfaces">
-<link rel="chapter" href="base-classes.html" title="Connections and channels">
-<link rel="chapter" href="ch-mixins.html" title="Implementation mixins">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
 <link rel="chapter" href="ch-utilities.html" title="Utilities">
-<link rel="chapter" href="ch-handle-management.html" title="Handle management">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
@@ -23,18 +25,18 @@
 <td><a accesskey="u" href="ch-utilities.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
 <th width="100%" align="center">telepathy-glib Reference Manual</th>
-<td><a accesskey="n" href="telepathy-glib-handle.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+<td><a accesskey="n" href="telepathy-glib-TpIntSet.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
-<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2602501" class="shortcut">Top</a>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2610607" class="shortcut">Top</a>
                   &#160;|&#160;
-                  <a href="#id2692576" class="shortcut">Description</a></nobr></td></tr>
+                  <a href="#id2840061" class="shortcut">Description</a></nobr></td></tr>
 </table>
 <div class="refentry" lang="en">
 <a name="telepathy-glib-debug"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
 <h2>
-<a name="id2602501"></a><span class="refentrytitle">Common debug support</span>
+<a name="id2610607"></a><span class="refentrytitle">Common debug support</span>
 </h2>
 <p>Common debug support &#8212; API to activate debugging messages from telepathy-glib</p>
 </td>
@@ -49,6 +51,11 @@
 
 void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags">tp_debug_set_flags</a>                  (const gchar *flags_string);
 void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent">tp_debug_set_persistent</a>             (gboolean persistent);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-divert-messages">tp_debug_divert_messages</a>            (const gchar *filename);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-timestamped-log-handler">tp_debug_timestamped_log_handler</a>    (const gchar *log_domain,
+                                                         GLogLevelFlags log_level,
+                                                         const gchar *message,
+                                                         gpointer ignored);
 
 void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-string">tp_debug_set_flags_from_string</a>      (const gchar *flags_string);
 void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-env">tp_debug_set_flags_from_env</a>         (const gchar *var);
@@ -56,7 +63,7 @@ void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set
 </pre>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2692576"></a><h2>Description</h2>
+<a name="id2840061"></a><h2>Description</h2>
 <p>
 telepathy-glib has an internal mechanism for debug messages and filtering.
 Connection managers written with telepathy-glib are expected to connect
@@ -73,13 +80,13 @@ include:
 <div class="itemizedlist"><ul type="disc">
 <li>
 <code class="literal">manager</code> - output debug messages regarding
-<span class="type">TpConnectionManager</span> (client)</li>
+<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> (client)</li>
 <li>
 <code class="literal">connection</code> - output debug messages regarding
-<a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> (service) and <span class="type">TpConnection</span> (client)</li>
+<a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> (service) and <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> (client)</li>
 <li>
 <code class="literal">channel</code> - output debug messages regarding
-<span class="type">TpChannel</span> (client)</li>
+<a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> (client)</li>
 <li>
 <code class="literal">im</code> - output debug messages regarding
 (text) instant messaging (service)</li>
@@ -97,11 +104,11 @@ connection manager parameters (service)</li>
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2692733"></a><h2>Details</h2>
+<a name="id2840219"></a><h2>Details</h2>
 <div class="refsect2" lang="en">
-<a name="id2692744"></a><h3>
+<a name="id2840229"></a><h3>
 <a name="tp-debug-set-flags"></a>tp_debug_set_flags ()</h3>
-<a class="indexterm" name="id2693576"></a><pre class="programlisting">void                tp_debug_set_flags                  (const gchar *flags_string);</pre>
+<a class="indexterm" name="id2840242"></a><pre class="programlisting">void                tp_debug_set_flags                  (const gchar *flags_string);</pre>
 <p>
 Set the debug flags indicated by <em class="parameter"><code>flags_string</code></em>, in addition to any already
 set.
@@ -130,9 +137,9 @@ this function does nothing.
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2693668"></a><h3>
+<a name="id2840333"></a><h3>
 <a name="tp-debug-set-persistent"></a>tp_debug_set_persistent ()</h3>
-<a class="indexterm" name="id2693679"></a><pre class="programlisting">void                tp_debug_set_persistent             (gboolean persistent);</pre>
+<a class="indexterm" name="id2840344"></a><pre class="programlisting">void                tp_debug_set_persistent             (gboolean persistent);</pre>
 <p>
 Used to enable persistent operation of the connection manager process for
 debugging purposes.
@@ -156,9 +163,101 @@ this function does nothing.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2693738"></a><h3>
+<a name="id2839005"></a><h3>
+<a name="tp-debug-divert-messages"></a>tp_debug_divert_messages ()</h3>
+<a class="indexterm" name="id2839019"></a><pre class="programlisting">void                tp_debug_divert_messages            (const gchar *filename);</pre>
+<p>
+Open the given file for writing and duplicate its file descriptor to
+be used for stdout and stderr. This has the effect of closing the previous
+stdout and stderr, and sending all messages that would have gone there
+to the given file instead.
+</p>
+<p>
+Passing <code class="literal">NULL</code> to this function is guaranteed to have no effect. This is
+so you can call it with the recommended usage
+<code class="literal">tp_debug_divert_messages (g_getenv ("MYAPP_LOGFILE"))</code>
+and it won't do anything if the environment variable is not set.
+</p>
+<p>
+This function still works if telepathy-glib was compiled without debug
+support.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em>&#160;:</span></p></td>
+<td> A file to which to divert stdout and stderr, or <code class="literal">NULL</code> to
+ do nothing
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2839117"></a><h3>
+<a name="tp-debug-timestamped-log-handler"></a>tp_debug_timestamped_log_handler ()</h3>
+<a class="indexterm" name="id2839130"></a><pre class="programlisting">void                tp_debug_timestamped_log_handler    (const gchar *log_domain,
+                                                         GLogLevelFlags log_level,
+                                                         const gchar *message,
+                                                         gpointer ignored);</pre>
+<p>
+A <span class="type">GLogFunc</span> that prepends the local time (currently in
+YYYY-MM-DD HH:MM:SS.SSSSSS format, with microsecond resolution) to the
+message, then calls g_log_default_handler.
+</p>
+<p>
+Intended usage is:
+</p>
+<p>
+</p>
+<div class="informalexample"><pre class="programlisting">if (g_getenv ("MYPROG_TIMING") != NULL)
+  g_log_set_default_handler (tp_debug_timestamped_log_handler, NULL);
+</pre></div>
+<p>
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function is equivalent to <code class="function">g_log_default_handler()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></p></td>
+<td> the message's log domain
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>log_level</code></em>&#160;:</span></p></td>
+<td> the log level of the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></p></td>
+<td> the message to process
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ignored</code></em>&#160;:</span></p></td>
+<td> not used
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2839290"></a><h3>
 <a name="tp-debug-set-flags-from-string"></a>tp_debug_set_flags_from_string ()</h3>
-<a class="indexterm" name="id2693749"></a><pre class="programlisting">void                tp_debug_set_flags_from_string      (const gchar *flags_string);</pre>
+<a class="indexterm" name="id2839301"></a><pre class="programlisting">void                tp_debug_set_flags_from_string      (const gchar *flags_string);</pre>
 <p>
 Set the debug flags indicated by <em class="parameter"><code>flags_string</code></em>, in addition to any already
 set. Unlike <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags"><code class="function">tp_debug_set_flags()</code></a>, this enables persistence like
@@ -191,9 +290,9 @@ this function does nothing.
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2680735"></a><h3>
+<a name="id2839430"></a><h3>
 <a name="tp-debug-set-flags-from-env"></a>tp_debug_set_flags_from_env ()</h3>
-<a class="indexterm" name="id2680746"></a><pre class="programlisting">void                tp_debug_set_flags_from_env         (const gchar *var);</pre>
+<a class="indexterm" name="id2839442"></a><pre class="programlisting">void                tp_debug_set_flags_from_env         (const gchar *var);</pre>
 <p>
 Equivalent to
 <code class="literal">tp_debug_set_flags_from_string (g_getenv (var))</code>,
@@ -220,9 +319,9 @@ this function does nothing.
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2680829"></a><h3>
+<a name="id2839524"></a><h3>
 <a name="tp-debug-set-all-flags"></a>tp_debug_set_all_flags ()</h3>
-<a class="indexterm" name="id2680840"></a><pre class="programlisting">void                tp_debug_set_all_flags              (void);</pre>
+<a class="indexterm" name="id2844311"></a><pre class="programlisting">void                tp_debug_set_all_flags              (void);</pre>
 <p>
 Activate all possible debug modes. This also activates persistent mode,
 which should have been orthogonal.
@@ -240,9 +339,9 @@ this function does nothing.
 </div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2680892"></a><div class="refsect2" lang="en"><a name="id2680893"></a></div>
+<a name="id2844363"></a><div class="refsect2" lang="en"><a name="id2844364"></a></div>
 <hr>
-<div class="refsect2" lang="en"><a name="id2680894"></a></div>
+<div class="refsect2" lang="en"><a name="id2844366"></a></div>
 </div>
 </div>
 </body>

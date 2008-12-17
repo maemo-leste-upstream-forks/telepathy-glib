@@ -1,8 +1,8 @@
 /*
  * base-connection-manager.c - Source for TpBaseConnectionManager
  *
- * Copyright (C) 2007 Collabora Ltd.
- * Copyright (C) 2007 Nokia Corporation
+ * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2008 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,12 +37,153 @@
 
 #include <dbus/dbus-protocol.h>
 
+#include <telepathy-glib/connection-manager.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_PARAMS
-#include "internal-debug.h"
+#include "debug-internal.h"
+
+/**
+ * TpCMParamSpec:
+ * @name: Name as passed over D-Bus
+ * @dtype: D-Bus type signature. We currently support 16- and 32-bit integers
+ *         (@gtype is INT), 16- and 32-bit unsigned integers (gtype is UINT),
+ *         strings (gtype is STRING) and booleans (gtype is BOOLEAN).
+ * @gtype: GLib type, derived from @dtype as above
+ * @flags: Some combination of TP_CONN_MGR_PARAM_FLAG_foo
+ * @def: Default value, as a (const gchar *) for string parameters, or
+         using #GINT_TO_POINTER or #GUINT_TO_POINTER for integer parameters
+ * @offset: Offset of the parameter in the opaque data structure, if
+ *          appropriate. The member at that offset is expected to be a gint,
+ *          guint, (gchar *) or gboolean, depending on @gtype. The default
+ *          parameter setter, #tp_cm_param_setter_offset, uses this field.
+ * @filter: A callback which is used to validate or normalize the user-provided
+ *          value before it is written into the opaque data structure
+ * @filter_data: Arbitrary opaque data intended for use by the filter function
+ * @setter_data: Arbitrary opaque data intended for use by the setter function
+ *               instead of or in addition to @offset.
+ *
+ * Structure representing a connection manager parameter, as accepted by
+ * RequestConnection.
+ *
+ * In addition to the fields documented here, there is one gpointer field
+ * which must currently be %NULL. A meaning may be defined for it in a
+ * future version of telepathy-glib.
+ */
+
+/**
+ * TpCMParamFilter:
+ * @paramspec: The parameter specification. The filter is likely to use
+ *  name (for the error message if the value is invalid) and filter_data.
+ * @value: The value for that parameter provided by the user.
+ *  May be changed to contain a different value of the same type, if
+ *  some sort of normalization is required
+ * @error: Used to raise %TP_ERROR_INVALID_ARGUMENT if the given value is
+ *  rejected
+ *
+ * Signature of a callback used to validate and/or normalize user-provided
+ * CM parameter values.
+ *
+ * Returns: %TRUE to accept, %FALSE (with @error set) to reject
+ */
+
+/**
+ * TpCMParamSetter:
+ * @paramspec: The parameter specification.  The setter is likely to use
+ *  some combination of the name, offset and setter_data fields.
+ * @value: The value for that parameter provided by the user.
+ * @params: An opaque data structure, created by
+ *  #TpCMProtocolSpec.params_new.
+ *
+ * The signature of a callback used to set a parameter within the opaque
+ * data structure used for a protocol.
+ *
+ * Since: 0.7.0
+ */
+
+/**
+ * TpCMProtocolSpec:
+ * @name: The name which should be passed to RequestConnection for this
+ *        protocol.
+ * @parameters: An array of #TpCMParamSpec representing the valid parameters
+ *              for this protocol, terminated by a #TpCMParamSpec whose name
+ *              entry is NULL.
+ * @params_new: A function which allocates an opaque data structure to store
+ *              the parsed parameters for this protocol. The offset fields
+ *              in the members of the @parameters array refer to offsets
+ *              within this opaque structure.
+ * @params_free: A function which deallocates the opaque data structure
+ *               provided by #params_new, including deallocating its
+ *               data members (currently, only strings) if necessary.
+ * @set_param: A function which sets a parameter within the opaque data
+ *             structure provided by #params_new. If %NULL,
+ *             tp_cm_param_setter_offset() will be used. (New in 0.7.0 -
+ *             previously, code equivalent to tp_cm_param_setter_offset() was
+ *             always used.)
+ *
+ * Structure representing a connection manager protocol.
+ *
+ * In addition to the fields documented here, there are three gpointer fields
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
+ */
+
+/**
+ * TpBaseConnectionManager:
+ * @parent: The parent instance structure
+ * @priv: Pointer to opaque private data
+ *
+ * A base class for connection managers. There are no interesting public
+ * fields in the instance structure.
+ */
+
+/**
+ * TpBaseConnectionManagerClass:
+ * @parent_class: The parent class
+ * @cm_dbus_name: The name of this connection manager, as used to construct
+ *  D-Bus object paths and bus names. Must contain only letters, digits
+ *  and underscores, and may not start with a digit. Must be filled in by
+ *  subclasses in their class_init function.
+ * @protocol_params: An array of #TpCMProtocolSpec structures representing
+ *  the protocols this connection manager supports, terminated by a structure
+ *  whose name member is %NULL.
+ * @new_connection: A #TpBaseConnectionManagerNewConnFunc used to construct
+ *  new connections. Must be filled in by subclasses in their class_init
+ *  function.
+ *
+ * The class structure for #TpBaseConnectionManager.
+ *
+ * In addition to the fields documented here, there are four gpointer fields
+ * which must currently be %NULL (a meaning may be defined for these in a
+ * future version of telepathy-glib), and a pointer to opaque private data.
+ *
+ * Changed in 0.7.1: it is a fatal error for @cm_dbus_name not to conform to
+ * the specification.
+ */
+
+/**
+ * TpBaseConnectionManagerNewConnFunc:
+ * @self: The connection manager implementation
+ * @proto: The protocol name from the D-Bus request
+ * @params_present: A set of integers representing the indexes into the
+ *                  array of #TpCMParamSpec of those parameters that were
+ *                  present in the request
+ * @parsed_params: An opaque data structure as returned by the protocol's
+ *                 params_new function, populated according to the
+ *                 parameter specifications
+ * @error: if not %NULL, used to indicate the error if %NULL is returned
+ *
+ * A function that will return a new connection according to the
+ * parsed parameters; used to implement RequestConnection.
+ *
+ * The connection manager base class will register the bus name for the
+ * new connection, and place a reference to it in its table of
+ * connections until the connection's shutdown process finishes.
+ *
+ * Returns: the new connection object, or %NULL on error.
+ */
 
 static void service_iface_init (gpointer, gpointer);
 
@@ -97,12 +238,33 @@ tp_base_connection_manager_finalize (GObject *object)
   G_OBJECT_CLASS (tp_base_connection_manager_parent_class)->finalize (object);
 }
 
+static GObject *
+tp_base_connection_manager_constructor (GType type,
+                                        guint n_params,
+                                        GObjectConstructParam *params)
+{
+  GObjectClass *object_class =
+      (GObjectClass *) tp_base_connection_manager_parent_class;
+  TpBaseConnectionManager *self =
+      TP_BASE_CONNECTION_MANAGER (object_class->constructor (type, n_params,
+            params));
+  TpBaseConnectionManagerClass *cls =
+      TP_BASE_CONNECTION_MANAGER_GET_CLASS (self);
+
+  g_assert (tp_connection_manager_check_valid_name (cls->cm_dbus_name, NULL));
+  g_assert (cls->protocol_params != NULL);
+  g_assert (cls->new_connection != NULL);
+
+  return (GObject *) self;
+}
+
 static void
 tp_base_connection_manager_class_init (TpBaseConnectionManagerClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   g_type_class_add_private (klass, sizeof (TpBaseConnectionManagerPrivate));
+  object_class->constructor = tp_base_connection_manager_constructor;
   object_class->dispose = tp_base_connection_manager_dispose;
   object_class->finalize = tp_base_connection_manager_finalize;
 
@@ -128,10 +290,6 @@ tp_base_connection_manager_init (TpBaseConnectionManager *self)
 {
   TpBaseConnectionManagerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       TP_TYPE_BASE_CONNECTION_MANAGER, TpBaseConnectionManagerPrivate);
-  TpBaseConnectionManagerClass *cls =
-    TP_BASE_CONNECTION_MANAGER_GET_CLASS (self);
-
-  (void)cls;
 
   self->priv = priv;
 
@@ -323,6 +481,30 @@ tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
           DEBUG ("%s = %s", paramspec->name, b ? "TRUE" : "FALSE");
         }
         break;
+      case DBUS_TYPE_ARRAY:
+        switch (paramspec->dtype[1])
+          {
+            case DBUS_TYPE_BYTE:
+              {
+                GArray **save_to = (GArray **) (params + paramspec->offset);
+                GArray *a = g_value_get_boxed (value);
+
+                if (*save_to != NULL)
+                  {
+                    g_array_free (*save_to, TRUE);
+                  }
+                *save_to = g_array_sized_new (FALSE, FALSE, sizeof(guint8), a->len);
+                g_array_append_vals (*save_to, a->data, a->len);
+                DEBUG ("%s = ...[%u]", paramspec->name, a->len);
+              }
+              break;
+            default:
+              g_error ("%s: encountered unhandled D-Bus array type %s on "
+                       "argument %s", G_STRFUNC, paramspec->dtype,
+                       paramspec->name);
+              g_assert_not_reached ();
+          }
+        break;
       default:
         g_error ("%s: encountered unhandled D-Bus type %s on argument %s",
                  G_STRFUNC, paramspec->dtype, paramspec->name);
@@ -480,7 +662,7 @@ tp_base_connection_manager_get_parameters (TpSvcConnectionManager *iface,
   TpBaseConnectionManagerClass *cls =
     TP_BASE_CONNECTION_MANAGER_GET_CLASS (self);
   GType param_type = TP_STRUCT_TYPE_PARAM_SPEC;
-  int i;
+  guint i;
 
   g_assert (TP_IS_BASE_CONNECTION_MANAGER (iface));
   g_assert (cls->protocol_params != NULL);
@@ -494,7 +676,7 @@ tp_base_connection_manager_get_parameters (TpSvcConnectionManager *iface,
 
   ret = g_ptr_array_new ();
 
-  for (i = 0; protospec->parameters[i].name; i++)
+  for (i = 0; protospec->parameters[i].name != NULL; i++)
     {
       GValue *def_value;
       GValue param = { 0, };
@@ -517,6 +699,12 @@ tp_base_connection_manager_get_parameters (TpSvcConnectionManager *iface,
     }
 
   tp_svc_connection_manager_return_from_get_parameters (context, ret);
+
+  for (i = 0; i < ret->len; i++)
+    {
+      g_boxed_free (param_type, g_ptr_array_index (ret, i));
+    }
+
   g_ptr_array_free (ret, TRUE);
 }
 
@@ -586,15 +774,16 @@ tp_base_connection_manager_request_connection (TpSvcConnectionManager *iface,
   TpCMParamSetter set_param;
 
   g_assert (TP_IS_BASE_CONNECTION_MANAGER (iface));
-  g_assert (cls->new_connection != NULL);
-  g_assert (cls->cm_dbus_name != NULL);
-  g_assert (cls->protocol_params != NULL);
+
+  if (!tp_connection_manager_check_valid_protocol_name (proto, &error))
+    goto ERROR;
 
   if (!get_parameters (cls->protocol_params, proto, &protospec, &error))
     {
       goto ERROR;
     }
 
+  g_assert (protospec->parameters != NULL);
   g_assert (protospec->params_new != NULL);
   g_assert (protospec->params_free != NULL);
 
@@ -657,6 +846,18 @@ OUT:
     protospec->params_free (params);
 }
 
+/**
+ * tp_base_connection_manager_register:
+ * @self: The connection manager implementation
+ *
+ * Register the connection manager with an appropriate object path as
+ * determined from its @cm_dbus_name, and register the appropriate well-known
+ * bus name.
+ *
+ * Returns: %TRUE on success, %FALSE (having emitted a warning to stderr)
+ *          on failure
+ */
+
 gboolean
 tp_base_connection_manager_register (TpBaseConnectionManager *self)
 {
@@ -669,7 +870,6 @@ tp_base_connection_manager_register (TpBaseConnectionManager *self)
 
   g_assert (TP_IS_BASE_CONNECTION_MANAGER (self));
   cls = TP_BASE_CONNECTION_MANAGER_GET_CLASS (self);
-  g_assert (cls->cm_dbus_name);
 
   bus = tp_get_bus ();
   bus_proxy = tp_get_bus_proxy ();

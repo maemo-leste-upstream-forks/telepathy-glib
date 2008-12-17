@@ -1,0 +1,61 @@
+telepathy-glib 0.7.1 (2008-01-04)
+=================================
+
+This is a major feature release, adding client-side code which continues the
+process of making libtelepathy obsolete.
+
+* Implements specification 0.17.1
+  - it is a fatal error for TpBaseConnectionManagerClass::cm_dbus_name not to
+    conform to the specification (briefly: it must match
+    /[A-Za-z_][A-Za-z0-9_]+/)
+  - connections cannot be opened for protocols not matching
+    /[A-Za-z-][A-Za-z0-9-]+/
+
+* Initial client-side code added:
+  - TpProxy, a much more capable version of DBusGProxy (it more closely
+    resembles a dbus-python ProxyObject, with one object per connection,
+    channel etc. rather than one per interface)
+  - auto-generation machinery for client call wrappers (namespaced tp_cli_*)
+  - TpDBusDaemon, a TpProxy subclass to talk to the bus daemon
+  - TpChannel, a channel (replaces libtelepathy's TpChan)
+  - TpConnection, a connection (replaces libtelepathy's TpConn)
+  - TpConnectionManager, a connection manager (replaces libtelepathy's
+    TpConnMgr)
+  - TpMediaStreamHandler and TpMediaSessionHandler, media signalling helpers
+  - Correct algorithms for listing connection managers, listing connections,
+    and reading .manager files (as documented in the 0.17.1 spec)
+
+* Examples extended:
+  - various simple client examples
+  - an "echo" connection manager
+  - an extended connection manager and client (implementing a hypothetical
+    Hats interface), to illustrate how to support experimental or extension
+    interfaces in services and clients
+
+* Miscellaneous:
+  - tp_debug_divert_messages (adapted from Gabble)
+  - tp_debug_timestamped_log_handler (adapted from Gabble)
+  - tp_cm_param_setter_offset now supports byte-array params
+
+* Versioned symbols
+  - versions are of the form TELEPATHY_GLIB_x.y.z
+  - unreleased development builds use versions containing _UNRELEASED
+    to force relinking against a proper version
+
+telepathy-glib 0.7.0 (2007-11-22)
+=================================
+
+This is the first release from the 0.7.0 development branch, and
+prepares the way for the client-side code I'm going to be merging soon.
+
+* Enums etc. updated to specification 0.17.0
+* Improved support for connection managers whose parameters aren't known
+  at compile time (*coughhazecough* :-)
+* Build system refactoring to make it less weird
+* GType-generating functions and macros in gtypes.h cache the results of calls
+  to dbus-glib type lookup functions, and give data types convenient names
+* Functions and macros to generate GQuarks for interface names (which will
+  be used extensively by client code in future)
+* The beginning of an examples/ directory, containing the simplest possible
+  example connection manager (it doesn't support any protocols)
+* Dependencies increased to libdbus 0.93, dbus-glib 0.73, glib 2.10

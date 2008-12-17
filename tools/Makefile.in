@@ -13,6 +13,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -39,12 +40,14 @@ subdir = tools
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
+SCRIPTS = $(noinst_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -73,6 +76,7 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -93,6 +97,10 @@ GTKDOC_CHECK = @GTKDOC_CHECK@
 GTK_DOC_USE_LIBTOOL_FALSE = @GTK_DOC_USE_LIBTOOL_FALSE@
 GTK_DOC_USE_LIBTOOL_TRUE = @GTK_DOC_USE_LIBTOOL_TRUE@
 HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
+HAVE_LD_VERSION_SCRIPT_FALSE = @HAVE_LD_VERSION_SCRIPT_FALSE@
+HAVE_LD_VERSION_SCRIPT_TRUE = @HAVE_LD_VERSION_SCRIPT_TRUE@
+HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
+HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -108,7 +116,11 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OFFICIAL_RELEASE_FALSE = @OFFICIAL_RELEASE_FALSE@
+OFFICIAL_RELEASE_TRUE = @OFFICIAL_RELEASE_TRUE@
 OUT_OF_TREE_BUILD_FALSE = @OUT_OF_TREE_BUILD_FALSE@
 OUT_OF_TREE_BUILD_TRUE = @OUT_OF_TREE_BUILD_TRUE@
 PACKAGE = @PACKAGE@
@@ -128,6 +140,7 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
+VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -176,6 +189,8 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+abs_top_builddir = @abs_top_builddir@
+noinst_SCRIPTS = telepathy-glib-env
 EXTRA_DIST = \
     c-constants-generator.xsl \
     check-coding-style.mk \
@@ -183,6 +198,8 @@ EXTRA_DIST = \
     check-misc.sh \
     check-whitespace.sh \
     c-interfaces-generator.xsl \
+    doc-generator.xsl \
+    glib-client-gen.py \
     glib-client-marshaller-gen.py \
     glib-errors-enum-body.xsl \
     glib-errors-enum-header.xsl \
@@ -191,15 +208,17 @@ EXTRA_DIST = \
     glib-ginterface-gen.py \
     glib-gtypes-generator.py \
     glib-signals-marshal-gen.py \
+    gobject-foo.py \
     identity.xsl \
     libglibcodegen.py \
     ls-interfaces.xsl \
     make-all-async.xsl \
     spec-to-introspect.xsl \
-    update-spec-gen-am.sh \
+    telepathy-glib-env.in \
     with-session-bus.sh
 
-CLEANFILES = libglibcodegen.pyc libglibcodegen.pyo
+CLEANFILES = libglibcodegen.pyc libglibcodegen.pyo $(noinst_SCRIPTS)
+TELEPATHY_SPEC_SRCDIR = $(top_srcdir)/../telepathy-spec
 all: all-am
 
 .SUFFIXES:
@@ -278,7 +297,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(SCRIPTS)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -362,6 +381,10 @@ uninstall-am: uninstall-info-am
 	uninstall-info-am
 
 
+telepathy-glib-env: telepathy-glib-env.in Makefile
+	sed -e 's![@]abs_top_builddir[@]!$(abs_top_builddir)!' $< > $@
+	chmod +x $@
+
 all: $(EXTRA_DIST)
 
 glib-client-marshaller-gen.py: libglibcodegen.py
@@ -372,6 +395,13 @@ glib-gtypes-generator.py: libglibcodegen.py
 	touch $@
 glib-signals-marshal-gen.py: libglibcodegen.py
 	touch $@
+maintainer-update-from-telepathy-spec:
+	set -e && cd $(srcdir) && \
+	for x in $(EXTRA_DIST); do \
+		if test -f $(TELEPATHY_SPEC_SRCDIR)/tools/$$x; then \
+			cp $(TELEPATHY_SPEC_SRCDIR)/tools/$$x $$x; \
+		fi; \
+	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

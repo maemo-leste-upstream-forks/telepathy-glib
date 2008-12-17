@@ -41,7 +41,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "internal-debug.h"
+#include "debug-internal.h"
 #include <telepathy-glib/base-connection-manager.h>
 #include <telepathy-glib/debug.h>
 #include <telepathy-glib/errors.h>
@@ -203,6 +203,10 @@ tp_run_connection_manager (const char *prog_name,
       G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR |
       G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
       critical_handler, NULL);
+  g_log_set_handler ("tp-glib",
+      G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR |
+      G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
+      critical_handler, NULL);
   g_log_set_handler (NULL,
       G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR |
       G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
@@ -211,8 +215,7 @@ tp_run_connection_manager (const char *prog_name,
 
   mainloop = g_main_loop_new (NULL, FALSE);
 
-  dbus_g_error_domain_register (TP_ERRORS,
-      "org.freedesktop.Telepathy.Error", TP_TYPE_ERROR);
+  dbus_g_error_domain_register (TP_ERRORS, TP_ERROR_PREFIX, TP_TYPE_ERROR);
 
   manager = construct_cm ();
 

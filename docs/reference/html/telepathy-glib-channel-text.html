@@ -1,0 +1,2303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Text channels</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-client.html" title="Client-side proxies">
+<link rel="prev" href="telepathy-glib-channel-group.html" title="Group interface on Channels">
+<link rel="next" href="telepathy-glib-channel-media.html" title="Media channels">
+<meta name="generator" content="GTK-Doc V1.9 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-channel-group.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-client.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-channel-media.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2579642" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2725563" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-channel-text"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2579642"></a><span class="refentrytitle">Text channels</span>
+</h2>
+<p>Text channels &#8212; client-side wrappers for the Text channel type, and
+ the Chat State and Password interfaces</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/channel.h&gt;
+
+
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-run-acknowledge-pending-messages">tp_cli_channel_type_text_run_acknowledge_pending_messages</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const GArray *in_ids,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-run-get-message-types">tp_cli_channel_type_text_run_get_message_types</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-run-list-pending-messages">tp_cli_channel_type_text_run_list_pending_messages</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gboolean in_clear,
+                                                         GPtrArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-run-send">tp_cli_channel_type_text_run_send</a>   (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_type,
+                                                         const gchar *in_text,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-call-acknowledge-pending-messages">tp_cli_channel_type_text_call_acknowledge_pending_messages</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const GArray *in_ids,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-acknowledge-pending-messages">tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-call-get-message-types">tp_cli_channel_type_text_call_get_message_types</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-get-message-types">tp_cli_channel_type_text_callback_for_get_message_types</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-call-list-pending-messages">tp_cli_channel_type_text_call_list_pending_messages</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gboolean in_clear,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-list-pending-messages">tp_cli_channel_type_text_callback_for_list_pending_messages</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-call-send">tp_cli_channel_type_text_call_send</a>  (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_type,
+                                                         const gchar *in_text,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-send">tp_cli_channel_type_text_callback_for_send</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-acknowledge-pending-messages">*tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-get-message-types">*tp_cli_channel_type_text_callback_for_get_message_types</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-list-pending-messages">*tp_cli_channel_type_text_callback_for_list_pending_messages</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GPtrArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-send">*tp_cli_channel_type_text_callback_for_send</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-lost-message">tp_cli_channel_type_text_connect_to_lost_message</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-lost-message">tp_cli_channel_type_text_signal_callback_lost_message</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-received">tp_cli_channel_type_text_connect_to_received</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-received">tp_cli_channel_type_text_signal_callback_received</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-send-error">tp_cli_channel_type_text_connect_to_send_error</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-send-error">tp_cli_channel_type_text_signal_callback_send_error</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-sent">tp_cli_channel_type_text_connect_to_sent</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-sent">tp_cli_channel_type_text_signal_callback_sent</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-lost-message">*tp_cli_channel_type_text_signal_callback_lost_message</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-received">*tp_cli_channel_type_text_signal_callback_received</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_id,
+                                                         guint arg_timestamp,
+                                                         guint arg_sender,
+                                                         guint arg_type,
+                                                         guint arg_flags,
+                                                         const gchar *arg_text,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-send-error">*tp_cli_channel_type_text_signal_callback_send_error</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_error,
+                                                         guint arg_timestamp,
+                                                         guint arg_type,
+                                                         const gchar *arg_text,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-sent">*tp_cli_channel_type_text_signal_callback_sent</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_timestamp,
+                                                         guint arg_type,
+                                                         const gchar *arg_text,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-run-set-chat-state">tp_cli_channel_interface_chat_state_run_set_chat_state</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_state,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-call-set-chat-state">tp_cli_channel_interface_chat_state_call_set_chat_state</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_state,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-callback-for-set-chat-state">tp_cli_channel_interface_chat_state_callback_for_set_chat_state</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-callback-for-set-chat-state">*tp_cli_channel_interface_chat_state_callback_for_set_chat_state</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-connect-to-chat-state-changed">tp_cli_channel_interface_chat_state_connect_to_chat_state_changed</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed">tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed">*tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_contact,
+                                                         guint arg_state,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-run-get-password-flags">tp_cli_channel_interface_password_run_get_password_flags</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+gboolean            <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-run-provide-password">tp_cli_channel_interface_password_run_provide_password</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_password,
+                                                         gboolean *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-call-get-password-flags">tp_cli_channel_interface_password_call_get_password_flags</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-callback-for-get-password-flags">tp_cli_channel_interface_password_callback_for_get_password_flags</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-call-provide-password">tp_cli_channel_interface_password_call_provide_password</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_password,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-callback-for-provide-password">tp_cli_channel_interface_password_callback_for_provide_password</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-callback-for-get-password-flags">*tp_cli_channel_interface_password_callback_for_get_password_flags</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-callback-for-provide-password">*tp_cli_channel_interface_password_callback_for_provide_password</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gboolean out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-connect-to-password-flags-changed">tp_cli_channel_interface_password_connect_to_password_flags_changed</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-signal-callback-password-flags-changed">tp_cli_channel_interface_password_signal_callback_password_flags_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+void                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-signal-callback-password-flags-changed">*tp_cli_channel_interface_password_signal_callback_password_flags_changed</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_added,
+                                                         guint arg_removed,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2725563"></a><h2>Description</h2>
+<p>
+A major use for instant messaging is obviously to send messages.
+Channels of type Text represent IM conversations or chat rooms.
+</p>
+<p>
+This section documents the auto-generated C wrappers for the Text channel
+type, and also for the Chat State and Password interfaces, which are
+usually used in conjunction with Text channels.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2725588"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2725598"></a><h3>
+<a name="tp-cli-channel-type-text-run-acknowledge-pending-messages"></a>tp_cli_channel_type_text_run_acknowledge_pending_messages ()</h3>
+<a class="indexterm" name="id2725611"></a><pre class="programlisting">gboolean            tp_cli_channel_type_text_run_acknowledge_pending_messages
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const GArray *in_ids,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method AcknowledgePendingMessages and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Inform the channel that you have handled messages by displaying them to         the user (or equivalent), so they can be removed from the pending queue.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_ids</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The IDs of the messages to acknowledge
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2725831"></a><h3>
+<a name="tp-cli-channel-type-text-run-get-message-types"></a>tp_cli_channel_type_text_run_get_message_types ()</h3>
+<a class="indexterm" name="id2725844"></a><pre class="programlisting">gboolean            tp_cli_channel_type_text_run_get_message_types
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method GetMessageTypes and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Return an array indicating which types of message may be sent on this         channel.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An array of integer message types (ChannelTextMessageType)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2726070"></a><h3>
+<a name="tp-cli-channel-type-text-run-list-pending-messages"></a>tp_cli_channel_type_text_run_list_pending_messages ()</h3>
+<a class="indexterm" name="id2726083"></a><pre class="programlisting">gboolean            tp_cli_channel_type_text_run_list_pending_messages
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gboolean in_clear,
+                                                         GPtrArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method ListPendingMessages and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+List the messages currently in the pending queue, and optionally         remove then all.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_clear</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: If true, remove all messages from the queue
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An array of structs representing the pending queue. Each contains:           &lt;ul&gt;             &lt;li&gt;a numeric identifier&lt;/li&gt;             &lt;li&gt;a Unix timestamp indicating when the message was received&lt;/li&gt;             &lt;li&gt;the contact handle for the contact who sent the message&lt;/li&gt;             &lt;li&gt;the message type, taken from ChannelTextMessageType&lt;/li&gt;             &lt;li&gt;the bitwise-OR of the message flags from ChannelTextMessageFlags&lt;/li&gt;             &lt;li&gt;the text of the message&lt;/li&gt;           &lt;/ul&gt;
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2726337"></a><h3>
+<a name="tp-cli-channel-type-text-run-send"></a>tp_cli_channel_type_text_run_send ()</h3>
+<a class="indexterm" name="id2726348"></a><pre class="programlisting">gboolean            tp_cli_channel_type_text_run_send   (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_type,
+                                                         const gchar *in_text,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method Send and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Request that a message be sent on this channel. The Sent signal will be         emitted when the message has been sent, and this method will return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An integer indicating the type of the message, from           ChannelTextMessageType
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_text</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The message to send
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2726586"></a><h3>
+<a name="tp-cli-channel-type-text-call-acknowledge-pending-messages"></a>tp_cli_channel_type_text_call_acknowledge_pending_messages ()</h3>
+<a class="indexterm" name="id2726599"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_type_text_call_acknowledge_pending_messages
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const GArray *in_ids,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-acknowledge-pending-messages">tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a AcknowledgePendingMessages method call.
+</p>
+<p>
+Inform the channel that you have handled messages by displaying them to         the user (or equivalent), so they can be removed from the pending queue.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_ids</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The IDs of the messages to acknowledge
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2726815"></a><h3>
+<a name="tp-cli-channel-type-text-call-get-message-types"></a>tp_cli_channel_type_text_call_get_message_types ()</h3>
+<a class="indexterm" name="id2726828"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_type_text_call_get_message_types
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-get-message-types">tp_cli_channel_type_text_callback_for_get_message_types</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a GetMessageTypes method call.
+</p>
+<p>
+Return an array indicating which types of message may be sent on this         channel.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2727021"></a><h3>
+<a name="tp-cli-channel-type-text-call-list-pending-messages"></a>tp_cli_channel_type_text_call_list_pending_messages ()</h3>
+<a class="indexterm" name="id2727034"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_type_text_call_list_pending_messages
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gboolean in_clear,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-list-pending-messages">tp_cli_channel_type_text_callback_for_list_pending_messages</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a ListPendingMessages method call.
+</p>
+<p>
+List the messages currently in the pending queue, and optionally         remove then all.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_clear</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: If true, remove all messages from the queue
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2727248"></a><h3>
+<a name="tp-cli-channel-type-text-call-send"></a>tp_cli_channel_type_text_call_send ()</h3>
+<a class="indexterm" name="id2727260"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_type_text_call_send  (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_type,
+                                                         const gchar *in_text,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-callback-for-send">tp_cli_channel_type_text_callback_for_send</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a Send method call.
+</p>
+<p>
+Request that a message be sent on this channel. The Sent signal will be         emitted when the message has been sent, and this method will return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An integer indicating the type of the message, from           ChannelTextMessageType
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_text</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The message to send
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2727492"></a><h3>
+<a name="tp-cli-channel-type-text-callback-for-acknowledge-pending-messages"></a>tp_cli_channel_type_text_callback_for_acknowledge_pending_messages ()</h3>
+<a class="indexterm" name="id2727507"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_callback_for_acknowledge_pending_messages)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a AcknowledgePendingMessages method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2727622"></a><h3>
+<a name="tp-cli-channel-type-text-callback-for-get-message-types"></a>tp_cli_channel_type_text_callback_for_get_message_types ()</h3>
+<a class="indexterm" name="id2727635"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_callback_for_get_message_types)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a GetMessageTypes method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An array of integer message types (ChannelTextMessageType)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2727785"></a><h3>
+<a name="tp-cli-channel-type-text-callback-for-list-pending-messages"></a>tp_cli_channel_type_text_callback_for_list_pending_messages ()</h3>
+<a class="indexterm" name="id2727799"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_callback_for_list_pending_messages)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GPtrArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a ListPendingMessages method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An array of structs representing the pending queue. Each contains:           &lt;ul&gt;             &lt;li&gt;a numeric identifier&lt;/li&gt;             &lt;li&gt;a Unix timestamp indicating when the message was received&lt;/li&gt;             &lt;li&gt;the contact handle for the contact who sent the message&lt;/li&gt;             &lt;li&gt;the message type, taken from ChannelTextMessageType&lt;/li&gt;             &lt;li&gt;the bitwise-OR of the message flags from ChannelTextMessageFlags&lt;/li&gt;             &lt;li&gt;the text of the message&lt;/li&gt;           &lt;/ul&gt;
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2727956"></a><h3>
+<a name="tp-cli-channel-type-text-callback-for-send"></a>tp_cli_channel_type_text_callback_for_send ()</h3>
+<a class="indexterm" name="id2727970"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_callback_for_send)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a Send method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2728084"></a><h3>
+<a name="tp-cli-channel-type-text-connect-to-lost-message"></a>tp_cli_channel_type_text_connect_to_lost_message ()</h3>
+<a class="indexterm" name="id2728097"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_type_text_connect_to_lost_message
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-lost-message">tp_cli_channel_type_text_signal_callback_lost_message</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal LostMessage.
+</p>
+<p>
+This signal is emitted to indicate that an incoming message was         not able to be stored and forwarded by the connection manager         due to lack of memory.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2728318"></a><h3>
+<a name="tp-cli-channel-type-text-connect-to-received"></a>tp_cli_channel_type_text_connect_to_received ()</h3>
+<a class="indexterm" name="id2728332"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_type_text_connect_to_received
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-received">tp_cli_channel_type_text_signal_callback_received</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal Received.
+</p>
+<p>
+Signals that a message with the given id, timestamp, sender, type         and text has been received on this channel. Applications that catch         this signal and reliably inform the user of the message should         acknowledge that they have dealt with the message with the         AcknowledgePendingMessage method.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2728555"></a><h3>
+<a name="tp-cli-channel-type-text-connect-to-send-error"></a>tp_cli_channel_type_text_connect_to_send_error ()</h3>
+<a class="indexterm" name="id2728568"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_type_text_connect_to_send_error
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-send-error">tp_cli_channel_type_text_signal_callback_send_error</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal SendError.
+</p>
+<p>
+Signals that an outgoing message has failed to send. The error         will be one of the values from ChannelTextSendError.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2728788"></a><h3>
+<a name="tp-cli-channel-type-text-connect-to-sent"></a>tp_cli_channel_type_text_connect_to_sent ()</h3>
+<a class="indexterm" name="id2728801"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_type_text_connect_to_sent
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-signal-callback-sent">tp_cli_channel_type_text_signal_callback_sent</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal Sent.
+</p>
+<p>
+Signals that a message has been sent on this channel.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2729020"></a><h3>
+<a name="tp-cli-channel-type-text-signal-callback-lost-message"></a>tp_cli_channel_type_text_signal_callback_lost_message ()</h3>
+<a class="indexterm" name="id2729033"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_signal_callback_lost_message)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal LostMessage.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-lost-message"><code class="function">tp_cli_channel_type_text_connect_to_lost_message()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2729130"></a><h3>
+<a name="tp-cli-channel-type-text-signal-callback-received"></a>tp_cli_channel_type_text_signal_callback_received ()</h3>
+<a class="indexterm" name="id2729143"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_signal_callback_received)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_id,
+                                                         guint arg_timestamp,
+                                                         guint arg_sender,
+                                                         guint arg_type,
+                                                         guint arg_flags,
+                                                         const gchar *arg_text,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal Received.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-received"><code class="function">tp_cli_channel_type_text_connect_to_received()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_id</code></em>&#160;:</span></p></td>
+<td> A numeric identifier for acknowledging the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_timestamp</code></em>&#160;:</span></p></td>
+<td> A Unix timestamp indicating when the message was received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_sender</code></em>&#160;:</span></p></td>
+<td> The handle of the contact who sent the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_type</code></em>&#160;:</span></p></td>
+<td> The type of the message (normal, action, notice, etc), from           ChannelTextMessageType
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_flags</code></em>&#160;:</span></p></td>
+<td> A bitwise OR of the message flags as defined by ChannelTextMessageFlags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_text</code></em>&#160;:</span></p></td>
+<td> The text of the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2729361"></a><h3>
+<a name="tp-cli-channel-type-text-signal-callback-send-error"></a>tp_cli_channel_type_text_signal_callback_send_error ()</h3>
+<a class="indexterm" name="id2729374"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_signal_callback_send_error)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_error,
+                                                         guint arg_timestamp,
+                                                         guint arg_type,
+                                                         const gchar *arg_text,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal SendError.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-send-error"><code class="function">tp_cli_channel_type_text_connect_to_send_error()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_error</code></em>&#160;:</span></p></td>
+<td> One of the values of ChannelTextSendError
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_timestamp</code></em>&#160;:</span></p></td>
+<td> The Unix timestamp indicating when the message was sent
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_type</code></em>&#160;:</span></p></td>
+<td> The message type from ChannelTextMessageType
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_text</code></em>&#160;:</span></p></td>
+<td> The text of the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2729550"></a><h3>
+<a name="tp-cli-channel-type-text-signal-callback-sent"></a>tp_cli_channel_type_text_signal_callback_sent ()</h3>
+<a class="indexterm" name="id2729564"></a><pre class="programlisting">void                (*tp_cli_channel_type_text_signal_callback_sent)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_timestamp,
+                                                         guint arg_type,
+                                                         const gchar *arg_text,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal Sent.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-type-text-connect-to-sent"><code class="function">tp_cli_channel_type_text_connect_to_sent()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_timestamp</code></em>&#160;:</span></p></td>
+<td> Unix timestamp indicating when the message was sent
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_type</code></em>&#160;:</span></p></td>
+<td> The message type (normal, action, notice, etc) from           ChannelTextMessageType
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_text</code></em>&#160;:</span></p></td>
+<td> The text of the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2729720"></a><h3>
+<a name="tp-cli-channel-interface-chat-state-run-set-chat-state"></a>tp_cli_channel_interface_chat_state_run_set_chat_state ()</h3>
+<a class="indexterm" name="id2729734"></a><pre class="programlisting">gboolean            tp_cli_channel_interface_chat_state_run_set_chat_state
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_state,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method SetChatState and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Set the local state and notify other members of the channel that it         has changed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_state</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The new state: one of the values of ChannelChatState.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2729952"></a><h3>
+<a name="tp-cli-channel-interface-chat-state-call-set-chat-state"></a>tp_cli_channel_interface_chat_state_call_set_chat_state ()</h3>
+<a class="indexterm" name="id2729966"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_interface_chat_state_call_set_chat_state
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_state,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-callback-for-set-chat-state">tp_cli_channel_interface_chat_state_callback_for_set_chat_state</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a SetChatState method call.
+</p>
+<p>
+Set the local state and notify other members of the channel that it         has changed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_state</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The new state: one of the values of ChannelChatState.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2730179"></a><h3>
+<a name="tp-cli-channel-interface-chat-state-callback-for-set-chat-state"></a>tp_cli_channel_interface_chat_state_callback_for_set_chat_state ()</h3>
+<a class="indexterm" name="id2730193"></a><pre class="programlisting">void                (*tp_cli_channel_interface_chat_state_callback_for_set_chat_state)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a SetChatState method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2730309"></a><h3>
+<a name="tp-cli-channel-interface-chat-state-connect-to-chat-state-changed"></a>tp_cli_channel_interface_chat_state_connect_to_chat_state_changed ()</h3>
+<a class="indexterm" name="id2730324"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_interface_chat_state_connect_to_chat_state_changed
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed">tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal ChatStateChanged.
+</p>
+<p>
+Emitted when the state of a member of the channel has changed.         This includes local state.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2730544"></a><h3>
+<a name="tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed"></a>tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed ()</h3>
+<a class="indexterm" name="id2730559"></a><pre class="programlisting">void                (*tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_contact,
+                                                         guint arg_state,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal ChatStateChanged.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-chat-state-connect-to-chat-state-changed"><code class="function">tp_cli_channel_interface_chat_state_connect_to_chat_state_changed()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_contact</code></em>&#160;:</span></p></td>
+<td> An integer handle for the contact.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_state</code></em>&#160;:</span></p></td>
+<td> The new state of this contact: one of the values of ChannelChatState.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2730697"></a><h3>
+<a name="tp-cli-channel-interface-password-run-get-password-flags"></a>tp_cli_channel_interface_password_run_get_password_flags ()</h3>
+<a class="indexterm" name="id2730711"></a><pre class="programlisting">gboolean            tp_cli_channel_interface_password_run_get_password_flags
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method GetPasswordFlags and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Returns the bitwise-OR of the flags relevant to the password on this         channel.  The user interface can use this to present information about         which operations are currently valid.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An integer with the logical OR of all the flags set           (values of ChannelPasswordFlags)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2730940"></a><h3>
+<a name="tp-cli-channel-interface-password-run-provide-password"></a>tp_cli_channel_interface_password_run_provide_password ()</h3>
+<a class="indexterm" name="id2730954"></a><pre class="programlisting">gboolean            tp_cli_channel_interface_password_run_provide_password
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_password,
+                                                         gboolean *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method ProvidePassword and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Provide the password so that the channel can be joined. Must be         called with the correct password in order for channel joining to         proceed if the 'provide' password flag is set.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_password</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The password
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2731201"></a><h3>
+<a name="tp-cli-channel-interface-password-call-get-password-flags"></a>tp_cli_channel_interface_password_call_get_password_flags ()</h3>
+<a class="indexterm" name="id2731215"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_interface_password_call_get_password_flags
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-callback-for-get-password-flags">tp_cli_channel_interface_password_callback_for_get_password_flags</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a GetPasswordFlags method call.
+</p>
+<p>
+Returns the bitwise-OR of the flags relevant to the password on this         channel.  The user interface can use this to present information about         which operations are currently valid.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2731410"></a><h3>
+<a name="tp-cli-channel-interface-password-call-provide-password"></a>tp_cli_channel_interface_password_call_provide_password ()</h3>
+<a class="indexterm" name="id2731424"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_channel_interface_password_call_provide_password
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_password,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-callback-for-provide-password">tp_cli_channel_interface_password_callback_for_provide_password</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a ProvidePassword method call.
+</p>
+<p>
+Provide the password so that the channel can be joined. Must be         called with the correct password in order for channel joining to         proceed if the 'provide' password flag is set.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_password</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The password
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2731640"></a><h3>
+<a name="tp-cli-channel-interface-password-callback-for-get-password-flags"></a>tp_cli_channel_interface_password_callback_for_get_password_flags ()</h3>
+<a class="indexterm" name="id2731655"></a><pre class="programlisting">void                (*tp_cli_channel_interface_password_callback_for_get_password_flags)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a GetPasswordFlags method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An integer with the logical OR of all the flags set           (values of ChannelPasswordFlags)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2731804"></a><h3>
+<a name="tp-cli-channel-interface-password-callback-for-provide-password"></a>tp_cli_channel_interface_password_callback_for_provide_password ()</h3>
+<a class="indexterm" name="id2731818"></a><pre class="programlisting">void                (*tp_cli_channel_interface_password_callback_for_provide_password)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         gboolean out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a ProvidePassword method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2731967"></a><h3>
+<a name="tp-cli-channel-interface-password-connect-to-password-flags-changed"></a>tp_cli_channel_interface_password_connect_to_password_flags_changed ()</h3>
+<a class="indexterm" name="id2731983"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_interface_password_connect_to_password_flags_changed
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-signal-callback-password-flags-changed">tp_cli_channel_interface_password_signal_callback_password_flags_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal PasswordFlagsChanged.
+</p>
+<p>
+Emitted when the flags as returned by GetPasswordFlags are changed.         The user interface should be updated as appropriate.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2732203"></a><h3>
+<a name="tp-cli-channel-interface-password-signal-callback-password-flags-changed"></a>tp_cli_channel_interface_password_signal_callback_password_flags_changed ()</h3>
+<a class="indexterm" name="id2732218"></a><pre class="programlisting">void                (*tp_cli_channel_interface_password_signal_callback_password_flags_changed)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_added,
+                                                         guint arg_removed,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal PasswordFlagsChanged.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-password-connect-to-password-flags-changed"><code class="function">tp_cli_channel_interface_password_connect_to_password_flags_changed()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_added</code></em>&#160;:</span></p></td>
+<td> A bitwise OR of the flags which have been set
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_removed</code></em>&#160;:</span></p></td>
+<td> A bitwise OR of the flags which have been cleared
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2732358"></a><h2>See Also</h2>
+channel-group, <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2732370"></a><div class="refsect2" lang="en"><a name="id2732371"></a></div>
+<hr>
+<div class="refsect2" lang="en"><a name="id2732372"></a></div>
+</div>
+</div>
+</body>
+</html>

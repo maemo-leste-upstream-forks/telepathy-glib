@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [0])
+m4_define([tp_glib_micro_version], [1])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -22,10 +22,17 @@ m4_define([tp_glib_nano_version], [0])
 #  increment current and set revision to 0
 # If interfaces have been added since last release, increment age
 # If interfaces have been removed since last release, set age to 0
+#
+# If interfaces have been added, they'll be in a section like
+# TP_GLIB_0.7.2_UNRELEASED in telepathy-glib/version-script.txt.
+# You need to rename this to TP_GLIB_0.7.2 before making the release.
+# This is to force binaries built against devel versions to be rebuilt
+# (we don't guarantee that we won't add ABI then remove it again, if it was
+# never seen in a release).
 
-m4_define([tp_glib_lt_current], [4])
+m4_define([tp_glib_lt_current], [5])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [4])
+m4_define([tp_glib_lt_age], [5])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -59,6 +66,12 @@ AC_SUBST([LT_CURRENT])
 AC_SUBST([LT_REVISION])
 AC_SUBST([LT_AGE])
 
+dnl optimizations, etc.
+COMPILER_OPTIMISATIONS
+COMPILER_COVERAGE
+LINKER_OPTIMISATIONS
+LINKER_VERSION_SCRIPT
+
 dnl decide error flags
 AS_COMPILER_FLAG(-Wall, ERROR_CFLAGS="-Wall", ERROR_CFLAGS="")
 AS_COMPILER_FLAG(-Werror, werror=yes, werror=no)
@@ -75,8 +88,10 @@ AS_COMPILER_FLAG(-Wno-unused-parameter,
         wno_unused_parameter=yes,
         wno_unused_parameter=no)
 
-ifelse(tp_glib_nano_version, 0, [],
+ifelse(tp_glib_nano_version, 0,
+    [ official_release=yes ],
     [
+        official_release=no
         if test x$werror = xyes; then
             ERROR_CFLAGS="$ERROR_CFLAGS -Werror"
         fi
@@ -88,6 +103,7 @@ ifelse(tp_glib_nano_version, 0, [],
     ])
 
 AC_SUBST(ERROR_CFLAGS)
+AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])
 
 AC_ARG_ENABLE(debug,
   AC_HELP_STRING([--disable-debug],[compile without debug code (note that this will disable much of the debug code in all GLib connection managers)]),
@@ -100,10 +116,6 @@ AC_ARG_ENABLE(handle-leak-debug,
 AC_ARG_ENABLE(backtrace,
   AC_HELP_STRING([--enable-backtrace],[enable printing out the backtrace in case of crash (in most GLib connection managers)]),
     enable_backtrace=$enableval, enable_backtrace=no )
-
-AC_ARG_ENABLE(coverage,
-  AC_HELP_STRING([--enable-coverage],[compile with coverage info]),
-    enable_coverage=$enableval, enable_coverage=no )
 
 ifelse(tp_glib_nano_version, 0,
     [ # tp-glib is version x.y.z - disable coding style checks by default
@@ -130,10 +142,6 @@ fi
 
 if test x$enable_backtrace = xyes; then
   AC_DEFINE(ENABLE_BACKTRACE, [], [Enable backtrace output on crashes])
-fi
-
-if test x$enable_coverage = xyes; then
-  COVERAGE_CFLAGS="-g -fprofile-arcs -ftest-coverage"
 fi
 
 AC_SUBST(HANDLE_LEAK_DEBUG_CFLAGS)
@@ -192,17 +200,32 @@ dnl signal functions
 AC_CHECK_FUNCS(signal)
 AC_CHECK_HEADERS(signal.h)
 
+HAVE_LD_VERSION_SCRIPT=no
+if test -n "$VERSION_SCRIPT_ARG"; then
+	HAVE_LD_VERSION_SCRIPT=yes
+fi
+AC_CHECK_PROGS([NM], [nm])
+if test -z "$NM"; then
+	HAVE_LD_VERSION_SCRIPT=no
+fi
+AM_CONDITIONAL([HAVE_LD_VERSION_SCRIPT], [test $HAVE_LD_VERSION_SCRIPT = yes])
+
 AC_OUTPUT( Makefile \
 	   docs/Makefile \
 	   docs/reference/Makefile \
 	   examples/Makefile \
 	   examples/client/Makefile \
 	   examples/cm/Makefile \
+	   examples/cm/echo/Makefile \
+	   examples/cm/extended/Makefile \
 	   examples/cm/no-protocols/Makefile \
+	   examples/extensions/Makefile \
 	   spec/Makefile \
 	   telepathy-glib/Makefile \
 	   telepathy-glib/telepathy-glib.pc \
 	   tests/Makefile \
+	   tests/dbus/Makefile \
+	   tests/tools/Makefile \
 	   tools/Makefile \
 	   m4/Makefile \
 )

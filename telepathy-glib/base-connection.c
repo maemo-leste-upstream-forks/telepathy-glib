@@ -41,13 +41,14 @@
 
 #include <dbus/dbus-glib-lowlevel.h>
 
+#include <telepathy-glib/connection-manager.h>
 #include <telepathy-glib/channel-factory-iface.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CONNECTION
-#include "internal-debug.h"
+#include "debug-internal.h"
 
 static void service_iface_init (gpointer, gpointer);
 
@@ -461,6 +462,10 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
   DEBUG("Post-construction: (TpBaseConnection *)%p", self);
 
   g_assert (cls->create_handle_repos != NULL);
+  g_assert (cls->create_channel_factories != NULL);
+  g_assert (cls->shut_down != NULL);
+  g_assert (cls->start_connecting != NULL);
+
   (cls->create_handle_repos) (self, priv->handles);
 
   /* a connection that doesn't support contacts is no use to anyone */
@@ -474,7 +479,6 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
       }
     }
 
-  g_assert (cls->create_channel_factories);
   priv->channel_factories = cls->create_channel_factories (self);
 
   for (i = 0; i < priv->channel_factories->len; i++)
@@ -512,14 +516,11 @@ tp_base_connection_class_init (TpBaseConnectionClass *klass)
    * name is required.
    */
   param_spec = g_param_spec_string ("protocol",
-                                    "Telepathy identifier for protocol",
-                                    "Identifier string used when the protocol "
-                                    "name is required.",
-                                    NULL,
-                                    G_PARAM_CONSTRUCT_ONLY |
-                                    G_PARAM_READWRITE |
-                                    G_PARAM_STATIC_NAME |
-                                    G_PARAM_STATIC_BLURB);
+      "Telepathy identifier for protocol",
+      "Identifier string used when the protocol name is required.",
+      NULL,
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
+      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class, PROP_PROTOCOL, param_spec);
 
   /* signal definitions */
@@ -596,7 +597,16 @@ tp_base_connection_register (TpBaseConnection *self,
   guint request_name_result;
   GError *request_error = NULL;
 
-  safe_proto = tp_escape_as_identifier (priv->protocol);
+  if (tp_connection_manager_check_valid_protocol_name (priv->protocol, NULL))
+    {
+      safe_proto = g_strdelimit (g_strdup (priv->protocol), "-", '_');
+    }
+  else
+    {
+      g_warning ("Protocol name %s is not valid - should match "
+          "[A-Za-z][A-Za-z0-9-]+", priv->protocol);
+      safe_proto = tp_escape_as_identifier (priv->protocol);
+    }
 
   if (cls->get_unique_connection_name)
     {
@@ -1563,7 +1573,6 @@ tp_base_connection_change_status (TpBaseConnection *self,
             (klass->disconnected) (self);
           g_ptr_array_foreach (priv->channel_factories, (GFunc)
               tp_channel_factory_iface_disconnected, NULL);
-          g_assert (klass->shut_down);
         }
       (klass->shut_down) (self);
       break;

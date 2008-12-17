@@ -1,7 +1,8 @@
 /*
  * manager.c - trivial connection manager which supports no protocols
  *
- * Copyright (C) 2007 Collabora Ltd.
+ * Copyright (C) 2007 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright (C) 2007 Nokia Corporation
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
@@ -52,6 +53,6 @@ example_connection_manager_class_init (ExampleConnectionManagerClass *klass)
       (TpBaseConnectionManagerClass *) klass;
 
   base_class->new_connection = new_connection;
-  base_class->cm_dbus_name = "example-no-protocols";
+  base_class->cm_dbus_name = "example_no_protocols";
   base_class->protocol_params = stub_protocols;
 }

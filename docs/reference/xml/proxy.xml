@@ -1,0 +1,1111 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-proxy">
+<refmeta>
+<refentrytitle role="top_of_page">TpProxy</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>TpProxy</refname>
+<refpurpose>base class for Telepathy client proxy objects</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+<anchor id="TpProxy"/>
+<synopsis>
+
+#include &lt;telepathy-glib/proxy.h&gt;
+
+
+                    <link linkend="TpProxy-struct">TpProxy</link>;
+                    <link linkend="TpProxyClass">TpProxyClass</link>;
+#define             <link linkend="tp-proxy-has-interface">tp_proxy_has_interface</link>              (self, interface)
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-proxy-has-interface-by-id">tp_proxy_has_interface_by_id</link>        (<link linkend="gpointer">gpointer</link> self,
+                                                         <link linkend="GQuark">GQuark</link> interface);
+                    <link linkend="TpProxyPendingCall">TpProxyPendingCall</link>;
+<link linkend="void">void</link>                <link linkend="tp-proxy-pending-call-cancel">tp_proxy_pending_call_cancel</link>        (<link linkend="TpProxyPendingCall">TpProxyPendingCall</link> *self);
+                    <link linkend="TpProxySignalConnection">TpProxySignalConnection</link>;
+<link linkend="void">void</link>                <link linkend="tp-proxy-signal-connection-disconnect">tp_proxy_signal_connection_disconnect</link>
+                                                        (<link linkend="TpProxySignalConnection">TpProxySignalConnection</link> *self);
+#define             <link linkend="TP-DBUS-ERRORS:CAPS">TP_DBUS_ERRORS</link>
+enum                <link linkend="TpDBusError">TpDBusError</link>;
+
+
+<link linkend="void">void</link>                (<link linkend="tp-cli-properties-interface-callback-for-get-properties">*tp_cli_properties_interface_callback_for_get_properties</link>)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-properties-interface-call-get-properties">tp_cli_properties_interface_call_get_properties</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_properties,
+                                                         <link linkend="tp-cli-properties-interface-callback-for-get-properties">tp_cli_properties_interface_callback_for_get_properties</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-properties-interface-run-get-properties">tp_cli_properties_interface_run_get_properties</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_properties,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="tp-cli-properties-interface-callback-for-list-properties">*tp_cli_properties_interface_callback_for_list_properties</link>)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-properties-interface-call-list-properties">tp_cli_properties_interface_call_list_properties</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-properties-interface-callback-for-list-properties">tp_cli_properties_interface_callback_for_list_properties</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-properties-interface-run-list-properties">tp_cli_properties_interface_run_list_properties</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="tp-cli-properties-interface-callback-for-set-properties">*tp_cli_properties_interface_callback_for_set_properties</link>)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-properties-interface-call-set-properties">tp_cli_properties_interface_call_set_properties</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_properties,
+                                                         <link linkend="tp-cli-properties-interface-callback-for-set-properties">tp_cli_properties_interface_callback_for_set_properties</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-properties-interface-run-set-properties">tp_cli_properties_interface_run_set_properties</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_properties,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="tp-cli-properties-interface-signal-callback-properties-changed">*tp_cli_properties_interface_signal_callback_properties_changed</link>)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *arg_properties,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-properties-interface-connect-to-properties-changed">tp_cli_properties_interface_connect_to_properties_changed</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="tp-cli-properties-interface-signal-callback-properties-changed">tp_cli_properties_interface_signal_callback_properties_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-properties-interface-signal-callback-property-flags-changed">*tp_cli_properties_interface_signal_callback_property_flags_changed</link>)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *arg_properties,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-properties-interface-connect-to-property-flags-changed">tp_cli_properties_interface_connect_to_property_flags_changed</link>
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="tp-cli-properties-interface-signal-callback-property-flags-changed">tp_cli_properties_interface_signal_callback_property_flags_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+
+  <link linkend="GObject">GObject</link>
+   +----TpProxy
+         +----<link linkend="TpChannel">TpChannel</link>
+         +----<link linkend="TpConnection">TpConnection</link>
+         +----<link linkend="TpConnectionManager">TpConnectionManager</link>
+         +----<link linkend="TpDBusDaemon">TpDBusDaemon</link>
+         +----<link linkend="TpMediaSessionHandler">TpMediaSessionHandler</link>
+         +----<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link>
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+<refsect1 role="properties">
+<title role="properties.title">Properties</title>
+<synopsis>
+
+  &quot;<link linkend="TpProxy--bus-name">bus-name</link>&quot;                 <link linkend="gchararray">gchararray</link>            : Read / Write / Construct Only
+  &quot;<link linkend="TpProxy--dbus-connection">dbus-connection</link>&quot;          <link linkend="DBusGConnection">DBusGConnection</link>       : Read / Write / Construct Only
+  &quot;<link linkend="TpProxy--dbus-daemon">dbus-daemon</link>&quot;              <link linkend="TpDBusDaemon">TpDBusDaemon</link>          : Read / Write / Construct Only
+  &quot;<link linkend="TpProxy--interfaces">interfaces</link>&quot;               <link linkend="GStrv">GStrv</link>                 : Read
+  &quot;<link linkend="TpProxy--object-path">object-path</link>&quot;              <link linkend="gchararray">gchararray</link>            : Read / Write / Construct Only
+</synopsis>
+</refsect1>
+
+<refsect1 role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+
+  &quot;<link linkend="TpProxy-interface-added">interface-added</link>&quot;                                : Run Last / Has Details
+  &quot;<link linkend="TpProxy-invalidated">invalidated</link>&quot;                                    : Run Last / Has Details
+</synopsis>
+</refsect1>
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="TpProxy"><type>TpProxy</type></link> is a base class for Telepathy client-side proxies, which represent
+an object accessed via D-Bus and provide access to its methods and signals.
+</para>
+<para>
+The header proxy.h also includes auto-generated client wrappers for the
+Properties interface, which can be implemented by any type of object.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="TpProxy-struct" role="struct"/>TpProxy</title>
+<indexterm role="0.7.1"><primary>TpProxy</primary></indexterm><programlisting>typedef struct {
+    GObject parent;
+
+    TpDBusDaemon *dbus_daemon;
+    DBusGConnection *dbus_connection;
+    gchar *bus_name;
+    gchar *object_path;
+
+    GError *invalidated /* initialized to NULL by g_object_new */;
+
+    TpProxyPrivate *priv;
+} TpProxy;
+</programlisting>
+<para>
+Structure representing a Telepathy client-side proxy.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="GObject">GObject</link>&nbsp;<structfield>parent</structfield>;</term>
+<listitem><simpara> parent object
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpDBusDaemon">TpDBusDaemon</link>&nbsp;*<structfield>dbus_daemon</structfield>;</term>
+<listitem><simpara> the <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> for this object, if any; always <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+ if this object is a <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> (read-only)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="DBusGConnection">DBusGConnection</link>&nbsp;*<structfield>dbus_connection</structfield>;</term>
+<listitem><simpara> the D-Bus connection used by this object (read-only)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>bus_name</structfield>;</term>
+<listitem><simpara> the bus name of the application exporting the object (read-only)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>object_path</structfield>;</term>
+<listitem><simpara> the object path of the remote object (read-only)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GError">GError</link>&nbsp;*<structfield>invalidated</structfield>;</term>
+<listitem><simpara> if not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, the reason this proxy was invalidated
+ (read-only)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpProxyPrivate">TpProxyPrivate</link>&nbsp;*<structfield>priv</structfield>;</term>
+<listitem><simpara> private internal data
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpProxyClass" role="struct" condition="since:0.7.1"/>TpProxyClass</title>
+<indexterm role="0.7.1"><primary>TpProxyClass</primary></indexterm><programlisting>typedef struct {
+    GObjectClass parent_class;
+
+    GQuark interface;
+
+    gboolean must_have_unique_name:1;
+    guint _reserved_flags:31;
+
+    GCallback _reserved[4];
+    gpointer priv;
+} TpProxyClass;
+</programlisting>
+<para>
+The class of a <link linkend="TpProxy"><type>TpProxy</type></link>.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="GObjectClass">GObjectClass</link>&nbsp;<structfield>parent_class</structfield>;</term>
+<listitem><simpara> The parent class structure
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GQuark">GQuark</link>&nbsp;<structfield>interface</structfield>;</term>
+<listitem><simpara> If set non-zero by a subclass, <link linkend="TpProxy"><type>TpProxy</type></link> will
+   automatically add this interface in its constructor
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gboolean">gboolean</link>&nbsp;<structfield>must_have_unique_name</structfield>&nbsp;:1;</term>
+<listitem><simpara> If set <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> by a subclass, the <link linkend="TpProxy"><type>TpProxy</type></link>
+   constructor will fail if a well-known bus name is given
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint">guint</link>&nbsp;<structfield>_reserved_flags</structfield>&nbsp;:31;</term>
+<listitem><simpara> Reserved for future expansion
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GCallback">GCallback</link>&nbsp;<structfield>_reserved</structfield>[4];</term>
+<listitem><simpara> Reserved for future expansion
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>priv</structfield>;</term>
+<listitem><simpara> Opaque pointer for private data
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-proxy-has-interface" role="macro" condition="since:0.7.1"/>tp_proxy_has_interface()</title>
+<indexterm role="0.7.1"><primary>tp_proxy_has_interface</primary></indexterm><programlisting>#define             tp_proxy_has_interface(self, interface)</programlisting>
+<para>
+A macro wrapping <link linkend="tp-proxy-has-interface-by-id"><function>tp_proxy_has_interface_by_id()</function></link>. Returns <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if this
+proxy implements the given interface.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link> (or subclass)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> the interface required, as a string
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-proxy-has-interface-by-id" role="function" condition="since:0.7.1"/>tp_proxy_has_interface_by_id ()</title>
+<indexterm role="0.7.1"><primary>tp_proxy_has_interface_by_id</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_proxy_has_interface_by_id        (<link linkend="gpointer">gpointer</link> self,
+                                                         <link linkend="GQuark">GQuark</link> interface);</programlisting>
+<para>
+<!-- --></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link> (or subclass)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> quark representing the interface required
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if this proxy implements the given interface.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpProxyPendingCall" role="struct" condition="since:0.7.1"/>TpProxyPendingCall</title>
+<indexterm role="0.7.1"><primary>TpProxyPendingCall</primary></indexterm><programlisting>typedef struct _TpProxyPendingCall TpProxyPendingCall;</programlisting>
+<para>
+Opaque structure representing a pending D-Bus call.</para>
+<para>
+
+</para><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-proxy-pending-call-cancel" role="function" condition="since:0.7.1"/>tp_proxy_pending_call_cancel ()</title>
+<indexterm role="0.7.1"><primary>tp_proxy_pending_call_cancel</primary></indexterm><programlisting><link linkend="void">void</link>                tp_proxy_pending_call_cancel        (<link linkend="TpProxyPendingCall">TpProxyPendingCall</link> *self);</programlisting>
+<para>
+Cancel the given pending call. After this function returns, you
+must not assume that the pending call remains valid, but you must not
+explicitly free it either.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a pending call
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpProxySignalConnection" role="struct" condition="since:0.7.1"/>TpProxySignalConnection</title>
+<indexterm role="0.7.1"><primary>TpProxySignalConnection</primary></indexterm><programlisting>typedef struct _TpProxySignalConnection TpProxySignalConnection;</programlisting>
+<para>
+Opaque structure representing a D-Bus signal connection.</para>
+<para>
+
+</para><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-proxy-signal-connection-disconnect" role="function" condition="since:0.7.1"/>tp_proxy_signal_connection_disconnect ()</title>
+<indexterm role="0.7.1"><primary>tp_proxy_signal_connection_disconnect</primary></indexterm><programlisting><link linkend="void">void</link>                tp_proxy_signal_connection_disconnect
+                                                        (<link linkend="TpProxySignalConnection">TpProxySignalConnection</link> *self);</programlisting>
+<para>
+Disconnect the given signal connection. After this function returns, you
+must not assume that the signal connection remains valid, but you must not
+explicitly free it either.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a signal connection
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="TP-DBUS-ERRORS:CAPS" role="macro" condition="since:0.7.1"/>TP_DBUS_ERRORS</title>
+<indexterm role="0.7.1"><primary>TP_DBUS_ERRORS</primary></indexterm><programlisting>#define TP_DBUS_ERRORS (tp_dbus_errors_quark ())
+</programlisting>
+<para>
+<link linkend="GError"><type>GError</type></link> domain representing D-Bus errors not directly related to
+Telepathy, for use by <link linkend="TpProxy"><type>TpProxy</type></link>. The <parameter>code</parameter> in a <link linkend="GError"><type>GError</type></link> with this
+domain must be a member of <link linkend="TpDBusError"><type>TpDBusError</type></link>.
+</para>
+<para>
+This macro expands to a function call returning a <link linkend="GQuark"><type>GQuark</type></link>.</para>
+<para>
+
+</para><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusError" role="enum" condition="since:0.7.1"/>enum TpDBusError</title>
+<indexterm role="0.7.1"><primary>TpDBusError</primary></indexterm><programlisting>typedef enum {
+    TP_DBUS_ERROR_UNKNOWN_REMOTE_ERROR = 0,
+    TP_DBUS_ERROR_PROXY_UNREFERENCED = 1,
+    TP_DBUS_ERROR_NO_INTERFACE = 2,
+    TP_DBUS_ERROR_NAME_OWNER_LOST = 3,
+    TP_DBUS_ERROR_INVALID_BUS_NAME = 4,
+    TP_DBUS_ERROR_INVALID_INTERFACE_NAME = 5,
+    TP_DBUS_ERROR_INVALID_OBJECT_PATH = 6,
+    TP_DBUS_ERROR_INVALID_MEMBER_NAME = 7,
+    TP_DBUS_ERROR_OBJECT_REMOVED = 8,
+    TP_DBUS_ERROR_CANCELLED = 9,
+    NUM_TP_DBUS_ERRORS
+} TpDBusError;
+</programlisting>
+<para>
+<link linkend="GError"><type>GError</type></link> codes for use with the <link linkend="TP-DBUS-ERRORS:CAPS"><literal>TP_DBUS_ERRORS</literal></link> domain.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-UNKNOWN-REMOTE-ERROR:CAPS" role="constant"/><literal>TP_DBUS_ERROR_UNKNOWN_REMOTE_ERROR</literal></term>
+<listitem><simpara> Raised if the error raised by
+ a remote D-Bus object is not recognised
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-PROXY-UNREFERENCED:CAPS" role="constant"/><literal>TP_DBUS_ERROR_PROXY_UNREFERENCED</literal></term>
+<listitem><simpara> Emitted in <link linkend="TpProxy--invalidated"><type>"invalidated"</type></link>
+ when the <link linkend="TpProxy"><type>TpProxy</type></link> has lost its last reference
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-NO-INTERFACE:CAPS" role="constant"/><literal>TP_DBUS_ERROR_NO_INTERFACE</literal></term>
+<listitem><simpara> Raised by <link linkend="TpProxy"><type>TpProxy</type></link> methods if the remote
+ object does not appear to have the required interface
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-NAME-OWNER-LOST:CAPS" role="constant"/><literal>TP_DBUS_ERROR_NAME_OWNER_LOST</literal></term>
+<listitem><simpara> Emitted in <link linkend="TpProxy--invalidated"><type>"invalidated"</type></link> if the
+ remote process loses ownership of its bus name, and raised by
+ any <link linkend="TpProxy"><type>TpProxy</type></link> methods that have not had a reply at that time or are called
+ after the proxy becomes invalid in this way (usually meaning it crashed)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-INVALID-BUS-NAME:CAPS" role="constant"/><literal>TP_DBUS_ERROR_INVALID_BUS_NAME</literal></term>
+<listitem><simpara> Raised if a D-Bus bus name given is not
+ valid, or is of an unacceptable type (e.g. well-known vs. unique)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-INVALID-INTERFACE-NAME:CAPS" role="constant"/><literal>TP_DBUS_ERROR_INVALID_INTERFACE_NAME</literal></term>
+<listitem><simpara> Raised if a D-Bus interface or
+ error name given is not valid
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-INVALID-OBJECT-PATH:CAPS" role="constant"/><literal>TP_DBUS_ERROR_INVALID_OBJECT_PATH</literal></term>
+<listitem><simpara> Raised if a D-Bus object path
+ given is not valid
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-INVALID-MEMBER-NAME:CAPS" role="constant"/><literal>TP_DBUS_ERROR_INVALID_MEMBER_NAME</literal></term>
+<listitem><simpara> Raised if a D-Bus method or signal
+ name given is not valid
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-OBJECT-REMOVED:CAPS" role="constant"/><literal>TP_DBUS_ERROR_OBJECT_REMOVED</literal></term>
+<listitem><simpara> A generic error which can be used with
+ <link linkend="TpProxy--invalidated"><type>"invalidated"</type></link> to indicate an application-specific indication
+ that the remote object no longer exists, if no more specific error
+ is available.
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-ERROR-CANCELLED:CAPS" role="constant"/><literal>TP_DBUS_ERROR_CANCELLED</literal></term>
+<listitem><simpara> Raised from calls that re-enter the main
+ loop (*_run_*) if they are cancelled
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="NUM-TP-DBUS-ERRORS:CAPS" role="constant"/><literal>NUM_TP_DBUS_ERRORS</literal></term>
+<listitem><simpara> 1 more than the highest valid <link linkend="TpDBusError"><type>TpDBusError</type></link>
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-callback-for-get-properties" role="function"/>tp_cli_properties_interface_callback_for_get_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_callback_for_get_properties</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_properties_interface_callback_for_get_properties)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a GetProperties method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">           <p>An array of structs containing:</p>           <ul>             <li>integer identifiers</li>             <li>variant boxed values</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-call-get-properties" role="function"/>tp_cli_properties_interface_call_get_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_call_get_properties</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_properties_interface_call_get_properties
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_properties,
+                                                         <link linkend="tp-cli-properties-interface-callback-for-get-properties">tp_cli_properties_interface_callback_for_get_properties</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a GetProperties method call.
+</para>
+<para>
+<![CDATA[Returns an array of (identifier, value) pairs containing the current         values of the given properties.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_properties</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[An array of property identifiers]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-run-get-properties" role="function"/>tp_cli_properties_interface_run_get_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_run_get_properties</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_properties_interface_run_get_properties
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_properties,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method GetProperties and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Returns an array of (identifier, value) pairs containing the current         values of the given properties.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_properties</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[An array of property identifiers]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">           <p>An array of structs containing:</p>           <ul>             <li>integer identifiers</li>             <li>variant boxed values</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-callback-for-list-properties" role="function"/>tp_cli_properties_interface_callback_for_list_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_callback_for_list_properties</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_properties_interface_callback_for_list_properties)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a ListProperties method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[An array of structs containing:           <ul>             <li>an integer identifier</li>             <li>a string property name</li>             <li>a string representing the D-Bus signature of this property</li>             <li>a bitwise OR of the flags applicable to this property</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-call-list-properties" role="function"/>tp_cli_properties_interface_call_list_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_call_list_properties</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_properties_interface_call_list_properties
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-properties-interface-callback-for-list-properties">tp_cli_properties_interface_callback_for_list_properties</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a ListProperties method call.
+</para>
+<para>
+<![CDATA[Returns a dictionary of the properties available on this channel.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-run-list-properties" role="function"/>tp_cli_properties_interface_run_list_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_run_list_properties</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_properties_interface_run_list_properties
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method ListProperties and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Returns a dictionary of the properties available on this channel.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[An array of structs containing:           <ul>             <li>an integer identifier</li>             <li>a string property name</li>             <li>a string representing the D-Bus signature of this property</li>             <li>a bitwise OR of the flags applicable to this property</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-callback-for-set-properties" role="function"/>tp_cli_properties_interface_callback_for_set_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_callback_for_set_properties</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_properties_interface_callback_for_set_properties)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a SetProperties method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-call-set-properties" role="function"/>tp_cli_properties_interface_call_set_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_call_set_properties</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_properties_interface_call_set_properties
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_properties,
+                                                         <link linkend="tp-cli-properties-interface-callback-for-set-properties">tp_cli_properties_interface_callback_for_set_properties</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a SetProperties method call.
+</para>
+<para>
+<![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">         <p>Takes an array of (identifier, value) pairs containing desired           values to set the given properties. In the case of any errors, no           properties will be changed. When the changes have been acknowledged           by the server, the PropertiesChanged signal will be emitted.</p>          <p>All properties given must have the PROPERTY_FLAG_WRITE flag, or         PermissionDenied will be returned. If any variants are of the wrong         type, NotAvailable will be returned.  If any given property identifiers         are invalid, InvalidArgument will be returned.</p>]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_properties</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[A dictionary mapping integer identifiers to boxed values]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-run-set-properties" role="function"/>tp_cli_properties_interface_run_set_properties ()</title>
+<indexterm><primary>tp_cli_properties_interface_run_set_properties</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_properties_interface_run_set_properties
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_properties,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method SetProperties and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">         <p>Takes an array of (identifier, value) pairs containing desired           values to set the given properties. In the case of any errors, no           properties will be changed. When the changes have been acknowledged           by the server, the PropertiesChanged signal will be emitted.</p>          <p>All properties given must have the PROPERTY_FLAG_WRITE flag, or         PermissionDenied will be returned. If any variants are of the wrong         type, NotAvailable will be returned.  If any given property identifiers         are invalid, InvalidArgument will be returned.</p>]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_properties</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[A dictionary mapping integer identifiers to boxed values]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-signal-callback-properties-changed" role="function"/>tp_cli_properties_interface_signal_callback_properties_changed ()</title>
+<indexterm><primary>tp_cli_properties_interface_signal_callback_properties_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_properties_interface_signal_callback_properties_changed)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *arg_properties,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal PropertiesChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-properties-interface-connect-to-properties-changed"><function>tp_cli_properties_interface_connect_to_properties_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_properties</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">           <p>An array of structs containing:</p>           <ul>             <li>integer identifiers</li>             <li>variant boxed values</li>           </ul>           <p>The array should contain only properties whose values have             actually changed.</p>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-connect-to-properties-changed" role="function"/>tp_cli_properties_interface_connect_to_properties_changed ()</title>
+<indexterm><primary>tp_cli_properties_interface_connect_to_properties_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_properties_interface_connect_to_properties_changed
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="tp-cli-properties-interface-signal-callback-properties-changed">tp_cli_properties_interface_signal_callback_properties_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal PropertiesChanged.
+</para>
+<para>
+<![CDATA[Emitted when the value of readable properties has changed.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-signal-callback-property-flags-changed" role="function"/>tp_cli_properties_interface_signal_callback_property_flags_changed ()</title>
+<indexterm><primary>tp_cli_properties_interface_signal_callback_property_flags_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_properties_interface_signal_callback_property_flags_changed)
+                                                        (<link linkend="TpProxy">TpProxy</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *arg_properties,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal PropertyFlagsChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-properties-interface-connect-to-property-flags-changed"><function>tp_cli_properties_interface_connect_to_property_flags_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_properties</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">           <p>An array of structs containing:</p>           <ul>             <li>integer identifiers</li>             <li>a bitwise OR of the current flags</li>           </ul>           <p>The array should contain only properties whose flags have actually             changed.</p>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-properties-interface-connect-to-property-flags-changed" role="function"/>tp_cli_properties_interface_connect_to_property_flags_changed ()</title>
+<indexterm><primary>tp_cli_properties_interface_connect_to_property_flags_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_properties_interface_connect_to_property_flags_changed
+                                                        (<link linkend="gpointer">gpointer</link> proxy,
+                                                         <link linkend="tp-cli-properties-interface-signal-callback-property-flags-changed">tp_cli_properties_interface_signal_callback_property_flags_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal PropertyFlagsChanged.
+</para>
+<para>
+<![CDATA[Emitted when the flags of some room properties have changed.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+<refsect1 role="property_details">
+<title role="property_details.title">Property Details</title>
+<refsect2><title><anchor id="TpProxy--bus-name"/>The <literal>&quot;bus-name&quot;</literal> property</title>
+<indexterm><primary>TpProxy:bus-name</primary></indexterm><programlisting>  &quot;bus-name&quot;                 <link linkend="gchararray">gchararray</link>            : Read / Write / Construct Only</programlisting>
+<para>
+The D-Bus bus name for this object. Read-only except during construction.</para>
+<para>
+
+</para><para>Default value: NULL</para>
+</refsect2>
+<refsect2><title><anchor id="TpProxy--dbus-connection"/>The <literal>&quot;dbus-connection&quot;</literal> property</title>
+<indexterm><primary>TpProxy:dbus-connection</primary></indexterm><programlisting>  &quot;dbus-connection&quot;          <link linkend="DBusGConnection">DBusGConnection</link>       : Read / Write / Construct Only</programlisting>
+<para>
+The D-Bus connection for this object. Read-only except during
+construction.</para>
+<para>
+
+</para></refsect2>
+<refsect2><title><anchor id="TpProxy--dbus-daemon"/>The <literal>&quot;dbus-daemon&quot;</literal> property</title>
+<indexterm><primary>TpProxy:dbus-daemon</primary></indexterm><programlisting>  &quot;dbus-daemon&quot;              <link linkend="TpDBusDaemon">TpDBusDaemon</link>          : Read / Write / Construct Only</programlisting>
+<para>
+The D-Bus daemon for this object (this object itself, if it is a
+TpDBusDaemon). Read-only except during construction.</para>
+<para>
+
+</para></refsect2>
+<refsect2><title><anchor id="TpProxy--interfaces"/>The <literal>&quot;interfaces&quot;</literal> property</title>
+<indexterm><primary>TpProxy:interfaces</primary></indexterm><programlisting>  &quot;interfaces&quot;               <link linkend="GStrv">GStrv</link>                 : Read</programlisting>
+<para>
+Known D-Bus interface names for this object.</para>
+<para>
+
+</para></refsect2>
+<refsect2><title><anchor id="TpProxy--object-path"/>The <literal>&quot;object-path&quot;</literal> property</title>
+<indexterm><primary>TpProxy:object-path</primary></indexterm><programlisting>  &quot;object-path&quot;              <link linkend="gchararray">gchararray</link>            : Read / Write / Construct Only</programlisting>
+<para>
+The D-Bus object path for this object. Read-only except during
+construction.</para>
+<para>
+
+</para><para>Default value: NULL</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1 role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2><title><anchor id="TpProxy-interface-added"/>The <literal>&quot;interface-added&quot;</literal> signal</title>
+<indexterm><primary>TpProxy::interface-added</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpProxy">TpProxy</link>    *self,
+                                                        <link linkend="guint">guint</link>       id,
+                                                        <link linkend="DBusGProxy">DBusGProxy</link> *proxy,
+                                                        <link linkend="gpointer">gpointer</link>    user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when this proxy has gained an interface. It is not guaranteed
+to be emitted immediately, but will be emitted before the interface is
+first used (at the latest: before it's returned from
+<link linkend="tp-proxy-borrow-interface-by-id"><function>tp_proxy_borrow_interface_by_id()</function></link>, any signal is connected, or any
+method is called).
+</para>
+<para>
+The intended use is to call <link linkend="dbus-g-proxy-add-signals"><function>dbus_g_proxy_add_signals()</function></link>. This signal
+should only be used by TpProy implementations</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> the GQuark representing the interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the dbus-glib proxy representing the interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2><title><anchor id="TpProxy-invalidated"/>The <literal>&quot;invalidated&quot;</literal> signal</title>
+<indexterm><primary>TpProxy::invalidated</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpProxy">TpProxy</link> *self,
+                                                        <link linkend="guint">guint</link>    domain,
+                                                        <link linkend="gint">gint</link>     code,
+                                                        <link linkend="gchar">gchar</link>   *message,
+                                                        <link linkend="gpointer">gpointer</link> user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when this proxy has been become invalid for
+whatever reason. Any more specific signal should be emitted first.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>domain</parameter>&nbsp;:</term>
+<listitem><simpara> domain of a GError indicating why this proxy was invalidated
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>code</parameter>&nbsp;:</term>
+<listitem><simpara> error code of a GError indicating why this proxy was invalidated
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>message</parameter>&nbsp;:</term>
+<listitem><simpara> a message associated with the error
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
+
+
+<refsect1>
+<title>See Also</title>
+<link linkend="TpChannel"><type>TpChannel</type></link>, <link linkend="TpConnection"><type>TpConnection</type></link>, <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link>
+</refsect1>
+
+
+<refsect1><refsect2 /><refsect2 /></refsect1>
+</refentry>

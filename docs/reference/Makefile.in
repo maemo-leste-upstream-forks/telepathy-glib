@@ -54,7 +54,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 subdir = docs/reference
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -88,6 +89,7 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -108,6 +110,10 @@ GTKDOC_CHECK = @GTKDOC_CHECK@
 GTK_DOC_USE_LIBTOOL_FALSE = @GTK_DOC_USE_LIBTOOL_FALSE@
 GTK_DOC_USE_LIBTOOL_TRUE = @GTK_DOC_USE_LIBTOOL_TRUE@
 HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
+HAVE_LD_VERSION_SCRIPT_FALSE = @HAVE_LD_VERSION_SCRIPT_FALSE@
+HAVE_LD_VERSION_SCRIPT_TRUE = @HAVE_LD_VERSION_SCRIPT_TRUE@
+HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
+HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -123,7 +129,11 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OFFICIAL_RELEASE_FALSE = @OFFICIAL_RELEASE_FALSE@
+OFFICIAL_RELEASE_TRUE = @OFFICIAL_RELEASE_TRUE@
 OUT_OF_TREE_BUILD_FALSE = @OUT_OF_TREE_BUILD_FALSE@
 OUT_OF_TREE_BUILD_TRUE = @OUT_OF_TREE_BUILD_TRUE@
 PACKAGE = @PACKAGE@
@@ -143,6 +153,7 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
+VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -240,7 +251,7 @@ CFILE_GLOB = $(top_srcdir)/telepathy-glib/*.c $(top_builddir)/telepathy-glib/_ge
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES = internal-debug.h internal-handle-repo.h
+IGNORE_HFILES = debug-internal.h handle-repo-internal.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -381,7 +392,9 @@ distdir: $(DISTFILES)
 	$(MAKE) $(AM_MAKEFLAGS) \
 	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
 	  dist-hook
+@ENABLE_GTK_DOC_FALSE@check-local:
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 all-am: Makefile all-local
 installdirs:
@@ -458,8 +471,8 @@ ps-am:
 
 uninstall-am: uninstall-info-am uninstall-local
 
-.PHONY: all all-am all-local check check-am clean clean-generic \
-	clean-libtool clean-local dist-hook distclean \
+.PHONY: all all-am all-local check check-am check-local clean \
+	clean-generic clean-libtool clean-local dist-hook distclean \
 	distclean-generic distclean-libtool distclean-local distdir \
 	dvi dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-data-local install-exec \
@@ -592,6 +605,21 @@ dist-hook: dist-check-gtkdoc dist-hook-local
 .PHONY : dist-hook-local docs
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
+
+@ENABLE_GTK_DOC_TRUE@check-local:
+@ENABLE_GTK_DOC_TRUE@	@if grep '^0 symbols incomplete' \
+@ENABLE_GTK_DOC_TRUE@		$(srcdir)/telepathy-glib-undocumented.txt; then\
+@ENABLE_GTK_DOC_TRUE@		:; else \
+@ENABLE_GTK_DOC_TRUE@		cat $(srcdir)/telepathy-glib-undocumented.txt; exit 1; fi
+@ENABLE_GTK_DOC_TRUE@	@if grep '^0 not documented' \
+@ENABLE_GTK_DOC_TRUE@		$(srcdir)/telepathy-glib-undocumented.txt; then\
+@ENABLE_GTK_DOC_TRUE@		:; else \
+@ENABLE_GTK_DOC_TRUE@		cat $(srcdir)/telepathy-glib-undocumented.txt; exit 1; fi
+@ENABLE_GTK_DOC_TRUE@	@if grep . $(srcdir)/telepathy-glib-unused.txt; then\
+@ENABLE_GTK_DOC_TRUE@		echo "^^^ Unused symbols" >&2; exit 1; fi
+@ENABLE_GTK_DOC_TRUE@	@if test -e $(srcdir)/telepathy-glib-undeclared.txt &&\
+@ENABLE_GTK_DOC_TRUE@		grep . $(srcdir)/telepathy-glib-undeclared.txt; then\
+@ENABLE_GTK_DOC_TRUE@		echo "^^^ Undeclared symbols" >&2; exit 1; fi
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

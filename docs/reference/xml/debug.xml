@@ -24,6 +24,11 @@
 
 <link linkend="void">void</link>                <link linkend="tp-debug-set-flags">tp_debug_set_flags</link>                  (const <link linkend="gchar">gchar</link> *flags_string);
 <link linkend="void">void</link>                <link linkend="tp-debug-set-persistent">tp_debug_set_persistent</link>             (<link linkend="gboolean">gboolean</link> persistent);
+<link linkend="void">void</link>                <link linkend="tp-debug-divert-messages">tp_debug_divert_messages</link>            (const <link linkend="gchar">gchar</link> *filename);
+<link linkend="void">void</link>                <link linkend="tp-debug-timestamped-log-handler">tp_debug_timestamped_log_handler</link>    (const <link linkend="gchar">gchar</link> *log_domain,
+                                                         <link linkend="GLogLevelFlags">GLogLevelFlags</link> log_level,
+                                                         const <link linkend="gchar">gchar</link> *message,
+                                                         <link linkend="gpointer">gpointer</link> ignored);
 
 <link linkend="void">void</link>                <link linkend="tp-debug-set-flags-from-string">tp_debug_set_flags_from_string</link>      (const <link linkend="gchar">gchar</link> *flags_string);
 <link linkend="void">void</link>                <link linkend="tp-debug-set-flags-from-env">tp_debug_set_flags_from_env</link>         (const <link linkend="gchar">gchar</link> *var);
@@ -118,6 +123,72 @@ this function does nothing.</para>
              (the default behavior).
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-debug-divert-messages" role="function" condition="since:0.7.1"/>tp_debug_divert_messages ()</title>
+<indexterm role="0.7.1"><primary>tp_debug_divert_messages</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_divert_messages            (const <link linkend="gchar">gchar</link> *filename);</programlisting>
+<para>
+Open the given file for writing and duplicate its file descriptor to
+be used for stdout and stderr. This has the effect of closing the previous
+stdout and stderr, and sending all messages that would have gone there
+to the given file instead.
+</para>
+<para>
+Passing <link linkend="NULL:CAPS"><literal>NULL</literal></link> to this function is guaranteed to have no effect. This is
+so you can call it with the recommended usage
+<literal>tp_debug_divert_messages (g_getenv ("MYAPP_LOGFILE"))</literal>
+and it won't do anything if the environment variable is not set.
+</para>
+<para>
+This function still works if telepathy-glib was compiled without debug
+support.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> A file to which to divert stdout and stderr, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> to
+ do nothing
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-debug-timestamped-log-handler" role="function" condition="since:0.7.1"/>tp_debug_timestamped_log_handler ()</title>
+<indexterm role="0.7.1"><primary>tp_debug_timestamped_log_handler</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_timestamped_log_handler    (const <link linkend="gchar">gchar</link> *log_domain,
+                                                         <link linkend="GLogLevelFlags">GLogLevelFlags</link> log_level,
+                                                         const <link linkend="gchar">gchar</link> *message,
+                                                         <link linkend="gpointer">gpointer</link> ignored);</programlisting>
+<para>
+A <link linkend="GLogFunc"><type>GLogFunc</type></link> that prepends the local time (currently in
+YYYY-MM-DD HH:MM:SS.SSSSSS format, with microsecond resolution) to the
+message, then calls g_log_default_handler.
+</para>
+<para>
+Intended usage is:
+</para>
+<para>
+<informalexample><programlisting>if (g_getenv ("MYPROG_TIMING") != NULL)
+  g_log_set_default_handler (tp_debug_timestamped_log_handler, NULL);
+</programlisting></informalexample>
+</para>
+<para>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function is equivalent to <link linkend="g-log-default-handler"><function>g_log_default_handler()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>log_domain</parameter>&nbsp;:</term>
+<listitem><simpara> the message's log domain
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>log_level</parameter>&nbsp;:</term>
+<listitem><simpara> the log level of the message
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>message</parameter>&nbsp;:</term>
+<listitem><simpara> the message to process
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ignored</parameter>&nbsp;:</term>
+<listitem><simpara> not used
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
 <refsect2>
 <title><anchor id="tp-debug-set-flags-from-string" role="function"/>tp_debug_set_flags_from_string ()</title>
 <indexterm><primary>tp_debug_set_flags_from_string</primary></indexterm><programlisting><link linkend="void">void</link>                tp_debug_set_flags_from_string      (const <link linkend="gchar">gchar</link> *flags_string);</programlisting>

@@ -47,7 +47,7 @@
 
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/heap.h>
-#include <telepathy-glib/internal-handle-repo.h>
+#include <telepathy-glib/handle-repo-internal.h>
 
 /* Handle leak tracing */
 
@@ -181,10 +181,21 @@ struct _TpDynamicHandleRepo {
    * _lookup
    */
   gpointer default_normalize_context;
-
-  /* To listen for NameOwnerChanged. FIXME: centralize this? */
-  DBusGProxy *bus_service_proxy;
 };
+
+/* To listen for NameOwnerChanged. One ref per dynamic handle repo */
+static gpointer bus_daemon;
+
+static TpDBusDaemon *
+ref_bus_daemon (void)
+{
+  if (bus_daemon != NULL)
+    return g_object_ref (bus_daemon);
+
+  bus_daemon = tp_dbus_daemon_new (tp_get_bus ());
+  g_object_add_weak_pointer (bus_daemon, &bus_daemon);
+  return (TpDBusDaemon *) bus_daemon;
+}
 
 static void dynamic_repo_iface_init (gpointer g_iface,
     gpointer iface_data);
@@ -245,13 +256,14 @@ handle_priv_remove (TpDynamicHandleRepo *repo,
 }
 
 static void
-handles_name_owner_changed_cb (DBusGProxy *proxy,
-    const gchar *name,
-    const gchar *old_owner,
-    const gchar *new_owner,
-    gpointer data)
+handles_name_owner_changed_cb (TpDBusDaemon *dbus_daemon,
+                               const gchar *name,
+                               const gchar *old_owner,
+                               const gchar *new_owner,
+                               gpointer unused,
+                               GObject *object)
 {
-  TpDynamicHandleRepo *repo = (TpDynamicHandleRepo *) data;
+  TpDynamicHandleRepo *repo = (TpDynamicHandleRepo *) object;
 
   if (old_owner && old_owner[0])
     {
@@ -272,17 +284,15 @@ tp_dynamic_handle_repo_init (TpDynamicHandleRepo *self)
   self->next_handle = 1;
   g_datalist_init (&self->holder_to_handle_set);
 
-  self->bus_service_proxy = dbus_g_proxy_new_for_name (tp_get_bus (),
-      DBUS_SERVICE_DBUS, DBUS_PATH_DBUS, DBUS_INTERFACE_DBUS);
+  ref_bus_daemon ();
 
-  dbus_g_proxy_add_signal (self->bus_service_proxy,
-      "NameOwnerChanged", G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-      G_TYPE_INVALID);
   /* FIXME: if dbus-glib gets arg matching, do this on a per-holder
-   * basis so we don't wake up whenever any name owner changes */
-  dbus_g_proxy_connect_signal (self->bus_service_proxy,
-      "NameOwnerChanged", G_CALLBACK (handles_name_owner_changed_cb),
-      self, NULL);
+   * basis so we don't wake up whenever any name owner changes... */
+
+  /* we call ref_bus_daemon() here, and do the corresponding unref on
+   * bus_daemon in _dispose */
+  tp_cli_dbus_daemon_connect_to_name_owner_changed (ref_bus_daemon (),
+      handles_name_owner_changed_cb, NULL, NULL, (GObject *) self, NULL);
 
   return;
 }
@@ -378,6 +388,14 @@ handle_leak_debug_bt (HandleLeakEvent event)
 #endif /* ENABLE_HANDLE_LEAK_DEBUG */
 
 static void
+dynamic_dispose (GObject *obj)
+{
+  g_object_unref (bus_daemon);
+
+  G_OBJECT_CLASS (tp_dynamic_handle_repo_parent_class)->dispose (obj);
+}
+
+static void
 dynamic_finalize (GObject *obj)
 {
   TpDynamicHandleRepo *self = TP_DYNAMIC_HANDLE_REPO (obj);
@@ -396,11 +414,6 @@ dynamic_finalize (GObject *obj)
   g_hash_table_destroy (self->handle_to_priv);
   g_hash_table_destroy (self->string_to_handle);
   tp_heap_destroy (self->free_handles);
-
-  dbus_g_proxy_disconnect_signal (self->bus_service_proxy,
-      "NameOwnerChanged", G_CALLBACK (handles_name_owner_changed_cb),
-      self);
-  g_object_unref (G_OBJECT (self->bus_service_proxy));
 
   if (parent->finalize)
     parent->finalize (obj);
@@ -462,6 +475,7 @@ tp_dynamic_handle_repo_class_init (TpDynamicHandleRepoClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *param_spec;
 
+  object_class->dispose = dynamic_dispose;
   object_class->finalize = dynamic_finalize;
 
   object_class->get_property = dynamic_get_property;
@@ -481,8 +495,8 @@ tp_dynamic_handle_repo_class_init (TpDynamicHandleRepoClass *klass)
   param_spec = g_param_spec_pointer ("normalize-function",
       "Normalization function",
       "A TpDynamicHandleRepoNormalizeFunc used to normalize handle IDs.",
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_NICK |
-      G_PARAM_STATIC_BLURB);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
+      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class, PROP_NORMALIZE_FUNCTION,
       param_spec);
 
@@ -499,8 +513,8 @@ tp_dynamic_handle_repo_class_init (TpDynamicHandleRepoClass *klass)
       "The default context given to the normalize-function if NULL is passed "
       "as context to the ensure or lookup function, e.g. when RequestHandle"
       "is called via D-Bus. The default is NULL.",
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_NICK |
-      G_PARAM_STATIC_BLURB);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
+      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class,
       PROP_DEFAULT_NORMALIZE_CONTEXT, param_spec);
 }

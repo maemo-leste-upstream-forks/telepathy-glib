@@ -1,7 +1,7 @@
 /*
  * group-mixin.h - Header for TpGroupMixin
- * Copyright (C) 2006 Collabora Ltd.
- * Copyright (C) 2006 Nokia Corporation
+ * Copyright (C) 2006-2007 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright (C) 2006-2007 Nokia Corporation
  *   @author Ole Andre Vadla Ravnaas <ole.andre.ravnaas@collabora.co.uk>
  *   @author Robert McQueen <robert.mcqueen@collabora.co.uk>
  *
@@ -115,7 +115,8 @@ struct _TpGroupMixinClass {
  * @handle_repo: The connection's contact handle repository
  * @self_handle: The local user's handle within this group, or 0 if none.
  *  Set using (FIXME: how do we do self-renaming?)
- * @group_flags: This group's flags. Set using tp_group_mixin_change_flags().
+ * @group_flags: This group's flags. Set using tp_group_mixin_change_flags();
+ *  defaults to 0.
  * @members: The members of the group. Alter using
  *  tp_group_mixin_change_members().
  * @local_pending: Members awaiting the local user's approval to join the

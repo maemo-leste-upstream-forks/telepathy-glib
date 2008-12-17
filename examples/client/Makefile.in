@@ -13,6 +13,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -35,18 +36,83 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+noinst_PROGRAMS = telepathy-example-inspect-channel$(EXEEXT) \
+	telepathy-example-inspect-connection$(EXEEXT) \
+	telepathy-example-inspect-cm$(EXEEXT) \
+	telepathy-example-list-connections$(EXEEXT) \
+	telepathy-example-list-managers$(EXEEXT) \
+	telepathy-example-extended-client$(EXEEXT)
 subdir = examples/client
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-SOURCES =
-DIST_SOURCES =
+PROGRAMS = $(noinst_PROGRAMS)
+am_telepathy_example_extended_client_OBJECTS =  \
+	extended-client.$(OBJEXT)
+telepathy_example_extended_client_OBJECTS =  \
+	$(am_telepathy_example_extended_client_OBJECTS)
+am__DEPENDENCIES_1 =
+telepathy_example_extended_client_DEPENDENCIES =  \
+	$(top_builddir)/examples/extensions/libexample-extensions.la \
+	$(am__DEPENDENCIES_1)
+am_telepathy_example_inspect_channel_OBJECTS =  \
+	inspect-channel.$(OBJEXT)
+telepathy_example_inspect_channel_OBJECTS =  \
+	$(am_telepathy_example_inspect_channel_OBJECTS)
+telepathy_example_inspect_channel_DEPENDENCIES =  \
+	$(am__DEPENDENCIES_1)
+am_telepathy_example_inspect_cm_OBJECTS = inspect-cm.$(OBJEXT)
+telepathy_example_inspect_cm_OBJECTS =  \
+	$(am_telepathy_example_inspect_cm_OBJECTS)
+telepathy_example_inspect_cm_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_telepathy_example_inspect_connection_OBJECTS =  \
+	inspect-connection.$(OBJEXT)
+telepathy_example_inspect_connection_OBJECTS =  \
+	$(am_telepathy_example_inspect_connection_OBJECTS)
+telepathy_example_inspect_connection_DEPENDENCIES =  \
+	$(am__DEPENDENCIES_1)
+am_telepathy_example_list_connections_OBJECTS =  \
+	list-connections.$(OBJEXT)
+telepathy_example_list_connections_OBJECTS =  \
+	$(am_telepathy_example_list_connections_OBJECTS)
+telepathy_example_list_connections_DEPENDENCIES =  \
+	$(am__DEPENDENCIES_1)
+am_telepathy_example_list_managers_OBJECTS = list-managers.$(OBJEXT)
+telepathy_example_list_managers_OBJECTS =  \
+	$(am_telepathy_example_list_managers_OBJECTS)
+telepathy_example_list_managers_DEPENDENCIES = $(am__DEPENDENCIES_1)
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(telepathy_example_extended_client_SOURCES) \
+	$(telepathy_example_inspect_channel_SOURCES) \
+	$(telepathy_example_inspect_cm_SOURCES) \
+	$(telepathy_example_inspect_connection_SOURCES) \
+	$(telepathy_example_list_connections_SOURCES) \
+	$(telepathy_example_list_managers_SOURCES)
+DIST_SOURCES = $(telepathy_example_extended_client_SOURCES) \
+	$(telepathy_example_inspect_channel_SOURCES) \
+	$(telepathy_example_inspect_cm_SOURCES) \
+	$(telepathy_example_inspect_connection_SOURCES) \
+	$(telepathy_example_list_connections_SOURCES) \
+	$(telepathy_example_list_managers_SOURCES)
+ETAGS = etags
+CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
@@ -73,6 +139,7 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -93,6 +160,10 @@ GTKDOC_CHECK = @GTKDOC_CHECK@
 GTK_DOC_USE_LIBTOOL_FALSE = @GTK_DOC_USE_LIBTOOL_FALSE@
 GTK_DOC_USE_LIBTOOL_TRUE = @GTK_DOC_USE_LIBTOOL_TRUE@
 HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
+HAVE_LD_VERSION_SCRIPT_FALSE = @HAVE_LD_VERSION_SCRIPT_FALSE@
+HAVE_LD_VERSION_SCRIPT_TRUE = @HAVE_LD_VERSION_SCRIPT_TRUE@
+HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
+HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -108,7 +179,11 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OFFICIAL_RELEASE_FALSE = @OFFICIAL_RELEASE_FALSE@
+OFFICIAL_RELEASE_TRUE = @OFFICIAL_RELEASE_TRUE@
 OUT_OF_TREE_BUILD_FALSE = @OUT_OF_TREE_BUILD_FALSE@
 OUT_OF_TREE_BUILD_TRUE = @OUT_OF_TREE_BUILD_TRUE@
 PACKAGE = @PACKAGE@
@@ -128,6 +203,7 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
+VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -176,6 +252,21 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+telepathy_example_inspect_channel_SOURCES = inspect-channel.c
+telepathy_example_inspect_channel_LDADD = $(ALL_LIBS)
+telepathy_example_inspect_connection_SOURCES = inspect-connection.c
+telepathy_example_inspect_connection_LDADD = $(ALL_LIBS)
+telepathy_example_inspect_cm_SOURCES = inspect-cm.c
+telepathy_example_inspect_cm_LDADD = $(ALL_LIBS)
+telepathy_example_list_connections_SOURCES = list-connections.c
+telepathy_example_list_connections_LDADD = $(ALL_LIBS)
+telepathy_example_list_managers_SOURCES = list-managers.c
+telepathy_example_list_managers_LDADD = $(ALL_LIBS)
+telepathy_example_extended_client_SOURCES = extended-client.c
+telepathy_example_extended_client_LDADD = \
+    $(top_builddir)/examples/extensions/libexample-extensions.la \
+    $(ALL_LIBS)
+
 
 # Sadly there is no AM_LDADD
 ALL_LIBS = \
@@ -192,6 +283,7 @@ AM_CFLAGS = \
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -222,6 +314,65 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
+telepathy-example-extended-client$(EXEEXT): $(telepathy_example_extended_client_OBJECTS) $(telepathy_example_extended_client_DEPENDENCIES) 
+	@rm -f telepathy-example-extended-client$(EXEEXT)
+	$(LINK) $(telepathy_example_extended_client_LDFLAGS) $(telepathy_example_extended_client_OBJECTS) $(telepathy_example_extended_client_LDADD) $(LIBS)
+telepathy-example-inspect-channel$(EXEEXT): $(telepathy_example_inspect_channel_OBJECTS) $(telepathy_example_inspect_channel_DEPENDENCIES) 
+	@rm -f telepathy-example-inspect-channel$(EXEEXT)
+	$(LINK) $(telepathy_example_inspect_channel_LDFLAGS) $(telepathy_example_inspect_channel_OBJECTS) $(telepathy_example_inspect_channel_LDADD) $(LIBS)
+telepathy-example-inspect-cm$(EXEEXT): $(telepathy_example_inspect_cm_OBJECTS) $(telepathy_example_inspect_cm_DEPENDENCIES) 
+	@rm -f telepathy-example-inspect-cm$(EXEEXT)
+	$(LINK) $(telepathy_example_inspect_cm_LDFLAGS) $(telepathy_example_inspect_cm_OBJECTS) $(telepathy_example_inspect_cm_LDADD) $(LIBS)
+telepathy-example-inspect-connection$(EXEEXT): $(telepathy_example_inspect_connection_OBJECTS) $(telepathy_example_inspect_connection_DEPENDENCIES) 
+	@rm -f telepathy-example-inspect-connection$(EXEEXT)
+	$(LINK) $(telepathy_example_inspect_connection_LDFLAGS) $(telepathy_example_inspect_connection_OBJECTS) $(telepathy_example_inspect_connection_LDADD) $(LIBS)
+telepathy-example-list-connections$(EXEEXT): $(telepathy_example_list_connections_OBJECTS) $(telepathy_example_list_connections_DEPENDENCIES) 
+	@rm -f telepathy-example-list-connections$(EXEEXT)
+	$(LINK) $(telepathy_example_list_connections_LDFLAGS) $(telepathy_example_list_connections_OBJECTS) $(telepathy_example_list_connections_LDADD) $(LIBS)
+telepathy-example-list-managers$(EXEEXT): $(telepathy_example_list_managers_OBJECTS) $(telepathy_example_list_managers_DEPENDENCIES) 
+	@rm -f telepathy-example-list-managers$(EXEEXT)
+	$(LINK) $(telepathy_example_list_managers_LDFLAGS) $(telepathy_example_list_managers_OBJECTS) $(telepathy_example_list_managers_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended-client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inspect-channel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inspect-cm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inspect-connection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list-connections.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list-managers.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -231,12 +382,54 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique
 tags: TAGS
-TAGS:
 
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	if test -z "$(ETAGS_ARGS)$$tags$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	    $$tags $$unique; \
+	fi
 ctags: CTAGS
-CTAGS:
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(CTAGS_ARGS)$$tags$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$tags $$unique
 
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
@@ -267,7 +460,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(PROGRAMS)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -295,11 +488,14 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-libtool
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -322,12 +518,14 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -339,14 +537,16 @@ ps-am:
 
 uninstall-am: uninstall-info-am
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	distclean distclean-generic distclean-libtool distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libtool clean-noinstPROGRAMS ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

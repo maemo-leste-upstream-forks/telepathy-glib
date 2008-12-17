@@ -36,37 +36,43 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-handle-set$(EXEEXT) test-heap$(EXEEXT) \
-	test-intset$(EXEEXT) test-util$(EXEEXT) \
-	test-internal-debug$(EXEEXT)
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+noinst_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
 subdir = tests
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
+am__EXEEXT_1 = test-handle-set$(EXEEXT) test-heap$(EXEEXT) \
+	test-intset$(EXEEXT) test-util$(EXEEXT)
+am__EXEEXT_2 = test-internal-debug$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
-am_test_handle_set_OBJECTS = test-intset.$(OBJEXT)
+am_test_handle_set_OBJECTS = test-handle-set.$(OBJEXT)
 test_handle_set_OBJECTS = $(am_test_handle_set_OBJECTS)
-test_handle_set_DEPENDENCIES = ../telepathy-glib/libtelepathy-glib.la
+test_handle_set_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 am_test_heap_OBJECTS = test-heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
-test_heap_DEPENDENCIES = ../telepathy-glib/libtelepathy-glib.la
+test_heap_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 am_test_internal_debug_OBJECTS = test-internal-debug.$(OBJEXT)
 test_internal_debug_OBJECTS = $(am_test_internal_debug_OBJECTS)
 test_internal_debug_DEPENDENCIES =  \
-	../telepathy-glib/libtelepathy-glib-internal.la
+	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
 am_test_intset_OBJECTS = test-intset.$(OBJEXT)
 test_intset_OBJECTS = $(am_test_intset_OBJECTS)
-test_intset_DEPENDENCIES = ../telepathy-glib/libtelepathy-glib.la
+test_intset_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 am_test_util_OBJECTS = test-util.$(OBJEXT)
 test_util_OBJECTS = $(am_test_util_OBJECTS)
-test_util_DEPENDENCIES = ../telepathy-glib/libtelepathy-glib.la
+test_util_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -84,8 +90,15 @@ SOURCES = $(test_handle_set_SOURCES) $(test_heap_SOURCES) \
 DIST_SOURCES = $(test_handle_set_SOURCES) $(test_heap_SOURCES) \
 	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
 	$(test_util_SOURCES)
+RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
+	html-recursive info-recursive install-data-recursive \
+	install-exec-recursive install-info-recursive \
+	install-recursive installcheck-recursive installdirs-recursive \
+	pdf-recursive ps-recursive uninstall-info-recursive \
+	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
@@ -112,6 +125,7 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -132,6 +146,10 @@ GTKDOC_CHECK = @GTKDOC_CHECK@
 GTK_DOC_USE_LIBTOOL_FALSE = @GTK_DOC_USE_LIBTOOL_FALSE@
 GTK_DOC_USE_LIBTOOL_TRUE = @GTK_DOC_USE_LIBTOOL_TRUE@
 HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
+HAVE_LD_VERSION_SCRIPT_FALSE = @HAVE_LD_VERSION_SCRIPT_FALSE@
+HAVE_LD_VERSION_SCRIPT_TRUE = @HAVE_LD_VERSION_SCRIPT_TRUE@
+HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
+HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -147,7 +165,11 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OFFICIAL_RELEASE_FALSE = @OFFICIAL_RELEASE_FALSE@
+OFFICIAL_RELEASE_TRUE = @OFFICIAL_RELEASE_TRUE@
 OUT_OF_TREE_BUILD_FALSE = @OUT_OF_TREE_BUILD_FALSE@
 OUT_OF_TREE_BUILD_TRUE = @OUT_OF_TREE_BUILD_TRUE@
 PACKAGE = @PACKAGE@
@@ -167,6 +189,7 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
+VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -215,30 +238,59 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+SUBDIRS = \
+    . \
+    dbus \
+    tools
+
+DYNAMIC_TESTS = \
+    test-handle-set \
+    test-heap \
+    test-intset \
+    test-util
+
+STATIC_TESTS = \
+    test-internal-debug
+
 TESTS = $(noinst_PROGRAMS)
+TESTS_ENVIRONMENT = \
+    G_DEBUG=fatal_warnings,fatal_criticals
+
+VALGRIND_TESTS_ENVIRONMENT = \
+    G_SLICE=always-malloc \
+    $(TESTS_ENVIRONMENT) \
+    $(top_builddir)/tools/telepathy-glib-env \
+    valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
+        --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
+        --child-silent-after-fork=yes --num-callers=20 \
+        $(VALGRIND_FLAGS)
+
+
+# myassert.h is used by some of the tests in dbus/
+EXTRA_DIST = myassert.h README
 test_handle_set_SOURCES = \
-    test-intset.c
+    test-handle-set.c
 
 test_handle_set_LDADD = \
-    ../telepathy-glib/libtelepathy-glib.la
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
 
 test_heap_SOURCES = \
     test-heap.c
 
 test_heap_LDADD = \
-    ../telepathy-glib/libtelepathy-glib.la
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
 
 test_util_SOURCES = \
     test-util.c
 
 test_util_LDADD = \
-    ../telepathy-glib/libtelepathy-glib.la
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
 
 test_intset_SOURCES = \
     test-intset.c
 
 test_intset_LDADD = \
-    ../telepathy-glib/libtelepathy-glib.la
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
 
 
 # this needs to link against the static convenience library so that
@@ -247,12 +299,16 @@ test_internal_debug_SOURCES = \
     test-internal-debug.c
 
 test_internal_debug_LDADD = \
-    ../telepathy-glib/libtelepathy-glib-internal.la
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
 
 check_c_sources = *.c
-AM_CFLAGS = $(ERROR_CFLAGS) @DBUS_CFLAGS@ @GLIB_CFLAGS@ @COVERAGE_CFLAGS@ -I.. -I$(srcdir)/..
-AM_LDFLAGS = @DBUS_LIBS@ @GLIB_LIBS@
-all: all-am
+AM_CFLAGS = \
+    $(ERROR_CFLAGS) \
+    $(DBUS_CFLAGS) \
+    $(GLIB_CFLAGS) \
+    $(TP_GLIB_CFLAGS)
+
+all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -314,6 +370,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-internal-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-intset.Po@am__quote@
@@ -350,6 +407,77 @@ distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
 
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive:
+	@failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+ctags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
+	done
+
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -360,10 +488,23 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
+	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
+	  include_option=--etags-include; \
+	  empty_fix=.; \
+	else \
+	  include_option=--include; \
+	  empty_fix=; \
+	fi; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test ! -f $$subdir/TAGS || \
+	      tags="$$tags $$include_option=$$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -376,7 +517,7 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	    $$tags $$unique; \
 	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
@@ -499,20 +640,36 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d "$(distdir)/$$subdir" \
+	    || $(mkdir_p) "$(distdir)/$$subdir" \
+	    || exit 1; \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS check-local
-check: check-am
+check: check-recursive
 all-am: Makefile $(PROGRAMS)
-installdirs:
-install: install-am
-install-exec: install-exec-am
-install-data: install-data-am
-uninstall: uninstall-am
+installdirs: installdirs-recursive
+installdirs-am:
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-am
+installcheck: installcheck-recursive
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
@@ -528,24 +685,24 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
+clean: clean-recursive
 
 clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
 	mostlyclean-am
 
-distclean: distclean-am
+distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
 
-dvi: dvi-am
+dvi: dvi-recursive
 
 dvi-am:
 
-html: html-am
+html: html-recursive
 
-info: info-am
+info: info-recursive
 
 info-am:
 
@@ -553,44 +710,55 @@ install-data-am:
 
 install-exec-am:
 
-install-info: install-info-am
+install-info: install-info-recursive
 
 install-man:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
+maintainer-clean: maintainer-clean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-am
+mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-pdf: pdf-am
+pdf: pdf-recursive
 
 pdf-am:
 
-ps: ps-am
+ps: ps-recursive
 
 ps-am:
 
 uninstall-am: uninstall-info-am
 
-.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am check-local \
-	clean clean-generic clean-libtool clean-noinstPROGRAMS ctags \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am
+uninstall-info: uninstall-info-recursive
 
+.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-TESTS \
+	check-am check-local clean clean-generic clean-libtool \
+	clean-noinstPROGRAMS clean-recursive ctags ctags-recursive \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
+	dvi dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-info-am
+
+
+check-valgrind:
+	$(MAKE) check-TESTS \
+		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)" \
+		TESTS="$(STATIC_TESTS) $(DYNAMIC_TESTS:%=.libs/%)"
+	$(MAKE) -C dbus check-valgrind
 check-local::
 	@fail=0; \
 	if test -n "$(check_misc_sources)"; then \

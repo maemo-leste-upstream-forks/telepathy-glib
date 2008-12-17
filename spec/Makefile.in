@@ -35,12 +35,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/spec-gen.am
 subdir = spec
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -74,6 +74,7 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -94,6 +95,10 @@ GTKDOC_CHECK = @GTKDOC_CHECK@
 GTK_DOC_USE_LIBTOOL_FALSE = @GTK_DOC_USE_LIBTOOL_FALSE@
 GTK_DOC_USE_LIBTOOL_TRUE = @GTK_DOC_USE_LIBTOOL_TRUE@
 HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
+HAVE_LD_VERSION_SCRIPT_FALSE = @HAVE_LD_VERSION_SCRIPT_FALSE@
+HAVE_LD_VERSION_SCRIPT_TRUE = @HAVE_LD_VERSION_SCRIPT_TRUE@
+HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
+HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -109,7 +114,11 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OFFICIAL_RELEASE_FALSE = @OFFICIAL_RELEASE_FALSE@
+OFFICIAL_RELEASE_TRUE = @OFFICIAL_RELEASE_TRUE@
 OUT_OF_TREE_BUILD_FALSE = @OUT_OF_TREE_BUILD_FALSE@
 OUT_OF_TREE_BUILD_TRUE = @OUT_OF_TREE_BUILD_TRUE@
 PACKAGE = @PACKAGE@
@@ -129,6 +138,7 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
+VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -179,60 +189,41 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 EXTRA_DIST = \
     all.xml \
+    Channel_Handler.xml \
+    Channel_Interface_Chat_State.xml \
+    Channel_Interface_DTMF.xml \
+    Channel_Interface_Group.xml \
+    Channel_Interface_Hold.xml \
+    Channel_Interface_Media_Signalling.xml \
+    Channel_Interface_Password.xml \
+    Channel_Interface_Transfer.xml \
+    Channel_Type_Contact_List.xml \
+    Channel_Type_Contact_Search.xml \
+    Channel_Type_Room_List.xml \
+    Channel_Type_Streamed_Media.xml \
+    Channel_Type_Text.xml \
+    Channel_Type_Tubes.xml \
+    Channel.xml \
+    Connection_Interface_Aliasing.xml \
+    Connection_Interface_Avatars.xml \
+    Connection_Interface_Capabilities.xml \
+    Connection_Interface_Contact_Info.xml \
+    Connection_Interface_Forwarding.xml \
+    Connection_Interface_Presence.xml \
+    Connection_Interface_Privacy.xml \
+    Connection_Interface_Renaming.xml \
+    Connection_Manager.xml \
+    Connection.xml \
     errors.xml \
     generic-types.xml \
-    $(SPEC_INTERFACE_XMLS)
+    Media_Session_Handler.xml \
+    Media_Stream_Handler.xml \
+    Properties_Interface.xml
 
-SPEC_INTERFACES = Connection_Manager Connection \
-	Connection_Interface_Aliasing Connection_Interface_Avatars \
-	Connection_Interface_Capabilities \
-	Connection_Interface_Contact_Info \
-	Connection_Interface_Forwarding Connection_Interface_Presence \
-	Connection_Interface_Privacy Connection_Interface_Renaming \
-	Channel Channel_Type_Contact_List Channel_Type_Contact_Search \
-	Channel_Type_Streamed_Media Channel_Type_Room_List \
-	Channel_Type_Text Channel_Type_Tubes \
-	Channel_Interface_Chat_State Channel_Interface_DTMF \
-	Channel_Interface_Group Channel_Interface_Hold \
-	Channel_Interface_Password Channel_Interface_Transfer \
-	Channel_Interface_Media_Signalling Media_Session_Handler \
-	Media_Stream_Handler Properties_Interface Channel_Handler
-SPEC_INTERFACE_XMLS = $(top_srcdir)/spec/Connection_Manager.xml \
-	$(top_srcdir)/spec/Connection.xml \
-	$(top_srcdir)/spec/Connection_Interface_Aliasing.xml \
-	$(top_srcdir)/spec/Connection_Interface_Avatars.xml \
-	$(top_srcdir)/spec/Connection_Interface_Capabilities.xml \
-	$(top_srcdir)/spec/Connection_Interface_Contact_Info.xml \
-	$(top_srcdir)/spec/Connection_Interface_Forwarding.xml \
-	$(top_srcdir)/spec/Connection_Interface_Presence.xml \
-	$(top_srcdir)/spec/Connection_Interface_Privacy.xml \
-	$(top_srcdir)/spec/Connection_Interface_Renaming.xml \
-	$(top_srcdir)/spec/Channel.xml \
-	$(top_srcdir)/spec/Channel_Type_Contact_List.xml \
-	$(top_srcdir)/spec/Channel_Type_Contact_Search.xml \
-	$(top_srcdir)/spec/Channel_Type_Streamed_Media.xml \
-	$(top_srcdir)/spec/Channel_Type_Room_List.xml \
-	$(top_srcdir)/spec/Channel_Type_Text.xml \
-	$(top_srcdir)/spec/Channel_Type_Tubes.xml \
-	$(top_srcdir)/spec/Channel_Interface_Chat_State.xml \
-	$(top_srcdir)/spec/Channel_Interface_DTMF.xml \
-	$(top_srcdir)/spec/Channel_Interface_Group.xml \
-	$(top_srcdir)/spec/Channel_Interface_Hold.xml \
-	$(top_srcdir)/spec/Channel_Interface_Password.xml \
-	$(top_srcdir)/spec/Channel_Interface_Transfer.xml \
-	$(top_srcdir)/spec/Channel_Interface_Media_Signalling.xml \
-	$(top_srcdir)/spec/Media_Session_Handler.xml \
-	$(top_srcdir)/spec/Media_Stream_Handler.xml \
-	$(top_srcdir)/spec/Properties_Interface.xml \
-	$(top_srcdir)/spec/Channel_Handler.xml
-SPEC_GENERATED_CS = 
-SPEC_GENERATED_HS = 
-SPEC_GENERATED_LISTS = 
-SPEC_GLUE_HS = 
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/spec-gen.am $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -279,7 +270,6 @@ CTAGS:
 
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/$(top_srcdir)/spec
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -390,17 +380,6 @@ uninstall-am: uninstall-info-am
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-info-am
 
-
-# Rules to re-generate this file
-spec-gen.am: $(top_srcdir)/spec/all.xml  \
-		$(top_srcdir)/spec/all.xml \
-		$(SPEC_INTERFACE_XMLS) \
-		$(top_srcdir)/tools/ls-interfaces.xsl \
-		$(top_builddir)/tools/update-spec-gen-am.sh
-	XSLTPROC=xsltproc TOP_SRCDIR=$(top_srcdir) $(SHELL) $(top_builddir)/tools/update-spec-gen-am.sh spec-gen.am  
-
-# This is a derived file but must be checked-in to Darcs anyway, for
-# bootstrapping.
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

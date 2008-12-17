@@ -150,13 +150,17 @@ Signature of a property in the Telepathy properties interface.</para>
 </varlistentry>
 <varlistentry>
 <term><link linkend="GType">GType</link>&nbsp;<structfield>type</structfield>;</term>
-<listitem><simpara> GType which the variant value must have
+<listitem><simpara> GType which the variant value must have. We currently support
+ only <link linkend="G-TYPE-UINT:CAPS"><literal>G_TYPE_UINT</literal></link>, <link linkend="G-TYPE-INT:CAPS"><literal>G_TYPE_INT</literal></link>, <link linkend="G-TYPE-STRING:CAPS"><literal>G_TYPE_STRING</literal></link>, <link linkend="G-TYPE-BOOLEAN:CAPS"><literal>G_TYPE_BOOLEAN</literal></link>,
+ corresponding to D-Bus signatures 'u', 'i', 's', 'b'.
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
 <refsect2>
 <title><anchor id="TpProperty" role="struct"/>TpProperty</title>
 <indexterm><primary>TpProperty</primary></indexterm><programlisting>typedef struct {
+    /* FIXME: if we ever break ABI, make this a (GValue) rather than a
+     * (GValue *) */
     GValue *value;
     guint flags;
 } TpProperty;
@@ -236,7 +240,8 @@ it using <link linkend="tp-properties-mixin-init"><function>tp_properties_mixin_
 </para><variablelist role="struct">
 <varlistentry>
 <term><link linkend="TpProperty">TpProperty</link>&nbsp;*<structfield>properties</structfield>;</term>
-<listitem><simpara> Array of property values. Should be considered read-only.
+<listitem><simpara> Array of property values, of length klass->num_props.
+ Should be considered read-only.
 </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -269,7 +274,7 @@ All fields should be considered read-only.</para>
 <varlistentry>
 <term>const&nbsp;<link linkend="TpPropertySignature">TpPropertySignature</link>&nbsp;*<structfield>signatures</structfield>;</term>
 <listitem><simpara> Array of property signatures, as provided via
- <link linkend="tp-properties-mixin-class-init"><function>tp_properties_mixin_class_init()</function></link>.
+ <link linkend="tp-properties-mixin-class-init"><function>tp_properties_mixin_class_init()</function></link>, of length <parameter>num_props</parameter>.
 </simpara></listitem>
 </varlistentry>
 <varlistentry>

@@ -1,0 +1,567 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-connection-aliasing">
+<refmeta>
+<refentrytitle role="top_of_page">Connection Aliasing interface</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Connection Aliasing interface</refname>
+<refpurpose>client-side wrappers for the Aliasing interface</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;telepathy-glib/connection.h&gt;
+
+
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-aliasing-run-get-alias-flags">tp_cli_connection_interface_aliasing_run_get_alias_flags</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> *out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-aliasing-run-request-aliases">tp_cli_connection_interface_aliasing_run_request_aliases</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_contacts,
+                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-aliasing-run-set-aliases">tp_cli_connection_interface_aliasing_run_set_aliases</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_aliases,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-interface-aliasing-call-get-alias-flags">tp_cli_connection_interface_aliasing_call_get_alias_flags</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-callback-for-get-alias-flags">tp_cli_connection_interface_aliasing_callback_for_get_alias_flags</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-interface-aliasing-call-request-aliases">tp_cli_connection_interface_aliasing_call_request_aliases</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_contacts,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-callback-for-request-aliases">tp_cli_connection_interface_aliasing_callback_for_request_aliases</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-interface-aliasing-call-set-aliases">tp_cli_connection_interface_aliasing_call_set_aliases</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_aliases,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-callback-for-set-aliases">tp_cli_connection_interface_aliasing_callback_for_set_aliases</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-aliasing-callback-for-get-alias-flags">*tp_cli_connection_interface_aliasing_callback_for_get_alias_flags</link>)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="guint">guint</link> out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-aliasing-callback-for-request-aliases">*tp_cli_connection_interface_aliasing_callback_for_request_aliases</link>)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-aliasing-callback-for-set-aliases">*tp_cli_connection_interface_aliasing_callback_for_set_aliases</link>)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-connection-interface-aliasing-connect-to-aliases-changed">tp_cli_connection_interface_aliasing_connect_to_aliases_changed</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-signal-callback-aliases-changed">tp_cli_connection_interface_aliasing_signal_callback_aliases_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-aliasing-signal-callback-aliases-changed">*tp_cli_connection_interface_aliasing_signal_callback_aliases_changed</link>)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *arg_aliases,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+Most instant messaging protocols allow users to set a nickname or
+alias. This section documents the auto-generated C wrappers for the
+Aliasing interface, used with <link linkend="TpConnection"><type>TpConnection</type></link> objects.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-run-get-alias-flags" role="function"/>tp_cli_connection_interface_aliasing_run_get_alias_flags ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_run_get_alias_flags</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_interface_aliasing_run_get_alias_flags
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> *out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method GetAliasFlags and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Return a bitwise OR of flags detailing the behaviour of aliases on this         connection.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnection"><type>TpConnection</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[An integer with a bitwise OR of flags from ConnectionAliasFlags]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-run-request-aliases" role="function"/>tp_cli_connection_interface_aliasing_run_request_aliases ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_run_request_aliases</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_interface_aliasing_run_request_aliases
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_contacts,
+                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method RequestAliases and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Request the value of several contacts' aliases at once.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnection"><type>TpConnection</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_contacts</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[An array of handles representing contacts]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[A list of aliases in the same order as the contact handles]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-run-set-aliases" role="function"/>tp_cli_connection_interface_aliasing_run_set_aliases ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_run_set_aliases</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_interface_aliasing_run_set_aliases
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_aliases,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method SetAliases and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Request that the alias of the given contact be changed. Success will be         indicated by emitting an AliasUpdate signal. On connections where the         CONNECTION_ALIAS_FLAG_USER_SET flag is not set, this method will only         ever succeed if the contact is the user's own handle (as returned by         GetSelfHandle on the Connection interface).]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnection"><type>TpConnection</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_aliases</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[A dictionary mapping integer handles of contacts           to strings of the new alias to set.]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-call-get-alias-flags" role="function"/>tp_cli_connection_interface_aliasing_call_get_alias_flags ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_call_get_alias_flags</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_interface_aliasing_call_get_alias_flags
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-callback-for-get-alias-flags">tp_cli_connection_interface_aliasing_callback_for_get_alias_flags</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a GetAliasFlags method call.
+</para>
+<para>
+<![CDATA[Return a bitwise OR of flags detailing the behaviour of aliases on this         connection.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-call-request-aliases" role="function"/>tp_cli_connection_interface_aliasing_call_request_aliases ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_call_request_aliases</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_interface_aliasing_call_request_aliases
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_contacts,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-callback-for-request-aliases">tp_cli_connection_interface_aliasing_callback_for_request_aliases</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a RequestAliases method call.
+</para>
+<para>
+<![CDATA[Request the value of several contacts' aliases at once.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_contacts</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[An array of handles representing contacts]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-call-set-aliases" role="function"/>tp_cli_connection_interface_aliasing_call_set_aliases ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_call_set_aliases</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_interface_aliasing_call_set_aliases
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_aliases,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-callback-for-set-aliases">tp_cli_connection_interface_aliasing_callback_for_set_aliases</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a SetAliases method call.
+</para>
+<para>
+<![CDATA[Request that the alias of the given contact be changed. Success will be         indicated by emitting an AliasUpdate signal. On connections where the         CONNECTION_ALIAS_FLAG_USER_SET flag is not set, this method will only         ever succeed if the contact is the user's own handle (as returned by         GetSelfHandle on the Connection interface).]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_aliases</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[A dictionary mapping integer handles of contacts           to strings of the new alias to set.]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-callback-for-get-alias-flags" role="function"/>tp_cli_connection_interface_aliasing_callback_for_get_alias_flags ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_callback_for_get_alias_flags</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_aliasing_callback_for_get_alias_flags)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="guint">guint</link> out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a GetAliasFlags method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[An integer with a bitwise OR of flags from ConnectionAliasFlags]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-callback-for-request-aliases" role="function"/>tp_cli_connection_interface_aliasing_callback_for_request_aliases ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_callback_for_request_aliases</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_aliasing_callback_for_request_aliases)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a RequestAliases method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[A list of aliases in the same order as the contact handles]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-callback-for-set-aliases" role="function"/>tp_cli_connection_interface_aliasing_callback_for_set_aliases ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_callback_for_set_aliases</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_aliasing_callback_for_set_aliases)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a SetAliases method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-connect-to-aliases-changed" role="function"/>tp_cli_connection_interface_aliasing_connect_to_aliases_changed ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_connect_to_aliases_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_connection_interface_aliasing_connect_to_aliases_changed
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="tp-cli-connection-interface-aliasing-signal-callback-aliases-changed">tp_cli_connection_interface_aliasing_signal_callback_aliases_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal AliasesChanged.
+</para>
+<para>
+<![CDATA[Signal emitted when a contact's alias (or that of the user) is changed.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnection"><type>TpConnection</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-connection-interface-aliasing-signal-callback-aliases-changed" role="function"/>tp_cli_connection_interface_aliasing_signal_callback_aliases_changed ()</title>
+<indexterm><primary>tp_cli_connection_interface_aliasing_signal_callback_aliases_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_aliasing_signal_callback_aliases_changed)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *arg_aliases,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal AliasesChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-connection-interface-aliasing-connect-to-aliases-changed"><function>tp_cli_connection_interface_aliasing_connect_to_aliases_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_aliases</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[<tp:docstring xmlns="http://www.w3.org/1999/xhtml">           An array containing structs of:           <ul>             <li>the handle representing the contact</li>             <li>the new alias</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1>
+<title>See Also</title>
+<link linkend="TpConnection"><type>TpConnection</type></link>
+</refsect1>
+
+
+<refsect1><refsect2 /><refsect2 /></refsect1>
+</refentry>

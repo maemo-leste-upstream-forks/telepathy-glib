@@ -1,0 +1,1618 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-channel-text">
+<refmeta>
+<refentrytitle role="top_of_page">Text channels</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Text channels</refname>
+<refpurpose>client-side wrappers for the Text channel type, and
+ the Chat State and Password interfaces</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;telepathy-glib/channel.h&gt;
+
+
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-type-text-run-acknowledge-pending-messages">tp_cli_channel_type_text_run_acknowledge_pending_messages</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_ids,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-type-text-run-get-message-types">tp_cli_channel_type_text_run_get_message_types</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GArray">GArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-type-text-run-list-pending-messages">tp_cli_channel_type_text_run_list_pending_messages</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="gboolean">gboolean</link> in_clear,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-type-text-run-send">tp_cli_channel_type_text_run_send</link>   (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_type,
+                                                         const <link linkend="gchar">gchar</link> *in_text,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-type-text-call-acknowledge-pending-messages">tp_cli_channel_type_text_call_acknowledge_pending_messages</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_ids,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-acknowledge-pending-messages">tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-type-text-call-get-message-types">tp_cli_channel_type_text_call_get_message_types</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-get-message-types">tp_cli_channel_type_text_callback_for_get_message_types</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-type-text-call-list-pending-messages">tp_cli_channel_type_text_call_list_pending_messages</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="gboolean">gboolean</link> in_clear,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-list-pending-messages">tp_cli_channel_type_text_callback_for_list_pending_messages</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-type-text-call-send">tp_cli_channel_type_text_call_send</link>  (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_type,
+                                                         const <link linkend="gchar">gchar</link> *in_text,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-send">tp_cli_channel_type_text_callback_for_send</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-callback-for-acknowledge-pending-messages">*tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-callback-for-get-message-types">*tp_cli_channel_type_text_callback_for_get_message_types</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GArray">GArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-callback-for-list-pending-messages">*tp_cli_channel_type_text_callback_for_list_pending_messages</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-callback-for-send">*tp_cli_channel_type_text_callback_for_send</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-type-text-connect-to-lost-message">tp_cli_channel_type_text_connect_to_lost_message</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-lost-message">tp_cli_channel_type_text_signal_callback_lost_message</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-type-text-connect-to-received">tp_cli_channel_type_text_connect_to_received</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-received">tp_cli_channel_type_text_signal_callback_received</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-type-text-connect-to-send-error">tp_cli_channel_type_text_connect_to_send_error</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-send-error">tp_cli_channel_type_text_signal_callback_send_error</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-type-text-connect-to-sent">tp_cli_channel_type_text_connect_to_sent</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-sent">tp_cli_channel_type_text_signal_callback_sent</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-signal-callback-lost-message">*tp_cli_channel_type_text_signal_callback_lost_message</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-signal-callback-received">*tp_cli_channel_type_text_signal_callback_received</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_id,
+                                                         <link linkend="guint">guint</link> arg_timestamp,
+                                                         <link linkend="guint">guint</link> arg_sender,
+                                                         <link linkend="guint">guint</link> arg_type,
+                                                         <link linkend="guint">guint</link> arg_flags,
+                                                         const <link linkend="gchar">gchar</link> *arg_text,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-signal-callback-send-error">*tp_cli_channel_type_text_signal_callback_send_error</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_error,
+                                                         <link linkend="guint">guint</link> arg_timestamp,
+                                                         <link linkend="guint">guint</link> arg_type,
+                                                         const <link linkend="gchar">gchar</link> *arg_text,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-type-text-signal-callback-sent">*tp_cli_channel_type_text_signal_callback_sent</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_timestamp,
+                                                         <link linkend="guint">guint</link> arg_type,
+                                                         const <link linkend="gchar">gchar</link> *arg_text,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-interface-chat-state-run-set-chat-state">tp_cli_channel_interface_chat_state_run_set_chat_state</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_state,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-interface-chat-state-call-set-chat-state">tp_cli_channel_interface_chat_state_call_set_chat_state</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_state,
+                                                         <link linkend="tp-cli-channel-interface-chat-state-callback-for-set-chat-state">tp_cli_channel_interface_chat_state_callback_for_set_chat_state</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-chat-state-callback-for-set-chat-state">*tp_cli_channel_interface_chat_state_callback_for_set_chat_state</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-interface-chat-state-connect-to-chat-state-changed">tp_cli_channel_interface_chat_state_connect_to_chat_state_changed</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed">tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed">*tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_contact,
+                                                         <link linkend="guint">guint</link> arg_state,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-interface-password-run-get-password-flags">tp_cli_channel_interface_password_run_get_password_flags</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> *out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-interface-password-run-provide-password">tp_cli_channel_interface_password_run_provide_password</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_password,
+                                                         <link linkend="gboolean">gboolean</link> *out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-interface-password-call-get-password-flags">tp_cli_channel_interface_password_call_get_password_flags</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-channel-interface-password-callback-for-get-password-flags">tp_cli_channel_interface_password_callback_for_get_password_flags</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-interface-password-call-provide-password">tp_cli_channel_interface_password_call_provide_password</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_password,
+                                                         <link linkend="tp-cli-channel-interface-password-callback-for-provide-password">tp_cli_channel_interface_password_callback_for_provide_password</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-password-callback-for-get-password-flags">*tp_cli_channel_interface_password_callback_for_get_password_flags</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-password-callback-for-provide-password">*tp_cli_channel_interface_password_callback_for_provide_password</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gboolean">gboolean</link> out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-interface-password-connect-to-password-flags-changed">tp_cli_channel_interface_password_connect_to_password_flags_changed</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-password-signal-callback-password-flags-changed">tp_cli_channel_interface_password_signal_callback_password_flags_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-password-signal-callback-password-flags-changed">*tp_cli_channel_interface_password_signal_callback_password_flags_changed</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_added,
+                                                         <link linkend="guint">guint</link> arg_removed,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+A major use for instant messaging is obviously to send messages.
+Channels of type Text represent IM conversations or chat rooms.
+</para>
+<para>
+This section documents the auto-generated C wrappers for the Text channel
+type, and also for the Chat State and Password interfaces, which are
+usually used in conjunction with Text channels.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-run-acknowledge-pending-messages" role="function"/>tp_cli_channel_type_text_run_acknowledge_pending_messages ()</title>
+<indexterm><primary>tp_cli_channel_type_text_run_acknowledge_pending_messages</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_type_text_run_acknowledge_pending_messages
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_ids,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method AcknowledgePendingMessages and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Inform the channel that you have handled messages by displaying them to         the user (or equivalent), so they can be removed from the pending queue.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_ids</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The IDs of the messages to acknowledge]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-run-get-message-types" role="function"/>tp_cli_channel_type_text_run_get_message_types ()</title>
+<indexterm><primary>tp_cli_channel_type_text_run_get_message_types</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_type_text_run_get_message_types
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GArray">GArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method GetMessageTypes and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Return an array indicating which types of message may be sent on this         channel.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[An array of integer message types (ChannelTextMessageType)]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-run-list-pending-messages" role="function"/>tp_cli_channel_type_text_run_list_pending_messages ()</title>
+<indexterm><primary>tp_cli_channel_type_text_run_list_pending_messages</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_type_text_run_list_pending_messages
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="gboolean">gboolean</link> in_clear,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method ListPendingMessages and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[List the messages currently in the pending queue, and optionally         remove then all.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_clear</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[If true, remove all messages from the queue]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[An array of structs representing the pending queue. Each contains:           <ul>             <li>a numeric identifier</li>             <li>a Unix timestamp indicating when the message was received</li>             <li>the contact handle for the contact who sent the message</li>             <li>the message type, taken from ChannelTextMessageType</li>             <li>the bitwise-OR of the message flags from ChannelTextMessageFlags</li>             <li>the text of the message</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-run-send" role="function"/>tp_cli_channel_type_text_run_send ()</title>
+<indexterm><primary>tp_cli_channel_type_text_run_send</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_type_text_run_send   (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_type,
+                                                         const <link linkend="gchar">gchar</link> *in_text,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method Send and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Request that a message be sent on this channel. The Sent signal will be         emitted when the message has been sent, and this method will return.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_type</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[An integer indicating the type of the message, from           ChannelTextMessageType]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_text</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The message to send]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-call-acknowledge-pending-messages" role="function"/>tp_cli_channel_type_text_call_acknowledge_pending_messages ()</title>
+<indexterm><primary>tp_cli_channel_type_text_call_acknowledge_pending_messages</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_type_text_call_acknowledge_pending_messages
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GArray">GArray</link> *in_ids,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-acknowledge-pending-messages">tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a AcknowledgePendingMessages method call.
+</para>
+<para>
+<![CDATA[Inform the channel that you have handled messages by displaying them to         the user (or equivalent), so they can be removed from the pending queue.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_ids</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The IDs of the messages to acknowledge]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-call-get-message-types" role="function"/>tp_cli_channel_type_text_call_get_message_types ()</title>
+<indexterm><primary>tp_cli_channel_type_text_call_get_message_types</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_type_text_call_get_message_types
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-get-message-types">tp_cli_channel_type_text_callback_for_get_message_types</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a GetMessageTypes method call.
+</para>
+<para>
+<![CDATA[Return an array indicating which types of message may be sent on this         channel.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-call-list-pending-messages" role="function"/>tp_cli_channel_type_text_call_list_pending_messages ()</title>
+<indexterm><primary>tp_cli_channel_type_text_call_list_pending_messages</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_type_text_call_list_pending_messages
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="gboolean">gboolean</link> in_clear,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-list-pending-messages">tp_cli_channel_type_text_callback_for_list_pending_messages</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a ListPendingMessages method call.
+</para>
+<para>
+<![CDATA[List the messages currently in the pending queue, and optionally         remove then all.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_clear</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[If true, remove all messages from the queue]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-call-send" role="function"/>tp_cli_channel_type_text_call_send ()</title>
+<indexterm><primary>tp_cli_channel_type_text_call_send</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_type_text_call_send  (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_type,
+                                                         const <link linkend="gchar">gchar</link> *in_text,
+                                                         <link linkend="tp-cli-channel-type-text-callback-for-send">tp_cli_channel_type_text_callback_for_send</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a Send method call.
+</para>
+<para>
+<![CDATA[Request that a message be sent on this channel. The Sent signal will be         emitted when the message has been sent, and this method will return.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_type</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[An integer indicating the type of the message, from           ChannelTextMessageType]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_text</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The message to send]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-callback-for-acknowledge-pending-messages" role="function"/>tp_cli_channel_type_text_callback_for_acknowledge_pending_messages ()</title>
+<indexterm><primary>tp_cli_channel_type_text_callback_for_acknowledge_pending_messages</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_callback_for_acknowledge_pending_messages)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a AcknowledgePendingMessages method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-callback-for-get-message-types" role="function"/>tp_cli_channel_type_text_callback_for_get_message_types ()</title>
+<indexterm><primary>tp_cli_channel_type_text_callback_for_get_message_types</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_callback_for_get_message_types)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GArray">GArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a GetMessageTypes method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[An array of integer message types (ChannelTextMessageType)]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-callback-for-list-pending-messages" role="function"/>tp_cli_channel_type_text_callback_for_list_pending_messages ()</title>
+<indexterm><primary>tp_cli_channel_type_text_callback_for_list_pending_messages</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_callback_for_list_pending_messages)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a ListPendingMessages method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[An array of structs representing the pending queue. Each contains:           <ul>             <li>a numeric identifier</li>             <li>a Unix timestamp indicating when the message was received</li>             <li>the contact handle for the contact who sent the message</li>             <li>the message type, taken from ChannelTextMessageType</li>             <li>the bitwise-OR of the message flags from ChannelTextMessageFlags</li>             <li>the text of the message</li>           </ul>]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-callback-for-send" role="function"/>tp_cli_channel_type_text_callback_for_send ()</title>
+<indexterm><primary>tp_cli_channel_type_text_callback_for_send</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_callback_for_send)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a Send method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-connect-to-lost-message" role="function"/>tp_cli_channel_type_text_connect_to_lost_message ()</title>
+<indexterm><primary>tp_cli_channel_type_text_connect_to_lost_message</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_type_text_connect_to_lost_message
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-lost-message">tp_cli_channel_type_text_signal_callback_lost_message</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal LostMessage.
+</para>
+<para>
+<![CDATA[This signal is emitted to indicate that an incoming message was         not able to be stored and forwarded by the connection manager         due to lack of memory.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-connect-to-received" role="function"/>tp_cli_channel_type_text_connect_to_received ()</title>
+<indexterm><primary>tp_cli_channel_type_text_connect_to_received</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_type_text_connect_to_received
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-received">tp_cli_channel_type_text_signal_callback_received</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal Received.
+</para>
+<para>
+<![CDATA[Signals that a message with the given id, timestamp, sender, type         and text has been received on this channel. Applications that catch         this signal and reliably inform the user of the message should         acknowledge that they have dealt with the message with the         AcknowledgePendingMessage method.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-connect-to-send-error" role="function"/>tp_cli_channel_type_text_connect_to_send_error ()</title>
+<indexterm><primary>tp_cli_channel_type_text_connect_to_send_error</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_type_text_connect_to_send_error
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-send-error">tp_cli_channel_type_text_signal_callback_send_error</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal SendError.
+</para>
+<para>
+<![CDATA[Signals that an outgoing message has failed to send. The error         will be one of the values from ChannelTextSendError.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-connect-to-sent" role="function"/>tp_cli_channel_type_text_connect_to_sent ()</title>
+<indexterm><primary>tp_cli_channel_type_text_connect_to_sent</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_type_text_connect_to_sent
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-type-text-signal-callback-sent">tp_cli_channel_type_text_signal_callback_sent</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal Sent.
+</para>
+<para>
+<![CDATA[Signals that a message has been sent on this channel.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-signal-callback-lost-message" role="function"/>tp_cli_channel_type_text_signal_callback_lost_message ()</title>
+<indexterm><primary>tp_cli_channel_type_text_signal_callback_lost_message</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_signal_callback_lost_message)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal LostMessage.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-type-text-connect-to-lost-message"><function>tp_cli_channel_type_text_connect_to_lost_message()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-signal-callback-received" role="function"/>tp_cli_channel_type_text_signal_callback_received ()</title>
+<indexterm><primary>tp_cli_channel_type_text_signal_callback_received</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_signal_callback_received)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_id,
+                                                         <link linkend="guint">guint</link> arg_timestamp,
+                                                         <link linkend="guint">guint</link> arg_sender,
+                                                         <link linkend="guint">guint</link> arg_type,
+                                                         <link linkend="guint">guint</link> arg_flags,
+                                                         const <link linkend="gchar">gchar</link> *arg_text,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal Received.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-type-text-connect-to-received"><function>tp_cli_channel_type_text_connect_to_received()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_id</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[A numeric identifier for acknowledging the message]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_timestamp</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[A Unix timestamp indicating when the message was received]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_sender</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The handle of the contact who sent the message]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_type</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The type of the message (normal, action, notice, etc), from           ChannelTextMessageType]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_flags</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[A bitwise OR of the message flags as defined by ChannelTextMessageFlags]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_text</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The text of the message]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-signal-callback-send-error" role="function"/>tp_cli_channel_type_text_signal_callback_send_error ()</title>
+<indexterm><primary>tp_cli_channel_type_text_signal_callback_send_error</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_signal_callback_send_error)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_error,
+                                                         <link linkend="guint">guint</link> arg_timestamp,
+                                                         <link linkend="guint">guint</link> arg_type,
+                                                         const <link linkend="gchar">gchar</link> *arg_text,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal SendError.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-type-text-connect-to-send-error"><function>tp_cli_channel_type_text_connect_to_send_error()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_error</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[One of the values of ChannelTextSendError]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_timestamp</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The Unix timestamp indicating when the message was sent]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_type</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The message type from ChannelTextMessageType]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_text</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The text of the message]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-type-text-signal-callback-sent" role="function"/>tp_cli_channel_type_text_signal_callback_sent ()</title>
+<indexterm><primary>tp_cli_channel_type_text_signal_callback_sent</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_type_text_signal_callback_sent)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_timestamp,
+                                                         <link linkend="guint">guint</link> arg_type,
+                                                         const <link linkend="gchar">gchar</link> *arg_text,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal Sent.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-type-text-connect-to-sent"><function>tp_cli_channel_type_text_connect_to_sent()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_timestamp</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[Unix timestamp indicating when the message was sent]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_type</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The message type (normal, action, notice, etc) from           ChannelTextMessageType]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_text</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The text of the message]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-chat-state-run-set-chat-state" role="function"/>tp_cli_channel_interface_chat_state_run_set_chat_state ()</title>
+<indexterm><primary>tp_cli_channel_interface_chat_state_run_set_chat_state</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_interface_chat_state_run_set_chat_state
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_state,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method SetChatState and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Set the local state and notify other members of the channel that it         has changed.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_state</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The new state: one of the values of ChannelChatState.]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-chat-state-call-set-chat-state" role="function"/>tp_cli_channel_interface_chat_state_call_set_chat_state ()</title>
+<indexterm><primary>tp_cli_channel_interface_chat_state_call_set_chat_state</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_interface_chat_state_call_set_chat_state
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> in_state,
+                                                         <link linkend="tp-cli-channel-interface-chat-state-callback-for-set-chat-state">tp_cli_channel_interface_chat_state_callback_for_set_chat_state</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a SetChatState method call.
+</para>
+<para>
+<![CDATA[Set the local state and notify other members of the channel that it         has changed.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_state</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The new state: one of the values of ChannelChatState.]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-chat-state-callback-for-set-chat-state" role="function"/>tp_cli_channel_interface_chat_state_callback_for_set_chat_state ()</title>
+<indexterm><primary>tp_cli_channel_interface_chat_state_callback_for_set_chat_state</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_chat_state_callback_for_set_chat_state)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a SetChatState method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-chat-state-connect-to-chat-state-changed" role="function"/>tp_cli_channel_interface_chat_state_connect_to_chat_state_changed ()</title>
+<indexterm><primary>tp_cli_channel_interface_chat_state_connect_to_chat_state_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_interface_chat_state_connect_to_chat_state_changed
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed">tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal ChatStateChanged.
+</para>
+<para>
+<![CDATA[Emitted when the state of a member of the channel has changed.         This includes local state.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-chat-state-signal-callback-chat-state-changed" role="function"/>tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed ()</title>
+<indexterm><primary>tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_chat_state_signal_callback_chat_state_changed)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_contact,
+                                                         <link linkend="guint">guint</link> arg_state,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal ChatStateChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-interface-chat-state-connect-to-chat-state-changed"><function>tp_cli_channel_interface_chat_state_connect_to_chat_state_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_contact</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[An integer handle for the contact.]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_state</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[The new state of this contact: one of the values of ChannelChatState.]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-run-get-password-flags" role="function"/>tp_cli_channel_interface_password_run_get_password_flags ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_run_get_password_flags</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_interface_password_run_get_password_flags
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> *out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method GetPasswordFlags and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Returns the bitwise-OR of the flags relevant to the password on this         channel.  The user interface can use this to present information about         which operations are currently valid.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[An integer with the logical OR of all the flags set           (values of ChannelPasswordFlags)]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-run-provide-password" role="function"/>tp_cli_channel_interface_password_run_provide_password ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_run_provide_password</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_interface_password_run_provide_password
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_password,
+                                                         <link linkend="gboolean">gboolean</link> *out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method ProvidePassword and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+<![CDATA[Provide the password so that the channel can be joined. Must be         called with the correct password in order for channel joining to         proceed if the 'provide' password flag is set.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_password</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The password]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: <![CDATA[(Undocumented)]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-call-get-password-flags" role="function"/>tp_cli_channel_interface_password_call_get_password_flags ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_call_get_password_flags</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_interface_password_call_get_password_flags
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-channel-interface-password-callback-for-get-password-flags">tp_cli_channel_interface_password_callback_for_get_password_flags</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a GetPasswordFlags method call.
+</para>
+<para>
+<![CDATA[Returns the bitwise-OR of the flags relevant to the password on this         channel.  The user interface can use this to present information about         which operations are currently valid.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-call-provide-password" role="function"/>tp_cli_channel_interface_password_call_provide_password ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_call_provide_password</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_interface_password_call_provide_password
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_password,
+                                                         <link linkend="tp-cli-channel-interface-password-callback-for-provide-password">tp_cli_channel_interface_password_callback_for_provide_password</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a ProvidePassword method call.
+</para>
+<para>
+<![CDATA[Provide the password so that the channel can be joined. Must be         called with the correct password in order for channel joining to         proceed if the 'provide' password flag is set.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_password</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: <![CDATA[The password]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-callback-for-get-password-flags" role="function"/>tp_cli_channel_interface_password_callback_for_get_password_flags ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_callback_for_get_password_flags</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_password_callback_for_get_password_flags)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a GetPasswordFlags method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[An integer with the logical OR of all the flags set           (values of ChannelPasswordFlags)]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-callback-for-provide-password" role="function"/>tp_cli_channel_interface_password_callback_for_provide_password ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_callback_for_provide_password</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_password_callback_for_provide_password)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gboolean">gboolean</link> out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a ProvidePassword method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: <![CDATA[(Undocumented)]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-connect-to-password-flags-changed" role="function"/>tp_cli_channel_interface_password_connect_to_password_flags_changed ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_connect_to_password_flags_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_interface_password_connect_to_password_flags_changed
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-password-signal-callback-password-flags-changed">tp_cli_channel_interface_password_signal_callback_password_flags_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal PasswordFlagsChanged.
+</para>
+<para>
+<![CDATA[Emitted when the flags as returned by GetPasswordFlags are changed.         The user interface should be updated as appropriate.]]></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-cli-channel-interface-password-signal-callback-password-flags-changed" role="function"/>tp_cli_channel_interface_password_signal_callback_password_flags_changed ()</title>
+<indexterm><primary>tp_cli_channel_interface_password_signal_callback_password_flags_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_password_signal_callback_password_flags_changed)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_added,
+                                                         <link linkend="guint">guint</link> arg_removed,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal PasswordFlagsChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-interface-password-connect-to-password-flags-changed"><function>tp_cli_channel_interface_password_connect_to_password_flags_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_added</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[A bitwise OR of the flags which have been set]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_removed</parameter>&nbsp;:</term>
+<listitem><simpara> <![CDATA[A bitwise OR of the flags which have been cleared]]>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1>
+<title>See Also</title>
+channel-group, <link linkend="TpChannel"><type>TpChannel</type></link>
+</refsect1>
+
+
+<refsect1><refsect2 /><refsect2 /></refsect1>
+</refentry>

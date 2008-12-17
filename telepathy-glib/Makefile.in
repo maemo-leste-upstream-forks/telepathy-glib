@@ -38,6 +38,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_1 = version-script.txt
+@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_2 = version-script.txt _gen/abi.txt
+@HAVE_LD_VERSION_SCRIPT_TRUE@am__append_3 = \
+@HAVE_LD_VERSION_SCRIPT_TRUE@    $(VERSION_SCRIPT_ARG)=$(srcdir)/version-script.txt
+
+@HAVE_LD_VERSION_SCRIPT_FALSE@am__append_4 = -export-symbols-regex '^tp'
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/telepathy-glib.pc.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
@@ -45,7 +51,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 subdir = telepathy-glib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -64,22 +71,23 @@ LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = base-connection.lo \
-	base-connection-manager.lo dbus.lo debug.lo interfaces.lo \
-	errors.lo group-mixin.lo gtypes.lo handle.lo handle-repo.lo \
+	base-connection-manager.lo channel.lo connection.lo \
+	connection-manager.lo dbus.lo debug.lo interfaces.lo errors.lo \
+	group-mixin.lo gtypes.lo handle.lo handle-repo.lo \
 	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
 	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
-	presence-mixin.lo properties-mixin.lo run.lo text-mixin.lo \
-	util.lo
+	media-interfaces.lo presence-mixin.lo properties-mixin.lo \
+	proxy.lo run.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = signals-marshal.lo \
-	telepathy-errors.lo tp-svc-channel-interfaces.lo \
-	tp-svc-connection-interfaces.lo \
-	tp-svc-connection-manager-interfaces.lo \
-	tp-svc-generic-interfaces.lo tp-svc-media-interfaces.lo
+	telepathy-errors.lo tp-svc-channel.lo tp-svc-connection.lo \
+	tp-svc-connection-manager.lo tp-svc-generic.lo \
+	tp-svc-media-session-handler.lo tp-svc-media-stream-handler.lo
 libtelepathy_glib_internal_la_OBJECTS =  \
 	$(am_libtelepathy_glib_internal_la_OBJECTS) \
 	$(nodist_libtelepathy_glib_internal_la_OBJECTS)
-libtelepathy_glib_la_DEPENDENCIES = libtelepathy-glib-internal.la
-am_libtelepathy_glib_la_OBJECTS =
+am__libtelepathy_glib_la_SOURCES_DIST = version-script.txt
+am__objects_1 =
+am_libtelepathy_glib_la_OBJECTS = $(am__objects_1)
 libtelepathy_glib_la_OBJECTS = $(am_libtelepathy_glib_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -96,7 +104,7 @@ SOURCES = $(libtelepathy_glib_internal_la_SOURCES) \
 	$(nodist_libtelepathy_glib_internal_la_SOURCES) \
 	$(libtelepathy_glib_la_SOURCES)
 DIST_SOURCES = $(libtelepathy_glib_internal_la_SOURCES) \
-	$(libtelepathy_glib_la_SOURCES)
+	$(am__libtelepathy_glib_la_SOURCES_DIST)
 pkgconfigDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(pkgconfig_DATA)
 nodist_genincludeHEADERS_INSTALL = $(INSTALL_HEADER)
@@ -130,6 +138,7 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -150,6 +159,10 @@ GTKDOC_CHECK = @GTKDOC_CHECK@
 GTK_DOC_USE_LIBTOOL_FALSE = @GTK_DOC_USE_LIBTOOL_FALSE@
 GTK_DOC_USE_LIBTOOL_TRUE = @GTK_DOC_USE_LIBTOOL_TRUE@
 HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
+HAVE_LD_VERSION_SCRIPT_FALSE = @HAVE_LD_VERSION_SCRIPT_FALSE@
+HAVE_LD_VERSION_SCRIPT_TRUE = @HAVE_LD_VERSION_SCRIPT_TRUE@
+HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
+HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -165,7 +178,11 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OFFICIAL_RELEASE_FALSE = @OFFICIAL_RELEASE_FALSE@
+OFFICIAL_RELEASE_TRUE = @OFFICIAL_RELEASE_TRUE@
 OUT_OF_TREE_BUILD_FALSE = @OUT_OF_TREE_BUILD_FALSE@
 OUT_OF_TREE_BUILD_TRUE = @OUT_OF_TREE_BUILD_TRUE@
 PACKAGE = @PACKAGE@
@@ -185,6 +202,7 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
+VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -238,12 +256,14 @@ genincludedir = $(tpgincludedir)/_gen
 pkgconfigdir = ${libdir}/pkgconfig
 pkgconfig_DATA = telepathy-glib.pc
 EXTRA_DIST = \
-    channel-interfaces.xml \
-    connection-interfaces.xml \
-    connection-manager-interfaces.xml \
+    channel.xml \
+    connection.xml \
+    connection-manager.xml \
+    dbus-daemon.xml \
     extra-gtkdoc.h \
-    generic-interfaces.xml \
-    media-interfaces.xml \
+    generic.xml \
+    media-session-handler.xml \
+    media-stream-handler.xml \
     stable-interfaces.xml
 
 lib_LTLIBRARIES = libtelepathy-glib.la
@@ -252,17 +272,25 @@ noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 # libtelepathy-glib is just a shared version of libtelepathy-glib-internal.
 # The static version is necessary because one of the tests wants to use
 # internal symbols (_tp_debug) which are made invisible by GNU ld.
-libtelepathy_glib_la_LDFLAGS = \
-    -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
-    -export-symbols-regex '^tp_'
 
+# The quoting here is unnecessary but harmless, and has the useful side-effect
+# that vim quickfix mode (:make) doesn't interpret the libtool --mode=link
+# command as an error message in a bizarrely named file
+libtelepathy_glib_la_LDFLAGS = -version-info \
+	"$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)" $(am__append_3) \
+	$(am__append_4)
 libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
-libtelepathy_glib_la_SOURCES = 
+libtelepathy_glib_la_SOURCES = $(am__append_1)
+libtelepathy_glib_la_DEPENDENCIES = $(am__append_2)
 tpginclude_HEADERS = \
     base-connection.h \
     base-connection-manager.h \
+    channel.h \
     channel-iface.h \
     channel-factory-iface.h \
+    media-interfaces.h \
+    connection.h \
+    connection-manager.h \
     dbus.h \
     defs.h \
     debug.h \
@@ -278,8 +306,11 @@ tpginclude_HEADERS = \
     heap.h \
     interfaces.h \
     intset.h \
+    media-interfaces.h \
     presence-mixin.h \
     properties-mixin.h \
+    proxy.h \
+    proxy-subclass.h \
     run.h \
     svc-channel.h \
     svc-connection.h \
@@ -299,28 +330,43 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/interfaces-body.h \
     _gen/gtypes-body.h \
     _gen/register-dbus-glib-marshallers-body.h \
-    _gen/tp-svc-channel-interfaces.c \
-    _gen/tp-svc-connection-interfaces.c \
-    _gen/tp-svc-connection-manager-interfaces.c \
-    _gen/tp-svc-generic-interfaces.c \
-    _gen/tp-svc-media-interfaces.c
+    _gen/tp-cli-channel-body.h \
+    _gen/tp-cli-connection-body.h \
+    _gen/tp-cli-connection-manager-body.h \
+    _gen/tp-cli-dbus-daemon-body.h \
+    _gen/tp-cli-generic-body.h \
+    _gen/tp-cli-media-session-handler-body.h \
+    _gen/tp-cli-media-stream-handler-body.h \
+    _gen/tp-svc-channel.c \
+    _gen/tp-svc-connection.c \
+    _gen/tp-svc-connection-manager.c \
+    _gen/tp-svc-generic.c \
+    _gen/tp-svc-media-session-handler.c \
+    _gen/tp-svc-media-stream-handler.c
 
 nodist_geninclude_HEADERS = \
     _gen/telepathy-enums.h \
     _gen/telepathy-interfaces.h \
     _gen/telepathy-errors.h \
     _gen/gtypes.h \
-    _gen/tp-svc-channel-interfaces.h \
-    _gen/tp-svc-connection-interfaces.h \
-    _gen/tp-svc-connection-manager-interfaces.h \
-    _gen/tp-svc-generic-interfaces.h \
-    _gen/tp-svc-media-interfaces.h
+    _gen/tp-cli-channel.h \
+    _gen/tp-cli-connection.h \
+    _gen/tp-cli-connection-manager.h \
+    _gen/tp-cli-dbus-daemon.h \
+    _gen/tp-cli-generic.h \
+    _gen/tp-cli-media-session-handler.h \
+    _gen/tp-cli-media-stream-handler.h \
+    _gen/tp-svc-channel.h \
+    _gen/tp-svc-connection.h \
+    _gen/tp-svc-connection-manager.h \
+    _gen/tp-svc-generic.h \
+    _gen/tp-svc-media-session-handler.h \
+    _gen/tp-svc-media-stream-handler.h
 
 BUILT_SOURCES = \
     $(nodist_libtelepathy_glib_internal_la_SOURCES) \
     $(nodist_geninclude_HEADERS) \
     _gen/stable-spec.xml \
-    _gen/glue-stamp \
     _gen/spec-stamp \
     _gen/stable-stamp \
     _gen/stable-interfaces
@@ -336,37 +382,42 @@ libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)
 libtelepathy_glib_internal_la_SOURCES = \
     base-connection.c \
     base-connection-manager.c \
+    channel.c \
+    connection.c \
+    connection-manager.c \
     dbus.c \
-    internal-dbus-glib.h \
+    dbus-internal.h \
     debug.c \
     interfaces.c \
-    internal-debug.h \
+    debug-internal.h \
     errors.c \
     group-mixin.c \
     gtypes.c \
     handle.c \
-    internal-handle-repo.h \
     handle-repo.c \
     handle-repo-dynamic.c \
+    handle-repo-internal.h \
     handle-repo-static.c \
     handle-set.c \
     heap.c \
     intset.c \
     channel-iface.c \
     channel-factory-iface.c \
+    media-interfaces.c \
     presence-mixin.c \
     properties-mixin.c \
+    proxy.c \
     run.c \
     signals-marshal.list \
     text-mixin.c \
     util.c
 
 AM_CFLAGS = \
+    -DG_LOG_DOMAIN=\"tp-glib\" \
     $(ERROR_CFLAGS) \
     @DBUS_CFLAGS@ \
     @GLIB_CFLAGS@ \
     @HANDLE_LEAK_DEBUG_CFLAGS@ \
-    @COVERAGE_CFLAGS@ \
     -I$(top_builddir) \
     -I$(top_srcdir)
 
@@ -465,6 +516,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-factory-iface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-iface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Plo@am__quote@
@@ -478,17 +532,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interfaces.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/media-interfaces.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/presence-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties-mixin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/run.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/telepathy-errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-channel-interfaces.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-connection-interfaces.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-connection-manager-interfaces.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-generic-interfaces.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-interfaces.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-connection-manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-generic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-session-handler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-stream-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 
 .c.o:
@@ -526,40 +583,47 @@ telepathy-errors.lo: _gen/telepathy-errors.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o telepathy-errors.lo `test -f '_gen/telepathy-errors.c' || echo '$(srcdir)/'`_gen/telepathy-errors.c
 
-tp-svc-channel-interfaces.lo: _gen/tp-svc-channel-interfaces.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-channel-interfaces.lo -MD -MP -MF "$(DEPDIR)/tp-svc-channel-interfaces.Tpo" -c -o tp-svc-channel-interfaces.lo `test -f '_gen/tp-svc-channel-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-channel-interfaces.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-channel-interfaces.Tpo" "$(DEPDIR)/tp-svc-channel-interfaces.Plo"; else rm -f "$(DEPDIR)/tp-svc-channel-interfaces.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-channel-interfaces.c' object='tp-svc-channel-interfaces.lo' libtool=yes @AMDEPBACKSLASH@
+tp-svc-channel.lo: _gen/tp-svc-channel.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-channel.lo -MD -MP -MF "$(DEPDIR)/tp-svc-channel.Tpo" -c -o tp-svc-channel.lo `test -f '_gen/tp-svc-channel.c' || echo '$(srcdir)/'`_gen/tp-svc-channel.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-channel.Tpo" "$(DEPDIR)/tp-svc-channel.Plo"; else rm -f "$(DEPDIR)/tp-svc-channel.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-channel.c' object='tp-svc-channel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-channel-interfaces.lo `test -f '_gen/tp-svc-channel-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-channel-interfaces.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-channel.lo `test -f '_gen/tp-svc-channel.c' || echo '$(srcdir)/'`_gen/tp-svc-channel.c
 
-tp-svc-connection-interfaces.lo: _gen/tp-svc-connection-interfaces.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-connection-interfaces.lo -MD -MP -MF "$(DEPDIR)/tp-svc-connection-interfaces.Tpo" -c -o tp-svc-connection-interfaces.lo `test -f '_gen/tp-svc-connection-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-connection-interfaces.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-connection-interfaces.Tpo" "$(DEPDIR)/tp-svc-connection-interfaces.Plo"; else rm -f "$(DEPDIR)/tp-svc-connection-interfaces.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-connection-interfaces.c' object='tp-svc-connection-interfaces.lo' libtool=yes @AMDEPBACKSLASH@
+tp-svc-connection.lo: _gen/tp-svc-connection.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-connection.lo -MD -MP -MF "$(DEPDIR)/tp-svc-connection.Tpo" -c -o tp-svc-connection.lo `test -f '_gen/tp-svc-connection.c' || echo '$(srcdir)/'`_gen/tp-svc-connection.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-connection.Tpo" "$(DEPDIR)/tp-svc-connection.Plo"; else rm -f "$(DEPDIR)/tp-svc-connection.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-connection.c' object='tp-svc-connection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-connection-interfaces.lo `test -f '_gen/tp-svc-connection-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-connection-interfaces.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-connection.lo `test -f '_gen/tp-svc-connection.c' || echo '$(srcdir)/'`_gen/tp-svc-connection.c
 
-tp-svc-connection-manager-interfaces.lo: _gen/tp-svc-connection-manager-interfaces.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-connection-manager-interfaces.lo -MD -MP -MF "$(DEPDIR)/tp-svc-connection-manager-interfaces.Tpo" -c -o tp-svc-connection-manager-interfaces.lo `test -f '_gen/tp-svc-connection-manager-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-connection-manager-interfaces.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-connection-manager-interfaces.Tpo" "$(DEPDIR)/tp-svc-connection-manager-interfaces.Plo"; else rm -f "$(DEPDIR)/tp-svc-connection-manager-interfaces.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-connection-manager-interfaces.c' object='tp-svc-connection-manager-interfaces.lo' libtool=yes @AMDEPBACKSLASH@
+tp-svc-connection-manager.lo: _gen/tp-svc-connection-manager.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-connection-manager.lo -MD -MP -MF "$(DEPDIR)/tp-svc-connection-manager.Tpo" -c -o tp-svc-connection-manager.lo `test -f '_gen/tp-svc-connection-manager.c' || echo '$(srcdir)/'`_gen/tp-svc-connection-manager.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-connection-manager.Tpo" "$(DEPDIR)/tp-svc-connection-manager.Plo"; else rm -f "$(DEPDIR)/tp-svc-connection-manager.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-connection-manager.c' object='tp-svc-connection-manager.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-connection-manager-interfaces.lo `test -f '_gen/tp-svc-connection-manager-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-connection-manager-interfaces.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-connection-manager.lo `test -f '_gen/tp-svc-connection-manager.c' || echo '$(srcdir)/'`_gen/tp-svc-connection-manager.c
 
-tp-svc-generic-interfaces.lo: _gen/tp-svc-generic-interfaces.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-generic-interfaces.lo -MD -MP -MF "$(DEPDIR)/tp-svc-generic-interfaces.Tpo" -c -o tp-svc-generic-interfaces.lo `test -f '_gen/tp-svc-generic-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-generic-interfaces.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-generic-interfaces.Tpo" "$(DEPDIR)/tp-svc-generic-interfaces.Plo"; else rm -f "$(DEPDIR)/tp-svc-generic-interfaces.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-generic-interfaces.c' object='tp-svc-generic-interfaces.lo' libtool=yes @AMDEPBACKSLASH@
+tp-svc-generic.lo: _gen/tp-svc-generic.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-generic.lo -MD -MP -MF "$(DEPDIR)/tp-svc-generic.Tpo" -c -o tp-svc-generic.lo `test -f '_gen/tp-svc-generic.c' || echo '$(srcdir)/'`_gen/tp-svc-generic.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-generic.Tpo" "$(DEPDIR)/tp-svc-generic.Plo"; else rm -f "$(DEPDIR)/tp-svc-generic.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-generic.c' object='tp-svc-generic.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-generic-interfaces.lo `test -f '_gen/tp-svc-generic-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-generic-interfaces.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-generic.lo `test -f '_gen/tp-svc-generic.c' || echo '$(srcdir)/'`_gen/tp-svc-generic.c
 
-tp-svc-media-interfaces.lo: _gen/tp-svc-media-interfaces.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-media-interfaces.lo -MD -MP -MF "$(DEPDIR)/tp-svc-media-interfaces.Tpo" -c -o tp-svc-media-interfaces.lo `test -f '_gen/tp-svc-media-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-media-interfaces.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-media-interfaces.Tpo" "$(DEPDIR)/tp-svc-media-interfaces.Plo"; else rm -f "$(DEPDIR)/tp-svc-media-interfaces.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-media-interfaces.c' object='tp-svc-media-interfaces.lo' libtool=yes @AMDEPBACKSLASH@
+tp-svc-media-session-handler.lo: _gen/tp-svc-media-session-handler.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-media-session-handler.lo -MD -MP -MF "$(DEPDIR)/tp-svc-media-session-handler.Tpo" -c -o tp-svc-media-session-handler.lo `test -f '_gen/tp-svc-media-session-handler.c' || echo '$(srcdir)/'`_gen/tp-svc-media-session-handler.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-media-session-handler.Tpo" "$(DEPDIR)/tp-svc-media-session-handler.Plo"; else rm -f "$(DEPDIR)/tp-svc-media-session-handler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-media-session-handler.c' object='tp-svc-media-session-handler.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-media-interfaces.lo `test -f '_gen/tp-svc-media-interfaces.c' || echo '$(srcdir)/'`_gen/tp-svc-media-interfaces.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-media-session-handler.lo `test -f '_gen/tp-svc-media-session-handler.c' || echo '$(srcdir)/'`_gen/tp-svc-media-session-handler.c
+
+tp-svc-media-stream-handler.lo: _gen/tp-svc-media-stream-handler.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-media-stream-handler.lo -MD -MP -MF "$(DEPDIR)/tp-svc-media-stream-handler.Tpo" -c -o tp-svc-media-stream-handler.lo `test -f '_gen/tp-svc-media-stream-handler.c' || echo '$(srcdir)/'`_gen/tp-svc-media-stream-handler.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/tp-svc-media-stream-handler.Tpo" "$(DEPDIR)/tp-svc-media-stream-handler.Plo"; else rm -f "$(DEPDIR)/tp-svc-media-stream-handler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-media-stream-handler.c' object='tp-svc-media-stream-handler.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-media-stream-handler.lo `test -f '_gen/tp-svc-media-stream-handler.c' || echo '$(srcdir)/'`_gen/tp-svc-media-stream-handler.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -669,6 +733,7 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+@OFFICIAL_RELEASE_FALSE@dist-hook:
 
 distdir: $(DISTFILES)
 	$(mkdir_p) $(distdir)/../tools
@@ -698,6 +763,9 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: $(BUILT_SOURCES)
@@ -790,11 +858,11 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 
 .PHONY: CTAGS GTAGS all all-am check check-am check-local clean \
 	clean-generic clean-libLTLIBRARIES clean-libtool \
-	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-local \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am \
+	clean-noinstLTLIBRARIES ctags dist-hook distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-local distclean-tags distdir dvi dvi-am html html-am \
+	info info-am install install-am install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
 	install-libLTLIBRARIES install-man \
 	install-nodist_genincludeHEADERS install-pkgconfigDATA \
 	install-strip install-tpgincludeHEADERS installcheck \
@@ -805,6 +873,18 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 	uninstall-libLTLIBRARIES uninstall-nodist_genincludeHEADERS \
 	uninstall-pkgconfigDATA uninstall-tpgincludeHEADERS
 
+
+@HAVE_LD_VERSION_SCRIPT_TRUE@_gen/abi.txt: libtelepathy-glib-internal.la _gen/versioned-abi.txt Makefile.am
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(NM) .libs/libtelepathy-glib-internal.a > _gen/abi.nm
+@HAVE_LD_VERSION_SCRIPT_TRUE@	grep " T " < _gen/abi.nm > _gen/abi.funcs
+@HAVE_LD_VERSION_SCRIPT_TRUE@	cut -d" " -f3 < _gen/abi.funcs > _gen/abi.funcnames
+@HAVE_LD_VERSION_SCRIPT_TRUE@	grep "^tp" < _gen/abi.funcnames > _gen/abi.tpfuncnames
+@HAVE_LD_VERSION_SCRIPT_TRUE@	sort -u < _gen/abi.tpfuncnames > $@
+@HAVE_LD_VERSION_SCRIPT_TRUE@	diff -c $@ _gen/versioned-abi.txt
+
+@HAVE_LD_VERSION_SCRIPT_TRUE@_gen/versioned-abi.txt: version-script.txt Makefile.am
+@HAVE_LD_VERSION_SCRIPT_TRUE@	sed -n -e "s/^[	 ]*\\(tp_.*\\);/\\1/p" < $< > $@.tmp
+@HAVE_LD_VERSION_SCRIPT_TRUE@	sort -u < $@.tmp > $@
 
 distclean-local:
 	rm -rf _gen
@@ -826,13 +906,19 @@ check-local::
 		exit 0;\
 	fi
 
+@OFFICIAL_RELEASE_TRUE@dist-hook: version-script.txt
+@OFFICIAL_RELEASE_TRUE@	@if grep '^[^#]*UNRELEASED' $< >&2; then \
+@OFFICIAL_RELEASE_TRUE@		echo "*** You need to update version-script.txt to not say"; \
+@OFFICIAL_RELEASE_TRUE@		echo "*** UNRELEASED before making a release tarball."; \
+@OFFICIAL_RELEASE_TRUE@	fi >&2
+
 # Bootstrapping
 
 _gen/spec-stamp: $(wildcard $(top_srcdir)/spec/*.xml)
 	$(mkdir_p) _gen
 	touch $@
 
-_gen/stable-stamp: $(wildcard *-interfaces.xml) _gen/spec-stamp
+_gen/stable-stamp: $(wildcard *.xml) _gen/spec-stamp
 	touch $@
 
 _gen/stable-interfaces: _gen/stable-spec.xml ../tools/ls-interfaces.xsl
@@ -905,56 +991,62 @@ _gen/signals-marshal.h: _gen/signals-marshal.list
 _gen/signals-marshal.c: _gen/signals-marshal.list
 	$(GLIB_GENMARSHAL) --body --prefix=_tp_marshal $< > $@
 
-_gen/glue-stamp: _gen/stable-interfaces \
-	../tools/make-all-async.xsl \
-	../tools/spec-to-introspect.xsl
-	set -e && for x in `cat _gen/stable-interfaces`; do \
-		$(XSLTPROC) $(XSLTPROCFLAGS) \
-			$(srcdir)/../tools/spec-to-introspect.xsl \
-			$(srcdir)/../spec/$$x.xml \
-			> _gen/introspect-$$x.xml.tmp; \
-		$(DROP_NAMESPACE) < _gen/introspect-$$x.xml.tmp \
-			> _gen/introspect-$$x.xml; \
-		$(XSLTPROC) $(XSLTPROCFLAGS) \
-			$(srcdir)/../tools/make-all-async.xsl \
-			_gen/introspect-$$x.xml \
-			> _gen/async-$$x.xml; \
-		$(DBUS_BINDING_TOOL) --mode=glib-server \
-			--output=_gen/svc-$$x-glue.h \
-			--prefix=tp_svc_`echo $$x | tr '[:upper:]' '[:lower:]'`\
-			_gen/async-$$x.xml; \
-		rm -f _gen/introspect-$$x.xml.tmp \
-			_gen/introspect-$$x.xml \
-			_gen/async-$$x.xml; \
-	done; \
-	touch $@
-
 # Things generated per interface
 
-_gen/%-interfaces.xml: %-interfaces.xml ../tools/identity.xsl _gen/spec-stamp
+_gen/tp-spec-%.xml: %.xml ../tools/identity.xsl _gen/spec-stamp
 	$(XSLTPROC) --xinclude $(XSLTPROCFLAGS) \
 		$(srcdir)/../tools/identity.xsl \
 		$< > $@
 
-_gen/tp-svc-%-interfaces.c _gen/tp-svc-%-interfaces.h: _gen/%-interfaces.xml \
+_gen/tp-svc-%.c _gen/tp-svc-%.h: _gen/tp-spec-%.xml \
 	../tools/glib-ginterface-gen.py \
-	../tools/ls-interfaces.xsl \
-	Makefile.am \
-	_gen/glue-stamp
-	$(XSLTPROC) $(XSLTPROCFLAGS) $(srcdir)/../tools/ls-interfaces.xsl \
-		$< > _gen/tp-svc-$*-interfaces.tmp
-	flags= ; \
-	for x in `cat _gen/tp-svc-$*-interfaces.tmp`; do \
-		 flags="$$flags --include-end=\"_gen/svc-$$x-glue.h\""; \
-	done; \
+	Makefile.am
 	$(PYTHON) $(srcdir)/../tools/glib-ginterface-gen.py \
-		--filename=_gen/tp-svc-$*-interfaces \
+		--filename=_gen/tp-svc-$* \
 		--signal-marshal-prefix=_tp \
 		--include='<telepathy-glib/dbus.h>' \
 		--include="\"_gen/signals-marshal.h\"" \
-		$$flags \
 		--not-implemented-func='tp_dbus_g_method_return_not_implemented' \
 		$< Tp_Svc_
+
+_gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
+	../tools/glib-client-gen.py \
+	../tools/ls-interfaces.xsl \
+	Makefile.am
+	set -e; \
+	subclass= ; \
+	subclass_assert= ; \
+	case $* in \
+		channel) \
+			subclass=--subclass=TpChannel; \
+			subclass_assert=--subclass-assert=TP_IS_CHANNEL; \
+			;; \
+		connection-manager) \
+			subclass=--subclass=TpConnectionManager; \
+			subclass_assert=--subclass-assert=TP_IS_CONNECTION_MANAGER \
+			;; \
+		connection) \
+			subclass=--subclass=TpConnection; \
+			subclass_assert=--subclass-assert=TP_IS_CONNECTION; \
+			;; \
+		media-session-handler) \
+			subclass=--subclass=TpMediaSessionHandler; \
+			subclass_assert=--subclass-assert=TP_IS_MEDIA_SESSION_HANDLER; \
+			;; \
+		media-stream-handler) \
+			subclass=--subclass=TpMediaStreamHandler; \
+			subclass_assert=--subclass-assert=TP_IS_MEDIA_STREAM_HANDLER; \
+			;; \
+		dbus-daemon) \
+			subclass=--subclass=TpDBusDaemon; \
+			subclass_assert=--subclass-assert=TP_IS_DBUS_DAEMON; \
+			;; \
+	esac; \
+	$(PYTHON) $(srcdir)/../tools/glib-client-gen.py \
+		$$subclass $$subclass_assert \
+		--group `echo $* | tr - _` \
+		--iface-quark-prefix=TP_IFACE_QUARK \
+		$< Tp_Cli _gen/tp-cli-$*
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

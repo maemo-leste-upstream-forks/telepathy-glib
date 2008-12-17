@@ -1,7 +1,8 @@
 /*
  * group-mixin.c - Source for TpGroupMixin
- * Copyright (C) 2006 Collabora Ltd.
- * Copyright (C) 2006 Nokia Corporation
+ *
+ * Copyright (C) 2006-2007 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright (C) 2006-2007 Nokia Corporation
  *   @author Ole Andre Vadla Ravnaas <ole.andre.ravnaas@collabora.co.uk>
  *   @author Robert McQueen <robert.mcqueen@collabora.co.uk>
  *
@@ -62,7 +63,7 @@
 
 #define DEBUG_FLAG TP_DEBUG_GROUPS
 
-#include "internal-debug.h"
+#include "debug-internal.h"
 
 #include "_gen/signals-marshal.h"
 
@@ -1224,7 +1225,8 @@ local_pending_remove (TpGroupMixin *mixin,
 /**
  * tp_group_mixin_change_members:
  * @obj: An object implementing the group interface using this mixin
- * @message: A message to be sent to the affected contacts if possible
+ * @message: A message to be sent to the affected contacts if possible;
+ *  %NULL is allowed, and is mapped to an empty string
  * @add: A set of contact handles to be added to the members (if not
  *  already present) and removed from local pending and remote pending
  *  (if present)
@@ -1247,6 +1249,9 @@ local_pending_remove (TpGroupMixin *mixin,
  * If any two of add, remove, add_local_pending and add_remote_pending have
  * a non-empty intersection, the result is undefined. Don't do that.
  *
+ * Each of the TpIntSet arguments may be %NULL, which is treated as
+ * equivalent to an empty set.
+ *
  * Returns: %TRUE if the group was changed and the MembersChanged signal
  *  was emitted; %FALSE if nothing actually changed and the signal was
  *  suppressed.
@@ -1267,6 +1272,9 @@ tp_group_mixin_change_members (GObject *obj,
   gboolean ret;
 
   empty = tp_intset_new ();
+
+  if (message == NULL)
+    message = "";
 
   if (add == NULL)
     add = empty;

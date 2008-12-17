@@ -14,11 +14,11 @@ please make any changes there.
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Library General Public License for more details.
+# Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 from string import ascii_letters, digits
@@ -115,6 +115,22 @@ def escape_as_identifier(identifier):
     return ''.join(ret)
 
 
+def get_docstring(element):
+    docstring = None
+    for x in element.childNodes:
+        if x.namespaceURI == NS_TP and x.localName == 'docstring':
+            docstring = x
+    if docstring is not None:
+        docstring = docstring.toxml().replace('\n', ' ').strip()
+        if docstring.startswith('<tp:docstring>'):
+            docstring = docstring[14:].lstrip()
+        if docstring.endswith('</tp:docstring>'):
+            docstring = docstring[:-15].rstrip()
+        if docstring in ('<tp:docstring/>', ''):
+            docstring = ''
+    return docstring
+
+
 def signal_to_marshal_type(signal):
     """
     return a list of strings indicating the marshalling type for this signal.
@@ -129,11 +145,13 @@ def signal_to_marshal_type(signal):
     return mtype
 
 
+_glib_marshallers = ['VOID', 'BOOLEAN', 'CHAR', 'UCHAR', 'INT',
+        'STRING', 'UINT', 'LONG', 'ULONG', 'ENUM', 'FLAGS', 'FLOAT',
+        'DOUBLE', 'STRING', 'PARAM', 'BOXED', 'POINTER', 'OBJECT',
+        'UINT_POINTER']
+
+
 def signal_to_marshal_name(signal, prefix):
-    glib_marshallers = ['VOID', 'BOOLEAN', 'CHAR', 'UCHAR', 'INT',
-            'STRING', 'UINT', 'LONG', 'ULONG', 'ENUM', 'FLAGS', 'FLOAT',
-            'DOUBLE', 'STRING', 'PARAM', 'BOXED', 'POINTER', 'OBJECT',
-            'UINT_POINTER']
 
     mtype = signal_to_marshal_type(signal)
     if len(mtype):
@@ -141,7 +159,25 @@ def signal_to_marshal_name(signal, prefix):
     else:
         name = 'VOID'
 
-    if name in glib_marshallers:
+    if name in _glib_marshallers:
+        return 'g_cclosure_marshal_VOID__' + name
+    else:
+        return prefix + '_marshal_VOID__' + name
+
+
+def method_to_glue_marshal_name(method, prefix):
+
+    mtype = []
+    for i in method.getElementsByTagName("arg"):
+        if i.getAttribute("direction") != "out":
+            type = i.getAttribute("type")
+            mtype.append(type_to_gtype(type)[2])
+
+    mtype.append('POINTER')
+
+    name = '_'.join(mtype)
+
+    if name in _glib_marshallers:
         return 'g_cclosure_marshal_VOID__' + name
     else:
         return prefix + '_marshal_VOID__' + name
@@ -224,9 +260,9 @@ def type_to_gtype(s):
     elif s == 'u': #uint32
         return ("guint ", "G_TYPE_UINT","UINT", False)
     elif s == 'x': #int64
-        return ("gint ", "G_TYPE_INT64","INT64", False)
-    elif s == 't': #uint32
-        return ("guint ", "G_TYPE_UINT64","UINT64", False)
+        return ("gint64 ", "G_TYPE_INT64","INT64", False)
+    elif s == 't': #uint64
+        return ("guint64 ", "G_TYPE_UINT64","UINT64", False)
     elif s == 'd': #double
         return ("gdouble ", "G_TYPE_DOUBLE","DOUBLE", False)
     elif s == 's': #string
@@ -257,9 +293,6 @@ def type_to_gtype(s):
         return ("GArray *", "DBUS_TYPE_G_BOOLEAN_ARRAY", "BOXED", True)
     elif s == 'ao': #object path array
         return ("GArray *", "DBUS_TYPE_G_OBJECT_ARRAY", "BOXED", True)
-    elif s[:2] == 'a(': #array of structs, recurse
-        gtype = type_to_gtype(s[1:])[1]
-        return ("GPtrArray *", "(dbus_g_type_get_collection (\"GPtrArray\", "+gtype+"))", "BOXED", True)
     elif s == 'a{ss}': #hash table of string to string
         return ("GHashTable *", "DBUS_TYPE_G_STRING_STRING_HASHTABLE", "BOXED", False)
     elif s[:2] == 'a{':  #some arbitrary hash tables
@@ -268,6 +301,9 @@ def type_to_gtype(s):
         first = type_to_gtype(s[2])
         second = type_to_gtype(s[3:-1])
         return ("GHashTable *", "(dbus_g_type_get_map (\"GHashTable\", " + first[1] + ", " + second[1] + "))", "BOXED", False)
+    elif s[:2] in ('a(', 'aa'): # array of structs or arrays, recurse
+        gtype = type_to_gtype(s[1:])[1]
+        return ("GPtrArray *", "(dbus_g_type_get_collection (\"GPtrArray\", "+gtype+"))", "BOXED", True)
     elif s[:1] == '(': #struct
         gtype = "(dbus_g_type_get_struct (\"GValueArray\", "
         for subsig in Signature(s[1:-1]):

@@ -1,0 +1,3192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>TpConnection</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-client.html" title="Client-side proxies">
+<link rel="prev" href="telepathy-glib-connection-manager.html" title="TpConnectionManager">
+<link rel="next" href="telepathy-glib-connection-aliasing.html" title="Connection Aliasing interface">
+<meta name="generator" content="GTK-Doc V1.9 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-connection-manager.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-client.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-connection-aliasing.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2590921" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2670872" class="shortcut">Description</a>
+                  &#160;|&#160;
+                  <a href="#id2670788" class="shortcut">Object Hierarchy</a>
+                  &#160;|&#160;
+                  <a href="#id2670819" class="shortcut">Properties</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-connection"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2590921"></a><span class="refentrytitle">TpConnection</span>
+</h2>
+<p>TpConnection &#8212; proxy object for a Telepathy connection</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<a name="TpConnection"></a><pre class="synopsis">
+
+#include &lt;telepathy-glib/connection.h&gt;
+
+
+void                (<a class="link" href="telepathy-glib-connection.html#TpConnectionNameListCb">*TpConnectionNameListCb</a>)           (const gchar * const *names,
+                                                         gsize n,
+                                                         const gchar * const *cms,
+                                                         const gchar * const *protocols,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                <a class="link" href="telepathy-glib-connection.html#tp-list-connection-names">tp_list_connection_names</a>            (<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a> *bus_daemon,
+                                                         <a class="link" href="telepathy-glib-connection.html#TpConnectionNameListCb">TpConnectionNameListCb</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a>*       <a class="link" href="telepathy-glib-connection.html#tp-connection-new">tp_connection_new</a>                   (<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a> *dbus,
+                                                         const gchar *bus_name,
+                                                         const gchar *object_path,
+                                                         GError **error);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-connection-run-until-ready">tp_connection_run_until_ready</a>       (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
+                                                         gboolean connect,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+                    <a class="link" href="telepathy-glib-connection.html#TpConnection-struct">TpConnection</a>;
+                    <a class="link" href="telepathy-glib-connection.html#TpConnectionClass">TpConnectionClass</a>;
+#define             <a class="link" href="telepathy-glib-connection.html#TP-UNKNOWN-CONNECTION-STATUS:CAPS">TP_UNKNOWN_CONNECTION_STATUS</a>
+#define             <a class="link" href="telepathy-glib-connection.html#TP-ERRORS-DISCONNECTED:CAPS">TP_ERRORS_DISCONNECTED</a>
+
+
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-connect">*tp_cli_connection_callback_for_connect</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-connect">tp_cli_connection_call_connect</a>      (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-connect">tp_cli_connection_callback_for_connect</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-connect">tp_cli_connection_run_connect</a>       (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-disconnect">*tp_cli_connection_callback_for_disconnect</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-disconnect">tp_cli_connection_call_disconnect</a>   (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-disconnect">tp_cli_connection_callback_for_disconnect</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-disconnect">tp_cli_connection_run_disconnect</a>    (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-interfaces">*tp_cli_connection_callback_for_get_interfaces</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar **out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-get-interfaces">tp_cli_connection_call_get_interfaces</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-interfaces">tp_cli_connection_callback_for_get_interfaces</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-get-interfaces">tp_cli_connection_run_get_interfaces</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gchar ***out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-protocol">*tp_cli_connection_callback_for_get_protocol</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-get-protocol">tp_cli_connection_call_get_protocol</a> (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-protocol">tp_cli_connection_callback_for_get_protocol</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-get-protocol">tp_cli_connection_run_get_protocol</a>  (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gchar **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-self-handle">*tp_cli_connection_callback_for_get_self_handle</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         guint out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-get-self-handle">tp_cli_connection_call_get_self_handle</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-self-handle">tp_cli_connection_callback_for_get_self_handle</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-get-self-handle">tp_cli_connection_run_get_self_handle</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-status">*tp_cli_connection_callback_for_get_status</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         guint out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-get-status">tp_cli_connection_call_get_status</a>   (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-status">tp_cli_connection_callback_for_get_status</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-get-status">tp_cli_connection_run_get_status</a>    (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-hold-handles">*tp_cli_connection_callback_for_hold_handles</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-hold-handles">tp_cli_connection_call_hold_handles</a> (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-hold-handles">tp_cli_connection_callback_for_hold_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-hold-handles">tp_cli_connection_run_hold_handles</a>  (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-inspect-handles">*tp_cli_connection_callback_for_inspect_handles</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar **out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-inspect-handles">tp_cli_connection_call_inspect_handles</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-inspect-handles">tp_cli_connection_callback_for_inspect_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-inspect-handles">tp_cli_connection_run_inspect_handles</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         gchar ***out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-list-channels">*tp_cli_connection_callback_for_list_channels</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GPtrArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-list-channels">tp_cli_connection_call_list_channels</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-list-channels">tp_cli_connection_callback_for_list_channels</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-list-channels">tp_cli_connection_run_list_channels</a> (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GPtrArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-release-handles">*tp_cli_connection_callback_for_release_handles</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-release-handles">tp_cli_connection_call_release_handles</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-release-handles">tp_cli_connection_callback_for_release_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-release-handles">tp_cli_connection_run_release_handles</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-request-channel">*tp_cli_connection_callback_for_request_channel</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-request-channel">tp_cli_connection_call_request_channel</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_type,
+                                                         guint in_handle_type,
+                                                         guint in_handle,
+                                                         gboolean in_suppress_handler,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-request-channel">tp_cli_connection_callback_for_request_channel</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-request-channel">tp_cli_connection_run_request_channel</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_type,
+                                                         guint in_handle_type,
+                                                         guint in_handle,
+                                                         gboolean in_suppress_handler,
+                                                         gchar **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-request-handles">*tp_cli_connection_callback_for_request_handles</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-request-handles">tp_cli_connection_call_request_handles</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const gchar **in_names,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-request-handles">tp_cli_connection_callback_for_request_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);
+gboolean            <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-request-handles">tp_cli_connection_run_request_handles</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const gchar **in_names,
+                                                         GArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-new-channel">*tp_cli_connection_signal_callback_new_channel</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar *arg_object_path,
+                                                         const gchar *arg_channel_type,
+                                                         guint arg_handle_type,
+                                                         guint arg_handle,
+                                                         gboolean arg_suppress_handler,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-connect-to-new-channel">tp_cli_connection_connect_to_new_channel</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-new-channel">tp_cli_connection_signal_callback_new_channel</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+void                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-status-changed">*tp_cli_connection_signal_callback_status_changed</a>)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         guint arg_status,
+                                                         guint arg_reason,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-connect-to-status-changed">tp_cli_connection_connect_to_status_changed</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-status-changed">tp_cli_connection_signal_callback_status_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2670788"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+
+  GObject
+   +----<a class="link" href="telepathy-glib-proxy.html#TpProxy">TpProxy</a>
+         +----TpConnection
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2670819"></a><h2>Properties</h2>
+<pre class="synopsis">
+
+  "<a class="link" href="telepathy-glib-connection.html#TpConnection--connection-ready">connection-ready</a>"         gboolean              : Read
+  "<a class="link" href="telepathy-glib-connection.html#TpConnection--status">status</a>"                   guint                 : Read
+  "<a class="link" href="telepathy-glib-connection.html#TpConnection--status-reason">status-reason</a>"            guint                 : Read
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2670872"></a><h2>Description</h2>
+<p>
+<a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> objects represent Telepathy instant messaging connections
+accessed via D-Bus.
+</p>
+<p>
+Compared with a simple proxy for method calls, they add the following
+features:
+</p>
+<p>
+* connection status tracking
+</p>
+<p>
+* calling <code class="function">GetInterfaces()</code> automatically</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2670923"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2670934"></a><h3>
+<a name="TpConnectionNameListCb"></a>TpConnectionNameListCb ()</h3>
+<a class="indexterm" name="id2670947"></a><pre class="programlisting">void                (*TpConnectionNameListCb)           (const gchar * const *names,
+                                                         gsize n,
+                                                         const gchar * const *cms,
+                                                         const gchar * const *protocols,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback supplied to <a class="link" href="telepathy-glib-connection-manager.html#tp-list-connection-managers"><code class="function">tp_list_connection_managers()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>names</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code>-terminated array of connection bus names,
+  or <code class="literal">NULL</code> on error
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>n</code></em>&#160;:</span></p></td>
+<td> number of names (not including the final <code class="literal">NULL</code>), or 0 on error
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>cms</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code>-terminated array of connection manager names in the same order
+  as <em class="parameter"><code>names</code></em>, or <code class="literal">NULL</code> on error
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>protocols</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code>-terminated array of protocol names in the same order
+  as <em class="parameter"><code>names</code></em>, or <code class="literal">NULL</code> on error
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error that occurred
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2679398"></a><h3>
+<a name="tp-list-connection-names"></a>tp_list_connection_names ()</h3>
+<a class="indexterm" name="id2679410"></a><pre class="programlisting">void                tp_list_connection_names            (<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a> *bus_daemon,
+                                                         <a class="link" href="telepathy-glib-connection.html#TpConnectionNameListCb">TpConnectionNameListCb</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+List the available (running or installed) connection managers. Call the
+callback when done.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bus_daemon</code></em>&#160;:</span></p></td>
+<td> proxy for the D-Bus daemon
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> callback to be called when listing the connections succeeds or
+  fails; not called if the D-Bus connection fails completely or if the
+  <em class="parameter"><code>weak_object</code></em> goes away
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> callback to destroy the user-supplied data, called after
+  <em class="parameter"><code>callback</code></em>, but also if the D-Bus connection fails or if the <em class="parameter"><code>weak_object</code></em>
+  goes away
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> if not <code class="literal">NULL</code>, will be weakly referenced; the callback will
+  not be called, and the call will be cancelled, if the object has vanished
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2679571"></a><h3>
+<a name="tp-connection-new"></a>tp_connection_new ()</h3>
+<a class="indexterm" name="id2679583"></a><pre class="programlisting"><a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a>*       tp_connection_new                   (<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a> *dbus,
+                                                         const gchar *bus_name,
+                                                         const gchar *object_path,
+                                                         GError **error);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>dbus</code></em>&#160;:</span></p></td>
+<td> a D-Bus daemon; may not be <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bus_name</code></em>&#160;:</span></p></td>
+<td> the well-known or unique name of the connection process;
+ if well-known, this function will make a blocking call to the bus daemon
+ to resolve the unique name. May be <code class="literal">NULL</code> if <em class="parameter"><code>object_path</code></em> is not, in which
+ case a well-known name will be derived from <em class="parameter"><code>object_path</code></em>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object_path</code></em>&#160;:</span></p></td>
+<td> the object path of the connection process. May be <code class="literal">NULL</code>
+ if <em class="parameter"><code>bus_name</code></em> is a well-known name, in which case the object path will
+ be derived from <em class="parameter"><code>bus_name</code></em>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> used to indicate the error if <code class="literal">NULL</code> is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a new connection proxy, or <code class="literal">NULL</code> if unique-name resolution
+ fails or on invalid arguments
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2679773"></a><h3>
+<a name="tp-connection-run-until-ready"></a>tp_connection_run_until_ready ()</h3>
+<a class="indexterm" name="id2679787"></a><pre class="programlisting">gboolean            tp_connection_run_until_ready       (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
+                                                         gboolean connect,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+If <em class="parameter"><code>self</code></em> is connected and ready for use, return immediately. Otherwise,
+call <code class="function">Connect()</code> (unless <em class="parameter"><code>connect</code></em> is <code class="literal">FALSE</code>) and re-enter the main loop
+until the connection becomes invalid, the connection connects successfully
+and is introspected, or the main loop stored via <em class="parameter"><code>loop</code></em> is cancelled.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>connect</code></em>&#160;:</span></p></td>
+<td> if <code class="literal">TRUE</code>, call <code class="function">Connect()</code> if it appears to be necessary;
+ if <code class="literal">FALSE</code>, rely on <code class="function">Connect()</code> to be called by another client
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> if not <code class="literal">NULL</code> and <code class="literal">FALSE</code> is returned, used to raise an error
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> if not <code class="literal">NULL</code>, a <span class="type">GMainLoop</span> is placed here while it is being run
+ (so calling code can call <code class="function">g_main_loop_quit()</code> to abort), and <code class="literal">NULL</code> is
+ placed here after the loop has been run
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> <code class="literal">TRUE</code> if the connection is now connected and ready for use,
+ <code class="literal">FALSE</code> if the connection has become invalid.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680052"></a><h3>
+<a name="TpConnection-struct"></a>TpConnection</h3>
+<a class="indexterm" name="id2680064"></a><pre class="programlisting">typedef struct _TpConnection TpConnection;</pre>
+<p>
+A proxy object for a Telepathy connection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody></tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680097"></a><h3>
+<a name="TpConnectionClass"></a>TpConnectionClass</h3>
+<a class="indexterm" name="id2680112"></a><pre class="programlisting">typedef struct _TpConnectionClass TpConnectionClass;</pre>
+<p>
+The class of a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody></tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680152"></a><h3>
+<a name="TP-UNKNOWN-CONNECTION-STATUS:CAPS"></a>TP_UNKNOWN_CONNECTION_STATUS</h3>
+<a class="indexterm" name="id2680168"></a><pre class="programlisting">#define TP_UNKNOWN_CONNECTION_STATUS ((TpConnectionStatus) -1)
+</pre>
+<p>
+An invalid connection status used in <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> to indicate that the
+status has not yet been discovered.</p>
+<p>
+
+</p>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680205"></a><h3>
+<a name="TP-ERRORS-DISCONNECTED:CAPS"></a>TP_ERRORS_DISCONNECTED</h3>
+<a class="indexterm" name="id2680221"></a><pre class="programlisting">#define TP_ERRORS_DISCONNECTED (tp_errors_disconnected_quark ())
+</pre>
+<p>
+<span class="type">GError</span> domain representing a Telepathy connection becoming disconnected.
+The <em class="parameter"><code>code</code></em> in a <span class="type">GError</span> with this domain must be a member of
+<a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason"><span class="type">TpConnectionStatusReason</span></a>.
+</p>
+<p>
+This macro expands to a function call returning a <span class="type">GQuark</span>.</p>
+<p>
+
+</p>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680289"></a><h3>
+<a name="tp-cli-connection-callback-for-connect"></a>tp_cli_connection_callback_for_connect ()</h3>
+<a class="indexterm" name="id2680304"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_connect)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a Connect method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680432"></a><h3>
+<a name="tp-cli-connection-call-connect"></a>tp_cli_connection_call_connect ()</h3>
+<a class="indexterm" name="id2680446"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_connect      (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-connect">tp_cli_connection_callback_for_connect</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a Connect method call.
+</p>
+<p>
+Request that the connection be established. This will be done         asynchronously and errors will be returned by emitting StatusChanged         signals.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680658"></a><h3>
+<a name="tp-cli-connection-run-connect"></a>tp_cli_connection_run_connect ()</h3>
+<a class="indexterm" name="id2680672"></a><pre class="programlisting">gboolean            tp_cli_connection_run_connect       (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method Connect and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Request that the connection be established. This will be done         asynchronously and errors will be returned by emitting StatusChanged         signals.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2680893"></a><h3>
+<a name="tp-cli-connection-callback-for-disconnect"></a>tp_cli_connection_callback_for_disconnect ()</h3>
+<a class="indexterm" name="id2680909"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_disconnect)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a Disconnect method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2681036"></a><h3>
+<a name="tp-cli-connection-call-disconnect"></a>tp_cli_connection_call_disconnect ()</h3>
+<a class="indexterm" name="id2681051"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_disconnect   (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-disconnect">tp_cli_connection_callback_for_disconnect</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a Disconnect method call.
+</p>
+<p>
+Request that the connection be closed. This closes the connection if         it's not already in DISCONNECTED state, and destroys the connection         object.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2681262"></a><h3>
+<a name="tp-cli-connection-run-disconnect"></a>tp_cli_connection_run_disconnect ()</h3>
+<a class="indexterm" name="id2681276"></a><pre class="programlisting">gboolean            tp_cli_connection_run_disconnect    (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method Disconnect and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Request that the connection be closed. This closes the connection if         it's not already in DISCONNECTED state, and destroys the connection         object.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2681498"></a><h3>
+<a name="tp-cli-connection-callback-for-get-interfaces"></a>tp_cli_connection_callback_for_get_interfaces ()</h3>
+<a class="indexterm" name="id2681513"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_get_interfaces)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar **out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a GetInterfaces method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An array of D-Bus interface names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2681678"></a><h3>
+<a name="tp-cli-connection-call-get-interfaces"></a>tp_cli_connection_call_get_interfaces ()</h3>
+<a class="indexterm" name="id2681693"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_get_interfaces
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-interfaces">tp_cli_connection_callback_for_get_interfaces</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a GetInterfaces method call.
+</p>
+<p>
+Get the optional interfaces supported by this connection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2681905"></a><h3>
+<a name="tp-cli-connection-run-get-interfaces"></a>tp_cli_connection_run_get_interfaces ()</h3>
+<a class="indexterm" name="id2681919"></a><pre class="programlisting">gboolean            tp_cli_connection_run_get_interfaces
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gchar ***out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method GetInterfaces and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Get the optional interfaces supported by this connection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An array of D-Bus interface names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2682172"></a><h3>
+<a name="tp-cli-connection-callback-for-get-protocol"></a>tp_cli_connection_callback_for_get_protocol ()</h3>
+<a class="indexterm" name="id2682187"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_get_protocol)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a GetProtocol method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: A string identifier for the protocol
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2682352"></a><h3>
+<a name="tp-cli-connection-call-get-protocol"></a>tp_cli_connection_call_get_protocol ()</h3>
+<a class="indexterm" name="id2682367"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_get_protocol (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-protocol">tp_cli_connection_callback_for_get_protocol</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a GetProtocol method call.
+</p>
+<p>
+Get the protocol this connection is using.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2682576"></a><h3>
+<a name="tp-cli-connection-run-get-protocol"></a>tp_cli_connection_run_get_protocol ()</h3>
+<a class="indexterm" name="id2682591"></a><pre class="programlisting">gboolean            tp_cli_connection_run_get_protocol  (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         gchar **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method GetProtocol and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Get the protocol this connection is using.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: A string identifier for the protocol
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2682842"></a><h3>
+<a name="tp-cli-connection-callback-for-get-self-handle"></a>tp_cli_connection_callback_for_get_self_handle ()</h3>
+<a class="indexterm" name="id2682857"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_get_self_handle)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         guint out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a GetSelfHandle method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An integer handle representing the user
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2683022"></a><h3>
+<a name="tp-cli-connection-call-get-self-handle"></a>tp_cli_connection_call_get_self_handle ()</h3>
+<a class="indexterm" name="id2683037"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_get_self_handle
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-self-handle">tp_cli_connection_callback_for_get_self_handle</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a GetSelfHandle method call.
+</p>
+<p>
+Get the handle which represents the user on this connection, which will         remain valid for the lifetime of this connection, or until a change         in the user's identifier is signalled by the Renamed signal on the         Renaming interface (if present). This is always a CONTACT type handle.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2683253"></a><h3>
+<a name="tp-cli-connection-run-get-self-handle"></a>tp_cli_connection_run_get_self_handle ()</h3>
+<a class="indexterm" name="id2683267"></a><pre class="programlisting">gboolean            tp_cli_connection_run_get_self_handle
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method GetSelfHandle and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Get the handle which represents the user on this connection, which will         remain valid for the lifetime of this connection, or until a change         in the user's identifier is signalled by the Renamed signal on the         Renaming interface (if present). This is always a CONTACT type handle.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An integer handle representing the user
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2683523"></a><h3>
+<a name="tp-cli-connection-callback-for-get-status"></a>tp_cli_connection_callback_for_get_status ()</h3>
+<a class="indexterm" name="id2683538"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_get_status)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         guint out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a GetStatus method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An integer representing the current status
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2683703"></a><h3>
+<a name="tp-cli-connection-call-get-status"></a>tp_cli_connection_call_get_status ()</h3>
+<a class="indexterm" name="id2683718"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_get_status   (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-get-status">tp_cli_connection_callback_for_get_status</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a GetStatus method call.
+</p>
+<p>
+Get the current status as defined in the StatusChanged signal.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2683928"></a><h3>
+<a name="tp-cli-connection-run-get-status"></a>tp_cli_connection_run_get_status ()</h3>
+<a class="indexterm" name="id2683942"></a><pre class="programlisting">gboolean            tp_cli_connection_run_get_status    (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint *out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method GetStatus and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Get the current status as defined in the StatusChanged signal.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An integer representing the current status
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2684194"></a><h3>
+<a name="tp-cli-connection-callback-for-hold-handles"></a>tp_cli_connection_callback_for_hold_handles ()</h3>
+<a class="indexterm" name="id2684209"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_hold_handles)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a HoldHandles method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2684336"></a><h3>
+<a name="tp-cli-connection-call-hold-handles"></a>tp_cli_connection_call_hold_handles ()</h3>
+<a class="indexterm" name="id2684351"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_hold_handles (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-hold-handles">tp_cli_connection_callback_for_hold_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a HoldHandles method call.
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Notify the connection manger that your client is holding a copy         of handles which may not be in use in any existing channel or         list, and were not obtained by using the RequestHandles method. For         example, a handle observed in an emitted signal, or displayed         somewhere in the UI that is not associated with a channel. The         connection manager must not deallocate a handle where any clients         have used this method to indicate it is in use until the ReleaseHandle         method is called, or the clients disappear from the bus.&lt;/p&gt;          &lt;p&gt;Note that HoldHandles is idempotent - calling it multiple times           is equivalent to calling it once. If a handle is &amp;quot;referenced&amp;quot; by           several components which share a D-Bus unique name, the client           should perform reference counting internally, and only call           ReleaseHandles when none of the cooperating components need the           handle any longer.&lt;/p&gt;</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The type of handle to be held
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handles</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: A array of integer handles to hold
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2684622"></a><h3>
+<a name="tp-cli-connection-run-hold-handles"></a>tp_cli_connection_run_hold_handles ()</h3>
+<a class="indexterm" name="id2684637"></a><pre class="programlisting">gboolean            tp_cli_connection_run_hold_handles  (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method HoldHandles and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Notify the connection manger that your client is holding a copy         of handles which may not be in use in any existing channel or         list, and were not obtained by using the RequestHandles method. For         example, a handle observed in an emitted signal, or displayed         somewhere in the UI that is not associated with a channel. The         connection manager must not deallocate a handle where any clients         have used this method to indicate it is in use until the ReleaseHandle         method is called, or the clients disappear from the bus.&lt;/p&gt;          &lt;p&gt;Note that HoldHandles is idempotent - calling it multiple times           is equivalent to calling it once. If a handle is &amp;quot;referenced&amp;quot; by           several components which share a D-Bus unique name, the client           should perform reference counting internally, and only call           ReleaseHandles when none of the cooperating components need the           handle any longer.&lt;/p&gt;</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The type of handle to be held
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handles</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: A array of integer handles to hold
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2684917"></a><h3>
+<a name="tp-cli-connection-callback-for-inspect-handles"></a>tp_cli_connection_callback_for_inspect_handles ()</h3>
+<a class="indexterm" name="id2684932"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_inspect_handles)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar **out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a InspectHandles method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An array of handle names in the same order as the given numbers
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2685098"></a><h3>
+<a name="tp-cli-connection-call-inspect-handles"></a>tp_cli_connection_call_inspect_handles ()</h3>
+<a class="indexterm" name="id2685112"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_inspect_handles
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-inspect-handles">tp_cli_connection_callback_for_inspect_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a InspectHandles method call.
+</p>
+<p>
+Return a string representation for a number of handles of a given         type.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The type of handle to be inspected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handles</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An array of integer handles of this type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2685369"></a><h3>
+<a name="tp-cli-connection-run-inspect-handles"></a>tp_cli_connection_run_inspect_handles ()</h3>
+<a class="indexterm" name="id2685384"></a><pre class="programlisting">gboolean            tp_cli_connection_run_inspect_handles
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         gchar ***out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method InspectHandles and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Return a string representation for a number of handles of a given         type.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The type of handle to be inspected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handles</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An array of integer handles of this type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An array of handle names in the same order as the given numbers
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2685682"></a><h3>
+<a name="tp-cli-connection-callback-for-list-channels"></a>tp_cli_connection_callback_for_list_channels ()</h3>
+<a class="indexterm" name="id2685697"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_list_channels)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GPtrArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a ListChannels method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An array of structs representing channels.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2685863"></a><h3>
+<a name="tp-cli-connection-call-list-channels"></a>tp_cli_connection_call_list_channels ()</h3>
+<a class="indexterm" name="id2685878"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_list_channels
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-list-channels">tp_cli_connection_callback_for_list_channels</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a ListChannels method call.
+</p>
+<p>
+List all the channels which currently exist on this connection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2686090"></a><h3>
+<a name="tp-cli-connection-run-list-channels"></a>tp_cli_connection_run_list_channels ()</h3>
+<a class="indexterm" name="id2686105"></a><pre class="programlisting">gboolean            tp_cli_connection_run_list_channels (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         GPtrArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method ListChannels and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+List all the channels which currently exist on this connection.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An array of structs representing channels.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2686356"></a><h3>
+<a name="tp-cli-connection-callback-for-release-handles"></a>tp_cli_connection_callback_for_release_handles ()</h3>
+<a class="indexterm" name="id2686370"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_release_handles)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a ReleaseHandles method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2686498"></a><h3>
+<a name="tp-cli-connection-call-release-handles"></a>tp_cli_connection_call_release_handles ()</h3>
+<a class="indexterm" name="id2686513"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_release_handles
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-release-handles">tp_cli_connection_callback_for_release_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a ReleaseHandles method call.
+</p>
+<p>
+Explicitly notify the connection manager that your client is no         longer holding any references to the given handles, and that they         may be deallocated if they are not held by any other clients or         referenced by any existing channels. See HoldHandles for notes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An integer handle type (as defined in RequestHandle)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handles</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An array of integer handles being held by the client
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2686774"></a><h3>
+<a name="tp-cli-connection-run-release-handles"></a>tp_cli_connection_run_release_handles ()</h3>
+<a class="indexterm" name="id2686788"></a><pre class="programlisting">gboolean            tp_cli_connection_run_release_handles
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const GArray *in_handles,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method ReleaseHandles and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Explicitly notify the connection manager that your client is no         longer holding any references to the given handles, and that they         may be deallocated if they are not held by any other clients or         referenced by any existing channels. See HoldHandles for notes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An integer handle type (as defined in RequestHandle)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handles</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An array of integer handles being held by the client
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2687058"></a><h3>
+<a name="tp-cli-connection-callback-for-request-channel"></a>tp_cli_connection_callback_for_request_channel ()</h3>
+<a class="indexterm" name="id2687073"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_request_channel)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a RequestChannel method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: The D-Bus object path for the channel created or retrieved
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2687240"></a><h3>
+<a name="tp-cli-connection-call-request-channel"></a>tp_cli_connection_call_request_channel ()</h3>
+<a class="indexterm" name="id2687254"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_request_channel
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_type,
+                                                         guint in_handle_type,
+                                                         guint in_handle,
+                                                         gboolean in_suppress_handler,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-request-channel">tp_cli_connection_callback_for_request_channel</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a RequestChannel method call.
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request a channel satisfying the specified type and communicating           with the contact, room, list etc. indicated by the given           handle_type and handle. The handle_type and handle may both be           zero to request the creation of a new, empty channel, which may           or may not be possible, depending on the protocol and channel           type.&lt;/p&gt;          &lt;p&gt;On success, the returned channel will always be of the requested           type (i.e. implement the requested channel-type interface).&lt;/p&gt;          &lt;p&gt;If a new, empty channel is requested, on success the returned           channel will always be an &amp;quot;anonymous&amp;quot; channel for which the type           and handle are both zero.&lt;/p&gt;          &lt;p&gt;If a channel to a contact, room etc. is requested, on success, the           returned channel may either be a new or existing channel to           the requested entity (i.e. its GetHandle() returns the           requested handle type and handle), or a newly created &amp;quot;anonymous&amp;quot;           channel associated with the requested handle in some           implementation-specific way.&lt;/p&gt;          &lt;p&gt;For example, for a contact handle, the returned channel           might be &amp;quot;anonymous&amp;quot;, but implement the groups interface and have           the requested contact already present among the members.&lt;/p&gt;          &lt;p&gt;If the request cannot be satisfied, an error is raised and no           channel is created.&lt;/p&gt;</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: A D-Bus interface name representing base channel type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An integer representing the handle type, or zero if no handle is being specified
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: A nonzero integer handle representing a contact, room, list etc.           according to handle_type, or zero if the handle_type is zero
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_suppress_handler</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: If true, the requesting client intends to take responsibility for           displaying the channel to the user, so no other handler needs to           be launched
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2687584"></a><h3>
+<a name="tp-cli-connection-run-request-channel"></a>tp_cli_connection_run_request_channel ()</h3>
+<a class="indexterm" name="id2687599"></a><pre class="programlisting">gboolean            tp_cli_connection_run_request_channel
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         const gchar *in_type,
+                                                         guint in_handle_type,
+                                                         guint in_handle,
+                                                         gboolean in_suppress_handler,
+                                                         gchar **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method RequestChannel and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request a channel satisfying the specified type and communicating           with the contact, room, list etc. indicated by the given           handle_type and handle. The handle_type and handle may both be           zero to request the creation of a new, empty channel, which may           or may not be possible, depending on the protocol and channel           type.&lt;/p&gt;          &lt;p&gt;On success, the returned channel will always be of the requested           type (i.e. implement the requested channel-type interface).&lt;/p&gt;          &lt;p&gt;If a new, empty channel is requested, on success the returned           channel will always be an &amp;quot;anonymous&amp;quot; channel for which the type           and handle are both zero.&lt;/p&gt;          &lt;p&gt;If a channel to a contact, room etc. is requested, on success, the           returned channel may either be a new or existing channel to           the requested entity (i.e. its GetHandle() returns the           requested handle type and handle), or a newly created &amp;quot;anonymous&amp;quot;           channel associated with the requested handle in some           implementation-specific way.&lt;/p&gt;          &lt;p&gt;For example, for a contact handle, the returned channel           might be &amp;quot;anonymous&amp;quot;, but implement the groups interface and have           the requested contact already present among the members.&lt;/p&gt;          &lt;p&gt;If the request cannot be satisfied, an error is raised and no           channel is created.&lt;/p&gt;</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: A D-Bus interface name representing base channel type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An integer representing the handle type, or zero if no handle is being specified
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: A nonzero integer handle representing a contact, room, list etc.           according to handle_type, or zero if the handle_type is zero
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_suppress_handler</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: If true, the requesting client intends to take responsibility for           displaying the channel to the user, so no other handler needs to           be launched
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: The D-Bus object path for the channel created or retrieved
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2687971"></a><h3>
+<a name="tp-cli-connection-callback-for-request-handles"></a>tp_cli_connection_callback_for_request_handles ()</h3>
+<a class="indexterm" name="id2687986"></a><pre class="programlisting">void                (*tp_cli_connection_callback_for_request_handles)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const GArray *out0,
+                                                         const GError *error,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Signature of the callback called when a RequestHandles method call
+succeeds or fails.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the proxy on which the call was made
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: An array of integer handle numbers in the same order as the given strings
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> <code class="literal">NULL</code> on success, or an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> user-supplied object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2688153"></a><h3>
+<a name="tp-cli-connection-call-request-handles"></a>tp_cli_connection_call_request_handles ()</h3>
+<a class="indexterm" name="id2688167"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall">TpProxyPendingCall</a>* tp_cli_connection_call_request_handles
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const gchar **in_names,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-callback-for-request-handles">tp_cli_connection_callback_for_request_handles</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object);</pre>
+<p>
+Start a RequestHandles method call.
+</p>
+<p>
+Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the ReleaseHandle         method. Where the name refers to an entity that already has a handle         in this connection manager, this handle should be returned instead.         The handle number 0 must not be returned by the connection manager.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the
+  default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The type of handle required
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_names</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An array of names of entities to request handles for
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> called when the method call succeeds or fails
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> user-supplied data passed to the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2688433"></a><h3>
+<a name="tp-cli-connection-run-request-handles"></a>tp_cli_connection_run_request_handles ()</h3>
+<a class="indexterm" name="id2688448"></a><pre class="programlisting">gboolean            tp_cli_connection_run_request_handles
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         gint timeout_ms,
+                                                         guint in_handle_type,
+                                                         const gchar **in_names,
+                                                         GArray **out0,
+                                                         GError **error,
+                                                         GMainLoop **loop);</pre>
+<p>
+Call the method RequestHandles and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</p>
+<p>
+Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the ReleaseHandle         method. Where the name refers to an entity that already has a handle         in this connection manager, this handle should be returned instead.         The handle number 0 must not be returned by the connection manager.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em>&#160;:</span></p></td>
+<td> Timeout in milliseconds, or -1 for default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_handle_type</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: The type of handle required
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_names</code></em>&#160;:</span></p></td>
+<td> Used to pass an 'in' argument: An array of names of entities to request handles for
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out0</code></em>&#160;:</span></p></td>
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: An array of integer handle numbers in the same order as the given strings
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
+ is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>loop</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, set before re-entering 
+ the main loop, to point to a <span class="type">GMainLoop</span> 
+ which can be used to cancel this call with 
+ <code class="function">g_main_loop_quit()</code>, causing a return of 
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> TRUE on success, FALSE and sets <em class="parameter"><code>error</code></em> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2688755"></a><h3>
+<a name="tp-cli-connection-signal-callback-new-channel"></a>tp_cli_connection_signal_callback_new_channel ()</h3>
+<a class="indexterm" name="id2688770"></a><pre class="programlisting">void                (*tp_cli_connection_signal_callback_new_channel)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         const gchar *arg_object_path,
+                                                         const gchar *arg_channel_type,
+                                                         guint arg_handle_type,
+                                                         guint arg_handle,
+                                                         gboolean arg_suppress_handler,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal NewChannel.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-connect-to-new-channel"><code class="function">tp_cli_connection_connect_to_new_channel()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_object_path</code></em>&#160;:</span></p></td>
+<td> A D-Bus object path for the channel object on this service
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_channel_type</code></em>&#160;:</span></p></td>
+<td> A D-Bus interface name representing the channel type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_handle_type</code></em>&#160;:</span></p></td>
+<td> An integer representing the type of handle this channel communicates with, which is zero if no handle is specified
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_handle</code></em>&#160;:</span></p></td>
+<td> A handle indicating the specific contact, room or list this channel communicates with, or zero if it is an anonymous channel
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_suppress_handler</code></em>&#160;:</span></p></td>
+<td> A boolean indicating that the channel was requested by a client that intends to display it to the user, so no handler needs to be launched
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2688993"></a><h3>
+<a name="tp-cli-connection-connect-to-new-channel"></a>tp_cli_connection_connect_to_new_channel ()</h3>
+<a class="indexterm" name="id2689008"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_connection_connect_to_new_channel
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-new-channel">tp_cli_connection_signal_callback_new_channel</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal NewChannel.
+</p>
+<p>
+Emitted when a new Channel object is created, either through user         request or incoming information from the service. The suppress_handler         boolean indicates if the channel was requested by an existing client,         or is an incoming communication and needs to have a handler launched.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2689255"></a><h3>
+<a name="tp-cli-connection-signal-callback-status-changed"></a>tp_cli_connection_signal_callback_status_changed ()</h3>
+<a class="indexterm" name="id2689270"></a><pre class="programlisting">void                (*tp_cli_connection_signal_callback_status_changed)
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         guint arg_status,
+                                                         guint arg_reason,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal StatusChanged.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-connect-to-status-changed"><code class="function">tp_cli_connection_connect_to_status_changed()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_status</code></em>&#160;:</span></p></td>
+<td> An integer indicating the new status, as defined by ConnectionStatus
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_reason</code></em>&#160;:</span></p></td>
+<td> An integer indicating the reason for the status change, as defined           by ConnectionStatusReason
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2689423"></a><h3>
+<a name="tp-cli-connection-connect-to-status-changed"></a>tp_cli_connection_connect_to_status_changed ()</h3>
+<a class="indexterm" name="id2689438"></a><pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_connection_connect_to_status_changed
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-status-changed">tp_cli_connection_signal_callback_status_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal StatusChanged.
+</p>
+<p>
+Emitted when the status of the connection changes.  All states and         reasons have numerical values, as defined in ConnectionStatus         and ConnectionStatusReason.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em>&#160;:</span></p></td>
+<td> A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em>&#160;:</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em>&#160;:</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em>&#160;:</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2689684"></a><h2>Property Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2689695"></a><h3>
+<a name="TpConnection--connection-ready"></a>The <code class="literal">"connection-ready"</code> property</h3>
+<a class="indexterm" name="id2689712"></a><pre class="programlisting">  "connection-ready"         gboolean              : Read</pre>
+<p>
+Initially <code class="literal">FALSE</code>; changes to <code class="literal">TRUE</code> when the connection has gone to
+CONNECTED status, introspection has finished and it's ready for use.
+</p>
+<p>
+By the time this property becomes <code class="literal">TRUE</code>, any extra interfaces will
+have been set up and the <a class="link" href="telepathy-glib-proxy.html#TpProxy--interfaces"><span class="type">"interfaces"</span></a> property will have been
+populated.</p>
+<p>
+
+</p>
+<p>Default value: FALSE</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2689784"></a><h3>
+<a name="TpConnection--status"></a>The <code class="literal">"status"</code> property</h3>
+<a class="indexterm" name="id2689801"></a><pre class="programlisting">  "status"                   guint                 : Read</pre>
+<p>
+This connection's status, or TP_UNKNOWN_CONNECTION_STATUS if we don't
+know yet.</p>
+<p>
+
+</p>
+<p>Default value: 4294967295</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2689832"></a><h3>
+<a name="TpConnection--status-reason"></a>The <code class="literal">"status-reason"</code> property</h3>
+<a class="indexterm" name="id2689848"></a><pre class="programlisting">  "status-reason"            guint                 : Read</pre>
+<p>
+The reason why <a class="link" href="telepathy-glib-connection.html#TpConnection--status"><span class="type">"status"</span></a> changed to its current value,
+or TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED if unknown.
+know yet.</p>
+<p>
+
+</p>
+<p>Default value: 0</p>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2689888"></a><h2>See Also</h2>
+<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a>, <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2689910"></a><div class="refsect2" lang="en"><a name="id2689911"></a></div>
+<hr>
+<div class="refsect2" lang="en"><a name="id2689912"></a></div>
+</div>
+</div>
+</body>
+</html>
