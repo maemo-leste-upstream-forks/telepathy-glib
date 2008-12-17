@@ -330,7 +330,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry>
 <term><anchor id="TP-CONNECTION-ALIAS-FLAG-USER-SET:CAPS" role="constant"/><literal>TP_CONNECTION_ALIAS_FLAG_USER_SET</literal></term>
-<listitem><simpara> <![CDATA[           The aliases of contacts on this connection are specified by the user           of the service, not the contacts themselves. This is the case on           eg Jabber.         ]]>
+<listitem><simpara> <![CDATA[           The aliases of contacts on this connection may be changed by the             user of the service, not just by the contacts themselves. This is             the case on Jabber, for instance.           It is possible that aliases can be changed by the contacts too -             which alias takes precedence is not defined by this             specification, and depends on the server and/or connection manager             implementation.           This flag only applies to the aliases of "globally valid" contact             handles. At this time, clients should not expect to be able to             change the aliases corresponding to any channel-specific             handles. If this becomes possible in future, a new flag will             be defined.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -925,7 +925,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry>
 <term><anchor id="TP-CHANNEL-GROUP-FLAG-CHANNEL-SPECIFIC-HANDLES:CAPS" role="constant"/><literal>TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES</literal></term>
-<listitem><simpara> <![CDATA[             The members of this group have handles which are specific to             this channel, and are not valid as general-purpose handles on             the connection. Depending on the channel, it may be possible to             call GetHandleOwners to find the owners of these handles, which             should be done if you wish to eg subscribe to the contact's             presence.         ]]>
+<listitem><simpara> <![CDATA[                        The members of this group have handles which are specific to             this channel, and are not valid as general-purpose handles on             the connection. Depending on the channel, it may be possible to             call GetHandleOwners to find the owners of these handles, which             should be done if you wish to eg subscribe to the contact's             presence.                                    Connection managers must ensure that any given handle is not             simultaneously a general-purpose handle and a channel-specific             handle.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -946,6 +946,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
     TP_CHANNEL_GROUP_CHANGE_REASON_ERROR = 6,
     TP_CHANNEL_GROUP_CHANGE_REASON_INVALID_CONTACT = 7,
     TP_CHANNEL_GROUP_CHANGE_REASON_NO_ANSWER = 8,
+    TP_CHANNEL_GROUP_CHANGE_REASON_RENAMED = 9,
 } TpChannelGroupChangeReason;
 </programlisting>
 <para>
@@ -996,6 +997,11 @@ Enumeration generated from the Telepathy specification.</para>
 <varlistentry>
 <term><anchor id="TP-CHANNEL-GROUP-CHANGE-REASON-NO-ANSWER:CAPS" role="constant"/><literal>TP_CHANNEL_GROUP_CHANGE_REASON_NO_ANSWER</literal></term>
 <listitem><simpara> <![CDATA[             The change is because the requested contact did not respond.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-CHANNEL-GROUP-CHANGE-REASON-RENAMED:CAPS" role="constant"/><literal>TP_CHANNEL_GROUP_CHANGE_REASON_RENAMED</literal></term>
+<listitem><simpara> <![CDATA[           The change is because a contact's unique identifier changed.           There must be exactly one handle in the removed set and exactly           one handle in one of the added sets. The Renamed signal on the           Renaming interface will have been emitted for the same handles,           shortly before this MembersChanged signal is emitted.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
