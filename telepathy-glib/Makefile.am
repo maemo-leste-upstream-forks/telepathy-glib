@@ -20,7 +20,8 @@ ABI_LISTS = \
     versions/0.7.14.abi \
     versions/0.7.15.abi \
     versions/0.7.16.abi \
-    versions/0.7.17.abi
+    versions/0.7.17.abi \
+    versions/0.7.18.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -50,11 +51,11 @@ noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 libtelepathy_glib_la_LDFLAGS = \
     -version-info "$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)"
 libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
-libtelepathy_glib_la_SOURCES =
+nodist_libtelepathy_glib_la_SOURCES =
 libtelepathy_glib_la_DEPENDENCIES = libtelepathy-glib-internal.la Makefile.am
 
 if HAVE_LD_VERSION_SCRIPT
-libtelepathy_glib_la_SOURCES += _gen/version-script.txt
+nodist_libtelepathy_glib_la_SOURCES += _gen/version-script.txt
 libtelepathy_glib_la_DEPENDENCIES += _gen/version-script.txt _gen/abi.txt
 
 if OFFICIAL_RELEASE
@@ -108,6 +109,7 @@ tpginclude_HEADERS = \
     media-interfaces.h \
     connection.h \
     connection-manager.h \
+    contact.h \
     contacts-mixin.h \
     dbus.h \
     dbus-properties-mixin.h \
@@ -198,7 +200,7 @@ distclean-local:
 
 check_c_sources = \
     $(tpginclude_HEADERS) \
-    $(libtelepathy_glib_la_SOURCES)
+    $(libtelepathy_glib_internal_la_SOURCES)
 
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
@@ -215,6 +217,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection-internal.h \
     connection-handles.c \
     connection-manager.c \
+    contact.c \
     contacts-mixin.c \
     dbus.c \
     dbus-internal.h \

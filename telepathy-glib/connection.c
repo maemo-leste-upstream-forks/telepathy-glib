@@ -110,23 +110,6 @@ tp_errors_disconnected_quark (void)
  * Since: 0.7.1; structure layout visible since 0.7.12
  */
 
-typedef void (*TpConnectionProc) (TpConnection *self);
-
-struct _TpConnectionPrivate {
-    /* GArray of TpConnectionProc */
-    GArray *introspect_needed;
-
-    TpConnectionStatus status;
-    TpConnectionStatusReason status_reason;
-
-    TpConnectionAliasFlags alias_flags;
-
-    /* GArray of GQuark */
-    GArray *contact_attribute_interfaces;
-
-    gboolean ready:1;
-};
-
 enum
 {
   PROP_STATUS = 1,
@@ -479,6 +462,7 @@ tp_connection_init (TpConnection *self)
 
   self->priv->status = TP_UNKNOWN_CONNECTION_STATUS;
   self->priv->status_reason = TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED;
+  self->priv->contacts = g_hash_table_new (g_direct_hash, g_direct_equal);
 }
 
 static void
@@ -504,10 +488,30 @@ tp_connection_finalize (GObject *object)
   ((GObjectClass *) tp_connection_parent_class)->finalize (object);
 }
 
+
+static void
+contact_notify_invalidated (gpointer k G_GNUC_UNUSED,
+                            gpointer v,
+                            gpointer d G_GNUC_UNUSED)
+{
+  _tp_contact_connection_invalidated (v);
+}
+
+
 static void
 tp_connection_dispose (GObject *object)
 {
+  TpConnection *self = TP_CONNECTION (object);
+
   DEBUG ("%p", object);
+
+  if (self->priv->contacts != NULL)
+    {
+      g_hash_table_foreach (self->priv->contacts, contact_notify_invalidated,
+          NULL);
+      g_hash_table_destroy (self->priv->contacts);
+      self->priv->contacts = NULL;
+    }
 
   ((GObjectClass *) tp_connection_parent_class)->dispose (object);
 }
@@ -712,7 +716,7 @@ tp_connection_get_status (TpConnection *self,
 typedef struct {
     GMainLoop *loop;
     TpProxyPendingCall *pc;
-    GError *connect_error;
+    GError *connect_error /* gets initialized */;
 } RunUntilReadyData;
 
 static void
@@ -1202,10 +1206,48 @@ tp_connection_presence_type_cmp_availability (TpConnectionPresenceType p1,
   return 0;
 }
 
-const GArray *
-_tp_connection_get_contact_attribute_interfaces (TpConnection *self)
+
+TpContact *
+_tp_connection_lookup_contact (TpConnection *self,
+                               TpHandle handle)
 {
-  return self->priv->contact_attribute_interfaces;
+  g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+  return g_hash_table_lookup (self->priv->contacts, GUINT_TO_POINTER (handle));
+}
+
+
+/* this could be done with proper weak references, but we know that every
+ * connection will weakly reference all its contacts, so we can just do this
+ * explicitly in tp_contact_dispose */
+void
+_tp_connection_remove_contact (TpConnection *self,
+                               TpHandle handle,
+                               TpContact *contact)
+{
+  TpContact *mine;
+
+  g_return_if_fail (TP_IS_CONNECTION (self));
+  g_return_if_fail (TP_IS_CONTACT (contact));
+
+  mine = g_hash_table_lookup (self->priv->contacts, GUINT_TO_POINTER (handle));
+  g_return_if_fail (mine == contact);
+  g_hash_table_remove (self->priv->contacts, GUINT_TO_POINTER (handle));
+}
+
+
+void
+_tp_connection_add_contact (TpConnection *self,
+                            TpHandle handle,
+                            TpContact *contact)
+{
+  g_return_if_fail (TP_IS_CONNECTION (self));
+  g_return_if_fail (TP_IS_CONTACT (contact));
+  g_return_if_fail (g_hash_table_lookup (self->priv->contacts,
+        GUINT_TO_POINTER (handle)) == NULL);
+
+  g_hash_table_insert (self->priv->contacts, GUINT_TO_POINTER (handle),
+      contact);
 }
 
 

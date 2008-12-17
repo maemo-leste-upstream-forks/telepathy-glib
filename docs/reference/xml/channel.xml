@@ -142,6 +142,24 @@ const <link linkend="TpIntSet">TpIntSet</link>*     <link linkend="tp-channel-gr
                                                         (<link linkend="TpChannel">TpChannel</link> *proxy,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
+
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-channel-interface-destroyable-call-destroy">tp_cli_channel_interface_destroyable_call_destroy</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-channel-interface-destroyable-callback-for-destroy">tp_cli_channel_interface_destroyable_callback_for_destroy</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-destroyable-callback-for-destroy">*tp_cli_channel_interface_destroyable_callback_for_destroy</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-channel-interface-destroyable-run-destroy">tp_cli_channel_interface_destroyable_run_destroy</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
 </synopsis>
 </refsynopsisdiv>
 
@@ -1247,6 +1265,121 @@ Represents the signature of a callback for the signal Closed.</para>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
 <listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-destroyable-call-destroy" role="function">
+<title>tp_cli_channel_interface_destroyable_call_destroy ()</title>
+<indexterm zone="tp-cli-channel-interface-destroyable-call-destroy"><primary>tp_cli_channel_interface_destroyable_call_destroy</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_channel_interface_destroyable_call_destroy
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-channel-interface-destroyable-callback-for-destroy">tp_cli_channel_interface_destroyable_callback_for_destroy</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a Destroy method call.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Close the channel abruptly, possibly with loss of data. The           connection manager MUST NOT re-create the channel unless/until           more events occur.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The main motivating situation for this method is that when a Text             channel with pending messages is closed with Close, it comes back             as an incoming channel (to avoid a race between Close and an             incoming message). If Destroy is called on a Text channel, the CM             should delete all pending messages and close the channel, and             the channel shouldn&apos;t be re-created until/unless another message             arrives.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Most clients SHOULD call           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;Channel.Close&lt;/tp:dbus-ref&gt;           instead. However, if a client explicitly intends to destroy the           channel with possible loss of data, it SHOULD call this method           if this interface is supported (according to the           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;Channel.Interfaces&lt;/tp:dbus-ref&gt;           property), falling back to Close if not.&lt;/p&gt;          &lt;p&gt;In particular, channel dispatchers SHOULD use this method if           available when terminating channels that cannot be handled           correctly (for instance, if no handler has been installed for           a channel type, or if the handler crashes repeatedly).&lt;/p&gt;          &lt;p&gt;Connection managers do not need to implement this interface on           channels where Close and Destroy would be equivalent.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Callers need to be able to fall back to Close in any case.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-destroyable-callback-for-destroy" role="function">
+<title>tp_cli_channel_interface_destroyable_callback_for_destroy ()</title>
+<indexterm zone="tp-cli-channel-interface-destroyable-callback-for-destroy"><primary>tp_cli_channel_interface_destroyable_callback_for_destroy</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_destroyable_callback_for_destroy)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a Destroy method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-destroyable-run-destroy" role="function">
+<title>tp_cli_channel_interface_destroyable_run_destroy ()</title>
+<indexterm zone="tp-cli-channel-interface-destroyable-run-destroy"><primary>tp_cli_channel_interface_destroyable_run_destroy</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_channel_interface_destroyable_run_destroy
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method Destroy and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Close the channel abruptly, possibly with loss of data. The           connection manager MUST NOT re-create the channel unless/until           more events occur.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The main motivating situation for this method is that when a Text             channel with pending messages is closed with Close, it comes back             as an incoming channel (to avoid a race between Close and an             incoming message). If Destroy is called on a Text channel, the CM             should delete all pending messages and close the channel, and             the channel shouldn&apos;t be re-created until/unless another message             arrives.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Most clients SHOULD call           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;Channel.Close&lt;/tp:dbus-ref&gt;           instead. However, if a client explicitly intends to destroy the           channel with possible loss of data, it SHOULD call this method           if this interface is supported (according to the           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;Channel.Interfaces&lt;/tp:dbus-ref&gt;           property), falling back to Close if not.&lt;/p&gt;          &lt;p&gt;In particular, channel dispatchers SHOULD use this method if           available when terminating channels that cannot be handled           correctly (for instance, if no handler has been installed for           a channel type, or if the handler crashes repeatedly).&lt;/p&gt;          &lt;p&gt;Connection managers do not need to implement this interface on           channels where Close and Destroy would be equivalent.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Callers need to be able to fall back to Close in any case.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 

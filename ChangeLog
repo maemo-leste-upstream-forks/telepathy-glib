@@ -1,3 +1,898 @@
+commit 53167127dd7b848ce0b55baa6a9fc355dc45f6e3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Nov 3 18:23:37 2008 +0000
+
+    Prepare version 0.7.18
+
+ NEWS                               |   13 +++++++++++--
+ configure.ac                       |    8 ++++----
+ telepathy-glib/Makefile.am         |    3 ++-
+ telepathy-glib/versions/0.7.18.abi |   24 ++++++++++++++++++++++++
+ 4 files changed, 41 insertions(+), 7 deletions(-)
+
+commit 6eb736d2160638508319a2d0daa9b8885dbe5938
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Nov 3 17:13:43 2008 +0000
+
+    TpBaseConnection: fix regression in behaviour of suppress_handler
+    
+    The variable can be set in more than one place, so the previous patch
+    was wrong.
+
+ telepathy-glib/base-connection.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 01b42949578ae9c0e24ba4df54eec627327af3af
+Merge: 8360082... a90d5f3...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Nov 3 15:25:42 2008 +0000
+
+    Merge branch 'spec'
+
+commit 836008271a730d755b6bf968d775ae104fcb0ead
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 31 17:14:30 2008 +0000
+
+    TpContactsMixin: spec compliance: always return TP_IFACE_CONNECTION info even if not asked for
+    
+    Reported by murrayc on IRC; tested by tests/dbus/contacts-mixin.c
+
+ telepathy-glib/contacts-mixin.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 7354a5e8581f9acfe19285530c7b0e02c5f93bfc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 31 17:13:15 2008 +0000
+
+    Add a simple regression test for the Contacts interface
+    
+    It exercises all the "easy" interfaces, but not SimplePresence or
+    Capabilities yet.
+
+ .gitignore                  |    1 +
+ tests/dbus/Makefile.am      |    6 +
+ tests/dbus/contacts-mixin.c |  227 +++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 234 insertions(+), 0 deletions(-)
+
+commit 4d9879859b0ac8c1809122d256e290621bdc607a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 31 17:11:57 2008 +0000
+
+    ContactsConnection: claim to support Contacts, and add a subclass that doesn't
+    
+    The subclass is so we can still test the fallback path through multiple
+    calls in TpContact, when TpContact has been upgraded to support the fast
+    path through Contacts.
+
+ tests/lib/contacts-conn.c |   30 ++++++++++++++++++++++++++++++
+ tests/lib/contacts-conn.h |   36 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 66 insertions(+), 0 deletions(-)
+
+commit a90d5f35d244121b1bb8b9248e9e6c278761ba47
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 18:31:21 2008 +0000
+
+    Add tp_text_mixin_receive_with_flags
+    
+    This lets us signal that we have received messages with special flags
+    (MUC scrollback is the only useful one at the moment).
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ examples/cm/echo/chan.c                    |    5 ++-
+ telepathy-glib/text-mixin.c                |   41 +++++++++++++++++++++++----
+ telepathy-glib/text-mixin.h                |    3 ++
+ 4 files changed, 42 insertions(+), 8 deletions(-)
+
+commit 1ef1d842f6d4c79f5be8507c686a4cd075d8e27a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 18:08:40 2008 +0000
+
+    Echo example CM: adjust order of events for spec 0.17.14 compliance
+    
+    This requires that the tests wait for the Sent and Received signals,
+    since they are now emitted after Send returns.
+
+ examples/cm/echo/chan.c   |   11 ++++-------
+ tests/dbus/text-mixin.c   |    7 +++++++
+ tests/dbus/text-respawn.c |    3 +++
+ 3 files changed, 14 insertions(+), 7 deletions(-)
+
+commit eadd2dd4f271d2f9c65743645e5c28b9809b5132
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 18:07:12 2008 +0000
+
+    Update NEWS
+
+ NEWS |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 54c77ddfe909314444b91e27240cfc7bf9630959
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 16:31:59 2008 +0000
+
+    TpBaseConnection: improve ordering of events for channel managers
+    
+    Same rationale as for channel factories (previous commit).
+
+ telepathy-glib/base-connection.c |   78 ++++++++++++++++++++++++++------------
+ 1 files changed, 54 insertions(+), 24 deletions(-)
+
+commit e6e057de1f9990176aaf1ecc46f32e7c855679b8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 16:31:06 2008 +0000
+
+    TpBaseConnection: improve sequence of events for channel factories
+    
+    We want to return from RequestChannel, then emit NewChannels, then
+    NewChannel.
+    
+    Rationale:
+    * requester should get its answer first, so it can alter its handling of
+      NewChannels accordingly
+    * clients that didn't introspect the Connection (so don't know whether
+      to expect NewChannels) get the more informative signal first
+
+ telepathy-glib/base-connection.c |   14 +++++++-------
+ 1 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 7a6317b899554d981e43df4fa32d424de4a53291
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 18:03:32 2008 +0000
+
+    text-respawn test: instead of ack + close (already tested in text-mixin), call Destroy
+
+ tests/dbus/text-respawn.c |   22 +++-------------------
+ 1 files changed, 3 insertions(+), 19 deletions(-)
+
+commit 330a48e8b791bd47f3bd6332369f97852d11090a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 18:02:41 2008 +0000
+
+    TpTextMixin: use the proper constant for RESCUED
+
+ telepathy-glib/text-mixin.c |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
+commit 226df418d354b44b77c10ada869670c742bf5dee
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 18:02:25 2008 +0000
+
+    Echo CM: implement Destroyable
+
+ examples/cm/echo/chan.c |   19 +++++++------------
+ 1 files changed, 7 insertions(+), 12 deletions(-)
+
+commit bbc3bd5398730eccbc9fb16b921eda723063654c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 17:58:11 2008 +0000
+
+    Include Destroyable interface in generated code and docs
+
+ docs/reference/telepathy-glib-sections.txt |   18 ++++++++++++++++++
+ telepathy-glib/channel.xml                 |    1 +
+ 2 files changed, 19 insertions(+), 0 deletions(-)
+
+commit 579429760e40244c372ba8671ba6a94de8903aa5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 17:57:34 2008 +0000
+
+    sections.txt: correct a couple of wrong header names
+
+ docs/reference/telepathy-glib-sections.txt |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit b7144877d9e85aa99c5cfd4caa010dc1ef55224d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 17:47:43 2008 +0000
+
+    Update spec to 0.17.14
+
+ spec/Channel_Interface_Delivery_Reporting.xml |  444 --------------------
+ spec/Channel_Interface_Destroyable.xml        |   11 +-
+ spec/Channel_Interface_Messages.xml           |  559 +++++++++++++++++++++----
+ spec/Channel_Type_Contact_List.xml            |   25 +-
+ spec/Channel_Type_Text.xml                    |   85 ++++-
+ spec/Client_Handler.xml                       |    2 +-
+ spec/Connection_Interface_Requests.xml        |   53 ++-
+ spec/Makefile.am                              |    1 -
+ spec/all.xml                                  |    3 +-
+ 9 files changed, 634 insertions(+), 549 deletions(-)
+
+commit c2a7a8e177e39a8680a2125332457c01994346fb
+Merge: 324589d... dffcc57...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 15:18:08 2008 +0000
+
+    Merge branch 'text'
+
+commit dffcc57e13853e8ea63d51b4ef8cc1843a229def
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 14:19:39 2008 +0000
+
+    Add a test for respawning text channels in the Echo example CM
+
+ .gitignore                |    1 +
+ tests/dbus/Makefile.am    |    7 +
+ tests/dbus/text-respawn.c |  291 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 299 insertions(+), 0 deletions(-)
+
+commit 5a55beabab79d2412a8ff699f8ab478f9dc6b98d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 14:06:56 2008 +0000
+
+    .gitignore: add test-text-mixin
+
+ .gitignore |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 627983fcd20a802167ed1a018db7d9651ce1614f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 14:06:23 2008 +0000
+
+    tests/dbus/text-mixin.c: exercise Close() (assumes echo CM has TpExportableChannel)
+
+ tests/dbus/text-mixin.c |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
+
+commit 3771c5eb6eb79ec80b36129238882eeaaae46156
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 14:05:59 2008 +0000
+
+    tests/dbus/text-mixin.c: exercise attempting to acknowledge a bad ID
+
+ tests/dbus/text-mixin.c |   28 ++++++++++++++++++++++++++++
+ 1 files changed, 28 insertions(+), 0 deletions(-)
+
+commit 13e5c90813fa1a52cf26102e396927e023e7e36f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 14:05:22 2008 +0000
+
+    Echo CM: implement TpExportableChannel, respawning, and (#if'd out) Destroyable
+
+ examples/cm/echo/chan.c    |  140 ++++++++++++++++++++++++++++++++++++++------
+ examples/cm/echo/factory.c |   21 +++++--
+ 2 files changed, 138 insertions(+), 23 deletions(-)
+
+commit 20b5b19cb98d7b45b499157b10b5d8c6f60825e4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 14:03:58 2008 +0000
+
+    Add a regression test for the text mixin (taken from the Messages branch)
+
+ tests/dbus/Makefile.am  |    7 +
+ tests/dbus/text-mixin.c |  280 +++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 287 insertions(+), 0 deletions(-)
+
+commit f42fabea670f0ae236d6832a8844fc02c3059bb9
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 30 12:40:39 2008 +0000
+
+    TpTextMixin: add tp_text_mixin_set_rescued
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/text-mixin.c                |   26 ++++++++++++++++++++++++++
+ telepathy-glib/text-mixin.h                |    1 +
+ 3 files changed, 28 insertions(+), 0 deletions(-)
+
+commit 324589df4ef62d3f45e5d53ec9aa55b0117f5834
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Tue Oct 28 17:44:59 2008 +0000
+
+    NEWS: update with changes so far
+
+ NEWS |   17 ++++++++++++++++-
+ 1 files changed, 16 insertions(+), 1 deletions(-)
+
+commit d771a12cbed7d47a4c019b347b02926bf3b0f95f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 17:37:40 2008 +0100
+
+    inspect-contact example: inspect other people as well as ourselves
+    
+    Usage:
+    
+    ./telepathy-example-inspect-contact $conn - inspect your own handle
+    ./telepathy-example-inspect-contact $conn foo@bar - inspect foo@bar
+
+ examples/client/inspect-contact.c |  103 ++++++++++++++++++++++++++++---------
+ 1 files changed, 79 insertions(+), 24 deletions(-)
+
+commit a453a798d67355242b0c6c02988525d2fffabab0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 17:36:37 2008 +0100
+
+    TpContact: on success, don't give the callback a free ref to each contact
+    
+    It seems saner to require the callback to take a ref itself if it wants
+    to keep the object (and in fact examples/client/inspect-contact.c failed
+    to unref it, so it's correct for the new semantics).
+    
+    Also, on fatal errors, give the callback a bit more information about
+    what was going on, by telling it the handles or IDs that were requested
+    in the first place (via the "failed handles/IDs" arguments).
+
+ telepathy-glib/contact.c |   93 +++++++++++++++++++++++++++------------------
+ telepathy-glib/contact.h |    4 +-
+ tests/dbus/contacts.c    |    6 +-
+ 3 files changed, 61 insertions(+), 42 deletions(-)
+
+commit 7d56f5f7315e517bb215a7d815a28b95f91b5347
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 17:31:35 2008 +0100
+
+    TpContact: clarify which properties can and can't be NULL
+
+ telepathy-glib/contact.c |   19 +++++++++++--------
+ 1 files changed, 11 insertions(+), 8 deletions(-)
+
+commit fbb5f15e22fbef9d17988b548ea408cf1c8a6c19
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 15:13:47 2008 +0100
+
+    TpContact: rename request[ed]_one to request[ed]_one_handle
+
+ telepathy-glib/contact.c |   23 ++++++++++++-----------
+ 1 files changed, 12 insertions(+), 11 deletions(-)
+
+commit 72ae03a51c3a24d1695b8531cf7f0ee7bd8b6b8b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 15:13:28 2008 +0100
+
+    TpContact: ContactsContext: avoid type-punning
+    
+    As per review from wjt
+
+ telepathy-glib/contact.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 3009245e227933822e9ffa9975528affb970048e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 15:12:50 2008 +0100
+
+    TpContact: Remove incorrect pseudocode
+    
+    wjt says the code itself is clear enough not to bother correcting
+    the pseudocode
+
+ telepathy-glib/contact.c |   35 -----------------------------------
+ 1 files changed, 0 insertions(+), 35 deletions(-)
+
+commit 9fb813df2ba4bde98e5a662810ad642b2c76522f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 15:12:13 2008 +0100
+
+    TpContact: conclude that the empty value for presence-status should indeed be ""
+    
+    As per review from wjt
+
+ telepathy-glib/contact.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit eb262f8cef95df4f2c5603a068798c479a6ecba6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 24 15:10:34 2008 +0100
+
+    TpContact: clarify the relationship of the C accessors to the properties, and their lack of reffing/copying
+    
+    As per review from wjt and Robot101
+
+ telepathy-glib/contact.c |   80 +++++++++++++++++++++++----------------------
+ 1 files changed, 41 insertions(+), 39 deletions(-)
+
+commit 9e7ac5a93dc62b6174472e2431b8f297177b2427
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 22 10:47:22 2008 +0100
+
+    tp_connection_unref_handles: if no handles are to be released, don't leak memory
+
+ telepathy-glib/connection-handles.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit b8d6d79a5f4f890704da5cfc41d010f805cc5e70
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 22 10:42:21 2008 +0100
+
+    TpContact: hide object and class structs
+    
+    TpContact isn't usefully subclassable anyway, so we might as well enforce that.
+
+ telepathy-glib/contact.c |   11 +++++++++++
+ telepathy-glib/contact.h |   11 -----------
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+
+commit 3110d3e7da4cb0cab0d3bb1e05d74996952d3a6e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 22 10:39:21 2008 +0100
+
+    Makefile.am: add upload-branch-docs target
+
+ Makefile.am |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit c344ad514f338a3e20c8bdd0a6a85dd1c6dd58fb
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 22 10:34:54 2008 +0100
+
+    TpContact: in initial docstring, mention by_id
+
+ telepathy-glib/contact.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit dd415489c09866a17a7417d6f2721e7fc3245e32
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 22 10:28:40 2008 +0100
+
+    telepathy-glib.types: add TpContact
+
+ docs/reference/telepathy-glib.types |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit d90ba595abee2fe6755b46c2d29cb6b82530ccc2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Tue Oct 21 15:17:42 2008 +0100
+
+    bug16307-conn: don't leak a GMainLoop
+
+ tests/lib/bug16307-conn.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit b2ca155122b1acd742de6c87c6094c5545dd2c60
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Tue Oct 21 15:17:23 2008 +0100
+
+    ContactsConnection: don't leak stuff
+
+ tests/lib/contacts-conn.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit f061f70fa27493a08b91cc75755da159034bef76
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 16 15:21:06 2008 +0100
+
+    Add an example program that inspects a contact (so far, only the self-handle)
+
+ examples/client/Makefile.am       |    4 +
+ examples/client/inspect-contact.c |  161 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 165 insertions(+), 0 deletions(-)
+
+commit 1e0a7024f341c354bb500f2cf743c613da1e528a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Oct 20 18:22:17 2008 +0100
+
+    tests/dbus/contacts.c: exercise getting by ID and upgrading
+
+ tests/dbus/contacts.c |  380 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 379 insertions(+), 1 deletions(-)
+
+commit 970e8611575ba8b1c927afe242b54c012da4976a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Oct 20 18:21:54 2008 +0100
+
+    TpContact: implement upgrading and getting by ID
+
+ docs/reference/telepathy-glib-sections.txt |    4 +
+ telepathy-glib/contact.c                   |  492 +++++++++++++++++++++++++---
+ telepathy-glib/contact.h                   |   21 ++
+ 3 files changed, 479 insertions(+), 38 deletions(-)
+
+commit f6ec2f970258354e9246ea46a7cfa5084c416b70
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Oct 20 12:07:55 2008 +0100
+
+    tests/dbus/contacts.c: exercise new features
+
+ tests/dbus/contacts.c |   38 ++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 38 insertions(+), 0 deletions(-)
+
+commit cf03d487f9fd379b8016a92190660bd86e6dab16
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 17 16:57:26 2008 +0100
+
+    tests/dbus/contacts: exercise features
+
+ tests/dbus/contacts.c |  154 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 154 insertions(+), 0 deletions(-)
+
+commit b181b77b762223d9ed996be897fa6cccce6c4c98
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 17 16:05:47 2008 +0100
+
+    tests/dbus/contacts: test contact introspection with no features enabled
+
+ tests/dbus/contacts.c |   72 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 72 insertions(+), 0 deletions(-)
+
+commit a04e0cc990563e27ca3c074a201a64c42941e781
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 17 16:05:17 2008 +0100
+
+    tests/dbus/contacts: use ContactsConnection
+
+ tests/dbus/contacts.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit d8fd1d686769c411a3ef02906f993b2ebdcbfb83
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 17 16:03:48 2008 +0100
+
+    tests/lib: add ContactsConnection, a connection with avatar tokens, aliases and presence
+
+ tests/lib/Makefile.am     |    6 +-
+ tests/lib/contacts-conn.c |  592 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/lib/contacts-conn.h |   86 +++++++
+ 3 files changed, 682 insertions(+), 2 deletions(-)
+
+commit be18142bd57723975b136ccb419a680618f19bac
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 17 16:03:15 2008 +0100
+
+    TpContact: track presence and avatars
+    
+    Currently, this only works if the CM has SimplePresence and GetKnownAvatarTokens.
+
+ telepathy-glib/connection-internal.h |    3 +
+ telepathy-glib/contact.c             |  211 ++++++++++++++++++++++++++++++++++
+ 2 files changed, 214 insertions(+), 0 deletions(-)
+
+commit 5735c914c253bce981d71aad70ced1f067bb3d50
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 16 15:22:20 2008 +0100
+
+    TpContact: track aliases if supported and requested
+
+ telepathy-glib/connection-internal.h |    1 +
+ telepathy-glib/contact.c             |  183 ++++++++++++++++++++++++++++++++++
+ 2 files changed, 184 insertions(+), 0 deletions(-)
+
+commit b0516884c47fe5f7675c2162ce684ceeb864b857
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Oct 16 13:09:07 2008 +0100
+
+    Move TpConnectionPrivate to connection-internal.h
+    
+    This allows _tp_connection_get_contact_attribute_interfaces() to be
+    removed, since TpContact can just access the struct member directly.
+
+ telepathy-glib/connection-internal.h |   21 +++++++++++++++++++--
+ telepathy-glib/connection.c          |   26 --------------------------
+ 2 files changed, 19 insertions(+), 28 deletions(-)
+
+commit 779ba57b058ce9f1995080ed7c8633a7a385a836
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 10 12:32:26 2008 +0100
+
+    TpContact: add a regression test for basic functionality
+
+ .gitignore             |    1 +
+ tests/dbus/Makefile.am |    6 +
+ tests/dbus/contacts.c  |  288 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 295 insertions(+), 0 deletions(-)
+
+commit b66f0cc1d417fb13253c76f5d6f212e936253a77
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Oct 10 12:32:02 2008 +0100
+
+    TpContact: hook up factory functions etc.
+
+ docs/reference/telepathy-glib-sections.txt |    2 +
+ telepathy-glib/connection-internal.h       |   11 +
+ telepathy-glib/connection.c                |   68 ++++
+ telepathy-glib/contact.c                   |  556 ++++++++++++++++++++++++++++
+ telepathy-glib/contact.h                   |   12 +
+ 5 files changed, 649 insertions(+), 0 deletions(-)
+
+commit d9f90572ef0f5adc533d0eadba6944dcb661dda2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Tue Oct 7 18:11:48 2008 +0100
+
+    TpContact: Add a skeletal version
+
+ docs/reference/telepathy-glib-docs.sgml    |    1 +
+ docs/reference/telepathy-glib-sections.txt |   27 ++
+ telepathy-glib/Makefile.am                 |    2 +
+ telepathy-glib/contact.c                   |  548 ++++++++++++++++++++++++++++
+ telepathy-glib/contact.h                   |   90 +++++
+ 5 files changed, 668 insertions(+), 0 deletions(-)
+
+commit 8a02c299b3687590c650bc56a98628beb9fa2814
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Oct 13 12:38:15 2008 +0100
+
+    Add a debug flag 'contacts'
+
+ telepathy-glib/debug-internal.h |    3 ++-
+ telepathy-glib/debug.c          |    3 +++
+ 2 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 2f658fee88f87dc595bec6dde590731f96dcfe6f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Mon Oct 20 18:20:01 2008 +0100
+
+    SimpleConnection: forbid IDs containing spaces, to have a more interesting validation function for tests to run
+
+ tests/lib/simple-conn.c |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit cfad0ea054ea9786fe9961f7c1c292eda3865c01
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:49:56 2008 +0100
+
+    a{sv} utilities: remove unnecessary annotation which confused the coding style check
+
+ telepathy-glib/dbus.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 879b6134db41e198e9416d95994c92e4a73cdc38
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:49:19 2008 +0100
+
+    tests/dbus: don't distribute generated files
+
+ tests/dbus/Makefile.am |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 8e26729f28e25ea195a41455409095c8be5ae18c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:49:06 2008 +0100
+
+    TpTextMixin: whitespace
+
+ telepathy-glib/text-mixin.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit b8fa0a98f4b86f7b09620d11123e90d890cf5bd4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:48:56 2008 +0100
+
+    TpProxy: use "unsigned int" in public struct, gtkdoc doesn't understand "unsigned"
+
+ telepathy-glib/proxy.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0f0e00aa0e3365bc54e2b575ba0a9b418c356d4d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:48:35 2008 +0100
+
+    TpProxy: suppress false positives from uninitialized GError detector
+
+ telepathy-glib/proxy-methods.c |    2 +-
+ telepathy-glib/proxy.c         |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 78251a512c5efa92f4cae1409821a5004c3da35d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:48:08 2008 +0100
+
+    TpPropertiesMixin: whitespace, remove an unnecessary cast
+
+ telepathy-glib/properties-mixin.c |   11 +++++------
+ 1 files changed, 5 insertions(+), 6 deletions(-)
+
+commit 5c788bad35ab82e08e382d8806b37a3a23ce6084
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:47:48 2008 +0100
+
+    TpPresenceMixin: whitespace, remove a couple of unnecessary casts
+
+ telepathy-glib/presence-mixin.c |   28 +++++++++++++---------------
+ 1 files changed, 13 insertions(+), 15 deletions(-)
+
+commit d4102c6103e5f66b767d27f7936ec6613745455c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:47:18 2008 +0100
+
+    TpHandleSet: remove an unnecessary cast
+
+ telepathy-glib/handle-set.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 54edb8b136af2f0468d7e847a62bb1f0463ac0aa
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:47:03 2008 +0100
+
+    TpGroupMixin: fix whitespace, remove some unnecessary casts
+
+ telepathy-glib/group-mixin.c |   62 +++++++++++++++++++++---------------------
+ 1 files changed, 31 insertions(+), 31 deletions(-)
+
+commit eecbe881fc2e917ec87ed79f99351f4cdea39e75
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:46:18 2008 +0100
+
+    TpContactsMixin: whitespace
+
+ telepathy-glib/contacts-mixin.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 9685b70cba727b99e5342e8a8df50454bca6d23f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:46:07 2008 +0100
+
+    TpConnection: stop coding style check complaining of uninitialized GErrors
+
+ telepathy-glib/connection.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d4afa9241ebde93f5cd8d9aa832cd2e499968c6d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:45:48 2008 +0100
+
+    TpConnectionManager: replace "unsigned" with "unsigned int" in public struct
+    
+    gtkdoc doesn't understand the former, but does understand the latter.
+
+ telepathy-glib/connection-manager.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d7d51f9bd6d396b861d46e919f537b24ed899ccd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:45:09 2008 +0100
+
+    TpChannel: delete trailing whitespace
+
+ telepathy-glib/channel.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c5f0801bbbae30282fceb8c4be0f549690e6ab80
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:44:59 2008 +0100
+
+    TpBaseConnection: coding style trivia
+
+ telepathy-glib/base-connection.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 8bb4aa1653b77b2766d650b551bcbec79f55ae0f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:44:41 2008 +0100
+
+    TpBaseConnectionManager: coding style trivia
+
+ telepathy-glib/base-connection-manager.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 1d004eddae4cfcdc5df80f45f17b4f23b01b948c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:44:19 2008 +0100
+
+    Switch coding style checks back on. Oops...
+
+ telepathy-glib/Makefile.am |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 16a7026dd1511fbc66ba20d3a5e5c210abf83891
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 11:44:02 2008 +0100
+
+    Don't distribute the generated version script in tarballs
+
+ telepathy-glib/Makefile.am |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 5dd9a19b88ca7df017d5862ca166a2da453b1c1e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:42:59 2008 +0100
+
+    glib-client-gen.py: use unsigned for booleans in bitfields
+
+ tools/glib-client-gen.py |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 7821c5ce046f8ecbe4b081f2554eada5d207e398
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:42:42 2008 +0100
+
+    TestTextChannelNull: use unsigned for booleans in bitfields
+
+ tests/lib/textchan-null.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 3ffb4060354922dbe34ea37c21fd8a680c14e144
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:42:25 2008 +0100
+
+    TpProxy: use unsigned for booleans in bitfields
+
+ telepathy-glib/proxy-methods.c |    6 +++---
+ telepathy-glib/proxy.c         |    2 +-
+ telepathy-glib/proxy.h         |    2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+commit e2b4e1641eaaadfa585a11e25e0a1b94e0ac4415
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:42:10 2008 +0100
+
+    TpConnection: use unsigned for booleans in bitfields
+
+ telepathy-glib/connection.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit df16a03c707f54e0fe96a189ec490174a73e495d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:41:55 2008 +0100
+
+    TpConnectionManager: use unsigned for booleans in bitfields
+
+ telepathy-glib/connection-manager.c |    4 ++--
+ telepathy-glib/connection-manager.h |    5 +++--
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+commit 62b5541ce5bcc50c1c03ebebeba00f80b8951fd4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:41:35 2008 +0100
+
+    TpChannel: use unsigned for boolean bitfields
+
+ telepathy-glib/channel-internal.h |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit d473200de4d5969498b35008d5fe61a433bd0f76
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:41:19 2008 +0100
+
+    TpBaseConnection: use unsigned, not gboolean, for booleans in bitfields
+
+ telepathy-glib/base-connection.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 8637415a3e9218e186a4928db49098603e6aa466
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 10:40:44 2008 +0100
+
+    example CMs: use unsigned, not gboolean, for bitfields
+    
+    It turns out gboolean is actually signed, so it's not safe to use in a bitfield.
+
+ examples/cm/channelspecific/room.c |    5 +++--
+ examples/cm/echo/chan.c            |    5 +++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+commit a760c3800fbb1f6f897986bc76a6033122fb958e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 09:32:07 2008 +0100
+
+    maintainer-upload-release: as well as doing what telepathy.am does, upload the docs
+
+ Makefile.am |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 4bc035115ef09262184a925842fc9b2a568cd48b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 09:31:43 2008 +0100
+
+    telepathy.am: restructure maintainer-upload-release so Makefile.am can add to it
+
+ tools/telepathy.am |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 714990810a4142196b64dc684b15c04b7bfe56c5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Oct 15 09:25:57 2008 +0100
+
+    telepathy.am: maintainer-upload-release: upload the signature too
+
+ tools/telepathy.am |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 5cd3637c32b6c69d45bf133e0e390a36b2cd807b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Tue Oct 14 18:31:01 2008 +0100
+
+    Fix a leak of a hash table per Group TpChannel
+
+ telepathy-glib/channel.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 7ee735665d68c70bc95e161ee2e87cd4e42002fd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Tue Oct 14 18:06:22 2008 +0100
+
+    Bump version number to 0.7.17.1
+
+ NEWS         |    5 +++++
+ configure.ac |    2 +-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
 commit 11eeecc6184a9909a604301063edb7a93bd35918
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   Tue Oct 14 16:57:15 2008 +0100

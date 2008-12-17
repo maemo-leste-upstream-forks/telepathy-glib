@@ -483,7 +483,7 @@ succeeds or fails.</p>
 <td><p><span class="term"><em class="parameter"><code>out_Channel</code></em> :</span></p></td>
 <td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
+><code class="literal">NULL</code></a>: &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;The Channel object, which MUST NOT be signalled with             &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; until after this method             returns.&lt;/p&gt;            &lt;tp:rationale&gt;             &lt;p&gt;This allows the requester to alter its handling of               NewChannels by knowing whether one of the channels satisfied               a request it made.&lt;/p&gt;           &lt;/tp:rationale&gt;
 </td>
 </tr>
 <tr>
@@ -561,7 +561,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 <td><p><span class="term"><em class="parameter"><code>out_Channel</code></em> :</span></p></td>
 <td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
+><code class="literal">NULL</code></a>: The Channel object. If it was created as a result of this method           call, it MUST NOT be signalled by           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; until after this method           returns.            &lt;tp:rationale&gt;             &lt;p&gt;This allows the requester to alter its handling of               NewChannels by knowing whether one of the channels satisfied               a request it made.&lt;/p&gt;           &lt;/tp:rationale&gt;
 </td>
 </tr>
 <tr>
@@ -699,7 +699,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
 Connect a handler to the signal NewChannels.
 </p>
 <p>
-&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;New channels have been created. The connection manager SHOULD emit           a single signal for any group of closely related channels that are           created at the same time, so that the channel dispatcher can try to           dispatch them to a handler as a unit.&lt;/p&gt;          &lt;p&gt;In particular, if additional channels are created as a side-effect           of a call to &lt;tp:member-ref&gt;CreateChannel&lt;/tp:member-ref&gt;,           these channels SHOULD appear in the same NewChannels signal as           the channel that satisfies the request.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Joining a MUC Tube in XMPP requires joining the corresponding             MUC (chatroom), so a Text channel can be created as a             side-effect.&lt;/p&gt;         &lt;/tp:rationale&gt;</p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;New channels have been created. The connection manager SHOULD emit           a single signal for any group of closely related channels that are           created at the same time, so that the channel dispatcher can try to           dispatch them to a handler as a unit.&lt;/p&gt;          &lt;p&gt;In particular, if additional channels are created as a side-effect           of a call to &lt;tp:member-ref&gt;CreateChannel&lt;/tp:member-ref&gt;,           these channels SHOULD appear in the same NewChannels signal as           the channel that satisfies the request.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Joining a MUC Tube in XMPP requires joining the corresponding             MUC (chatroom), so a Text channel can be created as a             side-effect.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Every time NewChannels is emitted, it MUST be followed by           a &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Connection.NewChannel&lt;/tp:dbus-ref&gt;           signal for each channel.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The double signal emission is for the benefit of older Telepathy             clients, which won't be listening for NewChannels.&lt;/p&gt;            &lt;p&gt;The more informative NewChannels signal comes first so that             clients that did not examine the connection to find             out whether Requests is supported will see the more informative             signal for each channel first, and then ignore the less             informative signal because it announces a new channel of which             they are already aware.&lt;/p&gt;         &lt;/tp:rationale&gt;</p>
 <p>
 
 </p>
@@ -822,7 +822,7 @@ state.
 <td><p><span class="term"><em class="parameter"><code>out_Channel</code></em> :</span></p></td>
 <td> Used to return an 'out' argument if <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
+><code class="literal">TRUE</code></a> is returned: &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;The Channel object, which MUST NOT be signalled with             &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; until after this method             returns.&lt;/p&gt;            &lt;tp:rationale&gt;             &lt;p&gt;This allows the requester to alter its handling of               NewChannels by knowing whether one of the channels satisfied               a request it made.&lt;/p&gt;           &lt;/tp:rationale&gt;
 </td>
 </tr>
 <tr>
@@ -936,7 +936,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
 <td><p><span class="term"><em class="parameter"><code>out_Channel</code></em> :</span></p></td>
 <td> Used to return an 'out' argument if <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
+><code class="literal">TRUE</code></a> is returned: The Channel object. If it was created as a result of this method           call, it MUST NOT be signalled by           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; until after this method           returns.            &lt;tp:rationale&gt;             &lt;p&gt;This allows the requester to alter its handling of               NewChannels by knowing whether one of the channels satisfied               a request it made.&lt;/p&gt;           &lt;/tp:rationale&gt;
 </td>
 </tr>
 <tr>

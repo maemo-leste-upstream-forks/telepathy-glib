@@ -77,6 +77,16 @@ href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 >GObject</a> *obj);
 <a
 href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="telepathy-glib-TpTextMixin.html#tp-text-mixin-receive-with-flags" title="tp_text_mixin_receive_with_flags ()">tp_text_mixin_receive_with_flags</a>    (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *obj,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpChannelTextMessageType" title="enum TpChannelTextMessageType">TpChannelTextMessageType</a> type,
+                                                         <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> sender,
+                                                         time_t timestamp,
+                                                         const char *text,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpChannelTextMessageFlags" title="enum TpChannelTextMessageFlags">TpChannelTextMessageFlags</a> flags);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
 >gboolean</a>            <a class="link" href="telepathy-glib-TpTextMixin.html#tp-text-mixin-receive" title="tp_text_mixin_receive ()">tp_text_mixin_receive</a>               (<a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 >GObject</a> *obj,
@@ -130,6 +140,9 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 >GObject</a> *obj,
                                                          <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> *first_sender);
+void                <a class="link" href="telepathy-glib-TpTextMixin.html#tp-text-mixin-set-rescued" title="tp_text_mixin_set_rescued ()">tp_text_mixin_set_rescued</a>           (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *obj);
 void                <a class="link" href="telepathy-glib-TpTextMixin.html#tp-text-mixin-iface-init" title="tp_text_mixin_iface_init ()">tp_text_mixin_iface_init</a>            (<a
 href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
 >gpointer</a> g_iface,
@@ -253,7 +266,7 @@ class_init function like so:
 <p>
 </p>
 <div class="informalexample"><pre class="programlisting">
-tp_text_mixin_class_init ((GObjectClass *)klass,
+tp_text_mixin_class_init ((GObjectClass *) klass,
                           G_STRUCT_OFFSET (SomeObjectClass, text_mixin));
 </pre></div>
 <p>
@@ -292,7 +305,7 @@ instance init function like so:
 <p>
 </p>
 <div class="informalexample"><pre class="programlisting">
-tp_text_mixin_init ((GObject *)self,
+tp_text_mixin_init ((GObject *) self,
                     G_STRUCT_OFFSET (SomeObject, text_mixin),
                     self-&gt;contact_repo);
 </pre></div>
@@ -373,6 +386,70 @@ Free resources held by the text mixin.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
+<a name="tp-text-mixin-receive-with-flags"></a><h3>tp_text_mixin_receive_with_flags ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            tp_text_mixin_receive_with_flags    (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *obj,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpChannelTextMessageType" title="enum TpChannelTextMessageType">TpChannelTextMessageType</a> type,
+                                                         <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> sender,
+                                                         time_t timestamp,
+                                                         const char *text,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpChannelTextMessageFlags" title="enum TpChannelTextMessageFlags">TpChannelTextMessageFlags</a> flags);</pre>
+<p>
+Add a message to the pending queue and emit Received.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>obj</code></em> :</span></p></td>
+<td> An object with the text mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>type</code></em> :</span></p></td>
+<td> The type of message received from the underlying protocol
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>sender</code></em> :</span></p></td>
+<td> The handle of the message sender
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timestamp</code></em> :</span></p></td>
+<td> The time the message was received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>text</code></em> :</span></p></td>
+<td> The text of the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> the message's flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> on success; <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> if the message was lost due to the memory
+limit.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
 <a name="tp-text-mixin-receive"></a><h3>tp_text_mixin_receive ()</h3>
 <pre class="programlisting"><a
 href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
@@ -384,7 +461,8 @@ href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
                                                          time_t timestamp,
                                                          const char *text);</pre>
 <p>
-Add a message to the pending queue and emit Received.</p>
+Add a message to the pending queue and emit Received. Exactly equivalent
+to <a class="link" href="telepathy-glib-TpTextMixin.html#tp-text-mixin-receive-with-flags" title="tp_text_mixin_receive_with_flags ()"><code class="function">tp_text_mixin_receive_with_flags()</code></a> with <em class="parameter"><code>flags</code></em> == 0.</p>
 <p>
 
 </p>
@@ -646,6 +724,27 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
 </td>
 </tr>
 </tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-text-mixin-set-rescued"></a><h3>tp_text_mixin_set_rescued ()</h3>
+<pre class="programlisting">void                tp_text_mixin_set_rescued           (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *obj);</pre>
+<p>
+Mark all pending messages as having been "rescued" from a channel that
+previously closed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>obj</code></em> :</span></p></td>
+<td> An object with this mixin
+</td>
+</tr></tbody>
 </table></div>
 </div>
 <hr>

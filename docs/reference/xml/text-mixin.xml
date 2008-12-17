@@ -34,6 +34,12 @@
 <link linkend="void">void</link>                <link linkend="tp-text-mixin-set-message-types">tp_text_mixin_set_message_types</link>     (<link linkend="GObject">GObject</link> *obj,
                                                          ...);
 <link linkend="void">void</link>                <link linkend="tp-text-mixin-finalize">tp_text_mixin_finalize</link>              (<link linkend="GObject">GObject</link> *obj);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-text-mixin-receive-with-flags">tp_text_mixin_receive_with_flags</link>    (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpChannelTextMessageType">TpChannelTextMessageType</link> type,
+                                                         <link linkend="TpHandle">TpHandle</link> sender,
+                                                         <link linkend="time-t">time_t</link> timestamp,
+                                                         const <link linkend="char">char</link> *text,
+                                                         <link linkend="TpChannelTextMessageFlags">TpChannelTextMessageFlags</link> flags);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-text-mixin-receive">tp_text_mixin_receive</link>               (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="TpChannelTextMessageType">TpChannelTextMessageType</link> type,
                                                          <link linkend="TpHandle">TpHandle</link> sender,
@@ -53,6 +59,7 @@
 <link linkend="void">void</link>                <link linkend="tp-text-mixin-clear">tp_text_mixin_clear</link>                 (<link linkend="GObject">GObject</link> *obj);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-text-mixin-has-pending-messages">tp_text_mixin_has_pending_messages</link>  (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="TpHandle">TpHandle</link> *first_sender);
+<link linkend="void">void</link>                <link linkend="tp-text-mixin-set-rescued">tp_text_mixin_set_rescued</link>           (<link linkend="GObject">GObject</link> *obj);
 <link linkend="void">void</link>                <link linkend="tp-text-mixin-iface-init">tp_text_mixin_iface_init</link>            (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
 </synopsis>
@@ -155,7 +162,7 @@ class_init function like so:
 </para>
 <para>
 <informalexample><programlisting>
-tp_text_mixin_class_init ((GObjectClass *)klass,
+tp_text_mixin_class_init ((GObjectClass *) klass,
                           G_STRUCT_OFFSET (SomeObjectClass, text_mixin));
 </programlisting></informalexample></para>
 <para>
@@ -179,7 +186,7 @@ instance init function like so:
 </para>
 <para>
 <informalexample><programlisting>
-tp_text_mixin_init ((GObject *)self,
+tp_text_mixin_init ((GObject *) self,
                     G_STRUCT_OFFSET (SomeObject, text_mixin),
                     self->contact_repo);
 </programlisting></informalexample></para>
@@ -225,6 +232,41 @@ Free resources held by the text mixin.</para>
 <listitem><simpara> An object with this mixin.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="tp-text-mixin-receive-with-flags" role="function">
+<title>tp_text_mixin_receive_with_flags ()</title>
+<indexterm zone="tp-text-mixin-receive-with-flags"><primary>tp_text_mixin_receive_with_flags</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_text_mixin_receive_with_flags    (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpChannelTextMessageType">TpChannelTextMessageType</link> type,
+                                                         <link linkend="TpHandle">TpHandle</link> sender,
+                                                         <link linkend="time-t">time_t</link> timestamp,
+                                                         const <link linkend="char">char</link> *text,
+                                                         <link linkend="TpChannelTextMessageFlags">TpChannelTextMessageFlags</link> flags);</programlisting>
+<para>
+Add a message to the pending queue and emit Received.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
+<listitem><simpara> An object with the text mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>type</parameter>&nbsp;:</term>
+<listitem><simpara> The type of message received from the underlying protocol
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>sender</parameter>&nbsp;:</term>
+<listitem><simpara> The handle of the message sender
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timestamp</parameter>&nbsp;:</term>
+<listitem><simpara> The time the message was received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>text</parameter>&nbsp;:</term>
+<listitem><simpara> The text of the message
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>flags</parameter>&nbsp;:</term>
+<listitem><simpara> the message's flags
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success; <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> if the message was lost due to the memory
+limit.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="tp-text-mixin-receive" role="function">
 <title>tp_text_mixin_receive ()</title>
 <indexterm zone="tp-text-mixin-receive"><primary>tp_text_mixin_receive</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_text_mixin_receive               (<link linkend="GObject">GObject</link> *obj,
@@ -233,7 +275,8 @@ Free resources held by the text mixin.</para>
                                                          <link linkend="time-t">time_t</link> timestamp,
                                                          const <link linkend="char">char</link> *text);</programlisting>
 <para>
-Add a message to the pending queue and emit Received.</para>
+Add a message to the pending queue and emit Received. Exactly equivalent
+to <link linkend="tp-text-mixin-receive-with-flags"><function>tp_text_mixin_receive_with_flags()</function></link> with <parameter>flags</parameter> == 0.</para>
 <para>
 
 </para><variablelist role="params">
@@ -365,6 +408,19 @@ is placed in it, without incrementing the handle's reference count.</para>
  message
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if there are pending messages
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-text-mixin-set-rescued" role="function">
+<title>tp_text_mixin_set_rescued ()</title>
+<indexterm zone="tp-text-mixin-set-rescued"><primary>tp_text_mixin_set_rescued</primary></indexterm><programlisting><link linkend="void">void</link>                tp_text_mixin_set_rescued           (<link linkend="GObject">GObject</link> *obj);</programlisting>
+<para>
+Mark all pending messages as having been "rescued" from a channel that
+previously closed.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
+<listitem><simpara> An object with this mixin
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-text-mixin-iface-init" role="function">

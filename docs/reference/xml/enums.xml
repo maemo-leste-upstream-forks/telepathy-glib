@@ -847,6 +847,8 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <indexterm zone="TpChannelTextMessageFlags"><primary>TpChannelTextMessageFlags</primary></indexterm><programlisting>typedef enum {
     TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED = 1,
     TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT = 2,
+    TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK = 4,
+    TP_CHANNEL_TEXT_MESSAGE_FLAG_RESCUED = 8,
 } TpChannelTextMessageFlags;
 </programlisting>
 <para>
@@ -862,6 +864,16 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-NON-TEXT-CONTENT:CAPS" role="constant">
 <term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT</literal></term>
 <listitem><simpara> <![CDATA[           The incoming message contained non-text content which cannot be             represented by this interface, but has been signalled             in the Messages interface.            Connection managers SHOULD only set this flag if the non-text             content appears to be relatively significant (exactly how             significant is up to the implementor). The intention is that             if this flag is set, clients using this interface SHOULD inform             the user that part of the message was not understood.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-SCROLLBACK:CAPS" role="constant">
+<term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK</literal></term>
+<listitem><simpara> <![CDATA[           The incoming message was part of a replay of message history.                         In XMPP multi-user chat, a few past messages are replayed               when you join a chatroom. A sufficiently capable IRC connection               manager could also set this flag on historical messages when               connected to a proxy like bip or irssi-proxy. The existence               of this flag allows loggers and UIs to use better heuristics               when eliminating duplicates (a simple implementation made               possible by this flag would be to avoid logging scrollback               at all).                    ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-RESCUED:CAPS" role="constant">
+<term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_RESCUED</literal></term>
+<listitem><simpara> <![CDATA[           The incoming message has been seen in a previous channel during             the lifetime of the Connection, but had not been acknowledged             when that channel closed, causing an identical channel (the             channel in which the message now appears) to open.                         This means that a logger (which should already have seen the               message in the previous channel) is able to recognise and ignore               these replayed messages.                    ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

@@ -138,7 +138,7 @@ tp_text_mixin_get_offset_quark ()
  * class_init function like so:
  *
  * <informalexample><programlisting>
- * tp_text_mixin_class_init ((GObjectClass *)klass,
+ * tp_text_mixin_class_init ((GObjectClass *) klass,
  *                           G_STRUCT_OFFSET (SomeObjectClass, text_mixin));
  * </programlisting></informalexample>
  */
@@ -168,7 +168,7 @@ tp_text_mixin_class_init (GObjectClass *obj_cls, glong offset)
  * instance init function like so:
  *
  * <informalexample><programlisting>
- * tp_text_mixin_init ((GObject *)self,
+ * tp_text_mixin_init ((GObject *) self,
  *                     G_STRUCT_OFFSET (SomeObject, text_mixin),
  *                     self->contact_repo);
  * </programlisting></informalexample>
@@ -267,12 +267,13 @@ tp_text_mixin_finalize (GObject *obj)
 }
 
 /**
- * tp_text_mixin_receive:
+ * tp_text_mixin_receive_with_flags:
  * @obj: An object with the text mixin
  * @type: The type of message received from the underlying protocol
  * @sender: The handle of the message sender
  * @timestamp: The time the message was received
  * @text: The text of the message
+ * @flags: the message's flags
  *
  * Add a message to the pending queue and emit Received.
  *
@@ -280,11 +281,12 @@ tp_text_mixin_finalize (GObject *obj)
  * limit.
  */
 gboolean
-tp_text_mixin_receive (GObject *obj,
-                       TpChannelTextMessageType type,
-                       TpHandle sender,
-                       time_t timestamp,
-                       const char *text)
+tp_text_mixin_receive_with_flags (GObject *obj,
+                                  TpChannelTextMessageType type,
+                                  TpHandle sender,
+                                  time_t timestamp,
+                                  const char *text,
+                                  TpChannelTextMessageFlags flags)
 {
   TpTextMixin *mixin = TP_TEXT_MIXIN (obj);
   _PendingMessage *msg;
@@ -298,6 +300,7 @@ tp_text_mixin_receive (GObject *obj,
   msg->id = mixin->priv->recv_id++;
   msg->timestamp = timestamp;
   msg->type = type;
+  msg->flags = flags;
 
   len = strlen (text);
   msg->text = g_try_malloc (len + 1);
@@ -334,6 +337,32 @@ tp_text_mixin_receive (GObject *obj,
   mixin->priv->message_lost = FALSE;
 
   return TRUE;
+}
+
+
+/**
+ * tp_text_mixin_receive:
+ * @obj: An object with the text mixin
+ * @type: The type of message received from the underlying protocol
+ * @sender: The handle of the message sender
+ * @timestamp: The time the message was received
+ * @text: The text of the message
+ *
+ * Add a message to the pending queue and emit Received. Exactly equivalent
+ * to tp_text_mixin_receive_with_flags() with @flags == 0.
+ *
+ * Returns: %TRUE on success; %FALSE if the message was lost due to the memory
+ * limit.
+ */
+gboolean
+tp_text_mixin_receive (GObject *obj,
+                       TpChannelTextMessageType type,
+                       TpHandle sender,
+                       time_t timestamp,
+                       const char *text)
+{
+  return tp_text_mixin_receive_with_flags (obj, type, sender, timestamp, text,
+      0);
 }
 
 static gint
@@ -601,6 +630,29 @@ tp_text_mixin_has_pending_messages (GObject *obj,
     }
 
   return (msg != NULL);
+}
+
+/**
+ * tp_text_mixin_set_rescued:
+ * @obj: An object with this mixin
+ *
+ * Mark all pending messages as having been "rescued" from a channel that
+ * previously closed.
+ */
+void
+tp_text_mixin_set_rescued (GObject *obj)
+{
+  TpTextMixin *mixin = TP_TEXT_MIXIN (obj);
+  GList *cur;
+
+  for (cur = g_queue_peek_head_link (mixin->priv->pending);
+       cur != NULL;
+       cur = cur->next)
+    {
+      _PendingMessage *msg = cur->data;
+
+      msg->flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_RESCUED;
+    }
 }
 
 /**

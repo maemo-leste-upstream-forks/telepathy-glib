@@ -250,7 +250,7 @@ struct _TpProxyPrivate {
      * the DBusGProxy has not been needed yet */
     GData *interfaces;
 
-    gboolean dispose_has_run:1;
+    unsigned dispose_has_run:1;
 };
 
 G_DEFINE_TYPE (TpProxy,
@@ -550,7 +550,7 @@ _tp_proxy_take_and_remap_error (TpProxy *self,
     }
   else
     {
-      GError *replacement;
+      GError *replacement = NULL;
       const gchar *dbus = dbus_g_error_get_name (error);
       GType proxy_type = TP_TYPE_PROXY;
       GType type;

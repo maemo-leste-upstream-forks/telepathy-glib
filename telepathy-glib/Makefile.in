@@ -70,7 +70,7 @@ libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = base-connection.lo \
 	base-connection-manager.lo channel.lo channel-group.lo \
 	channel-manager.lo connection.lo connection-handles.lo \
-	connection-manager.lo contacts-mixin.lo dbus.lo \
+	connection-manager.lo contact.lo contacts-mixin.lo dbus.lo \
 	dbus-properties-mixin.lo debug.lo interfaces.lo errors.lo \
 	exportable-channel.lo group-mixin.lo gtypes.lo handle.lo \
 	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
@@ -85,10 +85,9 @@ nodist_libtelepathy_glib_internal_la_OBJECTS = signals-marshal.lo \
 libtelepathy_glib_internal_la_OBJECTS =  \
 	$(am_libtelepathy_glib_internal_la_OBJECTS) \
 	$(nodist_libtelepathy_glib_internal_la_OBJECTS)
-am__libtelepathy_glib_la_SOURCES_DIST = _gen/version-script.txt
 am__objects_1 =
-am_libtelepathy_glib_la_OBJECTS = $(am__objects_1)
-libtelepathy_glib_la_OBJECTS = $(am_libtelepathy_glib_la_OBJECTS)
+nodist_libtelepathy_glib_la_OBJECTS = $(am__objects_1)
+libtelepathy_glib_la_OBJECTS = $(nodist_libtelepathy_glib_la_OBJECTS)
 libtelepathy_glib_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libtelepathy_glib_la_LDFLAGS) $(LDFLAGS) -o $@
@@ -106,9 +105,8 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libtelepathy_glib_internal_la_SOURCES) \
 	$(nodist_libtelepathy_glib_internal_la_SOURCES) \
-	$(libtelepathy_glib_la_SOURCES)
-DIST_SOURCES = $(libtelepathy_glib_internal_la_SOURCES) \
-	$(am__libtelepathy_glib_la_SOURCES_DIST)
+	$(nodist_libtelepathy_glib_la_SOURCES)
+DIST_SOURCES = $(libtelepathy_glib_internal_la_SOURCES)
 pkgconfigDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(pkgconfig_DATA)
 nodist_genincludeHEADERS_INSTALL = $(INSTALL_HEADER)
@@ -266,7 +264,8 @@ ABI_LISTS = \
     versions/0.7.14.abi \
     versions/0.7.15.abi \
     versions/0.7.16.abi \
-    versions/0.7.17.abi
+    versions/0.7.17.abi \
+    versions/0.7.18.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -297,7 +296,7 @@ libtelepathy_glib_la_LDFLAGS = -version-info \
 	"$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)" $(am__append_3) \
 	$(am__append_4)
 libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
-libtelepathy_glib_la_SOURCES = $(am__append_1)
+nodist_libtelepathy_glib_la_SOURCES = $(am__append_1)
 libtelepathy_glib_la_DEPENDENCIES = libtelepathy-glib-internal.la \
 	Makefile.am $(am__append_2)
 # allow new ABI, and silently put it in a dummy version (which can be used to
@@ -318,6 +317,7 @@ tpginclude_HEADERS = \
     media-interfaces.h \
     connection.h \
     connection-manager.h \
+    contact.h \
     contacts-mixin.h \
     dbus.h \
     dbus-properties-mixin.h \
@@ -405,7 +405,7 @@ CLEANFILES = \
 
 check_c_sources = \
     $(tpginclude_HEADERS) \
-    $(libtelepathy_glib_la_SOURCES)
+    $(libtelepathy_glib_internal_la_SOURCES)
 
 libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)
 libtelepathy_glib_internal_la_SOURCES = \
@@ -419,6 +419,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection-internal.h \
     connection-handles.c \
     connection-manager.c \
+    contact.c \
     contacts-mixin.c \
     dbus.c \
     dbus-internal.h \
@@ -565,6 +566,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-properties-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Plo@am__quote@

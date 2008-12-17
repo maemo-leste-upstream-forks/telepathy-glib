@@ -23,14 +23,46 @@
 #define TP_CONNECTION_INTERNAL_H
 
 #include <telepathy-glib/connection.h>
+#include <telepathy-glib/contact.h>
 
 G_BEGIN_DECLS
 
-const GArray *_tp_connection_get_contact_attribute_interfaces (
-    TpConnection *self);
+typedef void (*TpConnectionProc) (TpConnection *self);
+
+struct _TpConnectionPrivate {
+    /* GArray of TpConnectionProc */
+    GArray *introspect_needed;
+
+    TpConnectionStatus status;
+    TpConnectionStatusReason status_reason;
+
+    TpConnectionAliasFlags alias_flags;
+
+    /* GArray of GQuark */
+    GArray *contact_attribute_interfaces;
+
+    /* TpHandle => weak ref to TpContact */
+    GHashTable *contacts;
+
+    unsigned ready:1;
+    unsigned tracking_aliases_changed:1;
+    unsigned tracking_avatar_updated:1;
+    unsigned tracking_presences_changed:1;
+    unsigned tracking_presence_update:1;
+};
 
 void _tp_connection_init_handle_refs (TpConnection *self);
 void _tp_connection_clean_up_handle_refs (TpConnection *self);
+
+void _tp_connection_add_contact (TpConnection *self, TpHandle handle,
+    TpContact *contact);
+void _tp_connection_remove_contact (TpConnection *self, TpHandle handle,
+    TpContact *contact);
+TpContact *_tp_connection_lookup_contact (TpConnection *self, TpHandle handle);
+
+/* Actually implemented in contact.c, but having a contact-internal header
+ * just for this would be overkill */
+void _tp_contact_connection_invalidated (TpContact *contact);
 
 G_END_DECLS
 

@@ -5,6 +5,8 @@ noinst_PROGRAMS = \
     test-connection-handles \
     test-connection-inject-bug16307 \
     test-connection-getinterfaces-failure \
+    test-contacts \
+    test-contacts-mixin \
     test-dbus \
     test-disconnection \
     test-example-no-protocols \
@@ -12,6 +14,8 @@ noinst_PROGRAMS = \
     test-handle-set \
     test-invalidated-while-invoking-signals \
     test-properties \
+    test-text-mixin \
+    test-text-respawn \
     test-unsupported-interface
 
 TESTS = $(noinst_PROGRAMS)
@@ -46,6 +50,16 @@ test_connection_getinterfaces_failure_LDADD = \
 test_connection_getinterfaces_failure_SOURCES = \
     connection-getinterfaces-failure.c
 
+test_contacts_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+test_contacts_SOURCES = contacts.c
+
+test_contacts_mixin_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+test_contacts_mixin_SOURCES = contacts-mixin.c
+
 test_dbus_LDADD = $(TP_GLIB_LIBS)
 test_disconnection_LDADD = \
     $(TP_GLIB_LIBS) \
@@ -68,10 +82,22 @@ test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
 
 test_properties_LDADD = $(TP_GLIB_LIBS)
-test_properties_SOURCES = \
-    properties.c \
+test_properties_SOURCES = properties.c
+nodist_test_properties_SOURCES = \
     _gen/svc.h \
     _gen/svc.c
+
+test_text_mixin_LDADD = \
+    $(TP_GLIB_LIBS) \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_text_mixin_SOURCES = text-mixin.c
+
+test_text_respawn_LDADD = \
+    $(TP_GLIB_LIBS) \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_text_respawn_SOURCES = text-respawn.c
 
 test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
 test_unsupported_interface_SOURCES = unsupported-interface.c

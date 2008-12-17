@@ -183,7 +183,7 @@ tp_contacts_mixin_get_offset_quark ()
  * class_init function like so:
  *
  * <informalexample><programlisting>
- * tp_contacts_mixin_class_init ((GObjectClass *)klass,
+ * tp_contacts_mixin_class_init ((GObjectClass *) klass,
  *                          G_STRUCT_OFFSET (SomeObjectClass, contacts_mixin));
  * </programlisting></informalexample>
  *
@@ -220,7 +220,7 @@ tp_contacts_mixin_class_init (GObjectClass *obj_cls, glong offset)
  * instance init function like so:
  *
  * <informalexample><programlisting>
- * tp_contacts_mixin_init ((GObject *)self,
+ * tp_contacts_mixin_init ((GObject *) self,
  *                     G_STRUCT_OFFSET (SomeObject, text_mixin));
  * </programlisting></informalexample>
  *
@@ -278,6 +278,7 @@ tp_contacts_mixin_get_contact_attributes (
   TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (conn,
         TP_HANDLE_TYPE_CONTACT);
   GArray *valid_handles;
+  TpContactsMixinFillContactAttributesFunc func;
 
   TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (conn, context);
 
@@ -295,7 +296,7 @@ tp_contacts_mixin_get_contact_attributes (
 
 
   /* Setup handle array and hash with valid handles, optionally holding them */
-  valid_handles = g_array_sized_new (TRUE, TRUE, sizeof(TpHandle),
+  valid_handles = g_array_sized_new (TRUE, TRUE, sizeof (TpHandle),
       handles->len);
   result = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL,
       (GDestroyNotify) g_hash_table_destroy);
@@ -323,9 +324,13 @@ tp_contacts_mixin_get_contact_attributes (
    */
   tp_handles_ref (contact_repo, valid_handles);
 
+  func = g_hash_table_lookup (self->priv->interfaces, TP_IFACE_CONNECTION);
+
+  if (func != NULL)
+    func (G_OBJECT (iface), valid_handles, result);
+
   for (i = 0; interfaces[i] != NULL; i++)
     {
-      TpContactsMixinFillContactAttributesFunc func;
 
       func = g_hash_table_lookup (self->priv->interfaces, interfaces[i]);
 
