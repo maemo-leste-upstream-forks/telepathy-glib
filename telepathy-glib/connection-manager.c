@@ -179,6 +179,12 @@ struct _TpConnectionManagerPrivate {
     /* absolute path to .manager file */
     gchar *manager_file;
 
+    /* source ID for reading the manager file later */
+    guint manager_file_read_idle_id;
+
+    /* source ID for introspecting later */
+    guint introspect_idle_id;
+
     /* TRUE if we're waiting for ListProtocols */
     gboolean listing_protocols:1;
 
@@ -445,6 +451,8 @@ tp_connection_manager_idle_introspect (gpointer data)
           NULL);
     }
 
+  self->priv->introspect_idle_id = 0;
+
   return FALSE;
 }
 
@@ -475,7 +483,9 @@ tp_connection_manager_name_owner_changed_cb (TpDBusDaemon *bus,
       self->running = TRUE;
       g_signal_emit (self, signals[SIGNAL_ACTIVATED], 0);
 
-      g_idle_add (tp_connection_manager_idle_introspect, self);
+      if (self->priv->introspect_idle_id == 0)
+        self->priv->introspect_idle_id = g_idle_add (
+            tp_connection_manager_idle_introspect, self);
     }
 }
 
@@ -809,6 +819,8 @@ tp_connection_manager_idle_read_manager_file (gpointer data)
       && self->priv->manager_file[0] != '\0')
     tp_connection_manager_read_file (self, self->priv->manager_file);
 
+  self->priv->manager_file_read_idle_id = 0;
+
   return FALSE;
 }
 
@@ -878,7 +890,9 @@ tp_connection_manager_constructor (GType type,
       self->priv->manager_file =
           tp_connection_manager_find_manager_file (self->name);
 
-      g_idle_add (tp_connection_manager_idle_read_manager_file, self);
+      if (self->priv->manager_file_read_idle_id == 0)
+        self->priv->manager_file_read_idle_id = g_idle_add (
+            tp_connection_manager_idle_read_manager_file, self);
     }
 
   return (GObject *) self;
@@ -909,6 +923,12 @@ tp_connection_manager_finalize (GObject *object)
   guint i;
 
   g_free (self->priv->manager_file);
+
+  if (self->priv->manager_file_read_idle_id != 0)
+    g_source_remove (self->priv->manager_file_read_idle_id);
+
+  if (self->priv->introspect_idle_id != 0)
+    g_source_remove (self->priv->introspect_idle_id);
 
   if (self->priv->protocols != NULL)
     {
@@ -988,7 +1008,9 @@ tp_connection_manager_set_property (GObject *object,
           self->priv->manager_file = g_strdup (tmp);
         }
 
-      g_idle_add (tp_connection_manager_idle_read_manager_file, self);
+      if (self->priv->manager_file_read_idle_id == 0)
+        self->priv->manager_file_read_idle_id = g_idle_add (
+            tp_connection_manager_idle_read_manager_file, self);
 
       break;
 
@@ -1003,7 +1025,9 @@ tp_connection_manager_set_property (GObject *object,
               /* It's running, we weren't previously auto-introspecting,
                * but we are now. Try it when idle
                */
-              g_idle_add (tp_connection_manager_idle_introspect, self);
+              if (self->priv->introspect_idle_id == 0)
+                self->priv->introspect_idle_id = g_idle_add (
+                    tp_connection_manager_idle_introspect, self);
             }
         }
       break;

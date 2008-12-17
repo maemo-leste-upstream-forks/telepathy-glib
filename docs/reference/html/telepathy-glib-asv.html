@@ -1,0 +1,965 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Manipulating a{sv} mappings</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-dbus.html" title="General D-Bus support">
+<link rel="prev" href="telepathy-glib-dbus.html" title="D-Bus utilities">
+<link rel="next" href="telepathy-glib-proxy-subclass.html" title="TpProxy subclasses and mixins">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-dbus.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-dbus.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-proxy-subclass.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#telepathy-glib-asv.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#telepathy-glib-asv.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-asv"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="telepathy-glib-asv.top_of_page"></a>Manipulating a{sv} mappings</span></h2>
+<p>Manipulating a{sv} mappings — Functions to manipulate mappings from string to
+ variant, as represented in dbus-glib by a <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+><span class="type">GHashTable</span></a> from string
+ to <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#GValue"
+><span class="type">GValue</span></a></p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="telepathy-glib-asv.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/dbus.h&gt;
+
+#define             <a class="link" href="telepathy-glib-asv.html#tp-asv-size" title="tp_asv_size()">tp_asv_size</a>                         (asv)
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="telepathy-glib-asv.html#tp-asv-get-boolean" title="tp_asv_get_boolean ()">tp_asv_get_boolean</a>                  (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>            <a class="link" href="telepathy-glib-asv.html#tp-asv-get-boxed" title="tp_asv_get_boxed ()">tp_asv_get_boxed</a>                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Type-Information.html#GType"
+>GType</a> type);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Arrays.html#GArray"
+>GArray</a>*       <a class="link" href="telepathy-glib-asv.html#tp-asv-get-bytes" title="tp_asv_get_bytes ()">tp_asv_get_bytes</a>                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a>             <a class="link" href="telepathy-glib-asv.html#tp-asv-get-double" title="tp_asv_get_double ()">tp_asv_get_double</a>                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="telepathy-glib-asv.html#tp-asv-get-int32" title="tp_asv_get_int32 ()">tp_asv_get_int32</a>                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint64"
+>gint64</a>              <a class="link" href="telepathy-glib-asv.html#tp-asv-get-int64" title="tp_asv_get_int64 ()">tp_asv_get_int64</a>                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        <a class="link" href="telepathy-glib-asv.html#tp-asv-get-object-path" title="tp_asv_get_object_path ()">tp_asv_get_object_path</a>              (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        <a class="link" href="telepathy-glib-asv.html#tp-asv-get-string" title="tp_asv_get_string ()">tp_asv_get_string</a>                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>* const * <a class="link" href="telepathy-glib-asv.html#tp-asv-get-strv" title="tp_asv_get_strv ()">tp_asv_get_strv</a>                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a>             <a class="link" href="telepathy-glib-asv.html#tp-asv-get-uint32" title="tp_asv_get_uint32 ()">tp_asv_get_uint32</a>                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint64"
+>guint64</a>             <a class="link" href="telepathy-glib-asv.html#tp-asv-get-uint64" title="tp_asv_get_uint64 ()">tp_asv_get_uint64</a>                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);
+const <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#GValue"
+>GValue</a>*       <a class="link" href="telepathy-glib-asv.html#tp-asv-lookup" title="tp_asv_lookup ()">tp_asv_lookup</a>                       (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-asv.description"></a><h2>Description</h2>
+<p>
+Mappings from string to variant (D-Bus signature a{sv}) are commonly used
+to provide extensibility, but in dbus-glib they're somewhat awkward to deal
+with.
+</p>
+<p>
+These functions (tp_asv_*) provide convenient access to the values in such
+a mapping.
+</p>
+<p>
+They also work around the fact that none of the <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+><span class="type">GHashTable</span></a> public API
+takes a const pointer to a <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+><span class="type">GHashTable</span></a>, even the read-only methods that
+logically ought to.
+</p>
+<p>
+Parts of telepathy-glib return const pointers to <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+><span class="type">GHashTable</span></a>, to encourage
+the use of this API.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-asv.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="tp-asv-size"></a><h3>tp_asv_size()</h3>
+<pre class="programlisting">#define tp_asv_size(asv) _tp_asv_size_inline (asv)
+</pre>
+<p>
+Return the size of <em class="parameter"><code>asv</code></em> as if via <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#g-hash-table-size"
+><code class="function">g_hash_table_size()</code></a>.
+</p>
+<p>
+The only difference is that this version takes a const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+><span class="type">GHashTable</span></a> and
+casts it.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> a GHashTable
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.12
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-boolean"></a><h3>tp_asv_get_boolean ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            tp_asv_get_boolean                  (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and boolean, return it,
+and set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>, and set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+(FIXME: should we also allow 'i' and 'u' with nonzero &lt;=&gt; True?)</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>valid</code></em> :</span></p></td>
+<td> Either <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, or a location to store <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if the key actually
+ exists and has a boolean value
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a boolean value for <em class="parameter"><code>key</code></em>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-boxed"></a><h3>tp_asv_get_boxed ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>            tp_asv_get_boxed                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Type-Information.html#GType"
+>GType</a> type);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and is of the desired type,
+return it.
+</p>
+<p>
+Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+The returned value is not copied, and is only valid as long as the value
+for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it, for instance with
+<a
+href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html#g-boxed-copy"
+><code class="function">g_boxed_copy()</code></a>, if you need to keep it for longer.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>type</code></em> :</span></p></td>
+<td> The type that the key's value should have, which must be derived
+ from <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Type-Information.html#G-TYPE-BOXED:CAPS"
+><code class="literal">G_TYPE_BOXED</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of <em class="parameter"><code>key</code></em>, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-bytes"></a><h3>tp_asv_get_bytes ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Arrays.html#GArray"
+>GArray</a>*       tp_asv_get_bytes                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and is an array of bytes
+(its GType is <code class="literal">DBUS_TYPE_G_UCHAR_ARRAY</code>), return it.
+</p>
+<p>
+Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+The returned value is not copied, and is only valid as long as the value
+for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with
+g_boxed_copy (DBUS_TYPE_G_UCHAR_ARRAY, ...) if you need to keep
+it for longer.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the string value of <em class="parameter"><code>key</code></em>, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-double"></a><h3>tp_asv_get_double ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a>             tp_asv_get_double                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and has any numeric type used by
+dbus-glib (guchar, gint, guint, gint64, guint64 or gdouble),
+return it as a double, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>.
+</p>
+<p>
+Otherwise, return 0.0, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>valid</code></em> :</span></p></td>
+<td> Either <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, or a location in which to store <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> on success or
+   <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the double precision floating-point value of <em class="parameter"><code>key</code></em>, or 0.0
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-int32"></a><h3>tp_asv_get_int32 ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              tp_asv_get_int32                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and fits in the
+range of a gint32, return it, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>.
+</p>
+<p>
+Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>valid</code></em> :</span></p></td>
+<td> Either <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, or a location in which to store <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> on success or
+   <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the 32-bit signed integer value of <em class="parameter"><code>key</code></em>, or 0
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-int64"></a><h3>tp_asv_get_int64 ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint64"
+>gint64</a>              tp_asv_get_int64                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and fits in the
+range of a gint64, return it, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>.
+</p>
+<p>
+Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>valid</code></em> :</span></p></td>
+<td> Either <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, or a location in which to store <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> on success or
+   <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the 64-bit signed integer value of <em class="parameter"><code>key</code></em>, or 0
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-object-path"></a><h3>tp_asv_get_object_path ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        tp_asv_get_object_path              (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and is an object path, return it.
+</p>
+<p>
+Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+The returned value is not copied, and is only valid as long as the value
+for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strdup"
+><code class="function">g_strdup()</code></a> if you
+need to keep it for longer.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the object-path value of <em class="parameter"><code>key</code></em>, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-string"></a><h3>tp_asv_get_string ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        tp_asv_get_string                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and is a string, return it.
+</p>
+<p>
+Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+The returned value is not copied, and is only valid as long as the value
+for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strdup"
+><code class="function">g_strdup()</code></a> if you
+need to keep it for longer.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the string value of <em class="parameter"><code>key</code></em>, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-strv"></a><h3>tp_asv_get_strv ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>* const * tp_asv_get_strv                    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present and is an array of strings (strv),
+return it.
+</p>
+<p>
+Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+The returned value is not copied, and is only valid as long as the value
+for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strdupv"
+><code class="function">g_strdupv()</code></a> if you
+need to keep it for longer.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>-terminated string-array value of <em class="parameter"><code>key</code></em>, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-uint32"></a><h3>tp_asv_get_uint32 ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a>             tp_asv_get_uint32                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and fits in the
+range of a guint32, return it, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>.
+</p>
+<p>
+Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>valid</code></em> :</span></p></td>
+<td> Either <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, or a location in which to store <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> on success or
+   <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the 32-bit unsigned integer value of <em class="parameter"><code>key</code></em>, or 0
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-get-uint64"></a><h3>tp_asv_get_uint64 ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint64"
+>guint64</a>             tp_asv_get_uint64                   (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> *valid);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and is non-negative,
+return it, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>.
+</p>
+<p>
+Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>valid</code></em> :</span></p></td>
+<td> Either <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, or a location in which to store <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> on success or
+   <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the 64-bit unsigned integer value of <em class="parameter"><code>key</code></em>, or 0
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-asv-lookup"></a><h3>tp_asv_lookup ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#GValue"
+>GValue</a>*       tp_asv_lookup                       (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *asv,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *key);</pre>
+<p>
+If a value for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is present, return it. Otherwise return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</p>
+<p>
+The returned value is not copied, and is only valid as long as the value
+for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with (for instance)
+<a
+href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#g-value-copy"
+><code class="function">g_value_copy()</code></a> if you need to keep it for longer.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
+<td> A GHashTable where the keys are strings and the values are GValues
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td> The key to look up
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of <em class="parameter"><code>key</code></em>, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+<em class="parameter"><code>since</code></em> 0.7.9
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

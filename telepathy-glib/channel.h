@@ -23,7 +23,9 @@
 #define __TP_CHANNEL_H__
 
 #include <telepathy-glib/connection.h>
+#include <telepathy-glib/enums.h>
 #include <telepathy-glib/handle.h>
+#include <telepathy-glib/intset.h>
 #include <telepathy-glib/proxy.h>
 
 G_BEGIN_DECLS
@@ -31,6 +33,21 @@ G_BEGIN_DECLS
 typedef struct _TpChannel TpChannel;
 typedef struct _TpChannelPrivate TpChannelPrivate;
 typedef struct _TpChannelClass TpChannelClass;
+
+struct _TpChannelClass {
+    TpProxyClass parent_class;
+    /*<private>*/
+    GCallback _1;
+    GCallback _2;
+    GCallback _3;
+    GCallback _4;
+};
+
+struct _TpChannel {
+    TpProxy parent;
+
+    TpChannelPrivate *priv;
+};
 
 GType tp_channel_get_type (void);
 
@@ -69,6 +86,23 @@ void tp_channel_call_when_ready (TpChannel *self,
     TpChannelWhenReadyCb callback, gpointer user_data);
 
 void tp_channel_init_known_interfaces (void);
+
+gboolean tp_channel_is_ready (TpChannel *self);
+const gchar *tp_channel_get_channel_type (TpChannel *self);
+GQuark tp_channel_get_channel_type_id (TpChannel *self);
+TpHandle tp_channel_get_handle (TpChannel *self, TpHandleType *handle_type);
+TpConnection *tp_channel_borrow_connection (TpChannel *self);
+
+TpHandle tp_channel_group_get_self_handle (TpChannel *self);
+TpChannelGroupFlags tp_channel_group_get_flags (TpChannel *self);
+const TpIntSet *tp_channel_group_get_members (TpChannel *self);
+const TpIntSet *tp_channel_group_get_local_pending (TpChannel *self);
+const TpIntSet *tp_channel_group_get_remote_pending (TpChannel *self);
+gboolean tp_channel_group_get_local_pending_info (TpChannel *self,
+    TpHandle local_pending, TpHandle *actor,
+    TpChannelGroupChangeReason *reason, const gchar **message);
+
+TpHandle tp_channel_group_get_handle_owner (TpChannel *self, TpHandle handle);
 
 G_END_DECLS
 

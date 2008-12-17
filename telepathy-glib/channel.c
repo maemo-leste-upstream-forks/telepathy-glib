@@ -19,16 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "telepathy-glib/channel.h"
+#include "telepathy-glib/channel-internal.h"
 
 #include <telepathy-glib/channel-iface.h>
 #include <telepathy-glib/dbus.h>
-#include <telepathy-glib/handle.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/proxy-subclass.h>
 
 #define DEBUG_FLAG TP_DEBUG_CHANNEL
-#include "telepathy-glib/dbus-internal.h"
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/_gen/signals-marshal.h"
 
@@ -55,82 +53,28 @@
  * Since: 0.7.1
  */
 
-/**
- * TP_ERRORS_REMOVED_FROM_GROUP:
- *
- * #GError domain representing the local user being removed from a channel
- * with the Group interface. The @code in a #GError with this domain must
- * be a member of #TpChannelGroupChangeReason.
- *
- * This error may be raised on non-Group channels with certain reason codes
- * if there's no better error code to use (mainly
- * %TP_CHANNEL_GROUP_CHANGE_REASON_NONE).
- *
- * This macro expands to a function call returning a #GQuark.
- *
- * Since: 0.7.1
- */
-GQuark
-tp_errors_removed_from_group_quark (void)
-{
-  static GQuark q = 0;
-
-  if (q == 0)
-    q = g_quark_from_static_string ("tp_errors_removed_from_group_quark");
-
-  return q;
-}
 
 /**
  * TpChannelClass:
  * @parent_class: parent class
- * @priv: pointer to opaque private data
  *
- * The class of a #TpChannel.
+ * The class of a #TpChannel. In addition to @parent_class there are four
+ * pointers reserved for possible future use.
  *
- * Since: 0.7.1
+ * Since: 0.7.1; structure layout visible since 0.7.12
  */
-struct _TpChannelClass {
-    TpProxyClass parent_class;
-    gpointer priv;
-};
+
 
 /**
  * TpChannel:
  * @parent: parent class instance
- * @ready: the same as #TpChannel:channel-ready; should be considered
- *  read-only
- * @_reserved_flags: (private, reserved for future use)
- * @channel_type: quark representing the channel type; should be considered
- *  read-only
- * @handle_type: the handle type (%TP_UNKNOWN_HANDLE_TYPE if not yet known);
- *  should be considered read-only
- * @handle: the handle with which this channel communicates (0 if
- *  not yet known or if @handle_type is %TP_HANDLE_TYPE_NONE); should be
- *  considered read-only
  * @priv: pointer to opaque private data
  *
  * A proxy object for a Telepathy channel.
  *
- * Since: 0.7.1
+ * Since: 0.7.1; structure layout visible since 0.7.12
  */
-struct _TpChannel {
-    TpProxy parent;
 
-    TpConnection *connection;
-
-    gboolean ready:1;
-    gboolean _reserved_flags:31;
-    GQuark channel_type;
-    TpHandleType handle_type;
-    TpHandle handle;
-
-    TpChannelPrivate *priv;
-};
-
-struct _TpChannelPrivate {
-    gulong conn_invalidated_id;
-};
 
 enum
 {
@@ -139,13 +83,135 @@ enum
   PROP_HANDLE_TYPE,
   PROP_HANDLE,
   PROP_CHANNEL_READY,
+  PROP_GROUP_SELF_HANDLE,
+  PROP_GROUP_FLAGS,
   N_PROPS
 };
+
+enum {
+  SIGNAL_GROUP_FLAGS_CHANGED,
+  SIGNAL_GROUP_MEMBERS_CHANGED,
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS] = { 0 };
+
 
 G_DEFINE_TYPE_WITH_CODE (TpChannel,
     tp_channel,
     TP_TYPE_PROXY,
     G_IMPLEMENT_INTERFACE (TP_TYPE_CHANNEL_IFACE, NULL));
+
+
+/* Convenient property accessors for C (these duplicate the properties) */
+
+
+/**
+ * tp_channel_get_channel_type:
+ * @self: a channel
+ *
+ * Get the D-Bus interface name representing this channel's type,
+ * if it has been discovered.
+ *
+ * This is the same as the #TpChannel:channel-type property.
+ *
+ * Returns: the channel type, if the channel is ready; either the channel
+ *  type or %NULL, if the channel is not yet ready.
+ * Since: 0.7.12
+ */
+const gchar *
+tp_channel_get_channel_type (TpChannel *self)
+{
+  return g_quark_to_string (self->priv->channel_type);
+}
+
+
+/**
+ * tp_channel_get_channel_type_id:
+ * @self: a channel
+ *
+ * Get the D-Bus interface name representing this channel's type, as a GQuark,
+ * if it has been discovered.
+ *
+ * This is the same as the #TpChannel:channel-type property, except that it
+ * is a GQuark rather than a string.
+ *
+ * Returns: the channel type, if the channel is ready; either the channel
+ *  type or 0, if the channel is not yet ready.
+ * Since: 0.7.12
+ */
+GQuark
+tp_channel_get_channel_type_id (TpChannel *self)
+{
+  return self->priv->channel_type;
+}
+
+
+/**
+ * tp_channel_get_handle:
+ * @self: a channel
+ * @handle_type: if not %NULL, used to return the type of this handle
+ *
+ * Get the handle representing the contact, chatroom, etc. with which this
+ * channel communicates for its whole lifetime, or 0 if there is no such
+ * handle or it has not yet been discovered.
+ *
+ * This is the same as the #TpChannel:handle property.
+ *
+ * If %handle_type is not %NULL, the type of handle is written into it.
+ * This will be %TP_UNKNOWN_HANDLE_TYPE if the handle has not yet been
+ * discovered, or %TP_HANDLE_TYPE_NONE if there is no handle with which this
+ * channel will always communicate. This is the same as the
+ * #TpChannel:handle-type property.
+ *
+ * Returns: the handle
+ * Since: 0.7.12
+ */
+TpHandle
+tp_channel_get_handle (TpChannel *self,
+                       TpHandleType *handle_type)
+{
+  if (handle_type != NULL)
+    {
+      *handle_type = self->priv->handle_type;
+    }
+
+  return self->priv->handle;
+}
+
+
+/**
+ * tp_channel_is_ready:
+ * @self: a channel
+ *
+ * Returns the same thing as the #TpChannel:channel-ready property.
+ *
+ * Returns: %TRUE if introspection has completed
+ * Since: 0.7.12
+ */
+gboolean
+tp_channel_is_ready (TpChannel *self)
+{
+  return self->priv->ready;
+}
+
+
+/**
+ * tp_channel_borrow_connection:
+ * @self: a channel
+ *
+ * Returns the connection for this channel. The returned pointer is only valid
+ * while this channel is valid - reference it with g_object_ref() if needed.
+ *
+ * Returns: the value of #TpChannel:connection
+ * Since: 0.7.12
+ */
+TpConnection *
+tp_channel_borrow_connection (TpChannel *self)
+{
+  return self->priv->connection;
+}
+
 
 static void
 tp_channel_get_property (GObject *object,
@@ -158,20 +224,26 @@ tp_channel_get_property (GObject *object,
   switch (property_id)
     {
     case PROP_CONNECTION:
-      g_value_set_object (value, self->connection);
+      g_value_set_object (value, self->priv->connection);
       break;
     case PROP_CHANNEL_READY:
-      g_value_set_boolean (value, self->ready);
+      g_value_set_boolean (value, self->priv->ready);
       break;
     case PROP_CHANNEL_TYPE:
       g_value_set_static_string (value,
-          g_quark_to_string (self->channel_type));
+          g_quark_to_string (self->priv->channel_type));
       break;
     case PROP_HANDLE_TYPE:
-      g_value_set_uint (value, self->handle_type);
+      g_value_set_uint (value, self->priv->handle_type);
       break;
     case PROP_HANDLE:
-      g_value_set_uint (value, self->handle);
+      g_value_set_uint (value, self->priv->handle);
+      break;
+    case PROP_GROUP_SELF_HANDLE:
+      g_value_set_uint (value, self->priv->group_self_handle);
+      break;
+    case PROP_GROUP_FLAGS:
+      g_value_set_uint (value, self->priv->group_flags);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -190,24 +262,52 @@ tp_channel_set_property (GObject *object,
   switch (property_id)
     {
     case PROP_CONNECTION:
-      self->connection = TP_CONNECTION (g_value_dup_object (value));
+      self->priv->connection = TP_CONNECTION (g_value_dup_object (value));
       break;
     case PROP_CHANNEL_TYPE:
       /* can only be set in constructor */
-      g_assert (self->channel_type == 0);
-      self->channel_type = g_quark_from_string (g_value_get_string (value));
+      g_assert (self->priv->channel_type == 0);
+      self->priv->channel_type = g_quark_from_string (g_value_get_string (
+            value));
       break;
     case PROP_HANDLE_TYPE:
-      self->handle_type = g_value_get_uint (value);
+      self->priv->handle_type = g_value_get_uint (value);
       break;
     case PROP_HANDLE:
-      self->handle = g_value_get_uint (value);
+      self->priv->handle = g_value_get_uint (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
 }
+
+
+/* Introspection etc. */
+
+
+void
+_tp_channel_continue_introspection (TpChannel *self)
+{
+  g_assert (self->priv->introspect_needed != NULL);
+
+  if (g_queue_peek_head (self->priv->introspect_needed) == NULL)
+    {
+      g_queue_free (self->priv->introspect_needed);
+      self->priv->introspect_needed = NULL;
+
+      DEBUG ("%p: channel ready", self);
+      self->priv->ready = TRUE;
+      g_object_notify ((GObject *) self, "channel-ready");
+    }
+  else
+    {
+      TpChannelProc next = g_queue_pop_head (self->priv->introspect_needed);
+
+      next (self);
+    }
+}
+
 
 static void
 tp_channel_got_interfaces_cb (TpChannel *self,
@@ -232,8 +332,14 @@ tp_channel_got_interfaces_cb (TpChannel *self,
 
           if (tp_dbus_check_valid_interface_name (*iter, NULL))
             {
-              tp_proxy_add_interface_by_id ((TpProxy *) self,
-                  g_quark_from_string (*iter));
+              GQuark q = g_quark_from_string (*iter);
+              tp_proxy_add_interface_by_id ((TpProxy *) self, q);
+
+              if (q == TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP)
+                {
+                  g_queue_push_tail (self->priv->introspect_needed,
+                      _tp_channel_get_group_properties);
+                }
             }
           else
             {
@@ -242,10 +348,20 @@ tp_channel_got_interfaces_cb (TpChannel *self,
         }
     }
 
-  DEBUG ("%p: channel ready", self);
-  self->ready = TRUE;
-  g_object_notify ((GObject *) self, "channel-ready");
+  /* FIXME: give subclasses a chance to influence the definition of "ready"
+   * now that we have our interfaces? */
+
+  _tp_channel_continue_introspection (self);
 }
+
+
+static void
+_tp_channel_get_interfaces (TpChannel *self)
+{
+  tp_cli_channel_call_get_interfaces (self, -1,
+      tp_channel_got_interfaces_cb, NULL, NULL, NULL);
+}
+
 
 static void
 tp_channel_got_channel_type_cb (TpChannel *self,
@@ -263,10 +379,11 @@ tp_channel_got_channel_type_cb (TpChannel *self,
   else if (tp_dbus_check_valid_interface_name (channel_type, &err2))
     {
       DEBUG ("%p: Introspected channel type %s", self, channel_type);
-      self->channel_type = g_quark_from_string (channel_type);
+      self->priv->channel_type = g_quark_from_string (channel_type);
       g_object_notify ((GObject *) self, "channel-type");
 
-      tp_proxy_add_interface_by_id ((TpProxy *) self, self->channel_type);
+      tp_proxy_add_interface_by_id ((TpProxy *) self,
+          self->priv->channel_type);
 
     }
   else
@@ -276,9 +393,26 @@ tp_channel_got_channel_type_cb (TpChannel *self,
       g_error_free (err2);
     }
 
-  tp_cli_channel_call_get_interfaces (self, -1,
-      tp_channel_got_interfaces_cb, NULL, NULL, NULL);
+  _tp_channel_continue_introspection (self);
 }
+
+
+static void
+_tp_channel_get_channel_type (TpChannel *self)
+{
+  if (self->priv->channel_type == 0)
+    {
+      tp_cli_channel_call_get_channel_type (self, -1,
+          tp_channel_got_channel_type_cb, NULL, NULL, NULL);
+    }
+  else
+    {
+      tp_proxy_add_interface_by_id ((TpProxy *) self,
+          self->priv->channel_type);
+      _tp_channel_continue_introspection (self);
+    }
+}
+
 
 static void
 tp_channel_got_handle_cb (TpChannel *self,
@@ -292,8 +426,8 @@ tp_channel_got_handle_cb (TpChannel *self,
     {
       DEBUG ("%p: Introspected handle #%d of type %d", self, handle,
           handle_type);
-      self->handle_type = handle_type;
-      self->handle = handle;
+      self->priv->handle_type = handle_type;
+      self->priv->handle = handle;
       g_object_notify ((GObject *) self, "handle-type");
       g_object_notify ((GObject *) self, "handle");
     }
@@ -302,19 +436,26 @@ tp_channel_got_handle_cb (TpChannel *self,
       DEBUG ("%p: GetHandle() failed: %s", self, error->message);
     }
 
-  if (self->channel_type == 0)
+  _tp_channel_continue_introspection (self);
+}
+
+
+static void
+_tp_channel_get_handle (TpChannel *self)
+{
+  if (self->priv->handle_type == TP_UNKNOWN_HANDLE_TYPE
+      || (self->priv->handle == 0 &&
+          self->priv->handle_type != TP_HANDLE_TYPE_NONE))
     {
-      tp_cli_channel_call_get_channel_type (self, -1,
-          tp_channel_got_channel_type_cb, NULL, NULL, NULL);
+      tp_cli_channel_call_get_handle (self, -1,
+          tp_channel_got_handle_cb, NULL, NULL, NULL);
     }
   else
     {
-      tp_proxy_add_interface_by_id ((TpProxy *) self, self->channel_type);
-
-      tp_cli_channel_call_get_interfaces (self, -1,
-          tp_channel_got_interfaces_cb, NULL, NULL, NULL);
+      _tp_channel_continue_introspection (self);
     }
 }
+
 
 static void
 tp_channel_closed_cb (TpChannel *self,
@@ -324,9 +465,12 @@ tp_channel_closed_cb (TpChannel *self,
   GError e = { TP_DBUS_ERRORS, TP_DBUS_ERROR_OBJECT_REMOVED,
       "Channel was closed" };
 
-  /* FIXME: if it's a group, watch for MembersChanged: if we're removed
-   * for a reason, we can use that reason in the TP_ERRORS_REMOVED_FROM_GROUP
-   * domain */
+  if (self->priv->group_remove_message != NULL)
+    {
+      e.domain = TP_ERRORS_REMOVED_FROM_GROUP;
+      e.code = self->priv->group_remove_reason;
+      e.message = self->priv->group_remove_message;
+    }
 
   tp_proxy_invalidate ((TpProxy *) self, &e);
 }
@@ -350,9 +494,9 @@ tp_channel_connection_invalidated_cb (TpConnection *conn,
   tp_proxy_invalidate ((TpProxy *) self, &e);
 
   /* this channel's handle is now meaningless */
-  if (self->handle != 0)
+  if (self->priv->handle != 0)
     {
-      self->handle = 0;
+      self->priv->handle = 0;
       g_object_notify ((GObject *) self, "handle");
     }
 
@@ -369,7 +513,7 @@ tp_channel_constructor (GType type,
         n_params, params));
 
   /* If our TpConnection dies, so do we. */
-  self->priv->conn_invalidated_id = g_signal_connect (self->connection,
+  self->priv->conn_invalidated_id = g_signal_connect (self->priv->connection,
       "invalidated", G_CALLBACK (tp_channel_connection_invalidated_cb),
       self);
 
@@ -380,28 +524,24 @@ tp_channel_constructor (GType type,
       NULL, NULL);
 
   DEBUG ("%p: constructed with channel type \"%s\", handle #%d of type %d",
-      self, (self->channel_type != 0) ? g_quark_to_string (self->channel_type)
-                                      : "(null)",
-      self->handle, self->handle_type);
+      self,
+      (self->priv->channel_type != 0)
+          ? g_quark_to_string (self->priv->channel_type)
+          : "(null)",
+      self->priv->handle, self->priv->handle_type);
 
-  if (self->handle_type == TP_UNKNOWN_HANDLE_TYPE
-      || (self->handle == 0 && self->handle_type != TP_HANDLE_TYPE_NONE))
-    {
-      tp_cli_channel_call_get_handle (self, -1,
-          tp_channel_got_handle_cb, NULL, NULL, NULL);
-    }
-  else if (self->channel_type == 0)
-    {
-      tp_cli_channel_call_get_channel_type (self, -1,
-          tp_channel_got_channel_type_cb, NULL, NULL, NULL);
-    }
-  else
-    {
-      tp_proxy_add_interface_by_id ((TpProxy *) self, self->channel_type);
+  self->priv->introspect_needed = g_queue_new ();
 
-      tp_cli_channel_call_get_interfaces (self, -1,
-          tp_channel_got_interfaces_cb, NULL, NULL, NULL);
-    }
+  g_queue_push_tail (self->priv->introspect_needed,
+      _tp_channel_get_channel_type);
+
+  g_queue_push_tail (self->priv->introspect_needed,
+      _tp_channel_get_interfaces);
+
+  g_queue_push_tail (self->priv->introspect_needed,
+      _tp_channel_get_handle);
+
+  _tp_channel_continue_introspection (self);
 
   return (GObject *) self;
 }
@@ -411,29 +551,73 @@ tp_channel_init (TpChannel *self)
 {
   DEBUG ("%p", self);
 
-  self->channel_type = 0;
-  self->handle_type = TP_UNKNOWN_HANDLE_TYPE;
-  self->handle = 0;
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, TP_TYPE_CHANNEL,
       TpChannelPrivate);
+  self->priv->channel_type = 0;
+  self->priv->handle_type = TP_UNKNOWN_HANDLE_TYPE;
+  self->priv->handle = 0;
 }
 
 static void
 tp_channel_dispose (GObject *object)
 {
   TpChannel *self = (TpChannel *) object;
+
   DEBUG ("%p", self);
 
   if (self->priv->conn_invalidated_id != 0)
-    g_signal_handler_disconnect (self->connection,
+    g_signal_handler_disconnect (self->priv->connection,
         self->priv->conn_invalidated_id);
 
   self->priv->conn_invalidated_id = 0;
 
-  g_object_unref (self->connection);
-  self->connection = NULL;
+  g_object_unref (self->priv->connection);
+  self->priv->connection = NULL;
 
   ((GObjectClass *) tp_channel_parent_class)->dispose (object);
+}
+
+static void
+tp_channel_finalize (GObject *object)
+{
+  TpChannel *self = (TpChannel *) object;
+
+  DEBUG ("%p", self);
+
+  g_free (self->priv->group_remove_message);
+  self->priv->group_remove_message = NULL;
+
+  if (self->priv->group_local_pending_info != NULL)
+    {
+      g_hash_table_destroy (self->priv->group_local_pending_info);
+      self->priv->group_local_pending_info = NULL;
+    }
+
+  if (self->priv->group_members != NULL)
+    {
+      tp_intset_destroy (self->priv->group_members);
+      self->priv->group_members = NULL;
+    }
+
+  if (self->priv->group_local_pending != NULL)
+    {
+      tp_intset_destroy (self->priv->group_local_pending);
+      self->priv->group_local_pending = NULL;
+    }
+
+  if (self->priv->group_remote_pending != NULL)
+    {
+      tp_intset_destroy (self->priv->group_remote_pending);
+      self->priv->group_remote_pending = NULL;
+    }
+
+  if (self->priv->introspect_needed != NULL)
+    {
+      g_queue_free (self->priv->introspect_needed);
+      self->priv->introspect_needed = NULL;
+    }
+
+  ((GObjectClass *) tp_channel_parent_class)->finalize (object);
 }
 
 static void
@@ -442,6 +626,7 @@ tp_channel_class_init (TpChannelClass *klass)
   GParamSpec *param_spec;
   TpProxyClass *proxy_class = (TpProxyClass *) klass;
   GObjectClass *object_class = (GObjectClass *) klass;
+  GType au_type = dbus_g_type_get_collection ("GArray", G_TYPE_UINT);
 
   tp_channel_init_known_interfaces ();
 
@@ -451,6 +636,7 @@ tp_channel_class_init (TpChannelClass *klass)
   object_class->get_property = tp_channel_get_property;
   object_class->set_property = tp_channel_set_property;
   object_class->dispose = tp_channel_dispose;
+  object_class->finalize = tp_channel_finalize;
 
   proxy_class->interface = TP_IFACE_QUARK_CHANNEL;
   proxy_class->must_have_unique_name = TRUE;
@@ -502,10 +688,22 @@ tp_channel_class_init (TpChannelClass *klass)
    * Initially %FALSE; changes to %TRUE when introspection of the channel
    * has finished and it's ready for use.
    *
-   * By the time this property becomes %TRUE, the #TpChannel:channel-type,
-   * #TpChannel:handle-type and #TpChannel:handle properties will have been
-   * set (if introspection did not fail), and any extra interfaces will
-   * have been set up.
+   * By the time this property becomes %TRUE, the following will be true:
+   *
+   * - #TpChannel:channel-type set, unless introspection failed
+   * - #TpChannel:handle-type and #TpChannel:handle set, unless introspection
+   *   failed
+   * - any extra interfaces will have been set up in TpProxy (i.e.
+   *   #TpProxy:interfaces contains at least all extra Channel interfaces)
+   *
+   * In addition, if #TpProxy:interfaces includes the Group interface:
+   *
+   * - the initial value of the #TpChannel:group-self-handle property will
+   *   have been fetched and change notification will have been set up
+   * - the initial value of the #TpChannel:group-flags property will
+   *   have been fetched and change notification will have been set up
+   *
+   * Change notification is via notify::channel-ready.
    */
   param_spec = g_param_spec_boolean ("channel-ready", "Channel ready?",
       "Initially FALSE; changes to TRUE when introspection finishes", FALSE,
@@ -526,6 +724,93 @@ tp_channel_class_init (TpChannelClass *klass)
       G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class, PROP_CONNECTION,
       param_spec);
+
+  /**
+   * TpChannel:group-self-handle:
+   *
+   * If this channel is ready (#TpChannel:channel-ready) and is a group, and
+   * the user is a member of it, the #TpHandle representing them in this group.
+   *
+   * Otherwise, either a handle representing the user, or 0.
+   *
+   * Change notification is via notify::group-self-handle.
+   *
+   * Since: 0.7.12
+   */
+  param_spec = g_param_spec_uint ("group-self-handle", "Group.SelfHandle",
+      "Undefined if not a group", 0, G_MAXUINT32, 0,
+      G_PARAM_READABLE
+      | G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+  g_object_class_install_property (object_class, PROP_GROUP_SELF_HANDLE,
+      param_spec);
+
+  /**
+   * TpChannel:group-flags:
+   *
+   * If this channel is ready (#TpChannel:channel-ready) and is a group,
+   * #TpChannelGroupFlags indicating the capabilities and behaviour of that
+   * group.
+   *
+   * Otherwise, 0.
+   *
+   * Change notification is via notify::group-flags or
+   * TpChannel::group-flags-changed.
+   *
+   * Since: 0.7.12
+   */
+  param_spec = g_param_spec_uint ("group-flags", "Group.GroupFlags",
+      "0 if not a group", 0, G_MAXUINT32, 0,
+      G_PARAM_READABLE
+      | G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+  g_object_class_install_property (object_class, PROP_GROUP_FLAGS,
+      param_spec);
+
+  /**
+   * TpChannel::group-flags-changed:
+   * @self: a channel
+   * @added: #TpChannelGroupFlags which are newly set
+   * @removed: #TpChannelGroupFlags which are no longer set
+   *
+   * Emitted when the #TpChannel:group-flags property changes while the
+   * channel is ready.
+   *
+   * Since: 0.7.12
+   */
+  signals[SIGNAL_GROUP_FLAGS_CHANGED] = g_signal_new ("group-flags-changed",
+      G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL,
+      _tp_marshal_VOID__UINT_UINT,
+      G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_UINT);
+
+  /**
+   * TpChannel::group-members-changed:
+   * @self: a channel
+   * @message: an optional textual message
+   * @added: a #GArray of #guint containing the full members added
+   * @removed: a #GArray of #guint containing the members (full,
+   *  local-pending or remote-pending) removed
+   * @local_pending: a #GArray of #guint containing the local-pending
+   *  members added
+   * @remote_pending: a #GArray of #guint containing the remote-pending
+   *  members added
+   * @actor: the #TpHandle of the contact causing the change, or 0
+   * @reason: the reason for the change as a #TpChannelGroupChangeReason
+   *
+   * Emitted when the group members change in a Group channel that is ready.
+   *
+   * Since: 0.7.12
+   */
+  signals[SIGNAL_GROUP_MEMBERS_CHANGED] = g_signal_new (
+      "group-members-changed", G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL,
+      _tp_marshal_VOID__STRING_BOXED_BOXED_BOXED_BOXED_UINT_UINT,
+      G_TYPE_NONE, 7,
+      G_TYPE_STRING, au_type, au_type, au_type, au_type, G_TYPE_UINT,
+      G_TYPE_UINT);
 }
 
 /**
@@ -635,7 +920,7 @@ tp_channel_run_until_ready (TpChannel *self,
   if (as_proxy->invalidated)
     goto raise_invalidated;
 
-  if (self->ready)
+  if (self->priv->ready)
     return TRUE;
 
   my_loop = g_main_loop_new (NULL, FALSE);
@@ -659,7 +944,7 @@ tp_channel_run_until_ready (TpChannel *self,
   if (as_proxy->invalidated)
     goto raise_invalidated;
 
-  g_assert (self->ready);
+  g_assert (self->priv->ready);
   return TRUE;
 
 raise_invalidated:
@@ -759,7 +1044,7 @@ tp_channel_call_when_ready (TpChannel *self,
 
   g_return_if_fail (callback != NULL);
 
-  if (self->ready || as_proxy->invalidated != NULL)
+  if (self->priv->ready || as_proxy->invalidated != NULL)
     {
       DEBUG ("already ready or invalidated");
       callback (self, as_proxy->invalidated, user_data);

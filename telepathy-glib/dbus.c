@@ -1,8 +1,8 @@
 /*
  * dbus.c - Source for D-Bus utilities
  *
- * Copyright (C) 2005-2007 Collabora Ltd. <http://www.collabora.co.uk/>
- * Copyright (C) 2005-2007 Nokia Corporation
+ * Copyright (C) 2005-2008 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright (C) 2005-2008 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,30 @@
  * D-Bus utility functions used in telepathy-glib.
  */
 
+/**
+ * SECTION:asv
+ * @title: Manipulating a{sv} mappings
+ * @short_description: Functions to manipulate mappings from string to
+ *  variant, as represented in dbus-glib by a #GHashTable from string
+ *  to #GValue
+ *
+ * Mappings from string to variant (D-Bus signature a{sv}) are commonly used
+ * to provide extensibility, but in dbus-glib they're somewhat awkward to deal
+ * with.
+ *
+ * These functions (tp_asv_*) provide convenient access to the values in such
+ * a mapping.
+ *
+ * They also work around the fact that none of the #GHashTable public API
+ * takes a const pointer to a #GHashTable, even the read-only methods that
+ * logically ought to.
+ *
+ * Parts of telepathy-glib return const pointers to #GHashTable, to encourage
+ * the use of this API.
+ *
+ * Since: 0.7.9
+ */
+
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/dbus-internal.h>
 
@@ -43,6 +67,19 @@
 #include "telepathy-glib/_gen/signals-marshal.h"
 
 #include "telepathy-glib/_gen/tp-cli-dbus-daemon-body.h"
+
+/**
+ * tp_asv_size:
+ * @asv: a GHashTable
+ *
+ * Return the size of @asv as if via g_hash_table_size().
+ *
+ * The only difference is that this version takes a const #GHashTable and
+ * casts it.
+ *
+ * Since: 0.7.12
+ */
+/* (#define + static inline in dbus.h) */
 
 /**
  * tp_dbus_g_method_return_not_implemented:

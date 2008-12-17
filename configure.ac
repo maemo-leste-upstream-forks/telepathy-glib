@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [11])
+m4_define([tp_glib_micro_version], [12])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [12])
-m4_define([tp_glib_lt_revision], [1])
-m4_define([tp_glib_lt_age], [12])
+m4_define([tp_glib_lt_current], [13])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [13])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -42,7 +42,7 @@ AC_INIT([Telepathy-GLib], [tp_glib_version],
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.8 -Wno-portability])
+AM_INIT_AUTOMAKE([1.9 -Wno-portability])
 AM_CONFIG_HEADER(config.h)
 
 dnl check for tools
