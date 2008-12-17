@@ -32,9 +32,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-invalidated-while-invoking-signals$(EXEEXT) \
-	test-call-cancellation$(EXEEXT) test-dbus$(EXEEXT) \
-	test-disconnection$(EXEEXT) test-example-no-protocols$(EXEEXT) \
+noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
+	test-channel-introspect$(EXEEXT) \
+	test-connection-getinterfaces-failure$(EXEEXT) \
+	test-dbus$(EXEEXT) test-disconnection$(EXEEXT) \
+	test-example-no-protocols$(EXEEXT) test-handle-set$(EXEEXT) \
+	test-invalidated-while-invoking-signals$(EXEEXT) \
 	test-properties$(EXEEXT) test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
@@ -53,24 +56,38 @@ test_call_cancellation_SOURCES = test-call-cancellation.c
 test_call_cancellation_OBJECTS = test-call-cancellation.$(OBJEXT)
 am__DEPENDENCIES_1 =
 test_call_cancellation_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../libtp-glib-tests.la
+	../lib/libtp-glib-tests.la
+am_test_channel_introspect_OBJECTS = channel-introspect.$(OBJEXT)
+test_channel_introspect_OBJECTS =  \
+	$(am_test_channel_introspect_OBJECTS)
+test_channel_introspect_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../lib/libtp-glib-tests.la
+am_test_connection_getinterfaces_failure_OBJECTS =  \
+	connection-getinterfaces-failure.$(OBJEXT)
+test_connection_getinterfaces_failure_OBJECTS =  \
+	$(am_test_connection_getinterfaces_failure_OBJECTS)
+test_connection_getinterfaces_failure_DEPENDENCIES =  \
+	$(am__DEPENDENCIES_1) ../lib/libtp-glib-tests.la
 test_dbus_SOURCES = test-dbus.c
 test_dbus_OBJECTS = test-dbus.$(OBJEXT)
 test_dbus_DEPENDENCIES = $(am__DEPENDENCIES_1)
 test_disconnection_SOURCES = test-disconnection.c
 test_disconnection_OBJECTS = test-disconnection.$(OBJEXT)
 test_disconnection_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../libtp-glib-tests.la
+	../lib/libtp-glib-tests.la
 test_example_no_protocols_SOURCES = test-example-no-protocols.c
 test_example_no_protocols_OBJECTS =  \
 	test-example-no-protocols.$(OBJEXT)
 test_example_no_protocols_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_test_handle_set_OBJECTS = handle-set.$(OBJEXT)
+test_handle_set_OBJECTS = $(am_test_handle_set_OBJECTS)
+test_handle_set_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_test_invalidated_while_invoking_signals_OBJECTS =  \
 	invalidated-while-invoking-signals.$(OBJEXT)
 test_invalidated_while_invoking_signals_OBJECTS =  \
 	$(am_test_invalidated_while_invoking_signals_OBJECTS)
 test_invalidated_while_invoking_signals_DEPENDENCIES =  \
-	$(am__DEPENDENCIES_1) ../libtp-glib-tests.la
+	$(am__DEPENDENCIES_1) ../lib/libtp-glib-tests.la
 am_test_properties_OBJECTS = properties.$(OBJEXT) svc.$(OBJEXT)
 test_properties_OBJECTS = $(am_test_properties_OBJECTS)
 test_properties_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -91,13 +108,18 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = test-call-cancellation.c test-dbus.c test-disconnection.c \
-	test-example-no-protocols.c \
+SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
+	$(test_connection_getinterfaces_failure_SOURCES) test-dbus.c \
+	test-disconnection.c test-example-no-protocols.c \
+	$(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_properties_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
-DIST_SOURCES = test-call-cancellation.c test-dbus.c \
+DIST_SOURCES = test-call-cancellation.c \
+	$(test_channel_introspect_SOURCES) \
+	$(test_connection_getinterfaces_failure_SOURCES) test-dbus.c \
 	test-disconnection.c test-example-no-protocols.c \
+	$(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_properties_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
@@ -236,19 +258,33 @@ top_srcdir = @top_srcdir@
 TESTS = $(noinst_PROGRAMS)
 test_call_cancellation_LDADD = \
     $(TP_GLIB_LIBS) \
-    ../libtp-glib-tests.la
+    ../lib/libtp-glib-tests.la
+
+test_channel_introspect_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+
+test_channel_introspect_SOURCES = channel-introspect.c
+test_connection_getinterfaces_failure_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+
+test_connection_getinterfaces_failure_SOURCES = \
+    connection-getinterfaces-failure.c
 
 test_dbus_LDADD = $(TP_GLIB_LIBS)
 test_disconnection_LDADD = \
     $(TP_GLIB_LIBS) \
-    ../libtp-glib-tests.la
+    ../lib/libtp-glib-tests.la
 
 test_example_no_protocols_LDADD = $(TP_GLIB_LIBS)
+test_handle_set_SOURCES = handle-set.c
+test_handle_set_LDADD = $(TP_GLIB_LIBS)
 test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
 test_unsupported_interface_SOURCES = unsupported-interface.c
 test_invalidated_while_invoking_signals_LDADD = \
     $(TP_GLIB_LIBS) \
-    ../libtp-glib-tests.la
+    ../lib/libtp-glib-tests.la
 
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
@@ -339,6 +375,12 @@ clean-noinstPROGRAMS:
 test-call-cancellation$(EXEEXT): $(test_call_cancellation_OBJECTS) $(test_call_cancellation_DEPENDENCIES) 
 	@rm -f test-call-cancellation$(EXEEXT)
 	$(LINK) $(test_call_cancellation_OBJECTS) $(test_call_cancellation_LDADD) $(LIBS)
+test-channel-introspect$(EXEEXT): $(test_channel_introspect_OBJECTS) $(test_channel_introspect_DEPENDENCIES) 
+	@rm -f test-channel-introspect$(EXEEXT)
+	$(LINK) $(test_channel_introspect_OBJECTS) $(test_channel_introspect_LDADD) $(LIBS)
+test-connection-getinterfaces-failure$(EXEEXT): $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_DEPENDENCIES) 
+	@rm -f test-connection-getinterfaces-failure$(EXEEXT)
+	$(LINK) $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_LDADD) $(LIBS)
 test-dbus$(EXEEXT): $(test_dbus_OBJECTS) $(test_dbus_DEPENDENCIES) 
 	@rm -f test-dbus$(EXEEXT)
 	$(LINK) $(test_dbus_OBJECTS) $(test_dbus_LDADD) $(LIBS)
@@ -348,6 +390,9 @@ test-disconnection$(EXEEXT): $(test_disconnection_OBJECTS) $(test_disconnection_
 test-example-no-protocols$(EXEEXT): $(test_example_no_protocols_OBJECTS) $(test_example_no_protocols_DEPENDENCIES) 
 	@rm -f test-example-no-protocols$(EXEEXT)
 	$(LINK) $(test_example_no_protocols_OBJECTS) $(test_example_no_protocols_LDADD) $(LIBS)
+test-handle-set$(EXEEXT): $(test_handle_set_OBJECTS) $(test_handle_set_DEPENDENCIES) 
+	@rm -f test-handle-set$(EXEEXT)
+	$(LINK) $(test_handle_set_OBJECTS) $(test_handle_set_LDADD) $(LIBS)
 test-invalidated-while-invoking-signals$(EXEEXT): $(test_invalidated_while_invoking_signals_OBJECTS) $(test_invalidated_while_invoking_signals_DEPENDENCIES) 
 	@rm -f test-invalidated-while-invoking-signals$(EXEEXT)
 	$(LINK) $(test_invalidated_while_invoking_signals_OBJECTS) $(test_invalidated_while_invoking_signals_LDADD) $(LIBS)
@@ -364,6 +409,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-getinterfaces-failure.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidated-while-invoking-signals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@

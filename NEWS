@@ -1,3 +1,67 @@
+telepathy-glib 0.7.6 (2008-04-03)
+=================================
+
+The "hold the assertions" release.
+
+API changes:
+
+* API was added to fix fd.o #15325. Projects that add extension interfaces
+  to TpChannel or TpConnection might suffer from assertion failures if those
+  interfaces are later added to telepathy-glib, unless they follow the
+  recommendations below. Projects that do not use the telepathy-glib code
+  generation tools are unaffected.
+
+* Related to the above, extending TpDBusDaemon, TpMediaStreamHandler,
+  TpMediaSessionHandler and TpConnectionManager is officially not supported
+  at this time.
+
+Enhancements:
+
+* Updated to specification 0.17.3
+  - supports the CallState interface, for receiving notifications of a
+    remote contact or device's state (currently supported states are: ringing,
+    queued, placed us on hold)
+  - MediaStreamHandler supports some new Hold-related API
+  - the Hold interface is *not* yet supported, use private code-generation
+    (as seen in telepathy-sofiasip) for now
+
+Fixes:
+
+* Doesn't assert in client code when a connection's GetInterfaces method fails
+  (fd.o #15306)
+
+* The build process works on platforms without -Wl,-O1 and
+  -Wl,--version-script, such as Mac OS X (fd.o #15026)
+
+* test-handle-set now runs under a temporary session bus, so the tests can work
+  in platforms without working D-Bus autolaunch
+
+* Code generation uses G_GNUC_UNUSED where necessary, so you can use the
+  generated code in projects with stricter warning flags than telepathy-glib
+  itself
+
+* A couple of unterminated argument lists when initializing the allowed
+  message types for the text mixin have been fixed
+
+* glib-client-gen.py optionally inserts a guard against assertion failures
+  caused by a local extension overriding an interface that is also now provided
+  by telepathy-glib (fd.o #15325)
+
+* glib-client-gen.py has a mechanism to allow its output to be made
+  backwards-compatible: specify --tp-proxy-api=x.y.z where x.y.z is the oldest
+  version of telepathy-glib you check for in configure.ac (it must be at
+  least 0.7.6)
+
+Recommended updates for projects using telepathy-glib code generation:
+
+* Update glib-client-gen.py from telepathy-glib, and invoke it with
+  the extra argument "--tp-proxy-api=0.7.6", to fix #15325 (this will make
+  the generated code require telepathy-glib 0.7.6)
+
+* Before calling tp_proxy_or_subclass_hook_on_interface_add for an existing
+  class, call tp_proxy_init_known_interfaces,
+  tp_connection_init_known_interfaces or tp_channel_init_known_interfaces.
+
 telepathy-glib 0.7.5 (2008-03-07)
 =================================
 

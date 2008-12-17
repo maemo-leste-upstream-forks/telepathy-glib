@@ -36,7 +36,7 @@ test_svc_with_properties_get_type (void)
 }
 
 static inline void
-test_svc_with_properties_base_init_once (gpointer klass)
+test_svc_with_properties_base_init_once (gpointer klass G_GNUC_UNUSED)
 {
   static TpDBusPropertiesMixinPropInfo properties[4] = {
       { 0, TP_DBUS_PROPERTIES_MIXIN_FLAG_READ, "u", 0, NULL, NULL }, /* ReadOnly */

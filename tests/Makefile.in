@@ -14,7 +14,6 @@
 
 @SET_MAKE@
 
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -46,19 +45,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libtp_glib_tests_la_LIBADD =
-am_libtp_glib_tests_la_OBJECTS = simple-conn.lo simple-manager.lo \
-	stub-object.lo
-libtp_glib_tests_la_OBJECTS = $(am_libtp_glib_tests_la_OBJECTS)
-am__EXEEXT_1 = test-handle-set$(EXEEXT) test-heap$(EXEEXT) \
-	test-intset$(EXEEXT) test-util$(EXEEXT)
+am__EXEEXT_1 = test-heap$(EXEEXT) test-intset$(EXEEXT) \
+	test-util$(EXEEXT)
 am__EXEEXT_2 = test-internal-debug$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
-am_test_handle_set_OBJECTS = test-handle-set.$(OBJEXT)
-test_handle_set_OBJECTS = $(am_test_handle_set_OBJECTS)
-test_handle_set_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 am_test_heap_OBJECTS = test-heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
 test_heap_DEPENDENCIES =  \
@@ -87,13 +77,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libtp_glib_tests_la_SOURCES) $(test_handle_set_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+SOURCES = $(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
 	$(test_intset_SOURCES) $(test_util_SOURCES)
-DIST_SOURCES = $(libtp_glib_tests_la_SOURCES) \
-	$(test_handle_set_SOURCES) $(test_heap_SOURCES) \
-	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
-	$(test_util_SOURCES)
+DIST_SOURCES = $(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+	$(test_intset_SOURCES) $(test_util_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -238,11 +225,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
     . \
+    lib \
     dbus \
     tools
 
 DYNAMIC_TESTS = \
-    test-handle-set \
     test-heap \
     test-intset \
     test-util
@@ -253,16 +240,6 @@ STATIC_TESTS = \
 TESTS = $(noinst_PROGRAMS)
 TESTS_ENVIRONMENT = \
     G_DEBUG=fatal_warnings,fatal_criticals
-
-noinst_LTLIBRARIES = libtp-glib-tests.la
-libtp_glib_tests_la_SOURCES = \
-    myassert.h \
-    simple-conn.c \
-    simple-conn.h \
-    simple-manager.c \
-    simple-manager.h \
-    stub-object.c \
-    stub-object.h
 
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
@@ -275,12 +252,6 @@ VALGRIND_TESTS_ENVIRONMENT = \
         $(VALGRIND_FLAGS)
 
 EXTRA_DIST = README
-test_handle_set_SOURCES = \
-    test-handle-set.c
-
-test_handle_set_LDADD = \
-    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
-
 test_heap_SOURCES = \
     test-heap.c
 
@@ -349,26 +320,12 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
-	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
-	  test "$$dir" != "$$p" || dir=.; \
-	  echo "rm -f \"$${dir}/so_locations\""; \
-	  rm -f "$${dir}/so_locations"; \
-	done
-libtp-glib-tests.la: $(libtp_glib_tests_la_OBJECTS) $(libtp_glib_tests_la_DEPENDENCIES) 
-	$(LINK)  $(libtp_glib_tests_la_OBJECTS) $(libtp_glib_tests_la_LIBADD) $(LIBS)
-
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-test-handle-set$(EXEEXT): $(test_handle_set_OBJECTS) $(test_handle_set_DEPENDENCIES) 
-	@rm -f test-handle-set$(EXEEXT)
-	$(LINK) $(test_handle_set_OBJECTS) $(test_handle_set_LDADD) $(LIBS)
 test-heap$(EXEEXT): $(test_heap_OBJECTS) $(test_heap_DEPENDENCIES) 
 	@rm -f test-heap$(EXEEXT)
 	$(LINK) $(test_heap_OBJECTS) $(test_heap_LDADD) $(LIBS)
@@ -388,10 +345,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-conn.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-manager.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stub-object.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-internal-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-intset.Po@am__quote@
@@ -673,7 +626,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS check-local
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+all-am: Makefile $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -702,8 +655,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -764,19 +717,18 @@ uninstall-am:
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-TESTS check-am check-local clean \
-	clean-generic clean-libtool clean-noinstLTLIBRARIES \
-	clean-noinstPROGRAMS ctags ctags-recursive distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am
+	clean-generic clean-libtool clean-noinstPROGRAMS ctags \
+	ctags-recursive distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am
 
 
 check-valgrind:

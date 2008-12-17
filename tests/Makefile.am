@@ -1,10 +1,10 @@
 SUBDIRS = \
     . \
+    lib \
     dbus \
     tools
 
 DYNAMIC_TESTS = \
-    test-handle-set \
     test-heap \
     test-intset \
     test-util
@@ -15,17 +15,6 @@ noinst_PROGRAMS = $(DYNAMIC_TESTS) $(STATIC_TESTS)
 TESTS = $(noinst_PROGRAMS)
 TESTS_ENVIRONMENT = \
     G_DEBUG=fatal_warnings,fatal_criticals
-
-noinst_LTLIBRARIES = libtp-glib-tests.la
-
-libtp_glib_tests_la_SOURCES = \
-    myassert.h \
-    simple-conn.c \
-    simple-conn.h \
-    simple-manager.c \
-    simple-manager.h \
-    stub-object.c \
-    stub-object.h
 
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
@@ -44,11 +33,6 @@ check-valgrind:
 	$(MAKE) -C dbus check-valgrind
 
 EXTRA_DIST = README
-
-test_handle_set_SOURCES = \
-    test-handle-set.c
-test_handle_set_LDADD = \
-    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
 
 test_heap_SOURCES = \
     test-heap.c
