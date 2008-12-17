@@ -1,0 +1,399 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Common debug support</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-utilities.html" title="Utilities">
+<link rel="prev" href="telepathy-glib-debug-ansi.html" title="ANSI codes for debug messages">
+<link rel="next" href="telepathy-glib-TpIntSet.html" title="TpIntSet">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-debug-ansi.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-utilities.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-TpIntSet.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#telepathy-glib-debug.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#telepathy-glib-debug.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-debug"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="telepathy-glib-debug.top_of_page"></a>Common debug support</span></h2>
+<p>Common debug support — API to activate debugging messages from telepathy-glib</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="telepathy-glib-debug.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/debug.h&gt;
+
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags" title="tp_debug_set_flags ()">tp_debug_set_flags</a>                  (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *flags_string);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()">tp_debug_set_persistent</a>             (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> persistent);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-divert-messages" title="tp_debug_divert_messages ()">tp_debug_divert_messages</a>            (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-timestamped-log-handler" title="tp_debug_timestamped_log_handler ()">tp_debug_timestamped_log_handler</a>    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *log_domain,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Message-Logging.html#GLogLevelFlags"
+>GLogLevelFlags</a> log_level,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *message,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> ignored);
+
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-string" title="tp_debug_set_flags_from_string ()">tp_debug_set_flags_from_string</a>      (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *flags_string);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags-from-env" title="tp_debug_set_flags_from_env ()">tp_debug_set_flags_from_env</a>         (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *var);
+void                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-all-flags" title="tp_debug_set_all_flags ()">tp_debug_set_all_flags</a>              (void);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-debug.description"></a><h2>Description</h2>
+<p>
+telepathy-glib has an internal mechanism for debug messages and filtering.
+Connection managers written with telepathy-glib are expected to connect
+this to their own debugging mechanisms: when the CM's debugging mechanism
+is activated, it should call <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags" title="tp_debug_set_flags ()"><code class="function">tp_debug_set_flags()</code></a> and/or
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()"><code class="function">tp_debug_set_persistent()</code></a>.
+</p>
+<p>
+The supported debug-mode keywords and the debug messages that they enable
+are subject to change, but currently include:
+</p>
+<p>
+</p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<code class="literal">manager</code> -
+   <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> (client)</li>
+<li>
+<code class="literal">connection</code> - <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> (service)
+   and <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> (client)</li>
+<li>
+<code class="literal">contacts</code> - <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> objects
+   (client)</li>
+<li>
+<code class="literal">channel</code> - <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> (client)</li>
+<li>
+<code class="literal">im</code> - (text) instant messaging
+   (service)</li>
+<li>
+<code class="literal">properties</code> -
+   <a class="link" href="telepathy-glib-TpPropertiesMixin.html#TpPropertiesMixin" title="TpPropertiesMixin"><span class="type">TpPropertiesMixin</span></a> (service)</li>
+<li>
+<code class="literal">params</code> - connection manager parameters
+   (service)</li>
+<li>
+<code class="literal">handles</code> - handle reference tracking tracking
+   in <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> (service) and <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> (client)</li>
+<li>
+<code class="literal">all</code> - all of the above</li>
+</ul></div>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-debug.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="tp-debug-set-flags"></a><h3>tp_debug_set_flags ()</h3>
+<pre class="programlisting">void                tp_debug_set_flags                  (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *flags_string);</pre>
+<p>
+Set the debug flags indicated by <em class="parameter"><code>flags_string</code></em>, in addition to any already
+set.
+</p>
+<p>
+The parsing matches that of <a
+href="/usr/share/gtk-doc/html/glib/glib-Miscellaneous-Utility-Functions.html#g-parse-debug-string"
+><code class="function">g_parse_debug_string()</code></a>.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>since</code></em> 0.6.1</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>flags_string</code></em> :</span></p></td>
+<td> The flags to set, comma-separated. If <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> or empty,
+ no additional flags are set.
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-debug-set-persistent"></a><h3>tp_debug_set_persistent ()</h3>
+<pre class="programlisting">void                tp_debug_set_persistent             (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> persistent);</pre>
+<p>
+Used to enable persistent operation of the connection manager process for
+debugging purposes.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>persistent</code></em> :</span></p></td>
+<td> TRUE prevents the connection manager mainloop from exiting,
+             FALSE enables exiting if there are no connections
+             (the default behavior).
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-debug-divert-messages"></a><h3>tp_debug_divert_messages ()</h3>
+<pre class="programlisting">void                tp_debug_divert_messages            (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);</pre>
+<p>
+Open the given file for writing and duplicate its file descriptor to
+be used for stdout and stderr. This has the effect of closing the previous
+stdout and stderr, and sending all messages that would have gone there
+to the given file instead.
+</p>
+<p>
+By default the file is truncated and hence overwritten each time the
+process is executed.
+Since version 0.7.14, if the filename is prefixed with '+' then the
+file is not truncated and output is added at the end of the file.
+</p>
+<p>
+Passing <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> to this function is guaranteed to have no effect. This is
+so you can call it with the recommended usage
+<code class="literal">tp_debug_divert_messages (g_getenv ("MYAPP_LOGFILE"))</code>
+and it won't do anything if the environment variable is not set.
+</p>
+<p>
+This function still works if telepathy-glib was compiled without debug
+support.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> A file to which to divert stdout and stderr, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> to
+ do nothing
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-debug-timestamped-log-handler"></a><h3>tp_debug_timestamped_log_handler ()</h3>
+<pre class="programlisting">void                tp_debug_timestamped_log_handler    (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *log_domain,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Message-Logging.html#GLogLevelFlags"
+>GLogLevelFlags</a> log_level,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *message,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> ignored);</pre>
+<p>
+A <a
+href="/usr/share/gtk-doc/html/glib/glib-Message-Logging.html#GLogFunc"
+><span class="type">GLogFunc</span></a> that prepends the local time (currently in
+YYYY-MM-DD HH:MM:SS.SSSSSS format, with microsecond resolution) to the
+message, then calls g_log_default_handler.
+</p>
+<p>
+Intended usage is:
+</p>
+<p>
+</p>
+<div class="informalexample"><pre class="programlisting">if (g_getenv ("MYPROG_TIMING") != NULL)
+  g_log_set_default_handler (tp_debug_timestamped_log_handler, NULL);
+</pre></div>
+<p>
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function is equivalent to <a
+href="/usr/share/gtk-doc/html/glib/glib-Message-Logging.html#g-log-default-handler"
+><code class="function">g_log_default_handler()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>log_domain</code></em> :</span></p></td>
+<td> the message's log domain
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>log_level</code></em> :</span></p></td>
+<td> the log level of the message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>message</code></em> :</span></p></td>
+<td> the message to process
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ignored</code></em> :</span></p></td>
+<td> not used
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.1
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-debug-set-flags-from-string"></a><h3>tp_debug_set_flags_from_string ()</h3>
+<pre class="programlisting">void                tp_debug_set_flags_from_string      (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *flags_string);</pre>
+<p>
+Set the debug flags indicated by <em class="parameter"><code>flags_string</code></em>, in addition to any already
+set. Unlike <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags" title="tp_debug_set_flags ()"><code class="function">tp_debug_set_flags()</code></a>, this enables persistence like
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()"><code class="function">tp_debug_set_persistent()</code></a> if the "persist" flag is present or the string
+is "all" - this turns out to be unhelpful, as persistence should be
+orthogonal.
+</p>
+<p>
+The parsing matches that of <a
+href="/usr/share/gtk-doc/html/glib/glib-Miscellaneous-Utility-Functions.html#g-parse-debug-string"
+><code class="function">g_parse_debug_string()</code></a>.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>deprecated</code></em> since 0.6.1. Use <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags" title="tp_debug_set_flags ()"><code class="function">tp_debug_set_flags()</code></a> and
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()"><code class="function">tp_debug_set_persistent()</code></a> instead</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>flags_string</code></em> :</span></p></td>
+<td> The flags to set, comma-separated. If <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> or empty,
+ no additional flags are set.
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-debug-set-flags-from-env"></a><h3>tp_debug_set_flags_from_env ()</h3>
+<pre class="programlisting">void                tp_debug_set_flags_from_env         (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *var);</pre>
+<p>
+Equivalent to
+<code class="literal">tp_debug_set_flags_from_string (g_getenv (var))</code>,
+and has the same problem with persistence being included in "all".
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>deprecated</code></em> since 0.6.1. Use tp_debug_set_flags(g_getenv(...)) and
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()"><code class="function">tp_debug_set_persistent()</code></a> instead</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>var</code></em> :</span></p></td>
+<td> The name of the environment variable to parse
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-debug-set-all-flags"></a><h3>tp_debug_set_all_flags ()</h3>
+<pre class="programlisting">void                tp_debug_set_all_flags              (void);</pre>
+<p>
+Activate all possible debug modes. This also activates persistent mode,
+which should have been orthogonal.
+</p>
+<p>
+If telepathy-glib was compiled with --disable-debug (not recommended),
+this function does nothing.
+</p>
+<p>
+<em class="parameter"><code>deprecated</code></em> since 0.6.1. Use tp_debug_set_flags ("all") and
+<a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()"><code class="function">tp_debug_set_persistent()</code></a> instead.</p>
+<p>
+
+</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-asv">
+<refmeta>
+<refentrytitle role="top_of_page" id="telepathy-glib-asv.top_of_page">Manipulating a{sv} mappings</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Manipulating a{sv} mappings</refname>
+<refpurpose>Functions to manipulate mappings from string to
+ variant, as represented in dbus-glib by a <link linkend="GHashTable"><type>GHashTable</type></link> from string
+ to <link linkend="GValue"><type>GValue</type></link></refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="telepathy-glib-asv.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;telepathy-glib/dbus.h&gt;
+
+#define             <link linkend="tp-asv-size">tp_asv_size</link>                         (asv)
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-asv-get-boolean">tp_asv_get_boolean</link>                  (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);
+<link linkend="gpointer">gpointer</link>            <link linkend="tp-asv-get-boxed">tp_asv_get_boxed</link>                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="GType">GType</link> type);
+const <link linkend="GArray">GArray</link>*       <link linkend="tp-asv-get-bytes">tp_asv_get_bytes</link>                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);
+<link linkend="gdouble">gdouble</link>             <link linkend="tp-asv-get-double">tp_asv_get_double</link>                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);
+<link linkend="gint32">gint32</link>              <link linkend="tp-asv-get-int32">tp_asv_get_int32</link>                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);
+<link linkend="gint64">gint64</link>              <link linkend="tp-asv-get-int64">tp_asv_get_int64</link>                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);
+const <link linkend="gchar">gchar</link>*        <link linkend="tp-asv-get-object-path">tp_asv_get_object_path</link>              (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);
+const <link linkend="gchar">gchar</link>*        <link linkend="tp-asv-get-string">tp_asv_get_string</link>                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);
+const <link linkend="gchar">gchar</link>* const * <link linkend="tp-asv-get-strv">tp_asv_get_strv</link>                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);
+<link linkend="guint32">guint32</link>             <link linkend="tp-asv-get-uint32">tp_asv_get_uint32</link>                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);
+<link linkend="guint64">guint64</link>             <link linkend="tp-asv-get-uint64">tp_asv_get_uint64</link>                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);
+const <link linkend="GValue">GValue</link>*       <link linkend="tp-asv-lookup">tp_asv_lookup</link>                       (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="telepathy-glib-asv.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Mappings from string to variant (D-Bus signature a{sv}) are commonly used
+to provide extensibility, but in dbus-glib they're somewhat awkward to deal
+with.
+</para>
+<para>
+These functions provide convenient access to the values in such
+a mapping.
+</para>
+<para>
+They also work around the fact that none of the <link linkend="GHashTable"><type>GHashTable</type></link> public API
+takes a const pointer to a <link linkend="GHashTable"><type>GHashTable</type></link>, even the read-only methods that
+logically ought to.
+</para>
+<para>
+Parts of telepathy-glib return const pointers to <link linkend="GHashTable"><type>GHashTable</type></link>, to encourage
+the use of this API.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="telepathy-glib-asv.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="tp-asv-size" role="macro" condition="since:0.7.12">
+<title>tp_asv_size()</title>
+<indexterm zone="tp-asv-size" role="0.7.12"><primary>tp_asv_size</primary></indexterm><programlisting>#define tp_asv_size(asv) _tp_asv_size_inline (asv)
+</programlisting>
+<para>
+Return the size of <parameter>asv</parameter> as if via <link linkend="g-hash-table-size"><function>g_hash_table_size()</function></link>.
+</para>
+<para>
+The only difference is that this version takes a const <link linkend="GHashTable"><type>GHashTable</type></link> and
+casts it.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> a GHashTable
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.12
+</para></refsect2>
+<refsect2 id="tp-asv-get-boolean" role="function" condition="since:0.7.9">
+<title>tp_asv_get_boolean ()</title>
+<indexterm zone="tp-asv-get-boolean" role="0.7.9"><primary>tp_asv_get_boolean</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_asv_get_boolean                  (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and boolean, return it,
+and set *<parameter>valid</parameter> to <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+Otherwise return <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>, and set *<parameter>valid</parameter> to <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+(FIXME: should we also allow 'i' and 'u' with nonzero &lt;=&gt; True?)</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>valid</parameter>&nbsp;:</term>
+<listitem><simpara> Either <link linkend="NULL:CAPS"><literal>NULL</literal></link>, or a location to store <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if the key actually
+ exists and has a boolean value
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a boolean value for <parameter>key</parameter>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-boxed" role="function" condition="since:0.7.9">
+<title>tp_asv_get_boxed ()</title>
+<indexterm zone="tp-asv-get-boxed" role="0.7.9"><primary>tp_asv_get_boxed</primary></indexterm><programlisting><link linkend="gpointer">gpointer</link>            tp_asv_get_boxed                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="GType">GType</link> type);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and is of the desired type,
+return it.
+</para>
+<para>
+Otherwise return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned value is not copied, and is only valid as long as the value
+for <parameter>key</parameter> in <parameter>asv</parameter> is not removed or altered. Copy it, for instance with
+<link linkend="g-boxed-copy"><function>g_boxed_copy()</function></link>, if you need to keep it for longer.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>type</parameter>&nbsp;:</term>
+<listitem><simpara> The type that the key's value should have, which must be derived
+ from <link linkend="G-TYPE-BOXED:CAPS"><literal>G_TYPE_BOXED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the value of <parameter>key</parameter>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-bytes" role="function" condition="since:0.7.9">
+<title>tp_asv_get_bytes ()</title>
+<indexterm zone="tp-asv-get-bytes" role="0.7.9"><primary>tp_asv_get_bytes</primary></indexterm><programlisting>const <link linkend="GArray">GArray</link>*       tp_asv_get_bytes                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and is an array of bytes
+(its GType is <link linkend="DBUS-TYPE-G-UCHAR-ARRAY:CAPS"><literal>DBUS_TYPE_G_UCHAR_ARRAY</literal></link>), return it.
+</para>
+<para>
+Otherwise return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned value is not copied, and is only valid as long as the value
+for <parameter>key</parameter> in <parameter>asv</parameter> is not removed or altered. Copy it with
+g_boxed_copy (DBUS_TYPE_G_UCHAR_ARRAY, ...) if you need to keep
+it for longer.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the string value of <parameter>key</parameter>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-double" role="function" condition="since:0.7.9">
+<title>tp_asv_get_double ()</title>
+<indexterm zone="tp-asv-get-double" role="0.7.9"><primary>tp_asv_get_double</primary></indexterm><programlisting><link linkend="gdouble">gdouble</link>             tp_asv_get_double                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and has any numeric type used by
+dbus-glib (guchar, gint, guint, gint64, guint64 or gdouble),
+return it as a double, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>.
+</para>
+<para>
+Otherwise, return 0.0, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>valid</parameter>&nbsp;:</term>
+<listitem><simpara> Either <link linkend="NULL:CAPS"><literal>NULL</literal></link>, or a location in which to store <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success or
+   <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the double precision floating-point value of <parameter>key</parameter>, or 0.0
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-int32" role="function" condition="since:0.7.9">
+<title>tp_asv_get_int32 ()</title>
+<indexterm zone="tp-asv-get-int32" role="0.7.9"><primary>tp_asv_get_int32</primary></indexterm><programlisting><link linkend="gint32">gint32</link>              tp_asv_get_int32                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and fits in the
+range of a gint32, return it, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to
+<link linkend="TRUE:CAPS"><literal>TRUE</literal></link>.
+</para>
+<para>
+Otherwise, return 0, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>valid</parameter>&nbsp;:</term>
+<listitem><simpara> Either <link linkend="NULL:CAPS"><literal>NULL</literal></link>, or a location in which to store <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success or
+   <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the 32-bit signed integer value of <parameter>key</parameter>, or 0
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-int64" role="function" condition="since:0.7.9">
+<title>tp_asv_get_int64 ()</title>
+<indexterm zone="tp-asv-get-int64" role="0.7.9"><primary>tp_asv_get_int64</primary></indexterm><programlisting><link linkend="gint64">gint64</link>              tp_asv_get_int64                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and fits in the
+range of a gint64, return it, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to
+<link linkend="TRUE:CAPS"><literal>TRUE</literal></link>.
+</para>
+<para>
+Otherwise, return 0, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>valid</parameter>&nbsp;:</term>
+<listitem><simpara> Either <link linkend="NULL:CAPS"><literal>NULL</literal></link>, or a location in which to store <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success or
+   <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the 64-bit signed integer value of <parameter>key</parameter>, or 0
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-object-path" role="function" condition="since:0.7.9">
+<title>tp_asv_get_object_path ()</title>
+<indexterm zone="tp-asv-get-object-path" role="0.7.9"><primary>tp_asv_get_object_path</primary></indexterm><programlisting>const <link linkend="gchar">gchar</link>*        tp_asv_get_object_path              (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and is an object path, return it.
+</para>
+<para>
+Otherwise return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned value is not copied, and is only valid as long as the value
+for <parameter>key</parameter> in <parameter>asv</parameter> is not removed or altered. Copy it with <link linkend="g-strdup"><function>g_strdup()</function></link> if you
+need to keep it for longer.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the object-path value of <parameter>key</parameter>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-string" role="function" condition="since:0.7.9">
+<title>tp_asv_get_string ()</title>
+<indexterm zone="tp-asv-get-string" role="0.7.9"><primary>tp_asv_get_string</primary></indexterm><programlisting>const <link linkend="gchar">gchar</link>*        tp_asv_get_string                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and is a string, return it.
+</para>
+<para>
+Otherwise return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned value is not copied, and is only valid as long as the value
+for <parameter>key</parameter> in <parameter>asv</parameter> is not removed or altered. Copy it with <link linkend="g-strdup"><function>g_strdup()</function></link> if you
+need to keep it for longer.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the string value of <parameter>key</parameter>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-strv" role="function" condition="since:0.7.9">
+<title>tp_asv_get_strv ()</title>
+<indexterm zone="tp-asv-get-strv" role="0.7.9"><primary>tp_asv_get_strv</primary></indexterm><programlisting>const <link linkend="gchar">gchar</link>* const * tp_asv_get_strv                    (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present and is an array of strings (strv),
+return it.
+</para>
+<para>
+Otherwise return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned value is not copied, and is only valid as long as the value
+for <parameter>key</parameter> in <parameter>asv</parameter> is not removed or altered. Copy it with <link linkend="g-strdupv"><function>g_strdupv()</function></link> if you
+need to keep it for longer.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the <link linkend="NULL:CAPS"><literal>NULL</literal></link>-terminated string-array value of <parameter>key</parameter>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-uint32" role="function" condition="since:0.7.9">
+<title>tp_asv_get_uint32 ()</title>
+<indexterm zone="tp-asv-get-uint32" role="0.7.9"><primary>tp_asv_get_uint32</primary></indexterm><programlisting><link linkend="guint32">guint32</link>             tp_asv_get_uint32                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and fits in the
+range of a guint32, return it, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to
+<link linkend="TRUE:CAPS"><literal>TRUE</literal></link>.
+</para>
+<para>
+Otherwise, return 0, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>valid</parameter>&nbsp;:</term>
+<listitem><simpara> Either <link linkend="NULL:CAPS"><literal>NULL</literal></link>, or a location in which to store <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success or
+   <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the 32-bit unsigned integer value of <parameter>key</parameter>, or 0
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-get-uint64" role="function" condition="since:0.7.9">
+<title>tp_asv_get_uint64 ()</title>
+<indexterm zone="tp-asv-get-uint64" role="0.7.9"><primary>tp_asv_get_uint64</primary></indexterm><programlisting><link linkend="guint64">guint64</link>             tp_asv_get_uint64                   (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key,
+                                                         <link linkend="gboolean">gboolean</link> *valid);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present, has an integer type used by
+dbus-glib (guchar, gint, guint, gint64 or guint64) and is non-negative,
+return it, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>.
+</para>
+<para>
+Otherwise, return 0, and if <parameter>valid</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set *<parameter>valid</parameter> to <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>valid</parameter>&nbsp;:</term>
+<listitem><simpara> Either <link linkend="NULL:CAPS"><literal>NULL</literal></link>, or a location in which to store <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success or
+   <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the 64-bit unsigned integer value of <parameter>key</parameter>, or 0
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+<refsect2 id="tp-asv-lookup" role="function" condition="since:0.7.9">
+<title>tp_asv_lookup ()</title>
+<indexterm zone="tp-asv-lookup" role="0.7.9"><primary>tp_asv_lookup</primary></indexterm><programlisting>const <link linkend="GValue">GValue</link>*       tp_asv_lookup                       (const <link linkend="GHashTable">GHashTable</link> *asv,
+                                                         const <link linkend="gchar">gchar</link> *key);</programlisting>
+<para>
+If a value for <parameter>key</parameter> in <parameter>asv</parameter> is present, return it. Otherwise return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned value is not copied, and is only valid as long as the value
+for <parameter>key</parameter> in <parameter>asv</parameter> is not removed or altered. Copy it with (for instance)
+<link linkend="g-value-copy"><function>g_value_copy()</function></link> if you need to keep it for longer.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>asv</parameter>&nbsp;:</term>
+<listitem><simpara> A GHashTable where the keys are strings and the values are GValues
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>key</parameter>&nbsp;:</term>
+<listitem><simpara> The key to look up
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the value of <parameter>key</parameter>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.9
+</para></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

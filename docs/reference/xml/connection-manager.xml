@@ -1,0 +1,1120 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-connection-manager">
+<refmeta>
+<refentrytitle role="top_of_page" id="telepathy-glib-connection-manager.top_of_page">TpConnectionManager</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>TpConnectionManager</refname>
+<refpurpose>proxy object for a Telepathy connection manager</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="telepathy-glib-connection-manager.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+<anchor id="TpConnectionManager"/>
+<synopsis>
+
+#include &lt;telepathy-glib/connection-manager.h&gt;
+
+<link linkend="void">void</link>                (<link linkend="TpConnectionManagerListCb">*TpConnectionManagerListCb</link>)        (<link linkend="TpConnectionManager">TpConnectionManager</link> * const *cms,
+                                                         <link linkend="gsize">gsize</link> n_cms,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                <link linkend="tp-list-connection-managers">tp_list_connection_managers</link>         (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *bus_daemon,
+                                                         <link linkend="TpConnectionManagerListCb">TpConnectionManagerListCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+                    <link linkend="TpConnectionManager-struct">TpConnectionManager</link>;
+                    <link linkend="TpConnectionManagerProtocol">TpConnectionManagerProtocol</link>;
+                    <link linkend="TpConnectionManagerParam">TpConnectionManagerParam</link>;
+                    <link linkend="TpConnectionManagerClass">TpConnectionManagerClass</link>;
+enum                <link linkend="TpCMInfoSource">TpCMInfoSource</link>;
+<link linkend="TpConnectionManager">TpConnectionManager</link>* <link linkend="tp-connection-manager-new">tp_connection_manager_new</link>          (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *dbus,
+                                                         const <link linkend="gchar">gchar</link> *name,
+                                                         const <link linkend="gchar">gchar</link> *manager_filename,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-connection-manager-activate">tp_connection_manager_activate</link>      (<link linkend="TpConnectionManager">TpConnectionManager</link> *self);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-connection-manager-check-valid-name">tp_connection_manager_check_valid_name</link>
+                                                        (const <link linkend="gchar">gchar</link> *name,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-connection-manager-check-valid-protocol-name">tp_connection_manager_check_valid_protocol_name</link>
+                                                        (const <link linkend="gchar">gchar</link> *name,
+                                                         <link linkend="GError">GError</link> **error);
+
+
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-callback-for-get-parameters">*tp_cli_connection_manager_callback_for_get_parameters</link>)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-manager-call-get-parameters">tp_cli_connection_manager_call_get_parameters</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="tp-cli-connection-manager-callback-for-get-parameters">tp_cli_connection_manager_callback_for_get_parameters</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-manager-run-get-parameters">tp_cli_connection_manager_run_get_parameters</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-callback-for-list-protocols">*tp_cli_connection_manager_callback_for_list_protocols</link>)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-manager-call-list-protocols">tp_cli_connection_manager_call_list_protocols</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-connection-manager-callback-for-list-protocols">tp_cli_connection_manager_callback_for_list_protocols</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-manager-run-list-protocols">tp_cli_connection_manager_run_list_protocols</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-callback-for-request-connection">*tp_cli_connection_manager_callback_for_request_connection</link>)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *out0,
+                                                         const <link linkend="gchar">gchar</link> *out1,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-manager-call-request-connection">tp_cli_connection_manager_call_request_connection</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Parameters,
+                                                         <link linkend="tp-cli-connection-manager-callback-for-request-connection">tp_cli_connection_manager_callback_for_request_connection</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-manager-run-request-connection">tp_cli_connection_manager_run_request_connection</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Parameters,
+                                                         <link linkend="gchar">gchar</link> **out0,
+                                                         <link linkend="gchar">gchar</link> **out1,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-signal-callback-new-connection">*tp_cli_connection_manager_signal_callback_new_connection</link>)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *arg_Bus_Name,
+                                                         const <link linkend="gchar">gchar</link> *arg_Object_Path,
+                                                         const <link linkend="gchar">gchar</link> *arg_Protocol,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-connection-manager-connect-to-new-connection">tp_cli_connection_manager_connect_to_new_connection</link>
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="tp-cli-connection-manager-signal-callback-new-connection">tp_cli_connection_manager_signal_callback_new_connection</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="telepathy-glib-connection-manager.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----<link linkend="TpProxy">TpProxy</link>
+         +----TpConnectionManager
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+<refsect1 id="telepathy-glib-connection-manager.properties" role="properties">
+<title role="properties.title">Properties</title>
+<synopsis>
+  &quot;<link linkend="TpConnectionManager--always-introspect">always-introspect</link>&quot;        <link linkend="gboolean">gboolean</link>              : Read / Write
+  &quot;<link linkend="TpConnectionManager--connection-manager">connection-manager</link>&quot;       <link linkend="gchar">gchar</link>*                : Read
+  &quot;<link linkend="TpConnectionManager--info-source">info-source</link>&quot;              <link linkend="guint">guint</link>                 : Read
+  &quot;<link linkend="TpConnectionManager--manager-file">manager-file</link>&quot;             <link linkend="gchar">gchar</link>*                : Read / Write / Construct
+</synopsis>
+</refsect1>
+
+<refsect1 id="telepathy-glib-connection-manager.signals" role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+  &quot;<link linkend="TpConnectionManager-activated">activated</link>&quot;                                      : Run Last / Has Details
+  &quot;<link linkend="TpConnectionManager-exited">exited</link>&quot;                                         : Run Last / Has Details
+  &quot;<link linkend="TpConnectionManager-got-info">got-info</link>&quot;                                       : Run Last / Has Details
+</synopsis>
+</refsect1>
+
+
+<refsect1 id="telepathy-glib-connection-manager.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="TpConnectionManager"><type>TpConnectionManager</type></link> objects represent Telepathy connection managers. They
+can be used to open connections.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="telepathy-glib-connection-manager.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="TpConnectionManagerListCb" role="function" condition="since:0.7.1">
+<title>TpConnectionManagerListCb ()</title>
+<indexterm zone="TpConnectionManagerListCb" role="0.7.1"><primary>TpConnectionManagerListCb</primary></indexterm><programlisting><link linkend="void">void</link>                (*TpConnectionManagerListCb)        (<link linkend="TpConnectionManager">TpConnectionManager</link> * const *cms,
+                                                         <link linkend="gsize">gsize</link> n_cms,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback supplied to <link linkend="tp-list-connection-managers"><function>tp_list_connection_managers()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>cms</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link>-terminated array of <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link> (the objects will
+  be unreferenced and the array will be freed after the callback returns,
+  so the callback must reference any CMs it stores a pointer to),
+  or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on error
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n_cms</parameter>&nbsp;:</term>
+<listitem><simpara> number of connection managers in <parameter>cms</parameter> (not including the final
+ <link linkend="NULL:CAPS"><literal>NULL</literal></link>)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error that occurred
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="tp-list-connection-managers" role="function" condition="since:0.7.1">
+<title>tp_list_connection_managers ()</title>
+<indexterm zone="tp-list-connection-managers" role="0.7.1"><primary>tp_list_connection_managers</primary></indexterm><programlisting><link linkend="void">void</link>                tp_list_connection_managers         (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *bus_daemon,
+                                                         <link linkend="TpConnectionManagerListCb">TpConnectionManagerListCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+List the available (running or installed) connection managers. Call the
+callback when done.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>bus_daemon</parameter>&nbsp;:</term>
+<listitem><simpara> proxy for the D-Bus daemon
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> callback to be called when listing the CMs succeeds or fails;
+  not called if the <parameter>weak_object</parameter> goes away
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> callback to destroy the user-supplied data, called after
+  <parameter>callback</parameter>, but also if the <parameter>weak_object</parameter> goes away
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> if not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, will be weakly referenced; the callback will
+  not be called, and the call will be cancelled, if the object has vanished
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="TpConnectionManager-struct" role="struct">
+<title>TpConnectionManager</title>
+<indexterm zone="TpConnectionManager-struct" role="0.7.1"><primary>TpConnectionManager</primary></indexterm><programlisting>typedef struct {
+    TpProxy parent;
+
+    const gchar *name;
+    const TpConnectionManagerProtocol * const *protocols;
+
+    /* These are really booleans, but gboolean is signed. Thanks, GLib */
+    unsigned int running:1;
+    unsigned int always_introspect:1;
+    TpCMInfoSource info_source:2;
+    guint reserved_flags:28;
+
+    TpConnectionManagerPrivate *priv;
+} TpConnectionManager;
+</programlisting>
+<para>
+A proxy object for a Telepathy connection manager.
+</para>
+<para>
+This might represent a connection manager which is currently running
+(in which case it can be introspected) or not (in which case its
+capabilities can be read from .manager files in the filesystem).
+Accordingly, this object never emits <link linkend="TpProxy-invalidated"><type>"invalidated"</type></link> unless all
+references to it are discarded.
+</para>
+<para>
+On initialization, we find and read the .manager file, and emit
+got-info(FILE) on success, got-info(NONE) if no file
+or if reading the file failed.
+</para>
+<para>
+When the CM runs, we automatically introspect it if <parameter>always_introspect</parameter>
+is <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>. On success we emit got-info(LIVE). On failure, re-emit
+got-info(NONE) or got-info(FILE) as appropriate.
+</para>
+<para>
+If we're asked to activate the CM, it'll implicitly be introspected.
+</para>
+<para>
+If the CM exits, we still consider it to have been "introspected". If it's
+re-run, we introspect it again.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="TpProxy">TpProxy</link>&nbsp;<structfield>parent</structfield>;</term>
+<listitem><simpara> The parent class instance
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term>const&nbsp;<link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> The identifier of the connection manager (e.g. "gabble").
+ Should be considered read-only
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term>const&nbsp;<link linkend="TpConnectionManagerProtocol">TpConnectionManagerProtocol</link>&nbsp;*&nbsp;const&nbsp;&nbsp;*<structfield>protocols</structfield>;</term>
+<listitem><simpara> If info_source &gt; <link linkend="TP-CM-INFO-SOURCE-NONE:CAPS"><literal>TP_CM_INFO_SOURCE_NONE</literal></link>, a <link linkend="NULL:CAPS"><literal>NULL</literal></link>-terminated
+ array of pointers to <link linkend="TpConnectionManagerProtocol"><type>TpConnectionManagerProtocol</type></link> structures; otherwise
+ <link linkend="NULL:CAPS"><literal>NULL</literal></link>. Should be considered read-only
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term>unsigned&nbsp;<link linkend="int">int</link>&nbsp;<structfield>running</structfield>&nbsp;:1;</term>
+<listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if the CM is currently known to be running. Should be
+ considered read-only
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term>unsigned&nbsp;<link linkend="int">int</link>&nbsp;<structfield>always_introspect</structfield>&nbsp;:1;</term>
+<listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if the CM will be introspected automatically.
+ Should be considered read-only: use the
+ <link linkend="TpConnectionManager--always-introspect"><type>"always-introspect"</type></link> property if you want to change it
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpCMInfoSource">TpCMInfoSource</link>&nbsp;<structfield>info_source</structfield>&nbsp;:2;</term>
+<listitem><simpara> The source of <parameter>protocols</parameter>, or <link linkend="TP-CM-INFO-SOURCE-NONE:CAPS"><literal>TP_CM_INFO_SOURCE_NONE</literal></link>
+ if no info has been discovered yet
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint">guint</link>&nbsp;<structfield>reserved_flags</structfield>&nbsp;:28;</term>
+<listitem><simpara> Reserved for future use
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpConnectionManagerPrivate">TpConnectionManagerPrivate</link>&nbsp;*<structfield>priv</structfield>;</term>
+<listitem><simpara> Pointer to opaque private data
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="TpConnectionManagerProtocol" role="struct" condition="since:0.7.1">
+<title>TpConnectionManagerProtocol</title>
+<indexterm zone="TpConnectionManagerProtocol" role="0.7.1"><primary>TpConnectionManagerProtocol</primary></indexterm><programlisting>typedef struct {
+  gchar *name;
+  TpConnectionManagerParam *params;
+} TpConnectionManagerProtocol;
+</programlisting>
+<para>
+Structure representing a protocol supported by a connection manager.
+Note that the size of this structure may change, so its size must not be
+relied on.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> The name of this connection manager
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpConnectionManagerParam">TpConnectionManagerParam</link>&nbsp;*<structfield>params</structfield>;</term>
+<listitem><simpara> Array of <link linkend="TpConnectionManagerParam"><type>TpConnectionManagerParam</type></link> structures, terminated by
+ a structure whose <parameter>name</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="TpConnectionManagerParam" role="struct" condition="since:0.7.1">
+<title>TpConnectionManagerParam</title>
+<indexterm zone="TpConnectionManagerParam" role="0.7.1"><primary>TpConnectionManagerParam</primary></indexterm><programlisting>typedef struct {
+  gchar *name;
+  gchar *dbus_signature;
+  GValue default_value;
+  guint flags;
+
+  gpointer priv;
+} TpConnectionManagerParam;
+</programlisting>
+<para>
+Structure representing a connection manager parameter.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> The name of this parameter
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>dbus_signature</structfield>;</term>
+<listitem><simpara> This parameter's D-Bus signature
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GValue">GValue</link>&nbsp;<structfield>default_value</structfield>;</term>
+<listitem><simpara> This parameter's default value, or an arbitrary value
+ of an appropriate type if <link linkend="TP-CONN-MGR-PARAM-FLAG-HAS-DEFAULT:CAPS"><literal>TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT</literal></link> is not
+ set on this parameter, or an unset GValue if the signature is not
+ recognised by telepathy-glib
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint">guint</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> This parameter's flags (a combination of <link linkend="TpConnMgrParamFlags"><type>TpConnMgrParamFlags</type></link>)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>priv</structfield>;</term>
+<listitem><simpara> Pointer to opaque private data
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="TpConnectionManagerClass" role="struct" condition="since:0.7.1">
+<title>TpConnectionManagerClass</title>
+<indexterm zone="TpConnectionManagerClass" role="0.7.1"><primary>TpConnectionManagerClass</primary></indexterm><programlisting>typedef struct {
+} TpConnectionManagerClass;
+</programlisting>
+<para>
+The class of a <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link>.</para>
+<para>
+
+</para><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="TpCMInfoSource" role="enum" condition="since:0.7.1">
+<title>enum TpCMInfoSource</title>
+<indexterm zone="TpCMInfoSource" role="0.7.1"><primary>TpCMInfoSource</primary></indexterm><programlisting>typedef enum
+{
+  TP_CM_INFO_SOURCE_NONE,
+  TP_CM_INFO_SOURCE_FILE,
+  TP_CM_INFO_SOURCE_LIVE
+} TpCMInfoSource;
+</programlisting>
+<para>
+Describes possible sources of information on connection managers'
+supported protocols.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-CM-INFO-SOURCE-NONE:CAPS" role="constant">
+<term><literal>TP_CM_INFO_SOURCE_NONE</literal></term>
+<listitem><simpara> no information available
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CM-INFO-SOURCE-FILE:CAPS" role="constant">
+<term><literal>TP_CM_INFO_SOURCE_FILE</literal></term>
+<listitem><simpara> information came from a .manager file
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CM-INFO-SOURCE-LIVE:CAPS" role="constant">
+<term><literal>TP_CM_INFO_SOURCE_LIVE</literal></term>
+<listitem><simpara> information came from the connection manager
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="tp-connection-manager-new" role="function">
+<title>tp_connection_manager_new ()</title>
+<indexterm zone="tp-connection-manager-new"><primary>tp_connection_manager_new</primary></indexterm><programlisting><link linkend="TpConnectionManager">TpConnectionManager</link>* tp_connection_manager_new          (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *dbus,
+                                                         const <link linkend="gchar">gchar</link> *name,
+                                                         const <link linkend="gchar">gchar</link> *manager_filename,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Convenience function to create a new connection manager proxy.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus</parameter>&nbsp;:</term>
+<listitem><simpara> Proxy for the D-Bus daemon
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> The connection manager name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>manager_filename</parameter>&nbsp;:</term>
+<listitem><simpara> The <link linkend="TpConnectionManager-manager-file"><type>"manager-file"</type></link> property
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> used to return an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a new reference to a connection manager proxy
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-connection-manager-activate" role="function" condition="since:0.7.1">
+<title>tp_connection_manager_activate ()</title>
+<indexterm zone="tp-connection-manager-activate" role="0.7.1"><primary>tp_connection_manager_activate</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_connection_manager_activate      (<link linkend="TpConnectionManager">TpConnectionManager</link> *self);</programlisting>
+<para>
+Attempt to run and introspect the connection manager, asynchronously.
+</para>
+<para>
+If the CM was already running, do nothing and return <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.
+</para>
+<para>
+On success, emit <link linkend="TpConnectionManager-activated"><type>"activated"</type></link> when the CM appears
+on the bus, and <link linkend="TpConnectionManager-got-info"><type>"got-info"</type></link> when its capabilities
+have been (re-)discovered.
+</para>
+<para>
+On failure, emit <link linkend="TpConnectionManager-exited"><type>"exited"</type></link> without first emitting
+activated.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection manager proxy
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if activation was needed and is now in progress, <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>
+ if the connection manager was already running and no additional signals
+ will be emitted.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="tp-connection-manager-check-valid-name" role="function" condition="since:0.7.1">
+<title>tp_connection_manager_check_valid_name ()</title>
+<indexterm zone="tp-connection-manager-check-valid-name" role="0.7.1"><primary>tp_connection_manager_check_valid_name</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_connection_manager_check_valid_name
+                                                        (const <link linkend="gchar">gchar</link> *name,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Check that the given string is a valid connection manager name, i.e. that
+it consists entirely of ASCII letters, digits and underscores, and starts
+with a letter.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> a possible connection manager name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> used to raise <link linkend="TP-ERROR-INVALID-ARGUMENT:CAPS"><literal>TP_ERROR_INVALID_ARGUMENT</literal></link> if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if <parameter>name</parameter> is valid
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="tp-connection-manager-check-valid-protocol-name" role="function" condition="since:0.7.1">
+<title>tp_connection_manager_check_valid_protocol_name ()</title>
+<indexterm zone="tp-connection-manager-check-valid-protocol-name" role="0.7.1"><primary>tp_connection_manager_check_valid_protocol_name</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_connection_manager_check_valid_protocol_name
+                                                        (const <link linkend="gchar">gchar</link> *name,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Check that the given string is a valid protocol name, i.e. that
+it consists entirely of ASCII letters, digits and hyphen/minus, and starts
+with a letter.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> a possible protocol name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> used to raise <link linkend="TP-ERROR-INVALID-ARGUMENT:CAPS"><literal>TP_ERROR_INVALID_ARGUMENT</literal></link> if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if <parameter>name</parameter> is valid
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.1
+</para></refsect2>
+<refsect2 id="tp-cli-connection-manager-callback-for-get-parameters" role="function">
+<title>tp_cli_connection_manager_callback_for_get_parameters ()</title>
+<indexterm zone="tp-cli-connection-manager-callback-for-get-parameters"><primary>tp_cli_connection_manager_callback_for_get_parameters</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_callback_for_get_parameters)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a GetParameters method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           An array of structs representing possible parameters.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-call-get-parameters" role="function">
+<title>tp_cli_connection_manager_call_get_parameters ()</title>
+<indexterm zone="tp-cli-connection-manager-call-get-parameters"><primary>tp_cli_connection_manager_call_get_parameters</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_manager_call_get_parameters
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="tp-cli-connection-manager-callback-for-get-parameters">tp_cli_connection_manager_callback_for_get_parameters</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a GetParameters method call.
+</para>
+<para>
+Get a list of the parameters which must or may be provided to the         RequestConnection method when connecting to the given protocol,         or registering (the boolean &amp;quot;register&amp;quot; parameter is available,         and set to true).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Protocol</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: The required protocol name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-run-get-parameters" role="function">
+<title>tp_cli_connection_manager_run_get_parameters ()</title>
+<indexterm zone="tp-cli-connection-manager-run-get-parameters"><primary>tp_cli_connection_manager_run_get_parameters</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_manager_run_get_parameters
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method GetParameters and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+Get a list of the parameters which must or may be provided to the         RequestConnection method when connecting to the given protocol,         or registering (the boolean &amp;quot;register&amp;quot; parameter is available,         and set to true).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Protocol</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: The required protocol name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           An array of structs representing possible parameters.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-callback-for-list-protocols" role="function">
+<title>tp_cli_connection_manager_callback_for_list_protocols ()</title>
+<indexterm zone="tp-cli-connection-manager-callback-for-list-protocols"><primary>tp_cli_connection_manager_callback_for_list_protocols</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_callback_for_list_protocols)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a ListProtocols method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: A array of string protocol identifiers supported by this manager
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-call-list-protocols" role="function">
+<title>tp_cli_connection_manager_call_list_protocols ()</title>
+<indexterm zone="tp-cli-connection-manager-call-list-protocols"><primary>tp_cli_connection_manager_call_list_protocols</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_manager_call_list_protocols
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-connection-manager-callback-for-list-protocols">tp_cli_connection_manager_callback_for_list_protocols</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a ListProtocols method call.
+</para>
+<para>
+Get a list of protocol identifiers that are implemented by this         connection manager.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-run-list-protocols" role="function">
+<title>tp_cli_connection_manager_run_list_protocols ()</title>
+<indexterm zone="tp-cli-connection-manager-run-list-protocols"><primary>tp_cli_connection_manager_run_list_protocols</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_manager_run_list_protocols
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method ListProtocols and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+Get a list of protocol identifiers that are implemented by this         connection manager.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: A array of string protocol identifiers supported by this manager
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-callback-for-request-connection" role="function">
+<title>tp_cli_connection_manager_callback_for_request_connection ()</title>
+<indexterm zone="tp-cli-connection-manager-callback-for-request-connection"><primary>tp_cli_connection_manager_callback_for_request_connection</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_callback_for_request_connection)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *out0,
+                                                         const <link linkend="gchar">gchar</link> *out1,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a RequestConnection method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: A D-Bus service name where the new Connection object can be found
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out1</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The D-Bus object path to the Connection on this service
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-call-request-connection" role="function">
+<title>tp_cli_connection_manager_call_request_connection ()</title>
+<indexterm zone="tp-cli-connection-manager-call-request-connection"><primary>tp_cli_connection_manager_call_request_connection</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_manager_call_request_connection
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Parameters,
+                                                         <link linkend="tp-cli-connection-manager-callback-for-request-connection">tp_cli_connection_manager_callback_for_request_connection</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a RequestConnection method call.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Request a           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;Connection&lt;/tp:dbus-ref&gt;           object representing a given account on a given           protocol with the given parameters. The method returns the bus name           and the object path where the new Connection object can be found,           which should have the status of Connection_Status_Disconnected, to           allow signal handlers to be attached before connecting is started           with the           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy.Connection&quot;&gt;Connect&lt;/tp:dbus-ref&gt;           method.&lt;/p&gt;          &lt;p&gt;The parameters which must and may be provided in the parameters         dictionary can be discovered with the GetParameters method. These         parameters, their types, and their default values may be cached         in files so that all available connection managers do not need to be         started to discover which protocols are available.&lt;/p&gt;          &lt;p&gt;To request values for these parameters from the user, a client must         have prior knowledge of the meaning of the parameter names, so the         following well-known names and types should be used where appropriate:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;s:account&lt;/dt&gt;           &lt;dd&gt;The identifier for the user&apos;s account on the server&lt;/dd&gt;            &lt;dt&gt;s:server&lt;/dt&gt;&lt;dd&gt;A fully qualified domain name or numeric IPv4 or IPv6         address. Using the fully-qualified domain name form is recommended         whenever possible. If this parameter is specified and the account         for that protocol also specifies a server, this parameter should         override that in the user id.&lt;/dd&gt;        &lt;dt&gt;q:port&lt;/dt&gt;&lt;dd&gt;A TCP or UDP port number. If this parameter is specified         and the account for that protocol also specifies a port, this         parameter should override that in the account.&lt;/dd&gt;        &lt;dt&gt;s:password&lt;/dt&gt;&lt;dd&gt;A password associated with the account.&lt;/dd&gt;        &lt;dt&gt;b:require-encryption&lt;/dt&gt;&lt;dd&gt;Require encryption for this connection. A         connection should fail to connect if require-encryption is set         and an encrypted connection is not possible.&lt;/dd&gt;        &lt;dt&gt;b:register&lt;/dt&gt;&lt;dd&gt;This account should be created on the server if it         does not already exist.&lt;/dd&gt;        &lt;dt&gt;s:ident&lt;/dt&gt;&lt;dd&gt;The local username to report to the server if         necessary, such as in IRC.&lt;/dd&gt;        &lt;dt&gt;s:fullname&lt;/dt&gt;&lt;dd&gt;The user&apos;s full name if the service requires this         when authenticating or registering.&lt;/dd&gt;        &lt;dt&gt;s:stun-server&lt;/dt&gt;&lt;dd&gt;The IP address or FQDN of a STUN server to use         for NAT traversal, without any &amp;quot;:port&amp;quot; suffix.&lt;/dd&gt;       &lt;dt&gt;q:stun-port&lt;/dt&gt;&lt;dd&gt;The UDP port number on the stun-server to use for         STUN. Only significant if the stun-server is also supplied.&lt;/dd&gt;         &lt;/dl&gt;          &lt;p&gt;Every successful RequestConnection call will cause the emission of a         NewConnection signal for the same newly created connection. The         requester can use the returned object path and service name         independently of the emission of that signal. In that case this signal         emission is most useful for, e.g. other processes that are monitoring         the creation of new connections.&lt;/p&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Protocol</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: The protocol identifier
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Parameters</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: A dictionary mapping parameter name to the variant boxed value
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-run-request-connection" role="function">
+<title>tp_cli_connection_manager_run_request_connection ()</title>
+<indexterm zone="tp-cli-connection-manager-run-request-connection"><primary>tp_cli_connection_manager_run_request_connection</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_manager_run_request_connection
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="gchar">gchar</link> *in_Protocol,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Parameters,
+                                                         <link linkend="gchar">gchar</link> **out0,
+                                                         <link linkend="gchar">gchar</link> **out1,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method RequestConnection and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Request a           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;Connection&lt;/tp:dbus-ref&gt;           object representing a given account on a given           protocol with the given parameters. The method returns the bus name           and the object path where the new Connection object can be found,           which should have the status of Connection_Status_Disconnected, to           allow signal handlers to be attached before connecting is started           with the           &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy.Connection&quot;&gt;Connect&lt;/tp:dbus-ref&gt;           method.&lt;/p&gt;          &lt;p&gt;The parameters which must and may be provided in the parameters         dictionary can be discovered with the GetParameters method. These         parameters, their types, and their default values may be cached         in files so that all available connection managers do not need to be         started to discover which protocols are available.&lt;/p&gt;          &lt;p&gt;To request values for these parameters from the user, a client must         have prior knowledge of the meaning of the parameter names, so the         following well-known names and types should be used where appropriate:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;s:account&lt;/dt&gt;           &lt;dd&gt;The identifier for the user&apos;s account on the server&lt;/dd&gt;            &lt;dt&gt;s:server&lt;/dt&gt;&lt;dd&gt;A fully qualified domain name or numeric IPv4 or IPv6         address. Using the fully-qualified domain name form is recommended         whenever possible. If this parameter is specified and the account         for that protocol also specifies a server, this parameter should         override that in the user id.&lt;/dd&gt;        &lt;dt&gt;q:port&lt;/dt&gt;&lt;dd&gt;A TCP or UDP port number. If this parameter is specified         and the account for that protocol also specifies a port, this         parameter should override that in the account.&lt;/dd&gt;        &lt;dt&gt;s:password&lt;/dt&gt;&lt;dd&gt;A password associated with the account.&lt;/dd&gt;        &lt;dt&gt;b:require-encryption&lt;/dt&gt;&lt;dd&gt;Require encryption for this connection. A         connection should fail to connect if require-encryption is set         and an encrypted connection is not possible.&lt;/dd&gt;        &lt;dt&gt;b:register&lt;/dt&gt;&lt;dd&gt;This account should be created on the server if it         does not already exist.&lt;/dd&gt;        &lt;dt&gt;s:ident&lt;/dt&gt;&lt;dd&gt;The local username to report to the server if         necessary, such as in IRC.&lt;/dd&gt;        &lt;dt&gt;s:fullname&lt;/dt&gt;&lt;dd&gt;The user&apos;s full name if the service requires this         when authenticating or registering.&lt;/dd&gt;        &lt;dt&gt;s:stun-server&lt;/dt&gt;&lt;dd&gt;The IP address or FQDN of a STUN server to use         for NAT traversal, without any &amp;quot;:port&amp;quot; suffix.&lt;/dd&gt;       &lt;dt&gt;q:stun-port&lt;/dt&gt;&lt;dd&gt;The UDP port number on the stun-server to use for         STUN. Only significant if the stun-server is also supplied.&lt;/dd&gt;         &lt;/dl&gt;          &lt;p&gt;Every successful RequestConnection call will cause the emission of a         NewConnection signal for the same newly created connection. The         requester can use the returned object path and service name         independently of the emission of that signal. In that case this signal         emission is most useful for, e.g. other processes that are monitoring         the creation of new connections.&lt;/p&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Protocol</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: The protocol identifier
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Parameters</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: A dictionary mapping parameter name to the variant boxed value
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: A D-Bus service name where the new Connection object can be found
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out1</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The D-Bus object path to the Connection on this service
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-signal-callback-new-connection" role="function">
+<title>tp_cli_connection_manager_signal_callback_new_connection ()</title>
+<indexterm zone="tp-cli-connection-manager-signal-callback-new-connection"><primary>tp_cli_connection_manager_signal_callback_new_connection</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_signal_callback_new_connection)
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *arg_Bus_Name,
+                                                         const <link linkend="gchar">gchar</link> *arg_Object_Path,
+                                                         const <link linkend="gchar">gchar</link> *arg_Protocol,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal NewConnection.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-connection-manager-connect-to-new-connection"><function>tp_cli_connection_manager_connect_to_new_connection()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Bus_Name</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus service where the connection object can be found
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Object_Path</parameter>&nbsp;:</term>
+<listitem><simpara> The object path of the Connection object on this service
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Protocol</parameter>&nbsp;:</term>
+<listitem><simpara> The identifier for the protocol this connection uses
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-manager-connect-to-new-connection" role="function">
+<title>tp_cli_connection_manager_connect_to_new_connection ()</title>
+<indexterm zone="tp-cli-connection-manager-connect-to-new-connection"><primary>tp_cli_connection_manager_connect_to_new_connection</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_connection_manager_connect_to_new_connection
+                                                        (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
+                                                         <link linkend="tp-cli-connection-manager-signal-callback-new-connection">tp_cli_connection_manager_signal_callback_new_connection</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal NewConnection.
+</para>
+<para>
+Emitted when a new Connection object is created.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnectionManager"><type>TpConnectionManager</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+<refsect1 id="telepathy-glib-connection-manager.property-details" role="property_details">
+<title role="property_details.title">Property Details</title>
+<refsect2 id="TpConnectionManager--always-introspect"><title>The <literal>&quot;always-introspect&quot;</literal> property</title>
+<indexterm zone="TpConnectionManager--always-introspect"><primary>TpConnectionManager:always-introspect</primary></indexterm><programlisting>  &quot;always-introspect&quot;        <link linkend="gboolean">gboolean</link>              : Read / Write</programlisting>
+<para>Opportunistically introspect the CM when it's run.</para><para>Default value: FALSE</para>
+</refsect2>
+<refsect2 id="TpConnectionManager--connection-manager"><title>The <literal>&quot;connection-manager&quot;</literal> property</title>
+<indexterm zone="TpConnectionManager--connection-manager"><primary>TpConnectionManager:connection-manager</primary></indexterm><programlisting>  &quot;connection-manager&quot;       <link linkend="gchar">gchar</link>*                : Read</programlisting>
+<para>The name of the connection manager, e.g. "gabble" (read-only).</para><para>Default value: NULL</para>
+</refsect2>
+<refsect2 id="TpConnectionManager--info-source"><title>The <literal>&quot;info-source&quot;</literal> property</title>
+<indexterm zone="TpConnectionManager--info-source"><primary>TpConnectionManager:info-source</primary></indexterm><programlisting>  &quot;info-source&quot;              <link linkend="guint">guint</link>                 : Read</programlisting>
+<para>Where we got the current information on supported protocols.</para><para>Allowed values: &lt;= 2</para>
+<para>Default value: 0</para>
+</refsect2>
+<refsect2 id="TpConnectionManager--manager-file"><title>The <literal>&quot;manager-file&quot;</literal> property</title>
+<indexterm zone="TpConnectionManager--manager-file"><primary>TpConnectionManager:manager-file</primary></indexterm><programlisting>  &quot;manager-file&quot;             <link linkend="gchar">gchar</link>*                : Read / Write / Construct</programlisting>
+<para>The .manager filename.</para><para>Default value: NULL</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1 id="telepathy-glib-connection-manager.signal-details" role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2 id="TpConnectionManager-activated"><title>The <literal>&quot;activated&quot;</literal> signal</title>
+<indexterm zone="TpConnectionManager-activated"><primary>TpConnectionManager::activated</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpConnectionManager">TpConnectionManager</link> *self,
+                                                        <link linkend="gpointer">gpointer</link>             user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when the connection manager's well-known name appears on the bus.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the connection manager proxy
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="TpConnectionManager-exited"><title>The <literal>&quot;exited&quot;</literal> signal</title>
+<indexterm zone="TpConnectionManager-exited"><primary>TpConnectionManager::exited</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpConnectionManager">TpConnectionManager</link> *self,
+                                                        <link linkend="gpointer">gpointer</link>             user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when the connection manager's well-known name disappears from
+the bus or when activation fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the connection manager proxy
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="TpConnectionManager-got-info"><title>The <literal>&quot;got-info&quot;</literal> signal</title>
+<indexterm zone="TpConnectionManager-got-info"><primary>TpConnectionManager::got-info</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpConnectionManager">TpConnectionManager</link> *self,
+                                                        <link linkend="guint">guint</link>                source,
+                                                        <link linkend="gpointer">gpointer</link>             user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when the connection manager's capabilities have been discovered.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the connection manager proxy
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>source</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpCMInfoSource"><type>TpCMInfoSource</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
+
+
+<refsect1 id="telepathy-glib-connection-manager.see-also">
+<title>See Also</title>
+<link linkend="TpConnection"><type>TpConnection</type></link>
+</refsect1>
+
+</refentry>
