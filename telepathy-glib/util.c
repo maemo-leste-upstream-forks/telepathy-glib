@@ -113,6 +113,56 @@ tp_g_value_slice_dup (const GValue *value)
 }
 
 
+struct _tp_g_hash_table_update
+{
+  GHashTable *target;
+  GBoxedCopyFunc key_dup, value_dup;
+};
+
+static void
+_tp_g_hash_table_update_helper (gpointer key,
+                                gpointer value,
+                                gpointer user_data)
+{
+  struct _tp_g_hash_table_update *data = user_data;
+  gpointer new_key = (data->key_dup != NULL) ? (data->key_dup) (key) : key;
+  gpointer new_value = (data->value_dup != NULL) ? (data->value_dup) (value)
+                                                 : value;
+
+  g_hash_table_replace (data->target, new_key, new_value);
+}
+
+/**
+ * tp_g_hash_table_update:
+ * @target: The hash table to be updated
+ * @source: The hash table to update it with (read-only)
+ * @key_dup: function to duplicate a key from @source so it can be be stored
+ *           in @target. If NULL, the key is not copied, but is used as-is
+ * @value_dup: function to duplicate a value from @source so it can be stored
+ *             in @target. If NULL, the value is not copied, but is used as-is
+ *
+ * Add each item in @source to @target, replacing any existing item with the
+ * same key. @key_dup and @value_dup are used to duplicate the items; in
+ * principle they could also be used to convert between types.
+ *
+ * Since: 0.7.0
+ */
+void
+tp_g_hash_table_update (GHashTable *target,
+                        GHashTable *source,
+                        GBoxedCopyFunc key_dup,
+                        GBoxedCopyFunc value_dup)
+{
+  struct _tp_g_hash_table_update data = { target, key_dup,
+      value_dup };
+
+  g_return_if_fail (target != NULL);
+  g_return_if_fail (source != NULL);
+
+  g_hash_table_foreach (source, _tp_g_hash_table_update_helper, &data);
+}
+
+
 /**
  * tp_strdiff:
  * @left: The first string to compare (may be NULL)
@@ -187,7 +237,8 @@ _esc_ident_bad (gchar c, gboolean is_first)
  *    "0123abc_xyz\x01\xff" -> _30123abc_5fxyz_01_ff
  *
  * i.e. similar to URI encoding, but with _ taking the role of %, and a
- * smaller allowed set.
+ * smaller allowed set. As a special case, "" is escaped to "_" (just for
+ * completeness, really).
  *
  * Returns: the escaped string, which must be freed by the caller with #g_free
  */
@@ -200,6 +251,10 @@ tp_escape_as_identifier (const gchar *name)
   const gchar *ptr, *first_ok;
 
   g_return_val_if_fail (name != NULL, NULL);
+
+  /* fast path for empty name */
+  if (name[0] == '\0')
+    return g_strdup ("_");
 
   for (ptr = name; *ptr; ptr++)
     {

@@ -24,26 +24,12 @@
 
 #include <dbus/dbus-glib.h>
 #include <glib-object.h>
+
 #include <telepathy-glib/base-connection.h>
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/svc-connection-manager.h>
 
 G_BEGIN_DECLS
-
-/**
- * TP_CM_BUS_NAME_BASE:
- *
- * The prefix for a connection manager's bus name, to which the CM's name
- * (e.g. "gabble") should be appended.
- */
-#define TP_CM_BUS_NAME_BASE    "org.freedesktop.Telepathy.ConnectionManager."
-
-/**
- * TP_CM_OBJECT_PATH_BASE:
- *
- * The prefix for a connection manager's object path, to which the CM's name
- * (e.g. "gabble") should be appended.
- */
-#define TP_CM_OBJECT_PATH_BASE "/org/freedesktop/Telepathy/ConnectionManager/"
 
 /**
  * TpCMParamSpec:
@@ -55,20 +41,21 @@ G_BEGIN_DECLS
  * @flags: Some combination of TP_CONN_MGR_PARAM_FLAG_foo
  * @def: Default value, as a (const gchar *) for string parameters, or
          using #GINT_TO_POINTER or #GUINT_TO_POINTER for integer parameters
- * @offset: Offset of the parameter in the opaque data structure. The member
- *          at that offset is expected to be a gint, guint, (gchar *) or
- *          gboolean, depending on @gtype. Alternatively, this may be
- *          G_MAXSIZE, which means the parameter is obsolete, and is
- *          accepted but ignored.
+ * @offset: Offset of the parameter in the opaque data structure, if
+ *          appropriate. The member at that offset is expected to be a gint,
+ *          guint, (gchar *) or gboolean, depending on @gtype. The default
+ *          parameter setter, #tp_cm_param_setter_offset, uses this field.
  * @filter: A callback which is used to validate or normalize the user-provided
  *          value before it is written into the opaque data structure
  * @filter_data: Arbitrary opaque data intended for use by the filter function
+ * @setter_data: Arbitrary opaque data intended for use by the setter function
+ *               instead of or in addition to @offset.
  *
  * Structure representing a connection manager parameter, as accepted by
  * RequestConnection.
  *
- * In addition to the fields documented here, there are two gpointer fields
- * which must currently be %NULL. A meaning may be defined for these in a
+ * In addition to the fields documented here, there is one gpointer field
+ * which must currently be %NULL. A meaning may be defined for it in a
  * future version of telepathy-glib.
  */
 
@@ -119,10 +106,31 @@ struct _TpCMParamSpec {
     TpCMParamFilter filter;
     gconstpointer filter_data;
 
+    gconstpointer setter_data;
+
     /*<private>*/
     gpointer _future1;
-    gpointer _future2;
 };
+
+/**
+ * TpCMParamSetter:
+ * @paramspec: The parameter specification.  The setter is likely to use
+ *  some combination of the name, offset and setter_data fields.
+ * @value: The value for that parameter provided by the user.
+ * @params: An opaque data structure, created by
+ *  #TpCMProtocolSpec.params_new.
+ *
+ * The signature of a callback used to set a parameter within the opaque
+ * data structure used for a protocol.
+ *
+ * Since: 0.7.0
+ */
+
+typedef void (*TpCMParamSetter) (const TpCMParamSpec *paramspec,
+    const GValue *value, gpointer params);
+
+void tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
+    const GValue *value, gpointer params);
 
 /**
  * TpCMProtocolSpec:
@@ -138,10 +146,15 @@ struct _TpCMParamSpec {
  * @params_free: A function which deallocates the opaque data structure
  *               provided by #params_new, including deallocating its
  *               data members (currently, only strings) if necessary.
+ * @set_param: A function which sets a parameter within the opaque data
+ *             structure provided by #params_new. If %NULL,
+ *             tp_cm_param_setter_offset() will be used. (New in 0.7.0 -
+ *             previously, code equivalent to tp_cm_param_setter_offset() was
+ *             always used.)
  *
  * Structure representing a connection manager protocol.
  *
- * In addition to the fields documented here, there are four gpointer fields
+ * In addition to the fields documented here, there are three gpointer fields
  * which must currently be %NULL. A meaning may be defined for these in a
  * future version of telepathy-glib.
  */
@@ -150,12 +163,12 @@ typedef struct {
     const TpCMParamSpec *parameters;
     gpointer (*params_new) (void);
     void (*params_free) (gpointer);
+    TpCMParamSetter set_param;
 
     /*<private>*/
     gpointer _future1;
     gpointer _future2;
     gpointer _future3;
-    gpointer _future4;
 } TpCMProtocolSpec;
 
 /**

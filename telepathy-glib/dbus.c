@@ -32,6 +32,8 @@
 
 #include <telepathy-glib/errors.h>
 
+#include "_gen/signals-marshal.h"
+
 /**
  * tp_dbus_g_method_return_not_implemented:
  * @context: The D-Bus method invocation context
@@ -55,7 +57,7 @@ tp_dbus_g_method_return_not_implemented (DBusGMethodInvocation *context)
  * Returns: a connection to the starter or session D-Bus daemon.
  */
 DBusGConnection *
-tp_get_bus ()
+tp_get_bus (void)
 {
   static DBusGConnection *bus = NULL;
 
@@ -83,7 +85,7 @@ tp_get_bus ()
  * Returns: a proxy for the bus daemon object on the starter or session bus.
  */
 DBusGProxy *
-tp_get_bus_proxy ()
+tp_get_bus_proxy (void)
 {
   static DBusGProxy *bus_proxy = NULL;
 
@@ -102,3 +104,6 @@ tp_get_bus_proxy ()
 
   return bus_proxy;
 }
+
+/* Auto-generated implementation of _tp_register_dbus_glib_marshallers */
+#include "_gen/register-dbus-glib-marshallers-body.h"

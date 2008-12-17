@@ -38,6 +38,7 @@
 #include <dbus/dbus-protocol.h>
 
 #include <telepathy-glib/dbus.h>
+#include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_PARAMS
@@ -70,13 +71,6 @@ enum
 };
 
 static guint signals[N_SIGNALS] = {0};
-
-#define TP_TYPE_PARAM (dbus_g_type_get_struct ("GValueArray", \
-      G_TYPE_STRING, \
-      G_TYPE_UINT, \
-      G_TYPE_STRING, \
-      G_TYPE_VALUE, \
-      G_TYPE_INVALID))
 
 static void
 tp_base_connection_manager_dispose (GObject *object)
@@ -166,7 +160,7 @@ connection_shutdown_finished_cb (TpBaseConnection *conn,
 
   g_object_unref (conn);
 
-  g_debug ("%s: dereferenced connection", G_STRFUNC);
+  DEBUG ("dereferenced connection");
   if (g_hash_table_size (priv->connections) == 0)
     {
       g_signal_emit (self, signals[NO_MORE_CONNECTIONS], 0);
@@ -201,129 +195,72 @@ get_parameters (const TpCMProtocolSpec *protos,
 }
 
 static GValue *
-param_default_value (const TpCMParamSpec *params, int i)
+param_default_value (const TpCMParamSpec *param)
 {
   GValue *value;
 
-  value = tp_g_value_slice_new (params[i].gtype);
+  value = tp_g_value_slice_new (param->gtype);
 
   /* If HAS_DEFAULT is false, we don't really care what the value is, so we'll
    * just use whatever's in the user-supplied param spec. As long as we're
    * careful to accept NULL, that should be fine. */
 
-  switch (params[i].dtype[0])
+  switch (param->dtype[0])
     {
       case DBUS_TYPE_STRING:
-        g_assert (params[i].gtype == G_TYPE_STRING);
-        if (params[i].def == NULL)
+        g_assert (param->gtype == G_TYPE_STRING);
+        if (param->def == NULL)
           g_value_set_static_string (value, "");
         else
-          g_value_set_static_string (value, (const gchar *) params[i].def);
+          g_value_set_static_string (value, param->def);
         break;
       case DBUS_TYPE_INT16:
       case DBUS_TYPE_INT32:
-        g_assert (params[i].gtype == G_TYPE_INT);
-        g_value_set_int (value, GPOINTER_TO_INT (params[i].def));
+        g_assert (param->gtype == G_TYPE_INT);
+        g_value_set_int (value, GPOINTER_TO_INT (param->def));
         break;
       case DBUS_TYPE_UINT16:
       case DBUS_TYPE_UINT32:
-        g_assert (params[i].gtype == G_TYPE_UINT);
-        g_value_set_uint (value, GPOINTER_TO_UINT (params[i].def));
+        g_assert (param->gtype == G_TYPE_UINT);
+        g_value_set_uint (value, GPOINTER_TO_UINT (param->def));
         break;
       case DBUS_TYPE_BOOLEAN:
-        g_assert (params[i].gtype == G_TYPE_BOOLEAN);
-        g_value_set_boolean (value, GPOINTER_TO_INT (params[i].def));
+        g_assert (param->gtype == G_TYPE_BOOLEAN);
+        g_value_set_boolean (value, GPOINTER_TO_INT (param->def));
         break;
       default:
         g_error ("parameter_defaults: encountered unknown type %s on "
-            "argument %s", params[i].dtype, params[i].name);
+            "argument %s", param->dtype, param->name);
     }
 
   return value;
 }
 
-static void
-set_param_from_default (const TpCMParamSpec *paramspec,
-                        gpointer params)
+/**
+ * tp_cm_param_setter_offset:
+ * @paramspec: A parameter specification with offset set to some
+ *  meaningful value.
+ * @value: The value for that parameter, either provided by the user or
+ *  constructed from the parameter's default.
+ * @params: An opaque data structure such that the address at (@params +
+ *  @paramspec->offset) is a valid pointer to a variable of the
+ *  appropriate type.
+ *
+ * A #TpCMParamSetter which sets parameters by dereferencing an offset
+ * from @params.  If @paramspec->offset is G_MAXSIZE, the parameter is
+ * deemed obsolete, and is accepted but ignored.
+ *
+ * Since: 0.7.0
+ */
+void
+tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
+                           const GValue *value,
+                           gpointer params)
 {
-  switch (paramspec->dtype[0])
+  if (paramspec->offset == G_MAXSIZE)
     {
-    case DBUS_TYPE_STRING:
-      {
-        gchar **save_to = (gchar **) (params + paramspec->offset);
-        g_assert (paramspec->gtype == G_TYPE_STRING);
-        g_assert (paramspec->def != NULL);
-
-        *save_to = g_strdup ((const gchar *) (paramspec->def));
-        DEBUG ("%s = \"%s\"", paramspec->name, *save_to);
-      }
-      break;
-    case DBUS_TYPE_INT16:
-    case DBUS_TYPE_INT32:
-      {
-        gint *save_to = (gint *) (params + paramspec->offset);
-        g_assert (paramspec->gtype == G_TYPE_INT);
-
-        *save_to = GPOINTER_TO_INT (paramspec->def);
-        DEBUG ("%s = %d = 0x%x", paramspec->name, *save_to, *save_to);
-      }
-      break;
-    case DBUS_TYPE_UINT16:
-    case DBUS_TYPE_UINT32:
-      {
-        guint *save_to = (guint *) (params + paramspec->offset);
-        g_assert (paramspec->gtype == G_TYPE_UINT);
-
-        *save_to = GPOINTER_TO_UINT (paramspec->def);
-        DEBUG ("%s = %u = 0x%x", paramspec->name, *save_to, *save_to);
-      }
-      break;
-    case DBUS_TYPE_BOOLEAN:
-      {
-        gboolean *save_to = (gboolean *) (params + paramspec->offset);
-        g_assert (paramspec->gtype == G_TYPE_BOOLEAN);
-        g_assert (paramspec->def == GINT_TO_POINTER (TRUE) || paramspec->def == GINT_TO_POINTER (FALSE));
-
-        *save_to = GPOINTER_TO_INT (paramspec->def);
-        DEBUG ("%s = %s", paramspec->name, *save_to ? "TRUE" : "FALSE");
-      }
-      break;
-    default:
-      g_error ("%s: encountered unhandled D-Bus type %s "
-               "on argument %s", G_STRFUNC, paramspec->dtype, paramspec->name);
-      g_assert_not_reached ();
-    }
-}
-
-static gboolean
-set_param_from_value (const TpCMParamSpec *paramspec,
-                      GValue *value,
-                      void *params,
-                      GError **error)
-{
-  if (G_VALUE_TYPE (value) != paramspec->gtype)
-    {
-      DEBUG ("expected type %s for parameter %s, got %s",
-               g_type_name (paramspec->gtype), paramspec->name,
-               G_VALUE_TYPE_NAME (value));
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
-          "expected type %s for account parameter %s, got %s",
-          g_type_name (paramspec->gtype), paramspec->name,
-          G_VALUE_TYPE_NAME (value));
-      return FALSE;
-    }
-
-  if (paramspec->filter != NULL)
-    {
-      if (!(paramspec->filter) (paramspec, value, error))
-        {
-          DEBUG ("parameter %s rejected by filter function: %s",
-              paramspec->name, error ? (*error)->message : "(error ignored)");
-          return FALSE;
-        }
-
-      /* the filter may not change the type of the GValue */
-      g_return_val_if_fail (G_VALUE_TYPE (value) == paramspec->gtype, FALSE);
+      /* quietly ignore any obsolete params provided */
+      return;
     }
 
   switch (paramspec->dtype[0])
@@ -356,40 +293,86 @@ set_param_from_value (const TpCMParamSpec *paramspec,
       case DBUS_TYPE_INT16:
       case DBUS_TYPE_INT32:
         {
+          gint *save_to = (gint *) (params + paramspec->offset);
           gint i = g_value_get_int (value);
 
           g_assert (paramspec->gtype == G_TYPE_INT);
-          *((gint *) (params + paramspec->offset)) = i;
+          *save_to = i;
           DEBUG ("%s = %d = 0x%x", paramspec->name, i, i);
         }
         break;
       case DBUS_TYPE_UINT16:
       case DBUS_TYPE_UINT32:
         {
+          guint *save_to = (guint *) (params + paramspec->offset);
           guint i = g_value_get_uint (value);
 
           g_assert (paramspec->gtype == G_TYPE_UINT);
-          *((guint *) (params + paramspec->offset)) = i;
+          *save_to = i;
           DEBUG ("%s = %u = 0x%x", paramspec->name, i, i);
         }
         break;
       case DBUS_TYPE_BOOLEAN:
         {
+          gboolean *save_to = (gboolean *) (params + paramspec->offset);
           gboolean b = g_value_get_boolean (value);
 
           g_assert (paramspec->gtype == G_TYPE_BOOLEAN);
-          *((gboolean *) (params + paramspec->offset)) = b;
+          g_assert (b == TRUE || b == FALSE);
+          *save_to = b;
           DEBUG ("%s = %s", paramspec->name, b ? "TRUE" : "FALSE");
         }
         break;
       default:
-        g_error ("set_param_from_value: encountered unhandled D-Bus type %s "
-                 "on argument %s", paramspec->dtype, paramspec->name);
-        g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
-            "encountered unhandled D-Bus type %s for account parameter %s",
-            paramspec->dtype, paramspec->name);
-        return FALSE;
+        g_error ("%s: encountered unhandled D-Bus type %s on argument %s",
+                 G_STRFUNC, paramspec->dtype, paramspec->name);
+        g_assert_not_reached ();
     }
+}
+
+static void
+set_param_from_default (const TpCMParamSpec *paramspec,
+                        const TpCMParamSetter set_param,
+                        gpointer params)
+{
+  GValue *value = param_default_value (paramspec);
+  set_param (paramspec, value, params);
+  tp_g_value_slice_free (value);
+}
+
+static gboolean
+set_param_from_value (const TpCMParamSpec *paramspec,
+                      GValue *value,
+                      const TpCMParamSetter set_param,
+                      void *params,
+                      GError **error)
+{
+  if (G_VALUE_TYPE (value) != paramspec->gtype)
+    {
+      DEBUG ("expected type %s for parameter %s, got %s",
+               g_type_name (paramspec->gtype), paramspec->name,
+               G_VALUE_TYPE_NAME (value));
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          "expected type %s for account parameter %s, got %s",
+          g_type_name (paramspec->gtype), paramspec->name,
+          G_VALUE_TYPE_NAME (value));
+      return FALSE;
+    }
+
+  if (paramspec->filter != NULL)
+    {
+      if (!(paramspec->filter) (paramspec, value, error))
+        {
+          DEBUG ("parameter %s rejected by filter function: %s",
+              paramspec->name, error ? (*error)->message : "(error ignored)");
+          return FALSE;
+        }
+
+      /* the filter may not change the type of the GValue */
+      g_return_val_if_fail (G_VALUE_TYPE (value) == paramspec->gtype, FALSE);
+    }
+
+  set_param (paramspec, value, params);
 
   return TRUE;
 }
@@ -407,6 +390,7 @@ static gboolean
 parse_parameters (const TpCMParamSpec *paramspec,
                   GHashTable *provided,
                   TpIntSet *params_present,
+                  const TpCMParamSetter set_param,
                   void *params,
                   GError **error)
 {
@@ -423,13 +407,6 @@ parse_parameters (const TpCMParamSpec *paramspec,
 
   for (i = 0; paramspec[i].name; i++)
     {
-      if (paramspec->offset == G_MAXSIZE)
-        {
-          /* quietly ignore any obsolete params provided */
-          g_hash_table_remove (provided, paramspec[i].name);
-          continue;
-        }
-
       value = g_hash_table_lookup (provided, paramspec[i].name);
 
       if (value == NULL)
@@ -444,7 +421,7 @@ parse_parameters (const TpCMParamSpec *paramspec,
           else if (paramspec[i].flags & TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT)
             {
               /* FIXME: Should we add it to params_present? */
-              set_param_from_default (&paramspec[i], params);
+              set_param_from_default (&paramspec[i], set_param, params);
             }
           else
             {
@@ -454,7 +431,8 @@ parse_parameters (const TpCMParamSpec *paramspec,
         }
       else
         {
-          if (!set_param_from_value (&paramspec[i], value, params, error))
+          if (!set_param_from_value (&paramspec[i], value, set_param, params,
+                error))
             {
               return FALSE;
             }
@@ -501,6 +479,7 @@ tp_base_connection_manager_get_parameters (TpSvcConnectionManager *iface,
   TpBaseConnectionManager *self = TP_BASE_CONNECTION_MANAGER (iface);
   TpBaseConnectionManagerClass *cls =
     TP_BASE_CONNECTION_MANAGER_GET_CLASS (self);
+  GType param_type = TP_STRUCT_TYPE_PARAM_SPEC;
   int i;
 
   g_assert (TP_IS_BASE_CONNECTION_MANAGER (iface));
@@ -520,11 +499,11 @@ tp_base_connection_manager_get_parameters (TpSvcConnectionManager *iface,
       GValue *def_value;
       GValue param = { 0, };
 
-      g_value_init (&param, TP_TYPE_PARAM);
+      g_value_init (&param, param_type);
       g_value_set_static_boxed (&param,
-        dbus_g_type_specialized_construct (TP_TYPE_PARAM));
+        dbus_g_type_specialized_construct (param_type));
 
-      def_value = param_default_value (protospec->parameters, i);
+      def_value = param_default_value (protospec->parameters + i);
       dbus_g_type_struct_set (&param,
         0, protospec->parameters[i].name,
         1, protospec->parameters[i].flags,
@@ -604,6 +583,7 @@ tp_base_connection_manager_request_connection (TpSvcConnectionManager *iface,
   void *params = NULL;
   TpIntSet *params_present = NULL;
   const TpCMProtocolSpec *protospec = NULL;
+  TpCMParamSetter set_param;
 
   g_assert (TP_IS_BASE_CONNECTION_MANAGER (iface));
   g_assert (cls->new_connection != NULL);
@@ -621,8 +601,12 @@ tp_base_connection_manager_request_connection (TpSvcConnectionManager *iface,
   params_present = tp_intset_new ();
   params = protospec->params_new ();
 
+  set_param = protospec->set_param;
+  if (set_param == NULL)
+    set_param = tp_cm_param_setter_offset;
+
   if (!parse_parameters (protospec->parameters, parameters, params_present,
-        params, &error))
+        set_param, params, &error))
     {
       goto ERROR;
     }
@@ -637,7 +621,7 @@ tp_base_connection_manager_request_connection (TpSvcConnectionManager *iface,
   if (!tp_base_connection_register ((TpBaseConnection *)conn,
         cls->cm_dbus_name, &bus_name, &object_path, &error))
     {
-      g_debug ("%s failed: %s", G_STRFUNC, error->message);
+      DEBUG ("failed: %s", error->message);
 
       g_object_unref (G_OBJECT (conn));
       goto ERROR;

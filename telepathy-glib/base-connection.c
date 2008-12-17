@@ -43,6 +43,7 @@
 
 #include <telepathy-glib/channel-factory-iface.h>
 #include <telepathy-glib/dbus.h>
+#include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CONNECTION
@@ -73,10 +74,6 @@ static guint signals[N_SIGNALS] = {0};
 
 #define TP_BASE_CONNECTION_GET_PRIVATE(obj) \
     ((TpBaseConnectionPrivate *)obj->priv)
-
-#define TP_CHANNEL_LIST_ENTRY_TYPE (dbus_g_type_get_struct ("GValueArray", \
-      DBUS_TYPE_G_OBJECT_PATH, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, \
-      G_TYPE_INVALID))
 
 typedef struct _ChannelRequest ChannelRequest;
 
@@ -141,7 +138,7 @@ channel_request_cancel (gpointer data, gpointer user_data)
   channel_request_free (request);
 }
 
-struct _TpBaseConnectionPrivate
+typedef struct _TpBaseConnectionPrivate
 {
   /* Telepathy properties */
   gchar *protocol;
@@ -162,16 +159,7 @@ struct _TpBaseConnectionPrivate
    * Note that this is a GArray of gchar*, not a GPtrArray,
    * so that we can use GArray's convenient auto-null-termination. */
   GArray *interfaces;
-
-  /* Array of DBusGMethodInvocation * representing Disconnect calls.
-   * If NULL and we are in a state != DISCONNECTED, then we have not started
-   * shutting down yet.
-   * If NULL and we are in state DISCONNECTED, then we have finished shutting
-   * down.
-   * If not NULL, we are trying to shut down (and must be in state
-   * DISCONNECTED). */
-  GPtrArray *disconnect_requests;
-};
+} TpBaseConnectionPrivate;
 
 static void
 tp_base_connection_get_property (GObject *object,
@@ -473,10 +461,6 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
   DEBUG("Post-construction: (TpBaseConnection *)%p", self);
 
   g_assert (cls->create_handle_repos != NULL);
-  g_assert (cls->create_channel_factories != NULL);
-  g_assert (cls->shut_down != NULL);
-  g_assert (cls->start_connecting != NULL);
-
   (cls->create_handle_repos) (self, priv->handles);
 
   /* a connection that doesn't support contacts is no use to anyone */
@@ -490,6 +474,7 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
       }
     }
 
+  g_assert (cls->create_channel_factories);
   priv->channel_factories = cls->create_channel_factories (self);
 
   for (i = 0; i < priv->channel_factories->len; i++)
@@ -801,26 +786,11 @@ tp_base_connection_disconnect (TpSvcConnection *iface,
 
   g_assert (TP_IS_BASE_CONNECTION (self));
 
-  if (self->priv->disconnect_requests != NULL)
-    {
-      g_assert (self->status == TP_CONNECTION_STATUS_DISCONNECTED);
-      g_ptr_array_add (self->priv->disconnect_requests, context);
-      return;
-    }
-
-  if (self->status == TP_CONNECTION_STATUS_DISCONNECTED)
-    {
-      /* status DISCONNECTED and disconnect_requests NULL => already dead */
-      tp_svc_connection_return_from_disconnect (context);
-      return;
-    }
-
-  self->priv->disconnect_requests = g_ptr_array_sized_new (1);
-  g_ptr_array_add (self->priv->disconnect_requests, context);
-
   tp_base_connection_change_status (self,
       TP_CONNECTION_STATUS_DISCONNECTED,
       TP_CONNECTION_STATUS_REASON_REQUESTED);
+
+  tp_svc_connection_return_from_disconnect (context);
 }
 
 /**
@@ -1063,10 +1033,8 @@ list_channel_factory_foreach_one (TpChannelIface *chan,
   GPtrArray *values = (GPtrArray *) data;
   gchar *path, *type;
   guint handle_type, handle;
-  GValue *entry = tp_g_value_slice_new (TP_CHANNEL_LIST_ENTRY_TYPE);
-
-  g_value_take_boxed (entry, dbus_g_type_specialized_construct
-      (TP_CHANNEL_LIST_ENTRY_TYPE));
+  GValue *entry = tp_dbus_specialized_value_slice_new
+      (TP_STRUCT_TYPE_CHANNEL_INFO);
 
   g_object_get (channel,
       "object-path", &path,
@@ -1439,22 +1407,6 @@ tp_base_connection_get_handles (TpBaseConnection *self,
  */
 void tp_base_connection_finish_shutdown (TpBaseConnection *self)
 {
-  GPtrArray *contexts = self->priv->disconnect_requests;
-  guint i;
-
-  g_return_if_fail (self->status == TP_CONNECTION_STATUS_DISCONNECTED);
-  g_return_if_fail (contexts != NULL);
-
-  self->priv->disconnect_requests = NULL;
-
-  for (i = 0; i < contexts->len; i++)
-    {
-      tp_svc_connection_return_from_disconnect (g_ptr_array_index (contexts,
-            i));
-    }
-
-  g_ptr_array_free (contexts, TRUE);
-
   g_signal_emit (self, signals[SHUTDOWN_FINISHED], 0);
 }
 
@@ -1563,10 +1515,6 @@ tp_base_connection_change_status (TpBaseConnection *self,
 
   if (status == TP_CONNECTION_STATUS_DISCONNECTED)
     {
-      /* the presence of this array indicates that we are shutting down */
-      if (self->priv->disconnect_requests == NULL)
-        self->priv->disconnect_requests = g_ptr_array_sized_new (0);
-
       /* remove all channels and shut down all factories, so we don't get
        * any race conditions where method calls are delivered to a channel
        * after we've started disconnecting
@@ -1615,6 +1563,7 @@ tp_base_connection_change_status (TpBaseConnection *self,
             (klass->disconnected) (self);
           g_ptr_array_foreach (priv->channel_factories, (GFunc)
               tp_channel_factory_iface_disconnected, NULL);
+          g_assert (klass->shut_down);
         }
       (klass->shut_down) (self);
       break;

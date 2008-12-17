@@ -1,17 +1,11 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = m4 tools spec telepathy-glib tests docs
+SUBDIRS = m4 tools spec telepathy-glib tests examples docs
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --disable-debug
 
-pkgconfigdir = ${libdir}/pkgconfig
-pkgconfig_DATA = telepathy-glib.pc telepathy-glib-unstable.pc
-
 EXTRA_DIST = \
     autogen.sh \
-    check-coding-style.mk \
-    check-c-style.sh \
-    check-whitespace.sh \
     gtk-doc.make
 
 CLEANFILES = FIXME.out

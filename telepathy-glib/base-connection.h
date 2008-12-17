@@ -25,33 +25,15 @@
 #include <dbus/dbus-glib.h>
 #include <glib-object.h>
 
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/enums.h>
 #include <telepathy-glib/handle-repo.h>
 #include <telepathy-glib/svc-connection.h>
 
 G_BEGIN_DECLS
 
-/**
- * TP_CONN_BUS_NAME_BASE:
- *
- * The prefix for a connection's bus name, to which the CM's name
- * (e.g. "gabble"), the protocol (e.g. "jabber") and an element or sequence
- * of elements representing the account should be appended.
- */
-#define TP_CONN_BUS_NAME_BASE "org.freedesktop.Telepathy.Connection."
-
-/**
- * TP_CONN_OBJECT_PATH_BASE:
- *
- * The prefix for a connection's object path, to which the CM's name
- * (e.g. "gabble"), the protocol (e.g. "jabber") and an element or sequence
- * of elements representing the account should be appended.
- */
-#define TP_CONN_OBJECT_PATH_BASE "/org/freedesktop/Telepathy/Connection/"
-
 typedef struct _TpBaseConnection TpBaseConnection;
 typedef struct _TpBaseConnectionClass TpBaseConnectionClass;
-typedef struct _TpBaseConnectionPrivate TpBaseConnectionPrivate;
 
 /**
  * TpBaseConnectionProc:
@@ -163,7 +145,7 @@ typedef gchar *(*TpBaseConnectionGetUniqueConnectionNameImpl) (
  *  be left as %NULL.
  * @start_connecting: Asynchronously start connecting - called to implement
  *  the Connect D-Bus method. See #TpBaseConnectionStartConnectingImpl for
- *  details. May not be left as %NULL.
+ *  details.
  * @interfaces_always_present: A strv of extra D-Bus interfaces which are
  *  always implemented by instances of this class, which may be filled in
  *  by subclasses. The default is to list no additional interfaces.
@@ -257,7 +239,7 @@ struct _TpBaseConnection {
     gpointer _future3;
     gpointer _future4;
 
-    TpBaseConnectionPrivate *priv;
+    gpointer priv;
 };
 
 GType tp_base_connection_get_type (void);

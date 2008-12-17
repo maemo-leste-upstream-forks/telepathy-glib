@@ -58,17 +58,13 @@
 
 #include <telepathy-glib/debug-ansi.h>
 #include <telepathy-glib/errors.h>
+#include <telepathy-glib/gtypes.h>
 
 #define DEBUG_FLAG TP_DEBUG_GROUPS
 
 #include "internal-debug.h"
 
 #include "_gen/signals-marshal.h"
-
-#define TP_CHANNEL_GROUP_LOCAL_PENDING_WITH_INFO_ENTRY_TYPE \
-    (dbus_g_type_get_struct ("GValueArray", \
-        G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING, \
-        G_TYPE_INVALID))
 
 static const char *
 group_change_reason_str (guint reason)
@@ -784,15 +780,14 @@ local_pending_members_with_info_foreach (TpHandleSet *set,
 {
   _mixin_and_array_of_info *data = (_mixin_and_array_of_info *)userdata;
   TpGroupMixinPrivate *priv = data->mixin->priv;
+  GType info_type = TP_STRUCT_TYPE_LOCAL_PENDING_INFO;
   GValue entry = { 0, };
   LocalPendingInfo *info = g_hash_table_lookup (priv->local_pending_info,
                                                 GUINT_TO_POINTER(i));
   g_assert (info != NULL);
 
-  g_value_init (&entry, TP_CHANNEL_GROUP_LOCAL_PENDING_WITH_INFO_ENTRY_TYPE);
-  g_value_take_boxed (&entry,
-      dbus_g_type_specialized_construct (
-          TP_CHANNEL_GROUP_LOCAL_PENDING_WITH_INFO_ENTRY_TYPE));
+  g_value_init (&entry, info_type);
+  g_value_take_boxed (&entry, dbus_g_type_specialized_construct (info_type));
 
   dbus_g_type_struct_set (&entry,
       0, i,
@@ -1229,8 +1224,7 @@ local_pending_remove (TpGroupMixin *mixin,
 /**
  * tp_group_mixin_change_members:
  * @obj: An object implementing the group interface using this mixin
- * @message: A message to be sent to the affected contacts if possible;
- *  %NULL is allowed, and is mapped to an empty string
+ * @message: A message to be sent to the affected contacts if possible
  * @add: A set of contact handles to be added to the members (if not
  *  already present) and removed from local pending and remote pending
  *  (if present)
@@ -1273,9 +1267,6 @@ tp_group_mixin_change_members (GObject *obj,
   gboolean ret;
 
   empty = tp_intset_new ();
-
-  if (message == NULL)
-    message = "";
 
   if (add == NULL)
     add = empty;

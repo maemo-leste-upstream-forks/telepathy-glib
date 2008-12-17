@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [6])
-m4_define([tp_glib_micro_version], [2])
+m4_define([tp_glib_minor_version], [7])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -23,9 +23,9 @@ m4_define([tp_glib_nano_version], [0])
 # If interfaces have been added since last release, increment age
 # If interfaces have been removed since last release, set age to 0
 
-m4_define([tp_glib_lt_current], [3])
-m4_define([tp_glib_lt_revision], [2])
-m4_define([tp_glib_lt_age], [3])
+m4_define([tp_glib_lt_current], [4])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [4])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -48,6 +48,7 @@ AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
+AM_PROG_MKDIR_P
 
 GTK_DOC_CHECK([1.5])
 
@@ -145,7 +146,7 @@ dnl (srcdir != builddir)
 AM_CONDITIONAL([OUT_OF_TREE_BUILD], [test "z$ac_srcdir" != z.])
 
 dnl Check for Glib
-PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.4, gobject-2.0 >= 2.4])
+PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.10, gobject-2.0 >= 2.10])
 
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
@@ -154,10 +155,17 @@ GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
 
 dnl Check for D-Bus
-PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.61, dbus-glib-1 >= 0.72])
+PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.95, dbus-glib-1 >= 0.73])
 
 AC_SUBST(DBUS_CFLAGS)
 AC_SUBST(DBUS_LIBS)
+
+dnl We want the examples to be able to use TP_GLIB_CFLAGS, TP_GLIB_LIBS
+dnl as though they were independent programs
+TP_GLIB_CFLAGS='-I${top_builddir} -I${top_srcdir}'
+TP_GLIB_LIBS='-L${top_builddir}/telepathy-glib -ltelepathy-glib'
+AC_SUBST(TP_GLIB_CFLAGS)
+AC_SUBST(TP_GLIB_LIBS)
 
 dnl Check for code generation tools
 XSLTPROC=
@@ -185,12 +193,15 @@ AC_CHECK_FUNCS(signal)
 AC_CHECK_HEADERS(signal.h)
 
 AC_OUTPUT( Makefile \
-	   telepathy-glib.pc \
-	   telepathy-glib-unstable.pc \
 	   docs/Makefile \
 	   docs/reference/Makefile \
+	   examples/Makefile \
+	   examples/client/Makefile \
+	   examples/cm/Makefile \
+	   examples/cm/no-protocols/Makefile \
 	   spec/Makefile \
 	   telepathy-glib/Makefile \
+	   telepathy-glib/telepathy-glib.pc \
 	   tests/Makefile \
 	   tools/Makefile \
 	   m4/Makefile \

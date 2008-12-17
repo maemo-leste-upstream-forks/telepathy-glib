@@ -20,7 +20,7 @@
  */
 
 /**
- * SECTION:svc-properties-interface
+ * SECTION:svc-generic
  * @title: Service-side Properties interface
  * @short_description: GInterface for D-Bus objects exporting Telepathy
  *  properties
@@ -29,27 +29,6 @@
  * The Telepathy Properties interface associates a number of named properties
  * with a channel, connection or other D-Bus object. Signals are emitted
  * when the properties or their flags (readable/writable) change.
- */
-
-/**
- * SECTION:svc-unstable
- * @title: Interfaces in libtelepathy-glib-unstable
- * @short_description: Deprecated module
- *
- * Use of this module is deprecated. If you must implement these interfaces,
- * you should copy the relevant XML file from the spec into your source
- * package, and also copy in the code generation tools from telepathy-glib
- * (see the extensions/ directory in Gabble or Salut source for the structure
- * to use). Generate the code with a namespacing prefix other than Tp/tp_/TP_,
- * e.g. Gabble uses Gabble/gabble_/GABBLE_.
- *
- * The static library telepathy-glib-unstable exists to support interfaces
- * in the Telepathy specification which do not yet have a stable API,
- * in order to avoid changing the API and ABI of telepathy-glib too often.
- *
- * To use these interfaces you must use the pkg-config module
- * 'telepathy-glib-unstable', or link against -ltelepathy-glib-unstable
- * and add /usr/include/telepathy-unstable to your header search path.
  */
 
 /**
@@ -101,6 +80,19 @@
  */
 
 /**
+ * SECTION:defs
+ * @title: Miscellaneous definitions
+ * @short_description: Definitions useful for working with the Telepathy
+ *   protocol
+ *
+ * This header contains definitions which didn't fit into enums.h,
+ * interfaces.h or errors.h.
+ *
+ * Since: 0.7.0. In older versions, these constants were in base-connection.h
+ * and base-connection-manager.h.
+ */
+
+/**
  * SECTION:enums
  * @title: Telepathy protocol enumerations
  * @short_description: Enumerated types and bitfields from the Telepathy spec
@@ -127,8 +119,12 @@
  * @short_description: D-Bus interface names from the Telepathy spec
  *
  * This header exposes the interface names from the Telepathy specification
- * as cpp defines for strings. It is automatically generated from the
- * specification.
+ * as cpp defines for strings, such as %TP_IFACE_PROPERTIES_INTERFACE.
+ * It is automatically generated from the specification.
+ *
+ * Since 0.7.0 it also provides cpp defines like
+ * %TP_IFACE_QUARK_PROPERTIES_INTERFACE, which expand to function calls that
+ * return GQuarks for the same strings.
  */
 
 /**
