@@ -17,7 +17,8 @@ ABI_LISTS = \
     versions/0.7.10.abi \
     versions/0.7.12.abi \
     versions/0.7.13.abi \
-    versions/0.7.14.abi
+    versions/0.7.14.abi \
+    versions/0.7.15.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -101,6 +102,7 @@ tpginclude_HEADERS = \
     channel.h \
     channel-iface.h \
     channel-factory-iface.h \
+    channel-manager.h \
     media-interfaces.h \
     connection.h \
     connection-manager.h \
@@ -112,6 +114,7 @@ tpginclude_HEADERS = \
     debug-ansi.h \
     enums.h \
     errors.h \
+    exportable-channel.h \
     group-mixin.h \
     gtypes.h \
     handle.h \
@@ -205,6 +208,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel.c \
     channel-group.c \
     channel-internal.h \
+    channel-manager.c \
     connection.c \
     connection-manager.c \
     contacts-mixin.c \
@@ -215,6 +219,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     interfaces.c \
     debug-internal.h \
     errors.c \
+    exportable-channel.c \
     group-mixin.c \
     gtypes.c \
     handle.c \

@@ -45,6 +45,7 @@ host_triplet = @host@
 
 @HAVE_LD_VERSION_SCRIPT_FALSE@am__append_4 = -export-symbols-regex '^tp'
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/telepathy-glib-uninstalled.pc.in \
 	$(srcdir)/telepathy-glib.pc.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
 	$(tpginclude_HEADERS)
@@ -57,7 +58,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = telepathy-glib.pc
+CONFIG_CLEAN_FILES = telepathy-glib.pc telepathy-glib-uninstalled.pc
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -72,14 +73,14 @@ am__DEPENDENCIES_1 =
 libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = base-connection.lo \
 	base-connection-manager.lo channel.lo channel-group.lo \
-	connection.lo connection-manager.lo contacts-mixin.lo dbus.lo \
-	dbus-properties-mixin.lo debug.lo interfaces.lo errors.lo \
-	group-mixin.lo gtypes.lo handle.lo handle-repo.lo \
-	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
-	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
-	media-interfaces.lo presence-mixin.lo properties-mixin.lo \
-	proxy.lo proxy-methods.lo proxy-signals.lo run.lo \
-	text-mixin.lo util.lo
+	channel-manager.lo connection.lo connection-manager.lo \
+	contacts-mixin.lo dbus.lo dbus-properties-mixin.lo debug.lo \
+	interfaces.lo errors.lo exportable-channel.lo group-mixin.lo \
+	gtypes.lo handle.lo handle-repo.lo handle-repo-dynamic.lo \
+	handle-repo-static.lo handle-set.lo heap.lo intset.lo \
+	channel-iface.lo channel-factory-iface.lo media-interfaces.lo \
+	presence-mixin.lo properties-mixin.lo proxy.lo \
+	proxy-methods.lo proxy-signals.lo run.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = signals-marshal.lo \
 	telepathy-errors.lo tp-svc-channel.lo tp-svc-connection.lo \
 	tp-svc-connection-manager.lo tp-svc-generic.lo \
@@ -269,7 +270,8 @@ ABI_LISTS = \
     versions/0.7.10.abi \
     versions/0.7.12.abi \
     versions/0.7.13.abi \
-    versions/0.7.14.abi
+    versions/0.7.14.abi \
+    versions/0.7.15.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -317,6 +319,7 @@ tpginclude_HEADERS = \
     channel.h \
     channel-iface.h \
     channel-factory-iface.h \
+    channel-manager.h \
     media-interfaces.h \
     connection.h \
     connection-manager.h \
@@ -328,6 +331,7 @@ tpginclude_HEADERS = \
     debug-ansi.h \
     enums.h \
     errors.h \
+    exportable-channel.h \
     group-mixin.h \
     gtypes.h \
     handle.h \
@@ -415,6 +419,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel.c \
     channel-group.c \
     channel-internal.h \
+    channel-manager.c \
     connection.c \
     connection-manager.c \
     contacts-mixin.c \
@@ -425,6 +430,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     interfaces.c \
     debug-internal.h \
     errors.c \
+    exportable-channel.c \
     group-mixin.c \
     gtypes.c \
     handle.c \
@@ -503,6 +509,8 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 telepathy-glib.pc: $(top_builddir)/config.status $(srcdir)/telepathy-glib.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+telepathy-glib-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/telepathy-glib-uninstalled.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"
@@ -555,6 +563,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-factory-iface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-group.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-iface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
@@ -563,6 +572,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exportable-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtypes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo-dynamic.Plo@am__quote@

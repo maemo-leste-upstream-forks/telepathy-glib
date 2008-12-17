@@ -1,8 +1,8 @@
 /*
  * base-connection.c - Source for TpBaseConnection
  *
- * Copyright (C) 2005, 2006, 2007 Collabora Ltd.
- * Copyright (C) 2005, 2006, 2007 Nokia Corporation
+ * Copyright (C) 2005-2008 Collabora Ltd.
+ * Copyright (C) 2005-2008 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,34 +35,241 @@
  * asynchronously.
  */
 
+/**
+ * TpBaseConnectionProc:
+ * @self: The connection object
+ *
+ * Signature of a virtual method on #TpBaseConnection that takes no
+ * additional parameters and returns nothing.
+ */
+
+/**
+ * TpBaseConnectionStartConnectingImpl:
+ * @self: The connection object
+ * @error: Set to the error if %FALSE is returned
+ *
+ * Signature of an implementation of the start_connecting method
+ * of #TpBaseConnection.
+ *
+ * On entry, the implementation may assume that it is in state NEW.
+ *
+ * If %TRUE is returned, the Connect D-Bus method succeeds; the
+ * implementation must either have already set the status to CONNECTED by
+ * calling tp_base_connection_change_status(), or have arranged for a
+ * status change to either state DISCONNECTED or CONNECTED to be signalled by
+ * calling tp_base_connection_change_status() at some later time.
+ * If the status is still NEW after returning %TRUE, #TpBaseConnection will
+ * automatically change it to CONNECTING for reason REQUESTED.
+ *
+ * If %FALSE is returned, the error will be raised from Connect as an
+ * exception. If the status is not DISCONNECTED after %FALSE is returned,
+ * #TpBaseConnection will automatically change it to DISCONNECTED
+ * with a reason appropriate to the error; NetworkError results in
+ * NETWORK_ERROR, PermissionDenied results in AUTHENTICATION_FAILED, and all
+ * other errors currently result in NONE_SPECIFIED.
+ *
+ * All except the simplest connection managers are expected to implement this
+ * asynchronously, returning %TRUE in most cases and changing the status
+ * to CONNECTED or DISCONNECTED later.
+ *
+ * Returns: %FALSE if failure has already occurred, else %TRUE.
+ */
+
+/**
+ * TpBaseConnectionCreateHandleReposImpl:
+ * @self: The connection object
+ * @repos: An array of pointers to be filled in; the implementation
+ *         may assume all are initially NULL.
+ *
+ * Signature of an implementation of the create_handle_repos method
+ * of #TpBaseConnection.
+ */
+
+/**
+ * TpBaseConnectionCreateChannelFactoriesImpl:
+ * @self: The implementation, a subclass of TpBaseConnection
+ *
+ * Signature of an implementation of the create_channel_factories method
+ * of #TpBaseConnection.
+ *
+ * Returns: a GPtrArray of objects implementing #TpChannelFactoryIface
+ * which, between them, implement all channel types this Connection
+ * supports.
+ */
+
+/**
+ * TpBaseConnectionCreateChannelManagersImpl:
+ * @self: The implementation, a subclass of TpBaseConnection
+ *
+ * Signature of an implementation of the create_channel_managers method
+ * of #TpBaseConnection.
+ *
+ * Returns: a GPtrArray of objects implementing #TpChannelManager
+ * which, between them, implement all channel types this Connection
+ * supports.
+ */
+
+/**
+ * TpBaseConnectionGetUniqueConnectionNameImpl:
+ * @self: The implementation, a subclass of TpBaseConnection
+ *
+ * Signature of the @get_unique_connection_name virtual method
+ * on #TpBaseConnection.
+ *
+ * Returns: a name for this connection which will be unique within this
+ * connection manager process, as a string which the caller must free
+ * with #g_free.
+ */
+
+/**
+ * TpBaseConnectionClass:
+ * @parent_class: The superclass' structure
+ * @create_handle_repos: Fill in suitable handle repositories in the
+ *  given array for all those handle types this Connection supports.
+ *  Must be set by subclasses to a non-%NULL value; the function must create
+ *  at least a CONTACT handle repository (failing to do so will cause a crash).
+ * @create_channel_factories: Create an array of channel factories for this
+ *  Connection. At least one of this or @create_channel_managers must be set by
+ *  subclasses to a non-%NULL value; in new code, setting this to %NULL and
+ *  using channel managers exclusively is recommended.
+ * @get_unique_connection_name: Construct a unique name for this connection
+ *  (for example using the protocol's format for usernames). If %NULL (the
+ *  default), a unique name will be generated. Subclasses should usually
+ *  override this to get more obvious names, to aid debugging and prevent
+ *  multiple connections to the same account.
+ * @connecting: If set by subclasses, will be called just after the state
+ *  changes to CONNECTING. May be %NULL if nothing special needs to happen.
+ * @connected: If set by subclasses, will be called just after the state
+ *  changes to CONNECTED. May be %NULL if nothing special needs to happen.
+ * @disconnected: If set by subclasses, will be called just after the state
+ *  changes to DISCONNECTED. May be %NULL if nothing special needs to happen.
+ * @shut_down: Called after disconnected() is called, to clean up the
+ *  connection. Must start the shutdown process for the underlying
+ *  network connection, and arrange for tp_base_connection_finish_shutdown()
+ *  to be called after the underlying connection has been closed. May not
+ *  be left as %NULL.
+ * @start_connecting: Asynchronously start connecting - called to implement
+ *  the Connect D-Bus method. See #TpBaseConnectionStartConnectingImpl for
+ *  details. May not be left as %NULL.
+ * @interfaces_always_present: A strv of extra D-Bus interfaces which are
+ *  always implemented by instances of this class, which may be filled in
+ *  by subclasses. The default is to list no additional interfaces.
+ *  Individual instances may detect which additional interfaces they support
+ *  and signal them before going to state CONNECTED by calling
+ *  tp_base_connection_add_interfaces().
+ * @create_channel_managers: Create an array of channel managers for this
+ *  Connection. At least one of this or @create_channel_factories must be set
+ *  by subclasses to a non-%NULL value.
+ *  Since: 0.7.15
+ *
+ * The class of a #TpBaseConnection. Many members are virtual methods etc.
+ * to be filled in in the subclass' class_init function.
+ *
+ * In addition to the fields documented here, there are three gpointer fields
+ * which must currently be %NULL (a meaning may be defined for these in a
+ * future version of telepathy-glib), and a pointer to opaque private data.
+ */
+
+/**
+ * TP_INTERNAL_CONNECTION_STATUS_NEW:
+ *
+ * A special value for #TpConnectionStatus, used within GLib connection
+ * managers to indicate that the connection is disconnected because
+ * connection has never been attempted (as distinct from disconnected
+ * after connection has started, either by user request or an error).
+ *
+ * Must never be visible on the D-Bus - %TP_CONNECTION_STATUS_DISCONNECTED
+ * is sent instead.
+ */
+
+/**
+ * TpBaseConnection:
+ * @parent: Fields shared by the superclass.
+ * @bus_name: A D-Bus well-known bus name, owned by the connection manager
+ *  process and associated with this connection. Set by
+ *  tp_base_connection_register; should be considered read-only by subclasses.
+ * @object_path: The object-path of this connection. Set by
+ *  tp_base_connection_register; should be considered read-only by subclasses.
+ * @status: Connection status - may either be a valid TpConnectionStatus or
+ *  TP_INTERNAL_CONNECTION_STATUS_NEW. Should be considered read-only by
+ *  subclasses: use tp_base_connection_change_status() to set it.
+ * @self_handle: The handle of type %TP_HANDLE_TYPE_CONTACT representing the
+ *  local user. Must be set nonzero by the subclass before moving to state
+ *  CONNECTED. Since 0.7.15, setting this property directly is
+ *  deprecated, in favour of tp_base_connection_set_self_handle(); if this
+ *  property is set directly, the connection must ensure it holds a reference
+ *  to the handle. Changing this property directly having moved to state
+ *  CONNECTED is very strongly discouraged, as this will prevent the
+ *  SelfHandleChanged signal being emitted.
+ *
+ * Data structure representing a generic #TpSvcConnection implementation.
+ *
+ * In addition to the fields documented here, there are four gpointer fields
+ * which must currently be %NULL (a meaning may be defined for these in a
+ * future version of telepathy-glib), and a pointer to opaque private data.
+ */
+
+/**
+ * TpChannelManagerIter:
+ * @see_also: tp_base_connection_channel_manager_iter_init(),
+ *            tp_base_connection_channel_manager_iter_next()
+ *
+ * An iterator over the #TpChannelManager objects known to a #TpBaseConnection.
+ * It has no public fields.
+ *
+ * Since: 0.7.15
+ */
+
+/**
+ * TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED:
+ * @conn: A TpBaseConnection
+ * @context: A DBusGMethodInvocation
+ *
+ * If @conn is not in state #TP_CONNECTION_STATUS_CONNECTED, complete the
+ * D-Bus method invocation @context by raising the Telepathy error
+ * #TP_ERROR_DISCONNECTED, and return from the current function (which
+ * must be void). For use in D-Bus method implementations.
+ */
+
+
 #include <telepathy-glib/base-connection.h>
 
 #include <string.h>
 
 #include <dbus/dbus-glib-lowlevel.h>
 
+#include <telepathy-glib/channel-factory-iface.h>
+#include <telepathy-glib/channel-manager.h>
 #include <telepathy-glib/connection-manager.h>
 #include <telepathy-glib/contacts-mixin.h>
-#include <telepathy-glib/channel-factory-iface.h>
+#include <telepathy-glib/dbus-properties-mixin.h>
 #include <telepathy-glib/dbus.h>
+#include <telepathy-glib/exportable-channel.h>
 #include <telepathy-glib/gtypes.h>
-#include <telepathy-glib/util.h>
 #include <telepathy-glib/interfaces.h>
+#include <telepathy-glib/svc-generic.h>
+#include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CONNECTION
 #include "debug-internal.h"
 
-static void service_iface_init (gpointer, gpointer);
+static void conn_iface_init (gpointer, gpointer);
+static void requests_iface_init (gpointer, gpointer);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE(TpBaseConnection,
     tp_base_connection,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION,
-      service_iface_init))
+      conn_iface_init);
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
+      tp_dbus_properties_mixin_iface_init);
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_REQUESTS,
+      requests_iface_init));
 
 enum
 {
     PROP_PROTOCOL = 1,
+    PROP_SELF_HANDLE,
 };
 
 /* signal enum */
@@ -80,17 +287,30 @@ static guint signals[N_SIGNALS] = {0};
 
 typedef struct _ChannelRequest ChannelRequest;
 
+typedef enum {
+    METHOD_REQUEST_CHANNEL,
+    METHOD_CREATE_CHANNEL,
+#if 0
+    METHOD_ENSURE_CHANNEL,
+#endif
+    NUM_METHODS
+} ChannelRequestMethod;
+
 struct _ChannelRequest
 {
   DBusGMethodInvocation *context;
+  ChannelRequestMethod method;
+
   gchar *channel_type;
   guint handle_type;
   guint handle;
+  /* always TRUE for CREATE */
   gboolean suppress_handler;
 };
 
 static ChannelRequest *
 channel_request_new (DBusGMethodInvocation *context,
+                     ChannelRequestMethod method,
                      const char *channel_type,
                      guint handle_type,
                      guint handle,
@@ -100,9 +320,11 @@ channel_request_new (DBusGMethodInvocation *context,
 
   g_assert (NULL != context);
   g_assert (NULL != channel_type);
+  g_assert (method < NUM_METHODS);
 
   ret = g_slice_new0 (ChannelRequest);
   ret->context = context;
+  ret->method = method;
   ret->channel_type = g_strdup (channel_type);
   ret->handle_type = handle_type;
   ret->handle = handle;
@@ -150,6 +372,8 @@ struct _TpBaseConnectionPrivate
   gboolean dispose_has_run;
   /* array of (TpChannelFactoryIface *) */
   GPtrArray *channel_factories;
+  /* array of (TpChannelManager *) */
+  GPtrArray *channel_managers;
   /* array of (ChannelRequest *) */
   GPtrArray *channel_requests;
 
@@ -187,6 +411,10 @@ tp_base_connection_get_property (GObject *object,
       g_value_set_string (value, priv->protocol);
       break;
 
+    case PROP_SELF_HANDLE:
+      g_value_set_uint (value, self->self_handle);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -208,6 +436,31 @@ tp_base_connection_set_property (GObject      *object,
       priv->protocol = g_value_dup_string (value);
       g_assert (priv->protocol != NULL);
       break;
+
+    case PROP_SELF_HANDLE:
+      {
+        TpHandle new_self_handle = g_value_get_uint (value);
+
+        if (self->status == TP_CONNECTION_STATUS_CONNECTED)
+          g_return_if_fail (new_self_handle != 0);
+
+        if (self->self_handle == new_self_handle)
+          return;
+
+        if (self->self_handle != 0)
+          tp_handle_unref (priv->handles[TP_HANDLE_TYPE_CONTACT],
+              self->self_handle);
+
+        self->self_handle = new_self_handle;
+
+        if (self->self_handle != 0)
+          tp_handle_ref (priv->handles[TP_HANDLE_TYPE_CONTACT],
+              self->self_handle);
+
+        tp_svc_connection_emit_self_handle_changed (self, self->self_handle);
+      }
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -241,6 +494,10 @@ tp_base_connection_dispose (GObject *object)
   g_ptr_array_foreach (priv->channel_factories, (GFunc) g_object_unref, NULL);
   g_ptr_array_free (priv->channel_factories, TRUE);
   priv->channel_factories = NULL;
+
+  g_ptr_array_foreach (priv->channel_managers, (GFunc) g_object_unref, NULL);
+  g_ptr_array_free (priv->channel_managers, TRUE);
+  priv->channel_managers = NULL;
 
   if (priv->channel_requests)
     {
@@ -280,6 +537,143 @@ tp_base_connection_finalize (GObject *object)
   G_OBJECT_CLASS (tp_base_connection_parent_class)->finalize (object);
 }
 
+
+/**
+ * exportable_channel_get_old_info:
+ * @channel: a channel
+ * @object_path_out:  address at which to store the channel's object path,
+ *                    which the caller should g_free()
+ * @channel_type_out: address at which to store the channel's type, which the
+ *                    caller should g_free()
+ * @handle_type_out:  address at which to store the channel's associated handle
+ *                    type
+ * @handle_out:       address at which to store the channel's associated
+ *                    handle, if any.  This is a borrowed reference; the caller
+ *                    does not need to tp_handle_unref() it.
+ *
+ * Given a new-style exportable channel, as used by the Requests interface's
+ * API, fetches the information needed for the old-style ListChannels method
+ * on Connections.
+ */
+static void
+exportable_channel_get_old_info (TpExportableChannel *channel,
+                                 gchar **object_path_out,
+                                 gchar **channel_type_out,
+                                 guint *handle_type_out,
+                                 guint *handle_out)
+{
+  gchar *object_path;
+  GHashTable *channel_properties;
+  gboolean valid;
+
+  g_object_get (channel,
+      "object-path", &object_path,
+      "channel-properties", &channel_properties,
+      NULL);
+
+  g_assert (object_path != NULL);
+  g_assert (tp_dbus_check_valid_object_path (object_path, NULL));
+
+  if (object_path_out != NULL)
+    *object_path_out = object_path;
+  else
+    g_free (object_path);
+
+  if (channel_type_out != NULL)
+    {
+      *channel_type_out = g_strdup (tp_asv_get_string (channel_properties,
+          TP_IFACE_CHANNEL ".ChannelType"));
+      g_assert (*channel_type_out != NULL);
+      g_assert (tp_dbus_check_valid_interface_name (*channel_type_out, NULL));
+    }
+
+  if (handle_type_out != NULL)
+    {
+      *handle_type_out = tp_asv_get_uint32 (channel_properties,
+          TP_IFACE_CHANNEL ".TargetHandleType", &valid);
+      g_assert (valid);
+    }
+
+  if (handle_out != NULL)
+    {
+      *handle_out = tp_asv_get_uint32 (channel_properties,
+          TP_IFACE_CHANNEL ".TargetHandle", &valid);
+      g_assert (valid);
+
+      if (handle_type_out != NULL)
+        {
+          if (*handle_type_out == TP_HANDLE_TYPE_NONE)
+            g_assert (*handle_out == 0);
+          else
+            g_assert (*handle_out != 0);
+        }
+    }
+
+  g_hash_table_destroy (channel_properties);
+}
+
+
+/**
+ * get_channel_details:
+ * @obj: a channel, which must implement one of #TpExportableChannel and
+ *       #TpChannelIface
+ *
+ * Returns: (oa{sv}: o.fd.T.Conn.Iface.Requests.Channel_Details), suitable for
+ *          inclusion in the NewChannels signal.
+ */
+static GValueArray *
+get_channel_details (GObject *obj)
+{
+  GValueArray *structure = g_value_array_new (2);
+  GHashTable *table;
+  GValue *value;
+  gchar *object_path;
+
+  g_object_get (obj,
+      "object-path", &object_path,
+      NULL);
+
+  g_value_array_append (structure, NULL);
+  value = g_value_array_get_nth (structure, 0);
+  g_value_init (value, DBUS_TYPE_G_OBJECT_PATH);
+  g_value_take_boxed (value, object_path);
+  object_path = NULL;
+
+  g_assert (TP_IS_EXPORTABLE_CHANNEL (obj) || TP_IS_CHANNEL_IFACE (obj));
+
+  if (TP_IS_EXPORTABLE_CHANNEL (obj))
+    {
+      g_object_get (obj,
+          "channel-properties", &table,
+          NULL);
+    }
+  else
+    {
+     table = g_hash_table_new_full (g_str_hash, g_str_equal,
+          NULL, (GDestroyNotify) tp_g_value_slice_free);
+
+      value = tp_g_value_slice_new (G_TYPE_UINT);
+      g_object_get_property (obj, "handle", value);
+      g_hash_table_insert (table, TP_IFACE_CHANNEL ".TargetHandle", value);
+
+      value = tp_g_value_slice_new (G_TYPE_UINT);
+      g_object_get_property (obj, "handle-type", value);
+      g_hash_table_insert (table, TP_IFACE_CHANNEL ".TargetHandleType", value);
+
+      value = tp_g_value_slice_new (G_TYPE_STRING);
+      g_object_get_property (obj, "channel-type", value);
+      g_hash_table_insert (table, TP_IFACE_CHANNEL ".ChannelType", value);
+    }
+
+  g_value_array_append (structure, NULL);
+  value = g_value_array_get_nth (structure, 1);
+  g_value_init (value, TP_HASH_TYPE_QUALIFIED_PROPERTY_VALUE_MAP);
+  g_value_take_boxed (value, table);
+
+  return structure;
+}
+
+
 static GPtrArray *
 find_matching_channel_requests (TpBaseConnection *conn,
                                 const gchar *channel_type,
@@ -301,7 +695,8 @@ find_matching_channel_requests (TpBaseConnection *conn,
        * satisfy the request for which it was returned as EXISTING).
        */
       g_assert (handle == 0);
-      g_assert (channel_request == NULL || tp_g_ptr_array_contains (priv->channel_requests, channel_request));
+      g_assert (channel_request == NULL ||
+          tp_g_ptr_array_contains (priv->channel_requests, channel_request));
 
       if (channel_request)
         {
@@ -322,7 +717,7 @@ find_matching_channel_requests (TpBaseConnection *conn,
     {
       ChannelRequest *request = g_ptr_array_index (priv->channel_requests, i);
 
-      if (0 != strcmp (request->channel_type, channel_type))
+      if (tp_strdiff (request->channel_type, channel_type))
         continue;
 
       if (handle_type != request->handle_type)
@@ -340,19 +735,64 @@ find_matching_channel_requests (TpBaseConnection *conn,
   /* if this channel was created or returned as a result of a particular
    * request, that request had better be among the matching ones in the queue
    */
-  g_assert (channel_request == NULL || tp_g_ptr_array_contains (requests, channel_request));
+  g_assert (channel_request == NULL ||
+      tp_g_ptr_array_contains (requests, channel_request));
 
   return requests;
 }
 
+
 static void
-satisfy_requests (TpBaseConnection *conn,
-                  TpChannelFactoryIface *factory,
-                  TpChannelIface *chan,
-                  ChannelRequest *channel_request,
-                  gboolean is_new)
+satisfy_request (TpBaseConnection *conn,
+                 ChannelRequest *request,
+                 GObject *channel,
+                 const gchar *object_path)
 {
   TpBaseConnectionPrivate *priv = TP_BASE_CONNECTION_GET_PRIVATE (conn);
+  DEBUG ("completing queued request %p with success, "
+      "channel_type=%s, handle_type=%u, "
+      "handle=%u, suppress_handler=%u", request, request->channel_type,
+      request->handle_type, request->handle, request->suppress_handler);
+
+  switch (request->method)
+    {
+    case METHOD_REQUEST_CHANNEL:
+      tp_svc_connection_return_from_request_channel (request->context,
+          object_path);
+      break;
+
+    case METHOD_CREATE_CHANNEL:
+        {
+          GHashTable *properties;
+
+          g_assert (TP_IS_EXPORTABLE_CHANNEL (channel));
+          g_object_get (channel,
+              "channel-properties", &properties,
+              NULL);
+          tp_svc_connection_interface_requests_return_from_create_channel (
+              request->context, object_path, properties);
+          g_hash_table_destroy (properties);
+        }
+        break;
+
+    default:
+      g_assert_not_reached ();
+    }
+  request->context = NULL;
+
+  g_ptr_array_remove (priv->channel_requests, request);
+
+  channel_request_free (request);
+}
+
+
+static void
+factory_satisfy_requests (TpBaseConnection *conn,
+                          TpChannelFactoryIface *factory,
+                          TpChannelIface *chan,
+                          ChannelRequest *channel_request,
+                          gboolean is_new)
+{
   gchar *object_path = NULL, *channel_type = NULL;
   guint handle_type = 0, handle = 0;
   gboolean suppress_handler = FALSE;
@@ -373,26 +813,21 @@ satisfy_requests (TpBaseConnection *conn,
                                         &suppress_handler);
 
   if (is_new)
-    tp_svc_connection_emit_new_channel (conn, object_path, channel_type,
-        handle_type, handle, suppress_handler);
+    {
+      GPtrArray *array = g_ptr_array_sized_new (1);
+
+      tp_svc_connection_emit_new_channel (conn, object_path, channel_type,
+          handle_type, handle, suppress_handler);
+
+      g_ptr_array_add (array, get_channel_details (G_OBJECT (chan)));
+      tp_svc_connection_interface_requests_emit_new_channels (conn, array);
+      g_value_array_free (g_ptr_array_index (array, 0));
+      g_ptr_array_free (array, TRUE);
+    }
 
   for (i = 0; i < tmp->len; i++)
-    {
-      ChannelRequest *request = g_ptr_array_index (tmp, i);
-
-      DEBUG ("completing queued request %p with success, "
-          "channel_type=%s, handle_type=%u, "
-          "handle=%u, suppress_handler=%u", request, request->channel_type,
-          request->handle_type, request->handle, request->suppress_handler);
-
-      tp_svc_connection_return_from_request_channel (request->context,
-          object_path);
-      request->context = NULL;
-
-      g_ptr_array_remove (priv->channel_requests, request);
-
-      channel_request_free (request);
-    }
+    satisfy_request (conn, g_ptr_array_index (tmp, i), G_OBJECT (chan),
+        object_path);
 
   g_ptr_array_free (tmp, TRUE);
 
@@ -400,25 +835,67 @@ satisfy_requests (TpBaseConnection *conn,
   g_free (channel_type);
 }
 
+
 static void
-connection_new_channel_cb (TpChannelFactoryIface *factory,
-                           GObject *chan,
-                           ChannelRequest *channel_request,
-                           gpointer data)
+fail_channel_request (TpBaseConnection *conn,
+                      ChannelRequest *request,
+                      GError *error)
 {
-  satisfy_requests (TP_BASE_CONNECTION (data), factory,
-      TP_CHANNEL_IFACE (chan), channel_request, TRUE);
+  TpBaseConnectionPrivate *priv = TP_BASE_CONNECTION_GET_PRIVATE (conn);
+  DEBUG ("completing queued request %p with error, channel_type=%s, "
+      "handle_type=%u, handle=%u, suppress_handler=%u",
+      request, request->channel_type,
+      request->handle_type, request->handle, request->suppress_handler);
+
+  dbus_g_method_return_error (request->context, error);
+  request->context = NULL;
+
+  g_ptr_array_remove (priv->channel_requests, request);
+
+  channel_request_free (request);
+}
+
+
+/* Channel factory signal handlers */
+
+static void
+factory_channel_closed_cb (GObject *channel,
+                           TpBaseConnection *conn)
+{
+  gchar *object_path;
+
+  g_object_get (channel,
+      "object-path", &object_path,
+      NULL);
+
+  tp_svc_connection_interface_requests_emit_channel_closed (conn,
+      object_path);
+
+  g_free (object_path);
 }
 
 static void
-connection_channel_error_cb (TpChannelFactoryIface *factory,
-                             GObject *chan,
-                             GError *error,
-                             ChannelRequest *channel_request,
-                             gpointer data)
+factory_new_channel_cb (TpChannelFactoryIface *factory,
+                        GObject *chan,
+                        ChannelRequest *channel_request,
+                        gpointer data)
+{
+  factory_satisfy_requests (TP_BASE_CONNECTION (data), factory,
+      TP_CHANNEL_IFACE (chan), channel_request, TRUE);
+
+  g_signal_connect (chan, "closed", (GCallback) factory_channel_closed_cb,
+      data);
+}
+
+
+static void
+factory_channel_error_cb (TpChannelFactoryIface *factory,
+                          GObject *chan,
+                          GError *error,
+                          ChannelRequest *channel_request,
+                          gpointer data)
 {
   TpBaseConnection *conn = TP_BASE_CONNECTION (data);
-  TpBaseConnectionPrivate *priv = TP_BASE_CONNECTION_GET_PRIVATE (conn);
   gchar *channel_type = NULL;
   guint handle_type = 0, handle = 0;
   GPtrArray *tmp;
@@ -438,25 +915,140 @@ connection_channel_error_cb (TpChannelFactoryIface *factory,
                                         handle, channel_request, NULL);
 
   for (i = 0; i < tmp->len; i++)
-    {
-      ChannelRequest *request = g_ptr_array_index (tmp, i);
-
-      DEBUG ("completing queued request %p with error, channel_type=%s, "
-          "handle_type=%u, handle=%u, suppress_handler=%u",
-          request, request->channel_type,
-          request->handle_type, request->handle, request->suppress_handler);
-
-      dbus_g_method_return_error (request->context, error);
-      request->context = NULL;
-
-      g_ptr_array_remove (priv->channel_requests, request);
-
-      channel_request_free (request);
-    }
+    fail_channel_request (conn, g_ptr_array_index (tmp, i), error);
 
   g_ptr_array_free (tmp, TRUE);
   g_free (channel_type);
 }
+
+
+/* Channel manager signal handlers */
+
+static void
+manager_new_channel (gpointer key,
+                     gpointer value,
+                     gpointer data)
+{
+  TpExportableChannel *channel = TP_EXPORTABLE_CHANNEL (key);
+  GSList *request_tokens = value;
+  TpBaseConnection *self = TP_BASE_CONNECTION (data);
+  gchar *object_path, *channel_type;
+  guint handle_type, handle;
+  GSList *iter;
+  gboolean suppress_handler = FALSE;
+
+  exportable_channel_get_old_info (channel, &object_path, &channel_type,
+      &handle_type, &handle);
+
+  for (iter = request_tokens; iter != NULL; iter = iter->next)
+    {
+      ChannelRequest *request = iter->data;
+
+      if (request->suppress_handler)
+        {
+          suppress_handler = TRUE;
+          break;
+        }
+    }
+
+  tp_svc_connection_emit_new_channel (self, object_path, channel_type,
+      handle_type, handle, suppress_handler);
+
+  for (iter = request_tokens; iter != NULL; iter = iter->next)
+    {
+      satisfy_request (self, iter->data, G_OBJECT (channel),
+          object_path);
+    }
+
+  g_free (object_path);
+  g_free (channel_type);
+}
+
+
+static void
+manager_new_channels_foreach (gpointer key,
+                              gpointer value,
+                              gpointer data)
+{
+  GPtrArray *details = data;
+
+  g_ptr_array_add (details, get_channel_details (G_OBJECT (key)));
+}
+
+
+static void
+manager_new_channels_cb (TpChannelManager *manager,
+                         GHashTable *channels,
+                         TpBaseConnection *self)
+{
+  GPtrArray *array;
+
+  g_assert (TP_IS_CHANNEL_MANAGER (manager));
+  g_assert (TP_IS_BASE_CONNECTION (self));
+
+  array = g_ptr_array_sized_new (g_hash_table_size (channels));
+  g_hash_table_foreach (channels, manager_new_channels_foreach, array);
+  tp_svc_connection_interface_requests_emit_new_channels (self,
+      array);
+  g_ptr_array_foreach (array, (GFunc) g_value_array_free, NULL);
+  g_ptr_array_free (array, TRUE);
+
+  g_hash_table_foreach (channels, manager_new_channel, self);
+}
+
+
+static void
+manager_request_already_satisfied_cb (TpChannelManager *manager,
+                                      gpointer request_token,
+                                      TpExportableChannel *channel,
+                                      TpBaseConnection *self)
+{
+  gchar *object_path;
+
+  g_assert (TP_IS_CHANNEL_MANAGER (manager));
+  g_assert (TP_IS_EXPORTABLE_CHANNEL (channel));
+  g_assert (TP_IS_BASE_CONNECTION (self));
+
+  g_object_get (channel,
+      "object-path", &object_path,
+      NULL);
+
+  satisfy_request (self, request_token, G_OBJECT (channel), object_path);
+  g_free (object_path);
+}
+
+
+static void
+manager_request_failed_cb (TpChannelManager *manager,
+                           gpointer request_token,
+                           guint domain,
+                           gint code,
+                           gchar *message,
+                           TpBaseConnection *self)
+{
+  GError error = { domain, code, message };
+
+  g_assert (TP_IS_CHANNEL_MANAGER (manager));
+  g_assert (domain > 0);
+  g_assert (message != NULL);
+  g_assert (TP_IS_BASE_CONNECTION (self));
+
+  fail_channel_request (self, request_token, &error);
+}
+
+
+static void
+manager_channel_closed_cb (TpChannelManager *manager,
+                           const gchar *path,
+                           TpBaseConnection *self)
+{
+  g_assert (TP_IS_CHANNEL_MANAGER (manager));
+  g_assert (path != NULL);
+  g_assert (TP_IS_BASE_CONNECTION (self));
+
+  tp_svc_connection_interface_requests_emit_channel_closed (self, path);
+}
+
 
 static GObject *
 tp_base_connection_constructor (GType type, guint n_construct_properties,
@@ -473,7 +1065,8 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
   DEBUG("Post-construction: (TpBaseConnection *)%p", self);
 
   g_assert (cls->create_handle_repos != NULL);
-  g_assert (cls->create_channel_factories != NULL);
+  g_assert (cls->create_channel_factories != NULL ||
+            cls->create_channel_managers  != NULL);
   g_assert (cls->shut_down != NULL);
   g_assert (cls->start_connecting != NULL);
 
@@ -490,24 +1083,184 @@ tp_base_connection_constructor (GType type, guint n_construct_properties,
       }
     }
 
-  priv->channel_factories = cls->create_channel_factories (self);
+  if (cls->create_channel_factories != NULL)
+    priv->channel_factories = cls->create_channel_factories (self);
+  else
+    priv->channel_factories = g_ptr_array_sized_new (0);
+
+  if (cls->create_channel_managers != NULL)
+    priv->channel_managers = cls->create_channel_managers (self);
+  else
+    priv->channel_managers = g_ptr_array_sized_new (0);
 
   for (i = 0; i < priv->channel_factories->len; i++)
     {
       GObject *factory = g_ptr_array_index (priv->channel_factories, i);
       DEBUG("Channel factory #%u at %p", i, factory);
       g_signal_connect (factory, "new-channel", G_CALLBACK
-          (connection_new_channel_cb), self);
+          (factory_new_channel_cb), self);
       g_signal_connect (factory, "channel-error", G_CALLBACK
-          (connection_channel_error_cb), self);
+          (factory_channel_error_cb), self);
+    }
+
+  for (i = 0; i < priv->channel_managers->len; i++)
+    {
+      TpChannelManager *manager = TP_CHANNEL_MANAGER (
+          g_ptr_array_index (priv->channel_managers, i));
+
+      DEBUG("Channel manager #%u at %p", i, manager);
+
+      g_signal_connect (manager, "new-channels",
+          (GCallback) manager_new_channels_cb, self);
+      g_signal_connect (manager, "request-already-satisfied",
+          (GCallback) manager_request_already_satisfied_cb, self);
+      g_signal_connect (manager, "request-failed",
+          (GCallback) manager_request_failed_cb, self);
+      g_signal_connect (manager, "channel-closed",
+          (GCallback) manager_channel_closed_cb, self);
     }
 
   return (GObject *)self;
 }
 
+
+/* D-Bus properties for the Requests interface */
+
+static void
+factory_get_channel_details_foreach (TpChannelIface *chan,
+                                     gpointer data)
+{
+  GPtrArray *details = data;
+
+  g_ptr_array_add (details, get_channel_details (G_OBJECT (chan)));
+}
+
+
+static void
+manager_get_channel_details_foreach (TpExportableChannel *chan,
+                                     gpointer data)
+{
+  GPtrArray *details = data;
+
+  g_ptr_array_add (details, get_channel_details (G_OBJECT (chan)));
+}
+
+
+static GPtrArray *
+conn_requests_get_channel_details (TpBaseConnection *self)
+{
+  TpBaseConnectionPrivate *priv = TP_BASE_CONNECTION_GET_PRIVATE (self);
+  /* guess that each ChannelManager and each ChannelFactory has two
+   * channels, on average */
+  GPtrArray *details = g_ptr_array_sized_new (priv->channel_managers->len * 2
+      + priv->channel_factories->len * 2);
+  guint i;
+
+  for (i = 0; i < priv->channel_factories->len; i++)
+    {
+      TpChannelFactoryIface *factory = TP_CHANNEL_FACTORY_IFACE (
+          g_ptr_array_index (priv->channel_factories, i));
+
+      tp_channel_factory_iface_foreach (factory,
+          factory_get_channel_details_foreach, details);
+    }
+
+  for (i = 0; i < priv->channel_managers->len; i++)
+    {
+      TpChannelManager *manager = TP_CHANNEL_MANAGER (
+          g_ptr_array_index (priv->channel_managers, i));
+
+      tp_channel_manager_foreach_channel (manager,
+          manager_get_channel_details_foreach, details);
+    }
+
+  return details;
+}
+
+
+static void
+get_requestables_foreach (TpChannelManager *manager,
+                          GHashTable *fixed_properties,
+                          const gchar * const *allowed_properties,
+                          gpointer user_data)
+{
+  GPtrArray *details = user_data;
+  GValueArray *requestable = g_value_array_new (2);
+  GValue *value;
+
+  g_value_array_append (requestable, NULL);
+  value = g_value_array_get_nth (requestable, 0);
+  g_value_init (value, TP_HASH_TYPE_CHANNEL_CLASS);
+  g_value_set_boxed (value, fixed_properties);
+
+  g_value_array_append (requestable, NULL);
+  value = g_value_array_get_nth (requestable, 1);
+  g_value_init (value, G_TYPE_STRV);
+  g_value_set_boxed (value, allowed_properties);
+
+  g_ptr_array_add (details, requestable);
+}
+
+
+static GPtrArray *
+conn_requests_get_requestables (TpBaseConnection *self)
+{
+  TpBaseConnectionPrivate *priv = TP_BASE_CONNECTION_GET_PRIVATE (self);
+  /* generously guess that each ChannelManager has about 2 ChannelClasses */
+  GPtrArray *details = g_ptr_array_sized_new (priv->channel_managers->len * 2);
+  guint i;
+
+  for (i = 0; i < priv->channel_managers->len; i++)
+    {
+      TpChannelManager *manager = TP_CHANNEL_MANAGER (
+          g_ptr_array_index (priv->channel_managers, i));
+
+      tp_channel_manager_foreach_channel_class (manager,
+          get_requestables_foreach, details);
+    }
+
+  return details;
+}
+
+
+static void
+conn_requests_get_dbus_property (GObject *object,
+                                 GQuark interface,
+                                 GQuark name,
+                                 GValue *value,
+                                 gpointer unused G_GNUC_UNUSED)
+{
+  TpBaseConnection *self = TP_BASE_CONNECTION (object);
+
+  g_return_if_fail (interface == TP_IFACE_QUARK_CONNECTION_INTERFACE_REQUESTS);
+
+  if (name == g_quark_from_static_string ("Channels"))
+    {
+      g_value_take_boxed (value, conn_requests_get_channel_details (self));
+    }
+  else if (name == g_quark_from_static_string ("RequestableChannelClasses"))
+    {
+      g_value_take_boxed (value, conn_requests_get_requestables (self));
+    }
+  else
+    {
+      g_return_if_reached ();
+    }
+}
+
+
 static void
 tp_base_connection_class_init (TpBaseConnectionClass *klass)
 {
+  static TpDBusPropertiesMixinPropImpl connection_properties[] = {
+      { "SelfHandle", "self-handle", NULL },
+      { NULL }
+  };
+  static TpDBusPropertiesMixinPropImpl requests_properties[] = {
+        { "Channels", NULL, NULL },
+        { "RequestableChannelClasses", NULL, NULL },
+        { NULL }
+  };
   GParamSpec *param_spec;
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -534,6 +1287,22 @@ tp_base_connection_class_init (TpBaseConnectionClass *klass)
       G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class, PROP_PROTOCOL, param_spec);
 
+  /**
+   * TpBaseConnection:self-handle:
+   *
+   * The handle of type %TP_HANDLE_TYPE_CONTACT representing the local user.
+   * Must be set nonzero by the subclass before moving to state CONNECTED.
+   *
+   * Since: 0.7.15
+   */
+  param_spec = g_param_spec_uint ("self-handle",
+      "Connection.SelfHandle",
+      "The handle of type %TP_HANDLE_TYPE_CONTACT representing the local user.",
+      0, G_MAXUINT, 0,
+      G_PARAM_READWRITE |
+      G_PARAM_STATIC_BLURB);
+  g_object_class_install_property (object_class, PROP_SELF_HANDLE, param_spec);
+
   /* signal definitions */
 
   /**
@@ -552,6 +1321,16 @@ tp_base_connection_class_init (TpBaseConnectionClass *klass)
                   NULL, NULL,
                   g_cclosure_marshal_VOID__VOID,
                   G_TYPE_NONE, 0);
+
+  tp_dbus_properties_mixin_class_init (object_class, 0);
+  tp_dbus_properties_mixin_implement_interface (object_class,
+      TP_IFACE_QUARK_CONNECTION,
+      tp_dbus_properties_mixin_getter_gobject_properties, NULL,
+      connection_properties);
+  tp_dbus_properties_mixin_implement_interface (object_class,
+      TP_IFACE_QUARK_CONNECTION_INTERFACE_REQUESTS,
+      conn_requests_get_dbus_property, NULL,
+      requests_properties);
 }
 
 static void
@@ -707,6 +1486,11 @@ tp_base_connection_close_all_channels (TpBaseConnection *self)
 {
   TpBaseConnectionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       TP_TYPE_BASE_CONNECTION, TpBaseConnectionPrivate);
+
+  /* We deliberately don't iterate over channel managers here -
+   * they don't need this, and are expected to listen to
+   * TpSvcConnection::status-changed on the connection for themselves.
+   */
 
   /* trigger close_all on all channel factories */
   g_ptr_array_foreach (priv->channel_factories, (GFunc)
@@ -896,14 +1680,14 @@ tp_base_connection_get_protocol (TpSvcConnection *iface,
 }
 
 /**
- * tp_base_connection_get_self_handle
+ * tp_base_connection_dbus_get_self_handle
  *
  * Implements D-Bus method GetSelfHandle
  * on interface org.freedesktop.Telepathy.Connection
  */
 static void
-tp_base_connection_get_self_handle (TpSvcConnection *iface,
-                                    DBusGMethodInvocation *context)
+tp_base_connection_dbus_get_self_handle (TpSvcConnection *iface,
+                                         DBusGMethodInvocation *context)
 {
   TpBaseConnection *self = TP_BASE_CONNECTION (iface);
 
@@ -1047,13 +1831,12 @@ tp_base_connection_inspect_handles (TpSvcConnection *iface,
 
 /**
  * list_channel_factory_foreach_one:
- * @key: iterated key
- * @value: iterated value
- * @data: data attached to this key/value pair
+ * @chan: a channel
+ * @data: a GPtrArray in which channel information should be stored
  *
- * Called by the exported ListChannels function, this should iterate over
- * the handle/channel pairs in a channel factory, and to the GPtrArray in
- * the data pointer, add a GValueArray containing the following:
+ * Called by the exported ListChannels function for each channel in a channel
+ * factory, this should add to the GPtrArray (in the data pointer) a
+ * GValueArray containing the following:
  *  a D-Bus object path for the channel object on this service
  *  a D-Bus interface name representing the channel type
  *  an integer representing the handle type this channel communicates with,
@@ -1092,6 +1875,51 @@ list_channel_factory_foreach_one (TpChannelIface *chan,
   g_free (type);
 }
 
+
+/**
+ * list_channel_manager_foreach_one:
+ * @chan: a channel
+ * @data: a GPtrArray in which channel information should be stored
+ *
+ * Called by the exported ListChannels function for each channel in a channel
+ * manager, this should add to the GPtrArray (in the data pointer) a
+ * GValueArray containing the following:
+ *  a D-Bus object path for the channel object on this service
+ *  a D-Bus interface name representing the channel type
+ *  an integer representing the handle type this channel communicates with,
+ *    or zero
+ *  an integer handle representing the contact, room or list this channel
+ *    communicates with, or zero
+ */
+static void
+list_channel_manager_foreach_one (TpExportableChannel *channel,
+                                  gpointer data)
+{
+  GPtrArray *values = (GPtrArray *) data;
+  gchar *path, *type;
+  guint handle_type, handle;
+  GValue *entry = tp_dbus_specialized_value_slice_new
+      (TP_STRUCT_TYPE_CHANNEL_INFO);
+
+  g_assert (TP_IS_EXPORTABLE_CHANNEL (channel));
+
+  exportable_channel_get_old_info (channel, &path, &type, &handle_type,
+      &handle);
+
+  dbus_g_type_struct_set (entry,
+      0, path,
+      1, type,
+      2, handle_type,
+      3, handle,
+      G_MAXUINT);
+
+  g_ptr_array_add (values, entry);
+
+  g_free (path);
+  g_free (type);
+}
+
+
 static void
 tp_base_connection_list_channels (TpSvcConnection *iface,
                                   DBusGMethodInvocation *context)
@@ -1108,14 +1936,25 @@ tp_base_connection_list_channels (TpSvcConnection *iface,
   TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (self, context);
 
   /* I think on average, each factory will have 2 channels :D */
-  values = g_ptr_array_sized_new (priv->channel_factories->len * 2);
+  values = g_ptr_array_sized_new (priv->channel_factories->len * 2
+      + priv->channel_managers->len * 2);
 
   for (i = 0; i < priv->channel_factories->len; i++)
     {
       TpChannelFactoryIface *factory = g_ptr_array_index
         (priv->channel_factories, i);
+
       tp_channel_factory_iface_foreach (factory,
           list_channel_factory_foreach_one, values);
+    }
+
+  for (i = 0; i < priv->channel_managers->len; i++)
+    {
+      TpChannelManager *manager = g_ptr_array_index
+        (priv->channel_managers, i);
+
+      tp_channel_manager_foreach_channel (manager,
+          list_channel_manager_foreach_one, values);
     }
 
   channels = g_ptr_array_sized_new (values->len);
@@ -1161,6 +2000,9 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
   GError *error = NULL;
   guint i;
   ChannelRequest *request;
+  GHashTable *request_properties;
+  GValue *v;
+  gboolean claimed_by_channel_manager = FALSE;
 
   g_assert (TP_IS_BASE_CONNECTION (self));
 
@@ -1168,9 +2010,51 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
 
   TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (self, context);
 
-  request = channel_request_new (context, type, handle_type, handle,
-      suppress_handler);
+  request = channel_request_new (context, METHOD_REQUEST_CHANNEL,
+      type, handle_type, handle, suppress_handler);
   g_ptr_array_add (priv->channel_requests, request);
+
+  /* First try the channel managers */
+
+  request_properties = g_hash_table_new_full (g_str_hash, g_str_equal,
+      NULL, (GDestroyNotify) tp_g_value_slice_free);
+
+  v = tp_g_value_slice_new (G_TYPE_STRING);
+  g_value_set_string (v, type);
+  g_hash_table_insert (request_properties, TP_IFACE_CHANNEL ".ChannelType", v);
+
+  v = tp_g_value_slice_new (G_TYPE_UINT);
+  g_value_set_uint (v, handle_type);
+  g_hash_table_insert (request_properties,
+      TP_IFACE_CHANNEL ".TargetHandleType", v);
+
+  if (handle != 0)
+    {
+      v = tp_g_value_slice_new (G_TYPE_UINT);
+      g_value_set_uint (v, handle);
+      g_hash_table_insert (request_properties,
+          TP_IFACE_CHANNEL ".TargetHandle", v);
+    }
+
+  for (i = 0; i < priv->channel_managers->len; i++)
+    {
+      TpChannelManager *manager = TP_CHANNEL_MANAGER (
+          g_ptr_array_index (priv->channel_managers, i));
+
+      if (tp_channel_manager_request_channel (manager, request,
+            request_properties))
+        {
+          claimed_by_channel_manager = TRUE;
+          break;
+        }
+    }
+
+  g_hash_table_destroy (request_properties);
+
+  if (claimed_by_channel_manager)
+    return;
+
+  /* OK, none of them wanted it. Now try the channel factories */
 
   for (i = 0; i < priv->channel_factories->len; i++)
     {
@@ -1187,16 +2071,18 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
         case TP_CHANNEL_FACTORY_REQUEST_STATUS_EXISTING:
           {
             g_assert (NULL != chan);
-            satisfy_requests (self, factory, chan, request, FALSE);
-            /* satisfy_requests should remove the request */
-            g_assert (!tp_g_ptr_array_contains (priv->channel_requests, request));
+            factory_satisfy_requests (self, factory, chan, request, FALSE);
+            /* factory_satisfy_requests should remove the request */
+            g_assert (!tp_g_ptr_array_contains (priv->channel_requests,
+                  request));
             return;
           }
         case TP_CHANNEL_FACTORY_REQUEST_STATUS_CREATED:
           g_assert (NULL != chan);
           /* the signal handler should have completed the queued request
            * and freed the ChannelRequest already */
-          g_assert (!tp_g_ptr_array_contains (priv->channel_requests, request));
+          g_assert (!tp_g_ptr_array_contains (priv->channel_requests,
+                request));
           return;
         case TP_CHANNEL_FACTORY_REQUEST_STATUS_QUEUED:
           DEBUG ("queued request, channel_type=%s, handle_type=%u, "
@@ -1433,6 +2319,42 @@ tp_base_connection_get_handles (TpBaseConnection *self,
     return NULL;
   return priv->handles[handle_type];
 }
+
+
+/**
+ * tp_base_connection_get_self_handle:
+ * @self: A connection
+ *
+ * Returns the #TpBaseConnection:self-handle property, which is guaranteed not
+ * to be 0 once the connection has moved to the CONNECTED state.
+ *
+ * Returns: the current self handle of the connection.
+ *
+ * Since: 0.7.15
+ */
+TpHandle
+tp_base_connection_get_self_handle (TpBaseConnection *self)
+{
+  return self->self_handle;
+}
+
+/**
+ * tp_base_connection_set_self_handle:
+ * @self: A connection
+ * @self_handle: The new self handle for the connection.
+ *
+ * Sets the #TpBaseConnection:self-handle property.  self_handle may not be 0
+ * once the connection has moved to the CONNECTED state.
+ *
+ * Since: 0.7.15
+ */
+void
+tp_base_connection_set_self_handle (TpBaseConnection *self,
+                                    TpHandle self_handle)
+{
+  g_object_set (self, "self-handle", self_handle, NULL);
+}
+
 
 /**
  * tp_base_connection_finish_shutdown:
@@ -1701,7 +2623,7 @@ tp_base_connection_add_interfaces (TpBaseConnection *self,
 
 
 static void
-service_iface_init (gpointer g_iface, gpointer iface_data)
+conn_iface_init (gpointer g_iface, gpointer iface_data)
 {
   TpSvcConnectionClass *klass = (TpSvcConnectionClass *)g_iface;
 
@@ -1711,7 +2633,7 @@ service_iface_init (gpointer g_iface, gpointer iface_data)
   IMPLEMENT(,disconnect);
   IMPLEMENT(,get_interfaces);
   IMPLEMENT(,get_protocol);
-  IMPLEMENT(,get_self_handle);
+  IMPLEMENT(dbus_,get_self_handle);
   IMPLEMENT(,get_status);
   IMPLEMENT(,hold_handles);
   IMPLEMENT(,inspect_handles);
@@ -1721,6 +2643,397 @@ service_iface_init (gpointer g_iface, gpointer iface_data)
   IMPLEMENT(dbus_,request_handles);
 #undef IMPLEMENT
 }
+
+
+/* The handling of calls to Connection.Interface.Requests.CreateChannel is
+ * split into three chained functions, which each call the next function in
+ * the chain unless an error has occured.
+ */
+static void conn_requests_check_basic_properties (TpBaseConnection *self,
+    GHashTable *requested_properties, ChannelRequestMethod method,
+    DBusGMethodInvocation *context);
+
+static void
+conn_requests_requestotron_validate_handle (TpBaseConnection *self,
+    GHashTable *requested_properties, ChannelRequestMethod method,
+    const gchar *type, TpHandleType target_handle_type,
+    TpHandle target_handle, const gchar *target_id,
+    DBusGMethodInvocation *context);
+
+static void conn_requests_offer_request (TpBaseConnection *self,
+    GHashTable *requested_properties, ChannelRequestMethod method,
+    const gchar *type, TpHandleType target_handle_type,
+    TpHandle target_handle, DBusGMethodInvocation *context);
+
+
+#define RETURN_INVALID_ARGUMENT(message) \
+  G_STMT_START { \
+    GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT, message }; \
+    dbus_g_method_return_error (context, &e); \
+    return; \
+  } G_STMT_END
+
+
+static void
+conn_requests_requestotron (TpBaseConnection *self,
+                            GHashTable *requested_properties,
+                            ChannelRequestMethod method,
+                            DBusGMethodInvocation *context)
+{
+  TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (self, context);
+
+  /* Call the first function in the chain handling incoming requests; it will
+   * call the next steps.
+   */
+  conn_requests_check_basic_properties (self, requested_properties, method,
+      context);
+}
+
+
+static void
+conn_requests_check_basic_properties (TpBaseConnection *self,
+                                      GHashTable *requested_properties,
+                                      ChannelRequestMethod method,
+                                      DBusGMethodInvocation *context)
+{
+  /* Step 1:
+   *  Check that ChannelType, TargetHandleType, TargetHandle, TargetID have
+   *  the correct types, and that ChannelType is not omitted.
+   */
+  const gchar *type;
+  TpHandleType target_handle_type;
+  TpHandle target_handle;
+  const gchar *target_id;
+  gboolean valid;
+
+  type = tp_asv_get_string (requested_properties,
+        TP_IFACE_CHANNEL ".ChannelType");
+
+  if (type == NULL)
+    RETURN_INVALID_ARGUMENT ("ChannelType is required");
+
+  target_handle_type = tp_asv_get_uint32 (requested_properties,
+      TP_IFACE_CHANNEL ".TargetHandleType", &valid);
+
+  /* Allow TargetHandleType to be missing, but not to be otherwise broken */
+  if (!valid && tp_asv_lookup (requested_properties,
+          TP_IFACE_CHANNEL ".TargetHandleType") != NULL)
+    RETURN_INVALID_ARGUMENT (
+        "TargetHandleType must be an integer in range 0 to 2**32-1");
+
+  target_handle = tp_asv_get_uint32 (requested_properties,
+      TP_IFACE_CHANNEL ".TargetHandle", &valid);
+
+  /* Allow TargetHandle to be missing, but not to be otherwise broken */
+  if (!valid && tp_asv_lookup (requested_properties,
+          TP_IFACE_CHANNEL ".TargetHandle") != NULL)
+    RETURN_INVALID_ARGUMENT (
+      "TargetHandle must be an integer in range 1 to 2**32-1");
+
+  /* TargetHandle may not be 0 */
+  if (valid && target_handle == 0)
+    RETURN_INVALID_ARGUMENT ("TargetHandle may not be 0");
+
+  target_id = tp_asv_get_string (requested_properties,
+      TP_IFACE_CHANNEL ".TargetID");
+
+  /* Allow TargetID to be missing, but not to be otherwise broken */
+  if (target_id == NULL && tp_asv_lookup (requested_properties,
+          TP_IFACE_CHANNEL ".TargetID") != NULL)
+    RETURN_INVALID_ARGUMENT ("TargetID must be a string");
+
+  /* FIXME: when InitiatorHandle, InitiatorID and Requested are officially
+   * supported, if the request has any of them, raise an error */
+
+  conn_requests_requestotron_validate_handle (self,
+      requested_properties, method,
+      type, target_handle_type, target_handle, target_id,
+      context);
+}
+
+
+/**
+ * @target_handle: non-zero if a TargetHandle property was in the request;
+ *                 zero if TargetHandle was not in the request.
+ */
+static void
+conn_requests_requestotron_validate_handle (TpBaseConnection *self,
+                                            GHashTable *requested_properties,
+                                            ChannelRequestMethod method,
+                                            const gchar *type,
+                                            TpHandleType target_handle_type,
+                                            TpHandle target_handle,
+                                            const gchar *target_id,
+                                            DBusGMethodInvocation *context)
+{
+  /* Step 2: Validate the supplied set of Handle properties */
+  TpHandleRepoIface *handles = NULL;
+  GHashTable *altered_properties = NULL;
+  GValue *target_handle_value = NULL;
+
+  /* Handle type 0 cannot have a handle */
+  if (target_handle_type == TP_HANDLE_TYPE_NONE && target_handle != 0)
+    RETURN_INVALID_ARGUMENT (
+        "When TargetHandleType is NONE, TargetHandle must be omitted");
+
+  /* Handle type 0 cannot have a target id */
+  if (target_handle_type == TP_HANDLE_TYPE_NONE && target_id != NULL)
+    RETURN_INVALID_ARGUMENT (
+      "When TargetHandleType is NONE, TargetID must be omitted");
+
+  if (target_handle_type != TP_HANDLE_TYPE_NONE)
+    {
+      GError *error = NULL;
+
+      if (target_handle == 0 && target_id == NULL)
+        RETURN_INVALID_ARGUMENT ("When TargetHandleType is not None, either "
+            "TargetHandle or TargetID must also be given");
+
+      if (target_handle != 0 && target_id != NULL)
+        RETURN_INVALID_ARGUMENT (
+            "TargetHandle and TargetID must not both be given");
+
+      handles = tp_base_connection_get_handles (self, target_handle_type);
+
+      if (target_handle == 0)
+        {
+          /* Turn TargetID into TargetHandle */
+          target_handle = tp_handle_ensure (handles, target_id, NULL, &error);
+
+          if (target_handle == 0)
+            {
+              /* tp_handle_ensure can return any error in any domain; force
+               * the domain and code to be as documented for CreateChannel.
+               */
+              error->domain = TP_ERRORS;
+              error->code = TP_ERROR_INVALID_HANDLE;
+              dbus_g_method_return_error (context, error);
+              g_error_free (error);
+              return;
+            }
+
+          altered_properties = g_hash_table_new_full (g_str_hash, g_str_equal,
+              NULL, NULL);
+          tp_g_hash_table_update (altered_properties, requested_properties,
+              NULL, NULL);
+
+          target_handle_value = tp_g_value_slice_new (G_TYPE_UINT);
+          g_value_set_uint (target_handle_value, target_handle);
+          g_hash_table_insert (altered_properties,
+              TP_IFACE_CHANNEL ".TargetHandle", target_handle_value);
+
+          g_hash_table_remove (altered_properties,
+              TP_IFACE_CHANNEL ".TargetID");
+
+          requested_properties = altered_properties;
+        }
+      else
+        {
+          /* Check the supplied TargetHandle is valid */
+          if (!tp_handle_is_valid (handles, target_handle, &error))
+            {
+              error->code = TP_ERROR_INVALID_HANDLE;
+              dbus_g_method_return_error (context, error);
+              g_error_free (error);
+              return;
+            }
+
+          tp_handle_ref (handles, target_handle);
+        }
+    }
+
+  conn_requests_offer_request (self, requested_properties, method, type,
+      target_handle_type, target_handle, context);
+
+  /* If HandleType was not None, we got the relevant repo and took a reference
+   * to target_handle; release it before returning
+   */
+  if (handles != NULL)
+    {
+      tp_handle_unref (handles, target_handle);
+    }
+
+  /* If we made a new table, we should destroy it, and the GValue holding
+   * TargetHandle.  The other GValues are borrowed from the supplied
+   * requested_properties table.
+   */
+  if (altered_properties != NULL)
+    {
+      g_hash_table_destroy (altered_properties);
+      tp_g_value_slice_free (target_handle_value);
+    }
+}
+
+
+static void
+conn_requests_offer_request (TpBaseConnection *self,
+                             GHashTable *requested_properties,
+                             ChannelRequestMethod method,
+                             const gchar *type,
+                             TpHandleType target_handle_type,
+                             TpHandle target_handle,
+                             DBusGMethodInvocation *context)
+{
+  /* Step 3: offer the incoming, vaguely sanitized request to the channel
+   * managers.
+   */
+  TpBaseConnectionPrivate *priv = TP_BASE_CONNECTION_GET_PRIVATE (self);
+  TpChannelManagerRequestFunc func;
+  ChannelRequest *request;
+  gboolean suppress_handler;
+  guint i;
+
+  switch (method)
+    {
+    case METHOD_CREATE_CHANNEL:
+      func = tp_channel_manager_create_channel;
+      suppress_handler = TRUE;
+      break;
+
+#if 0
+    case METHOD_ENSURE_CHANNEL:
+      func = tp_channel_manager_ensure_channel;
+      suppress_handler = FALSE;
+      break;
+#endif
+
+    default:
+      g_assert_not_reached ();
+    }
+
+  request = channel_request_new (context, method,
+      type, target_handle_type, target_handle, suppress_handler);
+  g_ptr_array_add (priv->channel_requests, request);
+
+  for (i = 0; i < priv->channel_managers->len; i++)
+    {
+      TpChannelManager *manager = TP_CHANNEL_MANAGER (
+          g_ptr_array_index (priv->channel_managers, i));
+
+      if (func (manager, request, requested_properties))
+        return;
+    }
+
+  /* Nobody accepted the request */
+  tp_dbus_g_method_return_not_implemented (context);
+  request->context = NULL;
+
+  g_ptr_array_remove (priv->channel_requests, request);
+  channel_request_free (request);
+}
+
+
+static void
+conn_requests_create_channel (TpSvcConnectionInterfaceRequests *svc,
+                              GHashTable *requested_properties,
+                              DBusGMethodInvocation *context)
+{
+  TpBaseConnection *self = TP_BASE_CONNECTION (svc);
+
+  return conn_requests_requestotron (self, requested_properties,
+      METHOD_CREATE_CHANNEL, context);
+}
+
+
+#if 0
+static void
+conn_requests_ensure_channel (TpSvcConnectionInterfaceRequests *svc,
+                              GHashTable *requested_properties,
+                              DBusGMethodInvocation *context)
+{
+  TpBaseConnection *self = TP_BASE_CONNECTION (svc);
+
+  return conn_requests_requestotron (self, requested_properties,
+      METHOD_ENSURE_CHANNEL, context);
+}
+#endif
+
+
+static void
+requests_iface_init (gpointer g_iface,
+                     gpointer iface_data G_GNUC_UNUSED)
+{
+  TpSvcConnectionInterfaceRequestsClass *iface = g_iface;
+
+#define IMPLEMENT(x) \
+    tp_svc_connection_interface_requests_implement_##x (\
+        iface, conn_requests_##x)
+  IMPLEMENT (create_channel);
+#if 0
+  IMPLEMENT (ensure_channel);
+#endif
+#undef IMPLEMENT
+}
+
+
+/**
+ * tp_base_connection_channel_manager_iter_init:
+ * @iter: an uninitialized #TpChannelManagerIter
+ * @self: a connection
+ *
+ * Initializes an iterator over the #TpChannelManager objects known to
+ * @self.  It is intended to be used as followed:
+ *
+ * <informalexample><programlisting>
+ * TpChannelManagerIter iter;
+ * TpChannelManager *manager;
+ *
+ * tp_base_connection_channel_manager_iter_init (&iter, base_conn);
+ * while (tp_base_connection_channel_manager_iter_next (&iter, &manager))
+ *   {
+ *     ...do something with manager...
+ *   }
+ * </programlisting></informalexample>
+ *
+ * Since: 0.7.15
+ */
+void
+tp_base_connection_channel_manager_iter_init (TpChannelManagerIter *iter,
+                                              TpBaseConnection *self)
+{
+  iter->self = self;
+  iter->index = 0;
+}
+
+
+/**
+ * tp_base_connection_channel_manager_iter_next:
+ * @iter: an initialized #TpChannelManagerIter
+ * @manager_out: a location to store the channel manager, or %NULL.
+ *
+ * Advances @iter, and retrieves the #TpChannelManager it now points to.  If
+ * there are no more channel managers, @manager_out is not set and %FALSE is
+ * returned.
+ *
+ * Returns: %FALSE if there are no more channel managers; else %TRUE.
+ *
+ * Since: 0.7.15
+ */
+gboolean
+tp_base_connection_channel_manager_iter_next (TpChannelManagerIter *iter,
+                                              TpChannelManager **manager_out)
+{
+  TpBaseConnectionPrivate *priv;
+
+  /* Check the caller initialized the iterator properly. */
+  g_assert (TP_IS_BASE_CONNECTION (iter->self));
+
+  priv = TP_BASE_CONNECTION_GET_PRIVATE (iter->self);
+
+  /* Be noisy if something's gone really wrong */
+  g_return_val_if_fail (iter->index <= priv->channel_managers->len, FALSE);
+
+  if (iter->index == priv->channel_managers->len)
+    return FALSE;
+
+  if (manager_out != NULL)
+    *manager_out = TP_CHANNEL_MANAGER (
+        g_ptr_array_index (priv->channel_managers, iter->index));
+
+  iter->index++;
+  return TRUE;
+}
+
 
 static void
 tp_base_connection_fill_contact_attributes (GObject *obj,
@@ -1766,4 +3079,3 @@ tp_base_connection_register_with_contacts_mixin (TpBaseConnection *self)
       TP_IFACE_CONNECTION,
       tp_base_connection_fill_contact_attributes);
 }
-

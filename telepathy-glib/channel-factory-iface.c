@@ -1,8 +1,8 @@
 /*
  * tp-channel-factory-iface.c - Stubs for Telepathy Channel Factory interface
  *
- * Copyright (C) 2006 Collabora Ltd.
- * Copyright (C) 2006 Nokia Corporation
+ * Copyright (C) 2006-2008 Collabora Ltd.
+ * Copyright (C) 2006-2008 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,11 +34,11 @@
  * all requests and all incoming events, but in general, there will be
  * multiple channel factories handling different types of channel.
  *
- * For example, at the time of writing, Gabble has a roster channel factory
- * which handles contact lists and groups, an IM channel factory which
- * handles one-to-one messaging, a MUC channel factory which handles
- * multi-user chat rooms and the index of chat rooms, and a media channel
- * factory which handles VoIP calls.
+ * #TpChannelManager is a newer interface (introduced in telepathy-glib
+ * 0.7.15) for allocating and tracking channels which supports the
+ * Requests D-Bus interface introduced in version 0.17.11 of the
+ * specification.  New connection managers should implement that interface
+ * instead, and existing connection managers should migrate to it.
  */
 
 #include <telepathy-glib/channel-factory-iface.h>

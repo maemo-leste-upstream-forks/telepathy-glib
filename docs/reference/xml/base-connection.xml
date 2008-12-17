@@ -26,6 +26,8 @@
                     <link linkend="TpBaseConnectionClass">TpBaseConnectionClass</link>;
 <link linkend="GPtrArray">GPtrArray</link>*          (<link linkend="TpBaseConnectionCreateChannelFactoriesImpl">*TpBaseConnectionCreateChannelFactoriesImpl</link>)
                                                         (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);
+<link linkend="GPtrArray">GPtrArray</link>*          (<link linkend="TpBaseConnectionCreateChannelManagersImpl">*TpBaseConnectionCreateChannelManagersImpl</link>)
+                                                        (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);
 <link linkend="void">void</link>                (<link linkend="TpBaseConnectionCreateHandleReposImpl">*TpBaseConnectionCreateHandleReposImpl</link>)
                                                         (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
                                                          <link linkend="TpHandleRepoIface">TpHandleRepoIface</link> *repos[NUM_TP_HANDLE_TYPES]);
@@ -42,6 +44,9 @@
                                                          <link linkend="GError">GError</link> **error);
 <link linkend="TpHandleRepoIface">TpHandleRepoIface</link>*  <link linkend="tp-base-connection-get-handles">tp_base_connection_get_handles</link>      (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
                                                          <link linkend="TpHandleType">TpHandleType</link> handle_type);
+<link linkend="TpHandle">TpHandle</link>            <link linkend="tp-base-connection-get-self-handle">tp_base_connection_get_self_handle</link>  (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);
+<link linkend="void">void</link>                <link linkend="tp-base-connection-set-self-handle">tp_base_connection_set_self_handle</link>  (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
+                                                         <link linkend="TpHandle">TpHandle</link> self_handle);
 <link linkend="void">void</link>                <link linkend="tp-base-connection-change-status">tp_base_connection_change_status</link>    (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
                                                          <link linkend="TpConnectionStatus">TpConnectionStatus</link> status,
                                                          <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> reason);
@@ -56,6 +61,14 @@
 #define             <link linkend="TP-BASE-CONNECTION-ERROR-IF-NOT-CONNECTED:CAPS">TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED</link>(conn, context)
 <link linkend="void">void</link>                <link linkend="tp-base-connection-register-with-contacts-mixin">tp_base_connection_register_with_contacts_mixin</link>
                                                         (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);
+
+                    <link linkend="TpChannelManagerIter">TpChannelManagerIter</link>;
+<link linkend="void">void</link>                <link linkend="tp-base-connection-channel-manager-iter-init">tp_base_connection_channel_manager_iter_init</link>
+                                                        (<link linkend="TpChannelManagerIter">TpChannelManagerIter</link> *iter,
+                                                         <link linkend="TpBaseConnection">TpBaseConnection</link> *self);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-base-connection-channel-manager-iter-next">tp_base_connection_channel_manager_iter_next</link>
+                                                        (<link linkend="TpChannelManagerIter">TpChannelManagerIter</link> *iter,
+                                                         <link linkend="TpChannelManager">TpChannelManager</link> **manager_out);
 </synopsis>
 </refsynopsisdiv>
 
@@ -74,7 +87,7 @@
 <title role="impl_interfaces.title">Implemented Interfaces</title>
 <para>
 TpBaseConnection implements
- <link linkend="TpSvcConnection">TpSvcConnection</link>.</para>
+ <link linkend="TpSvcConnection">TpSvcConnection</link>,  <link linkend="TpSvcDBusProperties">TpSvcDBusProperties</link> and  <link linkend="TpSvcConnectionInterfaceRequests">TpSvcConnectionInterfaceRequests</link>.</para>
 
 </refsect1>
 
@@ -83,6 +96,7 @@ TpBaseConnection implements
 <title role="properties.title">Properties</title>
 <synopsis>
   &quot;<link linkend="TpBaseConnection--protocol">protocol</link>&quot;                 <link linkend="gchar">gchar</link>*                : Read / Write / Construct Only
+  &quot;<link linkend="TpBaseConnection--self-handle">self-handle</link>&quot;              <link linkend="guint">guint</link>                 : Read / Write
 </synopsis>
 </refsect1>
 
@@ -181,7 +195,12 @@ future version of telepathy-glib), and a pointer to opaque private data.</para>
 <term><link linkend="TpHandle">TpHandle</link>&nbsp;<structfield>self_handle</structfield>;</term>
 <listitem><simpara> The handle of type <link linkend="TP-HANDLE-TYPE-CONTACT:CAPS"><literal>TP_HANDLE_TYPE_CONTACT</literal></link> representing the
  local user. Must be set nonzero by the subclass before moving to state
- CONNECTED. If nonzero, the connection must hold a reference to the handle.
+ CONNECTED. Since 0.7.15, setting this property directly is
+ deprecated, in favour of <link linkend="tp-base-connection-set-self-handle"><function>tp_base_connection_set_self_handle()</function></link>; if this
+ property is set directly, the connection must ensure it holds a reference
+ to the handle. Changing this property directly having moved to state
+ CONNECTED is very strongly discouraged, as this will prevent the
+ SelfHandleChanged signal being emitted.
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -205,6 +224,8 @@ future version of telepathy-glib), and a pointer to opaque private data.</para>
     TpBaseConnectionStartConnectingImpl start_connecting;
 
     const gchar **interfaces_always_present;
+
+    TpBaseConnectionCreateChannelManagersImpl create_channel_managers;
 } TpBaseConnectionClass;
 </programlisting>
 <para>
@@ -212,7 +233,7 @@ The class of a <link linkend="TpBaseConnection"><type>TpBaseConnection</type></l
 to be filled in in the subclass' class_init function.
 </para>
 <para>
-In addition to the fields documented here, there are four gpointer fields
+In addition to the fields documented here, there are three gpointer fields
 which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link> (a meaning may be defined for these in a
 future version of telepathy-glib), and a pointer to opaque private data.</para>
 <para>
@@ -234,7 +255,9 @@ future version of telepathy-glib), and a pointer to opaque private data.</para>
 <varlistentry>
 <term><link linkend="TpBaseConnectionCreateChannelFactoriesImpl">TpBaseConnectionCreateChannelFactoriesImpl</link>&nbsp;<structfield>create_channel_factories</structfield>;</term>
 <listitem><simpara> Create an array of channel factories for this
- Connection. Must be set by subclasses to a non-<link linkend="NULL:CAPS"><literal>NULL</literal></link> value.
+ Connection. At least one of this or <parameter>create_channel_managers</parameter> must be set by
+ subclasses to a non-<link linkend="NULL:CAPS"><literal>NULL</literal></link> value; in new code, setting this to <link linkend="NULL:CAPS"><literal>NULL</literal></link> and
+ using channel managers exclusively is recommended.
 </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -290,13 +313,21 @@ future version of telepathy-glib), and a pointer to opaque private data.</para>
  <link linkend="tp-base-connection-add-interfaces"><function>tp_base_connection_add_interfaces()</function></link>.
 </simpara></listitem>
 </varlistentry>
+<varlistentry>
+<term><link linkend="TpBaseConnectionCreateChannelManagersImpl">TpBaseConnectionCreateChannelManagersImpl</link>&nbsp;<structfield>create_channel_managers</structfield>;</term>
+<listitem><simpara> Create an array of channel managers for this
+ Connection. At least one of this or <parameter>create_channel_factories</parameter> must be set
+ by subclasses to a non-<link linkend="NULL:CAPS"><literal>NULL</literal></link> value.
+ Since: 0.7.15
+</simpara></listitem>
+</varlistentry>
 </variablelist></refsect2>
 <refsect2 id="TpBaseConnectionCreateChannelFactoriesImpl" role="function">
 <title>TpBaseConnectionCreateChannelFactoriesImpl ()</title>
 <indexterm zone="TpBaseConnectionCreateChannelFactoriesImpl"><primary>TpBaseConnectionCreateChannelFactoriesImpl</primary></indexterm><programlisting><link linkend="GPtrArray">GPtrArray</link>*          (*TpBaseConnectionCreateChannelFactoriesImpl)
                                                         (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);</programlisting>
 <para>
-Signature of an implementation of the create_handle_repos method
+Signature of an implementation of the create_channel_factories method
 of <link linkend="TpBaseConnection"><type>TpBaseConnection</type></link>.</para>
 <para>
 
@@ -305,6 +336,24 @@ of <link linkend="TpBaseConnection"><type>TpBaseConnection</type></link>.</para>
 <listitem><simpara> The implementation, a subclass of TpBaseConnection
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a GPtrArray of objects implementing <link linkend="TpChannelFactoryIface"><type>TpChannelFactoryIface</type></link>
+which, between them, implement all channel types this Connection
+supports.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="TpBaseConnectionCreateChannelManagersImpl" role="function">
+<title>TpBaseConnectionCreateChannelManagersImpl ()</title>
+<indexterm zone="TpBaseConnectionCreateChannelManagersImpl"><primary>TpBaseConnectionCreateChannelManagersImpl</primary></indexterm><programlisting><link linkend="GPtrArray">GPtrArray</link>*          (*TpBaseConnectionCreateChannelManagersImpl)
+                                                        (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);</programlisting>
+<para>
+Signature of an implementation of the create_channel_managers method
+of <link linkend="TpBaseConnection"><type>TpBaseConnection</type></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The implementation, a subclass of TpBaseConnection
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a GPtrArray of objects implementing <link linkend="TpChannelManager"><type>TpChannelManager</type></link>
 which, between them, implement all channel types this Connection
 supports.
 </simpara></listitem></varlistentry>
@@ -457,6 +506,41 @@ bus name, and will release it when destroyed.</para>
 or <link linkend="NULL:CAPS"><type>NULL</type></link> if it's unsupported or invalid.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="tp-base-connection-get-self-handle" role="function" condition="since:0.7.15">
+<title>tp_base_connection_get_self_handle ()</title>
+<indexterm zone="tp-base-connection-get-self-handle" role="0.7.15"><primary>tp_base_connection_get_self_handle</primary></indexterm><programlisting><link linkend="TpHandle">TpHandle</link>            tp_base_connection_get_self_handle  (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);</programlisting>
+<para>
+Returns the <link linkend="TpBaseConnection--self-handle"><type>"self-handle"</type></link> property, which is guaranteed not
+to be 0 once the connection has moved to the CONNECTED state.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> A connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the current self handle of the connection.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.15
+</para></refsect2>
+<refsect2 id="tp-base-connection-set-self-handle" role="function" condition="since:0.7.15">
+<title>tp_base_connection_set_self_handle ()</title>
+<indexterm zone="tp-base-connection-set-self-handle" role="0.7.15"><primary>tp_base_connection_set_self_handle</primary></indexterm><programlisting><link linkend="void">void</link>                tp_base_connection_set_self_handle  (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
+                                                         <link linkend="TpHandle">TpHandle</link> self_handle);</programlisting>
+<para>
+Sets the <link linkend="TpBaseConnection--self-handle"><type>"self-handle"</type></link> property.  self_handle may not be 0
+once the connection has moved to the CONNECTED state.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> A connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>self_handle</parameter>&nbsp;:</term>
+<listitem><simpara> The new self handle for the connection.
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.15
+</para></refsect2>
 <refsect2 id="tp-base-connection-change-status" role="function">
 <title>tp_base_connection_change_status ()</title>
 <indexterm zone="tp-base-connection-change-status"><primary>tp_base_connection_change_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_base_connection_change_status    (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
@@ -617,6 +701,73 @@ is called</para>
 mixin
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="TpChannelManagerIter" role="struct" condition="since:0.7.15">
+<title>TpChannelManagerIter</title>
+<indexterm zone="TpChannelManagerIter" role="0.7.15"><primary>TpChannelManagerIter</primary></indexterm><programlisting>typedef struct {
+} TpChannelManagerIter;
+</programlisting>
+<para>
+An iterator over the <link linkend="TpChannelManager"><type>TpChannelManager</type></link> objects known to a <link linkend="TpBaseConnection"><type>TpBaseConnection</type></link>.
+It has no public fields.</para>
+<para>
+
+</para><variablelist role="struct">
+</variablelist><para role="since">Since  0.7.15
+</para></refsect2>
+<refsect2 id="tp-base-connection-channel-manager-iter-init" role="function" condition="since:0.7.15">
+<title>tp_base_connection_channel_manager_iter_init ()</title>
+<indexterm zone="tp-base-connection-channel-manager-iter-init" role="0.7.15"><primary>tp_base_connection_channel_manager_iter_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_base_connection_channel_manager_iter_init
+                                                        (<link linkend="TpChannelManagerIter">TpChannelManagerIter</link> *iter,
+                                                         <link linkend="TpBaseConnection">TpBaseConnection</link> *self);</programlisting>
+<para>
+Initializes an iterator over the <link linkend="TpChannelManager"><type>TpChannelManager</type></link> objects known to
+<parameter>self</parameter>.  It is intended to be used as followed:
+</para>
+<para>
+<informalexample><programlisting>
+TpChannelManagerIter iter;
+TpChannelManager *manager;
+
+tp_base_connection_channel_manager_iter_init (&amp;iter, base_conn);
+while (tp_base_connection_channel_manager_iter_next (&amp;iter, &amp;manager))
+  {
+    ...do something with manager...
+  }
+</programlisting></informalexample></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>iter</parameter>&nbsp;:</term>
+<listitem><simpara> an uninitialized <link linkend="TpChannelManagerIter"><type>TpChannelManagerIter</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.15
+</para></refsect2>
+<refsect2 id="tp-base-connection-channel-manager-iter-next" role="function" condition="since:0.7.15">
+<title>tp_base_connection_channel_manager_iter_next ()</title>
+<indexterm zone="tp-base-connection-channel-manager-iter-next" role="0.7.15"><primary>tp_base_connection_channel_manager_iter_next</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_base_connection_channel_manager_iter_next
+                                                        (<link linkend="TpChannelManagerIter">TpChannelManagerIter</link> *iter,
+                                                         <link linkend="TpChannelManager">TpChannelManager</link> **manager_out);</programlisting>
+<para>
+Advances <parameter>iter</parameter>, and retrieves the <link linkend="TpChannelManager"><type>TpChannelManager</type></link> it now points to.  If
+there are no more channel managers, <parameter>manager_out</parameter> is not set and <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> is
+returned.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>iter</parameter>&nbsp;:</term>
+<listitem><simpara> an initialized <link linkend="TpChannelManagerIter"><type>TpChannelManagerIter</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>manager_out</parameter>&nbsp;:</term>
+<listitem><simpara> a location to store the channel manager, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> if there are no more channel managers; else <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.15
+</para></refsect2>
 
 </refsect1>
 <refsect1 id="TpBaseConnection.property-details" role="property_details">
@@ -629,6 +780,17 @@ name is required.</para>
 <para>
 
 </para><para>Default value: NULL</para>
+</refsect2>
+<refsect2 id="TpBaseConnection--self-handle"><title>The <literal>&quot;self-handle&quot;</literal> property</title>
+<indexterm zone="TpBaseConnection--self-handle" role="0.7.15"><primary>TpBaseConnection:self-handle</primary></indexterm><programlisting>  &quot;self-handle&quot;              <link linkend="guint">guint</link>                 : Read / Write</programlisting>
+<para>
+The handle of type <link linkend="TP-HANDLE-TYPE-CONTACT:CAPS"><literal>TP_HANDLE_TYPE_CONTACT</literal></link> representing the local user.
+Must be set nonzero by the subclass before moving to state CONNECTED.</para>
+<para>
+
+</para><para>Default value: 0</para>
+<para>Since  0.7.15
+</para>
 </refsect2>
 
 </refsect1>

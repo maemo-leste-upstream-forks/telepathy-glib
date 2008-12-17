@@ -158,6 +158,7 @@ tp_g_hash_table_update (GHashTable *target,
 
   g_return_if_fail (target != NULL);
   g_return_if_fail (source != NULL);
+  g_return_if_fail (target != source);
 
   g_hash_table_foreach (source, _tp_g_hash_table_update_helper, &data);
 }
@@ -296,4 +297,35 @@ tp_escape_as_identifier (const gchar *name)
       g_string_append_len (op, first_ok, ptr - first_ok);
     }
   return g_string_free (op, FALSE);
+}
+
+
+/**
+ * tp_strv_contains:
+ * @strv: a NULL-terminated array of strings, or %NULL (which is treated as an
+ *        empty strv)
+ * @str: a non-NULL string
+ *
+ * <!-- -->
+ * Returns: TRUE if @str is an element of @strv, according to strcmp().
+ *
+ * Since: 0.7.15
+ */
+gboolean
+tp_strv_contains (const gchar * const *strv,
+                  const gchar *str)
+{
+  g_return_val_if_fail (str != NULL, FALSE);
+
+  if (strv == NULL)
+    return FALSE;
+
+  while (*strv != NULL)
+    {
+      if (!tp_strdiff (str, *strv))
+        return TRUE;
+      strv++;
+    }
+
+  return FALSE;
 }

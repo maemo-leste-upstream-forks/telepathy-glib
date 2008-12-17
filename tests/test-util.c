@@ -4,6 +4,23 @@
 
 #include <telepathy-glib/util.h>
 
+void test_strv_contains (void);
+
+void
+test_strv_contains (void)
+{
+  const gchar * const strv[] = {
+      "Pah",
+      "Pah",
+      "Pah-pah-pah",
+      "Patrick!",
+      NULL
+  };
+
+  g_assert (tp_strv_contains (strv, "Patrick!"));
+  g_assert (!tp_strv_contains (strv, "Snakes!"));
+}
+
 int main (int argc, char **argv)
 {
   GPtrArray *ptrarray;
@@ -34,6 +51,8 @@ int main (int argc, char **argv)
   string = tp_escape_as_identifier ("0123abc_xyz\x01\xff");
   g_assert (!tp_strdiff (string, "_30123abc_5fxyz_01_ff"));
   g_free (string);
+
+  test_strv_contains ();
 
   return 0;
 }

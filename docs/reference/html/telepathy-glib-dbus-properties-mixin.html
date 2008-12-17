@@ -7,7 +7,7 @@
 <link rel="start" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="telepathy-glib-TpContactsMixin.html" title="TpContactsMixin">
-<link rel="next" href="telepathy-glib-TpPresenceMixin.html" title="TpPresenceMixin">
+<link rel="next" href="telepathy-glib-TpExportableChannel.html" title="TpExportableChannel">
 <meta name="generator" content="GTK-Doc V1.10 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 <link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
@@ -25,7 +25,7 @@
 <td><a accesskey="u" href="ch-service-base.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
 <th width="100%" align="center">telepathy-glib Reference Manual</th>
-<td><a accesskey="n" href="telepathy-glib-TpPresenceMixin.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+<td><a accesskey="n" href="telepathy-glib-TpExportableChannel.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
 <tr><td colspan="5" class="shortcuts"><nobr><a href="#telepathy-glib-dbus-properties-mixin.synopsis" class="shortcut">Top</a>
                    | 
@@ -169,6 +169,19 @@ href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#GValue"
                                                          <a
 href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
 >GError</a> **error);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a>*         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-make-properties-hash" title="tp_dbus_properties_mixin_make_properties_hash ()">tp_dbus_properties_mixin_make_properties_hash</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *object,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *first_interface,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *first_property,
+                                                         ...);
 </pre>
 </div>
 <div class="refsect1" lang="en">
@@ -193,7 +206,7 @@ in your class structure, populate it with pointers to statically allocated
 <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-class-init" title="tp_dbus_properties_mixin_class_init ()"><code class="function">tp_dbus_properties_mixin_class_init()</code></a> from your class_init implementation.
 </p>
 <p>
-To use this mixin as the implementation of <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties" title="TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a>,
+To use this mixin as the implementation of <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a>,
 call <code class="literal">G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
 tp_dbus_properties_mixin_iface_init)</code> in the fourth argument to
 <code class="literal">G_DEFINE_TYPE_WITH_CODE</code>.</p>
@@ -827,6 +840,16 @@ Changed in 0.7.9: TpDBusPropertiesMixinClass::interfaces may now be <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 ><code class="literal">NULL</code></a>,
 which means that only interfaces whose properties are set up using
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-implement-interface" title="tp_dbus_properties_mixin_implement_interface ()"><code class="function">tp_dbus_properties_mixin_implement_interface()</code></a> will be used.
+</p>
+<p>
+Changed in 0.7.15: <em class="parameter"><code>offset</code></em> may now be 0, in which case the
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a> can be omitted from <em class="parameter"><code>cls</code></em>.  It is treated as if
+it were present, but with all fields (including
+TpDBusPropertiesMixinClass::interfaces) being <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, so only interfaces
+whose properties are set using
 <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-implement-interface" title="tp_dbus_properties_mixin_implement_interface ()"><code class="function">tp_dbus_properties_mixin_implement_interface()</code></a> will be used.</p>
 <p>
 
@@ -1040,10 +1063,73 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
 <p class="since">Since  0.7.13
 </p>
 </div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-dbus-properties-mixin-make-properties-hash"></a><h3>tp_dbus_properties_mixin_make_properties_hash ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a>*         tp_dbus_properties_mixin_make_properties_hash
+                                                        (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *object,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *first_interface,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *first_property,
+                                                         ...);</pre>
+<p>
+Retrieves the values of several D-Bus properties from an object, and builds
+a hash mapping the fully-qualified name of the property to its value.  This
+is equivalent to calling <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-get" title="tp_dbus_properties_mixin_get ()"><code class="function">tp_dbus_properties_mixin_get()</code></a> for each property
+and building the table yourself, with the proviso that this function will
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Testing.html#g-assert"
+><code class="function">g_assert()</code></a> if retrieving a property fails (for instance, because it does not
+exist).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> an object which uses the D-Bus properties mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>first_interface</code></em> :</span></p></td>
+<td> the interface of the first property to be retrieved
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>first_property</code></em> :</span></p></td>
+<td> the name of the first property to be retrieved
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>...</code></em> :</span></p></td>
+<td> more (interface name, property name) pairs, terminated by <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a hash table mapping (gchar *) fully-qualified property names to
+         GValues, which must be freed by the caller (at which point its
+         contents will also be freed).
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <div class="refsect1" lang="en">
 <a name="telepathy-glib-dbus-properties-mixin.see-also"></a><h2>See Also</h2>
-<a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties" title="TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a>
+<a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a>
 </div>
 </div>
 <div class="footer">

@@ -1,0 +1,1109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>TpChannelManager</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-service-base.html" title="Service-side implementation">
+<link rel="prev" href="telepathy-glib-TpChannelFactoryIface.html" title="TpChannelFactoryIface">
+<link rel="next" href="telepathy-glib-TpContactsMixin.html" title="TpContactsMixin">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-TpChannelFactoryIface.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-service-base.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-TpContactsMixin.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#telepathy-glib-TpChannelManager.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#telepathy-glib-TpChannelManager.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-TpChannelManager"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="telepathy-glib-TpChannelManager.top_of_page"></a>TpChannelManager</span></h2>
+<p>TpChannelManager — interface for creating and tracking channels</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="telepathy-glib-TpChannelManager.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/channel-manager.h&gt;
+
+void                (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerChannelClassFunc" title="TpChannelManagerChannelClassFunc ()">*TpChannelManagerChannelClassFunc</a>) (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *fixed_properties,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *allowed_properties,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+void                (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerForeachChannelClassFunc" title="TpChannelManagerForeachChannelClassFunc ()">*TpChannelManagerForeachChannelClassFunc</a>)
+                                                        (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerChannelClassFunc" title="TpChannelManagerChannelClassFunc ()">TpChannelManagerChannelClassFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+void                (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerForeachChannelFunc" title="TpChannelManagerForeachChannelFunc ()">*TpChannelManagerForeachChannelFunc</a>)
+                                                        (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannelFunc" title="TpExportableChannelFunc ()">TpExportableChannelFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerRequestFunc" title="TpChannelManagerRequestFunc ()">*TpChannelManagerRequestFunc</a>)      (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *request_properties);
+                    <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a>;
+                    <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerIface" title="TpChannelManagerIface">TpChannelManagerIface</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-asv-has-unknown-properties" title="tp_channel_manager_asv_has_unknown_properties ()">tp_channel_manager_asv_has_unknown_properties</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *properties,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *fixed,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *allowed,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+>GError</a> **error);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-create-channel" title="tp_channel_manager_create_channel ()">tp_channel_manager_create_channel</a>   (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *request_properties);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-channel-closed" title="tp_channel_manager_emit_channel_closed ()">tp_channel_manager_emit_channel_closed</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *path);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-channel-closed-for-object" title="tp_channel_manager_emit_channel_closed_for_object ()">tp_channel_manager_emit_channel_closed_for_object</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel">TpExportableChannel</a> *channel);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-new-channel" title="tp_channel_manager_emit_new_channel ()">tp_channel_manager_emit_new_channel</a> (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel">TpExportableChannel</a> *channel,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *request_tokens);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-new-channels" title="tp_channel_manager_emit_new_channels ()">tp_channel_manager_emit_new_channels</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *channels);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-request-already-satisfied" title="tp_channel_manager_emit_request_already_satisfied ()">tp_channel_manager_emit_request_already_satisfied</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel">TpExportableChannel</a> *channel);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-request-failed" title="tp_channel_manager_emit_request_failed ()">tp_channel_manager_emit_request_failed</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"
+>GQuark</a> domain,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a> code,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *message);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-request-failed-printf" title="tp_channel_manager_emit_request_failed_printf ()">tp_channel_manager_emit_request_failed_printf</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"
+>GQuark</a> domain,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a> code,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *format,
+                                                         ...);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-foreach-channel" title="tp_channel_manager_foreach_channel ()">tp_channel_manager_foreach_channel</a>  (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannelFunc" title="TpExportableChannelFunc ()">TpExportableChannelFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+void                <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-foreach-channel-class" title="tp_channel_manager_foreach_channel_class ()">tp_channel_manager_foreach_channel_class</a>
+                                                        (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerChannelClassFunc" title="TpChannelManagerChannelClassFunc ()">TpChannelManagerChannelClassFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-request-channel" title="tp_channel_manager_request_channel ()">tp_channel_manager_request_channel</a>  (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *request_properties);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-TpChannelManager.description"></a><h2>Description</h2>
+<p>
+A channel manager is attached to a connection. It carries out channel
+requests from the connection, and responds to channel-related events on the
+underlying network connection, for particular classes of channel (for
+example, incoming and outgoing calls, respectively). It also tracks
+currently-open channels of the relevant kinds.
+</p>
+<p>
+The connection has an array of channel managers. In response to a call to
+CreateChannel or RequestChannel, the channel request is offered to each
+channel manager in turn, until one accepts the request. In a trivial
+implementation there might be a single channel manager which handles all
+requests and all incoming events, but in general, there will be multiple
+channel managers handling different types of channel.
+</p>
+<p>
+For example, at the time of writing, Gabble has a roster channel manager
+which handles contact lists and groups, an IM channel manager which
+handles one-to-one messaging, a MUC channel manager which handles
+multi-user chat rooms, the index of chat rooms and MUC tubes, a media
+channel manager which handles VoIP calls, and a 1-1 tubes channel manager.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-TpChannelManager.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="TpChannelManagerChannelClassFunc"></a><h3>TpChannelManagerChannelClassFunc ()</h3>
+<pre class="programlisting">void                (*TpChannelManagerChannelClassFunc) (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *fixed_properties,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *allowed_properties,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Signature of callbacks which act on each channel class supported by <em class="parameter"><code>manager</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>fixed_properties</code></em> :</span></p></td>
+<td> A table mapping (const gchar *) property names to
+ GValues, representing the values those properties must take to request
+ channels of a particular class.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>allowed_properties</code></em> :</span></p></td>
+<td> A <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>-terminated array of property names which may
+ appear in requests for a particular channel class.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> Arbitrary user-supplied data.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpChannelManagerForeachChannelClassFunc"></a><h3>TpChannelManagerForeachChannelClassFunc ()</h3>
+<pre class="programlisting">void                (*TpChannelManagerForeachChannelClassFunc)
+                                                        (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerChannelClassFunc" title="TpChannelManagerChannelClassFunc ()">TpChannelManagerChannelClassFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Signature of an implementation of foreach_channel_class, which must call
+func(manager, fixed, allowed, user_data) for each channel class understood
+by <em class="parameter"><code>manager</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> A function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> Arbitrary data to be passed as the final argument of <em class="parameter"><code>func</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpChannelManagerForeachChannelFunc"></a><h3>TpChannelManagerForeachChannelFunc ()</h3>
+<pre class="programlisting">void                (*TpChannelManagerForeachChannelFunc)
+                                                        (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannelFunc" title="TpExportableChannelFunc ()">TpExportableChannelFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Signature of an implementation of foreach_channel, which must call
+func(channel, user_data) for each channel managed by this channel manager.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> an object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> A function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> Arbitrary data to be passed as the second argument of <em class="parameter"><code>func</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpChannelManagerRequestFunc"></a><h3>TpChannelManagerRequestFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*TpChannelManagerRequestFunc)      (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *request_properties);</pre>
+<p>
+Signature of an implementation of <span class="type">"create_channel"</span> and
+<span class="type">"request_channel"</span>.
+</p>
+<p>
+Implementations should inspect the contents of <em class="parameter"><code>request_properties</code></em> to see if
+it matches a channel class handled by this manager.  If so, they should
+return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> to accept responsibility for the request, and ultimately emit
+exactly one of the <span class="type">"new-channels"</span>,
+<span class="type">"already-satisfied"</span> and
+<span class="type">"request-failed"</span> signals (including <em class="parameter"><code>request_token</code></em> in
+the appropriate argument).
+</p>
+<p>
+If the implementation does not want to handle the request, it should return
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> to allow the request to be offered to another channel manager.
+</p>
+<p>
+Implementations may assume the following of <em class="parameter"><code>request_properties</code></em>:
+</p>
+<p>
+</p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+     the ChannelType property is present, and is a (const gchar *)
+  </li>
+<li>
+    the TargetHandleType property is a valid <a class="link" href="telepathy-glib-enums.html#TpHandleType" title="enum TpHandleType"><span class="type">TpHandleType</span></a>, if present
+  </li>
+<li>
+    if TargetHandleType is None, TargetHandle is omitted
+  </li>
+<li>
+    if TargetHandleType is not None, TargetHandle is a valid <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="type">TpHandle</span></a> of
+    that <a class="link" href="telepathy-glib-enums.html#TpHandleType" title="enum TpHandleType"><span class="type">TpHandleType</span></a>
+</li>
+<li>
+    the TargetID property is not present (if supplied by the client, it will
+    be converted to a TargetHandle before being passed to this function)
+  </li>
+</ul></div>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_token</code></em> :</span></p></td>
+<td> An opaque pointer representing this pending request.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_properties</code></em> :</span></p></td>
+<td> A table mapping (const gchar *) property names to
+ GValue, representing the desired properties of a channel requested by a
+ Telepathy client. The hash table will be freed after the function returns;
+ if the channel manager wants to keep it around, it must copy it.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if <em class="parameter"><code>manager</code></em> will handle this request, else <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpChannelManager"></a><h3>TpChannelManager</h3>
+<pre class="programlisting">typedef struct _TpChannelManager TpChannelManager;</pre>
+<p>
+Opaque typedef representing any channel manager implementation.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpChannelManagerIface"></a><h3>TpChannelManagerIface</h3>
+<pre class="programlisting">typedef struct {
+    GTypeInterface parent;
+
+    TpChannelManagerForeachChannelFunc foreach_channel;
+
+    TpChannelManagerForeachChannelClassFunc foreach_channel_class;
+
+    TpChannelManagerRequestFunc create_channel;
+    TpChannelManagerRequestFunc request_channel;
+    /* in principle we could have EnsureChannel here too */
+} TpChannelManagerIface;
+</pre>
+<p>
+The vtable for a channel manager implementation.
+</p>
+<p>
+In addition to the fields documented here there are several GCallback
+fields which must currently be <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/gobject/gobject-Type-Information.html#GTypeInterface"
+>GTypeInterface</a> <em class="structfield"><code>parent</code></em>;</span></p></td>
+<td> Fields shared with GTypeInterface.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerForeachChannelFunc" title="TpChannelManagerForeachChannelFunc ()">TpChannelManagerForeachChannelFunc</a> <em class="structfield"><code>foreach_channel</code></em>;</span></p></td>
+<td> Call func(channel, user_data) for each channel managed by
+ this manager. If not implemented, the manager is assumed to manage no
+ channels.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerForeachChannelClassFunc" title="TpChannelManagerForeachChannelClassFunc ()">TpChannelManagerForeachChannelClassFunc</a> <em class="structfield"><code>foreach_channel_class</code></em>;</span></p></td>
+<td> Call func(manager, fixed, allowed, user_data) for
+ each class of channel that this manager can create. If not implemented, the
+ manager is assumed to be able to create no classes of channels.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerRequestFunc" title="TpChannelManagerRequestFunc ()">TpChannelManagerRequestFunc</a> <em class="structfield"><code>create_channel</code></em>;</span></p></td>
+<td> Respond to a request for a new channel made with the
+ Connection.Interface.Requests.CreateChannel method. See
+ <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerRequestFunc" title="TpChannelManagerRequestFunc ()"><span class="type">TpChannelManagerRequestFunc</span></a> for details.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerRequestFunc" title="TpChannelManagerRequestFunc ()">TpChannelManagerRequestFunc</a> <em class="structfield"><code>request_channel</code></em>;</span></p></td>
+<td> Respond to a request for a (new or existing) channel made
+ with the Connection.RequestChannel method. See <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerRequestFunc" title="TpChannelManagerRequestFunc ()"><span class="type">TpChannelManagerRequestFunc</span></a>
+ for details.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-asv-has-unknown-properties"></a><h3>tp_channel_manager_asv_has_unknown_properties ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            tp_channel_manager_asv_has_unknown_properties
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *properties,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *fixed,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *allowed,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+>GError</a> **error);</pre>
+<p>
+Checks whether the keys of <em class="parameter"><code>properties</code></em> are elements of one of <em class="parameter"><code>fixed</code></em> and
+<em class="parameter"><code>allowed</code></em>.  This is intended to be used by implementations of
+<span class="type">"create_channel"</span> which have decided to accept a request,
+to conform with the specification's requirement that unknown requested
+properties must cause a request to fail, not be silently ignored.
+</p>
+<p>
+On encountering unknown properties, this function will return <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>, and
+set <em class="parameter"><code>error</code></em> to a <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+><span class="type">GError</span></a> that could be used as a D-Bus method error.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>properties</code></em> :</span></p></td>
+<td> a table mapping (const gchar *) property names to GValues,
+             as passed to methods of <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>fixed</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>-terminated array of property names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>allowed</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>-terminated array of property names
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> an address at which to store an error suitable for returning from
+        the D-Bus method when <em class="parameter"><code>properties</code></em> contains unknown properties
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if all of the keys of <em class="parameter"><code>properties</code></em> are elements of <em class="parameter"><code>fixed</code></em> or
+         <em class="parameter"><code>allowed</code></em>; else <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-create-channel"></a><h3>tp_channel_manager_create_channel ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            tp_channel_manager_create_channel   (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *request_properties);</pre>
+<p>
+Offers an incoming CreateChannel call to <em class="parameter"><code>manager</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_token</code></em> :</span></p></td>
+<td> An opaque pointer representing this pending request.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_properties</code></em> :</span></p></td>
+<td> A table mapping (const gchar *) property names to
+ GValue, representing the desired properties of a channel requested by a
+ Telepathy client.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if this request will be handled by <em class="parameter"><code>manager</code></em>; else <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-channel-closed"></a><h3>tp_channel_manager_emit_channel_closed ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_channel_closed
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *path);</pre>
+<p>
+Emit the <span class="type">"channel-closed"</span> signal indicating that
+the channel at the given object path has been closed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
+<td> A channel's object-path
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-channel-closed-for-object"></a><h3>tp_channel_manager_emit_channel_closed_for_object ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_channel_closed_for_object
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel">TpExportableChannel</a> *channel);</pre>
+<p>
+Emit the <span class="type">"channel-closed"</span> signal indicating that
+the given channel has been closed. (This is a convenient shortcut for
+calling <a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-channel-closed" title="tp_channel_manager_emit_channel_closed ()"><code class="function">tp_channel_manager_emit_channel_closed()</code></a> with the
+<span class="type">"object-path"</span> property of <em class="parameter"><code>channel</code></em>.)</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channel</code></em> :</span></p></td>
+<td> A <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel"><span class="type">TpExportableChannel</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-new-channel"></a><h3>tp_channel_manager_emit_new_channel ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_new_channel (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel">TpExportableChannel</a> *channel,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *request_tokens);</pre>
+<p>
+Emit the <span class="type">"new-channels"</span> signal indicating that the
+channel has been created. (This is a convenient shortcut for calling
+<a class="link" href="telepathy-glib-TpChannelManager.html#tp-channel-manager-emit-new-channels" title="tp_channel_manager_emit_new_channels ()"><code class="function">tp_channel_manager_emit_new_channels()</code></a> with a one-entry hash table.)</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channel</code></em> :</span></p></td>
+<td> A <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel"><span class="type">TpExportableChannel</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_tokens</code></em> :</span></p></td>
+<td> the request tokens (opaque pointers) satisfied by this
+                 channel
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-new-channels"></a><h3>tp_channel_manager_emit_new_channels ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_new_channels
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *channels);</pre>
+<p>
+If <em class="parameter"><code>channels</code></em> is non-empty, emit the <span class="type">"new-channels"</span>
+signal indicating that those channels have been created.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channels</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+><span class="type">GHashTable</span></a> where the keys are
+ <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel"><span class="type">TpExportableChannel</span></a> instances (hashed and compared
+ by <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#g-direct-hash"
+><code class="function">g_direct_hash()</code></a> and <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#g-direct-equal"
+><code class="function">g_direct_equal()</code></a>) and the values are
+ linked lists (<a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+><span class="type">GSList</span></a>) of request tokens (opaque pointers) satisfied by
+ these channels
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-request-already-satisfied"></a><h3>tp_channel_manager_emit_request_already_satisfied ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_request_already_satisfied
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannel" title="TpExportableChannel">TpExportableChannel</a> *channel);</pre>
+<p>
+Emit the <span class="type">"request-already-satisfied"</span> signal indicating
+that the pre-existing channel <em class="parameter"><code>channel</code></em> satisfies <em class="parameter"><code>request_token</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_token</code></em> :</span></p></td>
+<td> An opaque pointer representing the request that
+ succeeded
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channel</code></em> :</span></p></td>
+<td> The channel that satisfies the request
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-request-failed"></a><h3>tp_channel_manager_emit_request_failed ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_request_failed
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"
+>GQuark</a> domain,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a> code,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *message);</pre>
+<p>
+Emit the <span class="type">"request-failed"</span> signal indicating that
+the request <em class="parameter"><code>request_token</code></em> failed for the given reason.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_token</code></em> :</span></p></td>
+<td> An opaque pointer representing the request that failed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>domain</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+><span class="type">GError</span></a> domain
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>code</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+><span class="type">GError</span></a> code appropriate for <em class="parameter"><code>domain</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>message</code></em> :</span></p></td>
+<td> the error message
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-emit-request-failed-printf"></a><h3>tp_channel_manager_emit_request_failed_printf ()</h3>
+<pre class="programlisting">void                tp_channel_manager_emit_request_failed_printf
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> instance,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"
+>GQuark</a> domain,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a> code,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *format,
+                                                         ...);</pre>
+<p>
+Emit the <span class="type">"request-failed"</span> signal indicating that
+the request <em class="parameter"><code>request_token</code></em> failed for the given reason.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_token</code></em> :</span></p></td>
+<td> An opaque pointer representing the request that failed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>domain</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+><span class="type">GError</span></a> domain
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>code</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+><span class="type">GError</span></a> code appropriate for <em class="parameter"><code>domain</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>format</code></em> :</span></p></td>
+<td> a printf-style format string for the error message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>...</code></em> :</span></p></td>
+<td> arguments for the format string
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-foreach-channel"></a><h3>tp_channel_manager_foreach_channel ()</h3>
+<pre class="programlisting">void                tp_channel_manager_foreach_channel  (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpExportableChannel.html#TpExportableChannelFunc" title="TpExportableChannelFunc ()">TpExportableChannelFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Calls func(channel, user_data) for each channel managed by <em class="parameter"><code>manager</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> an object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> A function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> Arbitrary data to be passed as the second argument of <em class="parameter"><code>func</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-foreach-channel-class"></a><h3>tp_channel_manager_foreach_channel_class ()</h3>
+<pre class="programlisting">void                tp_channel_manager_foreach_channel_class
+                                                        (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManagerChannelClassFunc" title="TpChannelManagerChannelClassFunc ()">TpChannelManagerChannelClassFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Calls func(manager, fixed, allowed, user_data) for each channel class
+understood by <em class="parameter"><code>manager</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> A function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> Arbitrary data to be passed as the final argument of <em class="parameter"><code>func</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-manager-request-channel"></a><h3>tp_channel_manager_request_channel ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            tp_channel_manager_request_channel  (<a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager">TpChannelManager</a> *manager,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> request_token,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *request_properties);</pre>
+<p>
+Offers an incoming RequestChannel call to <em class="parameter"><code>manager</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td> An object implementing <a class="link" href="telepathy-glib-TpChannelManager.html#TpChannelManager" title="TpChannelManager"><span class="type">TpChannelManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_token</code></em> :</span></p></td>
+<td> An opaque pointer representing this pending request.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request_properties</code></em> :</span></p></td>
+<td> A table mapping (const gchar *) property names to
+ GValue, representing the desired properties of a channel requested by a
+ Telepathy client.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if this request will be handled by <em class="parameter"><code>manager</code></em>; else <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a>.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.15
+</p>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="telepathy-glib-TpChannelManager.see-also"></a><h2>See Also</h2>
+<a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnection"><span class="type">TpSvcConnection</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

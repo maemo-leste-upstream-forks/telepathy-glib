@@ -70,6 +70,11 @@ enum                <link linkend="TpDBusPropertiesMixinFlags">TpDBusPropertiesM
                                                          const <link linkend="gchar">gchar</link> *property_name,
                                                          <link linkend="GValue">GValue</link> *value,
                                                          <link linkend="GError">GError</link> **error);
+<link linkend="GHashTable">GHashTable</link>*         <link linkend="tp-dbus-properties-mixin-make-properties-hash">tp_dbus_properties_mixin_make_properties_hash</link>
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         const <link linkend="gchar">gchar</link> *first_interface,
+                                                         const <link linkend="gchar">gchar</link> *first_property,
+                                                         ...);
 </synopsis>
 </refsynopsisdiv>
 
@@ -511,6 +516,14 @@ that it will only be called once, even if the class is subclassed.
 <para>
 Changed in 0.7.9: TpDBusPropertiesMixinClass::interfaces may now be <link linkend="NULL:CAPS"><literal>NULL</literal></link>,
 which means that only interfaces whose properties are set up using
+<link linkend="tp-dbus-properties-mixin-implement-interface"><function>tp_dbus_properties_mixin_implement_interface()</function></link> will be used.
+</para>
+<para>
+Changed in 0.7.15: <parameter>offset</parameter> may now be 0, in which case the
+<link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link> can be omitted from <parameter>cls</parameter>.  It is treated as if
+it were present, but with all fields (including
+TpDBusPropertiesMixinClass::interfaces) being <link linkend="NULL:CAPS"><literal>NULL</literal></link>, so only interfaces
+whose properties are set using
 <link linkend="tp-dbus-properties-mixin-implement-interface"><function>tp_dbus_properties_mixin_implement_interface()</function></link> will be used.</para>
 <para>
 
@@ -634,6 +647,40 @@ is filled in instead.</para>
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.13
 </para></refsect2>
+<refsect2 id="tp-dbus-properties-mixin-make-properties-hash" role="function">
+<title>tp_dbus_properties_mixin_make_properties_hash ()</title>
+<indexterm zone="tp-dbus-properties-mixin-make-properties-hash"><primary>tp_dbus_properties_mixin_make_properties_hash</primary></indexterm><programlisting><link linkend="GHashTable">GHashTable</link>*         tp_dbus_properties_mixin_make_properties_hash
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         const <link linkend="gchar">gchar</link> *first_interface,
+                                                         const <link linkend="gchar">gchar</link> *first_property,
+                                                         ...);</programlisting>
+<para>
+Retrieves the values of several D-Bus properties from an object, and builds
+a hash mapping the fully-qualified name of the property to its value.  This
+is equivalent to calling <link linkend="tp-dbus-properties-mixin-get"><function>tp_dbus_properties_mixin_get()</function></link> for each property
+and building the table yourself, with the proviso that this function will
+<link linkend="g-assert"><function>g_assert()</function></link> if retrieving a property fails (for instance, because it does not
+exist).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> an object which uses the D-Bus properties mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>first_interface</parameter>&nbsp;:</term>
+<listitem><simpara> the interface of the first property to be retrieved
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>first_property</parameter>&nbsp;:</term>
+<listitem><simpara> the name of the first property to be retrieved
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>...</parameter>&nbsp;:</term>
+<listitem><simpara> more (interface name, property name) pairs, terminated by <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a hash table mapping (gchar *) fully-qualified property names to
+         GValues, which must be freed by the caller (at which point its
+         contents will also be freed).
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 
 </refsect1>
 

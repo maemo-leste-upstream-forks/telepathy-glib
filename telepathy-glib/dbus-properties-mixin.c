@@ -380,7 +380,7 @@ link_interface (GType type,
       if (prop_impl->mixin_priv == NULL)
         {
           g_critical ("%s tried to implement nonexistent property %s"
-              "on interface %s", g_type_name (type), prop_impl->name,
+              " on interface %s", g_type_name (type), prop_impl->name,
               iface_impl->name);
           return FALSE;
         }
@@ -434,7 +434,7 @@ tp_dbus_properties_mixin_implement_interface (GObjectClass *cls,
   GQuark extras_quark = _extra_prop_impls_quark ();
   GType type = G_OBJECT_CLASS_TYPE (cls);
   GType *interfaces = g_type_interfaces (type, NULL);
-  TpDBusPropertiesMixinClass *mixin;
+  TpDBusPropertiesMixinClass *mixin = NULL;
   gpointer offset_qdata;
   TpDBusPropertiesMixinIfaceImpl *iface_impl;
 
@@ -442,10 +442,9 @@ tp_dbus_properties_mixin_implement_interface (GObjectClass *cls,
 
   offset_qdata = g_type_get_qdata (type, offset_quark);
 
-  g_return_if_fail (offset_qdata != NULL);
-
-  mixin = &G_STRUCT_MEMBER (TpDBusPropertiesMixinClass, cls,
-      GPOINTER_TO_SIZE (offset_qdata));
+  if (offset_qdata != NULL)
+    mixin = &G_STRUCT_MEMBER (TpDBusPropertiesMixinClass, cls,
+        GPOINTER_TO_SIZE (offset_qdata));
 
   /* never freed - intentional per-class leak */
   iface_impl = g_new0 (TpDBusPropertiesMixinIfaceImpl, 1);
@@ -482,20 +481,23 @@ tp_dbus_properties_mixin_implement_interface (GObjectClass *cls,
 
       /* assert that we're not trying to implement the same interface via
        * this function and the static data */
-      for (iter = mixin->interfaces;
-           iter != NULL && iter->name != NULL;
-           iter++)
+      if (mixin != NULL && mixin->interfaces != NULL)
         {
-          TpDBusPropertiesMixinIfaceInfo *other_info = iter->mixin_priv;
-
-          g_assert (other_info != NULL);
-
-          if (G_UNLIKELY (other_info->dbus_interface == iface))
+          for (iter = mixin->interfaces;
+               iter->name != NULL;
+               iter++)
             {
-              g_critical ("type %s tried to implement interface %s with %s "
-                  "and also in static data", g_type_name (type),
-                  g_quark_to_string (iface), G_STRFUNC);
-              goto out;
+              TpDBusPropertiesMixinIfaceInfo *other_info = iter->mixin_priv;
+
+              g_assert (other_info != NULL);
+
+              if (G_UNLIKELY (other_info->dbus_interface == iface))
+                {
+                  g_critical ("type %s tried to implement interface %s with %s "
+                      "and also in static data", g_type_name (type),
+                      g_quark_to_string (iface), G_STRFUNC);
+                  goto out;
+                }
             }
         }
 #endif
@@ -536,6 +538,13 @@ out:
  * which means that only interfaces whose properties are set up using
  * tp_dbus_properties_mixin_implement_interface() will be used.
  *
+ * Changed in 0.7.15: @offset may now be 0, in which case the
+ * #TpDBusPropertiesMixinClass can be omitted from @cls.  It is treated as if
+ * it were present, but with all fields (including
+ * TpDBusPropertiesMixinClass::interfaces) being %NULL, so only interfaces
+ * whose properties are set using
+ * tp_dbus_properties_mixin_implement_interface() will be used.
+ *
  * Since: 0.7.3
  */
 void
@@ -552,12 +561,18 @@ tp_dbus_properties_mixin_class_init (GObjectClass *cls,
   g_return_if_fail (g_type_get_qdata (type, q) == NULL);
   g_type_set_qdata (type, q, GSIZE_TO_POINTER (offset));
 
+  if (offset == 0)
+    return;
+
   mixin = &G_STRUCT_MEMBER (TpDBusPropertiesMixinClass, cls, offset);
+
+  if (mixin->interfaces == NULL)
+    return;
 
   interfaces = g_type_interfaces (type, NULL);
 
   for (iface_impl = mixin->interfaces;
-       iface_impl != NULL && iface_impl->name != NULL;
+       iface_impl->name != NULL;
        iface_impl++)
     {
       GQuark iface_quark = g_quark_try_string (iface_impl->name);
@@ -608,24 +623,25 @@ _tp_dbus_properties_mixin_find_iface_impl (GObject *self,
        type = g_type_parent (type))
     {
       gpointer offset = g_type_get_qdata (type, offset_quark);
-      TpDBusPropertiesMixinClass *mixin;
+      TpDBusPropertiesMixinClass *mixin = NULL;
       TpDBusPropertiesMixinIfaceImpl *iface_impl;
       TpDBusPropertiesMixinIfaceInfo *iface_info;
 
-      if (offset == NULL)
-        continue;
+      if (offset != NULL)
+        mixin = &G_STRUCT_MEMBER (TpDBusPropertiesMixinClass,
+            G_OBJECT_GET_CLASS (self), GPOINTER_TO_SIZE (offset));
 
-      mixin = &G_STRUCT_MEMBER (TpDBusPropertiesMixinClass,
-          G_OBJECT_GET_CLASS (self), GPOINTER_TO_SIZE (offset));
-
-      for (iface_impl = mixin->interfaces;
-           iface_impl != NULL && iface_impl->name != NULL;
-           iface_impl++)
+      if (mixin != NULL && mixin->interfaces != NULL)
         {
-          iface_info = iface_impl->mixin_priv;
+          for (iface_impl = mixin->interfaces;
+               iface_impl->name != NULL;
+               iface_impl++)
+            {
+              iface_info = iface_impl->mixin_priv;
 
-          if (iface_info->dbus_interface == iface_quark)
-            return iface_impl;
+              if (iface_info->dbus_interface == iface_quark)
+                return iface_impl;
+            }
         }
 
       for (iface_impl = g_type_get_qdata (type, extras_quark);
@@ -735,6 +751,76 @@ tp_dbus_properties_mixin_get (GObject *self,
 
   return TRUE;
 }
+
+
+/**
+ * tp_dbus_properties_mixin_make_properties_hash:
+ * @object: an object which uses the D-Bus properties mixin
+ * @first_interface: the interface of the first property to be retrieved
+ * @first_property: the name of the first property to be retrieved
+ * @...: more (interface name, property name) pairs, terminated by %NULL.
+ *
+ * Retrieves the values of several D-Bus properties from an object, and builds
+ * a hash mapping the fully-qualified name of the property to its value.  This
+ * is equivalent to calling tp_dbus_properties_mixin_get() for each property
+ * and building the table yourself, with the proviso that this function will
+ * g_assert() if retrieving a property fails (for instance, because it does not
+ * exist).
+ *
+ * Returns: a hash table mapping (gchar *) fully-qualified property names to
+ *          GValues, which must be freed by the caller (at which point its
+ *          contents will also be freed).
+ */
+GHashTable *
+tp_dbus_properties_mixin_make_properties_hash (
+    GObject *object,
+    const gchar *first_interface,
+    const gchar *first_property,
+    ...)
+{
+  va_list ap;
+  GHashTable *table;
+  const gchar *interface, *property;
+  gboolean first = TRUE;
+
+  table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+      (GDestroyNotify) tp_g_value_slice_free);
+
+  va_start (ap, first_property);
+
+  for (interface = first_interface;
+       interface != NULL;
+       interface = va_arg (ap, gchar *))
+    {
+      GValue *value = g_slice_new0 (GValue);
+
+      if (first)
+        {
+          property = first_property;
+          first = FALSE;
+        }
+      else
+        {
+          property = va_arg (ap, gchar *);
+        }
+
+      /* If property is NULL, the caller might have omitted a comma or
+       * something; in any case, it shouldn't be.
+       */
+      g_assert (property != NULL);
+
+      tp_dbus_properties_mixin_get (object, interface, property,
+            value, NULL);
+      /* Fetching our immutable properties had better not fail... */
+      g_assert (G_IS_VALUE (value));
+
+      g_hash_table_insert (table,
+          g_strdup_printf ("%s.%s", interface, property), value);
+    }
+
+  return table;
+}
+
 
 static void
 _tp_dbus_properties_mixin_get (TpSvcDBusProperties *iface,
