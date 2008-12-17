@@ -900,8 +900,12 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
     TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION = 1,
     TP_CHANNEL_TEXT_MESSAGE_TYPE_NOTICE = 2,
     TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY = 3,
+    TP_CHANNEL_TEXT_MESSAGE_TYPE_DELIVERY_REPORT = 4,
 } TpChannelTextMessageType;
 </pre>
+<p>
+         The type of message.       
+</p>
 <p>
 Bitfield/set of flags generated from the Telepathy specification.</p>
 <p>
@@ -912,7 +916,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tbody>
 <tr>
 <td><p><a name="TP-CHANNEL-TEXT-MESSAGE-TYPE-NORMAL:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL</code></span></p></td>
-<td>          A standard message         
+<td>          An ordinary chat message. Unknown types SHOULD be treated like this.         
 </td>
 </tr>
 <tr>
@@ -927,7 +931,12 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-TEXT-MESSAGE-TYPE-AUTO-REPLY:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY</code></span></p></td>
-<td>          An automatically-generated reply message         
+<td>          An automatically-generated reply message.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-TEXT-MESSAGE-TYPE-DELIVERY-REPORT:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_TEXT_MESSAGE_TYPE_DELIVERY_REPORT</code></span></p></td>
+<td>            This message type MUST NOT appear unless the channel supports the           DeliveryReporting interface. The message MUST be as defined by           the DeliveryReporting interface.         
 </td>
 </tr>
 </tbody>
@@ -948,6 +957,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <a name="TpChannelTextMessageFlags"></a><h3>enum TpChannelTextMessageFlags</h3>
 <pre class="programlisting">typedef enum {
     TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED = 1,
+    TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT = 2,
 } TpChannelTextMessageFlags;
 </pre>
 <p>
@@ -957,11 +967,18 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
-<tbody><tr>
+<tbody>
+<tr>
 <td><p><a name="TP-CHANNEL-TEXT-MESSAGE-FLAG-TRUNCATED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED</code></span></p></td>
 <td>          The incoming message was truncated to a shorter length by the         server or the connection manager.         
 </td>
-</tr></tbody>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-TEXT-MESSAGE-FLAG-NON-TEXT-CONTENT:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT</code></span></p></td>
+<td>            The incoming message contained non-text content which cannot be             represented by this interface, but has been signalled             in the Messages interface.            Connection managers SHOULD only set this flag if the non-text             content appears to be relatively significant (exactly how             significant is up to the implementor). The intention is that             if this flag is set, clients using this interface SHOULD inform             the user that part of the message was not understood.         
+</td>
+</tr>
+</tbody>
 </table></div>
 </div>
 <hr>
@@ -1036,6 +1053,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
     TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES = 256,
     TP_CHANNEL_GROUP_FLAG_ONLY_ONE_GROUP = 512,
     TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE = 1024,
+    TP_CHANNEL_GROUP_FLAG_PROPERTIES = 2048,
 } TpChannelGroupFlags;
 </pre>
 <p>
@@ -1099,6 +1117,11 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-FLAG-HANDLE-OWNERS-NOT-AVAILABLE:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE</code></span></p></td>
 <td>            In rooms with channel specific handles (ie Channel_Specific_Handles           flag is set), this flag indicates that none of the handle owners are           available, and that GetHandleOwners method will always return 0 for           channel members other than the self handle.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-GROUP-FLAG-PROPERTIES:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_FLAG_PROPERTIES</code></span></p></td>
+<td>            This flag indicates that all the properties introduced in           specification 0.17.6 are fully supported.         
 </td>
 </tr>
 </tbody>

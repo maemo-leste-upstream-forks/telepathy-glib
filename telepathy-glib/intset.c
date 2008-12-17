@@ -256,7 +256,7 @@ addint (guint i, gpointer data)
  * the same integers as @set.
  */
 GArray *
-tp_intset_to_array (TpIntSet *set)
+tp_intset_to_array (const TpIntSet *set)
 {
   GArray *array;
 
@@ -280,7 +280,7 @@ tp_intset_to_array (TpIntSet *set)
  */
 
 TpIntSet *
-tp_intset_from_array (GArray *array)
+tp_intset_from_array (const GArray *array)
 {
   TpIntSet *set;
   guint max, i;

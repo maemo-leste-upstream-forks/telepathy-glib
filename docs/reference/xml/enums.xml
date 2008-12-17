@@ -785,8 +785,12 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
     TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION = 1,
     TP_CHANNEL_TEXT_MESSAGE_TYPE_NOTICE = 2,
     TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY = 3,
+    TP_CHANNEL_TEXT_MESSAGE_TYPE_DELIVERY_REPORT = 4,
 } TpChannelTextMessageType;
 </programlisting>
+<para>
+<![CDATA[         The type of message.       ]]>
+</para>
 <para>
 Bitfield/set of flags generated from the Telepathy specification.</para>
 <para>
@@ -794,7 +798,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-TYPE-NORMAL:CAPS" role="constant">
 <term><literal>TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL</literal></term>
-<listitem><simpara> <![CDATA[         A standard message         ]]>
+<listitem><simpara> <![CDATA[         An ordinary chat message. Unknown types SHOULD be treated like this.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-TYPE-ACTION:CAPS" role="constant">
@@ -809,7 +813,12 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-TYPE-AUTO-REPLY:CAPS" role="constant">
 <term><literal>TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY</literal></term>
-<listitem><simpara> <![CDATA[         An automatically-generated reply message         ]]>
+<listitem><simpara> <![CDATA[         An automatically-generated reply message.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CHANNEL-TEXT-MESSAGE-TYPE-DELIVERY-REPORT:CAPS" role="constant">
+<term><literal>TP_CHANNEL_TEXT_MESSAGE_TYPE_DELIVERY_REPORT</literal></term>
+<listitem><simpara> <![CDATA[           This message type MUST NOT appear unless the channel supports the           DeliveryReporting interface. The message MUST be as defined by           the DeliveryReporting interface.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -825,6 +834,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <title>enum TpChannelTextMessageFlags</title>
 <indexterm zone="TpChannelTextMessageFlags"><primary>TpChannelTextMessageFlags</primary></indexterm><programlisting>typedef enum {
     TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED = 1,
+    TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT = 2,
 } TpChannelTextMessageFlags;
 </programlisting>
 <para>
@@ -835,6 +845,11 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-TRUNCATED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED</literal></term>
 <listitem><simpara> <![CDATA[         The incoming message was truncated to a shorter length by the         server or the connection manager.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-NON-TEXT-CONTENT:CAPS" role="constant">
+<term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT</literal></term>
+<listitem><simpara> <![CDATA[           The incoming message contained non-text content which cannot be             represented by this interface, but has been signalled             in the Messages interface.            Connection managers SHOULD only set this flag if the non-text             content appears to be relatively significant (exactly how             significant is up to the implementor). The intention is that             if this flag is set, clients using this interface SHOULD inform             the user that part of the message was not understood.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -901,6 +916,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
     TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES = 256,
     TP_CHANNEL_GROUP_FLAG_ONLY_ONE_GROUP = 512,
     TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE = 1024,
+    TP_CHANNEL_GROUP_FLAG_PROPERTIES = 2048,
 } TpChannelGroupFlags;
 </programlisting>
 <para>
@@ -961,6 +977,11 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-HANDLE-OWNERS-NOT-AVAILABLE:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE</literal></term>
 <listitem><simpara> <![CDATA[           In rooms with channel specific handles (ie Channel_Specific_Handles           flag is set), this flag indicates that none of the handle owners are           available, and that GetHandleOwners method will always return 0 for           channel members other than the self handle.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CHANNEL-GROUP-FLAG-PROPERTIES:CAPS" role="constant">
+<term><literal>TP_CHANNEL_GROUP_FLAG_PROPERTIES</literal></term>
+<listitem><simpara> <![CDATA[           This flag indicates that all the properties introduced in           specification 0.17.6 are fully supported.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

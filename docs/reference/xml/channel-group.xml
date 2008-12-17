@@ -275,6 +275,31 @@
                                                          <link linkend="guint">guint</link> arg_reason,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-interface-group-connect-to-handle-owners-changed">tp_cli_channel_interface_group_connect_to_handle_owners_changed</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-group-signal-callback-handle-owners-changed">tp_cli_channel_interface_group_signal_callback_handle_owners_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-channel-interface-group-connect-to-self-handle-changed">tp_cli_channel_interface_group_connect_to_self_handle_changed</link>
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-group-signal-callback-self-handle-changed">tp_cli_channel_interface_group_signal_callback_self_handle_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-group-signal-callback-handle-owners-changed">*tp_cli_channel_interface_group_signal_callback_handle_owners_changed</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Added,
+                                                         const <link linkend="GArray">GArray</link> *arg_Removed,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-channel-interface-group-signal-callback-self-handle-changed">*tp_cli_channel_interface_group_signal_callback_self_handle_changed</link>)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_Self_Handle,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
 </synopsis>
 </refsynopsisdiv>
 
@@ -438,7 +463,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Returns an integer representing the bitwise-OR of flags on this         channel. The user interface can use this to present information about         which operations are currently valid.</para>
+Returns the value of the GroupFlags property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -449,7 +474,7 @@ Returns an integer representing the bitwise-OR of flags on this         channel.
 <listitem><simpara> Timeout in milliseconds, or -1 for default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The bitwise OR of zero or more values from ChannelGroupFlags
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The value of the GroupFlags property
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
@@ -528,7 +553,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Returns an array of handles representing contacts requesting         channel membership and awaiting local approval with AddMembers.</para>
+Returns the To_Be_Added handle (only) for each structure in the         LocalPendingMembers property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -571,7 +596,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Returns an array of structs containing handles representing contacts         requesting channel membership and awaiting local approval with         AddMembers.</para>
+Returns the LocalPendingMembers property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -614,7 +639,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Returns an array of handles for the members of this channel.</para>
+Returns the Members property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -700,7 +725,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Returns the handle for the user on this channel (which can also be a         local or remote pending member) or 0 if the user not a member at all         (which is likely to be the case, for instance, on Type.ContactList         channels). Note that this is different from the connection         GetSelfHandle on some protocols, so the value of this handle should         always be used with the methods of this interface.</para>
+Returns the value of the SelfHandle property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -946,7 +971,7 @@ Returns arrays of all current, local and remote pending channel         members.
 Start a GetGroupFlags method call.
 </para>
 <para>
-Returns an integer representing the bitwise-OR of flags on this         channel. The user interface can use this to present information about         which operations are currently valid.</para>
+Returns the value of the GroupFlags property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1050,7 +1075,7 @@ If the CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES flag is set on         the ch
 Start a GetLocalPendingMembers method call.
 </para>
 <para>
-Returns an array of handles representing contacts requesting         channel membership and awaiting local approval with AddMembers.</para>
+Returns the To_Be_Added handle (only) for each structure in the         LocalPendingMembers property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1100,7 +1125,7 @@ Returns an array of handles representing contacts requesting         channel mem
 Start a GetLocalPendingMembersWithInfo method call.
 </para>
 <para>
-Returns an array of structs containing handles representing contacts         requesting channel membership and awaiting local approval with         AddMembers.</para>
+Returns the LocalPendingMembers property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1150,7 +1175,7 @@ Returns an array of structs containing handles representing contacts         req
 Start a GetMembers method call.
 </para>
 <para>
-Returns an array of handles for the members of this channel.</para>
+Returns the Members property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1250,7 +1275,7 @@ Returns an array of handles representing contacts who have been         invited 
 Start a GetSelfHandle method call.
 </para>
 <para>
-Returns the handle for the user on this channel (which can also be a         local or remote pending member) or 0 if the user not a member at all         (which is likely to be the case, for instance, on Type.ContactList         channels). Note that this is different from the connection         GetSelfHandle on some protocols, so the value of this handle should         always be used with the methods of this interface.</para>
+Returns the value of the SelfHandle property.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1489,7 +1514,7 @@ succeeds or fails.</para>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The bitwise OR of zero or more values from ChannelGroupFlags
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The value of the GroupFlags property
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
@@ -1793,7 +1818,7 @@ or has become invalid.
 Connect a handler to the signal MembersChanged.
 </para>
 <para>
-Emitted when contacts join any of the three lists (members, local         pending or remote pending).  Contacts are listed in the removed         list when they leave any of the three lists. There may also be         a message from the server regarding this change, which may be         displayed to the user if desired.</para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Emitted when contacts join any of the three lists (members, local           pending or remote pending) or when they leave any of the three lists.           There may also be a message from the server regarding this change,           which may be displayed to the user if desired.&lt;/p&gt;          &lt;p&gt;All channel-specific handles that are mentioned in this signal           MUST be represented in the value of the HandleOwners property.           In practice, this will mean that HandleOwnersChanged is           emitted &lt;em&gt;before&lt;/em&gt; emitting a MembersChanged signal in which           channel-specific handles are added, but that it is emitted           &lt;em&gt;after&lt;/em&gt; emitting a MembersChanged signal in which           channel-specific handles are removed.&lt;/p&gt;</para>
 <para>
 
 </para><variablelist role="params">
@@ -1899,6 +1924,156 @@ Represents the signature of a callback for the signal MembersChanged.</para>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>arg_reason</parameter>&nbsp;:</term>
 <listitem><simpara> A reason for the change: one of the values of           ChannelGroupChangeReason
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-group-connect-to-handle-owners-changed" role="function">
+<title>tp_cli_channel_interface_group_connect_to_handle_owners_changed ()</title>
+<indexterm zone="tp-cli-channel-interface-group-connect-to-handle-owners-changed"><primary>tp_cli_channel_interface_group_connect_to_handle_owners_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_interface_group_connect_to_handle_owners_changed
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-group-signal-callback-handle-owners-changed">tp_cli_channel_interface_group_signal_callback_handle_owners_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal HandleOwnersChanged.
+</para>
+<para>
+Emitted whenever the HandleOwners property changes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-group-connect-to-self-handle-changed" role="function">
+<title>tp_cli_channel_interface_group_connect_to_self_handle_changed ()</title>
+<indexterm zone="tp-cli-channel-interface-group-connect-to-self-handle-changed"><primary>tp_cli_channel_interface_group_connect_to_self_handle_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_channel_interface_group_connect_to_self_handle_changed
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="tp-cli-channel-interface-group-signal-callback-self-handle-changed">tp_cli_channel_interface_group_signal_callback_self_handle_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal SelfHandleChanged.
+</para>
+<para>
+Emitted whenever the SelfHandle property changes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpChannel"><type>TpChannel</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-group-signal-callback-handle-owners-changed" role="function">
+<title>tp_cli_channel_interface_group_signal_callback_handle_owners_changed ()</title>
+<indexterm zone="tp-cli-channel-interface-group-signal-callback-handle-owners-changed"><primary>tp_cli_channel_interface_group_signal_callback_handle_owners_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_group_signal_callback_handle_owners_changed)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Added,
+                                                         const <link linkend="GArray">GArray</link> *arg_Removed,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal HandleOwnersChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-interface-group-connect-to-handle-owners-changed"><function>tp_cli_channel_interface_group_connect_to_handle_owners_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Added</parameter>&nbsp;:</term>
+<listitem><simpara> A map from channel-specific handles to their owners, in which the           keys include all the handles that were added to the keys of the           HandleOwners property, and all the handles in that property whose           owner has changed
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Removed</parameter>&nbsp;:</term>
+<listitem><simpara> The channel-specific handles that were removed from the keys of the           HandleOwners property, as a result of the contact leaving this group           in a previous MembersChanged signal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-channel-interface-group-signal-callback-self-handle-changed" role="function">
+<title>tp_cli_channel_interface_group_signal_callback_self_handle_changed ()</title>
+<indexterm zone="tp-cli-channel-interface-group-signal-callback-self-handle-changed"><primary>tp_cli_channel_interface_group_signal_callback_self_handle_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_channel_interface_group_signal_callback_self_handle_changed)
+                                                        (<link linkend="TpChannel">TpChannel</link> *proxy,
+                                                         <link linkend="guint">guint</link> arg_Self_Handle,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal SelfHandleChanged.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-channel-interface-group-connect-to-self-handle-changed"><function>tp_cli_channel_interface_group_connect_to_self_handle_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Self_Handle</parameter>&nbsp;:</term>
+<listitem><simpara> The new value of the SelfHandle property.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
 <listitem><simpara> User-supplied data

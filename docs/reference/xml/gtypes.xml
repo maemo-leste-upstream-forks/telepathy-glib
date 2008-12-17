@@ -53,6 +53,7 @@
 
 #define             <link linkend="TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS">TP_STRUCT_TYPE_LOCAL_PENDING_INFO</link>
 #define             <link linkend="TP-ARRAY-TYPE-LOCAL-PENDING-INFO-LIST:CAPS">TP_ARRAY_TYPE_LOCAL_PENDING_INFO_LIST</link>
+#define             <link linkend="TP-HASH-TYPE-HANDLE-OWNER-MAP:CAPS">TP_HASH_TYPE_HANDLE_OWNER_MAP</link>
 
 #define             <link linkend="TP-STRUCT-TYPE-PENDING-TEXT-MESSAGE:CAPS">TP_STRUCT_TYPE_PENDING_TEXT_MESSAGE</link>
 #define             <link linkend="TP-ARRAY-TYPE-PENDING-TEXT-MESSAGE-LIST:CAPS">TP_ARRAY_TYPE_PENDING_TEXT_MESSAGE_LIST</link>
@@ -659,11 +660,9 @@ named <literal>Parameter_Types</literal>):
 <title>TP_STRUCT_TYPE_LOCAL_PENDING_INFO</title>
 <indexterm zone="TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS"><primary>TP_STRUCT_TYPE_LOCAL_PENDING_INFO</primary></indexterm><programlisting>#define             TP_STRUCT_TYPE_LOCAL_PENDING_INFO</programlisting>
 <para>
-A struct (handle to be added, handle of contact
-        requesting the change, reason code, optional message)
-        representing a contact whose attempt to join a group is to be confirmed
-        by the local user, as returned by GetLocalPendingMembersWithInfo
-        on the Group interface.
+A structure representing a contact whose attempt to
+        join a group is to be confirmed by the local user using
+        AddMembers.
 </para>
 <para>
 This macro expands to a call to a function
@@ -675,24 +674,24 @@ with signature <literal>(uuus)</literal>.
 Member 0 (D-Bus type <literal>u</literal>,
 type <literal>Contact_Handle</literal>,
 named <literal>To_Be_Added</literal>):
-(Undocumented)
+The contact to be added to the group
 </para>
 <para>
 Member 1 (D-Bus type <literal>u</literal>,
 type <literal>Contact_Handle</literal>,
 named <literal>Actor</literal>):
-(Undocumented)
+The contact requesting or causing the change
 </para>
 <para>
 Member 2 (D-Bus type <literal>u</literal>,
 type <literal>Channel_Group_Change_Reason</literal>,
 named <literal>Reason</literal>):
-(Undocumented)
+The reason for the change
 </para>
 <para>
 Member 3 (D-Bus type <literal>s</literal>,
 named <literal>Message</literal>):
-(Undocumented)</para>
+A human-readable message from the Actor, or an empty string           if there is no message</para>
 <para>
 
 </para></refsect2>
@@ -703,6 +702,33 @@ named <literal>Message</literal>):
 Expands to a call to a function
 that returns the <link linkend="GType"><type>GType</type></link> of a <link linkend="GPtrArray"><type>GPtrArray</type></link>
 of <link linkend="TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS"><type>TP_STRUCT_TYPE_LOCAL_PENDING_INFO</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="TP-HASH-TYPE-HANDLE-OWNER-MAP:CAPS" role="macro">
+<title>TP_HASH_TYPE_HANDLE_OWNER_MAP</title>
+<indexterm zone="TP-HASH-TYPE-HANDLE-OWNER-MAP:CAPS"><primary>TP_HASH_TYPE_HANDLE_OWNER_MAP</primary></indexterm><programlisting>#define             TP_HASH_TYPE_HANDLE_OWNER_MAP</programlisting>
+<para>
+A map from channel-specific handles to their owners.
+</para>
+<para>
+This macro expands to a call to a function
+that returns the <link linkend="GType"><type>GType</type></link> of a <link linkend="GHashTable"><type>GHashTable</type></link>
+appropriate for representing a D-Bus
+dictionary of signature
+<literal>a{uu}</literal>.
+</para>
+<para>
+Keys (D-Bus type <literal>u</literal>,
+type <literal>Contact_Handle</literal>,
+named <literal>Channel_Specific_Handle</literal>):
+A nonzero channel-specific handle
+</para>
+<para>
+Values (D-Bus type <literal>u</literal>,
+type <literal>Contact_Handle</literal>,
+named <literal>Global_Handle</literal>):
+The global handle that owns the corresponding channel-specific           handle, or 0 if this could not be determined</para>
 <para>
 
 </para></refsect2>

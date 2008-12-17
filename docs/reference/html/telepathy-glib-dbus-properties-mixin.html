@@ -82,6 +82,12 @@ gboolean            <a class="link" href="telepathy-glib-dbus-properties-mixin.h
                                                          GError **error);
 void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-class-init" title="tp_dbus_properties_mixin_class_init ()">tp_dbus_properties_mixin_class_init</a> (GObjectClass *cls,
                                                          gsize offset);
+void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-implement-interface" title="tp_dbus_properties_mixin_implement_interface ()">tp_dbus_properties_mixin_implement_interface</a>
+                                                        (GObjectClass *cls,
+                                                         GQuark iface,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter" title="TpDBusPropertiesMixinGetter ()">TpDBusPropertiesMixinGetter</a> getter,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinSetter" title="TpDBusPropertiesMixinSetter ()">TpDBusPropertiesMixinSetter</a> setter,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl" title="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</a> *props);
 void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-iface-init" title="tp_dbus_properties_mixin_iface_init ()">tp_dbus_properties_mixin_iface_init</a> (gpointer g_iface,
                                                          gpointer iface_data);
 </pre>
@@ -316,7 +322,7 @@ future use, which must be initialized to <code class="literal">NULL</code>.</p>
 Structure representing an implementation of an interface's properties.
 </p>
 <p>
-In addition to the documented fields, there are three pointers which must
+In addition to the documented fields, there are four pointers which must
 be initialized to <code class="literal">NULL</code>.
 </p>
 <p>
@@ -629,8 +635,18 @@ a GInterface implemented by <em class="parameter"><code>cls</code></em>, using
 <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-svc-interface-set-dbus-properties-info" title="tp_svc_interface_set_dbus_properties_info ()"><code class="function">tp_svc_interface_set_dbus_properties_info()</code></a>.
 </p>
 <p>
-Before calling this function, the array of interfaces must have been
-placed in the TpDBusPropertiesMixinClass structure.</p>
+Before calling this function, the array <em class="parameter"><code>interfaces</code></em> must have been
+placed in the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a> structure; if it would be empty,
+it may instead be <code class="literal">NULL</code>.
+</p>
+<p>
+This function should be called from the class_init callback in such a way
+that it will only be called once, even if the class is subclassed.
+</p>
+<p>
+Changed in 0.7.9: TpDBusPropertiesMixinClass::interfaces may now be <code class="literal">NULL</code>,
+which means that only interfaces whose properties are set up using
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-implement-interface" title="tp_dbus_properties_mixin_implement_interface ()"><code class="function">tp_dbus_properties_mixin_implement_interface()</code></a> will be used.</p>
 <p>
 
 </p>
@@ -651,6 +667,78 @@ placed in the TpDBusPropertiesMixinClass structure.</p>
 </table></div>
 <p class="since">Since  0.7.3
 </p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-dbus-properties-mixin-implement-interface"></a><h3>tp_dbus_properties_mixin_implement_interface ()</h3>
+<pre class="programlisting">void                tp_dbus_properties_mixin_implement_interface
+                                                        (GObjectClass *cls,
+                                                         GQuark iface,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter" title="TpDBusPropertiesMixinGetter ()">TpDBusPropertiesMixinGetter</a> getter,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinSetter" title="TpDBusPropertiesMixinSetter ()">TpDBusPropertiesMixinSetter</a> setter,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl" title="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</a> *props);</pre>
+<p>
+Declare that, in addition to any interfaces set in
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-class-init" title="tp_dbus_properties_mixin_class_init ()"><code class="function">tp_dbus_properties_mixin_class_init()</code></a>, the given class (and its subclasses)
+will implement the properties of the interface <em class="parameter"><code>iface</code></em> using the callbacks
+<em class="parameter"><code>getter</code></em> and <em class="parameter"><code>setter</code></em> and the properties given by <em class="parameter"><code>props</code></em>.
+</p>
+<p>
+This function should be called from the class_init callback in such a way
+that it will only be called once, even if the class is subclassed.
+</p>
+<p>
+Typically, the static array <em class="parameter"><code>interfaces</code></em> in the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a>
+should be used for interfaces whose properties are implemented directly by
+the class <em class="parameter"><code>cls</code></em>, and this function should be used for interfaces whose
+properties are implemented by mixins.
+</p>
+<p>
+It is an error for the same interface to appear in the array <em class="parameter"><code>interfaces</code></em>
+in the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a>, and also be set up by this function.
+</p>
+<p>
+If a class C and a subclass S both implement the properties of the same
+interface, only the implementations from the subclass S will be used,
+regardless of whether the implementations in C and/or S were set up by
+this function or via the array <em class="parameter"><code>interfaces</code></em> in the
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>cls</code></em> :</span></p></td>
+<td> a subclass of <span class="type">GObjectClass</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>iface</code></em> :</span></p></td>
+<td> a quark representing the the name of the interface to implement
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>getter</code></em> :</span></p></td>
+<td> a callback to get properties on this interface, or <code class="literal">NULL</code> if they
+ are all write-only
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>setter</code></em> :</span></p></td>
+<td> a callback to set properties on this interface, or <code class="literal">NULL</code> if they
+ are all read-only
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>props</code></em> :</span></p></td>
+<td> an array of <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl" title="TpDBusPropertiesMixinPropImpl"><span class="type">TpDBusPropertiesMixinPropImpl</span></a> representing individual
+ properties, terminated by one with <em class="parameter"><code>name</code></em> == <code class="literal">NULL</code>
+</td>
+</tr>
+</tbody>
+</table></div>
 </div>
 <hr>
 <div class="refsect2" lang="en">

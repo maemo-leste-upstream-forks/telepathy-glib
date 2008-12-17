@@ -57,6 +57,12 @@ enum                <link linkend="TpDBusPropertiesMixinFlags">TpDBusPropertiesM
                                                          <link linkend="GError">GError</link> **error);
 <link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-class-init">tp_dbus_properties_mixin_class_init</link> (<link linkend="GObjectClass">GObjectClass</link> *cls,
                                                          <link linkend="gsize">gsize</link> offset);
+<link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-implement-interface">tp_dbus_properties_mixin_implement_interface</link>
+                                                        (<link linkend="GObjectClass">GObjectClass</link> *cls,
+                                                         <link linkend="GQuark">GQuark</link> iface,
+                                                         <link linkend="TpDBusPropertiesMixinGetter">TpDBusPropertiesMixinGetter</link> getter,
+                                                         <link linkend="TpDBusPropertiesMixinSetter">TpDBusPropertiesMixinSetter</link> setter,
+                                                         <link linkend="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</link> *props);
 <link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-iface-init">tp_dbus_properties_mixin_iface_init</link> (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
 </synopsis>
@@ -264,7 +270,7 @@ future use, which must be initialized to <link linkend="NULL:CAPS"><literal>NULL
 Structure representing an implementation of an interface's properties.
 </para>
 <para>
-In addition to the documented fields, there are three pointers which must
+In addition to the documented fields, there are four pointers which must
 be initialized to <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
 </para>
 <para>
@@ -489,8 +495,18 @@ a GInterface implemented by <parameter>cls</parameter>, using
 <link linkend="tp-svc-interface-set-dbus-properties-info"><function>tp_svc_interface_set_dbus_properties_info()</function></link>.
 </para>
 <para>
-Before calling this function, the array of interfaces must have been
-placed in the TpDBusPropertiesMixinClass structure.</para>
+Before calling this function, the array <parameter>interfaces</parameter> must have been
+placed in the <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link> structure; if it would be empty,
+it may instead be <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+This function should be called from the class_init callback in such a way
+that it will only be called once, even if the class is subclassed.
+</para>
+<para>
+Changed in 0.7.9: TpDBusPropertiesMixinClass::interfaces may now be <link linkend="NULL:CAPS"><literal>NULL</literal></link>,
+which means that only interfaces whose properties are set up using
+<link linkend="tp-dbus-properties-mixin-implement-interface"><function>tp_dbus_properties_mixin_implement_interface()</function></link> will be used.</para>
 <para>
 
 </para><variablelist role="params">
@@ -502,6 +518,62 @@ placed in the TpDBusPropertiesMixinClass structure.</para>
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.3
 </para></refsect2>
+<refsect2 id="tp-dbus-properties-mixin-implement-interface" role="function">
+<title>tp_dbus_properties_mixin_implement_interface ()</title>
+<indexterm zone="tp-dbus-properties-mixin-implement-interface"><primary>tp_dbus_properties_mixin_implement_interface</primary></indexterm><programlisting><link linkend="void">void</link>                tp_dbus_properties_mixin_implement_interface
+                                                        (<link linkend="GObjectClass">GObjectClass</link> *cls,
+                                                         <link linkend="GQuark">GQuark</link> iface,
+                                                         <link linkend="TpDBusPropertiesMixinGetter">TpDBusPropertiesMixinGetter</link> getter,
+                                                         <link linkend="TpDBusPropertiesMixinSetter">TpDBusPropertiesMixinSetter</link> setter,
+                                                         <link linkend="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</link> *props);</programlisting>
+<para>
+Declare that, in addition to any interfaces set in
+<link linkend="tp-dbus-properties-mixin-class-init"><function>tp_dbus_properties_mixin_class_init()</function></link>, the given class (and its subclasses)
+will implement the properties of the interface <parameter>iface</parameter> using the callbacks
+<parameter>getter</parameter> and <parameter>setter</parameter> and the properties given by <parameter>props</parameter>.
+</para>
+<para>
+This function should be called from the class_init callback in such a way
+that it will only be called once, even if the class is subclassed.
+</para>
+<para>
+Typically, the static array <parameter>interfaces</parameter> in the <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link>
+should be used for interfaces whose properties are implemented directly by
+the class <parameter>cls</parameter>, and this function should be used for interfaces whose
+properties are implemented by mixins.
+</para>
+<para>
+It is an error for the same interface to appear in the array <parameter>interfaces</parameter>
+in the <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link>, and also be set up by this function.
+</para>
+<para>
+If a class C and a subclass S both implement the properties of the same
+interface, only the implementations from the subclass S will be used,
+regardless of whether the implementations in C and/or S were set up by
+this function or via the array <parameter>interfaces</parameter> in the
+<link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>cls</parameter>&nbsp;:</term>
+<listitem><simpara> a subclass of <link linkend="GObjectClass"><type>GObjectClass</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>iface</parameter>&nbsp;:</term>
+<listitem><simpara> a quark representing the the name of the interface to implement
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>getter</parameter>&nbsp;:</term>
+<listitem><simpara> a callback to get properties on this interface, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if they
+ are all write-only
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>setter</parameter>&nbsp;:</term>
+<listitem><simpara> a callback to set properties on this interface, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if they
+ are all read-only
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>props</parameter>&nbsp;:</term>
+<listitem><simpara> an array of <link linkend="TpDBusPropertiesMixinPropImpl"><type>TpDBusPropertiesMixinPropImpl</type></link> representing individual
+ properties, terminated by one with <parameter>name</parameter> == <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="tp-dbus-properties-mixin-iface-init" role="function">
 <title>tp_dbus_properties_mixin_iface_init ()</title>
 <indexterm zone="tp-dbus-properties-mixin-iface-init"><primary>tp_dbus_properties_mixin_iface_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_dbus_properties_mixin_iface_init (<link linkend="gpointer">gpointer</link> g_iface,

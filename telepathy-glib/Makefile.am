@@ -12,7 +12,8 @@ ABI_LISTS = \
     versions/0.7.5.abi \
     versions/0.7.6.abi \
     versions/0.7.7.abi \
-    versions/0.7.8.abi
+    versions/0.7.8.abi \
+    versions/0.7.9.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -289,15 +290,13 @@ _gen/interfaces-body.h: _gen/stable-spec.xml \
 		_gen/stable-spec.xml > $@
 
 _gen/telepathy-errors.c: _gen/stable-spec.xml \
-	../tools/glib-errors-enum-body.xsl
-	$(XSLTPROC) $(XSLTPROCFLAGS) \
-		$(srcdir)/../tools/glib-errors-enum-body.xsl \
+	../tools/glib-errors-enum-body-gen.py
+	$(PYTHON) $(top_srcdir)/tools/glib-errors-enum-body-gen.py \
 		$< > $@
 
 _gen/telepathy-errors.h: _gen/stable-spec.xml \
-	../tools/glib-errors-enum-header.xsl
-	$(XSLTPROC) $(XSLTPROCFLAGS) \
-		$(srcdir)/../tools/glib-errors-enum-header.xsl \
+	../tools/glib-errors-enum-header-gen.py
+	$(PYTHON) $(top_srcdir)/tools/glib-errors-enum-header-gen.py \
 		$< > $@
 
 _gen/register-dbus-glib-marshallers-body.h: _gen/stable-spec.xml \

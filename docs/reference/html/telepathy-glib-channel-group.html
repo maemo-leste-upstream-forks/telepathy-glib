@@ -300,6 +300,31 @@ void                (<a class="link" href="telepathy-glib-channel-group.html#tp-
                                                          guint arg_reason,
                                                          gpointer user_data,
                                                          GObject *weak_object);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-connect-to-handle-owners-changed" title="tp_cli_channel_interface_group_connect_to_handle_owners_changed ()">tp_cli_channel_interface_group_connect_to_handle_owners_changed</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-signal-callback-handle-owners-changed" title="tp_cli_channel_interface_group_signal_callback_handle_owners_changed ()">tp_cli_channel_interface_group_signal_callback_handle_owners_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a>* <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-connect-to-self-handle-changed" title="tp_cli_channel_interface_group_connect_to_self_handle_changed ()">tp_cli_channel_interface_group_connect_to_self_handle_changed</a>
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-signal-callback-self-handle-changed" title="tp_cli_channel_interface_group_signal_callback_self_handle_changed ()">tp_cli_channel_interface_group_signal_callback_self_handle_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);
+void                (<a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-signal-callback-handle-owners-changed" title="tp_cli_channel_interface_group_signal_callback_handle_owners_changed ()">*tp_cli_channel_interface_group_signal_callback_handle_owners_changed</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         GHashTable *arg_Added,
+                                                         const GArray *arg_Removed,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
+void                (<a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-signal-callback-self-handle-changed" title="tp_cli_channel_interface_group_signal_callback_self_handle_changed ()">*tp_cli_channel_interface_group_signal_callback_self_handle_changed</a>)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_Self_Handle,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);
 </pre>
 </div>
 <div class="refsect1" lang="en">
@@ -497,7 +522,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Returns an integer representing the bitwise-OR of flags on this         channel. The user interface can use this to present information about         which operations are currently valid.</p>
+Returns the value of the GroupFlags property.</p>
 <p>
 
 </p>
@@ -516,7 +541,7 @@ Returns an integer representing the bitwise-OR of flags on this         channel.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: The bitwise OR of zero or more values from ChannelGroupFlags
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: The value of the GroupFlags property
 </td>
 </tr>
 <tr>
@@ -627,7 +652,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Returns an array of handles representing contacts requesting         channel membership and awaiting local approval with AddMembers.</p>
+Returns the To_Be_Added handle (only) for each structure in the         LocalPendingMembers property.</p>
 <p>
 
 </p>
@@ -689,7 +714,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Returns an array of structs containing handles representing contacts         requesting channel membership and awaiting local approval with         AddMembers.</p>
+Returns the LocalPendingMembers property.</p>
 <p>
 
 </p>
@@ -751,7 +776,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Returns an array of handles for the members of this channel.</p>
+Returns the Members property.</p>
 <p>
 
 </p>
@@ -875,7 +900,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Returns the handle for the user on this channel (which can also be a         local or remote pending member) or 0 if the user not a member at all         (which is likely to be the case, for instance, on Type.ContactList         channels). Note that this is different from the connection         GetSelfHandle on some protocols, so the value of this handle should         always be used with the methods of this interface.</p>
+Returns the value of the SelfHandle property.</p>
 <p>
 
 </p>
@@ -1230,7 +1255,7 @@ Returns arrays of all current, local and remote pending channel         members.
 Start a GetGroupFlags method call.
 </p>
 <p>
-Returns an integer representing the bitwise-OR of flags on this         channel. The user interface can use this to present information about         which operations are currently valid.</p>
+Returns the value of the GroupFlags property.</p>
 <p>
 
 </p>
@@ -1378,7 +1403,7 @@ If the CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES flag is set on         the ch
 Start a GetLocalPendingMembers method call.
 </p>
 <p>
-Returns an array of handles representing contacts requesting         channel membership and awaiting local approval with AddMembers.</p>
+Returns the To_Be_Added handle (only) for each structure in the         LocalPendingMembers property.</p>
 <p>
 
 </p>
@@ -1449,7 +1474,7 @@ Returns an array of handles representing contacts requesting         channel mem
 Start a GetLocalPendingMembersWithInfo method call.
 </p>
 <p>
-Returns an array of structs containing handles representing contacts         requesting channel membership and awaiting local approval with         AddMembers.</p>
+Returns the LocalPendingMembers property.</p>
 <p>
 
 </p>
@@ -1520,7 +1545,7 @@ Returns an array of structs containing handles representing contacts         req
 Start a GetMembers method call.
 </p>
 <p>
-Returns an array of handles for the members of this channel.</p>
+Returns the Members property.</p>
 <p>
 
 </p>
@@ -1662,7 +1687,7 @@ Returns an array of handles representing contacts who have been         invited 
 Start a GetSelfHandle method call.
 </p>
 <p>
-Returns the handle for the user on this channel (which can also be a         local or remote pending member) or 0 if the user not a member at all         (which is likely to be the case, for instance, on Type.ContactList         channels). Note that this is different from the connection         GetSelfHandle on some protocols, so the value of this handle should         always be used with the methods of this interface.</p>
+Returns the value of the SelfHandle property.</p>
 <p>
 
 </p>
@@ -2014,7 +2039,7 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: The bitwise OR of zero or more values from ChannelGroupFlags
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: The value of the GroupFlags property
 </td>
 </tr>
 <tr>
@@ -2473,7 +2498,7 @@ or has become invalid.
 Connect a handler to the signal MembersChanged.
 </p>
 <p>
-Emitted when contacts join any of the three lists (members, local         pending or remote pending).  Contacts are listed in the removed         list when they leave any of the three lists. There may also be         a message from the server regarding this change, which may be         displayed to the user if desired.</p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Emitted when contacts join any of the three lists (members, local           pending or remote pending) or when they leave any of the three lists.           There may also be a message from the server regarding this change,           which may be displayed to the user if desired.&lt;/p&gt;          &lt;p&gt;All channel-specific handles that are mentioned in this signal           MUST be represented in the value of the HandleOwners property.           In practice, this will mean that HandleOwnersChanged is           emitted &lt;em&gt;before&lt;/em&gt; emitting a MembersChanged signal in which           channel-specific handles are added, but that it is emitted           &lt;em&gt;after&lt;/em&gt; emitting a MembersChanged signal in which           channel-specific handles are removed.&lt;/p&gt;</p>
 <p>
 
 </p>
@@ -2634,6 +2659,228 @@ Represents the signature of a callback for the signal MembersChanged.</p>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>arg_reason</code></em> :</span></p></td>
 <td> A reason for the change: one of the values of           ChannelGroupChangeReason
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-cli-channel-interface-group-connect-to-handle-owners-changed"></a><h3>tp_cli_channel_interface_group_connect_to_handle_owners_changed ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_interface_group_connect_to_handle_owners_changed
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-signal-callback-handle-owners-changed" title="tp_cli_channel_interface_group_signal_callback_handle_owners_changed ()">tp_cli_channel_interface_group_signal_callback_handle_owners_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal HandleOwnersChanged.
+</p>
+<p>
+Emitted whenever the HandleOwners property changes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-cli-channel-interface-group-connect-to-self-handle-changed"></a><h3>tp_cli_channel_interface_group_connect_to_self_handle_changed ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a>* tp_cli_channel_interface_group_connect_to_self_handle_changed
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-signal-callback-self-handle-changed" title="tp_cli_channel_interface_group_signal_callback_self_handle_changed ()">tp_cli_channel_interface_group_signal_callback_self_handle_changed</a> callback,
+                                                         gpointer user_data,
+                                                         GDestroyNotify destroy,
+                                                         GObject *weak_object,
+                                                         GError **error);</pre>
+<p>
+Connect a handler to the signal SelfHandleChanged.
+</p>
+<p>
+Emitted whenever the SelfHandle property changes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td> A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td> A <span class="type">GObject</span> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<code class="literal">NULL</code> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-cli-channel-interface-group-signal-callback-handle-owners-changed"></a><h3>tp_cli_channel_interface_group_signal_callback_handle_owners_changed ()</h3>
+<pre class="programlisting">void                (*tp_cli_channel_interface_group_signal_callback_handle_owners_changed)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         GHashTable *arg_Added,
+                                                         const GArray *arg_Removed,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal HandleOwnersChanged.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-connect-to-handle-owners-changed" title="tp_cli_channel_interface_group_connect_to_handle_owners_changed ()"><code class="function">tp_cli_channel_interface_group_connect_to_handle_owners_changed()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Added</code></em> :</span></p></td>
+<td> A map from channel-specific handles to their owners, in which the           keys include all the handles that were added to the keys of the           HandleOwners property, and all the handles in that property whose           owner has changed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Removed</code></em> :</span></p></td>
+<td> The channel-specific handles that were removed from the keys of the           HandleOwners property, as a result of the contact leaving this group           in a previous MembersChanged signal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td> User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-cli-channel-interface-group-signal-callback-self-handle-changed"></a><h3>tp_cli_channel_interface_group_signal_callback_self_handle_changed ()</h3>
+<pre class="programlisting">void                (*tp_cli_channel_interface_group_signal_callback_self_handle_changed)
+                                                        (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *proxy,
+                                                         guint arg_Self_Handle,
+                                                         gpointer user_data,
+                                                         GObject *weak_object);</pre>
+<p>
+Represents the signature of a callback for the signal SelfHandleChanged.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td> The proxy on which <a class="link" href="telepathy-glib-channel-group.html#tp-cli-channel-interface-group-connect-to-self-handle-changed" title="tp_cli_channel_interface_group_connect_to_self_handle_changed ()"><code class="function">tp_cli_channel_interface_group_connect_to_self_handle_changed()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Self_Handle</code></em> :</span></p></td>
+<td> The new value of the SelfHandle property.
 </td>
 </tr>
 <tr>

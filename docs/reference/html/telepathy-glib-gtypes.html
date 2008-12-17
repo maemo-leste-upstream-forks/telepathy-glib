@@ -78,6 +78,7 @@ GValue*             <a class="link" href="telepathy-glib-gtypes.html#tp-dbus-spe
 
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS" title="TP_STRUCT_TYPE_LOCAL_PENDING_INFO">TP_STRUCT_TYPE_LOCAL_PENDING_INFO</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-LOCAL-PENDING-INFO-LIST:CAPS" title="TP_ARRAY_TYPE_LOCAL_PENDING_INFO_LIST">TP_ARRAY_TYPE_LOCAL_PENDING_INFO_LIST</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-HANDLE-OWNER-MAP:CAPS" title="TP_HASH_TYPE_HANDLE_OWNER_MAP">TP_HASH_TYPE_HANDLE_OWNER_MAP</a>
 
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-PENDING-TEXT-MESSAGE:CAPS" title="TP_STRUCT_TYPE_PENDING_TEXT_MESSAGE">TP_STRUCT_TYPE_PENDING_TEXT_MESSAGE</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-PENDING-TEXT-MESSAGE-LIST:CAPS" title="TP_ARRAY_TYPE_PENDING_TEXT_MESSAGE_LIST">TP_ARRAY_TYPE_PENDING_TEXT_MESSAGE_LIST</a>
@@ -727,11 +728,9 @@ named <code class="literal">Parameter_Types</code>):
 <a name="TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS"></a><h3>TP_STRUCT_TYPE_LOCAL_PENDING_INFO</h3>
 <pre class="programlisting">#define             TP_STRUCT_TYPE_LOCAL_PENDING_INFO</pre>
 <p>
-A struct (handle to be added, handle of contact
-        requesting the change, reason code, optional message)
-        representing a contact whose attempt to join a group is to be confirmed
-        by the local user, as returned by GetLocalPendingMembersWithInfo
-        on the Group interface.
+A structure representing a contact whose attempt to
+        join a group is to be confirmed by the local user using
+        AddMembers.
 </p>
 <p>
 This macro expands to a call to a function
@@ -743,24 +742,24 @@ with signature <code class="literal">(uuus)</code>.
 Member 0 (D-Bus type <code class="literal">u</code>,
 type <code class="literal">Contact_Handle</code>,
 named <code class="literal">To_Be_Added</code>):
-(Undocumented)
+The contact to be added to the group
 </p>
 <p>
 Member 1 (D-Bus type <code class="literal">u</code>,
 type <code class="literal">Contact_Handle</code>,
 named <code class="literal">Actor</code>):
-(Undocumented)
+The contact requesting or causing the change
 </p>
 <p>
 Member 2 (D-Bus type <code class="literal">u</code>,
 type <code class="literal">Channel_Group_Change_Reason</code>,
 named <code class="literal">Reason</code>):
-(Undocumented)
+The reason for the change
 </p>
 <p>
 Member 3 (D-Bus type <code class="literal">s</code>,
 named <code class="literal">Message</code>):
-(Undocumented)</p>
+A human-readable message from the Actor, or an empty string           if there is no message</p>
 <p>
 
 </p>
@@ -773,6 +772,35 @@ named <code class="literal">Message</code>):
 Expands to a call to a function
 that returns the <span class="type">GType</span> of a <span class="type">GPtrArray</span>
 of <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS" title="TP_STRUCT_TYPE_LOCAL_PENDING_INFO"><span class="type">TP_STRUCT_TYPE_LOCAL_PENDING_INFO</span></a>.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TP-HASH-TYPE-HANDLE-OWNER-MAP:CAPS"></a><h3>TP_HASH_TYPE_HANDLE_OWNER_MAP</h3>
+<pre class="programlisting">#define             TP_HASH_TYPE_HANDLE_OWNER_MAP</pre>
+<p>
+A map from channel-specific handles to their owners.
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <span class="type">GType</span> of a <span class="type">GHashTable</span>
+appropriate for representing a D-Bus
+dictionary of signature
+<code class="literal">a{uu}</code>.
+</p>
+<p>
+Keys (D-Bus type <code class="literal">u</code>,
+type <code class="literal">Contact_Handle</code>,
+named <code class="literal">Channel_Specific_Handle</code>):
+A nonzero channel-specific handle
+</p>
+<p>
+Values (D-Bus type <code class="literal">u</code>,
+type <code class="literal">Contact_Handle</code>,
+named <code class="literal">Global_Handle</code>):
+The global handle that owns the corresponding channel-specific           handle, or 0 if this could not be determined</p>
 <p>
 
 </p>
