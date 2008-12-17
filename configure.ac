@@ -11,11 +11,8 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [10])
+m4_define([tp_glib_micro_version], [11])
 m4_define([tp_glib_nano_version], [0])
-
-# When deciding the following, only consider the shared library, not the
-# -unstable library.
 
 # If library source has changed since last release, increment revision
 # If interfaces have been added, removed or changed since last release,
@@ -30,7 +27,7 @@ m4_define([tp_glib_nano_version], [0])
 # never seen in a release).
 
 m4_define([tp_glib_lt_current], [12])
-m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_revision], [1])
 m4_define([tp_glib_lt_age], [12])
 
 # Some magic

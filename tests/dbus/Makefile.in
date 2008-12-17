@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) $(test_connection_SOURCES) $(test_connection_getinterfaces_failure_SOURCES) test-dbus.c test-disconnection.c test-example-no-protocols.c $(test_finalized_in_invalidated_handler_SOURCES) $(test_handle_set_SOURCES) $(test_invalidated_while_invoking_signals_SOURCES) $(test_properties_SOURCES) $(test_unsupported_interface_SOURCES)
+SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) $(test_connection_SOURCES) $(test_connection_getinterfaces_failure_SOURCES) $(test_connection_inject_bug16307_SOURCES) test-dbus.c test-disconnection.c test-example-no-protocols.c $(test_finalized_in_invalidated_handler_SOURCES) $(test_handle_set_SOURCES) $(test_invalidated_while_invoking_signals_SOURCES) $(test_properties_SOURCES) $(test_unsupported_interface_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -39,6 +39,7 @@ POST_UNINSTALL = :
 host_triplet = @host@
 noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-connection$(EXEEXT) \
+	test-connection-inject-bug16307$(EXEEXT) \
 	test-connection-getinterfaces-failure$(EXEEXT) \
 	test-dbus$(EXEEXT) test-disconnection$(EXEEXT) \
 	test-example-no-protocols$(EXEEXT) \
@@ -79,6 +80,12 @@ test_connection_getinterfaces_failure_OBJECTS =  \
 	$(am_test_connection_getinterfaces_failure_OBJECTS)
 test_connection_getinterfaces_failure_DEPENDENCIES =  \
 	$(am__DEPENDENCIES_1) ../lib/libtp-glib-tests.la
+am_test_connection_inject_bug16307_OBJECTS =  \
+	connection-inject-bug16307.$(OBJEXT)
+test_connection_inject_bug16307_OBJECTS =  \
+	$(am_test_connection_inject_bug16307_OBJECTS)
+test_connection_inject_bug16307_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../lib/libtp-glib-tests.la
 test_dbus_SOURCES = test-dbus.c
 test_dbus_OBJECTS = test-dbus.$(OBJEXT)
 test_dbus_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -118,6 +125,7 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/channel-introspect.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/connection-getinterfaces-failure.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/connection-inject-bug16307.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/connection.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/finalized-in-invalidated-handler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/handle-set.Po \
@@ -138,7 +146,8 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_connection_SOURCES) \
-	$(test_connection_getinterfaces_failure_SOURCES) test-dbus.c \
+	$(test_connection_getinterfaces_failure_SOURCES) \
+	$(test_connection_inject_bug16307_SOURCES) test-dbus.c \
 	test-disconnection.c test-example-no-protocols.c \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_handle_set_SOURCES) \
@@ -147,7 +156,8 @@ SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = test-call-cancellation.c \
 	$(test_channel_introspect_SOURCES) $(test_connection_SOURCES) \
-	$(test_connection_getinterfaces_failure_SOURCES) test-dbus.c \
+	$(test_connection_getinterfaces_failure_SOURCES) \
+	$(test_connection_inject_bug16307_SOURCES) test-dbus.c \
 	test-disconnection.c test-example-no-protocols.c \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_handle_set_SOURCES) \
@@ -307,6 +317,11 @@ test_connection_LDADD = \
     ../lib/libtp-glib-tests.la
 
 test_connection_SOURCES = connection.c
+test_connection_inject_bug16307_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+
+test_connection_inject_bug16307_SOURCES = connection-inject-bug16307.c
 test_connection_getinterfaces_failure_LDADD = \
     $(TP_GLIB_LIBS) \
     ../lib/libtp-glib-tests.la
@@ -433,6 +448,9 @@ test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENC
 test-connection-getinterfaces-failure$(EXEEXT): $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_DEPENDENCIES) 
 	@rm -f test-connection-getinterfaces-failure$(EXEEXT)
 	$(LINK) $(test_connection_getinterfaces_failure_LDFLAGS) $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_LDADD) $(LIBS)
+test-connection-inject-bug16307$(EXEEXT): $(test_connection_inject_bug16307_OBJECTS) $(test_connection_inject_bug16307_DEPENDENCIES) 
+	@rm -f test-connection-inject-bug16307$(EXEEXT)
+	$(LINK) $(test_connection_inject_bug16307_LDFLAGS) $(test_connection_inject_bug16307_OBJECTS) $(test_connection_inject_bug16307_LDADD) $(LIBS)
 test-dbus$(EXEEXT): $(test_dbus_OBJECTS) $(test_dbus_DEPENDENCIES) 
 	@rm -f test-dbus$(EXEEXT)
 	$(LINK) $(test_dbus_LDFLAGS) $(test_dbus_OBJECTS) $(test_dbus_LDADD) $(LIBS)
@@ -466,6 +484,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-getinterfaces-failure.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-inject-bug16307.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/finalized-in-invalidated-handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-set.Po@am__quote@

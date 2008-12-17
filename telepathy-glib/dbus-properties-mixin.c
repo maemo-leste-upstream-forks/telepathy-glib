@@ -684,7 +684,13 @@ _tp_dbus_properties_mixin_get (TpSvcDBusProperties *iface,
       interface_name, context);
 
   if (iface_impl == NULL)
-    return;
+    {
+      GError e = { DBUS_GERROR, DBUS_GERROR_INVALID_ARGS,
+          "No properties known for that interface" };
+
+      dbus_g_method_return_error (context, &e);
+      return;
+    }
 
   iface_info = iface_impl->mixin_priv;
 
@@ -692,7 +698,13 @@ _tp_dbus_properties_mixin_get (TpSvcDBusProperties *iface,
       property_name, context);
 
   if (prop_impl == NULL)
-    return;
+    {
+      GError e = { DBUS_GERROR, DBUS_GERROR_INVALID_ARGS,
+          "Unknown property" };
+
+      dbus_g_method_return_error (context, &e);
+      return;
+    }
 
   prop_info = prop_impl->mixin_priv;
 
@@ -729,7 +741,7 @@ _tp_dbus_properties_mixin_get_all (TpSvcDBusProperties *iface,
       interface_name, context);
 
   if (iface_impl == NULL)
-    return;
+    goto out;   /* no properties, but we need to return that */
 
   iface_info = iface_impl->mixin_priv;
 
@@ -749,6 +761,7 @@ _tp_dbus_properties_mixin_get_all (TpSvcDBusProperties *iface,
       g_hash_table_insert (values, (gchar *) prop_impl->name, value);
     }
 
+out:
   tp_svc_dbus_properties_return_from_get_all (context, values);
   g_hash_table_destroy (values);
 }
@@ -772,7 +785,13 @@ _tp_dbus_properties_mixin_set (TpSvcDBusProperties *iface,
       interface_name, context);
 
   if (iface_impl == NULL)
-    return;
+    {
+      GError e = { DBUS_GERROR, DBUS_GERROR_INVALID_ARGS,
+          "No properties known for that interface" };
+
+      dbus_g_method_return_error (context, &e);
+      return;
+    }
 
   iface_info = iface_impl->mixin_priv;
 
@@ -780,7 +799,13 @@ _tp_dbus_properties_mixin_set (TpSvcDBusProperties *iface,
       property_name, context);
 
   if (prop_impl == NULL)
-    return;
+    {
+      GError e = { DBUS_GERROR, DBUS_GERROR_INVALID_ARGS,
+          "Unknown property" };
+
+      dbus_g_method_return_error (context, &e);
+      return;
+    }
 
   prop_info = prop_impl->mixin_priv;
 
@@ -807,13 +832,17 @@ _tp_dbus_properties_mixin_set (TpSvcDBusProperties *iface,
 
           dbus_g_method_return_error (context, error);
           g_error_free (error);
+          goto out;
         }
+
+      /* use copy instead of value from now on */
+      value = &copy;
     }
 
   if (iface_impl->setter (self, iface_info->dbus_interface,
         prop_info->name, value, prop_impl->setter_data, &error))
     {
-      tp_svc_dbus_properties_return_from_get (context, value);
+      tp_svc_dbus_properties_return_from_set (context);
     }
   else
     {
@@ -821,6 +850,7 @@ _tp_dbus_properties_mixin_set (TpSvcDBusProperties *iface,
       g_error_free (error);
     }
 
+out:
   if (G_IS_VALUE (&copy))
     g_value_unset (&copy);
 }
