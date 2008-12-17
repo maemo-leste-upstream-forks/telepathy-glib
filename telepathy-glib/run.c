@@ -37,6 +37,7 @@
 #include <telepathy-glib/run.h>
 
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -45,6 +46,8 @@
 #include <telepathy-glib/base-connection-manager.h>
 #include <telepathy-glib/debug.h>
 #include <telepathy-glib/errors.h>
+#include <telepathy-glib/util.h>
+#include <telepathy-glib/dbus.h>
 
 #ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
@@ -152,6 +155,20 @@ add_signal_handlers (void)
 #endif /* HAVE_SIGNAL && ENABLE_BACKTRACE */
 }
 
+static DBusHandlerResult
+dbus_filter_function (DBusConnection *connection,
+                      DBusMessage *message,
+                      void *user_data)
+{
+  if (dbus_message_is_signal (message, DBUS_INTERFACE_LOCAL, "Disconnected") &&
+      !tp_strdiff (dbus_message_get_path (message), DBUS_PATH_LOCAL))
+    {
+      g_message ("Got disconnected from the session bus");
+    }
+
+  return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+}
+
 /**
  * tp_run_connection_manager:
  * @prog_name: The program name to be used in debug messages etc.
@@ -183,6 +200,7 @@ tp_run_connection_manager (const char *prog_name,
                            char **argv)
 {
   GLogLevelFlags fatal_mask;
+  DBusConnection *connection;
 
   add_signal_handlers ();
 
@@ -224,6 +242,13 @@ tp_run_connection_manager (const char *prog_name,
 
   g_signal_connect (manager, "no-more-connections",
       (GCallback) no_more_connections, NULL);
+
+  /* It appears that dbus-glib registers a filter that wrongly returns
+   * DBUS_HANDLER_RESULT_HANDLED for signals, so for *our* filter to have any
+   * effect, we need to install it before calling
+   * tp_base_connection_manager_register () */
+  connection = dbus_g_connection_get_connection (tp_get_bus ());
+  dbus_connection_add_filter (connection, dbus_filter_function, NULL, NULL);
 
   if (!tp_base_connection_manager_register (manager))
     {

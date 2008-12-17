@@ -61,6 +61,12 @@
 gboolean            <a class="link" href="telepathy-glib-channel.html#tp-channel-run-until-ready" title="tp_channel_run_until_ready ()">tp_channel_run_until_ready</a>          (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *self,
                                                          GError **error,
                                                          GMainLoop **loop);
+void                (<a class="link" href="telepathy-glib-channel.html#TpChannelWhenReadyCb" title="TpChannelWhenReadyCb ()">*TpChannelWhenReadyCb</a>)             (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *channel,
+                                                         const GError *error,
+                                                         gpointer user_data);
+void                <a class="link" href="telepathy-glib-channel.html#tp-channel-call-when-ready" title="tp_channel_call_when_ready ()">tp_channel_call_when_ready</a>          (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *self,
+                                                         <a class="link" href="telepathy-glib-channel.html#TpChannelWhenReadyCb" title="TpChannelWhenReadyCb ()">TpChannelWhenReadyCb</a> callback,
+                                                         gpointer user_data);
 void                <a class="link" href="telepathy-glib-channel.html#tp-channel-init-known-interfaces" title="tp_channel_init_known_interfaces ()">tp_channel_init_known_interfaces</a>    (void);
                     <a class="link" href="telepathy-glib-channel.html#TpChannel-struct" title="TpChannel">TpChannel</a>;
                     <a class="link" href="telepathy-glib-channel.html#TpChannelClass" title="TpChannelClass">TpChannelClass</a>;
@@ -301,6 +307,81 @@ via <em class="parameter"><code>loop</code></em> is cancelled.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
+<a name="TpChannelWhenReadyCb"></a><h3>TpChannelWhenReadyCb ()</h3>
+<pre class="programlisting">void                (*TpChannelWhenReadyCb)             (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *channel,
+                                                         const GError *error,
+                                                         gpointer user_data);</pre>
+<p>
+Signature of a callback passed to <a class="link" href="telepathy-glib-channel.html#tp-channel-call-when-ready" title="tp_channel_call_when_ready ()"><code class="function">tp_channel_call_when_ready()</code></a>, which
+will be called exactly once, when the channel becomes ready or
+invalid (whichever happens first)</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channel</code></em> :</span></p></td>
+<td> the channel (which may be in the middle of being disposed,
+ if error is non-<code class="literal">NULL</code>, error-&gt;domain is TP_DBUS_ERRORS and error-&gt;code is
+ TP_DBUS_ERROR_PROXY_UNREFERENCED)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> <code class="literal">NULL</code> if the channel is ready for use, or the error with which
+ it was invalidated if it is now invalid
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> whatever was passed to <a class="link" href="telepathy-glib-channel.html#tp-channel-call-when-ready" title="tp_channel_call_when_ready ()"><code class="function">tp_channel_call_when_ready()</code></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-channel-call-when-ready"></a><h3>tp_channel_call_when_ready ()</h3>
+<pre class="programlisting">void                tp_channel_call_when_ready          (<a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a> *self,
+                                                         <a class="link" href="telepathy-glib-channel.html#TpChannelWhenReadyCb" title="TpChannelWhenReadyCb ()">TpChannelWhenReadyCb</a> callback,
+                                                         gpointer user_data);</pre>
+<p>
+If <em class="parameter"><code>self</code></em> is ready for use or has been invalidated, call <em class="parameter"><code>callback</code></em>
+immediately, then return. Otherwise, arrange
+for <em class="parameter"><code>callback</code></em> to be called when <em class="parameter"><code>self</code></em> either becomes ready for use
+or becomes invalid.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a channel
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> called when the channel becomes ready or invalidated, whichever
+ happens first
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> arbitrary user-supplied data passed to the callback
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.7
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
 <a name="tp-channel-init-known-interfaces"></a><h3>tp_channel_init_known_interfaces ()</h3>
 <pre class="programlisting">void                tp_channel_init_known_interfaces    (void);</pre>
 <p>
@@ -404,25 +485,30 @@ Request that the channel be closed. This is not the case until         the Close
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
-<td> called when the method call succeeds or fails
+<td> called when the method call succeeds or fails;
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
+  reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
-<td> user-supplied data passed to the callback
+<td> user-supplied data passed to the callback;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> A <span class="type">GObject</span> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<td> If not <code class="literal">NULL</code>, a <span class="type">GObject</span> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -470,25 +556,30 @@ Returns the interface name for the type of this channel.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
-<td> called when the method call succeeds or fails
+<td> called when the method call succeeds or fails;
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
+  reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
-<td> user-supplied data passed to the callback
+<td> user-supplied data passed to the callback;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> A <span class="type">GObject</span> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<td> If not <code class="literal">NULL</code>, a <span class="type">GObject</span> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -535,25 +626,30 @@ Returns the handle type and number if this channel represents a         communic
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
-<td> called when the method call succeeds or fails
+<td> called when the method call succeeds or fails;
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
+  reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
-<td> user-supplied data passed to the callback
+<td> user-supplied data passed to the callback;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> A <span class="type">GObject</span> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<td> If not <code class="literal">NULL</code>, a <span class="type">GObject</span> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -600,25 +696,30 @@ Get the optional interfaces implemented by the channel.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
-<td> called when the method call succeeds or fails
+<td> called when the method call succeeds or fails;
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
+  reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
-<td> user-supplied data passed to the callback
+<td> user-supplied data passed to the callback;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> A <span class="type">GObject</span> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<td> If not <code class="literal">NULL</code>, a <span class="type">GObject</span> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>

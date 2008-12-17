@@ -1079,10 +1079,13 @@ group_flags_to_string (TpChannelGroupFlags flags)
  * @add: Flags to be added
  * @del: Flags to be removed
  *
- * Request a change to be made to the flags. Emits the
- * GroupFlagsChanged signal with the changes which were actually made.
+ * Request a change to be made to the flags. If any flags were actually
+ * set or cleared, emits the GroupFlagsChanged signal with the changes.
  *
  * It is an error to set any of the same bits in both @add and @del.
+ *
+ * Changed in 0.7.7: the signal is not emitted if adding @add and
+ *  removing @del had no effect on the existing group flags.
  */
 void
 tp_group_mixin_change_flags (GObject *obj,
@@ -1101,7 +1104,12 @@ tp_group_mixin_change_flags (GObject *obj,
   removed = del & mixin->group_flags;
   mixin->group_flags &= ~removed;
 
-  if (add != 0 || del != 0)
+  if (added == 0 && removed == 0)
+    {
+      DEBUG ("No change: %u includes all the bits of %u and none of %u",
+          mixin->group_flags, add, del);
+    }
+  else
     {
       gchar *str_added, *str_removed, *str_flags;
 

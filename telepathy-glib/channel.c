@@ -343,6 +343,10 @@ tp_channel_connection_invalidated_cb (TpConnection *conn,
   g_signal_handler_disconnect (conn, self->priv->conn_invalidated_id);
   self->priv->conn_invalidated_id = 0;
 
+  /* tp_proxy_invalidate and g_object_notify call out to user code - add a
+   * temporary ref to ensure that we don't become finalized while doing so */
+  g_object_ref (self);
+
   tp_proxy_invalidate ((TpProxy *) self, &e);
 
   /* this channel's handle is now meaningless */
@@ -351,6 +355,8 @@ tp_channel_connection_invalidated_cb (TpConnection *conn,
       self->handle = 0;
       g_object_notify ((GObject *) self, "handle");
     }
+
+  g_object_unref (self);
 }
 
 static GObject *
@@ -664,6 +670,113 @@ raise_invalidated:
     }
 
   return FALSE;
+}
+
+typedef struct {
+    TpChannelWhenReadyCb callback;
+    gpointer user_data;
+    gulong invalidated_id;
+    gulong ready_id;
+} CallWhenReadyContext;
+
+static void
+cwr_invalidated (TpChannel *self,
+                 guint domain,
+                 gint code,
+                 gchar *message,
+                 gpointer user_data)
+{
+  CallWhenReadyContext *ctx = user_data;
+  GError e = { domain, code, message };
+
+  DEBUG ("enter");
+
+  g_assert (ctx->callback != NULL);
+
+  ctx->callback (self, &e, ctx->user_data);
+
+  g_signal_handler_disconnect (self, ctx->invalidated_id);
+  g_signal_handler_disconnect (self, ctx->ready_id);
+
+  ctx->callback = NULL;   /* poison it to detect errors */
+  g_slice_free (CallWhenReadyContext, ctx);
+}
+
+static void
+cwr_ready (TpChannel *self,
+           GParamSpec *unused G_GNUC_UNUSED,
+           gpointer user_data)
+{
+  CallWhenReadyContext *ctx = user_data;
+
+  DEBUG ("enter");
+
+  g_assert (ctx->callback != NULL);
+
+  ctx->callback (self, NULL, ctx->user_data);
+
+  g_signal_handler_disconnect (self, ctx->invalidated_id);
+  g_signal_handler_disconnect (self, ctx->ready_id);
+
+  ctx->callback = NULL;   /* poison it to detect errors */
+  g_slice_free (CallWhenReadyContext, ctx);
+}
+
+/**
+ * TpChannelWhenReadyCb:
+ * @channel: the channel (which may be in the middle of being disposed,
+ *  if error is non-%NULL, error->domain is TP_DBUS_ERRORS and error->code is
+ *  TP_DBUS_ERROR_PROXY_UNREFERENCED)
+ * @error: %NULL if the channel is ready for use, or the error with which
+ *  it was invalidated if it is now invalid
+ * @user_data: whatever was passed to tp_channel_call_when_ready()
+ *
+ * Signature of a callback passed to tp_channel_call_when_ready(), which
+ * will be called exactly once, when the channel becomes ready or
+ * invalid (whichever happens first)
+ */
+
+/**
+ * tp_channel_call_when_ready:
+ * @self: a channel
+ * @callback: called when the channel becomes ready or invalidated, whichever
+ *  happens first
+ * @user_data: arbitrary user-supplied data passed to the callback
+ *
+ * If @self is ready for use or has been invalidated, call @callback
+ * immediately, then return. Otherwise, arrange
+ * for @callback to be called when @self either becomes ready for use
+ * or becomes invalid.
+ *
+ * Since: 0.7.7
+ */
+void
+tp_channel_call_when_ready (TpChannel *self,
+                            TpChannelWhenReadyCb callback,
+                            gpointer user_data)
+{
+  TpProxy *as_proxy = (TpProxy *) self;
+
+  g_return_if_fail (callback != NULL);
+
+  if (self->ready || as_proxy->invalidated != NULL)
+    {
+      DEBUG ("already ready or invalidated");
+      callback (self, as_proxy->invalidated, user_data);
+    }
+  else
+    {
+      CallWhenReadyContext *ctx = g_slice_new (CallWhenReadyContext);
+
+      DEBUG ("arranging callback later");
+
+      ctx->callback = callback;
+      ctx->user_data = user_data;
+      ctx->invalidated_id = g_signal_connect (self, "invalidated",
+          G_CALLBACK (cwr_invalidated), ctx);
+      ctx->ready_id = g_signal_connect (self, "notify::channel-ready",
+          G_CALLBACK (cwr_ready), ctx);
+    }
 }
 
 static gpointer

@@ -1,10 +1,12 @@
 noinst_PROGRAMS = \
     test-call-cancellation \
     test-channel-introspect \
+    test-connection \
     test-connection-getinterfaces-failure \
     test-dbus \
     test-disconnection \
     test-example-no-protocols \
+    test-finalized-in-invalidated-handler \
     test-handle-set \
     test-invalidated-while-invoking-signals \
     test-properties \
@@ -21,6 +23,11 @@ test_channel_introspect_LDADD = \
     ../lib/libtp-glib-tests.la
 test_channel_introspect_SOURCES = channel-introspect.c
 
+test_connection_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+test_connection_SOURCES = connection.c
+
 test_connection_getinterfaces_failure_LDADD = \
     $(TP_GLIB_LIBS) \
     ../lib/libtp-glib-tests.la
@@ -33,11 +40,14 @@ test_disconnection_LDADD = \
     ../lib/libtp-glib-tests.la
 test_example_no_protocols_LDADD = $(TP_GLIB_LIBS)
 
+test_finalized_in_invalidated_handler_SOURCES = \
+    finalized-in-invalidated-handler.c
+test_finalized_in_invalidated_handler_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../lib/libtp-glib-tests.la
+
 test_handle_set_SOURCES = handle-set.c
 test_handle_set_LDADD = $(TP_GLIB_LIBS)
-
-test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
-test_unsupported_interface_SOURCES = unsupported-interface.c
 
 test_invalidated_while_invoking_signals_LDADD = \
     $(TP_GLIB_LIBS) \
@@ -50,6 +60,9 @@ test_properties_SOURCES = \
     properties.c \
     _gen/svc.h \
     _gen/svc.c
+
+test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
+test_unsupported_interface_SOURCES = unsupported-interface.c
 
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk

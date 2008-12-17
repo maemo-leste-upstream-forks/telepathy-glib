@@ -49,6 +49,37 @@
 #include <telepathy-glib/heap.h>
 #include <telepathy-glib/handle-repo-internal.h>
 
+/**
+ * TpDynamicHandleRepoNormalizeFunc:
+ * @repo: The repository on which tp_handle_lookup() or tp_handle_ensure()
+ *        was called
+ * @id: The name to be normalized
+ * @context: Arbitrary context passed to tp_handle_lookup() or
+ *           tp_handle_ensure()
+ * @error: Used to raise the Telepathy error InvalidHandle with an appropriate
+ *         message if NULL is returned
+ *
+ * Signature of the normalization function optionally used by
+ * #TpDynamicHandleRepo instances.
+ *
+ * Returns: a normalized version of @id (to be freed with g_free by the
+ *          caller), or NULL if @id is not valid for this repository
+ */
+
+/**
+ * tp_dynamic_handle_repo_new:
+ * @handle_type: The handle type
+ * @normalize_func: The function to be used to normalize and validate handles,
+ *  or %NULL to accept all handles as-is
+ * @default_normalize_context: The context pointer to be passed to the
+ *  @normalize_func if a %NULL context is passed to tp_handle_lookup() and
+ *  tp_handle_ensure(); this may itself be %NULL
+ *
+ * <!---->
+ *
+ * Returns: a new dynamic handle repository
+ */
+
 /* Handle leak tracing */
 
 #ifdef ENABLE_HANDLE_LEAK_DEBUG
@@ -353,7 +384,10 @@ handle_leak_debug_print_report (TpDynamicHandleRepo *self)
   g_assert (self != NULL);
 
   if (g_hash_table_size (self->handle_to_priv) == 0)
-    return;
+    {
+      printf ("No handles were leaked\n");
+      return;
+    }
 
   printf ("HANDLE LEAK: The following handles were not freed from repo %p:\n",
       self);
@@ -738,6 +772,14 @@ dynamic_lookup_handle (TpHandleRepoIface *irepo,
 
   handle = GPOINTER_TO_UINT (g_hash_table_lookup (self->string_to_handle,
         id));
+
+  if (handle == 0)
+    {
+      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+          "no %s handle (type %u) currently exists for ID \"%s\"",
+          tp_handle_type_to_string (self->handle_type),
+          self->handle_type, id);
+    }
 
   g_free (normal_id);
   return handle;

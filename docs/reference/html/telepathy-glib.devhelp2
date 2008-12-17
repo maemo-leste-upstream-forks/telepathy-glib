@@ -36,7 +36,13 @@
     <sub name="Service-side D-Bus interfaces" link="ch-service-dbus.html">
       <sub name="&#10;      The TpSvc* interfaces&#10;    " link="telepathy-glib-svc.html"/>
       <sub name="Generic service-side interfaces" link="telepathy-glib-svc-generic.html"/>
-      <sub name="Service-side Channel types and interfaces" link="telepathy-glib-svc-channel.html"/>
+      <sub name="Service-side Channel base interface" link="telepathy-glib-svc-channel.html"/>
+      <sub name="Service-side Channel Group interface" link="telepathy-glib-svc-channel-group.html"/>
+      <sub name="Contact List channels" link="telepathy-glib-svc-channel-contactlist.html"/>
+      <sub name="Text channels" link="telepathy-glib-svc-channel-text.html"/>
+      <sub name="Media channels" link="telepathy-glib-svc-channel-media.html"/>
+      <sub name="Tubes channels" link="telepathy-glib-svc-channel-tubes.html"/>
+      <sub name="Room List channels" link="telepathy-glib-svc-channel-roomlist.html"/>
       <sub name="Service-side Connection interfaces" link="telepathy-glib-svc-connection.html"/>
       <sub name="Service-side media streaming helper interfaces" link="telepathy-glib-svc-media-interfaces.html"/>
       <sub name="Service-side Connection Manager interface" link="telepathy-glib-svc-connection-manager.html"/>
@@ -400,6 +406,8 @@
     <keyword type="function" name="tp_list_connection_names ()" link="telepathy-glib-connection.html#tp-list-connection-names" since="0.7.1"/>
     <keyword type="function" name="tp_connection_new ()" link="telepathy-glib-connection.html#tp-connection-new" since="0.7.1"/>
     <keyword type="function" name="tp_connection_run_until_ready ()" link="telepathy-glib-connection.html#tp-connection-run-until-ready" since="0.7.1"/>
+    <keyword type="function" name="TpConnectionWhenReadyCb ()" link="telepathy-glib-connection.html#TpConnectionWhenReadyCb"/>
+    <keyword type="function" name="tp_connection_call_when_ready ()" link="telepathy-glib-connection.html#tp-connection-call-when-ready" since="0.7.7"/>
     <keyword type="function" name="tp_connection_init_known_interfaces ()" link="telepathy-glib-connection.html#tp-connection-init-known-interfaces" since="0.7.6"/>
     <keyword type="struct" name="TpConnection" link="telepathy-glib-connection.html#TpConnection-struct"/>
     <keyword type="struct" name="TpConnectionClass" link="telepathy-glib-connection.html#TpConnectionClass" since="0.7.1"/>
@@ -520,6 +528,8 @@
     <keyword type="function" name="tp_cli_connection_interface_presence_signal_callback_presence_update ()" link="telepathy-glib-connection-presence.html#tp-cli-connection-interface-presence-signal-callback-presence-update"/>
     <keyword type="function" name="tp_channel_new ()" link="telepathy-glib-channel.html#tp-channel-new" since="0.7.1"/>
     <keyword type="function" name="tp_channel_run_until_ready ()" link="telepathy-glib-channel.html#tp-channel-run-until-ready" since="0.7.1"/>
+    <keyword type="function" name="TpChannelWhenReadyCb ()" link="telepathy-glib-channel.html#TpChannelWhenReadyCb"/>
+    <keyword type="function" name="tp_channel_call_when_ready ()" link="telepathy-glib-channel.html#tp-channel-call-when-ready" since="0.7.7"/>
     <keyword type="function" name="tp_channel_init_known_interfaces ()" link="telepathy-glib-channel.html#tp-channel-init-known-interfaces" since="0.7.6"/>
     <keyword type="struct" name="TpChannel" link="telepathy-glib-channel.html#TpChannel-struct"/>
     <keyword type="struct" name="TpChannelClass" link="telepathy-glib-channel.html#TpChannelClass" since="0.7.1"/>
@@ -817,173 +827,170 @@
     <keyword type="function" name="tp_svc_channel_implement_get_interfaces ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-implement-get-interfaces"/>
     <keyword type="function" name="tp_svc_channel_return_from_get_interfaces ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-return-from-get-interfaces"/>
     <keyword type="function" name="tp_svc_channel_emit_closed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-emit-closed"/>
-    <keyword type="struct" name="TpSvcChannelTypeText" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeText"/>
-    <keyword type="struct" name="TpSvcChannelTypeTextClass" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeTextClass"/>
-    <keyword type="function" name="tp_svc_channel_type_text_acknowledge_pending_messages_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-acknowledge-pending-messages-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_text_implement_acknowledge_pending_messages ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-implement-acknowledge-pending-messages"/>
-    <keyword type="function" name="tp_svc_channel_type_text_return_from_acknowledge_pending_messages ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-return-from-acknowledge-pending-messages"/>
-    <keyword type="function" name="tp_svc_channel_type_text_get_message_types_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-get-message-types-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_text_implement_get_message_types ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-implement-get-message-types"/>
-    <keyword type="function" name="tp_svc_channel_type_text_return_from_get_message_types ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-return-from-get-message-types"/>
-    <keyword type="function" name="tp_svc_channel_type_text_list_pending_messages_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-list-pending-messages-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_text_implement_list_pending_messages ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-implement-list-pending-messages"/>
-    <keyword type="function" name="tp_svc_channel_type_text_return_from_list_pending_messages ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-return-from-list-pending-messages"/>
-    <keyword type="function" name="tp_svc_channel_type_text_send_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-send-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_text_implement_send ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-implement-send"/>
-    <keyword type="function" name="tp_svc_channel_type_text_return_from_send ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-return-from-send"/>
-    <keyword type="function" name="tp_svc_channel_type_text_emit_lost_message ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-emit-lost-message"/>
-    <keyword type="function" name="tp_svc_channel_type_text_emit_received ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-emit-received"/>
-    <keyword type="function" name="tp_svc_channel_type_text_emit_send_error ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-emit-send-error"/>
-    <keyword type="function" name="tp_svc_channel_type_text_emit_sent ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-text-emit-sent"/>
-    <keyword type="struct" name="TpSvcChannelTypeTubes" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeTubes"/>
-    <keyword type="struct" name="TpSvcChannelTypeTubesClass" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeTubesClass"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_accept_d_bus_tube_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-accept-d-bus-tube-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_accept_d_bus_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-accept-d-bus-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_accept_d_bus_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-accept-d-bus-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_accept_stream_tube_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-accept-stream-tube-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_accept_stream_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-accept-stream-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_accept_stream_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-accept-stream-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_close_tube_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-close-tube-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_close_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-close-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_close_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-close-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_get_available_stream_tube_types_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-get-available-stream-tube-types-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_available_stream_tube_types ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-get-available-stream-tube-types"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_available_stream_tube_types ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-get-available-stream-tube-types"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_get_available_tube_types_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-get-available-tube-types-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_available_tube_types ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-get-available-tube-types"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_available_tube_types ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-get-available-tube-types"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_get_d_bus_names_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-get-d-bus-names-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_d_bus_names ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-get-d-bus-names"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_d_bus_names ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-get-d-bus-names"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_get_d_bus_tube_address_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-get-d-bus-tube-address-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_d_bus_tube_address ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-get-d-bus-tube-address"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_d_bus_tube_address ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-get-d-bus-tube-address"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_get_stream_tube_socket_address_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-get-stream-tube-socket-address-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_stream_tube_socket_address ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-get-stream-tube-socket-address"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_stream_tube_socket_address ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-get-stream-tube-socket-address"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_list_tubes_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-list-tubes-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_list_tubes ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-list-tubes"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_list_tubes ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-list-tubes"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_offer_d_bus_tube_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-offer-d-bus-tube-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_offer_d_bus_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-offer-d-bus-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_offer_d_bus_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-offer-d-bus-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_offer_stream_tube_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-offer-stream-tube-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_implement_offer_stream_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-implement-offer-stream-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_offer_stream_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-return-from-offer-stream-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_emit_d_bus_names_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-emit-d-bus-names-changed"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_emit_new_tube ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-emit-new-tube"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_emit_stream_tube_new_connection ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-emit-stream-tube-new-connection"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_emit_tube_closed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-emit-tube-closed"/>
-    <keyword type="function" name="tp_svc_channel_type_tubes_emit_tube_state_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-tubes-emit-tube-state-changed"/>
-    <keyword type="function" name="tp_svc_connection_interface_avatars_get_known_avatar_tokens_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-connection-interface-avatars-get-known-avatar-tokens-impl"/>
-    <keyword type="function" name="tp_svc_connection_interface_avatars_implement_get_known_avatar_tokens ()" link="telepathy-glib-svc-channel.html#tp-svc-connection-interface-avatars-implement-get-known-avatar-tokens"/>
-    <keyword type="function" name="tp_svc_connection_interface_avatars_return_from_get_known_avatar_tokens ()" link="telepathy-glib-svc-channel.html#tp-svc-connection-interface-avatars-return-from-get-known-avatar-tokens"/>
-    <keyword type="struct" name="TpSvcChannelInterfacePassword" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfacePassword"/>
-    <keyword type="struct" name="TpSvcChannelInterfacePasswordClass" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfacePasswordClass"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_get_password_flags_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-get-password-flags-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_implement_get_password_flags ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-implement-get-password-flags"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_return_from_get_password_flags ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-return-from-get-password-flags"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_provide_password_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-provide-password-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_implement_provide_password ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-implement-provide-password"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_return_from_provide_password ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-return-from-provide-password"/>
-    <keyword type="function" name="tp_svc_channel_interface_password_emit_password_flags_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-password-emit-password-flags-changed"/>
-    <keyword type="struct" name="TpSvcChannelTypeRoomList" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeRoomList"/>
-    <keyword type="struct" name="TpSvcChannelTypeRoomListClass" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeRoomListClass"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_get_listing_rooms_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-get-listing-rooms-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_implement_get_listing_rooms ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-implement-get-listing-rooms"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_return_from_get_listing_rooms ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-return-from-get-listing-rooms"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_list_rooms_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-list-rooms-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_implement_list_rooms ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-implement-list-rooms"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_return_from_list_rooms ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-return-from-list-rooms"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_stop_listing_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-stop-listing-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_implement_stop_listing ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-implement-stop-listing"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_return_from_stop_listing ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-return-from-stop-listing"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_emit_got_rooms ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-emit-got-rooms"/>
-    <keyword type="function" name="tp_svc_channel_type_room_list_emit_listing_rooms ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-room-list-emit-listing-rooms"/>
-    <keyword type="struct" name="TpSvcChannelTypeStreamedMedia" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeStreamedMedia"/>
-    <keyword type="struct" name="TpSvcChannelTypeStreamedMediaClass" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeStreamedMediaClass"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_list_streams_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-list-streams-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_list_streams ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-implement-list-streams"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_list_streams ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-return-from-list-streams"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_remove_streams_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-remove-streams-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_remove_streams ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-implement-remove-streams"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_remove_streams ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-return-from-remove-streams"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_request_stream_direction_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-request-stream-direction-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_request_stream_direction ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-implement-request-stream-direction"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_request_stream_direction ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-return-from-request-stream-direction"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_request_streams_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-request-streams-impl"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_request_streams ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-implement-request-streams"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_request_streams ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-return-from-request-streams"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_added ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-emit-stream-added"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_direction_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-emit-stream-direction-changed"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_error ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-emit-stream-error"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_removed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-emit-stream-removed"/>
-    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_state_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-type-streamed-media-emit-stream-state-changed"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceDTMF" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceDTMF"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceDTMFClass" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceDTMFClass"/>
-    <keyword type="function" name="tp_svc_channel_interface_dtmf_implement_start_tone ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-dtmf-implement-start-tone"/>
-    <keyword type="function" name="tp_svc_channel_interface_dtmf_implement_stop_tone ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-dtmf-implement-stop-tone"/>
-    <keyword type="function" name="tp_svc_channel_interface_dtmf_return_from_start_tone ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-dtmf-return-from-start-tone"/>
-    <keyword type="function" name="tp_svc_channel_interface_dtmf_return_from_stop_tone ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-dtmf-return-from-stop-tone"/>
-    <keyword type="function" name="tp_svc_channel_interface_dtmf_start_tone_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-dtmf-start-tone-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_dtmf_stop_tone_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-dtmf-stop-tone-impl"/>
-    <keyword type="struct" name="TpSvcChannelTypeContactList" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeContactList"/>
-    <keyword type="struct" name="TpSvcChannelTypeContactListClass" link="telepathy-glib-svc-channel.html#TpSvcChannelTypeContactListClass"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceGroup" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceGroup"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceGroupClass" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceGroupClass"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_add_members_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-add-members-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_add_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-add-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_add_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-add-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_all_members_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-all-members-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_all_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-all-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_all_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-all-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_group_flags_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-group-flags-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_group_flags ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-group-flags"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_group_flags ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-group-flags"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_handle_owners_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-handle-owners-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_handle_owners ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-handle-owners"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_handle_owners ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-handle-owners"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_local_pending_members_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-local-pending-members-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_local_pending_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-local-pending-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_local_pending_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-local-pending-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_local_pending_members_with_info_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-local-pending-members-with-info-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_local_pending_members_with_info ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-local-pending-members-with-info"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_local_pending_members_with_info ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-local-pending-members-with-info"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_members_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-members-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_remote_pending_members_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-remote-pending-members-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_remote_pending_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-remote-pending-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_remote_pending_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-remote-pending-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_get_self_handle_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-get-self-handle-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_self_handle ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-get-self-handle"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_self_handle ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-get-self-handle"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_remove_members_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-remove-members-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_remove_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-remove-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_remove_members ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-remove-members"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_emit_group_flags_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-emit-group-flags-changed"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_emit_members_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-emit-members-changed"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_implement_remove_members_with_reason ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-implement-remove-members-with-reason"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_remove_members_with_reason_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-remove-members-with-reason-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_group_return_from_remove_members_with_reason ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-group-return-from-remove-members-with-reason"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceMediaSignalling" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceMediaSignalling"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceMediaSignallingClass" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceMediaSignallingClass"/>
-    <keyword type="function" name="tp_svc_channel_interface_media_signalling_get_session_handlers_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-media-signalling-get-session-handlers-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_media_signalling_implement_get_session_handlers ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-media-signalling-implement-get-session-handlers"/>
-    <keyword type="function" name="tp_svc_channel_interface_media_signalling_return_from_get_session_handlers ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-media-signalling-return-from-get-session-handlers"/>
-    <keyword type="function" name="tp_svc_channel_interface_media_signalling_emit_new_session_handler ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-media-signalling-emit-new-session-handler"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceChatState" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceChatState"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceChatStateClass" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceChatStateClass"/>
-    <keyword type="function" name="tp_svc_channel_interface_chat_state_set_chat_state_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-chat-state-set-chat-state-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_chat_state_implement_set_chat_state ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-chat-state-implement-set-chat-state"/>
-    <keyword type="function" name="tp_svc_channel_interface_chat_state_return_from_set_chat_state ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-chat-state-return-from-set-chat-state"/>
-    <keyword type="function" name="tp_svc_channel_interface_chat_state_emit_chat_state_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-chat-state-emit-chat-state-changed"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceCallState" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceCallState"/>
-    <keyword type="struct" name="TpSvcChannelInterfaceCallStateClass" link="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceCallStateClass"/>
-    <keyword type="function" name="tp_svc_channel_interface_call_state_emit_call_state_changed ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-call-state-emit-call-state-changed"/>
-    <keyword type="function" name="tp_svc_channel_interface_call_state_get_call_states_impl ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-call-state-get-call-states-impl"/>
-    <keyword type="function" name="tp_svc_channel_interface_call_state_implement_get_call_states ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-call-state-implement-get-call-states"/>
-    <keyword type="function" name="tp_svc_channel_interface_call_state_return_from_get_call_states ()" link="telepathy-glib-svc-channel.html#tp-svc-channel-interface-call-state-return-from-get-call-states"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceGroup" link="telepathy-glib-svc-channel-group.html#TpSvcChannelInterfaceGroup"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceGroupClass" link="telepathy-glib-svc-channel-group.html#TpSvcChannelInterfaceGroupClass"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_add_members_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-add-members-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_add_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-add-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_add_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-add-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_all_members_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-all-members-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_all_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-all-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_all_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-all-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_group_flags_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-group-flags-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_group_flags ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-group-flags"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_group_flags ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-group-flags"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_handle_owners_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-handle-owners-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_handle_owners ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-handle-owners"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_handle_owners ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-handle-owners"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_local_pending_members_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-local-pending-members-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_local_pending_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-local-pending-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_local_pending_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-local-pending-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_local_pending_members_with_info_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-local-pending-members-with-info-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_local_pending_members_with_info ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-local-pending-members-with-info"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_local_pending_members_with_info ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-local-pending-members-with-info"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_members_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-members-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_remote_pending_members_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-remote-pending-members-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_remote_pending_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-remote-pending-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_remote_pending_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-remote-pending-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_get_self_handle_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-get-self-handle-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_get_self_handle ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-get-self-handle"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_get_self_handle ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-get-self-handle"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_remove_members_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-remove-members-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_remove_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-remove-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_remove_members ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-remove-members"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_emit_group_flags_changed ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-emit-group-flags-changed"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_emit_members_changed ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-emit-members-changed"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_implement_remove_members_with_reason ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-implement-remove-members-with-reason"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_remove_members_with_reason_impl ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-remove-members-with-reason-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_group_return_from_remove_members_with_reason ()" link="telepathy-glib-svc-channel-group.html#tp-svc-channel-interface-group-return-from-remove-members-with-reason"/>
+    <keyword type="struct" name="TpSvcChannelTypeContactList" link="telepathy-glib-svc-channel-contactlist.html#TpSvcChannelTypeContactList"/>
+    <keyword type="struct" name="TpSvcChannelTypeContactListClass" link="telepathy-glib-svc-channel-contactlist.html#TpSvcChannelTypeContactListClass"/>
+    <keyword type="struct" name="TpSvcChannelTypeText" link="telepathy-glib-svc-channel-text.html#TpSvcChannelTypeText"/>
+    <keyword type="struct" name="TpSvcChannelTypeTextClass" link="telepathy-glib-svc-channel-text.html#TpSvcChannelTypeTextClass"/>
+    <keyword type="function" name="tp_svc_channel_type_text_acknowledge_pending_messages_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-acknowledge-pending-messages-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_text_implement_acknowledge_pending_messages ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-implement-acknowledge-pending-messages"/>
+    <keyword type="function" name="tp_svc_channel_type_text_return_from_acknowledge_pending_messages ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-return-from-acknowledge-pending-messages"/>
+    <keyword type="function" name="tp_svc_channel_type_text_get_message_types_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-get-message-types-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_text_implement_get_message_types ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-implement-get-message-types"/>
+    <keyword type="function" name="tp_svc_channel_type_text_return_from_get_message_types ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-return-from-get-message-types"/>
+    <keyword type="function" name="tp_svc_channel_type_text_list_pending_messages_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-list-pending-messages-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_text_implement_list_pending_messages ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-implement-list-pending-messages"/>
+    <keyword type="function" name="tp_svc_channel_type_text_return_from_list_pending_messages ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-return-from-list-pending-messages"/>
+    <keyword type="function" name="tp_svc_channel_type_text_send_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-send-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_text_implement_send ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-implement-send"/>
+    <keyword type="function" name="tp_svc_channel_type_text_return_from_send ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-return-from-send"/>
+    <keyword type="function" name="tp_svc_channel_type_text_emit_lost_message ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-emit-lost-message"/>
+    <keyword type="function" name="tp_svc_channel_type_text_emit_received ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-emit-received"/>
+    <keyword type="function" name="tp_svc_channel_type_text_emit_send_error ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-emit-send-error"/>
+    <keyword type="function" name="tp_svc_channel_type_text_emit_sent ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-type-text-emit-sent"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceChatState" link="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfaceChatState"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceChatStateClass" link="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfaceChatStateClass"/>
+    <keyword type="function" name="tp_svc_channel_interface_chat_state_set_chat_state_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-chat-state-set-chat-state-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_chat_state_implement_set_chat_state ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-chat-state-implement-set-chat-state"/>
+    <keyword type="function" name="tp_svc_channel_interface_chat_state_return_from_set_chat_state ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-chat-state-return-from-set-chat-state"/>
+    <keyword type="function" name="tp_svc_channel_interface_chat_state_emit_chat_state_changed ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-chat-state-emit-chat-state-changed"/>
+    <keyword type="struct" name="TpSvcChannelInterfacePassword" link="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfacePassword"/>
+    <keyword type="struct" name="TpSvcChannelInterfacePasswordClass" link="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfacePasswordClass"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_get_password_flags_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-get-password-flags-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_implement_get_password_flags ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-implement-get-password-flags"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_return_from_get_password_flags ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-return-from-get-password-flags"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_provide_password_impl ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-provide-password-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_implement_provide_password ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-implement-provide-password"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_return_from_provide_password ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-return-from-provide-password"/>
+    <keyword type="function" name="tp_svc_channel_interface_password_emit_password_flags_changed ()" link="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-password-emit-password-flags-changed"/>
+    <keyword type="struct" name="TpSvcChannelTypeStreamedMedia" link="telepathy-glib-svc-channel-media.html#TpSvcChannelTypeStreamedMedia"/>
+    <keyword type="struct" name="TpSvcChannelTypeStreamedMediaClass" link="telepathy-glib-svc-channel-media.html#TpSvcChannelTypeStreamedMediaClass"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_list_streams_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-list-streams-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_list_streams ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-implement-list-streams"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_list_streams ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-return-from-list-streams"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_remove_streams_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-remove-streams-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_remove_streams ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-implement-remove-streams"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_remove_streams ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-return-from-remove-streams"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_request_stream_direction_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-request-stream-direction-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_request_stream_direction ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-implement-request-stream-direction"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_request_stream_direction ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-return-from-request-stream-direction"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_request_streams_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-request-streams-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_implement_request_streams ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-implement-request-streams"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_return_from_request_streams ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-return-from-request-streams"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_added ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-emit-stream-added"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_direction_changed ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-emit-stream-direction-changed"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_error ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-emit-stream-error"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_removed ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-emit-stream-removed"/>
+    <keyword type="function" name="tp_svc_channel_type_streamed_media_emit_stream_state_changed ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-type-streamed-media-emit-stream-state-changed"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceCallState" link="telepathy-glib-svc-channel-media.html#TpSvcChannelInterfaceCallState"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceCallStateClass" link="telepathy-glib-svc-channel-media.html#TpSvcChannelInterfaceCallStateClass"/>
+    <keyword type="function" name="tp_svc_channel_interface_call_state_emit_call_state_changed ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-call-state-emit-call-state-changed"/>
+    <keyword type="function" name="tp_svc_channel_interface_call_state_get_call_states_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-call-state-get-call-states-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_call_state_implement_get_call_states ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-call-state-implement-get-call-states"/>
+    <keyword type="function" name="tp_svc_channel_interface_call_state_return_from_get_call_states ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-call-state-return-from-get-call-states"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceDTMF" link="telepathy-glib-svc-channel-media.html#TpSvcChannelInterfaceDTMF"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceDTMFClass" link="telepathy-glib-svc-channel-media.html#TpSvcChannelInterfaceDTMFClass"/>
+    <keyword type="function" name="tp_svc_channel_interface_dtmf_implement_start_tone ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-dtmf-implement-start-tone"/>
+    <keyword type="function" name="tp_svc_channel_interface_dtmf_implement_stop_tone ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-dtmf-implement-stop-tone"/>
+    <keyword type="function" name="tp_svc_channel_interface_dtmf_return_from_start_tone ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-dtmf-return-from-start-tone"/>
+    <keyword type="function" name="tp_svc_channel_interface_dtmf_return_from_stop_tone ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-dtmf-return-from-stop-tone"/>
+    <keyword type="function" name="tp_svc_channel_interface_dtmf_start_tone_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-dtmf-start-tone-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_dtmf_stop_tone_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-dtmf-stop-tone-impl"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceMediaSignalling" link="telepathy-glib-svc-channel-media.html#TpSvcChannelInterfaceMediaSignalling"/>
+    <keyword type="struct" name="TpSvcChannelInterfaceMediaSignallingClass" link="telepathy-glib-svc-channel-media.html#TpSvcChannelInterfaceMediaSignallingClass"/>
+    <keyword type="function" name="tp_svc_channel_interface_media_signalling_get_session_handlers_impl ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-media-signalling-get-session-handlers-impl"/>
+    <keyword type="function" name="tp_svc_channel_interface_media_signalling_implement_get_session_handlers ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-media-signalling-implement-get-session-handlers"/>
+    <keyword type="function" name="tp_svc_channel_interface_media_signalling_return_from_get_session_handlers ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-media-signalling-return-from-get-session-handlers"/>
+    <keyword type="function" name="tp_svc_channel_interface_media_signalling_emit_new_session_handler ()" link="telepathy-glib-svc-channel-media.html#tp-svc-channel-interface-media-signalling-emit-new-session-handler"/>
+    <keyword type="struct" name="TpSvcChannelTypeTubes" link="telepathy-glib-svc-channel-tubes.html#TpSvcChannelTypeTubes"/>
+    <keyword type="struct" name="TpSvcChannelTypeTubesClass" link="telepathy-glib-svc-channel-tubes.html#TpSvcChannelTypeTubesClass"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_accept_d_bus_tube_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-accept-d-bus-tube-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_accept_d_bus_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-accept-d-bus-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_accept_d_bus_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-accept-d-bus-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_accept_stream_tube_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-accept-stream-tube-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_accept_stream_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-accept-stream-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_accept_stream_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-accept-stream-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_close_tube_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-close-tube-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_close_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-close-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_close_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-close-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_get_available_stream_tube_types_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-get-available-stream-tube-types-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_available_stream_tube_types ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-get-available-stream-tube-types"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_available_stream_tube_types ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-get-available-stream-tube-types"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_get_available_tube_types_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-get-available-tube-types-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_available_tube_types ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-get-available-tube-types"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_available_tube_types ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-get-available-tube-types"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_get_d_bus_names_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-get-d-bus-names-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_d_bus_names ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-get-d-bus-names"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_d_bus_names ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-get-d-bus-names"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_get_d_bus_tube_address_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-get-d-bus-tube-address-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_d_bus_tube_address ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-get-d-bus-tube-address"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_d_bus_tube_address ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-get-d-bus-tube-address"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_get_stream_tube_socket_address_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-get-stream-tube-socket-address-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_get_stream_tube_socket_address ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-get-stream-tube-socket-address"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_get_stream_tube_socket_address ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-get-stream-tube-socket-address"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_list_tubes_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-list-tubes-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_list_tubes ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-list-tubes"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_list_tubes ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-list-tubes"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_offer_d_bus_tube_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-offer-d-bus-tube-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_offer_d_bus_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-offer-d-bus-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_offer_d_bus_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-offer-d-bus-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_offer_stream_tube_impl ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-offer-stream-tube-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_implement_offer_stream_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-implement-offer-stream-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_return_from_offer_stream_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-return-from-offer-stream-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_emit_d_bus_names_changed ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-emit-d-bus-names-changed"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_emit_new_tube ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-emit-new-tube"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_emit_stream_tube_new_connection ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-emit-stream-tube-new-connection"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_emit_tube_closed ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-emit-tube-closed"/>
+    <keyword type="function" name="tp_svc_channel_type_tubes_emit_tube_state_changed ()" link="telepathy-glib-svc-channel-tubes.html#tp-svc-channel-type-tubes-emit-tube-state-changed"/>
+    <keyword type="struct" name="TpSvcChannelTypeRoomList" link="telepathy-glib-svc-channel-roomlist.html#TpSvcChannelTypeRoomList"/>
+    <keyword type="struct" name="TpSvcChannelTypeRoomListClass" link="telepathy-glib-svc-channel-roomlist.html#TpSvcChannelTypeRoomListClass"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_get_listing_rooms_impl ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-get-listing-rooms-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_implement_get_listing_rooms ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-implement-get-listing-rooms"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_return_from_get_listing_rooms ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-return-from-get-listing-rooms"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_list_rooms_impl ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-list-rooms-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_implement_list_rooms ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-implement-list-rooms"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_return_from_list_rooms ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-return-from-list-rooms"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_stop_listing_impl ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-stop-listing-impl"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_implement_stop_listing ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-implement-stop-listing"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_return_from_stop_listing ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-return-from-stop-listing"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_emit_got_rooms ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-emit-got-rooms"/>
+    <keyword type="function" name="tp_svc_channel_type_room_list_emit_listing_rooms ()" link="telepathy-glib-svc-channel-roomlist.html#tp-svc-channel-type-room-list-emit-listing-rooms"/>
     <keyword type="struct" name="TpSvcConnection" link="telepathy-glib-svc-connection.html#TpSvcConnection-struct"/>
     <keyword type="struct" name="TpSvcConnectionClass" link="telepathy-glib-svc-connection.html#TpSvcConnectionClass"/>
     <keyword type="function" name="tp_svc_connection_connect_impl ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-connect-impl"/>
@@ -1073,6 +1080,9 @@
     <keyword type="function" name="tp_svc_connection_interface_avatars_implement_request_avatars ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-request-avatars"/>
     <keyword type="function" name="tp_svc_connection_interface_avatars_request_avatars_impl ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatars-impl"/>
     <keyword type="function" name="tp_svc_connection_interface_avatars_return_from_request_avatars ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-request-avatars"/>
+    <keyword type="function" name="tp_svc_connection_interface_avatars_get_known_avatar_tokens_impl ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-known-avatar-tokens-impl"/>
+    <keyword type="function" name="tp_svc_connection_interface_avatars_implement_get_known_avatar_tokens ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-get-known-avatar-tokens"/>
+    <keyword type="function" name="tp_svc_connection_interface_avatars_return_from_get_known_avatar_tokens ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-get-known-avatar-tokens"/>
     <keyword type="struct" name="TpSvcConnectionInterfaceAliasing" link="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing"/>
     <keyword type="struct" name="TpSvcConnectionInterfaceAliasingClass" link="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass"/>
     <keyword type="function" name="tp_svc_connection_interface_aliasing_get_alias_flags_impl ()" link="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-get-alias-flags-impl"/>

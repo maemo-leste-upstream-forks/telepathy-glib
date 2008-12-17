@@ -41,6 +41,12 @@
                                                          <link linkend="gboolean">gboolean</link> connect,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="void">void</link>                (<link linkend="TpConnectionWhenReadyCb">*TpConnectionWhenReadyCb</link>)          (<link linkend="TpConnection">TpConnection</link> *connection,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="void">void</link>                <link linkend="tp-connection-call-when-ready">tp_connection_call_when_ready</link>       (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="TpConnectionWhenReadyCb">TpConnectionWhenReadyCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
 <link linkend="void">void</link>                <link linkend="tp-connection-init-known-interfaces">tp_connection_init_known_interfaces</link> (void);
                     <link linkend="TpConnection-struct">TpConnection</link>;
                     <link linkend="TpConnectionClass">TpConnectionClass</link>;
@@ -504,6 +510,63 @@ and is introspected, or the main loop stored via <parameter>loop</parameter> is 
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.1
 </para></refsect2>
+<refsect2 id="TpConnectionWhenReadyCb" role="function">
+<title>TpConnectionWhenReadyCb ()</title>
+<indexterm zone="TpConnectionWhenReadyCb"><primary>TpConnectionWhenReadyCb</primary></indexterm><programlisting><link linkend="void">void</link>                (*TpConnectionWhenReadyCb)          (<link linkend="TpConnection">TpConnection</link> *connection,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Signature of a callback passed to <link linkend="tp-connection-call-when-ready"><function>tp_connection_call_when_ready()</function></link>, which
+will be called exactly once, when the connection becomes ready or
+invalid (whichever happens first)</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>connection</parameter>&nbsp;:</term>
+<listitem><simpara> the connection (which may be in the middle of being disposed,
+ if error is non-<link linkend="NULL:CAPS"><literal>NULL</literal></link>, error->domain is TP_DBUS_ERRORS and error->code is
+ TP_DBUS_ERROR_PROXY_UNREFERENCED)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> if the connection is ready for use, or the error with which
+ it was invalidated if it is now invalid
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> whatever was passed to <link linkend="tp-connection-call-when-ready"><function>tp_connection_call_when_ready()</function></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-connection-call-when-ready" role="function" condition="since:0.7.7">
+<title>tp_connection_call_when_ready ()</title>
+<indexterm zone="tp-connection-call-when-ready" role="0.7.7"><primary>tp_connection_call_when_ready</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_call_when_ready       (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="TpConnectionWhenReadyCb">TpConnectionWhenReadyCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+If <parameter>self</parameter> is ready for use or has been invalidated, call <parameter>callback</parameter>
+immediately, then return. Otherwise, arrange
+for <parameter>callback</parameter> to be called when <parameter>self</parameter> either becomes ready for use
+or becomes invalid.
+</para>
+<para>
+Note that if the connection is not in state CONNECTED, the callback will
+not be called until the connection either goes to state CONNECTED
+or is invalidated (e.g. by going to state DISCONNECTED or by becoming
+unreferenced). In particular, this method does not call <link linkend="Connect"><function>Connect()</function></link>.
+Call <link linkend="tp-cli-connection-call-connect"><function>tp_cli_connection_call_connect()</function></link> too, if you want to do that.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the connection becomes ready or invalidated,
+ whichever happens first
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> arbitrary user-supplied data passed to the callback
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.7
+</para></refsect2>
 <refsect2 id="tp-connection-init-known-interfaces" role="function" condition="since:0.7.6">
 <title>tp_connection_init_known_interfaces ()</title>
 <indexterm zone="tp-connection-init-known-interfaces" role="0.7.6"><primary>tp_connection_init_known_interfaces</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_init_known_interfaces (void);</programlisting>
@@ -614,19 +677,24 @@ Request that the connection be established. This will be done         asynchrono
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -722,19 +790,24 @@ Request that the connection be closed. This closes the connection if         it&
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -835,19 +908,24 @@ Get the optional interfaces supported by this connection.</para>
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -952,19 +1030,24 @@ Get the protocol this connection is using.</para>
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1069,19 +1152,24 @@ Get the handle which represents the user on this connection, which will         
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1186,19 +1274,24 @@ Get the current status as defined in the StatusChanged signal.</para>
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1306,19 +1399,24 @@ Start a HoldHandles method call.
 <listitem><simpara> Used to pass an 'in' argument: A array of integer handles to hold
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1435,19 +1533,24 @@ Return a string representation for a number of handles of a given         type.<
 <listitem><simpara> Used to pass an 'in' argument: An array of integer handles of this type
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1561,19 +1664,24 @@ List all the channels which currently exist on this connection.</para>
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1682,19 +1790,24 @@ Explicitly notify the connection manager that your client is no         longer h
 <listitem><simpara> Used to pass an 'in' argument: An array of integer handles being held by the client
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1820,19 +1933,24 @@ Start a RequestChannel method call.
 <listitem><simpara> Used to pass an 'in' argument: If true, the requesting client intends to take responsibility for           displaying the channel to the user, so no other handler needs to           be launched
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become
@@ -1962,19 +2080,24 @@ Request several handles from the connection manager which represent a         nu
 <listitem><simpara> Used to pass an 'in' argument: An array of names of entities to request handles for
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
-<listitem><simpara> called when the method call succeeds or fails
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
-<listitem><simpara> user-supplied data passed to the callback
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
 <listitem><simpara> called with the user_data as argument, after the
-  call has succeeded, failed or been cancelled
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
-<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
-  if it is destroyed, this callback will automatically be
-  disconnected
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
  progress. It is borrowed from the object, and will become

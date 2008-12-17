@@ -58,74 +58,18 @@
 
 #include "debug-internal.h"
 
-/* allocator */
-
-typedef struct
-{
-  gulong size;
-  guint limit;
-  guint count;
-} _Allocator;
-
-#define _new0(alloc, type) \
-    ((type *) _allocator_alloc0 (alloc))
-
-static void
-_allocator_init (_Allocator *alloc, gulong size, guint limit)
-{
-  g_assert (alloc != NULL);
-  g_assert (size > 0);
-  g_assert (limit > 0);
-
-  alloc->size = size;
-  alloc->limit = limit;
-}
-
-static gpointer _allocator_alloc0 (_Allocator *alloc)
-{
-  gpointer ret;
-
-  g_assert (alloc != NULL);
-  g_assert (alloc->count <= alloc->limit);
-
-  if (alloc->count == alloc->limit)
-    {
-      ret = NULL;
-    }
-  else
-    {
-      ret = g_malloc0 (alloc->size);
-      alloc->count++;
-    }
-
-  return ret;
-}
-
-static void _allocator_free (_Allocator *alloc, gpointer thing)
-{
-  g_assert (alloc != NULL);
-  g_assert (thing != NULL);
-
-  g_free (thing);
-  alloc->count--;
-}
-
 struct _TpTextMixinPrivate
 {
-  TpHandleRepoIface *contacts_repo;
-  guint recv_id;
-  gboolean message_lost;
+    TpHandleRepoIface *contacts_repo;
+    guint recv_id;
+    gboolean message_lost;
 
-  GQueue *pending;
+    GQueue *pending;
 
-  GArray *msg_types;
+    GArray *msg_types;
 };
 
 /* pending message */
-
-/* some fairly arbitrary resource limits */
-#define MAX_PENDING_MESSAGES 256
-#define MAX_MESSAGE_SIZE 8191
 
 /*
  * _PendingMessage:
@@ -140,12 +84,12 @@ struct _TpTextMixinPrivate
  */
 typedef struct
 {
-  guint id;
-  time_t timestamp;
-  TpHandle sender;
-  TpChannelTextMessageType type;
-  char *text;
-  guint flags;
+    guint id;
+    time_t timestamp;
+    TpHandle sender;
+    TpChannelTextMessageType type;
+    char *text;
+    guint flags;
 } _PendingMessage;
 
 /**
@@ -159,8 +103,10 @@ GQuark
 tp_text_mixin_class_get_offset_quark ()
 {
   static GQuark offset_quark = 0;
-  if (!offset_quark)
+
+  if (G_UNLIKELY (offset_quark == 0))
     offset_quark = g_quark_from_static_string ("TpTextMixinClassOffsetQuark");
+
   return offset_quark;
 }
 
@@ -175,8 +121,10 @@ GQuark
 tp_text_mixin_get_offset_quark ()
 {
   static GQuark offset_quark = 0;
-  if (!offset_quark)
+
+  if (G_UNLIKELY (offset_quark == 0))
     offset_quark = g_quark_from_static_string ("TpTextMixinOffsetQuark");
+
   return offset_quark;
 }
 
@@ -274,9 +222,25 @@ tp_text_mixin_set_message_types (GObject *obj,
   va_end (args);
 }
 
-static void _pending_free (_PendingMessage *msg,
-    TpHandleRepoIface *contacts_repo);
-static _Allocator * _pending_get_alloc (void);
+static inline _PendingMessage *
+_pending_new0 (void)
+{
+  return g_slice_new0 (_PendingMessage);
+}
+
+/**
+ * _pending_free
+ *
+ * Free up a _PendingMessage struct.
+ */
+static void
+_pending_free (_PendingMessage *msg,
+               TpHandleRepoIface *contacts_repo)
+{
+  g_free (msg->text);
+  tp_handle_unref (contacts_repo, msg->sender);
+  g_slice_free (_PendingMessage, msg);
+}
 
 /**
  * tp_text_mixin_finalize:
@@ -303,39 +267,6 @@ tp_text_mixin_finalize (GObject *obj)
 }
 
 /**
- * _pending_get_alloc:
- *
- * Returns: an Allocator for creating up to 256 pending messages, but no
- * more.
- */
-static _Allocator *
-_pending_get_alloc ()
-{
-  static _Allocator alloc = { 0, };
-
-  if (0 == alloc.size)
-    _allocator_init (&alloc, sizeof (_PendingMessage), MAX_PENDING_MESSAGES);
-
-  return &alloc;
-}
-
-#define _pending_new0() \
-  (_new0 (_pending_get_alloc (), _PendingMessage))
-
-/**
- * _pending_free
- *
- * Free up a _PendingMessage struct.
- */
-static void _pending_free (_PendingMessage *msg,
-                           TpHandleRepoIface *contacts_repo)
-{
-  g_free (msg->text);
-  tp_handle_unref (contacts_repo, msg->sender);
-  _allocator_free (_pending_get_alloc (), msg);
-}
-
-/**
  * tp_text_mixin_receive:
  * @obj: An object with the text mixin
  * @type: The type of message received from the underlying protocol
@@ -356,52 +287,24 @@ tp_text_mixin_receive (GObject *obj,
                        const char *text)
 {
   TpTextMixin *mixin = TP_TEXT_MIXIN (obj);
-
-  gchar *end;
   _PendingMessage *msg;
   size_t len;
 
   msg = _pending_new0 ();
-
-  if (msg == NULL)
-    {
-      DEBUG ("no more pending messages available, giving up");
-
-      if (!mixin->priv->message_lost)
-        {
-          tp_svc_channel_type_text_emit_lost_message (obj);
-          mixin->priv->message_lost = TRUE;
-        }
-
-      return FALSE;
-    }
-
   tp_handle_ref (mixin->priv->contacts_repo, sender);
   msg->sender = sender;
+  /* FIXME: we don't check for overflow, so in highly pathological cases we
+   * might end up with multiple messages with the same ID */
   msg->id = mixin->priv->recv_id++;
   msg->timestamp = timestamp;
   msg->type = type;
 
   len = strlen (text);
-
-  if (len > MAX_MESSAGE_SIZE)
-    {
-      DEBUG ("message exceeds maximum size, truncating");
-
-      msg->flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED;
-
-      end = g_utf8_find_prev_char (text, text+MAX_MESSAGE_SIZE);
-      if (end)
-        len = end-text;
-      else
-        len = 0;
-    }
-
   msg->text = g_try_malloc (len + 1);
 
   if (msg->text == NULL)
     {
-      DEBUG ("unable to allocate message, giving up");
+      DEBUG ("unable to copy message, giving up");
 
       if (!mixin->priv->message_lost)
         {
@@ -540,7 +443,7 @@ tp_text_mixin_acknowledge_pending_messages_async (TpSvcChannelTypeText *iface,
 gboolean
 tp_text_mixin_list_pending_messages (GObject *obj,
                                      gboolean clear,
-                                     GPtrArray ** ret,
+                                     GPtrArray **ret,
                                      GError **error)
 {
   TpTextMixin *mixin = TP_TEXT_MIXIN (obj);
@@ -556,7 +459,7 @@ tp_text_mixin_list_pending_messages (GObject *obj,
        cur != NULL;
        cur = cur->next)
     {
-      _PendingMessage *msg = (_PendingMessage *) cur->data;
+      _PendingMessage *msg = cur->data;
       GValue val = { 0, };
 
       g_value_init (&val, pending_type);
@@ -575,7 +478,10 @@ tp_text_mixin_list_pending_messages (GObject *obj,
     }
 
   if (clear)
-    tp_text_mixin_clear (obj);
+    {
+      DEBUG ("WARNING: ListPendingMessages(clear=TRUE) is deprecated");
+      tp_text_mixin_clear (obj);
+    }
 
   *ret = messages;
 
@@ -593,8 +499,14 @@ tp_text_mixin_list_pending_messages_async (TpSvcChannelTypeText *iface,
   if (tp_text_mixin_list_pending_messages (G_OBJECT (iface), clear, &ret,
       &error))
     {
+      guint i;
+
       tp_svc_channel_type_text_return_from_list_pending_messages (
           context, ret);
+
+      for (i = 0; i < ret->len; i++)
+        g_value_array_free (g_ptr_array_index (ret, i));
+
       g_ptr_array_free (ret, TRUE);
     }
   else
@@ -640,19 +552,10 @@ static void
 tp_text_mixin_get_message_types_async (TpSvcChannelTypeText *iface,
                                        DBusGMethodInvocation *context)
 {
-  GArray *ret;
-  GError *error = NULL;
+  TpTextMixin *mixin = TP_TEXT_MIXIN (iface);
 
-  if (tp_text_mixin_get_message_types (G_OBJECT (iface), &ret, &error))
-    {
-      tp_svc_channel_type_text_return_from_get_message_types (context, ret);
-      g_array_free (ret, TRUE);
-    }
-  else
-    {
-      dbus_g_method_return_error (context, error);
-      g_error_free (error);
-    }
+  tp_svc_channel_type_text_return_from_get_message_types (context,
+      mixin->priv->msg_types);
 }
 
 /**
@@ -667,7 +570,7 @@ tp_text_mixin_clear (GObject *obj)
   TpTextMixin *mixin = TP_TEXT_MIXIN (obj);
   _PendingMessage *msg;
 
-  while ((msg = g_queue_pop_head (mixin->priv->pending)))
+  while ((msg = g_queue_pop_head (mixin->priv->pending)) != NULL)
     {
       _pending_free (msg, mixin->priv->contacts_repo);
     }
@@ -685,9 +588,10 @@ tp_text_mixin_clear (GObject *obj)
  * providing a Send implementation.
  */
 void
-tp_text_mixin_iface_init (gpointer g_iface, gpointer iface_data)
+tp_text_mixin_iface_init (gpointer g_iface,
+                          gpointer iface_data)
 {
-  TpSvcChannelTypeTextClass *klass = (TpSvcChannelTypeTextClass *)g_iface;
+  TpSvcChannelTypeTextClass *klass = g_iface;
 
 #define IMPLEMENT(x) tp_svc_channel_type_text_implement_##x (klass,\
     tp_text_mixin_##x##_async)
