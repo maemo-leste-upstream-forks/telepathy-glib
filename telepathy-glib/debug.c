@@ -73,6 +73,8 @@
 
 static TpDebugFlags flags = 0;
 
+static gboolean tp_debug_persistent = FALSE;
+
 /**
  * tp_debug_set_all_flags:
  *
@@ -130,6 +132,21 @@ tp_debug_set_flags_from_env (const gchar *var)
   tp_debug_set_flags_from_string (g_getenv (var));
 }
 
+/**
+ * tp_debug_set_persistent:
+ * @persistent: TRUE prevents the connection manager mainloop from exiting,
+ *              FALSE enables exiting if there are no connections
+ *              (the default behavior).
+ *
+ * Used to enable persistent operation of the connection manager process for
+ * debugging purposes.
+ */
+void
+tp_debug_set_persistent (gboolean persistent)
+{
+  tp_debug_persistent = persistent;
+}
+
 /*
  * _tp_debug_set_flags:
  * @new_flags More flags to set
@@ -175,6 +192,18 @@ void _tp_debug (TpDebugFlags flag,
     }
 }
 
+/*
+ * _tp_debug_is_persistent:
+ *
+ * Returns: %TRUE if persistent mainloop behavior has been enabled with
+ * tp_debug_set_persistent().
+ */
+gboolean
+_tp_debug_is_persistent (void)
+{
+  return tp_debug_persistent;
+}
+
 #else /* !ENABLE_DEBUG */
 
 void
@@ -189,6 +218,11 @@ tp_debug_set_flags_from_string (const gchar *flags_string)
 
 void
 tp_debug_set_flags_from_env (const gchar *var)
+{
+}
+
+void
+tp_debug_set_persistent (gboolean persistent)
 {
 }
 

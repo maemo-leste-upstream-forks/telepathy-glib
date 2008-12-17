@@ -41,8 +41,8 @@
  * tp_group_mixin_iface_init)</literal> in the fourth argument to
  * <literal>G_DEFINE_TYPE_WITH_CODE</literal>.
  *
- * You can also implement the group interface by forwarding all group
- * operations to the group mixin of an associated object (mainly useful
+ * Since 0.5.13 you can also implement the group interface by forwarding all
+ * group operations to the group mixin of an associated object (mainly useful
  * for Tubes channels). To do this, call tp_external_group_mixin_init()
  * in the constructor after the associated object has been set,
  * tp_external_group_mixin_finalize() in the dispose or finalize function, and
@@ -181,6 +181,8 @@ tp_group_mixin_get_offset_quark ()
  * initialization, the given callback will be used instead of the remove
  * callback passed to tp_group_mixin_class_init() (which must be %NULL
  * in this case).
+ *
+ * Since: 0.5.13
  */
 void
 tp_group_mixin_class_set_remove_with_reason_func (GObjectClass *cls,
@@ -689,7 +691,7 @@ tp_group_mixin_remove_members_async (TpSvcChannelInterfaceGroup *obj,
 /**
  * tp_group_mixin_get_members:
  * @obj: An object implementing the group interface using this mixin
- * @ret: Used to return a GArray of guint contact handles
+ * @ret: Used to return a newly-allocated GArray of guint contact handles
  * @error: Unused
  *
  * Get the group's current members
@@ -731,7 +733,7 @@ tp_group_mixin_get_members_async (TpSvcChannelInterfaceGroup *obj,
 /**
  * tp_group_mixin_get_local_pending_members:
  * @obj: An object implementing the group interface using this mixin
- * @ret: Used to return a GArray of guint contact handles
+ * @ret: Used to return a newly-allocated GArray of guint contact handles
  * @error: Unused
  *
  * Get the group's local-pending members.
@@ -805,8 +807,8 @@ local_pending_members_with_info_foreach (TpHandleSet *set,
 /**
  * tp_group_mixin_get_local_pending_members_with_info:
  * @obj: An object implementing the group interface using this mixin
- * @ret: Used to return a GPtrArray of D-Bus structures each containing
- *  the handle of a local-pending contact, the handle of a contact
+ * @ret: Used to return a newly-allocated GPtrArray of D-Bus structures each
+ * containing the handle of a local-pending contact, the handle of a contact
  *  responsible for adding them to the group (or 0), the reason code
  *  and a related message (e.g. their request to join the group)
  * @error: Unused
@@ -863,8 +865,8 @@ tp_group_mixin_get_local_pending_members_with_info_async (
 /**
  * tp_group_mixin_get_remote_pending_members:
  * @obj: An object implementing the group interface using this mixin
- * @ret: Used to return a GArray of guint representing the handles
- *  of the group's remote pending members
+ * @ret: Used to return a newly-allocated GArray of guint representing the
+ * handles of the group's remote pending members
  * @error: Unused
  *
  * Get the group's remote-pending members.
@@ -906,12 +908,12 @@ tp_group_mixin_get_remote_pending_members_async (TpSvcChannelInterfaceGroup *obj
 /**
  * tp_group_mixin_get_all_members:
  * @obj: An object implementing the group interface using this mixin
- * @members: Used to return a GArray of guint representing the handles
- *  of the group's members
- * @local_pending: Used to return a GArray of guint representing the handles
- *  of the group's local pending members
- * @remote_pending: Used to return a GArray of guint representing the handles
- *  of the group's remote pending members
+ * @members: Used to return a newly-allocated GArray of guint representing
+ * the handles of the group's members
+ * @local_pending: Used to return a newly-allocated GArray of guint
+ * representing the handles of the group's local pending members
+ * @remote_pending: Used to return a newly-allocated GArray of guint
+ * representing the handles of the group's remote pending members
  * @error: Unused
  *
  * Get the group's current and pending members.
@@ -1546,6 +1548,8 @@ _external_group_mixin_get_obj_quark (void)
  * Fill in the qdata needed to implement the group interface using
  * the group mixin of another object. This function should usually be called
  * in the instance constructor.
+ *
+ * Since: 0.5.13
  */
 void
 tp_external_group_mixin_init (GObject *obj, GObject *obj_with_mixin)
@@ -1563,6 +1567,8 @@ tp_external_group_mixin_init (GObject *obj, GObject *obj_with_mixin)
  *
  * Remove the external group mixin. This function should usually be called
  * in the dispose or finalize function.
+ *
+ * Since: 0.5.13
  */
 void
 tp_external_group_mixin_finalize (GObject *obj)
@@ -1705,6 +1711,8 @@ tp_external_group_mixin_remove_members_with_reason_async
  * Fill in the vtable entries needed to implement the group interface using
  * the group mixin of another object. This function should usually be called
  * via G_IMPLEMENT_INTERFACE.
+ *
+ * Since: 0.5.13
  */
 void
 tp_external_group_mixin_iface_init (gpointer g_iface,

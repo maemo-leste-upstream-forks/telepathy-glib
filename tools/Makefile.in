@@ -120,7 +120,6 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PYTHON = @PYTHON@
 RANLIB = @RANLIB@
-SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -175,16 +174,17 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 EXTRA_DIST = \
     c-constants-generator.xsl \
-    glib-errors-enum-body.xsl \
-    glib-errors-enum-header.xsl \
     c-interfaces-generator.xsl \
     genginterface.py \
+    glib-errors-enum-body.xsl \
+    glib-errors-enum-header.xsl \
     identity.xsl \
     ls-interfaces.xsl \
     make-all-async.xsl \
     spec-to-introspect.xsl \
     update-spec-gen-am.sh
 
+CLEANFILES = genginterface.pyc genginterface.pyo
 all: all-am
 
 .SUFFIXES:
@@ -282,6 +282,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

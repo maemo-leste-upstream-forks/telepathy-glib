@@ -92,29 +92,9 @@ typedef struct _TpCMParamSpec TpCMParamSpec;
 typedef gboolean (*TpCMParamFilter) (const TpCMParamSpec *paramspec,
     GValue *value, GError **error);
 
-/**
- * tp_cm_param_filter_string_nonempty:
- * @paramspec: The parameter specification for a string parameter
- * @value: A GValue containing a string, which will not be altered
- * @error: Used to return an error if the string is empty
- *
- * A #TpCMParamFilter which rejects empty strings.
- *
- * Returns: %TRUE to accept, %FALSE (with @error set) to reject
- */
 gboolean tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
     GValue *value, GError **error);
 
-/**
- * tp_cm_param_filter_uint_nonzero:
- * @paramspec: The parameter specification for a guint parameter
- * @value: A GValue containing a guint, which will not be altered
- * @error: Used to return an error if the guint is 0
- *
- * A #TpCMParamFilter which rejects zero, useful for server port numbers.
- *
- * Returns: %TRUE to accept, %FALSE (with @error set) to reject
- */
 gboolean tp_cm_param_filter_uint_nonzero (const TpCMParamSpec *paramspec,
     GValue *value, GError **error);
 
@@ -131,13 +111,13 @@ gboolean tp_cm_param_filter_uint_nonzero (const TpCMParamSpec *paramspec,
 struct _TpCMParamSpec {
     const gchar *name;
     const gchar *dtype;
-    const GType gtype;
+    GType gtype;
     guint flags;
-    const gpointer def;
-    const gsize offset;
+    gconstpointer def;
+    gsize offset;
 
     TpCMParamFilter filter;
-    const gpointer filter_data;
+    gconstpointer filter_data;
 
     /*<private>*/
     gpointer _future1;

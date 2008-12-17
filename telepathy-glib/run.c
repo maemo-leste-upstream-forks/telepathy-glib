@@ -63,7 +63,9 @@ static gboolean
 kill_connection_manager (gpointer data)
 {
 #ifdef ENABLE_DEBUG
-  if (!_tp_debug_flag_is_set (TP_DEBUG_PERSIST) && !connections_exist)
+  if (!_tp_debug_is_persistent ()
+      && !_tp_debug_flag_is_set (TP_DEBUG_PERSIST)
+      && !connections_exist)
 #else
   if (!connections_exist)
 #endif
@@ -237,6 +239,7 @@ tp_run_connection_manager (const char *prog_name,
   timeout_id = g_timeout_add (DIE_TIME, kill_connection_manager, NULL);
 
   g_main_loop_run (mainloop);
+  g_main_loop_unref (mainloop);
 
   return 0;
 }

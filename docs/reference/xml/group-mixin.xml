@@ -149,8 +149,8 @@ tp_group_mixin_iface_init)</literal> in the fourth argument to
 <literal>G_DEFINE_TYPE_WITH_CODE</literal>.
 </para>
 <para>
-You can also implement the group interface by forwarding all group
-operations to the group mixin of an associated object (mainly useful
+Since 0.5.13 you can also implement the group interface by forwarding all
+group operations to the group mixin of an associated object (mainly useful
 for Tubes channels). To do this, call <link linkend="tp-external-group-mixin-init"><function>tp_external_group_mixin_init()</function></link>
 in the constructor after the associated object has been set,
 <link linkend="tp-external-group-mixin-finalize"><function>tp_external_group_mixin_finalize()</function></link> in the dispose or finalize function, and
@@ -387,8 +387,8 @@ Configure the mixin for use with the given class.</para>
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2>
-<title><anchor id="tp-group-mixin-class-set-remove-with-reason-func" role="function"/>tp_group_mixin_class_set_remove_with_reason_func ()</title>
-<indexterm><primary>tp_group_mixin_class_set_remove_with_reason_func</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_class_set_remove_with_reason_func
+<title><anchor id="tp-group-mixin-class-set-remove-with-reason-func" role="function" condition="since:0.5.13"/>tp_group_mixin_class_set_remove_with_reason_func ()</title>
+<indexterm role="0.5.13"><primary>tp_group_mixin_class_set_remove_with_reason_func</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_class_set_remove_with_reason_func
                                                         (<link linkend="GObjectClass">GObjectClass</link> *cls,
                                                          <link linkend="TpGroupMixinRemMemberWithReasonFunc">TpGroupMixinRemMemberWithReasonFunc</link> func);</programlisting>
 <para>
@@ -408,7 +408,8 @@ in this case).</para>
 <listitem><simpara> A callback to be used to remove contacts from this group with a
  specified reason.
 </simpara></listitem></varlistentry>
-</variablelist></refsect2>
+</variablelist><para role="since">Since  0.5.13
+</para></refsect2>
 <refsect2>
 <title><anchor id="tp-group-mixin-init" role="function"/>tp_group_mixin_init ()</title>
 <indexterm><primary>tp_group_mixin_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_init                 (<link linkend="GObject">GObject</link> *obj,
@@ -603,7 +604,7 @@ Get the group's current members</para>
 <listitem><simpara> An object implementing the group interface using this mixin
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GArray of guint contact handles
+<listitem><simpara> Used to return a newly-allocated GArray of guint contact handles
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> Unused
@@ -626,7 +627,7 @@ Get the group's local-pending members.</para>
 <listitem><simpara> An object implementing the group interface using this mixin
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GArray of guint contact handles
+<listitem><simpara> Used to return a newly-allocated GArray of guint contact handles
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> Unused
@@ -650,8 +651,8 @@ requests to join the channel.</para>
 <listitem><simpara> An object implementing the group interface using this mixin
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GPtrArray of D-Bus structures each containing
- the handle of a local-pending contact, the handle of a contact
+<listitem><simpara> Used to return a newly-allocated GPtrArray of D-Bus structures each
+containing the handle of a local-pending contact, the handle of a contact
  responsible for adding them to the group (or 0), the reason code
  and a related message (e.g. their request to join the group)
 </simpara></listitem></varlistentry>
@@ -676,8 +677,8 @@ Get the group's remote-pending members.</para>
 <listitem><simpara> An object implementing the group interface using this mixin
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GArray of guint representing the handles
- of the group's remote pending members
+<listitem><simpara> Used to return a newly-allocated GArray of guint representing the
+handles of the group's remote pending members
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> Unused
@@ -701,16 +702,16 @@ Get the group's current and pending members.</para>
 <listitem><simpara> An object implementing the group interface using this mixin
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>members</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GArray of guint representing the handles
- of the group's members
+<listitem><simpara> Used to return a newly-allocated GArray of guint representing
+the handles of the group's members
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>local_pending</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GArray of guint representing the handles
- of the group's local pending members
+<listitem><simpara> Used to return a newly-allocated GArray of guint
+representing the handles of the group's local pending members
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>remote_pending</parameter>&nbsp;:</term>
-<listitem><simpara> Used to return a GArray of guint representing the handles
- of the group's remote pending members
+<listitem><simpara> Used to return a newly-allocated GArray of guint
+representing the handles of the group's remote pending members
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> Unused
@@ -872,8 +873,8 @@ G_IMPLEMENT_INTERFACE.</para>
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2>
-<title><anchor id="tp-external-group-mixin-iface-init" role="function"/>tp_external_group_mixin_iface_init ()</title>
-<indexterm><primary>tp_external_group_mixin_iface_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_iface_init  (<link linkend="gpointer">gpointer</link> g_iface,
+<title><anchor id="tp-external-group-mixin-iface-init" role="function" condition="since:0.5.13"/>tp_external_group_mixin_iface_init ()</title>
+<indexterm role="0.5.13"><primary>tp_external_group_mixin_iface_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_iface_init  (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);</programlisting>
 <para>
 Fill in the vtable entries needed to implement the group interface using
@@ -888,10 +889,11 @@ via G_IMPLEMENT_INTERFACE.</para>
 <varlistentry><term><parameter>iface_data</parameter>&nbsp;:</term>
 <listitem><simpara> Unused
 </simpara></listitem></varlistentry>
-</variablelist></refsect2>
+</variablelist><para role="since">Since  0.5.13
+</para></refsect2>
 <refsect2>
-<title><anchor id="tp-external-group-mixin-init" role="function"/>tp_external_group_mixin_init ()</title>
-<indexterm><primary>tp_external_group_mixin_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_init        (<link linkend="GObject">GObject</link> *obj,
+<title><anchor id="tp-external-group-mixin-init" role="function" condition="since:0.5.13"/>tp_external_group_mixin_init ()</title>
+<indexterm role="0.5.13"><primary>tp_external_group_mixin_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_init        (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="GObject">GObject</link> *obj_with_mixin);</programlisting>
 <para>
 Fill in the qdata needed to implement the group interface using
@@ -907,10 +909,11 @@ in the instance constructor.</para>
 <varlistentry><term><parameter>obj_with_mixin</parameter>&nbsp;:</term>
 <listitem><simpara> A GObject with the group mixin
 </simpara></listitem></varlistentry>
-</variablelist></refsect2>
+</variablelist><para role="since">Since  0.5.13
+</para></refsect2>
 <refsect2>
-<title><anchor id="tp-external-group-mixin-finalize" role="function"/>tp_external_group_mixin_finalize ()</title>
-<indexterm><primary>tp_external_group_mixin_finalize</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_finalize    (<link linkend="GObject">GObject</link> *obj);</programlisting>
+<title><anchor id="tp-external-group-mixin-finalize" role="function" condition="since:0.5.13"/>tp_external_group_mixin_finalize ()</title>
+<indexterm role="0.5.13"><primary>tp_external_group_mixin_finalize</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_finalize    (<link linkend="GObject">GObject</link> *obj);</programlisting>
 <para>
 Remove the external group mixin. This function should usually be called
 in the dispose or finalize function.</para>
@@ -921,7 +924,8 @@ in the dispose or finalize function.</para>
 <listitem><simpara> An object implementing the groups interface using an external group
    mixin
 </simpara></listitem></varlistentry>
-</variablelist></refsect2>
+</variablelist><para role="since">Since  0.5.13
+</para></refsect2>
 
 </refsect1>
 
