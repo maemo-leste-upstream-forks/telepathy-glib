@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-<refentry id="telepathy-glib-TpChannelFactoryIface">
+<refentry id="TpChannelFactoryIface">
 <refmeta>
-<refentrytitle role="top_of_page" id="telepathy-glib-TpChannelFactoryIface.top_of_page">TpChannelFactoryIface</refentrytitle>
+<refentrytitle role="top_of_page" id="TpChannelFactoryIface.top_of_page">TpChannelFactoryIface</refentrytitle>
 <manvolnum>3</manvolnum>
 <refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
 </refmeta>
@@ -14,7 +14,7 @@
 <!--[<xref linkend="desc" endterm="desc.title"/>]-->
 </refnamediv>
 
-<refsynopsisdiv id="telepathy-glib-TpChannelFactoryIface.synopsis" role="synopsis">
+<refsynopsisdiv id="TpChannelFactoryIface.synopsis" role="synopsis">
 <title role="synopsis.title">Synopsis</title>
 
 <synopsis>
@@ -34,7 +34,7 @@
                                                          <link linkend="TpChannelIface">TpChannelIface</link> **ret,
                                                          <link linkend="GError">GError</link> **error);
 enum                <link linkend="TpChannelFactoryRequestStatus">TpChannelFactoryRequestStatus</link>;
-                    <link linkend="TpChannelFactoryIface">TpChannelFactoryIface</link>;
+                    <link linkend="TpChannelFactoryIface-struct">TpChannelFactoryIface</link>;
                     <link linkend="TpChannelFactoryIfaceClass">TpChannelFactoryIfaceClass</link>;
 <link linkend="void">void</link>                <link linkend="tp-channel-factory-iface-close-all">tp_channel_factory_iface_close_all</link>  (<link linkend="TpChannelFactoryIface">TpChannelFactoryIface</link> *self);
 <link linkend="void">void</link>                <link linkend="tp-channel-factory-iface-connecting">tp_channel_factory_iface_connecting</link> (<link linkend="TpChannelFactoryIface">TpChannelFactoryIface</link> *self);
@@ -64,15 +64,30 @@ enum                <link linkend="TpChannelFactoryRequestStatus">TpChannelFacto
 </synopsis>
 </refsynopsisdiv>
 
+<refsect1 id="TpChannelFactoryIface.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GInterface">GInterface</link>
+   +----TpChannelFactoryIface
+</synopsis>
+
+</refsect1>
 
 
 
 
 
 
+<refsect1 id="TpChannelFactoryIface.signals" role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+  &quot;<link linkend="TpChannelFactoryIface-channel-error">channel-error</link>&quot;                                  : Run Last / Has Details
+  &quot;<link linkend="TpChannelFactoryIface-new-channel">new-channel</link>&quot;                                    : Run Last / Has Details
+</synopsis>
+</refsect1>
 
 
-<refsect1 id="telepathy-glib-TpChannelFactoryIface.description" role="desc">
+<refsect1 id="TpChannelFactoryIface.description" role="desc">
 <title role="desc.title">Description</title>
 <para>
 A channel factory is attached to a connection. It carries out channel
@@ -96,7 +111,7 @@ instead, and existing connection managers should migrate to it.</para>
 </para>
 </refsect1>
 
-<refsect1 id="telepathy-glib-TpChannelFactoryIface.details" role="details">
+<refsect1 id="TpChannelFactoryIface.details" role="details">
 <title role="details.title">Details</title>
 <refsect2 id="TpChannelFactoryIfaceForeachImpl" role="function">
 <title>TpChannelFactoryIfaceForeachImpl ()</title>
@@ -246,9 +261,9 @@ Indicates the result of a channel request.</para>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
-<refsect2 id="TpChannelFactoryIface" role="struct">
+<refsect2 id="TpChannelFactoryIface-struct" role="struct">
 <title>TpChannelFactoryIface</title>
-<indexterm zone="TpChannelFactoryIface"><primary>TpChannelFactoryIface</primary></indexterm><programlisting>typedef struct _TpChannelFactoryIface TpChannelFactoryIface;</programlisting>
+<indexterm zone="TpChannelFactoryIface-struct"><primary>TpChannelFactoryIface</primary></indexterm><programlisting>typedef struct _TpChannelFactoryIface TpChannelFactoryIface;</programlisting>
 <para>
 Opaque typedef representing any channel factory implementation.</para>
 <para>
@@ -447,11 +462,16 @@ Request a channel.</para>
                                                          <link linkend="gpointer">gpointer</link> request);</programlisting>
 <para>
 Signal that a new channel has been created (new-channel signal).
+</para>
+<para>
 If the channel was created in response to a channel request, the request
 was for a nonzero handle type, and the channel has zero handle type,
 request will be the request context passed to
-<link linkend="tp-channel-factory-iface-request"><function>tp_channel_factory_iface_request()</function></link>. Otherwise, request may either be
-NULL or a request that led to the channel's creation; callers are expected
+<link linkend="tp-channel-factory-iface-request"><function>tp_channel_factory_iface_request()</function></link>.
+</para>
+<para>
+Otherwise, request may either be
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> or a request that led to the channel's creation; callers are expected
 to determine which channels satisfy which requests based on the handle
 and handle-type.</para>
 <para>
@@ -480,7 +500,7 @@ Signal that a new channel was created, but an error occurred before it
 could become useful.
 </para>
 <para>
-request is as for <link linkend="tp-channel-factory-iface-emit-new-channel"><type>tp_channel_factory_iface_emit_new_channel</type></link>.</para>
+request is as for <link linkend="tp-channel-factory-iface-emit-new-channel"><function>tp_channel_factory_iface_emit_new_channel()</function></link>.</para>
 <para>
 
 </para><variablelist role="params">
@@ -494,16 +514,83 @@ request is as for <link linkend="tp-channel-factory-iface-emit-new-channel"><typ
 <listitem><simpara> The error that made the channel request fail
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>request</parameter>&nbsp;:</term>
-<listitem><simpara> A request context as passed to <link linkend="tp-channel-factory-iface-request"><type>tp_channel_factory_iface_request</type></link>,
+<listitem><simpara> A request context as passed to <link linkend="tp-channel-factory-iface-request"><function>tp_channel_factory_iface_request()</function></link>,
           or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 
 </refsect1>
 
+<refsect1 id="TpChannelFactoryIface.signal-details" role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2 id="TpChannelFactoryIface-channel-error"><title>The <literal>&quot;channel-error&quot;</literal> signal</title>
+<indexterm zone="TpChannelFactoryIface-channel-error"><primary>TpChannelFactoryIface::channel-error</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpChannelFactoryIface">TpChannelFactoryIface</link> *self,
+                                                        <link linkend="GObject">GObject</link>               *channel,
+                                                        <link linkend="gpointer">gpointer</link>               error,
+                                                        <link linkend="gpointer">gpointer</link>               request_context,
+                                                        <link linkend="gpointer">gpointer</link>               user_data)            : Run Last / Has Details</programlisting>
+<para>
+Emitted when a new channel has been created, but an error occurred
+before it could become useful.
+</para>
+<para>
+<parameter>request</parameter> is the same as for <link linkend="TpChannelFactoryIface-new-channel"><type>"new-channel"</type></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> an object implementing <link linkend="TpChannelFactoryIface"><type>TpChannelFactoryIface</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>channel</parameter>&nbsp;:</term>
+<listitem><simpara> an object implementing <link linkend="TpChannelIface"><type>TpChannelIface</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="GError"><type>GError</type></link> that made the channel request fail
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>request_context</parameter>&nbsp;:</term>
+<listitem><simpara> a request context as passed to
+ <link linkend="tp-channel-factory-iface-request"><function>tp_channel_factory_iface_request()</function></link>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="TpChannelFactoryIface-new-channel"><title>The <literal>&quot;new-channel&quot;</literal> signal</title>
+<indexterm zone="TpChannelFactoryIface-new-channel"><primary>TpChannelFactoryIface::new-channel</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpChannelFactoryIface">TpChannelFactoryIface</link> *self,
+                                                        <link linkend="GObject">GObject</link>               *channel,
+                                                        <link linkend="gpointer">gpointer</link>               request_context,
+                                                        <link linkend="gpointer">gpointer</link>               user_data)            : Run Last / Has Details</programlisting>
+<para>
+Emitted when a new channel has been created.
+</para>
+<para>
+If the <parameter>channel</parameter> was created in response to a channel request, the
+request was for a nonzero handle type, and the channel has zero handle
+type, <parameter>request_context</parameter> will be the request context passed to
+<link linkend="tp-channel-factory-iface-request"><function>tp_channel_factory_iface_request()</function></link>.
+</para>
+<para>
+Otherwise, request may either be <link linkend="NULL:CAPS"><literal>NULL</literal></link> or a request that led to
+<parameter>channel</parameter>'s creation; callers are expected to determine which channels
+satisfy which requests based on the handle and handle-type.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> an object implementing <link linkend="TpChannelFactoryIface"><type>TpChannelFactoryIface</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>channel</parameter>&nbsp;:</term>
+<listitem><simpara> a new channel (an object implementing <link linkend="TpChannelIface"><type>TpChannelIface</type></link>)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>request_context</parameter>&nbsp;:</term>
+<listitem><simpara> a request context as passed to
+ <link linkend="tp-channel-factory-iface-request"><function>tp_channel_factory_iface_request()</function></link>, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
 
 
-<refsect1 id="telepathy-glib-TpChannelFactoryIface.see-also">
+<refsect1 id="TpChannelFactoryIface.see-also">
 <title>See Also</title>
 <link linkend="TpSvcConnection"><type>TpSvcConnection</type></link>
 </refsect1>

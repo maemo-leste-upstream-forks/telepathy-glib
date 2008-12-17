@@ -671,9 +671,13 @@ dist-hook:
 		git log > ${distdir}/ChangeLog; \
 	fi
 
-maintainer-upload-docs:
-	rsync -rtvzPp --chmod=Dg+s,ug+rwX,o=rX docs/reference/html/ \
-		telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib
+@OFFICIAL_RELEASE_TRUE@maintainer-upload-release:
+@OFFICIAL_RELEASE_TRUE@	test -f telepathy-glib-@VERSION@.tar.gz
+@OFFICIAL_RELEASE_TRUE@	test -f telepathy-glib-@VERSION@.tar.gz.asc
+@OFFICIAL_RELEASE_TRUE@	gpg --verify telepathy-glib-@VERSION@.tar.gz.asc
+@OFFICIAL_RELEASE_TRUE@	rsync -rtvzPp --chmod=Dg+s,ug+rwX,o=rX docs/reference/html/ \
+@OFFICIAL_RELEASE_TRUE@		telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib
+@OFFICIAL_RELEASE_TRUE@	rsync -vzP telepathy-glib-@VERSION@.tar.gz telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/releases/telepathy-glib/
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

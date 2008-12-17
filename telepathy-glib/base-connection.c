@@ -290,9 +290,7 @@ typedef struct _ChannelRequest ChannelRequest;
 typedef enum {
     METHOD_REQUEST_CHANNEL,
     METHOD_CREATE_CHANNEL,
-#if 0
     METHOD_ENSURE_CHANNEL,
-#endif
     NUM_METHODS
 } ChannelRequestMethod;
 
@@ -304,8 +302,14 @@ struct _ChannelRequest
   gchar *channel_type;
   guint handle_type;
   guint handle;
-  /* always TRUE for CREATE */
-  gboolean suppress_handler;
+  /* always TRUE for CREATE; always FALSE for ENSURE */
+  gboolean suppress_handler : 1;
+
+  /* only meaningful for METHOD_ENSURE_CHANNEL; only true if this is the first
+   * request to be satisfied with a particular channel, and no other request
+   * satisfied by that channel has a different method.
+   */
+  gboolean yours : 1;
 };
 
 static ChannelRequest *
@@ -329,6 +333,7 @@ channel_request_new (DBusGMethodInvocation *context,
   ret->handle_type = handle_type;
   ret->handle = handle;
   ret->suppress_handler = suppress_handler;
+  ret->yours = FALSE;
 
   DEBUG("New channel request at %p: ctype=%s htype=%d handle=%d suppress=%d",
         ret, channel_type, handle_type, handle, suppress_handler);
@@ -775,6 +780,20 @@ satisfy_request (TpBaseConnection *conn,
         }
         break;
 
+    case METHOD_ENSURE_CHANNEL:
+        {
+          GHashTable *properties;
+
+          g_assert (TP_IS_EXPORTABLE_CHANNEL (channel));
+          g_object_get (channel,
+              "channel-properties", &properties,
+              NULL);
+          tp_svc_connection_interface_requests_return_from_ensure_channel (
+              request->context, request->yours, object_path, properties);
+          g_hash_table_destroy (properties);
+        }
+        break;
+
     default:
       g_assert_not_reached ();
     }
@@ -936,23 +955,76 @@ manager_new_channel (gpointer key,
   guint handle_type, handle;
   GSList *iter;
   gboolean suppress_handler = FALSE;
+  gboolean satisfies_create_channel = FALSE;
+  gboolean satisfies_request_channel = FALSE;
+  ChannelRequest *first_ensure = NULL;
 
   exportable_channel_get_old_info (channel, &object_path, &channel_type,
       &handle_type, &handle);
 
+  /* suppress_handler on Connection.NewChannel should be TRUE if:
+   *   - any satisfied requests were calls to CreateChannel; or
+   *   - at least one satisfied RequestChannel call had suppress_handler=TRUE;
+   *     or
+   *   - any EnsureChannel call will receive Yours=TRUE (that is, if the
+   *     channel satisfies no CreateChannel or RequestChannel calls).
+   *
+   * So, it should be FALSE if:
+   *   - all the requests were RequestChannel(..., suppress_handler=FALSE) or
+   *     EnsureChannel and there was at least one RequestChannel; or
+   *   - no requests were satisfied by the channel.
+   */
   for (iter = request_tokens; iter != NULL; iter = iter->next)
     {
       ChannelRequest *request = iter->data;
 
-      if (request->suppress_handler)
+      switch (request->method)
         {
-          suppress_handler = TRUE;
-          break;
+          case METHOD_REQUEST_CHANNEL:
+            satisfies_request_channel = TRUE;
+            if (request->suppress_handler)
+              {
+                suppress_handler = TRUE;
+                goto break_loop_early;
+              }
+            break;
+
+          case METHOD_CREATE_CHANNEL:
+            satisfies_create_channel = TRUE;
+            goto break_loop_early;
+            break;
+
+          case METHOD_ENSURE_CHANNEL:
+            if (first_ensure == NULL)
+              first_ensure = request;
+            break;
+
+          case NUM_METHODS:
+            g_assert_not_reached ();
         }
+
     }
+break_loop_early:
+
+  if (request_tokens != NULL &&
+      (satisfies_create_channel || !satisfies_request_channel))
+    suppress_handler = TRUE;
 
   tp_svc_connection_emit_new_channel (self, object_path, channel_type,
       handle_type, handle, suppress_handler);
+
+
+  /* If the only type of request satisfied by this new channel is
+   * EnsureChannel, give exactly one request Yours=True.
+   * If other kinds of requests are involved, don't give anyone Yours=True.
+   */
+  if (!satisfies_request_channel
+      && !satisfies_create_channel
+      && first_ensure != NULL)
+    {
+      first_ensure->yours = TRUE;
+    }
+
 
   for (iter = request_tokens; iter != NULL; iter = iter->next)
     {
@@ -1495,15 +1567,6 @@ tp_base_connection_close_all_channels (TpBaseConnection *self)
   /* trigger close_all on all channel factories */
   g_ptr_array_foreach (priv->channel_factories, (GFunc)
       tp_channel_factory_iface_close_all, NULL);
-
-  /* cancel all queued channel requests */
-  if (priv->channel_requests->len > 0)
-    {
-      g_ptr_array_foreach (priv->channel_requests, (GFunc)
-        channel_request_cancel, NULL);
-      g_ptr_array_remove_range (priv->channel_requests, 0,
-        priv->channel_requests->len);
-    }
 }
 
 /* D-Bus methods on Connection interface ----------------------------*/
@@ -2010,6 +2073,39 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
 
   TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (self, context);
 
+  if (handle_type == TP_HANDLE_TYPE_NONE)
+    {
+      if (handle != 0)
+        {
+          GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              "When handle type is NONE, handle must be 0" };
+
+          dbus_g_method_return_error (context, &e);
+          return;
+        }
+    }
+  else
+    {
+      TpHandleRepoIface *handle_repo = tp_base_connection_get_handles (self,
+          handle_type);
+
+      if (handle_repo == NULL)
+        {
+          GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+              "Handle type not supported by this connection manager" };
+
+          dbus_g_method_return_error (context, &e);
+          return;
+        }
+
+      if (!tp_handle_is_valid (handle_repo, handle, &error))
+        {
+          dbus_g_method_return_error (context, error);
+          g_error_free (error);
+          return;
+        }
+    }
+
   request = channel_request_new (context, METHOD_REQUEST_CHANNEL,
       type, handle_type, handle, suppress_handler);
   g_ptr_array_add (priv->channel_requests, request);
@@ -2498,13 +2594,6 @@ tp_base_connection_change_status (TpBaseConnection *self,
        * after we've started disconnecting
        */
       tp_base_connection_close_all_channels (self);
-
-      if (self->self_handle)
-        {
-          tp_handle_unref (priv->handles[TP_HANDLE_TYPE_CONTACT],
-              self->self_handle);
-          self->self_handle = 0;
-        }
     }
 
   DEBUG("emitting status-changed to %u, for reason %u", status, reason);
@@ -2535,6 +2624,24 @@ tp_base_connection_change_status (TpBaseConnection *self,
       break;
 
     case TP_CONNECTION_STATUS_DISCONNECTED:
+      if (self->self_handle != 0)
+        {
+          tp_handle_unref (self->priv->handles[TP_HANDLE_TYPE_CONTACT],
+              self->self_handle);
+          self->self_handle = 0;
+        }
+
+      /* cancel all queued channel requests that weren't already cancelled by
+       * the channel managers.
+       */
+      if (priv->channel_requests->len > 0)
+        {
+          g_ptr_array_foreach (priv->channel_requests, (GFunc)
+            channel_request_cancel, NULL);
+          g_ptr_array_remove_range (priv->channel_requests, 0,
+            priv->channel_requests->len);
+        }
+
       if (prev_status != TP_INTERNAL_CONNECTION_STATUS_NEW)
         {
           if (klass->disconnected)
@@ -2795,6 +2902,15 @@ conn_requests_requestotron_validate_handle (TpBaseConnection *self,
 
       handles = tp_base_connection_get_handles (self, target_handle_type);
 
+      if (handles == NULL)
+        {
+          GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+              "Handle type not supported by this connection manager" };
+
+          dbus_g_method_return_error (context, &e);
+          return;
+        }
+
       if (target_handle == 0)
         {
           /* Turn TargetID into TargetHandle */
@@ -2890,12 +3006,10 @@ conn_requests_offer_request (TpBaseConnection *self,
       suppress_handler = TRUE;
       break;
 
-#if 0
     case METHOD_ENSURE_CHANNEL:
       func = tp_channel_manager_ensure_channel;
       suppress_handler = FALSE;
       break;
-#endif
 
     default:
       g_assert_not_reached ();
@@ -2935,7 +3049,6 @@ conn_requests_create_channel (TpSvcConnectionInterfaceRequests *svc,
 }
 
 
-#if 0
 static void
 conn_requests_ensure_channel (TpSvcConnectionInterfaceRequests *svc,
                               GHashTable *requested_properties,
@@ -2946,7 +3059,6 @@ conn_requests_ensure_channel (TpSvcConnectionInterfaceRequests *svc,
   return conn_requests_requestotron (self, requested_properties,
       METHOD_ENSURE_CHANNEL, context);
 }
-#endif
 
 
 static void
@@ -2959,9 +3071,7 @@ requests_iface_init (gpointer g_iface,
     tp_svc_connection_interface_requests_implement_##x (\
         iface, conn_requests_##x)
   IMPLEMENT (create_channel);
-#if 0
   IMPLEMENT (ensure_channel);
-#endif
 #undef IMPLEMENT
 }
 
@@ -2978,8 +3088,8 @@ requests_iface_init (gpointer g_iface,
  * TpChannelManagerIter iter;
  * TpChannelManager *manager;
  *
- * tp_base_connection_channel_manager_iter_init (&iter, base_conn);
- * while (tp_base_connection_channel_manager_iter_next (&iter, &manager))
+ * tp_base_connection_channel_manager_iter_init (&amp;iter, base_conn);
+ * while (tp_base_connection_channel_manager_iter_next (&amp;iter, &amp;manager))
  *   {
  *     ...do something with manager...
  *   }

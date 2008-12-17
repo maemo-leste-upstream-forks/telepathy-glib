@@ -49,13 +49,17 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-am__EXEEXT_1 = test-asv$(EXEEXT) test-heap$(EXEEXT) \
-	test-intset$(EXEEXT) test-util$(EXEEXT)
+am__EXEEXT_1 = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
+	test-heap$(EXEEXT) test-intset$(EXEEXT) test-util$(EXEEXT)
 am__EXEEXT_2 = test-internal-debug$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_test_asv_OBJECTS = asv.$(OBJEXT)
 test_asv_OBJECTS = $(am_test_asv_OBJECTS)
 test_asv_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
+am_test_availability_cmp_OBJECTS = test-availability-cmp.$(OBJEXT)
+test_availability_cmp_OBJECTS = $(am_test_availability_cmp_OBJECTS)
+test_availability_cmp_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 am_test_heap_OBJECTS = test-heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
@@ -84,12 +88,12 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(test_asv_SOURCES) $(test_heap_SOURCES) \
-	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
-	$(test_util_SOURCES)
-DIST_SOURCES = $(test_asv_SOURCES) $(test_heap_SOURCES) \
-	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
-	$(test_util_SOURCES)
+SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
+	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+	$(test_intset_SOURCES) $(test_util_SOURCES)
+DIST_SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
+	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+	$(test_intset_SOURCES) $(test_util_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -245,6 +249,7 @@ SUBDIRS = \
 
 DYNAMIC_TESTS = \
     test-asv \
+    test-availability-cmp \
     test-heap \
     test-intset \
     test-util
@@ -289,6 +294,12 @@ test_intset_SOURCES = \
     test-intset.c
 
 test_intset_LDADD = \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
+
+test_availability_cmp_SOURCES = \
+    test-availability-cmp.c
+
+test_availability_cmp_LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la
 
 
@@ -350,6 +361,9 @@ clean-noinstPROGRAMS:
 test-asv$(EXEEXT): $(test_asv_OBJECTS) $(test_asv_DEPENDENCIES) 
 	@rm -f test-asv$(EXEEXT)
 	$(LINK) $(test_asv_LDFLAGS) $(test_asv_OBJECTS) $(test_asv_LDADD) $(LIBS)
+test-availability-cmp$(EXEEXT): $(test_availability_cmp_OBJECTS) $(test_availability_cmp_DEPENDENCIES) 
+	@rm -f test-availability-cmp$(EXEEXT)
+	$(LINK) $(test_availability_cmp_LDFLAGS) $(test_availability_cmp_OBJECTS) $(test_availability_cmp_LDADD) $(LIBS)
 test-heap$(EXEEXT): $(test_heap_OBJECTS) $(test_heap_DEPENDENCIES) 
 	@rm -f test-heap$(EXEEXT)
 	$(LINK) $(test_heap_LDFLAGS) $(test_heap_OBJECTS) $(test_heap_LDADD) $(LIBS)
@@ -370,6 +384,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-availability-cmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-internal-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-intset.Po@am__quote@

@@ -29,8 +29,24 @@
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
                                                          <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-interface-requests-call-ensure-channel">tp_cli_connection_interface_requests_call_ensure_channel</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Request,
+                                                         <link linkend="tp-cli-connection-interface-requests-callback-for-ensure-channel">tp_cli_connection_interface_requests_callback_for_ensure_channel</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-requests-callback-for-create-channel">*tp_cli_connection_interface_requests_callback_for_create_channel</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *out_Channel,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Properties,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-requests-callback-for-ensure-channel">*tp_cli_connection_interface_requests_callback_for_ensure_channel</link>)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gboolean">gboolean</link> out_Yours,
                                                          const <link linkend="gchar">gchar</link> *out_Channel,
                                                          <link linkend="GHashTable">GHashTable</link> *out_Properties,
                                                          const <link linkend="GError">GError</link> *error,
@@ -54,6 +70,15 @@
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          <link linkend="GHashTable">GHashTable</link> *in_Request,
+                                                         <link linkend="gchar">gchar</link> **out_Channel,
+                                                         <link linkend="GHashTable">GHashTable</link> **out_Properties,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-requests-run-ensure-channel">tp_cli_connection_interface_requests_run_ensure_channel</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Request,
+                                                         <link linkend="gboolean">gboolean</link> *out_Yours,
                                                          <link linkend="gchar">gchar</link> **out_Channel,
                                                          <link linkend="GHashTable">GHashTable</link> **out_Properties,
                                                          <link linkend="GError">GError</link> **error,
@@ -150,6 +175,60 @@ Start a CreateChannel method call.
  cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="tp-cli-connection-interface-requests-call-ensure-channel" role="function">
+<title>tp_cli_connection_interface_requests_call_ensure_channel ()</title>
+<indexterm zone="tp-cli-connection-interface-requests-call-ensure-channel"><primary>tp_cli_connection_interface_requests_call_ensure_channel</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_connection_interface_requests_call_ensure_channel
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Request,
+                                                         <link linkend="tp-cli-connection-interface-requests-callback-for-ensure-channel">tp_cli_connection_interface_requests_callback_for_ensure_channel</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a EnsureChannel method call.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Request that channels are ensured to exist.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The connection manager is in the best position to determine which             existing channels could satisfy which requests.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Request</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;A dictionary containing desirable properties, with the same             semantics as the corresponding parameter to             &lt;tp:member-ref&gt;CreateChannel&lt;/tp:member-ref&gt;.&lt;/p&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="tp-cli-connection-interface-requests-callback-for-create-channel" role="function">
 <title>tp_cli_connection_interface_requests_callback_for_create_channel ()</title>
 <indexterm zone="tp-cli-connection-interface-requests-callback-for-create-channel"><primary>tp_cli_connection_interface_requests_callback_for_create_channel</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_requests_callback_for_create_channel)
@@ -167,6 +246,44 @@ succeeds or fails.</para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Channel</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Properties</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;Properties of the channel that was produced, equivalent to             the properties in &lt;tp:type&gt;Channel_Details&lt;/tp:type&gt;.             Connection managers MUST NOT include properties here whose             values can change, for the same reasons as in             &lt;tp:type&gt;Channel_Details&lt;/tp:type&gt;.&lt;/p&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-interface-requests-callback-for-ensure-channel" role="function">
+<title>tp_cli_connection_interface_requests_callback_for_ensure_channel ()</title>
+<indexterm zone="tp-cli-connection-interface-requests-callback-for-ensure-channel"><primary>tp_cli_connection_interface_requests_callback_for_ensure_channel</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_requests_callback_for_ensure_channel)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gboolean">gboolean</link> out_Yours,
+                                                         const <link linkend="gchar">gchar</link> *out_Channel,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Properties,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a EnsureChannel method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Yours</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;If false, the caller of EnsureChannel MUST assume that some             other process is handling this channel; if true, the caller of             EnsureChannel SHOULD handle it themselves or delegate it to another             client.&lt;/p&gt;            &lt;p&gt;If the creation of a channel makes several calls to EnsureChannel             (and no other requests) successful, exactly one of those calls MUST             return a true value for this argument.&lt;/p&gt;            &lt;p&gt;If the creation of a channel makes other requests successful,             the value returned for this argument MUST be such that exactly             one of the clients making requests ends up responsible for the             channel. In particular, if CreateChannel returns a channel             &lt;em&gt;C&lt;/em&gt;, any EnsureChannel calls that also return &lt;em&gt;C&lt;/em&gt;             MUST return a false value for this argument.&lt;/p&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out_Channel</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
@@ -308,6 +425,61 @@ state.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Request</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;A dictionary containing desirable properties. Some properties             are defined such that only an exact match makes sense, and             connection managers MUST NOT satisfy a request with a channel             where that property does not match; some properties are defined             such that the connection manager MAY treat the request as merely             a hint, and make a best-effort attempt to satisfy it. This is             documented separately for each property.&lt;/p&gt;            &lt;p&gt;If this dictionary contains a property whose semantics             are not known to the connection manager, this method MUST fail             without side-effects (in particular it must not create a new             channel).&lt;/p&gt;            &lt;tp:rationale&gt;             &lt;p&gt;This is necessary if we want to be able to invent properties               in future that, when used in a request, are hard requirements               rather than just hints. A connection manager that did not know               the semantics of those properties could incorrectly return a               new channel that did not satisfy the requirements.&lt;/p&gt;           &lt;/tp:rationale&gt;            &lt;p&gt;The connection manager MUST NOT respond successfully,             and SHOULD NOT create a new channel or cause any other             side-effects, unless it can create a new channel that satisfies             the client&apos;s requirements.&lt;/p&gt;            &lt;p&gt;Properties that will be set by this argument need not have write             access after the channel has been created - indeed, it is             expected that most will be read-only.&lt;/p&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Channel</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Properties</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;Properties of the channel that was produced, equivalent to             the properties in &lt;tp:type&gt;Channel_Details&lt;/tp:type&gt;.             Connection managers MUST NOT include properties here whose             values can change, for the same reasons as in             &lt;tp:type&gt;Channel_Details&lt;/tp:type&gt;.&lt;/p&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-interface-requests-run-ensure-channel" role="function">
+<title>tp_cli_connection_interface_requests_run_ensure_channel ()</title>
+<indexterm zone="tp-cli-connection-interface-requests-run-ensure-channel"><primary>tp_cli_connection_interface_requests_run_ensure_channel</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_interface_requests_run_ensure_channel
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Request,
+                                                         <link linkend="gboolean">gboolean</link> *out_Yours,
+                                                         <link linkend="gchar">gchar</link> **out_Channel,
+                                                         <link linkend="GHashTable">GHashTable</link> **out_Properties,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method EnsureChannel and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Request that channels are ensured to exist.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The connection manager is in the best position to determine which             existing channels could satisfy which requests.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnection"><type>TpConnection</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Request</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;A dictionary containing desirable properties, with the same             semantics as the corresponding parameter to             &lt;tp:member-ref&gt;CreateChannel&lt;/tp:member-ref&gt;.&lt;/p&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Yours</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;If false, the caller of EnsureChannel MUST assume that some             other process is handling this channel; if true, the caller of             EnsureChannel SHOULD handle it themselves or delegate it to another             client.&lt;/p&gt;            &lt;p&gt;If the creation of a channel makes several calls to EnsureChannel             (and no other requests) successful, exactly one of those calls MUST             return a true value for this argument.&lt;/p&gt;            &lt;p&gt;If the creation of a channel makes other requests successful,             the value returned for this argument MUST be such that exactly             one of the clients making requests ends up responsible for the             channel. In particular, if CreateChannel returns a channel             &lt;em&gt;C&lt;/em&gt;, any EnsureChannel calls that also return &lt;em&gt;C&lt;/em&gt;             MUST return a false value for this argument.&lt;/p&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out_Channel</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The Channel object, which MUST already have been signalled with           &lt;tp:member-ref&gt;NewChannels&lt;/tp:member-ref&gt; by the time this method           returns.

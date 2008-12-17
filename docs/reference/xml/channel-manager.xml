@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-<refentry id="telepathy-glib-TpChannelManager">
+<refentry id="TpChannelManager">
 <refmeta>
-<refentrytitle role="top_of_page" id="telepathy-glib-TpChannelManager.top_of_page">TpChannelManager</refentrytitle>
+<refentrytitle role="top_of_page" id="TpChannelManager.top_of_page">TpChannelManager</refentrytitle>
 <manvolnum>3</manvolnum>
 <refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
 </refmeta>
@@ -14,7 +14,7 @@
 <!--[<xref linkend="desc" endterm="desc.title"/>]-->
 </refnamediv>
 
-<refsynopsisdiv id="telepathy-glib-TpChannelManager.synopsis" role="synopsis">
+<refsynopsisdiv id="TpChannelManager.synopsis" role="synopsis">
 <title role="synopsis.title">Synopsis</title>
 
 <synopsis>
@@ -36,7 +36,7 @@
 <link linkend="gboolean">gboolean</link>            (<link linkend="TpChannelManagerRequestFunc">*TpChannelManagerRequestFunc</link>)      (<link linkend="TpChannelManager">TpChannelManager</link> *manager,
                                                          <link linkend="gpointer">gpointer</link> request_token,
                                                          <link linkend="GHashTable">GHashTable</link> *request_properties);
-                    <link linkend="TpChannelManager">TpChannelManager</link>;
+                    <link linkend="TpChannelManager-struct">TpChannelManager</link>;
                     <link linkend="TpChannelManagerIface">TpChannelManagerIface</link>;
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-channel-manager-asv-has-unknown-properties">tp_channel_manager_asv_has_unknown_properties</link>
                                                         (<link linkend="GHashTable">GHashTable</link> *properties,
@@ -75,6 +75,9 @@
                                                          <link linkend="gint">gint</link> code,
                                                          const <link linkend="gchar">gchar</link> *format,
                                                          ...);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-channel-manager-ensure-channel">tp_channel_manager_ensure_channel</link>   (<link linkend="TpChannelManager">TpChannelManager</link> *manager,
+                                                         <link linkend="gpointer">gpointer</link> request_token,
+                                                         <link linkend="GHashTable">GHashTable</link> *request_properties);
 <link linkend="void">void</link>                <link linkend="tp-channel-manager-foreach-channel">tp_channel_manager_foreach_channel</link>  (<link linkend="TpChannelManager">TpChannelManager</link> *manager,
                                                          <link linkend="TpExportableChannelFunc">TpExportableChannelFunc</link> func,
                                                          <link linkend="gpointer">gpointer</link> user_data);
@@ -88,15 +91,32 @@
 </synopsis>
 </refsynopsisdiv>
 
+<refsect1 id="TpChannelManager.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GInterface">GInterface</link>
+   +----TpChannelManager
+</synopsis>
+
+</refsect1>
 
 
 
 
 
 
+<refsect1 id="TpChannelManager.signals" role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+  &quot;<link linkend="TpChannelManager-channel-closed">channel-closed</link>&quot;                                 : Run Last / Has Details
+  &quot;<link linkend="TpChannelManager-new-channels">new-channels</link>&quot;                                   : Run Last / Has Details
+  &quot;<link linkend="TpChannelManager-request-already-satisfied">request-already-satisfied</link>&quot;                      : Run Last / Has Details
+  &quot;<link linkend="TpChannelManager-request-failed">request-failed</link>&quot;                                 : Run Last / Has Details
+</synopsis>
+</refsect1>
 
 
-<refsect1 id="telepathy-glib-TpChannelManager.description" role="desc">
+<refsect1 id="TpChannelManager.description" role="desc">
 <title role="desc.title">Description</title>
 <para>
 A channel manager is attached to a connection. It carries out channel
@@ -124,7 +144,7 @@ channel manager which handles VoIP calls, and a 1-1 tubes channel manager.</para
 </para>
 </refsect1>
 
-<refsect1 id="telepathy-glib-TpChannelManager.details" role="details">
+<refsect1 id="TpChannelManager.details" role="details">
 <title role="details.title">Details</title>
 <refsect2 id="TpChannelManagerChannelClassFunc" role="function">
 <title>TpChannelManagerChannelClassFunc ()</title>
@@ -261,17 +281,17 @@ Implementations may assume the following of <parameter>request_properties</param
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if <parameter>manager</parameter> will handle this request, else <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
-<refsect2 id="TpChannelManager" role="struct">
+<refsect2 id="TpChannelManager-struct" role="struct">
 <title>TpChannelManager</title>
-<indexterm zone="TpChannelManager"><primary>TpChannelManager</primary></indexterm><programlisting>typedef struct _TpChannelManager TpChannelManager;</programlisting>
+<indexterm zone="TpChannelManager-struct"><primary>TpChannelManager</primary></indexterm><programlisting>typedef struct _TpChannelManager TpChannelManager;</programlisting>
 <para>
 Opaque typedef representing any channel manager implementation.</para>
 <para>
 
 </para></refsect2>
-<refsect2 id="TpChannelManagerIface" role="struct">
+<refsect2 id="TpChannelManagerIface" role="struct" condition="since:0.7.15">
 <title>TpChannelManagerIface</title>
-<indexterm zone="TpChannelManagerIface"><primary>TpChannelManagerIface</primary></indexterm><programlisting>typedef struct {
+<indexterm zone="TpChannelManagerIface" role="0.7.15"><primary>TpChannelManagerIface</primary></indexterm><programlisting>typedef struct {
     GTypeInterface parent;
 
     TpChannelManagerForeachChannelFunc foreach_channel;
@@ -280,7 +300,7 @@ Opaque typedef representing any channel manager implementation.</para>
 
     TpChannelManagerRequestFunc create_channel;
     TpChannelManagerRequestFunc request_channel;
-    /* in principle we could have EnsureChannel here too */
+    TpChannelManagerRequestFunc ensure_channel;
 } TpChannelManagerIface;
 </programlisting>
 <para>
@@ -325,7 +345,16 @@ fields which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal>
  for details.
 </simpara></listitem>
 </varlistentry>
-</variablelist></refsect2>
+<varlistentry>
+<term><link linkend="TpChannelManagerRequestFunc">TpChannelManagerRequestFunc</link>&nbsp;<structfield>ensure_channel</structfield>;</term>
+<listitem><simpara> Respond to a request for a (new or existing) channel made
+ with the Connection.Interface.Requests.EnsureChannel method. See
+ <link linkend="TpChannelManagerRequestFunc"><type>TpChannelManagerRequestFunc</type></link> for details.
+ Since: 0.7.16
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.15
+</para></refsect2>
 <refsect2 id="tp-channel-manager-asv-has-unknown-properties" role="function" condition="since:0.7.15">
 <title>tp_channel_manager_asv_has_unknown_properties ()</title>
 <indexterm zone="tp-channel-manager-asv-has-unknown-properties" role="0.7.15"><primary>tp_channel_manager_asv_has_unknown_properties</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_channel_manager_asv_has_unknown_properties
@@ -569,6 +598,32 @@ the request <parameter>request_token</parameter> failed for the given reason.</p
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.15
 </para></refsect2>
+<refsect2 id="tp-channel-manager-ensure-channel" role="function" condition="since:0.7.16">
+<title>tp_channel_manager_ensure_channel ()</title>
+<indexterm zone="tp-channel-manager-ensure-channel" role="0.7.16"><primary>tp_channel_manager_ensure_channel</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_channel_manager_ensure_channel   (<link linkend="TpChannelManager">TpChannelManager</link> *manager,
+                                                         <link linkend="gpointer">gpointer</link> request_token,
+                                                         <link linkend="GHashTable">GHashTable</link> *request_properties);</programlisting>
+<para>
+Offers an incoming EnsureChannel call to <parameter>manager</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>manager</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing <link linkend="TpChannelManager"><type>TpChannelManager</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>request_token</parameter>&nbsp;:</term>
+<listitem><simpara> An opaque pointer representing this pending request.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>request_properties</parameter>&nbsp;:</term>
+<listitem><simpara> A table mapping (const gchar *) property names to
+ GValue, representing the desired properties of a channel requested by a
+ Telepathy client.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if this request will be handled by <parameter>manager</parameter>; else <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.16
+</para></refsect2>
 <refsect2 id="tp-channel-manager-foreach-channel" role="function" condition="since:0.7.15">
 <title>tp_channel_manager_foreach_channel ()</title>
 <indexterm zone="tp-channel-manager-foreach-channel" role="0.7.15"><primary>tp_channel_manager_foreach_channel</primary></indexterm><programlisting><link linkend="void">void</link>                tp_channel_manager_foreach_channel  (<link linkend="TpChannelManager">TpChannelManager</link> *manager,
@@ -642,9 +697,115 @@ Offers an incoming RequestChannel call to <parameter>manager</parameter>.</para>
 
 </refsect1>
 
+<refsect1 id="TpChannelManager.signal-details" role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2 id="TpChannelManager-channel-closed"><title>The <literal>&quot;channel-closed&quot;</literal> signal</title>
+<indexterm zone="TpChannelManager-channel-closed"><primary>TpChannelManager::channel-closed</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpChannelManager">TpChannelManager</link> *self,
+                                                        <link linkend="gchar">gchar</link>            *path,
+                                                        <link linkend="gpointer">gpointer</link>          user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when a channel has been closed. The Connection should
+generally respond to this signal by emitting ChannelClosed.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the channel manager
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> the channel's object-path
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="TpChannelManager-new-channels"><title>The <literal>&quot;new-channels&quot;</literal> signal</title>
+<indexterm zone="TpChannelManager-new-channels"><primary>TpChannelManager::new-channels</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpChannelManager">TpChannelManager</link> *self,
+                                                        <link linkend="gpointer">gpointer</link>          channels,
+                                                        <link linkend="gpointer">gpointer</link>          user_data)      : Run Last / Has Details</programlisting>
+<para>
+Emitted when new channels have been created. The Connection should
+generally emit NewChannels (and NewChannel) in response to this
+signal, and then return from pending CreateChannel, EnsureChannel
+and/or RequestChannel calls if appropriate.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the channel manager
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>channels</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="GHashTable"><type>GHashTable</type></link> where the keys are
+ <link linkend="TpExportableChannel"><type>TpExportableChannel</type></link> instances (hashed and compared
+ by <link linkend="g-direct-hash"><function>g_direct_hash()</function></link> and <link linkend="g-direct-equal"><function>g_direct_equal()</function></link>) and the values are
+ linked lists (<link linkend="GSList"><type>GSList</type></link>) of request tokens (opaque pointers) satisfied
+ by these channels
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="TpChannelManager-request-already-satisfied"><title>The <literal>&quot;request-already-satisfied&quot;</literal> signal</title>
+<indexterm zone="TpChannelManager-request-already-satisfied"><primary>TpChannelManager::request-already-satisfied</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpChannelManager">TpChannelManager</link> *self,
+                                                        <link linkend="gpointer">gpointer</link>          request_token,
+                                                        <link linkend="GObject">GObject</link>          *channel,
+                                                        <link linkend="gpointer">gpointer</link>          user_data)          : Run Last / Has Details</programlisting>
+<para>
+Emitted when a channel request is satisfied by an existing channel.
+The Connection should generally respond to this signal by returning
+success from EnsureChannel or RequestChannel.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the channel manager
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>request_token</parameter>&nbsp;:</term>
+<listitem><simpara> opaque pointer supplied by the requester,
+ representing a request
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>channel</parameter>&nbsp;:</term>
+<listitem><simpara> the existing <link linkend="TpExportableChannel"><type>TpExportableChannel</type></link> that satisfies the
+ request
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="TpChannelManager-request-failed"><title>The <literal>&quot;request-failed&quot;</literal> signal</title>
+<indexterm zone="TpChannelManager-request-failed"><primary>TpChannelManager::request-failed</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpChannelManager">TpChannelManager</link> *self,
+                                                        <link linkend="gpointer">gpointer</link>          request_token,
+                                                        <link linkend="guint">guint</link>             domain,
+                                                        <link linkend="gint">gint</link>              code,
+                                                        <link linkend="gchar">gchar</link>            *message,
+                                                        <link linkend="gpointer">gpointer</link>          user_data)          : Run Last / Has Details</programlisting>
+<para>
+Emitted when a channel request has failed. The Connection should
+generally respond to this signal by returning failure from
+CreateChannel, EnsureChannel or RequestChannel.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> the channel manager
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>request_token</parameter>&nbsp;:</term>
+<listitem><simpara> opaque pointer supplied by the requester,
+ representing a request
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>domain</parameter>&nbsp;:</term>
+<listitem><simpara> the domain of a <link linkend="GError"><type>GError</type></link> indicating why the request
+ failed
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>code</parameter>&nbsp;:</term>
+<listitem><simpara> the error code of a <link linkend="GError"><type>GError</type></link> indicating why the request
+ failed
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>message</parameter>&nbsp;:</term>
+<listitem><simpara> the string part of a <link linkend="GError"><type>GError</type></link> indicating why the request
+ failed
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
 
 
-<refsect1 id="telepathy-glib-TpChannelManager.see-also">
+<refsect1 id="TpChannelManager.see-also">
 <title>See Also</title>
 <link linkend="TpSvcConnection"><type>TpSvcConnection</type></link>
 </refsect1>

@@ -1,3 +1,416 @@
+commit 224a21a88387343c4c7047ced55614594d105785
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Sep 26 17:43:42 2008 +0100
+
+    Update spec to 0.17.12 (no code changes) and prepare 0.7.16 release
+
+ NEWS                                               |   28 ++-
+ configure.ac                                       |    8 +-
+ spec/Channel_Dispatch_Operation.xml                |  331 ++++++++++++++++++++
+ spec/Channel_Dispatcher.xml                        |  222 +++++++++++++
+ ...Channel_Dispatcher_Interface_Operation_List.xml |  138 ++++++++
+ spec/Channel_Interface_Call_State.xml              |    8 +
+ spec/Channel_Interface_Destroyable.xml             |   79 +++++
+ spec/Channel_Request.xml                           |  178 +++++++++++
+ spec/Client.xml                                    |  123 ++++++++
+ spec/Client_Approver.xml                           |  135 ++++++++
+ spec/Client_Handler.xml                            |  268 ++++++++++++++++
+ spec/Client_Observer.xml                           |  230 ++++++++++++++
+ spec/Makefile.am                                   |    9 +
+ spec/all.xml                                       |   34 ++-
+ spec/errors.xml                                    |   21 ++-
+ spec/generic-types.xml                             |    3 +-
+ telepathy-glib/Makefile.am                         |    3 +-
+ telepathy-glib/channel-manager.c                   |    6 +-
+ telepathy-glib/connection.c                        |    2 +-
+ telepathy-glib/versions/0.7.16.abi                 |    9 +
+ 20 files changed, 1810 insertions(+), 25 deletions(-)
+
+commit 2afdf679d8b6304efacadaab7211a8d2a10fd793
+Merge: de37570... 2bfd427...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Sep 26 16:52:02 2008 +0100
+
+    Merge commit 'wjt/requestotron-ensure' into release
+
+commit de375704f760ad18f84774181d2fd865b8a81510
+Merge: 37c9061... 1825093...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Sep 25 18:31:53 2008 +0100
+
+    Merge branch 'requestotron'
+
+commit 182509350baf455f8708ea404d9ccbe1e598fb27
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Sep 25 18:13:06 2008 +0100
+
+    TpBaseConnection: in CreateChannel, check that handle repo exists before using it
+    
+    This fixes a crash if a channel with an entirely unsupported handle type is
+    requested. The change is actually in utility code, so EnsureChannel will
+    also benefit from this once we implement it.
+
+ telepathy-glib/base-connection.c |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit 21dd997909114243d82d42364a3272f58dd970f4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Sep 25 18:11:10 2008 +0100
+
+    TpBaseConnection: in RequestChannel, ensure that handles are valid
+    
+    In the brave new channel-manager world, channel managers are no longer
+    responsible for this check (although to be honest, channel factories
+    never should have been) so the Connection has to do it.
+
+ telepathy-glib/base-connection.c |   33 +++++++++++++++++++++++++++++++++
+ 1 files changed, 33 insertions(+), 0 deletions(-)
+
+commit 2bfd42724088b0f467c0467687a88c04f196d26a
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 25 11:43:46 2008 +0100
+
+    BaseConnection: suppress_handler=FALSE if the new channel satisfies no requests
+
+ telepathy-glib/base-connection.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 3f3ef4b44146601eb464f02c77d806ffd90e3c5f
+Merge: 615c232... 449a7b0...
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 18:53:04 2008 +0100
+
+    Merge branch 'master' into requestotron-ensure
+
+commit 449a7b0ffd1b39a680be53167124f8ee4432b554
+Merge: 8814086... a9d9579...
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 18:50:51 2008 +0100
+
+    Merge commit 'smcv/docs'
+
+commit 88140869ccb0af63a5a22b1d014490ae10e0b050
+Merge: ed69518... 25cada7...
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 18:39:04 2008 +0100
+
+    Merge branch 'uht-channel-requests'
+
+commit ed69518e79f08f4c15389fdbc657ed0af19dd56e
+Merge: 37c9061... 67abfd8...
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 18:38:40 2008 +0100
+
+    Merge branch 'trivia' of git+ssh://wjt@git.collabora.co.uk/git/user/smcv/telepathy-glib-smcv
+
+commit a9d9579fbb96bba0fd180e2ba6325971226d61d8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Sep 24 17:52:59 2008 +0100
+
+    telepathy-glib.types: produce gtkdoc for GInterfaces
+    
+    Temporarily bump gtkdoc dependency to 1.10 since that's the only version
+    I've tested with. We might need to work around gtkdoc 1.7 later though,
+    because Maemo.
+
+ configure.ac                        |    2 +-
+ docs/reference/telepathy-glib.types |   52 +++++++++++++++++++++++++++++++---
+ 2 files changed, 48 insertions(+), 6 deletions(-)
+
+commit f3b4f2504cbf3eac8a077687aad98b5e023a430a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Sep 24 17:50:00 2008 +0100
+
+    glib-ginterface-gen.py: generate trivial gtkdoc for signals
+
+ tools/glib-ginterface-gen.py |   15 +++++++++++++--
+ 1 files changed, 13 insertions(+), 2 deletions(-)
+
+commit 04a0fbbbdccd853ba6cd46c4aaecd4ab74a9184f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Sep 24 17:49:37 2008 +0100
+
+    TpChannelFactory: actually document the signals
+    
+    I can't believe we never did this...
+
+ telepathy-glib/channel-factory-iface.c |   42 ++++++++++++++++++++++++++++---
+ 1 files changed, 38 insertions(+), 4 deletions(-)
+
+commit e7f5af6a6e9bc9279cc9436c4640b7e146521252
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Sep 24 17:49:08 2008 +0100
+
+    tp_base_connection_channel_manager_iter_init: escape ampersands for XML validity
+
+ telepathy-glib/base-connection.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 25cada7db36601a897cba71497344fbdca84ab42
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 17:41:14 2008 +0100
+
+    Don't cancel channel requests until status-changed(Disconnected) has been emitted
+    
+    This gives ChannelManagers a chance to clean up their pending requests
+    before we do it from under them.
+
+ telepathy-glib/base-connection.c |   20 +++++++++++---------
+ 1 files changed, 11 insertions(+), 9 deletions(-)
+
+commit 67abfd82e0c251321ddea2bd2f6695735b9aa61f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Sep 24 16:44:23 2008 +0100
+
+    dbus.[ch]: rename 'daemon' function parameter to bus_daemon
+    
+    Otherwise, this shadows daemon(3) under glibc with _BSD_SOURCE or
+    _XOPEN_SOURCE (and so presumably, also on real BSD systems), provoking a
+    warning. Thanks, libc.
+
+ telepathy-glib/dbus.c |    2 +-
+ telepathy-glib/dbus.h |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 615c232211ce3ed066c074c3696ce3907272b1f7
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 16:10:38 2008 +0100
+
+    Bitfield-ify gbooleans ChannelRequest::suppress_handler and ::yours
+
+ telepathy-glib/base-connection.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit a67c425cb763a5190ec82ab3448fc8ba00907ca9
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 14:31:03 2008 +0100
+
+    BaseConnection: determine when suppress_handler should be True for ExportableChannels
+
+ telepathy-glib/base-connection.c |   69 ++++++++++++++++++++++++++------------
+ 1 files changed, 47 insertions(+), 22 deletions(-)
+
+commit 42363ec80886ce9f735cd153f171e4a608479cc9
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 11:56:08 2008 +0100
+
+    Update Requests spec plus EnsureChannel to that from a spec branch
+    
+    (rather than using a placeholder spec for EnsureChannel)
+
+ spec/Connection_Interface_Requests.xml |  170 ++++++++++++++++++--------------
+ 1 files changed, 96 insertions(+), 74 deletions(-)
+
+commit 37c906193d2f6174d6c31324f0f024f94d554e6a
+Merge: 7c49169... 90435e3...
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 11:36:19 2008 +0100
+
+    Merge branch 'long-live-the-self-handle'
+
+commit 90435e39f2570e06fbca4200e71ba00aee282543
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 24 11:10:00 2008 +0100
+
+    BaseConnection: set self_handle to 0 just after emitting status-changed(Disconnected)
+    
+    Zeroing it in finish_shutdown() broke connection managers that unreffed
+    the connection before calling that method, as base_connection_dispose
+    asserts that self_handle == 0 (because the handle factories complain if
+    there are outstanding refs when they are destroyed).
+    
+    Zeroing it in base_connection_dispose broke Gabble, because
+    gabble_connection_dispose asserts that the self_handle is already 0.
+    This is fd.o #17751, as dispose is conceptually the right place to drop
+    the ref.
+
+ telepathy-glib/base-connection.c |   14 +++++++-------
+ 1 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 3c8f9a436281ed0929a7d64d6eb9f4a18b51df2f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 18 14:21:57 2008 +0100
+
+    Add EnsureChannel generated functions to gtkdoc sections
+
+ docs/reference/telepathy-glib-sections.txt |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 9216c031b7a85cde9a2283eecd423abcd599b22c
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 18 09:47:05 2008 +0100
+
+    BaseConnection: Return Yours=True to at most one call to EnsureChannel
+
+ telepathy-glib/base-connection.c |   28 +++++++++++++++++++++++-----
+ 1 files changed, 23 insertions(+), 5 deletions(-)
+
+commit 0e510bb9553cc434c54b547b45b3cbf1bf5515eb
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 18 00:47:56 2008 +0100
+
+    BaseConnection: add a yours field to ChannelRequest
+
+ telepathy-glib/base-connection.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit a2adb4c6265135a3f8a41033c64459bec5c2c853
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 18 00:42:38 2008 +0100
+
+    BaseConnection: implement EnsureChannel
+
+ telepathy-glib/base-connection.c |   26 ++++++++++++++++++--------
+ 1 files changed, 18 insertions(+), 8 deletions(-)
+
+commit 7af132d2174379a6a6961a4e439d90c87125e68c
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 17 23:35:13 2008 +0100
+
+    ChannelManager: add ensure_channel method to vtable
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/channel-manager.c           |   36 ++++++++++++++++++++++++++++
+ telepathy-glib/channel-manager.h           |    8 ++++--
+ 3 files changed, 42 insertions(+), 3 deletions(-)
+
+commit 84fe60bfd662be5b484dd3de7f87fdff6ad963f1
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 18 00:26:40 2008 +0100
+
+    EnsureChannel: require Yours to be true at most once, and not if CreateChannel is involved
+
+ spec/Connection_Interface_Requests.xml |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 5534d55589adc36c68f31c38770bb494ffa65809
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Thu Sep 18 00:20:30 2008 +0100
+
+    Add EnsureChannel method to Conn.Iface.Requests
+
+ spec/Connection_Interface_Requests.xml |   70 ++++++++++++++++++++++++++++++++
+ 1 files changed, 70 insertions(+), 0 deletions(-)
+
+commit e4851819b5dd0859012af655d852246a1781f8fd
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Wed Sep 17 17:54:13 2008 +0100
+
+    conn_requests_offer_request: note that suppress_handler=FALSE for Ensure is questionable
+
+ telepathy-glib/base-connection.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 7c491693fd52ecf4fb609b1a94af54dfadc1a3fc
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Tue Sep 23 12:08:43 2008 +0100
+
+    connection_shutdown_finished_cb: correct argument type in gtkdoc
+
+ telepathy-glib/base-connection-manager.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 6f153bca3115ed20542842febdf760b4615007c6
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Tue Sep 23 18:14:37 2008 +0100
+
+    Fix spurious test failures due to moving the zeroing of self_handle.
+    
+    These tests never allowed tp_base_connection_finish_shutdown() to be
+    called, which lead to an assertion failure when the base connection was
+    disposed.
+
+ tests/dbus/connection-getinterfaces-failure.c   |    9 +++++++++
+ tests/dbus/finalized-in-invalidated-handler.c   |   12 ++++++++++--
+ tests/dbus/invalidated-while-invoking-signals.c |   12 ++++++++++--
+ 3 files changed, 29 insertions(+), 4 deletions(-)
+
+commit 66f60db57c140c653e791d79b8ec9a1aa4680f91
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Tue Sep 23 18:10:27 2008 +0100
+
+    BaseConnection: set self_handle to 0 as late as possible when disconnecting
+    
+    Previously, self_handle was set to zero before signalling
+    status-changed.  This meant that channel managers which use the
+    status-changed signal to close all their channels could not use the
+    self_handle field when doing so, unlike channel factories (on which
+    close_all was called before blanking the self-handle).
+
+ telepathy-glib/base-connection.c |   14 +++++++-------
+ 1 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 61f1fd250ddc2d756acfb3c8d0b4170697243342
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   Mon Sep 22 19:20:48 2008 +0200
+
+    Add test-availability-cmp
+
+ .gitignore                    |    1 +
+ tests/Makefile.am             |    6 ++++++
+ tests/test-availability-cmp.c |   16 ++++++++++++++++
+ 3 files changed, 23 insertions(+), 0 deletions(-)
+
+commit 06df374f3db903f821048e3f9e7868d218cdb0a2
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   Mon Sep 22 18:19:03 2008 +0200
+
+    Fix naming of tp_connection_presence_type_cmp so it is clear that it's availability order, and define that order in the doc.
+
+ docs/reference/telepathy-glib-sections.txt |    2 +-
+ telepathy-glib/connection.c                |   30 +++++++++++++++------------
+ telepathy-glib/connection.h                |    2 +-
+ 3 files changed, 19 insertions(+), 15 deletions(-)
+
+commit 4a79aff694edd8f63af8e84e9aa6d5d72011e887
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   Mon Sep 22 14:08:11 2008 +0200
+
+    Add tp_connection_presence_type_cmp() for presenceness compare.
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/connection.c                |   59 ++++++++++++++++++++++++++++
+ telepathy-glib/connection.h                |    3 +
+ 3 files changed, 63 insertions(+), 0 deletions(-)
+
+commit d4fb7328110ad71584cd1d3bec44539ced04ba7b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Sep 19 12:07:10 2008 -0700
+
+    Add a maintainer-upload-release target
+
+ Makefile.am |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit 0b7e2ffa3cdcb3471b93a2176711c559c1801125
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Sep 19 12:08:55 2008 -0700
+
+    Start version 0.7.16 development
+
+ NEWS         |   13 +++++++++++++
+ configure.ac |    2 +-
+ 2 files changed, 14 insertions(+), 1 deletions(-)
+
+commit 7382637f9d129b2eaa8680aac290e00713b64f25
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Thu Sep 18 14:56:09 2008 -0700
+
+    Prepare version 0.7.15
+    
+    Signed-Off-By: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+
+ NEWS                                   |   37 +++++++++++++++++++++++------
+ configure.ac                           |    8 +++---
+ telepathy-glib/Makefile.am             |    3 +-
+ telepathy-glib/base-connection.c       |   16 ++++++------
+ telepathy-glib/channel-factory-iface.c |    2 +-
+ telepathy-glib/channel-manager.c       |   26 ++++++++++----------
+ telepathy-glib/dbus-properties-mixin.c |    2 +-
+ telepathy-glib/util.c                  |    2 +-
+ telepathy-glib/versions/0.7.15.abi     |   39 ++++++++++++++++++++++++++++++++
+ 9 files changed, 98 insertions(+), 37 deletions(-)
+
 commit bdc57dc3efaa6ae05e0e4958666b99e1e1ad1eef
 Author: Will Thompson <will.thompson@collabora.co.uk>
 Date:   Thu Sep 18 12:04:58 2008 +0100

@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [15])
+m4_define([tp_glib_micro_version], [16])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [16])
+m4_define([tp_glib_lt_current], [17])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [16])
+m4_define([tp_glib_lt_age], [17])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -55,7 +55,7 @@ AM_PROG_MKDIR_P
 # pkg-config 0.21 adds CFLAGS from Requires.private, which we need
 PKG_PROG_PKG_CONFIG([0.21])
 
-GTK_DOC_CHECK([1.5])
+GTK_DOC_CHECK([1.10])
 
 LT_CURRENT=tp_glib_lt_current
 LT_REVISION=tp_glib_lt_revision
