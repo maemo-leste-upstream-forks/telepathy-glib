@@ -47,8 +47,45 @@
 <link linkend="void">void</link>                <link linkend="tp-connection-call-when-ready">tp_connection_call_when_ready</link>       (<link linkend="TpConnection">TpConnection</link> *self,
                                                          <link linkend="TpConnectionWhenReadyCb">TpConnectionWhenReadyCb</link> callback,
                                                          <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-connection-is-ready">tp_connection_is_ready</link>              (<link linkend="TpConnection">TpConnection</link> *self);
 <link linkend="TpConnectionStatus">TpConnectionStatus</link>  <link linkend="tp-connection-get-status">tp_connection_get_status</link>            (<link linkend="TpConnection">TpConnection</link> *self,
                                                          <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> *reason);
+<link linkend="void">void</link>                (<link linkend="TpConnectionRequestHandlesCb">*TpConnectionRequestHandlesCb</link>)     (<link linkend="TpConnection">TpConnection</link> *connection,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         const <link linkend="gchar">gchar</link> * const *ids,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                <link linkend="tp-connection-request-handles">tp_connection_request_handles</link>       (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         const <link linkend="gchar">gchar</link> * const *ids,
+                                                         <link linkend="TpConnectionRequestHandlesCb">TpConnectionRequestHandlesCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="TpConnectionHoldHandlesCb">*TpConnectionHoldHandlesCb</link>)        (<link linkend="TpConnection">TpConnection</link> *connection,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                <link linkend="tp-connection-hold-handles">tp_connection_hold_handles</link>          (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         <link linkend="TpConnectionHoldHandlesCb">TpConnectionHoldHandlesCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                <link linkend="tp-connection-unref-handles">tp_connection_unref_handles</link>         (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles);
 <link linkend="void">void</link>                <link linkend="tp-connection-init-known-interfaces">tp_connection_init_known_interfaces</link> (void);
 <link linkend="gint">gint</link>                <link linkend="tp-connection-presence-type-cmp-availability">tp_connection_presence_type_cmp_availability</link>
                                                         (<link linkend="TpConnectionPresenceType">TpConnectionPresenceType</link> p1,
@@ -584,6 +621,21 @@ Call <link linkend="tp-cli-connection-call-connect"><function>tp_cli_connection_
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.7
 </para></refsect2>
+<refsect2 id="tp-connection-is-ready" role="function" condition="since:0.7.17">
+<title>tp_connection_is_ready ()</title>
+<indexterm zone="tp-connection-is-ready" role="0.7.17"><primary>tp_connection_is_ready</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_connection_is_ready              (<link linkend="TpConnection">TpConnection</link> *self);</programlisting>
+<para>
+Returns the same thing as the <link linkend="TpConnection--connection-ready"><type>"connection-ready"</type></link> property.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if introspection has completed
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.17
+</para></refsect2>
 <refsect2 id="tp-connection-get-status" role="function" condition="since:0.7.14">
 <title>tp_connection_get_status ()</title>
 <indexterm zone="tp-connection-get-status" role="0.7.14"><primary>tp_connection_get_status</primary></indexterm><programlisting><link linkend="TpConnectionStatus">TpConnectionStatus</link>  tp_connection_get_status            (<link linkend="TpConnection">TpConnection</link> *self,
@@ -606,6 +658,247 @@ don't know yet.
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.14
 </para></refsect2>
+<refsect2 id="TpConnectionRequestHandlesCb" role="function">
+<title>TpConnectionRequestHandlesCb ()</title>
+<indexterm zone="TpConnectionRequestHandlesCb"><primary>TpConnectionRequestHandlesCb</primary></indexterm><programlisting><link linkend="void">void</link>                (*TpConnectionRequestHandlesCb)     (<link linkend="TpConnection">TpConnection</link> *connection,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         const <link linkend="gchar">gchar</link> * const *ids,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link>
+succeeds or fails.
+</para>
+<para>
+On success, the caller has one reference to each handle in <parameter>handles</parameter>, which
+may be released later with <link linkend="tp-connection-unref-handles"><function>tp_connection_unref_handles()</function></link>. If not
+released, the handles will remain valid until <parameter>connection</parameter> becomes invalid
+(signalled by TpProxy::invalidated).
+</para>
+<para>
+For convenience, the handle type and IDs requested by the caller are
+passed through to this callback, so the caller does not have to include
+them in <parameter>user_data</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>connection</parameter>&nbsp;:</term>
+<listitem><simpara> the connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> the handle type that was passed to
+ <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n_handles</parameter>&nbsp;:</term>
+<listitem><simpara> the number of IDs that were passed to
+ <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link> on success, or 0 on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> the <parameter>n_handles</parameter> handles corresponding to <parameter>ids</parameter>, in the same order,
+ or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ids</parameter>&nbsp;:</term>
+<listitem><simpara> a copy of the array of <parameter>n_handles</parameter> IDs that was passed to
+ <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link> on success, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> the same arbitrary pointer that was passed to
+ <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> the same object that was passed to
+ <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-connection-request-handles" role="function">
+<title>tp_connection_request_handles ()</title>
+<indexterm zone="tp-connection-request-handles"><primary>tp_connection_request_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_request_handles       (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         const <link linkend="gchar">gchar</link> * const *ids,
+                                                         <link linkend="TpConnectionRequestHandlesCb">TpConnectionRequestHandlesCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Request the handles corresponding to the given identifiers, and if they
+are valid, hold (ensure a reference to) the corresponding handles.
+</para>
+<para>
+If they are valid, the callback will later be called with the given
+handles; if not all of them are valid, the callback will be called with
+an error.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> the handle type
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ids</parameter>&nbsp;:</term>
+<listitem><simpara> an array of string identifiers for which handles are required,
+ terminated by <link linkend="NULL:CAPS"><literal>NULL</literal></link> (must not be <link linkend="NULL:CAPS"><literal>NULL</literal></link> or empty)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called on success or failure (unless <parameter>weak_object</parameter> has become
+ unreferenced)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> arbitrary user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called to destroy <parameter>user_data</parameter> after calling <parameter>callback</parameter>, or when
+ <parameter>weak_object</parameter> becomes unreferenced (whichever occurs sooner)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> if not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, an object to be weakly referenced: if it is
+ destroyed, <parameter>callback</parameter> will not be called
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="TpConnectionHoldHandlesCb" role="function">
+<title>TpConnectionHoldHandlesCb ()</title>
+<indexterm zone="TpConnectionHoldHandlesCb"><primary>TpConnectionHoldHandlesCb</primary></indexterm><programlisting><link linkend="void">void</link>                (*TpConnectionHoldHandlesCb)        (<link linkend="TpConnection">TpConnection</link> *connection,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link> succeeds
+or fails.
+</para>
+<para>
+On success, the caller has one reference to each handle in <parameter>handles</parameter>, which
+may be released later with <link linkend="tp-connection-unref-handles"><function>tp_connection_unref_handles()</function></link>. If not
+released, the handles will remain valid until <parameter>connection</parameter> becomes invalid
+(signalled by TpProxy::invalidated).
+</para>
+<para>
+For convenience, the handle type and handles requested by the caller are
+passed through to this callback on success, so the caller does not have to
+include them in <parameter>user_data</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>connection</parameter>&nbsp;:</term>
+<listitem><simpara> the connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> the handle type that was passed to
+ <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n_handles</parameter>&nbsp;:</term>
+<listitem><simpara> the number of handles that were passed to
+ <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link> on success, or 0 on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> a copy of the array of <parameter>n_handles</parameter> handles that was passed to
+ <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link> on success, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> the same arbitrary pointer that was passed to
+ <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> the same object that was passed to
+ <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-connection-hold-handles" role="function">
+<title>tp_connection_hold_handles ()</title>
+<indexterm zone="tp-connection-hold-handles"><primary>tp_connection_hold_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_hold_handles          (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         <link linkend="TpConnectionHoldHandlesCb">TpConnectionHoldHandlesCb</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Hold (ensure a reference to) the given handles, if they are valid.
+</para>
+<para>
+If they are valid, the callback will later be called with the given
+handles; if not all of them are valid, the callback will be called with
+an error.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> the handle type
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n_handles</parameter>&nbsp;:</term>
+<listitem><simpara> the number of handles in <parameter>handles</parameter> (must be at least 1)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> an array of handles
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called on success or failure (unless <parameter>weak_object</parameter> has become
+ unreferenced)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> arbitrary user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called to destroy <parameter>user_data</parameter> after calling <parameter>callback</parameter>, or when
+ <parameter>weak_object</parameter> becomes unreferenced (whichever occurs sooner)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> if not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, an object to be weakly referenced: if it is
+ destroyed, <parameter>callback</parameter> will not be called
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-connection-unref-handles" role="function">
+<title>tp_connection_unref_handles ()</title>
+<indexterm zone="tp-connection-unref-handles"><primary>tp_connection_unref_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_unref_handles         (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles);</programlisting>
+<para>
+Release the reference to the handles in <parameter>handles</parameter> that was obtained by
+calling <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link> or <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link>.
+</para>
+<para>
+If <parameter>self</parameter> has already become invalid, this function does nothing.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> a handle type
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n_handles</parameter>&nbsp;:</term>
+<listitem><simpara> the number of handles in <parameter>handles</parameter>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> an array of <parameter>n_handles</parameter> handles
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="tp-connection-init-known-interfaces" role="function" condition="since:0.7.6">
 <title>tp_connection_init_known_interfaces ()</title>
 <indexterm zone="tp-connection-init-known-interfaces" role="0.7.6"><primary>tp_connection_init_known_interfaces</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_init_known_interfaces (void);</programlisting>

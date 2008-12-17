@@ -19,7 +19,8 @@ ABI_LISTS = \
     versions/0.7.13.abi \
     versions/0.7.14.abi \
     versions/0.7.15.abi \
-    versions/0.7.16.abi
+    versions/0.7.16.abi \
+    versions/0.7.17.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -211,6 +212,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-internal.h \
     channel-manager.c \
     connection.c \
+    connection-internal.h \
+    connection-handles.c \
     connection-manager.c \
     contacts-mixin.c \
     dbus.c \

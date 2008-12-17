@@ -23,9 +23,11 @@ EXTRA_DIST = \
     glib-signals-marshal-gen.py \
     gobject-foo.py \
     identity.xsl \
+    lcov.am \
     libtpcodegen.py \
     libglibcodegen.py \
     make-version-script.py \
+    telepathy.am \
     telepathy-glib-env.in \
     with-session-bus.sh
 

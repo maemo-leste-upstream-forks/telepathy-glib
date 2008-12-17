@@ -31,6 +31,11 @@
                     <link linkend="TpProxySignalConnection">TpProxySignalConnection</link>;
 <link linkend="void">void</link>                <link linkend="tp-proxy-signal-connection-disconnect">tp_proxy_signal_connection_disconnect</link>
                                                         (<link linkend="TpProxySignalConnection">TpProxySignalConnection</link> *sc);
+<link linkend="TpDBusDaemon">TpDBusDaemon</link>*       <link linkend="tp-proxy-get-dbus-daemon">tp_proxy_get_dbus_daemon</link>            (<link linkend="gpointer">gpointer</link> self);
+<link linkend="DBusGConnection">DBusGConnection</link>*    <link linkend="tp-proxy-get-dbus-connection">tp_proxy_get_dbus_connection</link>        (<link linkend="gpointer">gpointer</link> self);
+const <link linkend="gchar">gchar</link>*        <link linkend="tp-proxy-get-bus-name">tp_proxy_get_bus_name</link>               (<link linkend="gpointer">gpointer</link> self);
+const <link linkend="gchar">gchar</link>*        <link linkend="tp-proxy-get-object-path">tp_proxy_get_object_path</link>            (<link linkend="gpointer">gpointer</link> self);
+const <link linkend="GError">GError</link>*       <link linkend="tp-proxy-get-invalidated">tp_proxy_get_invalidated</link>            (<link linkend="gpointer">gpointer</link> self);
 #define             <link linkend="TP-DBUS-ERRORS:CAPS">TP_DBUS_ERRORS</link>
 enum                <link linkend="TpDBusError">TpDBusError</link>;
 </synopsis>
@@ -89,61 +94,12 @@ an object accessed via D-Bus and provide access to its methods and signals.</par
 <title role="details.title">Details</title>
 <refsect2 id="TpProxy-struct" role="struct">
 <title>TpProxy</title>
-<indexterm zone="TpProxy-struct" role="0.7.1"><primary>TpProxy</primary></indexterm><programlisting>typedef struct {
-    GObject parent;
-
-    TpDBusDaemon *dbus_daemon;
-    DBusGConnection *dbus_connection;
-    gchar *bus_name;
-    gchar *object_path;
-
-    GError *invalidated /* initialized to NULL by g_object_new */;
-
-    TpProxyPrivate *priv;
-} TpProxy;
-</programlisting>
+<indexterm zone="TpProxy-struct" role="0.7.1"><primary>TpProxy</primary></indexterm><programlisting>typedef struct _TpProxy TpProxy;</programlisting>
 <para>
 Structure representing a Telepathy client-side proxy.</para>
 <para>
 
 </para><variablelist role="struct">
-<varlistentry>
-<term><link linkend="GObject">GObject</link>&nbsp;<structfield>parent</structfield>;</term>
-<listitem><simpara> parent object
-</simpara></listitem>
-</varlistentry>
-<varlistentry>
-<term><link linkend="TpDBusDaemon">TpDBusDaemon</link>&nbsp;*<structfield>dbus_daemon</structfield>;</term>
-<listitem><simpara> the <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> for this object, if any; always <link linkend="NULL:CAPS"><literal>NULL</literal></link>
- if this object is a <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> (read-only)
-</simpara></listitem>
-</varlistentry>
-<varlistentry>
-<term><link linkend="DBusGConnection">DBusGConnection</link>&nbsp;*<structfield>dbus_connection</structfield>;</term>
-<listitem><simpara> the D-Bus connection used by this object (read-only)
-</simpara></listitem>
-</varlistentry>
-<varlistentry>
-<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>bus_name</structfield>;</term>
-<listitem><simpara> the bus name of the application exporting the object (read-only)
-</simpara></listitem>
-</varlistentry>
-<varlistentry>
-<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>object_path</structfield>;</term>
-<listitem><simpara> the object path of the remote object (read-only)
-</simpara></listitem>
-</varlistentry>
-<varlistentry>
-<term><link linkend="GError">GError</link>&nbsp;*<structfield>invalidated</structfield>;</term>
-<listitem><simpara> if not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, the reason this proxy was invalidated
- (read-only)
-</simpara></listitem>
-</varlistentry>
-<varlistentry>
-<term><link linkend="TpProxyPrivate">TpProxyPrivate</link>&nbsp;*<structfield>priv</structfield>;</term>
-<listitem><simpara> private internal data
-</simpara></listitem>
-</varlistentry>
 </variablelist><para role="since">Since  0.7.1
 </para></refsect2>
 <refsect2 id="TpProxyClass" role="struct" condition="since:0.7.1">
@@ -285,6 +241,94 @@ explicitly free it either.</para>
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.1
 </para></refsect2>
+<refsect2 id="tp-proxy-get-dbus-daemon" role="function" condition="since:0.7.17">
+<title>tp_proxy_get_dbus_daemon ()</title>
+<indexterm zone="tp-proxy-get-dbus-daemon" role="0.7.17"><primary>tp_proxy_get_dbus_daemon</primary></indexterm><programlisting><link linkend="TpDBusDaemon">TpDBusDaemon</link>*       tp_proxy_get_dbus_daemon            (<link linkend="gpointer">gpointer</link> self);</programlisting>
+<para>
+<!-- --></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a borrowed reference to the <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> for this object, if any;
+ always <link linkend="NULL:CAPS"><literal>NULL</literal></link> if this object is itself a <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link>. The caller must
+ reference the returned object with <link linkend="g-object-ref"><function>g_object_ref()</function></link> if it will be kept.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.17
+</para></refsect2>
+<refsect2 id="tp-proxy-get-dbus-connection" role="function" condition="since:0.7.17">
+<title>tp_proxy_get_dbus_connection ()</title>
+<indexterm zone="tp-proxy-get-dbus-connection" role="0.7.17"><primary>tp_proxy_get_dbus_connection</primary></indexterm><programlisting><link linkend="DBusGConnection">DBusGConnection</link>*    tp_proxy_get_dbus_connection        (<link linkend="gpointer">gpointer</link> self);</programlisting>
+<para>
+<!-- --></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a borrowed reference to the D-Bus connection used by this object.
+ The caller must reference the returned pointer with
+ <link linkend="dbus-g-connection-ref"><function>dbus_g_connection_ref()</function></link> if it will be kept.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.17
+</para></refsect2>
+<refsect2 id="tp-proxy-get-bus-name" role="function" condition="since:0.7.17">
+<title>tp_proxy_get_bus_name ()</title>
+<indexterm zone="tp-proxy-get-bus-name" role="0.7.17"><primary>tp_proxy_get_bus_name</primary></indexterm><programlisting>const <link linkend="gchar">gchar</link>*        tp_proxy_get_bus_name               (<link linkend="gpointer">gpointer</link> self);</programlisting>
+<para>
+<!-- --></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the bus name of the application exporting the object. The caller
+ must copy the string with <link linkend="g-strdup"><function>g_strdup()</function></link> if it will be kept.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.17
+</para></refsect2>
+<refsect2 id="tp-proxy-get-object-path" role="function" condition="since:0.7.17">
+<title>tp_proxy_get_object_path ()</title>
+<indexterm zone="tp-proxy-get-object-path" role="0.7.17"><primary>tp_proxy_get_object_path</primary></indexterm><programlisting>const <link linkend="gchar">gchar</link>*        tp_proxy_get_object_path            (<link linkend="gpointer">gpointer</link> self);</programlisting>
+<para>
+<!-- --></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the object path of the remote object. The caller must copy the
+ string with <link linkend="g-strdup"><function>g_strdup()</function></link> if it will be kept.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.17
+</para></refsect2>
+<refsect2 id="tp-proxy-get-invalidated" role="function" condition="since:0.7.17">
+<title>tp_proxy_get_invalidated ()</title>
+<indexterm zone="tp-proxy-get-invalidated" role="0.7.17"><primary>tp_proxy_get_invalidated</primary></indexterm><programlisting>const <link linkend="GError">GError</link>*       tp_proxy_get_invalidated            (<link linkend="gpointer">gpointer</link> self);</programlisting>
+<para>
+<!-- --></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the reason this proxy was invalidated, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if has not been
+ invalidated. The caller must copy the error, for instance with
+ <link linkend="g-error-copy"><function>g_error_copy()</function></link>, if it will be kept.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.17
+</para></refsect2>
 <refsect2 id="TP-DBUS-ERRORS:CAPS" role="macro" condition="since:0.7.1">
 <title>TP_DBUS_ERRORS</title>
 <indexterm zone="TP-DBUS-ERRORS:CAPS" role="0.7.1"><primary>TP_DBUS_ERRORS</primary></indexterm><programlisting>#define TP_DBUS_ERRORS (tp_dbus_errors_quark ())
@@ -313,6 +357,7 @@ This macro expands to a function call returning a <link linkend="GQuark"><type>G
     TP_DBUS_ERROR_INVALID_MEMBER_NAME = 7,
     TP_DBUS_ERROR_OBJECT_REMOVED = 8,
     TP_DBUS_ERROR_CANCELLED = 9,
+    TP_DBUS_ERROR_INCONSISTENT = 10,
     NUM_TP_DBUS_ERRORS
 } TpDBusError;
 </programlisting>
@@ -385,9 +430,16 @@ This macro expands to a function call returning a <link linkend="GQuark"><type>G
  loop (*_run_*) if they are cancelled
 </simpara></listitem>
 </varlistentry>
+<varlistentry id="TP-DBUS-ERROR-INCONSISTENT:CAPS" role="constant">
+<term><literal>TP_DBUS_ERROR_INCONSISTENT</literal></term>
+<listitem><simpara> Raised if information received from a remote
+ object is inconsistent or otherwise obviously wrong (added in 0.7.17)
+</simpara></listitem>
+</varlistentry>
 <varlistentry id="NUM-TP-DBUS-ERRORS:CAPS" role="constant">
 <term><literal>NUM_TP_DBUS_ERRORS</literal></term>
-<listitem><simpara> 1 more than the highest valid <link linkend="TpDBusError"><type>TpDBusError</type></link>
+<listitem><simpara> 1 more than the highest valid <link linkend="TpDBusError"><type>TpDBusError</type></link> at the
+ time of compilation
 </simpara></listitem>
 </varlistentry>
 </variablelist><para role="since">Since  0.7.1

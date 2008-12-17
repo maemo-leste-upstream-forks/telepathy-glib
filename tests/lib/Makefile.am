@@ -1,6 +1,7 @@
 noinst_LTLIBRARIES = libtp-glib-tests.la
 
 libtp_glib_tests_la_SOURCES = \
+    debug.h \
     myassert.h \
     simple-conn.c \
     simple-conn.h \
@@ -11,7 +12,9 @@ libtp_glib_tests_la_SOURCES = \
     stub-object.c \
     stub-object.h \
     textchan-null.c \
-    textchan-null.h
+    textchan-null.h \
+    util.c \
+    util.h
 
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk

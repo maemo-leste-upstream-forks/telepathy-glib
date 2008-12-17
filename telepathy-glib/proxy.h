@@ -48,13 +48,14 @@ typedef enum {
     TP_DBUS_ERROR_INVALID_MEMBER_NAME = 7,
     TP_DBUS_ERROR_OBJECT_REMOVED = 8,
     TP_DBUS_ERROR_CANCELLED = 9,
+    TP_DBUS_ERROR_INCONSISTENT = 10,
     NUM_TP_DBUS_ERRORS
 } TpDBusError;
 
 struct _TpProxy {
-    /*<public>*/
     GObject parent;
 
+    /*<private>*/
     TpDBusDaemon *dbus_daemon;
     DBusGConnection *dbus_connection;
     gchar *bus_name;
@@ -119,6 +120,16 @@ _tp_proxy_inline_has_interface (gpointer self, const gchar *interface)
 
 #define tp_proxy_has_interface(self, interface) \
     (_tp_proxy_inline_has_interface (self, interface))
+
+TpDBusDaemon *tp_proxy_get_dbus_daemon (gpointer self);
+
+DBusGConnection *tp_proxy_get_dbus_connection (gpointer self);
+
+const gchar *tp_proxy_get_bus_name (gpointer self);
+
+const gchar *tp_proxy_get_object_path (gpointer self);
+
+const GError *tp_proxy_get_invalidated (gpointer self);
 
 G_END_DECLS
 

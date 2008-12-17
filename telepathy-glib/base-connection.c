@@ -251,7 +251,7 @@
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CONNECTION
-#include "debug-internal.h"
+#include "telepathy-glib/debug-internal.h"
 
 static void conn_iface_init (gpointer, gpointer);
 static void requests_iface_init (gpointer, gpointer);
@@ -1787,6 +1787,10 @@ tp_base_connection_get_status (TpSvcConnection *iface,
 }
 
 
+#undef DEBUG_FLAG
+#define DEBUG_FLAG TP_DEBUG_HANDLES
+#include "telepathy-glib/debug-internal.h"
+
 /**
  * tp_base_connection_hold_handles
  *
@@ -1822,6 +1826,9 @@ tp_base_connection_hold_handles (TpSvcConnection *iface,
     }
 
   sender = dbus_g_method_get_sender (context);
+
+  DEBUG ("%u handles of type %u, for %s", handles->len, handle_type, sender);
+
   if (!tp_handles_client_hold (priv->handles[handle_type], sender,
         handles, &error))
     {
@@ -1891,6 +1898,10 @@ tp_base_connection_inspect_handles (TpSvcConnection *iface,
 
   g_free (ret);
 }
+
+#undef DEBUG_FLAG
+#define DEBUG_FLAG TP_DEBUG_CONNECTION
+#include "telepathy-glib/debug-internal.h"
 
 /**
  * list_channel_factory_foreach_one:
@@ -2238,6 +2249,10 @@ ERROR:
 }
 
 
+#undef DEBUG_FLAG
+#define DEBUG_FLAG TP_DEBUG_HANDLES
+#include "telepathy-glib/debug-internal.h"
+
 /**
  * tp_base_connection_release_handles
  *
@@ -2272,6 +2287,8 @@ tp_base_connection_release_handles (TpSvcConnection *iface,
     }
 
   sender = dbus_g_method_get_sender (context);
+  DEBUG ("%u handles of type %u, for %s", handles->len, handle_type, sender);
+
   if (!tp_handles_client_release (priv->handles[handle_type],
         sender, handles, &error))
     {
@@ -2370,6 +2387,8 @@ tp_base_connection_dbus_request_handles (TpSvcConnection *iface,
     }
 
   sender = dbus_g_method_get_sender (context);
+  DEBUG ("%u handles of type %u, for %s", handles->len, handle_type, sender);
+
   if (!tp_handles_client_hold (handle_repo, sender, handles, &error))
     {
       g_assert (error != NULL);
@@ -2393,6 +2412,10 @@ out:
       g_array_free (handles, TRUE);
     }
 }
+
+#undef DEBUG_FLAG
+#define DEBUG_FLAG TP_DEBUG_CONNECTION
+#include "telepathy-glib/debug-internal.h"
 
 /**
  * tp_base_connection_get_handles:
@@ -2948,6 +2971,7 @@ conn_requests_requestotron_validate_handle (TpBaseConnection *self,
           /* Check the supplied TargetHandle is valid */
           if (!tp_handle_is_valid (handles, target_handle, &error))
             {
+              error->domain = TP_ERRORS;
               error->code = TP_ERROR_INVALID_HANDLE;
               dbus_g_method_return_error (context, error);
               g_error_free (error);

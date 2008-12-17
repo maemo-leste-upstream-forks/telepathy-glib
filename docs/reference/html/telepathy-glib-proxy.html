@@ -68,6 +68,29 @@ void                <a class="link" href="telepathy-glib-proxy.html#tp-proxy-pen
                     <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a>;
 void                <a class="link" href="telepathy-glib-proxy.html#tp-proxy-signal-connection-disconnect" title="tp_proxy_signal_connection_disconnect ()">tp_proxy_signal_connection_disconnect</a>
                                                         (<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a> *sc);
+<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>*       <a class="link" href="telepathy-glib-proxy.html#tp-proxy-get-dbus-daemon" title="tp_proxy_get_dbus_daemon ()">tp_proxy_get_dbus_daemon</a>            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);
+<a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConnection"
+>DBusGConnection</a>*    <a class="link" href="telepathy-glib-proxy.html#tp-proxy-get-dbus-connection" title="tp_proxy_get_dbus_connection ()">tp_proxy_get_dbus_connection</a>        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        <a class="link" href="telepathy-glib-proxy.html#tp-proxy-get-bus-name" title="tp_proxy_get_bus_name ()">tp_proxy_get_bus_name</a>               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        <a class="link" href="telepathy-glib-proxy.html#tp-proxy-get-object-path" title="tp_proxy_get_object_path ()">tp_proxy_get_object_path</a>            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);
+const <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+>GError</a>*       <a class="link" href="telepathy-glib-proxy.html#tp-proxy-get-invalidated" title="tp_proxy_get_invalidated ()">tp_proxy_get_invalidated</a>            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);
 #define             <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERRORS:CAPS" title="TP_DBUS_ERRORS">TP_DBUS_ERRORS</a>
 enum                <a class="link" href="telepathy-glib-proxy.html#TpDBusError" title="enum TpDBusError">TpDBusError</a>;
 </pre>
@@ -125,19 +148,7 @@ an object accessed via D-Bus and provide access to its methods and signals.</p>
 <a name="telepathy-glib-proxy.details"></a><h2>Details</h2>
 <div class="refsect2" lang="en">
 <a name="TpProxy-struct"></a><h3>TpProxy</h3>
-<pre class="programlisting">typedef struct {
-    GObject parent;
-
-    TpDBusDaemon *dbus_daemon;
-    DBusGConnection *dbus_connection;
-    gchar *bus_name;
-    gchar *object_path;
-
-    GError *invalidated /* initialized to NULL by g_object_new */;
-
-    TpProxyPrivate *priv;
-} TpProxy;
-</pre>
+<pre class="programlisting">typedef struct _TpProxy TpProxy;</pre>
 <p>
 Structure representing a Telepathy client-side proxy.</p>
 <p>
@@ -145,59 +156,7 @@ Structure representing a Telepathy client-side proxy.</p>
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><a
-href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
->GObject</a> <em class="structfield"><code>parent</code></em>;</span></p></td>
-<td> parent object
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a> *<em class="structfield"><code>dbus_daemon</code></em>;</span></p></td>
-<td> the <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> for this object, if any; always <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
- if this object is a <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> (read-only)
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><a
-href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConnection"
->DBusGConnection</a> *<em class="structfield"><code>dbus_connection</code></em>;</span></p></td>
-<td> the D-Bus connection used by this object (read-only)
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><a
-href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
->gchar</a> *<em class="structfield"><code>bus_name</code></em>;</span></p></td>
-<td> the bus name of the application exporting the object (read-only)
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><a
-href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
->gchar</a> *<em class="structfield"><code>object_path</code></em>;</span></p></td>
-<td> the object path of the remote object (read-only)
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><a
-href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
->GError</a> *<em class="structfield"><code>invalidated</code></em>;</span></p></td>
-<td> if not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, the reason this proxy was invalidated
- (read-only)
-</td>
-</tr>
-<tr>
-<td><p><span class="term">TpProxyPrivate *<em class="structfield"><code>priv</code></em>;</span></p></td>
-<td> private internal data
-</td>
-</tr>
-</tbody>
+<tbody></tbody>
 </table></div>
 <p class="since">Since  0.7.1
 </p>
@@ -419,6 +378,186 @@ explicitly free it either.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
+<a name="tp-proxy-get-dbus-daemon"></a><h3>tp_proxy_get_dbus_daemon ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>*       tp_proxy_get_dbus_daemon            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a borrowed reference to the <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> for this object, if any;
+ always <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> if this object is itself a <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a>. The caller must
+ reference the returned object with <a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#g-object-ref"
+><code class="function">g_object_ref()</code></a> if it will be kept.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.17
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-proxy-get-dbus-connection"></a><h3>tp_proxy_get_dbus_connection ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConnection"
+>DBusGConnection</a>*    tp_proxy_get_dbus_connection        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a borrowed reference to the D-Bus connection used by this object.
+ The caller must reference the returned pointer with
+ <a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#dbus-g-connection-ref"
+><code class="function">dbus_g_connection_ref()</code></a> if it will be kept.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.17
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-proxy-get-bus-name"></a><h3>tp_proxy_get_bus_name ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        tp_proxy_get_bus_name               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the bus name of the application exporting the object. The caller
+ must copy the string with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strdup"
+><code class="function">g_strdup()</code></a> if it will be kept.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.17
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-proxy-get-object-path"></a><h3>tp_proxy_get_object_path ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*        tp_proxy_get_object_path            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the object path of the remote object. The caller must copy the
+ string with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strdup"
+><code class="function">g_strdup()</code></a> if it will be kept.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.17
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-proxy-get-invalidated"></a><h3>tp_proxy_get_invalidated ()</h3>
+<pre class="programlisting">const <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+>GError</a>*       tp_proxy_get_invalidated            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> self);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the reason this proxy was invalidated, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> if has not been
+ invalidated. The caller must copy the error, for instance with
+ <a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#g-error-copy"
+><code class="function">g_error_copy()</code></a>, if it will be kept.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.17
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
 <a name="TP-DBUS-ERRORS:CAPS"></a><h3>TP_DBUS_ERRORS</h3>
 <pre class="programlisting">#define TP_DBUS_ERRORS (tp_dbus_errors_quark ())
 </pre>
@@ -455,6 +594,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"
     TP_DBUS_ERROR_INVALID_MEMBER_NAME = 7,
     TP_DBUS_ERROR_OBJECT_REMOVED = 8,
     TP_DBUS_ERROR_CANCELLED = 9,
+    TP_DBUS_ERROR_INCONSISTENT = 10,
     NUM_TP_DBUS_ERRORS
 } TpDBusError;
 </pre>
@@ -533,8 +673,15 @@ href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
 </td>
 </tr>
 <tr>
+<td><p><a name="TP-DBUS-ERROR-INCONSISTENT:CAPS"></a><span class="term"><code class="literal">TP_DBUS_ERROR_INCONSISTENT</code></span></p></td>
+<td> Raised if information received from a remote
+ object is inconsistent or otherwise obviously wrong (added in 0.7.17)
+</td>
+</tr>
+<tr>
 <td><p><a name="NUM-TP-DBUS-ERRORS:CAPS"></a><span class="term"><code class="literal">NUM_TP_DBUS_ERRORS</code></span></p></td>
-<td> 1 more than the highest valid <a class="link" href="telepathy-glib-proxy.html#TpDBusError" title="enum TpDBusError"><span class="type">TpDBusError</span></a>
+<td> 1 more than the highest valid <a class="link" href="telepathy-glib-proxy.html#TpDBusError" title="enum TpDBusError"><span class="type">TpDBusError</span></a> at the
+ time of compilation
 </td>
 </tr>
 </tbody>

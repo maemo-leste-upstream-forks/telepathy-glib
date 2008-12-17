@@ -90,7 +90,10 @@ tp_dbus_errors_quark (void)
  *  is available.
  * @TP_DBUS_ERROR_CANCELLED: Raised from calls that re-enter the main
  *  loop (*_run_*) if they are cancelled
- * @NUM_TP_DBUS_ERRORS: 1 more than the highest valid #TpDBusError
+ * @TP_DBUS_ERROR_INCONSISTENT: Raised if information received from a remote
+ *  object is inconsistent or otherwise obviously wrong (added in 0.7.17)
+ * @NUM_TP_DBUS_ERRORS: 1 more than the highest valid #TpDBusError at the
+ *  time of compilation
  *
  * #GError codes for use with the %TP_DBUS_ERRORS domain.
  *
@@ -157,14 +160,6 @@ tp_dbus_errors_quark (void)
 /**
  * TpProxy:
  * @parent: parent object
- * @dbus_daemon: the #TpDBusDaemon for this object, if any; always %NULL
- *  if this object is a #TpDBusDaemon (read-only)
- * @dbus_connection: the D-Bus connection used by this object (read-only)
- * @bus_name: the bus name of the application exporting the object (read-only)
- * @object_path: the object path of the remote object (read-only)
- * @invalidated: if not %NULL, the reason this proxy was invalidated
- *  (read-only)
- * @priv: private internal data
  *
  * Structure representing a Telepathy client-side proxy.
  *
@@ -1041,6 +1036,104 @@ tp_proxy_class_init (TpProxyClass *klass)
       NULL, NULL,
       _tp_marshal_VOID__UINT_INT_STRING,
       G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_INT, G_TYPE_STRING);
+}
+
+/**
+ * tp_proxy_get_dbus_daemon:
+ * @self: a #TpProxy or subclass
+ *
+ * <!-- -->
+ *
+ * Returns: a borrowed reference to the #TpDBusDaemon for this object, if any;
+ *  always %NULL if this object is itself a #TpDBusDaemon. The caller must
+ *  reference the returned object with g_object_ref() if it will be kept.
+ *
+ * Since: 0.7.17
+ */
+TpDBusDaemon *
+tp_proxy_get_dbus_daemon (gpointer self)
+{
+  TpProxy *proxy = TP_PROXY (self);
+
+  return proxy->dbus_daemon;
+}
+
+/**
+ * tp_proxy_get_dbus_connection:
+ * @self: a #TpProxy or subclass
+ *
+ * <!-- -->
+ *
+ * Returns: a borrowed reference to the D-Bus connection used by this object.
+ *  The caller must reference the returned pointer with
+ *  dbus_g_connection_ref() if it will be kept.
+ *
+ * Since: 0.7.17
+ */
+DBusGConnection *
+tp_proxy_get_dbus_connection (gpointer self)
+{
+  TpProxy *proxy = TP_PROXY (self);
+
+  return proxy->dbus_connection;
+}
+
+/**
+ * tp_proxy_get_bus_name:
+ * @self: a #TpProxy or subclass
+ *
+ * <!-- -->
+ *
+ * Returns: the bus name of the application exporting the object. The caller
+ *  must copy the string with g_strdup() if it will be kept.
+ *
+ * Since: 0.7.17
+ */
+const gchar *
+tp_proxy_get_bus_name (gpointer self)
+{
+  TpProxy *proxy = TP_PROXY (self);
+
+  return proxy->bus_name;
+}
+
+/**
+ * tp_proxy_get_object_path:
+ * @self: a #TpProxy or subclass
+ *
+ * <!-- -->
+ *
+ * Returns: the object path of the remote object. The caller must copy the
+ *  string with g_strdup() if it will be kept.
+ *
+ * Since: 0.7.17
+ */
+const gchar *
+tp_proxy_get_object_path (gpointer self)
+{
+  TpProxy *proxy = TP_PROXY (self);
+
+  return proxy->object_path;
+}
+
+/**
+ * tp_proxy_get_invalidated:
+ * @self: a #TpProxy or subclass
+ *
+ * <!-- -->
+ *
+ * Returns: the reason this proxy was invalidated, or %NULL if has not been
+ *  invalidated. The caller must copy the error, for instance with
+ *  g_error_copy(), if it will be kept.
+ *
+ * Since: 0.7.17
+ */
+const GError *
+tp_proxy_get_invalidated (gpointer self)
+{
+  TpProxy *proxy = TP_PROXY (self);
+
+  return proxy->invalidated;
 }
 
 /**

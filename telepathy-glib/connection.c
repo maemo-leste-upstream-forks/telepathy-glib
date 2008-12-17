@@ -34,6 +34,7 @@
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CONNECTION
+#include "telepathy-glib/connection-internal.h"
 #include "telepathy-glib/dbus-internal.h"
 #include "telepathy-glib/debug-internal.h"
 
@@ -117,7 +118,11 @@ struct _TpConnectionPrivate {
 
     TpConnectionStatus status;
     TpConnectionStatusReason status_reason;
+
     TpConnectionAliasFlags alias_flags;
+
+    /* GArray of GQuark */
+    GArray *contact_attribute_interfaces;
 
     gboolean ready:1;
 };
@@ -214,6 +219,75 @@ introspect_aliasing (TpConnection *self)
 }
 
 static void
+got_contact_attribute_interfaces (TpProxy *proxy,
+                                  const GValue *value,
+                                  const GError *error,
+                                  gpointer user_data G_GNUC_UNUSED,
+                                  GObject *weak_object G_GNUC_UNUSED)
+{
+  TpConnection *self = TP_CONNECTION (proxy);
+
+  if (error == NULL)
+    {
+      if (G_VALUE_HOLDS (value, G_TYPE_STRV))
+        {
+          GArray *arr;
+          gchar **interfaces = g_value_get_boxed (value);
+          gchar **iter;
+
+          arr = g_array_sized_new (FALSE, FALSE, sizeof (GQuark),
+              interfaces == NULL ? 0 : g_strv_length (interfaces));
+
+          if (interfaces != NULL)
+            {
+              for (iter = interfaces; *iter != NULL; iter++)
+                {
+                  if (tp_dbus_check_valid_interface_name (*iter, NULL))
+                    {
+                      GQuark q = g_quark_from_string (*iter);
+
+                      DEBUG ("%p: ContactAttributeInterfaces has %s", self,
+                          *iter);
+                      g_array_append_val (arr, q);
+                    }
+                  else
+                    {
+                      DEBUG ("%p: ignoring invalid interface: %s", self,
+                          *iter);
+                    }
+                }
+            }
+
+          g_assert (self->priv->contact_attribute_interfaces == NULL);
+          self->priv->contact_attribute_interfaces = arr;
+        }
+      else
+        {
+          DEBUG ("%p: ContactAttributeInterfaces had wrong type %s, "
+              "ignoring", self, G_VALUE_TYPE_NAME (value));
+        }
+    }
+  else
+    {
+      DEBUG ("%p: Get(Contacts, ContactAttributeInterfaces) failed with "
+          "%s %d: %s", self, g_quark_to_string (error->domain), error->code,
+          error->message);
+    }
+
+  tp_connection_continue_introspection (self);
+}
+
+static void
+introspect_contacts (TpConnection *self)
+{
+  g_assert (self->priv->introspect_needed != NULL);
+
+  tp_cli_dbus_properties_call_get (self, -1,
+       TP_IFACE_CONNECTION_INTERFACE_CONTACTS, "ContactAttributeInterfaces",
+       got_contact_attribute_interfaces, NULL, NULL, NULL);
+}
+
+static void
 tp_connection_got_interfaces_cb (TpConnection *self,
                                  const gchar **interfaces,
                                  const GError *error,
@@ -246,7 +320,13 @@ tp_connection_got_interfaces_cb (TpConnection *self,
               tp_proxy_add_interface_by_id ((TpProxy *) self,
                   g_quark_from_string (*iter));
 
-              if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING)
+              if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS)
+                {
+                  TpConnectionProc func = introspect_contacts;
+
+                  g_array_append_val (self->priv->introspect_needed, func);
+                }
+              else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING)
                 {
                   /* call GetAliasFlags */
                   TpConnectionProc func = introspect_aliasing;
@@ -380,6 +460,11 @@ tp_connection_constructor (GType type,
   tp_cli_connection_call_get_status (self, -1,
       tp_connection_got_status_cb, NULL, NULL, NULL);
 
+  _tp_connection_init_handle_refs (self);
+
+  g_signal_connect (self, "invalidated",
+      G_CALLBACK (_tp_connection_clean_up_handle_refs), NULL);
+
   DEBUG ("Returning %p", self);
   return (GObject *) self;
 }
@@ -394,6 +479,29 @@ tp_connection_init (TpConnection *self)
 
   self->priv->status = TP_UNKNOWN_CONNECTION_STATUS;
   self->priv->status_reason = TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED;
+}
+
+static void
+tp_connection_finalize (GObject *object)
+{
+  TpConnection *self = TP_CONNECTION (object);
+
+  DEBUG ("%p", self);
+
+  /* not true unless we were finalized before we were ready */
+  if (self->priv->introspect_needed != NULL)
+    {
+      g_array_free (self->priv->introspect_needed, TRUE);
+      self->priv->introspect_needed = NULL;
+    }
+
+  if (self->priv->contact_attribute_interfaces != NULL)
+    {
+      g_array_free (self->priv->contact_attribute_interfaces, TRUE);
+      self->priv->contact_attribute_interfaces = NULL;
+    }
+
+  ((GObjectClass *) tp_connection_parent_class)->finalize (object);
 }
 
 static void
@@ -417,6 +525,7 @@ tp_connection_class_init (TpConnectionClass *klass)
   object_class->constructor = tp_connection_constructor;
   object_class->get_property = tp_connection_get_property;
   object_class->dispose = tp_connection_dispose;
+  object_class->finalize = tp_connection_finalize;
 
   proxy_class->interface = TP_IFACE_QUARK_CONNECTION;
   /* If you change this, you must also change TpChannel to stop asserting
@@ -504,7 +613,7 @@ tp_connection_new (TpDBusDaemon *dbus,
   gchar *dup_unique_name = NULL;
   TpConnection *ret = NULL;
 
-  g_return_val_if_fail (dbus != NULL, NULL);
+  g_return_val_if_fail (TP_IS_DBUS_DAEMON (dbus), NULL);
   g_return_val_if_fail (object_path != NULL ||
                         (bus_name != NULL && bus_name[0] != ':'), NULL);
 
@@ -638,6 +747,8 @@ tp_connection_run_until_ready (TpConnection *self,
   TpProxy *as_proxy = (TpProxy *) self;
   gulong invalidated_id, ready_id;
   RunUntilReadyData data = { NULL, NULL, NULL };
+
+  g_return_val_if_fail (TP_IS_CONNECTION (self), FALSE);
 
   if (as_proxy->invalidated)
     goto raise_invalidated;
@@ -867,6 +978,9 @@ tp_list_connection_names (TpDBusDaemon *bus_daemon,
 {
   _ListContext *list_context = g_slice_new0 (_ListContext);
 
+  g_return_if_fail (TP_IS_DBUS_DAEMON (bus_daemon));
+  g_return_if_fail (callback != NULL);
+
   list_context->base_len = strlen (TP_CONN_BUS_NAME_BASE);
   list_context->callback = callback;
   list_context->user_data = user_data;
@@ -1002,6 +1116,7 @@ tp_connection_call_when_ready (TpConnection *self,
 {
   TpProxy *as_proxy = (TpProxy *) self;
 
+  g_return_if_fail (TP_IS_CONNECTION (self));
   g_return_if_fail (callback != NULL);
 
   if (self->priv->ready || as_proxy->invalidated != NULL)
@@ -1085,4 +1200,28 @@ tp_connection_presence_type_cmp_availability (TpConnectionPresenceType p1,
     return +1;
 
   return 0;
+}
+
+const GArray *
+_tp_connection_get_contact_attribute_interfaces (TpConnection *self)
+{
+  return self->priv->contact_attribute_interfaces;
+}
+
+
+/**
+ * tp_connection_is_ready:
+ * @self: a connection
+ *
+ * Returns the same thing as the #TpConnection:connection-ready property.
+ *
+ * Returns: %TRUE if introspection has completed
+ * Since: 0.7.17
+ */
+gboolean
+tp_connection_is_ready (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), FALSE);
+
+  return self->priv->ready;
 }
