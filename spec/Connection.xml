@@ -100,7 +100,7 @@ USA.</p>
       <tp:possible-errors>
         <tp:error name="org.freedesktop.Telepathy.Error.Disconnected">
           <tp:docstring>
-             Before version 0.17.UNRELEASED calling GetInterfaces while
+             Before version 0.17.8 calling GetInterfaces while
              on a connection that is not yet CONNECTED wasn't allowed. If a
              CM returns this error, its list of interfaces should be regarded
              as empty until it becomes CONNECTED.
@@ -277,15 +277,13 @@ USA.</p>
           <p>If true, the channel was requested by a client that intends to
             present it to the user itself (i.e. it passed suppress_handler=TRUE
             to the RequestChannel method), so no other handler should be
-            launched.</p>
+            launched. Clients MAY assume that channels where this is true
+            were created by a user request.</p>
 
           <p>If false, either the channel was created due to incoming
             information from the service, or the channel was requested by
             a local client that does not intend to handle the channel itself
-            (a typical use-case is an address-book viewer that does not itself
-            implement chat or VoIP functionality, starting a channel that
-            will be handled by the same user interface that would handle
-            incoming channels).</p>
+            (this usage is deprecated).</p>
 
           <p>Clients MUST NOT assume that only incoming channels will have
             this flag set to false.</p>
@@ -657,9 +655,8 @@ USA.</p>
     functionality, such as the Connection.Interface.Presence for receiving and
     reporting presence information, and Connection.Interface.Aliasing for
     connections where contacts may set and change an alias for themselves.
-    These interfaces can be discovered using GetInterfaces after the
-    connection, has been established and must not change subsequently at
-    runtime.</p>
+    These interfaces can be discovered using the
+    <tp:member-ref>GetInterfaces</tp:member-ref> method.</p>
 
     <p>Contacts, rooms, and server-stored lists (such as subscribed contacts,
     block lists, or allow lists) on a service are all represented by

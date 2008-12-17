@@ -47,6 +47,8 @@
 <link linkend="void">void</link>                <link linkend="tp-connection-call-when-ready">tp_connection_call_when_ready</link>       (<link linkend="TpConnection">TpConnection</link> *self,
                                                          <link linkend="TpConnectionWhenReadyCb">TpConnectionWhenReadyCb</link> callback,
                                                          <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="TpConnectionStatus">TpConnectionStatus</link>  <link linkend="tp-connection-get-status">tp_connection_get_status</link>            (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> *reason);
 <link linkend="void">void</link>                <link linkend="tp-connection-init-known-interfaces">tp_connection_init_known_interfaces</link> (void);
                     <link linkend="TpConnection-struct">TpConnection</link>;
                     <link linkend="TpConnectionClass">TpConnectionClass</link>;
@@ -566,6 +568,28 @@ Call <link linkend="tp-cli-connection-call-connect"><function>tp_cli_connection_
 <listitem><simpara> arbitrary user-supplied data passed to the callback
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.7
+</para></refsect2>
+<refsect2 id="tp-connection-get-status" role="function" condition="since:0.7.14">
+<title>tp_connection_get_status ()</title>
+<indexterm zone="tp-connection-get-status" role="0.7.14"><primary>tp_connection_get_status</primary></indexterm><programlisting><link linkend="TpConnectionStatus">TpConnectionStatus</link>  tp_connection_get_status            (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> *reason);</programlisting>
+<para>
+If <parameter>reason</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link> it is set to the reason why "status" changed to its
+current value, or <link linkend="TP-CONNECTION-STATUS-REASON-NONE-SPECIFIED:CAPS"><literal>TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED</literal></link> if unknown.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>reason</parameter>&nbsp;:</term>
+<listitem><simpara> a TpConnectionStatusReason, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> This connection's status, or <link linkend="TP-UNKNOWN-CONNECTION-STATUS:CAPS"><literal>TP_UNKNOWN_CONNECTION_STATUS</literal></link> if we
+don't know yet.
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.14
 </para></refsect2>
 <refsect2 id="tp-connection-init-known-interfaces" role="function" condition="since:0.7.6">
 <title>tp_connection_init_known_interfaces ()</title>
@@ -2198,7 +2222,7 @@ Represents the signature of a callback for the signal NewChannel.</para>
 <listitem><simpara> A handle indicating the specific contact, room or list this           channel communicates with, or zero if no handle is specified
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>arg_suppress_handler</parameter>&nbsp;:</term>
-<listitem><simpara> &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;If true, the channel was requested by a client that intends to             present it to the user itself (i.e. it passed suppress_handler=TRUE             to the RequestChannel method), so no other handler should be             launched.&lt;/p&gt;            &lt;p&gt;If false, either the channel was created due to incoming             information from the service, or the channel was requested by             a local client that does not intend to handle the channel itself             (a typical use-case is an address-book viewer that does not itself             implement chat or VoIP functionality, starting a channel that             will be handled by the same user interface that would handle             incoming channels).&lt;/p&gt;            &lt;p&gt;Clients MUST NOT assume that only incoming channels will have             this flag set to false.&lt;/p&gt;
+<listitem><simpara> &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;If true, the channel was requested by a client that intends to             present it to the user itself (i.e. it passed suppress_handler=TRUE             to the RequestChannel method), so no other handler should be             launched. Clients MAY assume that channels where this is true             were created by a user request.&lt;/p&gt;            &lt;p&gt;If false, either the channel was created due to incoming             information from the service, or the channel was requested by             a local client that does not intend to handle the channel itself             (this usage is deprecated).&lt;/p&gt;            &lt;p&gt;Clients MUST NOT assume that only incoming channels will have             this flag set to false.&lt;/p&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
 <listitem><simpara> User-supplied data

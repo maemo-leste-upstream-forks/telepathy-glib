@@ -116,6 +116,8 @@ void                <a class="link" href="telepathy-glib-connection.html#tp-conn
                                                          <a
 href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
 >gpointer</a> user_data);
+<a class="link" href="telepathy-glib-enums.html#TpConnectionStatus" title="enum TpConnectionStatus">TpConnectionStatus</a>  <a class="link" href="telepathy-glib-connection.html#tp-connection-get-status" title="tp_connection_get_status ()">tp_connection_get_status</a>            (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason">TpConnectionStatusReason</a> *reason);
 void                <a class="link" href="telepathy-glib-connection.html#tp-connection-init-known-interfaces" title="tp_connection_init_known_interfaces ()">tp_connection_init_known_interfaces</a> (void);
                     <a class="link" href="telepathy-glib-connection.html#TpConnection-struct" title="TpConnection">TpConnection</a>;
                     <a class="link" href="telepathy-glib-connection.html#TpConnectionClass" title="TpConnectionClass">TpConnectionClass</a>;
@@ -1205,6 +1207,46 @@ Call <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call
 </tbody>
 </table></div>
 <p class="since">Since  0.7.7
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-connection-get-status"></a><h3>tp_connection_get_status ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-enums.html#TpConnectionStatus" title="enum TpConnectionStatus">TpConnectionStatus</a>  tp_connection_get_status            (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason">TpConnectionStatusReason</a> *reason);</pre>
+<p>
+If <em class="parameter"><code>reason</code></em> is not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> it is set to the reason why "status" changed to its
+current value, or <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-REASON-NONE-SPECIFIED:CAPS"><code class="literal">TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED</code></a> if unknown.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>reason</code></em> :</span></p></td>
+<td> a TpConnectionStatusReason, or <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> This connection's status, or <a class="link" href="telepathy-glib-connection.html#TP-UNKNOWN-CONNECTION-STATUS:CAPS" title="TP_UNKNOWN_CONNECTION_STATUS"><code class="literal">TP_UNKNOWN_CONNECTION_STATUS</code></a> if we
+don't know yet.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.14
 </p>
 </div>
 <hr>
@@ -4357,7 +4399,7 @@ Represents the signature of a callback for the signal NewChannel.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>arg_suppress_handler</code></em> :</span></p></td>
-<td> &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;If true, the channel was requested by a client that intends to             present it to the user itself (i.e. it passed suppress_handler=TRUE             to the RequestChannel method), so no other handler should be             launched.&lt;/p&gt;            &lt;p&gt;If false, either the channel was created due to incoming             information from the service, or the channel was requested by             a local client that does not intend to handle the channel itself             (a typical use-case is an address-book viewer that does not itself             implement chat or VoIP functionality, starting a channel that             will be handled by the same user interface that would handle             incoming channels).&lt;/p&gt;            &lt;p&gt;Clients MUST NOT assume that only incoming channels will have             this flag set to false.&lt;/p&gt;
+<td> &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;If true, the channel was requested by a client that intends to             present it to the user itself (i.e. it passed suppress_handler=TRUE             to the RequestChannel method), so no other handler should be             launched. Clients MAY assume that channels where this is true             were created by a user request.&lt;/p&gt;            &lt;p&gt;If false, either the channel was created due to incoming             information from the service, or the channel was requested by             a local client that does not intend to handle the channel itself             (this usage is deprecated).&lt;/p&gt;            &lt;p&gt;Clients MUST NOT assume that only incoming channels will have             this flag set to false.&lt;/p&gt;
 </td>
 </tr>
 <tr>
