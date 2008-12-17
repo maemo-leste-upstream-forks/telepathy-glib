@@ -69,6 +69,10 @@ enum                <link linkend="TpTubeState">TpTubeState</link>;
 #define             <link linkend="NUM-TP-TUBE-TYPES:CAPS">NUM_TP_TUBE_TYPES</link>
 enum                <link linkend="TpTubeType">TpTubeType</link>;
 enum                <link linkend="TpChannelCallStateFlags">TpChannelCallStateFlags</link>;
+#define             <link linkend="NUM-TP-LOCAL-HOLD-STATES:CAPS">NUM_TP_LOCAL_HOLD_STATES</link>
+enum                <link linkend="TpLocalHoldState">TpLocalHoldState</link>;
+#define             <link linkend="NUM-TP-LOCAL-HOLD-STATE-REASONS:CAPS">NUM_TP_LOCAL_HOLD_STATE_REASONS</link>
+enum                <link linkend="TpLocalHoldStateReason">TpLocalHoldStateReason</link>;
 </synopsis>
 </refsynopsisdiv>
 
@@ -1373,6 +1377,92 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry id="TP-CHANNEL-CALL-STATE-HELD:CAPS" role="constant">
 <term><literal>TP_CHANNEL_CALL_STATE_HELD</literal></term>
 <listitem><simpara> <![CDATA[           The contact has placed the call on hold, and will not receive           media from the local user or any other participants until they           unhold the call again.         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="NUM-TP-LOCAL-HOLD-STATES:CAPS" role="macro">
+<title>NUM_TP_LOCAL_HOLD_STATES</title>
+<indexterm zone="NUM-TP-LOCAL-HOLD-STATES:CAPS"><primary>NUM_TP_LOCAL_HOLD_STATES</primary></indexterm><programlisting>#define             NUM_TP_LOCAL_HOLD_STATES</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpLocalHoldState"><type>TpLocalHoldState</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="TpLocalHoldState" role="enum">
+<title>enum TpLocalHoldState</title>
+<indexterm zone="TpLocalHoldState"><primary>TpLocalHoldState</primary></indexterm><programlisting>typedef enum {
+    TP_LOCAL_HOLD_STATE_UNHELD = 0,
+    TP_LOCAL_HOLD_STATE_HELD = 1,
+    TP_LOCAL_HOLD_STATE_PENDING_HOLD = 2,
+    TP_LOCAL_HOLD_STATE_PENDING_UNHOLD = 3,
+} TpLocalHoldState;
+</programlisting>
+<para>
+<![CDATA[         The hold state of a channel.       ]]>
+</para>
+<para>
+Bitfield/set of flags generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-LOCAL-HOLD-STATE-UNHELD:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_UNHELD</literal></term>
+<listitem><simpara> <![CDATA[           All streams are unheld (the call is active). New channels SHOULD           have this hold state.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-LOCAL-HOLD-STATE-HELD:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_HELD</literal></term>
+<listitem><simpara> <![CDATA[           All streams are held (the call is on hold)         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-LOCAL-HOLD-STATE-PENDING-HOLD:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_PENDING_HOLD</literal></term>
+<listitem><simpara> <![CDATA[           The connection manager is attempting to move to state Held, but           has not yet completed that operation. It is unspecified whether           any, all or none of the streams making up the channel are on hold.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-LOCAL-HOLD-STATE-PENDING-UNHOLD:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_PENDING_UNHOLD</literal></term>
+<listitem><simpara> <![CDATA[           The connection manager is attempting to move to state Held, but           has not yet completed that operation. It is unspecified whether           any, all or none of the streams making up the channel are on hold.         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="NUM-TP-LOCAL-HOLD-STATE-REASONS:CAPS" role="macro">
+<title>NUM_TP_LOCAL_HOLD_STATE_REASONS</title>
+<indexterm zone="NUM-TP-LOCAL-HOLD-STATE-REASONS:CAPS"><primary>NUM_TP_LOCAL_HOLD_STATE_REASONS</primary></indexterm><programlisting>#define             NUM_TP_LOCAL_HOLD_STATE_REASONS</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpLocalHoldStateReason"><type>TpLocalHoldStateReason</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="TpLocalHoldStateReason" role="enum">
+<title>enum TpLocalHoldStateReason</title>
+<indexterm zone="TpLocalHoldStateReason"><primary>TpLocalHoldStateReason</primary></indexterm><programlisting>typedef enum {
+    TP_LOCAL_HOLD_STATE_REASON_NONE = 0,
+    TP_LOCAL_HOLD_STATE_REASON_REQUESTED = 1,
+    TP_LOCAL_HOLD_STATE_REASON_RESOURCE_NOT_AVAILABLE = 2,
+} TpLocalHoldStateReason;
+</programlisting>
+<para>
+<![CDATA[         The reason for a change to the Local_Hold_State. Clients MUST         treat unknown values as equivalent to Local_Hold_State_Reason_None.       ]]>
+</para>
+<para>
+Bitfield/set of flags generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-LOCAL-HOLD-STATE-REASON-NONE:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_REASON_NONE</literal></term>
+<listitem><simpara> <![CDATA[           The reason cannot be described by any of the predefined values           (connection managers SHOULD avoid this reason, but clients MUST           handle it gracefully)         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-LOCAL-HOLD-STATE-REASON-REQUESTED:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_REASON_REQUESTED</literal></term>
+<listitem><simpara> <![CDATA[           The change is in response to a user request         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-LOCAL-HOLD-STATE-REASON-RESOURCE-NOT-AVAILABLE:CAPS" role="constant">
+<term><literal>TP_LOCAL_HOLD_STATE_REASON_RESOURCE_NOT_AVAILABLE</literal></term>
+<listitem><simpara> <![CDATA[           The change is because some resource was not available         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

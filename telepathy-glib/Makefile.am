@@ -11,7 +11,8 @@ ABI_LISTS = \
     versions/0.7.3.abi \
     versions/0.7.5.abi \
     versions/0.7.6.abi \
-    versions/0.7.7.abi
+    versions/0.7.7.abi \
+    versions/0.7.8.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -182,7 +183,9 @@ distclean-local:
 check_c_sources = \
     $(tpginclude_HEADERS) \
     $(libtelepathy_glib_la_SOURCES)
+
 include $(top_srcdir)/tools/check-coding-style.mk
+check-local: check-coding-style
 
 libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)
 libtelepathy_glib_internal_la_SOURCES = \

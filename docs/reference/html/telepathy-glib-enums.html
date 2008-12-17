@@ -94,6 +94,10 @@ enum                <a class="link" href="telepathy-glib-enums.html#TpTubeState"
 #define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-TUBE-TYPES:CAPS" title="NUM_TP_TUBE_TYPES">NUM_TP_TUBE_TYPES</a>
 enum                <a class="link" href="telepathy-glib-enums.html#TpTubeType" title="enum TpTubeType">TpTubeType</a>;
 enum                <a class="link" href="telepathy-glib-enums.html#TpChannelCallStateFlags" title="enum TpChannelCallStateFlags">TpChannelCallStateFlags</a>;
+#define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-LOCAL-HOLD-STATES:CAPS" title="NUM_TP_LOCAL_HOLD_STATES">NUM_TP_LOCAL_HOLD_STATES</a>
+enum                <a class="link" href="telepathy-glib-enums.html#TpLocalHoldState" title="enum TpLocalHoldState">TpLocalHoldState</a>;
+#define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-LOCAL-HOLD-STATE-REASONS:CAPS" title="NUM_TP_LOCAL_HOLD_STATE_REASONS">NUM_TP_LOCAL_HOLD_STATE_REASONS</a>
+enum                <a class="link" href="telepathy-glib-enums.html#TpLocalHoldStateReason" title="enum TpLocalHoldStateReason">TpLocalHoldStateReason</a>;
 </pre>
 </div>
 <div class="refsect1" lang="en">
@@ -1591,6 +1595,108 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tr>
 <td><p><a name="TP-CHANNEL-CALL-STATE-HELD:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CALL_STATE_HELD</code></span></p></td>
 <td>            The contact has placed the call on hold, and will not receive           media from the local user or any other participants until they           unhold the call again.         
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="NUM-TP-LOCAL-HOLD-STATES:CAPS"></a><h3>NUM_TP_LOCAL_HOLD_STATES</h3>
+<pre class="programlisting">#define             NUM_TP_LOCAL_HOLD_STATES</pre>
+<p>
+1 higher than the highest valid value of <a class="link" href="telepathy-glib-enums.html#TpLocalHoldState" title="enum TpLocalHoldState"><span class="type">TpLocalHoldState</span></a>.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpLocalHoldState"></a><h3>enum TpLocalHoldState</h3>
+<pre class="programlisting">typedef enum {
+    TP_LOCAL_HOLD_STATE_UNHELD = 0,
+    TP_LOCAL_HOLD_STATE_HELD = 1,
+    TP_LOCAL_HOLD_STATE_PENDING_HOLD = 2,
+    TP_LOCAL_HOLD_STATE_PENDING_UNHOLD = 3,
+} TpLocalHoldState;
+</pre>
+<p>
+         The hold state of a channel.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-UNHELD:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_UNHELD</code></span></p></td>
+<td>            All streams are unheld (the call is active). New channels SHOULD           have this hold state.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-HELD:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_HELD</code></span></p></td>
+<td>            All streams are held (the call is on hold)         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-PENDING-HOLD:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_PENDING_HOLD</code></span></p></td>
+<td>            The connection manager is attempting to move to state Held, but           has not yet completed that operation. It is unspecified whether           any, all or none of the streams making up the channel are on hold.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-PENDING-UNHOLD:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_PENDING_UNHOLD</code></span></p></td>
+<td>            The connection manager is attempting to move to state Held, but           has not yet completed that operation. It is unspecified whether           any, all or none of the streams making up the channel are on hold.         
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="NUM-TP-LOCAL-HOLD-STATE-REASONS:CAPS"></a><h3>NUM_TP_LOCAL_HOLD_STATE_REASONS</h3>
+<pre class="programlisting">#define             NUM_TP_LOCAL_HOLD_STATE_REASONS</pre>
+<p>
+1 higher than the highest valid value of <a class="link" href="telepathy-glib-enums.html#TpLocalHoldStateReason" title="enum TpLocalHoldStateReason"><span class="type">TpLocalHoldStateReason</span></a>.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="TpLocalHoldStateReason"></a><h3>enum TpLocalHoldStateReason</h3>
+<pre class="programlisting">typedef enum {
+    TP_LOCAL_HOLD_STATE_REASON_NONE = 0,
+    TP_LOCAL_HOLD_STATE_REASON_REQUESTED = 1,
+    TP_LOCAL_HOLD_STATE_REASON_RESOURCE_NOT_AVAILABLE = 2,
+} TpLocalHoldStateReason;
+</pre>
+<p>
+         The reason for a change to the Local_Hold_State. Clients MUST         treat unknown values as equivalent to Local_Hold_State_Reason_None.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-REASON-NONE:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_REASON_NONE</code></span></p></td>
+<td>            The reason cannot be described by any of the predefined values           (connection managers SHOULD avoid this reason, but clients MUST           handle it gracefully)         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-REASON-REQUESTED:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_REASON_REQUESTED</code></span></p></td>
+<td>            The change is in response to a user request         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-LOCAL-HOLD-STATE-REASON-RESOURCE-NOT-AVAILABLE:CAPS"></a><span class="term"><code class="literal">TP_LOCAL_HOLD_STATE_REASON_RESOURCE_NOT_AVAILABLE</code></span></p></td>
+<td>            The change is because some resource was not available         
 </td>
 </tr>
 </tbody>
