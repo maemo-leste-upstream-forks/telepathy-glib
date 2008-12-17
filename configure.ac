@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [1])
+m4_define([tp_glib_micro_version], [2])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -30,9 +30,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [5])
+m4_define([tp_glib_lt_current], [6])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [5])
+m4_define([tp_glib_lt_age], [6])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -180,11 +180,6 @@ XSLTPROC=
 AC_CHECK_PROGS([XSLTPROC], [xsltproc])
 if test -z "$XSLTPROC"; then
   AC_MSG_ERROR([xsltproc (from the libxslt source package) is required])
-fi
-DBUS_BINDING_TOOL=
-AC_CHECK_PROGS([DBUS_BINDING_TOOL], [dbus-binding-tool])
-if test -z "$DBUS_BINDING_TOOL"; then
-  AC_MSG_ERROR([dbus-binding-tool (from dbus-glib) is required])
 fi
 PYTHON=
 AC_CHECK_PROGS([PYTHON], [python2.3 python2.4 python2.5 python])

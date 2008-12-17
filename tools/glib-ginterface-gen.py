@@ -89,7 +89,11 @@ class Generator(object):
         interface = interfaces[0]
         self.iface_name = interface.getAttribute('name')
 
-        tmp = node.getAttribute('causes-havoc')
+        tmp = interface.getAttribute('tp:implement-service')
+        if tmp == "no":
+            return
+
+        tmp = interface.getAttribute('tp:causes-havoc')
         if tmp and not self.allow_havoc:
             raise AssertionError('%s is %s' % (self.iface_name, tmp))
 
@@ -99,6 +103,9 @@ class Generator(object):
 
         methods = interface.getElementsByTagName('method')
         signals = interface.getElementsByTagName('signal')
+        # Don't handle properties until we know what we're doing
+        # a bit better - generate empty introspect data
+        properties = []
 
         self.b('struct _%s%sClass {' % (self.Prefix, node_name_mixed))
         self.b('    GTypeInterface parent_class;')
@@ -235,7 +242,7 @@ class Generator(object):
         self.b('  %d,' % len(methods))
         self.b('"' + method_blob.replace('\0', '\\0') + '",')
         self.b('"' + self.get_signal_glue(signals).replace('\0', '\\0') + '",')
-        self.b('"\\0"')
+        self.b('"' + self.get_property_glue(properties).replace('\0', '\\0') + '",')
         self.b('};')
         self.b('')
 
@@ -298,6 +305,9 @@ class Generator(object):
             info.append(signal.getAttribute('name'))
 
         return '\0'.join(info) + '\0\0'
+
+    # the implementation can be the same
+    get_property_glue = get_signal_glue
 
     def get_method_impl_names(self, method):
         dbus_method_name = method.getAttribute('name')
