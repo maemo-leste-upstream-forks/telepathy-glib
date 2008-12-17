@@ -34,6 +34,10 @@
                                                          const <link linkend="gchar">gchar</link> *right);
 <link linkend="gpointer">gpointer</link>            <link linkend="tp-mixin-offset-cast">tp_mixin_offset_cast</link>                (<link linkend="gpointer">gpointer</link> instance,
                                                          <link linkend="guint">guint</link> offset);
+<link linkend="guint">guint</link>               <link linkend="tp-mixin-class-get-offset">tp_mixin_class_get_offset</link>           (<link linkend="gpointer">gpointer</link> klass,
+                                                         <link linkend="GQuark">GQuark</link> quark);
+<link linkend="guint">guint</link>               <link linkend="tp-mixin-instance-get-offset">tp_mixin_instance_get_offset</link>        (<link linkend="gpointer">gpointer</link> instance,
+                                                         <link linkend="GQuark">GQuark</link> quark);
 <link linkend="gchar">gchar</link>*              <link linkend="tp-escape-as-identifier">tp_escape_as_identifier</link>             (const <link linkend="gchar">gchar</link> *name);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-strv-contains">tp_strv_contains</link>                    (const <link linkend="gchar">gchar</link> * const *strv,
                                                          const <link linkend="gchar">gchar</link> *str);
@@ -190,6 +194,52 @@ mixin classes.</para>
 <listitem><simpara> The offset of a structure member in bytes, which must not be 0
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a pointer <parameter>offset</parameter> bytes beyond <parameter>instance</parameter>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-mixin-class-get-offset" role="function">
+<title>tp_mixin_class_get_offset ()</title>
+<indexterm zone="tp-mixin-class-get-offset"><primary>tp_mixin_class_get_offset</primary></indexterm><programlisting><link linkend="guint">guint</link>               tp_mixin_class_get_offset           (<link linkend="gpointer">gpointer</link> klass,
+                                                         <link linkend="GQuark">GQuark</link> quark);</programlisting>
+<para>
+If the type of <parameter>klass</parameter>, or any of its ancestor types, has had an offset
+attached using qdata with the given <parameter>quark</parameter>, return that offset. If not,
+this indicates a programming error and results are undefined.
+</para>
+<para>
+This is used to implement the telepathy-glib mixin classes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A pointer to a GObjectClass-derived class structure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>quark</parameter>&nbsp;:</term>
+<listitem><simpara> A quark that was used to store the offset with <link linkend="g-type-set-qdata"><function>g_type_set_qdata()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the offset of the mixin class
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-mixin-instance-get-offset" role="function">
+<title>tp_mixin_instance_get_offset ()</title>
+<indexterm zone="tp-mixin-instance-get-offset"><primary>tp_mixin_instance_get_offset</primary></indexterm><programlisting><link linkend="guint">guint</link>               tp_mixin_instance_get_offset        (<link linkend="gpointer">gpointer</link> instance,
+                                                         <link linkend="GQuark">GQuark</link> quark);</programlisting>
+<para>
+If the type of <parameter>instance</parameter>, or any of its ancestor types, has had an offset
+attached using qdata with the given <parameter>quark</parameter>, return that offset. If not,
+this indicates a programming error and results are undefined.
+</para>
+<para>
+This is used to implement the telepathy-glib mixin classes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> A pointer to a GObject-derived instance structure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>quark</parameter>&nbsp;:</term>
+<listitem><simpara> A quark that was used to store the offset with <link linkend="g-type-set-qdata"><function>g_type_set_qdata()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the offset of the mixin
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-escape-as-identifier" role="function">

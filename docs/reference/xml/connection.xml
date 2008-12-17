@@ -73,6 +73,17 @@
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                <link linkend="tp-connection-get-contact-attributes">tp_connection_get_contact_attributes</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         const <link linkend="gchar">gchar</link> * const *interfaces,
+                                                         <link linkend="gboolean">gboolean</link> hold,
+                                                         <link linkend="tp-cli-connection-interface-contacts-callback-for-get-contact-attributes">tp_cli_connection_interface_contacts_callback_for_get_contact_attributes</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                <link linkend="tp-connection-hold-handles">tp_connection_hold_handles</link>          (<link linkend="TpConnection">TpConnection</link> *self,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          <link linkend="TpHandleType">TpHandleType</link> handle_type,
@@ -819,6 +830,75 @@ include them in <parameter>user_data</parameter>.</para>
  <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link>
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="tp-connection-get-contact-attributes" role="function">
+<title>tp_connection_get_contact_attributes ()</title>
+<indexterm zone="tp-connection-get-contact-attributes"><primary>tp_connection_get_contact_attributes</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_get_contact_attributes
+                                                        (<link linkend="TpConnection">TpConnection</link> *self,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="guint">guint</link> n_handles,
+                                                         const <link linkend="TpHandle">TpHandle</link> *handles,
+                                                         const <link linkend="gchar">gchar</link> * const *interfaces,
+                                                         <link linkend="gboolean">gboolean</link> hold,
+                                                         <link linkend="tp-cli-connection-interface-contacts-callback-for-get-contact-attributes">tp_cli_connection_interface_contacts_callback_for_get_contact_attributes</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Return (via a callback) any number of attributes of the given handles, and
+if they are valid and <parameter>hold</parameter> is TRUE, hold a reference to them.
+</para>
+<para>
+This is a thin wrapper around the GetContactAttributes D-Bus method, and
+should be used in preference to
+<link linkend="tp-cli-connection-interface-contacts-get-contact-attributes"><function>tp_cli_connection_interface_contacts_get_contact_attributes()</function></link>.
+The <link linkend="TpContact"><type>TpContact</type></link> API provides a higher-level abstraction which should
+usually be used instead.
+</para>
+<para>
+<parameter>callback</parameter> will later be called with the attributes of those of the given
+handles that were valid. Invalid handles are simply omitted from the
+parameter to the callback.
+</para>
+<para>
+If <parameter>hold</parameter> is <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>, the <parameter>callback</parameter> is given one reference to each handle
+that appears as a key in the callback's <parameter>attributes</parameter> parameter.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n_handles</parameter>&nbsp;:</term>
+<listitem><simpara> the number of handles in <parameter>handles</parameter> (must be at least 1)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> an array of handles
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interfaces</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="GStrv"><type>GStrv</type></link> of interfaces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>hold</parameter>&nbsp;:</term>
+<listitem><simpara> if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>, the callback will hold one reference to each valid handle
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called on success or failure (unless <parameter>weak_object</parameter> has become
+ unreferenced)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> arbitrary user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called to destroy <parameter>user_data</parameter> after calling <parameter>callback</parameter>, or when
+ <parameter>weak_object</parameter> becomes unreferenced (whichever occurs sooner)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> if not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, an object to be weakly referenced: if it is
+ destroyed, <parameter>callback</parameter> will not be called
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="tp-connection-hold-handles" role="function">
 <title>tp_connection_hold_handles ()</title>
 <indexterm zone="tp-connection-hold-handles"><primary>tp_connection_hold_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_connection_hold_handles          (<link linkend="TpConnection">TpConnection</link> *self,
@@ -880,6 +960,18 @@ an error.</para>
 <para>
 Release the reference to the handles in <parameter>handles</parameter> that was obtained by
 calling <link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link> or <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link>.
+</para>
+<para>
+This function might release any references held by calling
+<link linkend="tp-cli-connection-call-request-handles"><function>tp_cli_connection_call_request_handles()</function></link>,
+<link linkend="tp-cli-connection-run-request-handles"><function>tp_cli_connection_run_request_handles()</function></link>,
+<link linkend="tp-cli-connection-call-hold-handles"><function>tp_cli_connection_call_hold_handles()</function></link>,
+<link linkend="tp-cli-connection-run-hold-handles"><function>tp_cli_connection_run_hold_handles()</function></link>,
+<link linkend="tp-cli-connection-interface-contacts-call-get-contact-attributes"><function>tp_cli_connection_interface_contacts_call_get_contact_attributes()</function></link> or
+<link linkend="tp-cli-connection-interface-contacts-run-get-contact-attributes"><function>tp_cli_connection_interface_contacts_run_get_contact_attributes()</function></link> directly.
+Those functions should be avoided in favour of using <link linkend="TpContact"><type>TpContact</type></link>,
+<link linkend="tp-connection-hold-handles"><function>tp_connection_hold_handles()</function></link>, <link linkend="tp-connection-request-handles"><function>tp_connection_request_handles()</function></link> and
+<link linkend="tp-connection-get-contact-attributes"><function>tp_connection_get_contact_attributes()</function></link>.
 </para>
 <para>
 If <parameter>self</parameter> has already become invalid, this function does nothing.</para>

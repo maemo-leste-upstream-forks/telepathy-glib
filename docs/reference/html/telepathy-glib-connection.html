@@ -172,6 +172,31 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
                                                          <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 >GObject</a> *weak_object);
+void                <a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()">tp_connection_get_contact_attributes</a>
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a> timeout_ms,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a> n_handles,
+                                                         const <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> *handles,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *interfaces,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> hold,
+                                                         <a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-callback-for-get-contact-attributes" title="tp_cli_connection_interface_contacts_callback_for_get_contact_attributes ()">tp_cli_connection_interface_contacts_callback_for_get_contact_attributes</a> callback,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"
+>GDestroyNotify</a> destroy,
+                                                         <a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *weak_object);
 void                <a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()">tp_connection_hold_handles</a>          (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
                                                          <a
 href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
@@ -1661,6 +1686,123 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 </div>
 <hr>
 <div class="refsect2" lang="en">
+<a name="tp-connection-get-contact-attributes"></a><h3>tp_connection_get_contact_attributes ()</h3>
+<pre class="programlisting">void                tp_connection_get_contact_attributes
+                                                        (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a> timeout_ms,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a> n_handles,
+                                                         const <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> *handles,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> * const *interfaces,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> hold,
+                                                         <a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-callback-for-get-contact-attributes" title="tp_cli_connection_interface_contacts_callback_for_get_contact_attributes ()">tp_cli_connection_interface_contacts_callback_for_get_contact_attributes</a> callback,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"
+>GDestroyNotify</a> destroy,
+                                                         <a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *weak_object);</pre>
+<p>
+Return (via a callback) any number of attributes of the given handles, and
+if they are valid and <em class="parameter"><code>hold</code></em> is TRUE, hold a reference to them.
+</p>
+<p>
+This is a thin wrapper around the GetContactAttributes D-Bus method, and
+should be used in preference to
+<code class="function">tp_cli_connection_interface_contacts_get_contact_attributes()</code>.
+The <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> API provides a higher-level abstraction which should
+usually be used instead.
+</p>
+<p>
+<em class="parameter"><code>callback</code></em> will later be called with the attributes of those of the given
+handles that were valid. Invalid handles are simply omitted from the
+parameter to the callback.
+</p>
+<p>
+If <em class="parameter"><code>hold</code></em> is <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>, the <em class="parameter"><code>callback</code></em> is given one reference to each handle
+that appears as a key in the callback's <em class="parameter"><code>attributes</code></em> parameter.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em> :</span></p></td>
+<td> the timeout in milliseconds, or -1 to use the default
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>n_handles</code></em> :</span></p></td>
+<td> the number of handles in <em class="parameter"><code>handles</code></em> (must be at least 1)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>handles</code></em> :</span></p></td>
+<td> an array of handles
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interfaces</code></em> :</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html#GStrv"
+><span class="type">GStrv</span></a> of interfaces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>hold</code></em> :</span></p></td>
+<td> if <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a>, the callback will hold one reference to each valid handle
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> called on success or failure (unless <em class="parameter"><code>weak_object</code></em> has become
+ unreferenced)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> arbitrary user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td> called to destroy <em class="parameter"><code>user_data</code></em> after calling <em class="parameter"><code>callback</code></em>, or when
+ <em class="parameter"><code>weak_object</code></em> becomes unreferenced (whichever occurs sooner)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td> if not <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, an object to be weakly referenced: if it is
+ destroyed, <em class="parameter"><code>callback</code></em> will not be called
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
 <a name="tp-connection-hold-handles"></a><h3>tp_connection_hold_handles ()</h3>
 <pre class="programlisting">void                tp_connection_hold_handles          (<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a> *self,
                                                          <a
@@ -1759,6 +1901,18 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
 <p>
 Release the reference to the handles in <em class="parameter"><code>handles</code></em> that was obtained by
 calling <a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()"><code class="function">tp_connection_hold_handles()</code></a> or <a class="link" href="telepathy-glib-connection.html#tp-connection-request-handles" title="tp_connection_request_handles ()"><code class="function">tp_connection_request_handles()</code></a>.
+</p>
+<p>
+This function might release any references held by calling
+<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-request-handles" title="tp_cli_connection_call_request_handles ()"><code class="function">tp_cli_connection_call_request_handles()</code></a>,
+<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-request-handles" title="tp_cli_connection_run_request_handles ()"><code class="function">tp_cli_connection_run_request_handles()</code></a>,
+<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-hold-handles" title="tp_cli_connection_call_hold_handles ()"><code class="function">tp_cli_connection_call_hold_handles()</code></a>,
+<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-hold-handles" title="tp_cli_connection_run_hold_handles ()"><code class="function">tp_cli_connection_run_hold_handles()</code></a>,
+<a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-call-get-contact-attributes" title="tp_cli_connection_interface_contacts_call_get_contact_attributes ()"><code class="function">tp_cli_connection_interface_contacts_call_get_contact_attributes()</code></a> or
+<a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-run-get-contact-attributes" title="tp_cli_connection_interface_contacts_run_get_contact_attributes ()"><code class="function">tp_cli_connection_interface_contacts_run_get_contact_attributes()</code></a> directly.
+Those functions should be avoided in favour of using <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>,
+<a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()"><code class="function">tp_connection_hold_handles()</code></a>, <a class="link" href="telepathy-glib-connection.html#tp-connection-request-handles" title="tp_connection_request_handles ()"><code class="function">tp_connection_request_handles()</code></a> and
+<a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()"><code class="function">tp_connection_get_contact_attributes()</code></a>.
 </p>
 <p>
 If <em class="parameter"><code>self</code></em> has already become invalid, this function does nothing.</p>
