@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [4])
+m4_define([tp_glib_micro_version], [5])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -30,9 +30,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [7])
-m4_define([tp_glib_lt_revision], [1])
-m4_define([tp_glib_lt_age], [7])
+m4_define([tp_glib_lt_current], [8])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [8])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -179,7 +179,7 @@ AC_SUBST(DBUS_LIBS)
 dnl We want the examples to be able to use TP_GLIB_CFLAGS, TP_GLIB_LIBS
 dnl as though they were independent programs
 TP_GLIB_CFLAGS='-I${top_builddir} -I${top_srcdir}'
-TP_GLIB_LIBS='-L${top_builddir}/telepathy-glib -ltelepathy-glib'
+TP_GLIB_LIBS='${top_builddir}/telepathy-glib/libtelepathy-glib.la'
 AC_SUBST(TP_GLIB_CFLAGS)
 AC_SUBST(TP_GLIB_LIBS)
 

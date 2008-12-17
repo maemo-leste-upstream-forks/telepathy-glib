@@ -32,7 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-call-cancellation$(EXEEXT) test-dbus$(EXEEXT) \
+noinst_PROGRAMS = test-invalidated-while-invoking-signals$(EXEEXT) \
+	test-call-cancellation$(EXEEXT) test-dbus$(EXEEXT) \
 	test-disconnection$(EXEEXT) test-example-no-protocols$(EXEEXT) \
 	test-properties$(EXEEXT) test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -64,6 +65,12 @@ test_example_no_protocols_SOURCES = test-example-no-protocols.c
 test_example_no_protocols_OBJECTS =  \
 	test-example-no-protocols.$(OBJEXT)
 test_example_no_protocols_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_test_invalidated_while_invoking_signals_OBJECTS =  \
+	invalidated-while-invoking-signals.$(OBJEXT)
+test_invalidated_while_invoking_signals_OBJECTS =  \
+	$(am_test_invalidated_while_invoking_signals_OBJECTS)
+test_invalidated_while_invoking_signals_DEPENDENCIES =  \
+	$(am__DEPENDENCIES_1) ../libtp-glib-tests.la
 am_test_properties_OBJECTS = properties.$(OBJEXT) svc.$(OBJEXT)
 test_properties_OBJECTS = $(am_test_properties_OBJECTS)
 test_properties_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -85,10 +92,13 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = test-call-cancellation.c test-dbus.c test-disconnection.c \
-	test-example-no-protocols.c $(test_properties_SOURCES) \
+	test-example-no-protocols.c \
+	$(test_invalidated_while_invoking_signals_SOURCES) \
+	$(test_properties_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = test-call-cancellation.c test-dbus.c \
 	test-disconnection.c test-example-no-protocols.c \
+	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_properties_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
@@ -236,6 +246,13 @@ test_disconnection_LDADD = \
 test_example_no_protocols_LDADD = $(TP_GLIB_LIBS)
 test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
 test_unsupported_interface_SOURCES = unsupported-interface.c
+test_invalidated_while_invoking_signals_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../libtp-glib-tests.la
+
+test_invalidated_while_invoking_signals_SOURCES = \
+    invalidated-while-invoking-signals.c
+
 test_properties_LDADD = $(TP_GLIB_LIBS)
 test_properties_SOURCES = \
     properties.c \
@@ -331,6 +348,9 @@ test-disconnection$(EXEEXT): $(test_disconnection_OBJECTS) $(test_disconnection_
 test-example-no-protocols$(EXEEXT): $(test_example_no_protocols_OBJECTS) $(test_example_no_protocols_DEPENDENCIES) 
 	@rm -f test-example-no-protocols$(EXEEXT)
 	$(LINK) $(test_example_no_protocols_OBJECTS) $(test_example_no_protocols_LDADD) $(LIBS)
+test-invalidated-while-invoking-signals$(EXEEXT): $(test_invalidated_while_invoking_signals_OBJECTS) $(test_invalidated_while_invoking_signals_DEPENDENCIES) 
+	@rm -f test-invalidated-while-invoking-signals$(EXEEXT)
+	$(LINK) $(test_invalidated_while_invoking_signals_OBJECTS) $(test_invalidated_while_invoking_signals_LDADD) $(LIBS)
 test-properties$(EXEEXT): $(test_properties_OBJECTS) $(test_properties_DEPENDENCIES) 
 	@rm -f test-properties$(EXEEXT)
 	$(LINK) $(test_properties_OBJECTS) $(test_properties_LDADD) $(LIBS)
@@ -344,6 +364,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidated-while-invoking-signals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-call-cancellation.Po@am__quote@
