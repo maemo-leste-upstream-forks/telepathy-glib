@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="TpStaticHandleRepo">
+<refmeta>
+<refentrytitle role="top_of_page">TpStaticHandleRepo</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>TpStaticHandleRepo</refname>
+<refpurpose>handle repository implementation with a fixed, static
+ set of handle names</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;telepathy-glib/handle-repo-static.h&gt;
+
+
+<link linkend="TpHandleRepoIface">TpHandleRepoIface</link>*  <link linkend="tp-static-handle-repo-new">tp_static_handle_repo_new</link>           (<link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         const <link linkend="gchar">gchar</link> **handle_names);
+                    <link linkend="TpStaticHandleRepo-struct">TpStaticHandleRepo</link>;
+                    <link linkend="TpStaticHandleRepoClass">TpStaticHandleRepoClass</link>;
+
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+
+  <link linkend="GObject">GObject</link>
+   +----TpStaticHandleRepo
+</synopsis>
+
+</refsect1>
+
+
+
+<refsect1 role="impl_interfaces">
+<title role="impl_interfaces.title">Implemented Interfaces</title>
+<para>
+TpStaticHandleRepo implements
+ <link linkend="TpHandleRepoIface">TpHandleRepoIface</link>.</para>
+
+</refsect1>
+
+
+<refsect1 role="properties">
+<title role="properties.title">Properties</title>
+<synopsis>
+
+  &quot;<link linkend="TpStaticHandleRepo--handle-names">handle-names</link>&quot;             <link linkend="GStrv">GStrv</link>                 : Read / Write / Construct Only
+</synopsis>
+</refsect1>
+
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+A static handle repository has a fixed, static set of allowed names;
+these handles can never be destroyed, and no more can be created, so
+no reference counting is performed.
+</para>
+<para>
+The <link linkend="TpHandleRepoIface--handle-type"><type>TpHandleRepoIface:handle-type</type></link> property must be set at construction
+time.
+</para>
+<para>
+Most connection managers will use this for handles of type
+<link linkend="TP-HANDLE-TYPE-CONTACT-LIST:CAPS"><literal>TP_HANDLE_TYPE_CONTACT_LIST</literal></link>.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="tp-static-handle-repo-new" role="function"/>tp_static_handle_repo_new ()</title>
+<indexterm><primary>tp_static_handle_repo_new</primary></indexterm><programlisting><link linkend="TpHandleRepoIface">TpHandleRepoIface</link>*  tp_static_handle_repo_new           (<link linkend="TpHandleType">TpHandleType</link> handle_type,
+                                                         const <link linkend="gchar">gchar</link> **handle_names);</programlisting>
+<para>
+<!----></para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> The type of handle to store in the
+ new repository
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_names</parameter>&nbsp;:</term>
+<listitem><simpara> Same as <link linkend="TpStaticHandleRepo--handle-names"><type>TpStaticHandleRepo:handle-names</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a new static handle repository
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpStaticHandleRepo-struct" role="struct"/>TpStaticHandleRepo</title>
+<indexterm><primary>TpStaticHandleRepo</primary></indexterm><programlisting>typedef struct _TpStaticHandleRepo TpStaticHandleRepo;</programlisting>
+<para>
+A static handle repository contains a fixed set of handles.
+</para>
+<para>
+As well as setting the <link linkend="TpHandleRepoIface--handle-type"><type>TpHandleRepoIface:handle-type</type></link> property, code
+which creates a static handle repository must set the
+<link linkend="TpStaticHandleRepo--handle-names"><type>TpStaticHandleRepo:handle-names</type></link> construction property to a strv of
+valid handle names. All of these are preallocated; no more may be
+created, and attempts to do so will fail.
+</para>
+<para>
+Handles in this repository are 1 more than the index in the string
+vector of the handle's name, so the first name in the vector has
+handle 1 and so on. Connection managers which use a static repository
+may assume this to be true, and use an enumeration starting at 1, in the
+same order as the string vector, to avoid having to look up handles
+internally.
+</para>
+<para>
+This is intended for handles of type <link linkend="TP-HANDLE-TYPE-CONTACT-LIST:CAPS"><literal>TP_HANDLE_TYPE_CONTACT_LIST</literal></link>,
+for which the connection manager should only accept a static list of
+supported handle names.
+</para>
+<para>
+All structure fields are private.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpStaticHandleRepoClass" role="struct"/>TpStaticHandleRepoClass</title>
+<indexterm><primary>TpStaticHandleRepoClass</primary></indexterm><programlisting>typedef struct _TpStaticHandleRepoClass TpStaticHandleRepoClass;</programlisting>
+<para>
+The class of a TpStaticHandleRepo. All fields are private.</para>
+<para>
+
+</para></refsect2>
+
+</refsect1>
+<refsect1 role="property_details">
+<title role="property_details.title">Property Details</title>
+<refsect2><title><anchor id="TpStaticHandleRepo--handle-names"/>The &quot;<literal>handle-names</literal>&quot; property</title>
+<indexterm><primary>TpStaticHandleRepo:handle-names</primary></indexterm><programlisting>  &quot;handle-names&quot;             <link linkend="GStrv">GStrv</link>                 : Read / Write / Construct Only</programlisting>
+<para>The static set of handle names supported by this repo.</para></refsect2>
+
+</refsect1>
+
+
+
+<refsect1>
+<title>See Also</title>
+TpHandleRepoIface, TpDynamicHandleRepo
+</refsect1>
+
+</refentry>

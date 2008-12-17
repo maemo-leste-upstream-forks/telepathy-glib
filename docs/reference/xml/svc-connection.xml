@@ -1,0 +1,2410 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-svc-connection">
+<refmeta>
+<refentrytitle role="top_of_page">Service-side Connection interfaces</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Service-side Connection interfaces</refname>
+<refpurpose>GInterfaces for Telepathy Connection objects</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+<anchor id="TpSvcConnection"/>
+<synopsis>
+
+#include &lt;telepathy-glib/svc-connection.h&gt;
+
+
+                    <link linkend="TpSvcConnection-struct">TpSvcConnection</link>;
+                    <link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-connect-impl">*tp_svc_connection_connect_impl</link>)   (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-connect">tp_svc_connection_implement_connect</link> (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-connect-impl">tp_svc_connection_connect_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-connect">tp_svc_connection_return_from_connect</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-disconnect-impl">*tp_svc_connection_disconnect_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-disconnect">tp_svc_connection_implement_disconnect</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-disconnect-impl">tp_svc_connection_disconnect_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-disconnect">tp_svc_connection_return_from_disconnect</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-get-interfaces-impl">*tp_svc_connection_get_interfaces_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-get-interfaces">tp_svc_connection_implement_get_interfaces</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-interfaces-impl">tp_svc_connection_get_interfaces_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-get-interfaces">tp_svc_connection_return_from_get_interfaces</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-get-protocol-impl">*tp_svc_connection_get_protocol_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-get-protocol">tp_svc_connection_implement_get_protocol</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-protocol-impl">tp_svc_connection_get_protocol_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-get-protocol">tp_svc_connection_return_from_get_protocol</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> *ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-get-self-handle-impl">*tp_svc_connection_get_self_handle_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-get-self-handle">tp_svc_connection_implement_get_self_handle</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-self-handle-impl">tp_svc_connection_get_self_handle_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-get-self-handle">tp_svc_connection_return_from_get_self_handle</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="guint">guint</link> ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-get-status-impl">*tp_svc_connection_get_status_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-get-status">tp_svc_connection_implement_get_status</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-status-impl">tp_svc_connection_get_status_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-get-status">tp_svc_connection_return_from_get_status</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="guint">guint</link> ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-hold-handles-impl">*tp_svc_connection_hold_handles_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-hold-handles">tp_svc_connection_implement_hold_handles</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-hold-handles-impl">tp_svc_connection_hold_handles_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-hold-handles">tp_svc_connection_return_from_hold_handles</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-inspect-handles-impl">*tp_svc_connection_inspect_handles_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-inspect-handles">tp_svc_connection_implement_inspect_handles</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-inspect-handles-impl">tp_svc_connection_inspect_handles_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-inspect-handles">tp_svc_connection_return_from_inspect_handles</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-list-channels-impl">*tp_svc_connection_list_channels_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-list-channels">tp_svc_connection_implement_list_channels</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-list-channels-impl">tp_svc_connection_list_channels_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-list-channels">tp_svc_connection_return_from_list_channels</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-release-handles-impl">*tp_svc_connection_release_handles_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-release-handles">tp_svc_connection_implement_release_handles</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-release-handles-impl">tp_svc_connection_release_handles_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-release-handles">tp_svc_connection_return_from_release_handles</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-request-channel-impl">*tp_svc_connection_request_channel_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *type,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         <link linkend="guint">guint</link> handle,
+                                                         <link linkend="gboolean">gboolean</link> suppress_handler,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-request-channel">tp_svc_connection_implement_request_channel</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-request-channel-impl">tp_svc_connection_request_channel_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-request-channel">tp_svc_connection_return_from_request_channel</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> *ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-request-handles-impl">*tp_svc_connection_request_handles_impl</link>)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="gchar">gchar</link> **names,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-implement-request-handles">tp_svc_connection_implement_request_handles</link>
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-request-handles-impl">tp_svc_connection_request_handles_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-return-from-request-handles">tp_svc_connection_return_from_request_handles</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GArray">GArray</link> *ret);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-emit-new-channel">tp_svc_connection_emit_new_channel</link>  (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *object_path,
+                                                         const <link linkend="gchar">gchar</link> *channel_type,
+                                                         const <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="guint">guint</link> handle,
+                                                         const <link linkend="gboolean">gboolean</link> suppress_handler);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-emit-status-changed">tp_svc_connection_emit_status_changed</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="guint">guint</link> status,
+                                                         const <link linkend="guint">guint</link> reason);
+
+
+                    <link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link>;
+                    <link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-add-status-impl">*tp_svc_connection_interface_presence_add_status_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *status,
+                                                         <link linkend="GHashTable">GHashTable</link> *parms,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-add-status">tp_svc_connection_interface_presence_implement_add_status</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-add-status-impl">tp_svc_connection_interface_presence_add_status_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-add-status">tp_svc_connection_interface_presence_return_from_add_status</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-clear-status-impl">*tp_svc_connection_interface_presence_clear_status_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-clear-status">tp_svc_connection_interface_presence_implement_clear_status</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-clear-status-impl">tp_svc_connection_interface_presence_clear_status_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-clear-status">tp_svc_connection_interface_presence_return_from_clear_status</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-get-presence-impl">*tp_svc_connection_interface_presence_get_presence_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-get-presence">tp_svc_connection_interface_presence_implement_get_presence</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-get-presence-impl">tp_svc_connection_interface_presence_get_presence_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-get-presence">tp_svc_connection_interface_presence_return_from_get_presence</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="GHashTable">GHashTable</link> *presence);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-get-statuses-impl">*tp_svc_connection_interface_presence_get_statuses_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-get-statuses">tp_svc_connection_interface_presence_implement_get_statuses</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-get-statuses-impl">tp_svc_connection_interface_presence_get_statuses_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-get-statuses">tp_svc_connection_interface_presence_return_from_get_statuses</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="GHashTable">GHashTable</link> *ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-remove-status-impl">*tp_svc_connection_interface_presence_remove_status_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *status,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-remove-status">tp_svc_connection_interface_presence_implement_remove_status</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-remove-status-impl">tp_svc_connection_interface_presence_remove_status_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-remove-status">tp_svc_connection_interface_presence_return_from_remove_status</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-request-presence-impl">*tp_svc_connection_interface_presence_request_presence_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-request-presence">tp_svc_connection_interface_presence_implement_request_presence</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-request-presence-impl">tp_svc_connection_interface_presence_request_presence_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-request-presence">tp_svc_connection_interface_presence_return_from_request_presence</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-set-last-activity-time-impl">*tp_svc_connection_interface_presence_set_last_activity_time_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="guint">guint</link> time,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-set-last-activity-time">tp_svc_connection_interface_presence_implement_set_last_activity_time</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-set-last-activity-time-impl">tp_svc_connection_interface_presence_set_last_activity_time_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-set-last-activity-time">tp_svc_connection_interface_presence_return_from_set_last_activity_time</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-presence-set-status-impl">*tp_svc_connection_interface_presence_set_status_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="GHashTable">GHashTable</link> *statuses,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-implement-set-status">tp_svc_connection_interface_presence_implement_set_status</link>
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-set-status-impl">tp_svc_connection_interface_presence_set_status_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-return-from-set-status">tp_svc_connection_interface_presence_return_from_set_status</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-presence-emit-presence-update">tp_svc_connection_interface_presence_emit_presence_update</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GHashTable">GHashTable</link> *presence);
+
+
+                    <link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link>;
+                    <link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-avatars-clear-avatar-impl">*tp_svc_connection_interface_avatars_clear_avatar_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-implement-clear-avatar">tp_svc_connection_interface_avatars_implement_clear_avatar</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-clear-avatar-impl">tp_svc_connection_interface_avatars_clear_avatar_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-return-from-clear-avatar">tp_svc_connection_interface_avatars_return_from_clear_avatar</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-avatars-get-avatar-requirements-impl">*tp_svc_connection_interface_avatars_get_avatar_requirements_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-implement-get-avatar-requirements">tp_svc_connection_interface_avatars_implement_get_avatar_requirements</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-get-avatar-requirements-impl">tp_svc_connection_interface_avatars_get_avatar_requirements_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-return-from-get-avatar-requirements">tp_svc_connection_interface_avatars_return_from_get_avatar_requirements</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret,
+                                                         <link linkend="guint">guint</link> ret1,
+                                                         <link linkend="guint">guint</link> ret2,
+                                                         <link linkend="guint">guint</link> ret3,
+                                                         <link linkend="guint">guint</link> ret4,
+                                                         <link linkend="guint">guint</link> ret5);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-avatars-get-avatar-tokens-impl">*tp_svc_connection_interface_avatars_get_avatar_tokens_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-implement-get-avatar-tokens">tp_svc_connection_interface_avatars_implement_get_avatar_tokens</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-get-avatar-tokens-impl">tp_svc_connection_interface_avatars_get_avatar_tokens_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-return-from-get-avatar-tokens">tp_svc_connection_interface_avatars_return_from_get_avatar_tokens</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-avatars-request-avatar-impl">*tp_svc_connection_interface_avatars_request_avatar_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         <link linkend="guint">guint</link> contact,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-implement-request-avatar">tp_svc_connection_interface_avatars_implement_request_avatar</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-request-avatar-impl">tp_svc_connection_interface_avatars_request_avatar_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-return-from-request-avatar">tp_svc_connection_interface_avatars_return_from_request_avatar</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GArray">GArray</link> *ret,
+                                                         const <link linkend="gchar">gchar</link> *ret1);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-avatars-set-avatar-impl">*tp_svc_connection_interface_avatars_set_avatar_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *avatar,
+                                                         const <link linkend="gchar">gchar</link> *mime_type,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-implement-set-avatar">tp_svc_connection_interface_avatars_implement_set_avatar</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-set-avatar-impl">tp_svc_connection_interface_avatars_set_avatar_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-return-from-set-avatar">tp_svc_connection_interface_avatars_return_from_set_avatar</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> *ret);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-avatars-emit-avatar-updated">tp_svc_connection_interface_avatars_emit_avatar_updated</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="guint">guint</link> contact,
+                                                         const <link linkend="gchar">gchar</link> *new_avatar_token);
+
+
+                    <link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link>;
+                    <link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-aliasing-get-alias-flags-impl">*tp_svc_connection_interface_aliasing_get_alias_flags_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-implement-get-alias-flags">tp_svc_connection_interface_aliasing_implement_get_alias_flags</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-aliasing-get-alias-flags-impl">tp_svc_connection_interface_aliasing_get_alias_flags_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-return-from-get-alias-flags">tp_svc_connection_interface_aliasing_return_from_get_alias_flags</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="guint">guint</link> ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-aliasing-request-aliases-impl">*tp_svc_connection_interface_aliasing_request_aliases_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-implement-request-aliases">tp_svc_connection_interface_aliasing_implement_request_aliases</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-aliasing-request-aliases-impl">tp_svc_connection_interface_aliasing_request_aliases_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-return-from-request-aliases">tp_svc_connection_interface_aliasing_return_from_request_aliases</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-aliasing-set-aliases-impl">*tp_svc_connection_interface_aliasing_set_aliases_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link> *self,
+                                                         <link linkend="GHashTable">GHashTable</link> *aliases,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-implement-set-aliases">tp_svc_connection_interface_aliasing_implement_set_aliases</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-aliasing-set-aliases-impl">tp_svc_connection_interface_aliasing_set_aliases_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-return-from-set-aliases">tp_svc_connection_interface_aliasing_return_from_set_aliases</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-aliasing-emit-aliases-changed">tp_svc_connection_interface_aliasing_emit_aliases_changed</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *aliases);
+
+
+                    <link linkend="TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</link>;
+                    <link linkend="TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-capabilities-advertise-capabilities-impl">*tp_svc_connection_interface_capabilities_advertise_capabilities_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *add,
+                                                         const <link linkend="gchar">gchar</link> **remove,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-capabilities-implement-advertise-capabilities">tp_svc_connection_interface_capabilities_implement_advertise_capabilities</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-capabilities-advertise-capabilities-impl">tp_svc_connection_interface_capabilities_advertise_capabilities_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-capabilities-return-from-advertise-capabilities">tp_svc_connection_interface_capabilities_return_from_advertise_capabilities</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *ret);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-capabilities-get-capabilities-impl">*tp_svc_connection_interface_capabilities_get_capabilities_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-capabilities-implement-get-capabilities">tp_svc_connection_interface_capabilities_implement_get_capabilities</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-capabilities-get-capabilities-impl">tp_svc_connection_interface_capabilities_get_capabilities_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-capabilities-return-from-get-capabilities">tp_svc_connection_interface_capabilities_return_from_get_capabilities</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *ret);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-capabilities-emit-capabilities-changed">tp_svc_connection_interface_capabilities_emit_capabilities_changed</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *caps);
+
+
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+
+  <link linkend="GInterface">GInterface</link>
+   +----TpSvcConnection
+</synopsis>
+
+</refsect1>
+
+
+
+
+<refsect1 role="implementations">
+<title role="implementations.title">Known Implementations</title>
+<para>
+TpSvcConnection is implemented by
+ <link linkend="TpBaseConnection">TpBaseConnection</link>.</para>
+
+</refsect1>
+
+
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+These interfaces (auto-generated from the Telepathy spec) make it easier
+to export objects implementing the Telepathy Connection and its
+optional interfaces, with the correct method and signal signatures,
+and emit signals from those objects in a type-safe way.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="TpSvcConnection-struct" role="struct"/>TpSvcConnection</title>
+<indexterm><primary>TpSvcConnection</primary></indexterm><programlisting>typedef struct _TpSvcConnection TpSvcConnection;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionClass" role="struct"/>TpSvcConnectionClass</title>
+<indexterm><primary>TpSvcConnectionClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionClass TpSvcConnectionClass;</programlisting>
+<para>
+The class of TpSvcConnection.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-connect-impl" role="function"/>tp_svc_connection_connect_impl ()</title>
+<indexterm><primary>tp_svc_connection_connect_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_connect_impl)   (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method Connect
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-connect" role="function"/>tp_svc_connection_implement_connect ()</title>
+<indexterm><primary>tp_svc_connection_implement_connect</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_connect (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-connect-impl">tp_svc_connection_connect_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the Connect method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the Connect method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-connect" role="function"/>tp_svc_connection_return_from_connect ()</title>
+<indexterm><primary>tp_svc_connection_return_from_connect</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_connect
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-disconnect-impl" role="function"/>tp_svc_connection_disconnect_impl ()</title>
+<indexterm><primary>tp_svc_connection_disconnect_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_disconnect_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method Disconnect
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-disconnect" role="function"/>tp_svc_connection_implement_disconnect ()</title>
+<indexterm><primary>tp_svc_connection_implement_disconnect</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_disconnect
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-disconnect-impl">tp_svc_connection_disconnect_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the Disconnect method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the Disconnect method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-disconnect" role="function"/>tp_svc_connection_return_from_disconnect ()</title>
+<indexterm><primary>tp_svc_connection_return_from_disconnect</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_disconnect
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-get-interfaces-impl" role="function"/>tp_svc_connection_get_interfaces_impl ()</title>
+<indexterm><primary>tp_svc_connection_get_interfaces_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_get_interfaces_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetInterfaces
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-get-interfaces" role="function"/>tp_svc_connection_implement_get_interfaces ()</title>
+<indexterm><primary>tp_svc_connection_implement_get_interfaces</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_get_interfaces
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-interfaces-impl">tp_svc_connection_get_interfaces_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetInterfaces method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetInterfaces method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-get-interfaces" role="function"/>tp_svc_connection_return_from_get_interfaces ()</title>
+<indexterm><primary>tp_svc_connection_return_from_get_interfaces</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_get_interfaces
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-get-protocol-impl" role="function"/>tp_svc_connection_get_protocol_impl ()</title>
+<indexterm><primary>tp_svc_connection_get_protocol_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_get_protocol_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetProtocol
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-get-protocol" role="function"/>tp_svc_connection_implement_get_protocol ()</title>
+<indexterm><primary>tp_svc_connection_implement_get_protocol</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_get_protocol
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-protocol-impl">tp_svc_connection_get_protocol_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetProtocol method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetProtocol method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-get-protocol" role="function"/>tp_svc_connection_return_from_get_protocol ()</title>
+<indexterm><primary>tp_svc_connection_return_from_get_protocol</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_get_protocol
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-get-self-handle-impl" role="function"/>tp_svc_connection_get_self_handle_impl ()</title>
+<indexterm><primary>tp_svc_connection_get_self_handle_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_get_self_handle_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetSelfHandle
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-get-self-handle" role="function"/>tp_svc_connection_implement_get_self_handle ()</title>
+<indexterm><primary>tp_svc_connection_implement_get_self_handle</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_get_self_handle
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-self-handle-impl">tp_svc_connection_get_self_handle_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetSelfHandle method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetSelfHandle method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-get-self-handle" role="function"/>tp_svc_connection_return_from_get_self_handle ()</title>
+<indexterm><primary>tp_svc_connection_return_from_get_self_handle</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_get_self_handle
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="guint">guint</link> ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-get-status-impl" role="function"/>tp_svc_connection_get_status_impl ()</title>
+<indexterm><primary>tp_svc_connection_get_status_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_get_status_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetStatus
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-get-status" role="function"/>tp_svc_connection_implement_get_status ()</title>
+<indexterm><primary>tp_svc_connection_implement_get_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_get_status
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-get-status-impl">tp_svc_connection_get_status_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetStatus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-get-status" role="function"/>tp_svc_connection_return_from_get_status ()</title>
+<indexterm><primary>tp_svc_connection_return_from_get_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_get_status
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="guint">guint</link> ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-hold-handles-impl" role="function"/>tp_svc_connection_hold_handles_impl ()</title>
+<indexterm><primary>tp_svc_connection_hold_handles_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_hold_handles_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method HoldHandles
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-hold-handles" role="function"/>tp_svc_connection_implement_hold_handles ()</title>
+<indexterm><primary>tp_svc_connection_implement_hold_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_hold_handles
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-hold-handles-impl">tp_svc_connection_hold_handles_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the HoldHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the HoldHandles method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-hold-handles" role="function"/>tp_svc_connection_return_from_hold_handles ()</title>
+<indexterm><primary>tp_svc_connection_return_from_hold_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_hold_handles
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-inspect-handles-impl" role="function"/>tp_svc_connection_inspect_handles_impl ()</title>
+<indexterm><primary>tp_svc_connection_inspect_handles_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_inspect_handles_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method InspectHandles
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-inspect-handles" role="function"/>tp_svc_connection_implement_inspect_handles ()</title>
+<indexterm><primary>tp_svc_connection_implement_inspect_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_inspect_handles
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-inspect-handles-impl">tp_svc_connection_inspect_handles_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the InspectHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the InspectHandles method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-inspect-handles" role="function"/>tp_svc_connection_return_from_inspect_handles ()</title>
+<indexterm><primary>tp_svc_connection_return_from_inspect_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_inspect_handles
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-list-channels-impl" role="function"/>tp_svc_connection_list_channels_impl ()</title>
+<indexterm><primary>tp_svc_connection_list_channels_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_list_channels_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method ListChannels
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-list-channels" role="function"/>tp_svc_connection_implement_list_channels ()</title>
+<indexterm><primary>tp_svc_connection_implement_list_channels</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_list_channels
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-list-channels-impl">tp_svc_connection_list_channels_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the ListChannels method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the ListChannels method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-list-channels" role="function"/>tp_svc_connection_return_from_list_channels ()</title>
+<indexterm><primary>tp_svc_connection_return_from_list_channels</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_list_channels
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-release-handles-impl" role="function"/>tp_svc_connection_release_handles_impl ()</title>
+<indexterm><primary>tp_svc_connection_release_handles_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_release_handles_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method ReleaseHandles
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-release-handles" role="function"/>tp_svc_connection_implement_release_handles ()</title>
+<indexterm><primary>tp_svc_connection_implement_release_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_release_handles
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-release-handles-impl">tp_svc_connection_release_handles_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the ReleaseHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the ReleaseHandles method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-release-handles" role="function"/>tp_svc_connection_return_from_release_handles ()</title>
+<indexterm><primary>tp_svc_connection_return_from_release_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_release_handles
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-request-channel-impl" role="function"/>tp_svc_connection_request_channel_impl ()</title>
+<indexterm><primary>tp_svc_connection_request_channel_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_request_channel_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *type,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         <link linkend="guint">guint</link> handle,
+                                                         <link linkend="gboolean">gboolean</link> suppress_handler,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method RequestChannel
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>suppress_handler</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-request-channel" role="function"/>tp_svc_connection_implement_request_channel ()</title>
+<indexterm><primary>tp_svc_connection_implement_request_channel</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_request_channel
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-request-channel-impl">tp_svc_connection_request_channel_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RequestChannel method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the RequestChannel method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-request-channel" role="function"/>tp_svc_connection_return_from_request_channel ()</title>
+<indexterm><primary>tp_svc_connection_return_from_request_channel</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_request_channel
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-request-handles-impl" role="function"/>tp_svc_connection_request_handles_impl ()</title>
+<indexterm><primary>tp_svc_connection_request_handles_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_request_handles_impl)
+                                                        (<link linkend="TpSvcConnection">TpSvcConnection</link> *self,
+                                                         <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="gchar">gchar</link> **names,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method RequestHandles
+on interface org.freedesktop.Telepathy.Connection</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>names</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-implement-request-handles" role="function"/>tp_svc_connection_implement_request_handles ()</title>
+<indexterm><primary>tp_svc_connection_implement_request_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_implement_request_handles
+                                                        (<link linkend="TpSvcConnectionClass">TpSvcConnectionClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-request-handles-impl">tp_svc_connection_request_handles_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RequestHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the RequestHandles method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-return-from-request-handles" role="function"/>tp_svc_connection_return_from_request_handles ()</title>
+<indexterm><primary>tp_svc_connection_return_from_request_handles</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_return_from_request_handles
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GArray">GArray</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-emit-new-channel" role="function"/>tp_svc_connection_emit_new_channel ()</title>
+<indexterm><primary>tp_svc_connection_emit_new_channel</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_emit_new_channel  (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *object_path,
+                                                         const <link linkend="gchar">gchar</link> *channel_type,
+                                                         const <link linkend="guint">guint</link> handle_type,
+                                                         const <link linkend="guint">guint</link> handle,
+                                                         const <link linkend="gboolean">gboolean</link> suppress_handler);</programlisting>
+<para>
+Emit the NewChannel D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>object_path</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>channel_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handle</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>suppress_handler</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-emit-status-changed" role="function"/>tp_svc_connection_emit_status_changed ()</title>
+<indexterm><primary>tp_svc_connection_emit_status_changed</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_emit_status_changed
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="guint">guint</link> status,
+                                                         const <link linkend="guint">guint</link> reason);</programlisting>
+<para>
+Emit the StatusChanged D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>status</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>reason</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfacePresence" role="struct"/>TpSvcConnectionInterfacePresence</title>
+<indexterm><primary>TpSvcConnectionInterfacePresence</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfacePresence TpSvcConnectionInterfacePresence;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfacePresenceClass" role="struct"/>TpSvcConnectionInterfacePresenceClass</title>
+<indexterm><primary>TpSvcConnectionInterfacePresenceClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfacePresenceClass TpSvcConnectionInterfacePresenceClass;</programlisting>
+<para>
+The class of TpSvcConnectionInterfacePresence.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-add-status-impl" role="function"/>tp_svc_connection_interface_presence_add_status_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_add_status_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_add_status_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *status,
+                                                         <link linkend="GHashTable">GHashTable</link> *parms,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method AddStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>status</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>parms</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-add-status" role="function"/>tp_svc_connection_interface_presence_implement_add_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_add_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_add_status
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-add-status-impl">tp_svc_connection_interface_presence_add_status_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the AddStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the AddStatus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-add-status" role="function"/>tp_svc_connection_interface_presence_return_from_add_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_add_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_add_status
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-clear-status-impl" role="function"/>tp_svc_connection_interface_presence_clear_status_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_clear_status_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_clear_status_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method ClearStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-clear-status" role="function"/>tp_svc_connection_interface_presence_implement_clear_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_clear_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_clear_status
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-clear-status-impl">tp_svc_connection_interface_presence_clear_status_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the ClearStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the ClearStatus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-clear-status" role="function"/>tp_svc_connection_interface_presence_return_from_clear_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_clear_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_clear_status
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-get-presence-impl" role="function"/>tp_svc_connection_interface_presence_get_presence_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_get_presence_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_get_presence_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetPresence
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>contacts</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-get-presence" role="function"/>tp_svc_connection_interface_presence_implement_get_presence ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_get_presence</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_get_presence
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-get-presence-impl">tp_svc_connection_interface_presence_get_presence_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetPresence method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetPresence method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-get-presence" role="function"/>tp_svc_connection_interface_presence_return_from_get_presence ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_get_presence</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_get_presence
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="GHashTable">GHashTable</link> *presence);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>presence</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-get-statuses-impl" role="function"/>tp_svc_connection_interface_presence_get_statuses_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_get_statuses_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_get_statuses_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetStatuses
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-get-statuses" role="function"/>tp_svc_connection_interface_presence_implement_get_statuses ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_get_statuses</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_get_statuses
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-get-statuses-impl">tp_svc_connection_interface_presence_get_statuses_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetStatuses method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetStatuses method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-get-statuses" role="function"/>tp_svc_connection_interface_presence_return_from_get_statuses ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_get_statuses</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_get_statuses
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="GHashTable">GHashTable</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-remove-status-impl" role="function"/>tp_svc_connection_interface_presence_remove_status_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_remove_status_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_remove_status_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *status,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method RemoveStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>status</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-remove-status" role="function"/>tp_svc_connection_interface_presence_implement_remove_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_remove_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_remove_status
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-remove-status-impl">tp_svc_connection_interface_presence_remove_status_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RemoveStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the RemoveStatus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-remove-status" role="function"/>tp_svc_connection_interface_presence_return_from_remove_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_remove_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_remove_status
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-request-presence-impl" role="function"/>tp_svc_connection_interface_presence_request_presence_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_request_presence_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_request_presence_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method RequestPresence
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>contacts</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-request-presence" role="function"/>tp_svc_connection_interface_presence_implement_request_presence ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_request_presence</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_request_presence
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-request-presence-impl">tp_svc_connection_interface_presence_request_presence_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RequestPresence method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the RequestPresence method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-request-presence" role="function"/>tp_svc_connection_interface_presence_return_from_request_presence ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_request_presence</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_request_presence
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-set-last-activity-time-impl" role="function"/>tp_svc_connection_interface_presence_set_last_activity_time_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_set_last_activity_time_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_set_last_activity_time_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="guint">guint</link> time,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method SetLastActivityTime
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>time</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-set-last-activity-time" role="function"/>tp_svc_connection_interface_presence_implement_set_last_activity_time ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_set_last_activity_time</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_set_last_activity_time
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-set-last-activity-time-impl">tp_svc_connection_interface_presence_set_last_activity_time_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SetLastActivityTime method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the SetLastActivityTime method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-set-last-activity-time" role="function"/>tp_svc_connection_interface_presence_return_from_set_last_activity_time ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_set_last_activity_time</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_set_last_activity_time
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-set-status-impl" role="function"/>tp_svc_connection_interface_presence_set_status_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_set_status_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_presence_set_status_impl)
+                                                        (<link linkend="TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</link> *self,
+                                                         <link linkend="GHashTable">GHashTable</link> *statuses,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method SetStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>statuses</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-implement-set-status" role="function"/>tp_svc_connection_interface_presence_implement_set_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_implement_set_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_implement_set_status
+                                                        (<link linkend="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-presence-set-status-impl">tp_svc_connection_interface_presence_set_status_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SetStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the SetStatus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-return-from-set-status" role="function"/>tp_svc_connection_interface_presence_return_from_set_status ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_return_from_set_status</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_return_from_set_status
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-presence-emit-presence-update" role="function"/>tp_svc_connection_interface_presence_emit_presence_update ()</title>
+<indexterm><primary>tp_svc_connection_interface_presence_emit_presence_update</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_presence_emit_presence_update
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GHashTable">GHashTable</link> *presence);</programlisting>
+<para>
+Emit the PresenceUpdate D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>presence</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfaceAvatars" role="struct"/>TpSvcConnectionInterfaceAvatars</title>
+<indexterm><primary>TpSvcConnectionInterfaceAvatars</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceAvatars TpSvcConnectionInterfaceAvatars;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfaceAvatarsClass" role="struct"/>TpSvcConnectionInterfaceAvatarsClass</title>
+<indexterm><primary>TpSvcConnectionInterfaceAvatarsClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceAvatarsClass TpSvcConnectionInterfaceAvatarsClass;</programlisting>
+<para>
+The class of TpSvcConnectionInterfaceAvatars.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-clear-avatar-impl" role="function"/>tp_svc_connection_interface_avatars_clear_avatar_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_clear_avatar_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_avatars_clear_avatar_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method ClearAvatar
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-implement-clear-avatar" role="function"/>tp_svc_connection_interface_avatars_implement_clear_avatar ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_implement_clear_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_implement_clear_avatar
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-clear-avatar-impl">tp_svc_connection_interface_avatars_clear_avatar_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the ClearAvatar method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the ClearAvatar method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-return-from-clear-avatar" role="function"/>tp_svc_connection_interface_avatars_return_from_clear_avatar ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_return_from_clear_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_return_from_clear_avatar
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-get-avatar-requirements-impl" role="function"/>tp_svc_connection_interface_avatars_get_avatar_requirements_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_get_avatar_requirements_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_avatars_get_avatar_requirements_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetAvatarRequirements
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-implement-get-avatar-requirements" role="function"/>tp_svc_connection_interface_avatars_implement_get_avatar_requirements ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_implement_get_avatar_requirements</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_implement_get_avatar_requirements
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-get-avatar-requirements-impl">tp_svc_connection_interface_avatars_get_avatar_requirements_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetAvatarRequirements method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetAvatarRequirements method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-return-from-get-avatar-requirements" role="function"/>tp_svc_connection_interface_avatars_return_from_get_avatar_requirements ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_return_from_get_avatar_requirements</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_return_from_get_avatar_requirements
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret,
+                                                         <link linkend="guint">guint</link> ret1,
+                                                         <link linkend="guint">guint</link> ret2,
+                                                         <link linkend="guint">guint</link> ret3,
+                                                         <link linkend="guint">guint</link> ret4,
+                                                         <link linkend="guint">guint</link> ret5);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret1</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret2</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret3</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret4</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret5</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-get-avatar-tokens-impl" role="function"/>tp_svc_connection_interface_avatars_get_avatar_tokens_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_get_avatar_tokens_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_avatars_get_avatar_tokens_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetAvatarTokens
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>contacts</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-implement-get-avatar-tokens" role="function"/>tp_svc_connection_interface_avatars_implement_get_avatar_tokens ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_implement_get_avatar_tokens</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_implement_get_avatar_tokens
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-get-avatar-tokens-impl">tp_svc_connection_interface_avatars_get_avatar_tokens_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetAvatarTokens method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetAvatarTokens method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-return-from-get-avatar-tokens" role="function"/>tp_svc_connection_interface_avatars_return_from_get_avatar_tokens ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_return_from_get_avatar_tokens</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_return_from_get_avatar_tokens
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-request-avatar-impl" role="function"/>tp_svc_connection_interface_avatars_request_avatar_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_request_avatar_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_avatars_request_avatar_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         <link linkend="guint">guint</link> contact,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method RequestAvatar
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>contact</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-implement-request-avatar" role="function"/>tp_svc_connection_interface_avatars_implement_request_avatar ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_implement_request_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_implement_request_avatar
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-request-avatar-impl">tp_svc_connection_interface_avatars_request_avatar_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RequestAvatar method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the RequestAvatar method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-return-from-request-avatar" role="function"/>tp_svc_connection_interface_avatars_return_from_request_avatar ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_return_from_request_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_return_from_request_avatar
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GArray">GArray</link> *ret,
+                                                         const <link linkend="gchar">gchar</link> *ret1);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret1</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-set-avatar-impl" role="function"/>tp_svc_connection_interface_avatars_set_avatar_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_set_avatar_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_avatars_set_avatar_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *avatar,
+                                                         const <link linkend="gchar">gchar</link> *mime_type,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method SetAvatar
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>avatar</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>mime_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-implement-set-avatar" role="function"/>tp_svc_connection_interface_avatars_implement_set_avatar ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_implement_set_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_implement_set_avatar
+                                                        (<link linkend="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-avatars-set-avatar-impl">tp_svc_connection_interface_avatars_set_avatar_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SetAvatar method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the SetAvatar method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-return-from-set-avatar" role="function"/>tp_svc_connection_interface_avatars_return_from_set_avatar ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_return_from_set_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_return_from_set_avatar
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-avatars-emit-avatar-updated" role="function"/>tp_svc_connection_interface_avatars_emit_avatar_updated ()</title>
+<indexterm><primary>tp_svc_connection_interface_avatars_emit_avatar_updated</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_avatars_emit_avatar_updated
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="guint">guint</link> contact,
+                                                         const <link linkend="gchar">gchar</link> *new_avatar_token);</programlisting>
+<para>
+Emit the AvatarUpdated D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>contact</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>new_avatar_token</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfaceAliasing" role="struct"/>TpSvcConnectionInterfaceAliasing</title>
+<indexterm><primary>TpSvcConnectionInterfaceAliasing</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceAliasing TpSvcConnectionInterfaceAliasing;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfaceAliasingClass" role="struct"/>TpSvcConnectionInterfaceAliasingClass</title>
+<indexterm><primary>TpSvcConnectionInterfaceAliasingClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceAliasingClass TpSvcConnectionInterfaceAliasingClass;</programlisting>
+<para>
+The class of TpSvcConnectionInterfaceAliasing.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-get-alias-flags-impl" role="function"/>tp_svc_connection_interface_aliasing_get_alias_flags_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_get_alias_flags_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_aliasing_get_alias_flags_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetAliasFlags
+on interface org.freedesktop.Telepathy.Connection.Interface.Aliasing</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-implement-get-alias-flags" role="function"/>tp_svc_connection_interface_aliasing_implement_get_alias_flags ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_implement_get_alias_flags</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_implement_get_alias_flags
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-aliasing-get-alias-flags-impl">tp_svc_connection_interface_aliasing_get_alias_flags_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetAliasFlags method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetAliasFlags method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-return-from-get-alias-flags" role="function"/>tp_svc_connection_interface_aliasing_return_from_get_alias_flags ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_return_from_get_alias_flags</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_return_from_get_alias_flags
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         <link linkend="guint">guint</link> ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-request-aliases-impl" role="function"/>tp_svc_connection_interface_aliasing_request_aliases_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_request_aliases_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_aliasing_request_aliases_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method RequestAliases
+on interface org.freedesktop.Telepathy.Connection.Interface.Aliasing</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>contacts</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-implement-request-aliases" role="function"/>tp_svc_connection_interface_aliasing_implement_request_aliases ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_implement_request_aliases</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_implement_request_aliases
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-aliasing-request-aliases-impl">tp_svc_connection_interface_aliasing_request_aliases_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RequestAliases method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the RequestAliases method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-return-from-request-aliases" role="function"/>tp_svc_connection_interface_aliasing_return_from_request_aliases ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_return_from_request_aliases</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_return_from_request_aliases
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="gchar">gchar</link> **ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-set-aliases-impl" role="function"/>tp_svc_connection_interface_aliasing_set_aliases_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_set_aliases_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_aliasing_set_aliases_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</link> *self,
+                                                         <link linkend="GHashTable">GHashTable</link> *aliases,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method SetAliases
+on interface org.freedesktop.Telepathy.Connection.Interface.Aliasing</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>aliases</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-implement-set-aliases" role="function"/>tp_svc_connection_interface_aliasing_implement_set_aliases ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_implement_set_aliases</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_implement_set_aliases
+                                                        (<link linkend="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-aliasing-set-aliases-impl">tp_svc_connection_interface_aliasing_set_aliases_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SetAliases method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the SetAliases method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-return-from-set-aliases" role="function"/>tp_svc_connection_interface_aliasing_return_from_set_aliases ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_return_from_set_aliases</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_return_from_set_aliases
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-aliasing-emit-aliases-changed" role="function"/>tp_svc_connection_interface_aliasing_emit_aliases_changed ()</title>
+<indexterm><primary>tp_svc_connection_interface_aliasing_emit_aliases_changed</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_aliasing_emit_aliases_changed
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *aliases);</programlisting>
+<para>
+Emit the AliasesChanged D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>aliases</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfaceCapabilities" role="struct"/>TpSvcConnectionInterfaceCapabilities</title>
+<indexterm><primary>TpSvcConnectionInterfaceCapabilities</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceCapabilities TpSvcConnectionInterfaceCapabilities;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcConnectionInterfaceCapabilitiesClass" role="struct"/>TpSvcConnectionInterfaceCapabilitiesClass</title>
+<indexterm><primary>TpSvcConnectionInterfaceCapabilitiesClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceCapabilitiesClass TpSvcConnectionInterfaceCapabilitiesClass;</programlisting>
+<para>
+The class of TpSvcConnectionInterfaceCapabilities.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-advertise-capabilities-impl" role="function"/>tp_svc_connection_interface_capabilities_advertise_capabilities_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_advertise_capabilities_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_capabilities_advertise_capabilities_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *add,
+                                                         const <link linkend="gchar">gchar</link> **remove,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method AdvertiseCapabilities
+on interface org.freedesktop.Telepathy.Connection.Interface.Capabilities</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>remove</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-implement-advertise-capabilities" role="function"/>tp_svc_connection_interface_capabilities_implement_advertise_capabilities ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_implement_advertise_capabilities</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_capabilities_implement_advertise_capabilities
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-capabilities-advertise-capabilities-impl">tp_svc_connection_interface_capabilities_advertise_capabilities_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the AdvertiseCapabilities method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the AdvertiseCapabilities method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-return-from-advertise-capabilities" role="function"/>tp_svc_connection_interface_capabilities_return_from_advertise_capabilities ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_return_from_advertise_capabilities</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_capabilities_return_from_advertise_capabilities
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-get-capabilities-impl" role="function"/>tp_svc_connection_interface_capabilities_get_capabilities_impl ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_get_capabilities_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_capabilities_get_capabilities_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *handles,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method GetCapabilities
+on interface org.freedesktop.Telepathy.Connection.Interface.Capabilities</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>handles</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-implement-get-capabilities" role="function"/>tp_svc_connection_interface_capabilities_implement_get_capabilities ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_implement_get_capabilities</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_capabilities_implement_get_capabilities
+                                                        (<link linkend="TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-capabilities-get-capabilities-impl">tp_svc_connection_interface_capabilities_get_capabilities_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetCapabilities method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the GetCapabilities method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-return-from-get-capabilities" role="function"/>tp_svc_connection_interface_capabilities_return_from_get_capabilities ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_return_from_get_capabilities</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_capabilities_return_from_get_capabilities
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *ret);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ret</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-connection-interface-capabilities-emit-capabilities-changed" role="function"/>tp_svc_connection_interface_capabilities_emit_capabilities_changed ()</title>
+<indexterm><primary>tp_svc_connection_interface_capabilities_emit_capabilities_changed</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_capabilities_emit_capabilities_changed
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *caps);</programlisting>
+<para>
+Emit the CapabilitiesChanged D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>caps</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1>
+<title>See Also</title>
+<link linkend="TpBaseConnection"><type>TpBaseConnection</type></link>
+</refsect1>
+
+</refentry>

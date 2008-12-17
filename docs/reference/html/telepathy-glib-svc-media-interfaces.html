@@ -1,0 +1,1651 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Service-side media streaming helper interfaces</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.72.0">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-dbus.html" title="D-Bus interfaces">
+<link rel="prev" href="telepathy-glib-svc-connection.html" title="Service-side Connection interfaces">
+<link rel="next" href="telepathy-glib-svc-connection-manager.html" title="Service-side Connection Manager interface">
+<meta name="generator" content="GTK-Doc V1.8 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="D-Bus interfaces">
+<link rel="chapter" href="base-classes.html" title="Connections and channels">
+<link rel="chapter" href="ch-mixins.html" title="Implementation mixins">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+<link rel="chapter" href="ch-handle-management.html" title="Handle management">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-svc-connection.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-dbus.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-svc-connection-manager.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2568278" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2610708" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-svc-media-interfaces"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2568278"></a><span class="refentrytitle">Service-side media streaming helper interfaces</span>
+</h2>
+<p>Service-side media streaming helper interfaces &#8212; media session and media stream</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/svc-media-interfaces.h&gt;
+
+
+
+                    <a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</a>;
+                    <a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a>;
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-error-impl">*tp_svc_media_session_handler_error_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</a> *self,
+                                                         guint errno,
+                                                         const gchar *message,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-implement-error">tp_svc_media_session_handler_implement_error</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-error-impl">tp_svc_media_session_handler_error_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-return-from-error">tp_svc_media_session_handler_return_from_error</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-ready-impl">*tp_svc_media_session_handler_ready_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</a> *self,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-implement-ready">tp_svc_media_session_handler_implement_ready</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-ready-impl">tp_svc_media_session_handler_ready_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-return-from-ready">tp_svc_media_session_handler_return_from_ready</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-emit-new-stream-handler">tp_svc_media_session_handler_emit_new_stream_handler</a>
+                                                        (gpointer instance,
+                                                         const gchar *stream_handler,
+                                                         const guint id,
+                                                         const guint media_type,
+                                                         const guint direction);
+
+
+                    <a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a>;
+                    <a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a>;
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-codec-choice-impl">*tp_svc_media_stream_handler_codec_choice_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         guint codec_id,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-codec-choice">tp_svc_media_stream_handler_implement_codec_choice</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-codec-choice-impl">tp_svc_media_stream_handler_codec_choice_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-codec-choice">tp_svc_media_stream_handler_return_from_codec_choice</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-error-impl">*tp_svc_media_stream_handler_error_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         guint errno,
+                                                         const gchar *message,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-error">tp_svc_media_stream_handler_implement_error</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-error-impl">tp_svc_media_stream_handler_error_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-error">tp_svc_media_stream_handler_return_from_error</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-native-candidates-prepared-impl">*tp_svc_media_stream_handler_native_candidates_prepared_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-native-candidates-prepared">tp_svc_media_stream_handler_implement_native_candidates_prepared</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-native-candidates-prepared-impl">tp_svc_media_stream_handler_native_candidates_prepared_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-native-candidates-prepared">tp_svc_media_stream_handler_return_from_native_candidates_prepared</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-new-active-candidate-pair-impl">*tp_svc_media_stream_handler_new_active_candidate_pair_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const gchar *native_candidate_id,
+                                                         const gchar *remote_candidate_id,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-new-active-candidate-pair">tp_svc_media_stream_handler_implement_new_active_candidate_pair</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-new-active-candidate-pair-impl">tp_svc_media_stream_handler_new_active_candidate_pair_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-new-active-candidate-pair">tp_svc_media_stream_handler_return_from_new_active_candidate_pair</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-new-native-candidate-impl">*tp_svc_media_stream_handler_new_native_candidate_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const gchar *candidate_id,
+                                                         const GPtrArray *transports,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-new-native-candidate">tp_svc_media_stream_handler_implement_new_native_candidate</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-new-native-candidate-impl">tp_svc_media_stream_handler_new_native_candidate_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-new-native-candidate">tp_svc_media_stream_handler_return_from_new_native_candidate</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-ready-impl">*tp_svc_media_stream_handler_ready_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const GPtrArray *codecs,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-ready">tp_svc_media_stream_handler_implement_ready</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-ready-impl">tp_svc_media_stream_handler_ready_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-ready">tp_svc_media_stream_handler_return_from_ready</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-set-local-codecs-impl">*tp_svc_media_stream_handler_set_local_codecs_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const GPtrArray *codecs,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-set-local-codecs">tp_svc_media_stream_handler_implement_set_local_codecs</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-set-local-codecs-impl">tp_svc_media_stream_handler_set_local_codecs_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-set-local-codecs">tp_svc_media_stream_handler_return_from_set_local_codecs</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-stream-state-impl">*tp_svc_media_stream_handler_stream_state_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         guint state,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-stream-state">tp_svc_media_stream_handler_implement_stream_state</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-stream-state-impl">tp_svc_media_stream_handler_stream_state_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-stream-state">tp_svc_media_stream_handler_return_from_stream_state</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                (<a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-supported-codecs-impl">*tp_svc_media_stream_handler_supported_codecs_impl</a>)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const GPtrArray *codecs,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-implement-supported-codecs">tp_svc_media_stream_handler_implement_supported_codecs</a>
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-supported-codecs-impl">tp_svc_media_stream_handler_supported_codecs_impl</a> impl);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-return-from-supported-codecs">tp_svc_media_stream_handler_return_from_supported_codecs</a>
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-add-remote-candidate">tp_svc_media_stream_handler_emit_add_remote_candidate</a>
+                                                        (gpointer instance,
+                                                         const gchar *candidate_id,
+                                                         const GPtrArray *transports);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-close">tp_svc_media_stream_handler_emit_close</a>
+                                                        (gpointer instance);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-remove-remote-candidate">tp_svc_media_stream_handler_emit_remove_remote_candidate</a>
+                                                        (gpointer instance,
+                                                         const gchar *candidate_id);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-set-active-candidate-pair">tp_svc_media_stream_handler_emit_set_active_candidate_pair</a>
+                                                        (gpointer instance,
+                                                         const gchar *native_candidate_id,
+                                                         const gchar *remote_candidate_id);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-set-remote-candidate-list">tp_svc_media_stream_handler_emit_set_remote_candidate_list</a>
+                                                        (gpointer instance,
+                                                         const GPtrArray *remote_candidates);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-set-remote-codecs">tp_svc_media_stream_handler_emit_set_remote_codecs</a>
+                                                        (gpointer instance,
+                                                         const GPtrArray *codecs);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-set-stream-playing">tp_svc_media_stream_handler_emit_set_stream_playing</a>
+                                                        (gpointer instance,
+                                                         const gboolean playing);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-set-stream-sending">tp_svc_media_stream_handler_emit_set_stream_sending</a>
+                                                        (gpointer instance,
+                                                         const gboolean playing);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-start-telephony-event">tp_svc_media_stream_handler_emit_start_telephony_event</a>
+                                                        (gpointer instance,
+                                                         const guchar event);
+void                <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-emit-stop-telephony-event">tp_svc_media_stream_handler_emit_stop_telephony_event</a>
+                                                        (gpointer instance);
+
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2610708"></a><h2>Description</h2>
+<p>
+These interfaces (auto-generated from the telepathy spec) make it easier
+to export the objects used to implement <a href="telepathy-glib-svc-channel.html#TpSvcChannelTypeStreamedMedia"><span class="type">TpSvcChannelTypeStreamedMedia</span></a>,
+with the correct method and signal signatures, and emit signals from those
+objects.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2610738"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2610749"></a><h3>
+<a name="TpSvcMediaSessionHandler"></a>TpSvcMediaSessionHandler</h3>
+<a class="indexterm" name="id2610760"></a><pre class="programlisting">typedef struct _TpSvcMediaSessionHandler TpSvcMediaSessionHandler;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610781"></a><h3>
+<a name="TpSvcMediaSessionHandlerClass"></a>TpSvcMediaSessionHandlerClass</h3>
+<a class="indexterm" name="id2610794"></a><pre class="programlisting">typedef struct _TpSvcMediaSessionHandlerClass TpSvcMediaSessionHandlerClass;</pre>
+<p>
+The class of TpSvcMediaSessionHandler.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610816"></a><h3>
+<a name="tp-svc-media-session-handler-error-impl"></a>tp_svc_media_session_handler_error_impl ()</h3>
+<a class="indexterm" name="id2610829"></a><pre class="programlisting">void                (*tp_svc_media_session_handler_error_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</a> *self,
+                                                         guint errno,
+                                                         const gchar *message,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method Error
+on interface org.freedesktop.Telepathy.Media.SessionHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>errno</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610948"></a><h3>
+<a name="tp-svc-media-session-handler-implement-error"></a>tp_svc_media_session_handler_implement_error ()</h3>
+<a class="indexterm" name="id2610962"></a><pre class="programlisting">void                tp_svc_media_session_handler_implement_error
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-error-impl">tp_svc_media_session_handler_error_impl</a> impl);</pre>
+<p>
+Register an implementation for the Error method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the Error method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611040"></a><h3>
+<a name="tp-svc-media-session-handler-return-from-error"></a>tp_svc_media_session_handler_return_from_error ()</h3>
+<a class="indexterm" name="id2611054"></a><pre class="programlisting">void                tp_svc_media_session_handler_return_from_error
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611114"></a><h3>
+<a name="tp-svc-media-session-handler-ready-impl"></a>tp_svc_media_session_handler_ready_impl ()</h3>
+<a class="indexterm" name="id2611128"></a><pre class="programlisting">void                (*tp_svc_media_session_handler_ready_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</a> *self,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method Ready
+on interface org.freedesktop.Telepathy.Media.SessionHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611203"></a><h3>
+<a name="tp-svc-media-session-handler-implement-ready"></a>tp_svc_media_session_handler_implement_ready ()</h3>
+<a class="indexterm" name="id2611217"></a><pre class="programlisting">void                tp_svc_media_session_handler_implement_ready
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-ready-impl">tp_svc_media_session_handler_ready_impl</a> impl);</pre>
+<p>
+Register an implementation for the Ready method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the Ready method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611295"></a><h3>
+<a name="tp-svc-media-session-handler-return-from-ready"></a>tp_svc_media_session_handler_return_from_ready ()</h3>
+<a class="indexterm" name="id2611309"></a><pre class="programlisting">void                tp_svc_media_session_handler_return_from_ready
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611369"></a><h3>
+<a name="tp-svc-media-session-handler-emit-new-stream-handler"></a>tp_svc_media_session_handler_emit_new_stream_handler ()</h3>
+<a class="indexterm" name="id2611383"></a><pre class="programlisting">void                tp_svc_media_session_handler_emit_new_stream_handler
+                                                        (gpointer instance,
+                                                         const gchar *stream_handler,
+                                                         const guint id,
+                                                         const guint media_type,
+                                                         const guint direction);</pre>
+<p>
+Emit the NewStreamHandler D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>stream_handler</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>media_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>direction</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611530"></a><h3>
+<a name="TpSvcMediaStreamHandler"></a>TpSvcMediaStreamHandler</h3>
+<a class="indexterm" name="id2611541"></a><pre class="programlisting">typedef struct _TpSvcMediaStreamHandler TpSvcMediaStreamHandler;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611562"></a><h3>
+<a name="TpSvcMediaStreamHandlerClass"></a>TpSvcMediaStreamHandlerClass</h3>
+<a class="indexterm" name="id2611575"></a><pre class="programlisting">typedef struct _TpSvcMediaStreamHandlerClass TpSvcMediaStreamHandlerClass;</pre>
+<p>
+The class of TpSvcMediaStreamHandler.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611597"></a><h3>
+<a name="tp-svc-media-stream-handler-codec-choice-impl"></a>tp_svc_media_stream_handler_codec_choice_impl ()</h3>
+<a class="indexterm" name="id2611611"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_codec_choice_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         guint codec_id,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method CodecChoice
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>codec_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611708"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-codec-choice"></a>tp_svc_media_stream_handler_implement_codec_choice ()</h3>
+<a class="indexterm" name="id2611722"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_codec_choice
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-codec-choice-impl">tp_svc_media_stream_handler_codec_choice_impl</a> impl);</pre>
+<p>
+Register an implementation for the CodecChoice method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the CodecChoice method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611801"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-codec-choice"></a>tp_svc_media_stream_handler_return_from_codec_choice ()</h3>
+<a class="indexterm" name="id2611815"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_codec_choice
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611875"></a><h3>
+<a name="tp-svc-media-stream-handler-error-impl"></a>tp_svc_media_stream_handler_error_impl ()</h3>
+<a class="indexterm" name="id2611889"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_error_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         guint errno,
+                                                         const gchar *message,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method Error
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>errno</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612007"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-error"></a>tp_svc_media_stream_handler_implement_error ()</h3>
+<a class="indexterm" name="id2612022"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_error
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-error-impl">tp_svc_media_stream_handler_error_impl</a> impl);</pre>
+<p>
+Register an implementation for the Error method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the Error method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612099"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-error"></a>tp_svc_media_stream_handler_return_from_error ()</h3>
+<a class="indexterm" name="id2612113"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_error
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612173"></a><h3>
+<a name="tp-svc-media-stream-handler-native-candidates-prepared-impl"></a>tp_svc_media_stream_handler_native_candidates_prepared_impl ()</h3>
+<a class="indexterm" name="id2612188"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_native_candidates_prepared_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method NativeCandidatesPrepared
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612263"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-native-candidates-prepared"></a>tp_svc_media_stream_handler_implement_native_candidates_prepared ()</h3>
+<a class="indexterm" name="id2612278"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_native_candidates_prepared
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-native-candidates-prepared-impl">tp_svc_media_stream_handler_native_candidates_prepared_impl</a> impl);</pre>
+<p>
+Register an implementation for the NativeCandidatesPrepared method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the NativeCandidatesPrepared method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612358"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-native-candidates-prepared"></a>tp_svc_media_stream_handler_return_from_native_candidates_prepared ()</h3>
+<a class="indexterm" name="id2612374"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_native_candidates_prepared
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612433"></a><h3>
+<a name="tp-svc-media-stream-handler-new-active-candidate-pair-impl"></a>tp_svc_media_stream_handler_new_active_candidate_pair_impl ()</h3>
+<a class="indexterm" name="id2612448"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_new_active_candidate_pair_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const gchar *native_candidate_id,
+                                                         const gchar *remote_candidate_id,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method NewActiveCandidatePair
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>native_candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remote_candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612568"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-new-active-candidate-pair"></a>tp_svc_media_stream_handler_implement_new_active_candidate_pair ()</h3>
+<a class="indexterm" name="id2612583"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_new_active_candidate_pair
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-new-active-candidate-pair-impl">tp_svc_media_stream_handler_new_active_candidate_pair_impl</a> impl);</pre>
+<p>
+Register an implementation for the NewActiveCandidatePair method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the NewActiveCandidatePair method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612663"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-new-active-candidate-pair"></a>tp_svc_media_stream_handler_return_from_new_active_candidate_pair ()</h3>
+<a class="indexterm" name="id2612679"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_new_active_candidate_pair
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612738"></a><h3>
+<a name="tp-svc-media-stream-handler-new-native-candidate-impl"></a>tp_svc_media_stream_handler_new_native_candidate_impl ()</h3>
+<a class="indexterm" name="id2612753"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_new_native_candidate_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const gchar *candidate_id,
+                                                         const GPtrArray *transports,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method NewNativeCandidate
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>transports</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612872"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-new-native-candidate"></a>tp_svc_media_stream_handler_implement_new_native_candidate ()</h3>
+<a class="indexterm" name="id2612887"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_new_native_candidate
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-new-native-candidate-impl">tp_svc_media_stream_handler_new_native_candidate_impl</a> impl);</pre>
+<p>
+Register an implementation for the NewNativeCandidate method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the NewNativeCandidate method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612966"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-new-native-candidate"></a>tp_svc_media_stream_handler_return_from_new_native_candidate ()</h3>
+<a class="indexterm" name="id2612981"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_new_native_candidate
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613042"></a><h3>
+<a name="tp-svc-media-stream-handler-ready-impl"></a>tp_svc_media_stream_handler_ready_impl ()</h3>
+<a class="indexterm" name="id2613055"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_ready_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const GPtrArray *codecs,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method Ready
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>codecs</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613152"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-ready"></a>tp_svc_media_stream_handler_implement_ready ()</h3>
+<a class="indexterm" name="id2613166"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_ready
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-ready-impl">tp_svc_media_stream_handler_ready_impl</a> impl);</pre>
+<p>
+Register an implementation for the Ready method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the Ready method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613244"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-ready"></a>tp_svc_media_stream_handler_return_from_ready ()</h3>
+<a class="indexterm" name="id2613258"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_ready
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613318"></a><h3>
+<a name="tp-svc-media-stream-handler-set-local-codecs-impl"></a>tp_svc_media_stream_handler_set_local_codecs_impl ()</h3>
+<a class="indexterm" name="id2613332"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_set_local_codecs_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const GPtrArray *codecs,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method SetLocalCodecs
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>codecs</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613429"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-set-local-codecs"></a>tp_svc_media_stream_handler_implement_set_local_codecs ()</h3>
+<a class="indexterm" name="id2613443"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_set_local_codecs
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-set-local-codecs-impl">tp_svc_media_stream_handler_set_local_codecs_impl</a> impl);</pre>
+<p>
+Register an implementation for the SetLocalCodecs method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the SetLocalCodecs method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613522"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-set-local-codecs"></a>tp_svc_media_stream_handler_return_from_set_local_codecs ()</h3>
+<a class="indexterm" name="id2613537"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_set_local_codecs
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613597"></a><h3>
+<a name="tp-svc-media-stream-handler-stream-state-impl"></a>tp_svc_media_stream_handler_stream_state_impl ()</h3>
+<a class="indexterm" name="id2613611"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_stream_state_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         guint state,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method StreamState
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>state</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613708"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-stream-state"></a>tp_svc_media_stream_handler_implement_stream_state ()</h3>
+<a class="indexterm" name="id2613722"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_stream_state
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-stream-state-impl">tp_svc_media_stream_handler_stream_state_impl</a> impl);</pre>
+<p>
+Register an implementation for the StreamState method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the StreamState method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613801"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-stream-state"></a>tp_svc_media_stream_handler_return_from_stream_state ()</h3>
+<a class="indexterm" name="id2613815"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_stream_state
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613875"></a><h3>
+<a name="tp-svc-media-stream-handler-supported-codecs-impl"></a>tp_svc_media_stream_handler_supported_codecs_impl ()</h3>
+<a class="indexterm" name="id2613890"></a><pre class="programlisting">void                (*tp_svc_media_stream_handler_supported_codecs_impl)
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</a> *self,
+                                                         const GPtrArray *codecs,
+                                                         <a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *context);</pre>
+<p>
+Signature of an implementation of D-Bus method SupportedCodecs
+on interface org.freedesktop.Telepathy.Media.StreamHandler</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>codecs</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613987"></a><h3>
+<a name="tp-svc-media-stream-handler-implement-supported-codecs"></a>tp_svc_media_stream_handler_implement_supported_codecs ()</h3>
+<a class="indexterm" name="id2614001"></a><pre class="programlisting">void                tp_svc_media_stream_handler_implement_supported_codecs
+                                                        (<a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-stream-handler-supported-codecs-impl">tp_svc_media_stream_handler_supported_codecs_impl</a> impl);</pre>
+<p>
+Register an implementation for the SupportedCodecs method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the SupportedCodecs method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614080"></a><h3>
+<a name="tp-svc-media-stream-handler-return-from-supported-codecs"></a>tp_svc_media_stream_handler_return_from_supported_codecs ()</h3>
+<a class="indexterm" name="id2614095"></a><pre class="programlisting">void                tp_svc_media_stream_handler_return_from_supported_codecs
+                                                        (<a
+href="../dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"
+>DBusGMethodInvocation</a> *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614155"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-add-remote-candidate"></a>tp_svc_media_stream_handler_emit_add_remote_candidate ()</h3>
+<a class="indexterm" name="id2614169"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_add_remote_candidate
+                                                        (gpointer instance,
+                                                         const gchar *candidate_id,
+                                                         const GPtrArray *transports);</pre>
+<p>
+Emit the AddRemoteCandidate D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>transports</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614272"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-close"></a>tp_svc_media_stream_handler_emit_close ()</h3>
+<a class="indexterm" name="id2614286"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_close
+                                                        (gpointer instance);</pre>
+<p>
+Emit the Close D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614343"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-remove-remote-candidate"></a>tp_svc_media_stream_handler_emit_remove_remote_candidate ()</h3>
+<a class="indexterm" name="id2614358"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_remove_remote_candidate
+                                                        (gpointer instance,
+                                                         const gchar *candidate_id);</pre>
+<p>
+Emit the RemoveRemoteCandidate D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614439"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-set-active-candidate-pair"></a>tp_svc_media_stream_handler_emit_set_active_candidate_pair ()</h3>
+<a class="indexterm" name="id2614453"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_set_active_candidate_pair
+                                                        (gpointer instance,
+                                                         const gchar *native_candidate_id,
+                                                         const gchar *remote_candidate_id);</pre>
+<p>
+Emit the SetActiveCandidatePair D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>native_candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remote_candidate_id</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614556"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-set-remote-candidate-list"></a>tp_svc_media_stream_handler_emit_set_remote_candidate_list ()</h3>
+<a class="indexterm" name="id2614570"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_set_remote_candidate_list
+                                                        (gpointer instance,
+                                                         const GPtrArray *remote_candidates);</pre>
+<p>
+Emit the SetRemoteCandidateList D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remote_candidates</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614651"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-set-remote-codecs"></a>tp_svc_media_stream_handler_emit_set_remote_codecs ()</h3>
+<a class="indexterm" name="id2614665"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_set_remote_codecs
+                                                        (gpointer instance,
+                                                         const GPtrArray *codecs);</pre>
+<p>
+Emit the SetRemoteCodecs D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>codecs</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614746"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-set-stream-playing"></a>tp_svc_media_stream_handler_emit_set_stream_playing ()</h3>
+<a class="indexterm" name="id2614760"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_set_stream_playing
+                                                        (gpointer instance,
+                                                         const gboolean playing);</pre>
+<p>
+Emit the SetStreamPlaying D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>playing</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614840"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-set-stream-sending"></a>tp_svc_media_stream_handler_emit_set_stream_sending ()</h3>
+<a class="indexterm" name="id2614854"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_set_stream_sending
+                                                        (gpointer instance,
+                                                         const gboolean playing);</pre>
+<p>
+Emit the SetStreamSending D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>playing</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2614935"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-start-telephony-event"></a>tp_svc_media_stream_handler_emit_start_telephony_event ()</h3>
+<a class="indexterm" name="id2614949"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_start_telephony_event
+                                                        (gpointer instance,
+                                                         const guchar event);</pre>
+<p>
+Emit the StartTelephonyEvent D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>event</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2615030"></a><h3>
+<a name="tp-svc-media-stream-handler-emit-stop-telephony-event"></a>tp_svc_media_stream_handler_emit_stop_telephony_event ()</h3>
+<a class="indexterm" name="id2615044"></a><pre class="programlisting">void                tp_svc_media_stream_handler_emit_stop_telephony_event
+                                                        (gpointer instance);</pre>
+<p>
+Emit the StopTelephonyEvent D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2615104"></a><h2>See Also</h2>
+<a href="telepathy-glib-svc-channel.html#TpSvcChannelTypeStreamedMedia"><span class="type">TpSvcChannelTypeStreamedMedia</span></a>
+</div>
+</div>
+</body>
+</html>

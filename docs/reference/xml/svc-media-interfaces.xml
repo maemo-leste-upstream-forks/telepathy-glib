@@ -1,0 +1,1072 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-svc-media-interfaces">
+<refmeta>
+<refentrytitle role="top_of_page">Service-side media streaming helper interfaces</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Service-side media streaming helper interfaces</refname>
+<refpurpose>media session and media stream</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;telepathy-glib/svc-media-interfaces.h&gt;
+
+
+
+                    <link linkend="TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</link>;
+                    <link linkend="TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-session-handler-error-impl">*tp_svc_media_session_handler_error_impl</link>)
+                                                        (<link linkend="TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</link> *self,
+                                                         <link linkend="guint">guint</link> errno,
+                                                         const <link linkend="gchar">gchar</link> *message,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-session-handler-implement-error">tp_svc_media_session_handler_implement_error</link>
+                                                        (<link linkend="TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-session-handler-error-impl">tp_svc_media_session_handler_error_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-session-handler-return-from-error">tp_svc_media_session_handler_return_from_error</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-session-handler-ready-impl">*tp_svc_media_session_handler_ready_impl</link>)
+                                                        (<link linkend="TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-session-handler-implement-ready">tp_svc_media_session_handler_implement_ready</link>
+                                                        (<link linkend="TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-session-handler-ready-impl">tp_svc_media_session_handler_ready_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-session-handler-return-from-ready">tp_svc_media_session_handler_return_from_ready</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-session-handler-emit-new-stream-handler">tp_svc_media_session_handler_emit_new_stream_handler</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *stream_handler,
+                                                         const <link linkend="guint">guint</link> id,
+                                                         const <link linkend="guint">guint</link> media_type,
+                                                         const <link linkend="guint">guint</link> direction);
+
+
+                    <link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link>;
+                    <link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-codec-choice-impl">*tp_svc_media_stream_handler_codec_choice_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="guint">guint</link> codec_id,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-codec-choice">tp_svc_media_stream_handler_implement_codec_choice</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-codec-choice-impl">tp_svc_media_stream_handler_codec_choice_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-codec-choice">tp_svc_media_stream_handler_return_from_codec_choice</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-error-impl">*tp_svc_media_stream_handler_error_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="guint">guint</link> errno,
+                                                         const <link linkend="gchar">gchar</link> *message,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-error">tp_svc_media_stream_handler_implement_error</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-error-impl">tp_svc_media_stream_handler_error_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-error">tp_svc_media_stream_handler_return_from_error</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-native-candidates-prepared-impl">*tp_svc_media_stream_handler_native_candidates_prepared_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-native-candidates-prepared">tp_svc_media_stream_handler_implement_native_candidates_prepared</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-native-candidates-prepared-impl">tp_svc_media_stream_handler_native_candidates_prepared_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-native-candidates-prepared">tp_svc_media_stream_handler_return_from_native_candidates_prepared</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-new-active-candidate-pair-impl">*tp_svc_media_stream_handler_new_active_candidate_pair_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *native_candidate_id,
+                                                         const <link linkend="gchar">gchar</link> *remote_candidate_id,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-new-active-candidate-pair">tp_svc_media_stream_handler_implement_new_active_candidate_pair</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-new-active-candidate-pair-impl">tp_svc_media_stream_handler_new_active_candidate_pair_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-new-active-candidate-pair">tp_svc_media_stream_handler_return_from_new_active_candidate_pair</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-new-native-candidate-impl">*tp_svc_media_stream_handler_new_native_candidate_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *candidate_id,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *transports,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-new-native-candidate">tp_svc_media_stream_handler_implement_new_native_candidate</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-new-native-candidate-impl">tp_svc_media_stream_handler_new_native_candidate_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-new-native-candidate">tp_svc_media_stream_handler_return_from_new_native_candidate</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-ready-impl">*tp_svc_media_stream_handler_ready_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-ready">tp_svc_media_stream_handler_implement_ready</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-ready-impl">tp_svc_media_stream_handler_ready_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-ready">tp_svc_media_stream_handler_return_from_ready</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-set-local-codecs-impl">*tp_svc_media_stream_handler_set_local_codecs_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-set-local-codecs">tp_svc_media_stream_handler_implement_set_local_codecs</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-set-local-codecs-impl">tp_svc_media_stream_handler_set_local_codecs_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-set-local-codecs">tp_svc_media_stream_handler_return_from_set_local_codecs</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-stream-state-impl">*tp_svc_media_stream_handler_stream_state_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="guint">guint</link> state,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-stream-state">tp_svc_media_stream_handler_implement_stream_state</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-stream-state-impl">tp_svc_media_stream_handler_stream_state_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-stream-state">tp_svc_media_stream_handler_return_from_stream_state</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                (<link linkend="tp-svc-media-stream-handler-supported-codecs-impl">*tp_svc_media_stream_handler_supported_codecs_impl</link>)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-implement-supported-codecs">tp_svc_media_stream_handler_implement_supported_codecs</link>
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-supported-codecs-impl">tp_svc_media_stream_handler_supported_codecs_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-return-from-supported-codecs">tp_svc_media_stream_handler_return_from_supported_codecs</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-add-remote-candidate">tp_svc_media_stream_handler_emit_add_remote_candidate</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *candidate_id,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *transports);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-close">tp_svc_media_stream_handler_emit_close</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-remove-remote-candidate">tp_svc_media_stream_handler_emit_remove_remote_candidate</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *candidate_id);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-set-active-candidate-pair">tp_svc_media_stream_handler_emit_set_active_candidate_pair</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *native_candidate_id,
+                                                         const <link linkend="gchar">gchar</link> *remote_candidate_id);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-set-remote-candidate-list">tp_svc_media_stream_handler_emit_set_remote_candidate_list</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *remote_candidates);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-set-remote-codecs">tp_svc_media_stream_handler_emit_set_remote_codecs</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-set-stream-playing">tp_svc_media_stream_handler_emit_set_stream_playing</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gboolean">gboolean</link> playing);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-set-stream-sending">tp_svc_media_stream_handler_emit_set_stream_sending</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gboolean">gboolean</link> playing);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-start-telephony-event">tp_svc_media_stream_handler_emit_start_telephony_event</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="guchar">guchar</link> event);
+<link linkend="void">void</link>                <link linkend="tp-svc-media-stream-handler-emit-stop-telephony-event">tp_svc_media_stream_handler_emit_stop_telephony_event</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance);
+
+
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+These interfaces (auto-generated from the telepathy spec) make it easier
+to export the objects used to implement <link linkend="TpSvcChannelTypeStreamedMedia"><type>TpSvcChannelTypeStreamedMedia</type></link>,
+with the correct method and signal signatures, and emit signals from those
+objects.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="TpSvcMediaSessionHandler" role="struct"/>TpSvcMediaSessionHandler</title>
+<indexterm><primary>TpSvcMediaSessionHandler</primary></indexterm><programlisting>typedef struct _TpSvcMediaSessionHandler TpSvcMediaSessionHandler;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcMediaSessionHandlerClass" role="struct"/>TpSvcMediaSessionHandlerClass</title>
+<indexterm><primary>TpSvcMediaSessionHandlerClass</primary></indexterm><programlisting>typedef struct _TpSvcMediaSessionHandlerClass TpSvcMediaSessionHandlerClass;</programlisting>
+<para>
+The class of TpSvcMediaSessionHandler.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-error-impl" role="function"/>tp_svc_media_session_handler_error_impl ()</title>
+<indexterm><primary>tp_svc_media_session_handler_error_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_session_handler_error_impl)
+                                                        (<link linkend="TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</link> *self,
+                                                         <link linkend="guint">guint</link> errno,
+                                                         const <link linkend="gchar">gchar</link> *message,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method Error
+on interface org.freedesktop.Telepathy.Media.SessionHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>errno</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>message</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-implement-error" role="function"/>tp_svc_media_session_handler_implement_error ()</title>
+<indexterm><primary>tp_svc_media_session_handler_implement_error</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_session_handler_implement_error
+                                                        (<link linkend="TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-session-handler-error-impl">tp_svc_media_session_handler_error_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the Error method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the Error method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-return-from-error" role="function"/>tp_svc_media_session_handler_return_from_error ()</title>
+<indexterm><primary>tp_svc_media_session_handler_return_from_error</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_session_handler_return_from_error
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-ready-impl" role="function"/>tp_svc_media_session_handler_ready_impl ()</title>
+<indexterm><primary>tp_svc_media_session_handler_ready_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_session_handler_ready_impl)
+                                                        (<link linkend="TpSvcMediaSessionHandler">TpSvcMediaSessionHandler</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method Ready
+on interface org.freedesktop.Telepathy.Media.SessionHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-implement-ready" role="function"/>tp_svc_media_session_handler_implement_ready ()</title>
+<indexterm><primary>tp_svc_media_session_handler_implement_ready</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_session_handler_implement_ready
+                                                        (<link linkend="TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-session-handler-ready-impl">tp_svc_media_session_handler_ready_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the Ready method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the Ready method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-return-from-ready" role="function"/>tp_svc_media_session_handler_return_from_ready ()</title>
+<indexterm><primary>tp_svc_media_session_handler_return_from_ready</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_session_handler_return_from_ready
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-session-handler-emit-new-stream-handler" role="function"/>tp_svc_media_session_handler_emit_new_stream_handler ()</title>
+<indexterm><primary>tp_svc_media_session_handler_emit_new_stream_handler</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_session_handler_emit_new_stream_handler
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *stream_handler,
+                                                         const <link linkend="guint">guint</link> id,
+                                                         const <link linkend="guint">guint</link> media_type,
+                                                         const <link linkend="guint">guint</link> direction);</programlisting>
+<para>
+Emit the NewStreamHandler D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>stream_handler</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>media_type</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>direction</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpSvcMediaStreamHandler" role="struct"/>TpSvcMediaStreamHandler</title>
+<indexterm><primary>TpSvcMediaStreamHandler</primary></indexterm><programlisting>typedef struct _TpSvcMediaStreamHandler TpSvcMediaStreamHandler;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSvcMediaStreamHandlerClass" role="struct"/>TpSvcMediaStreamHandlerClass</title>
+<indexterm><primary>TpSvcMediaStreamHandlerClass</primary></indexterm><programlisting>typedef struct _TpSvcMediaStreamHandlerClass TpSvcMediaStreamHandlerClass;</programlisting>
+<para>
+The class of TpSvcMediaStreamHandler.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-codec-choice-impl" role="function"/>tp_svc_media_stream_handler_codec_choice_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_codec_choice_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_codec_choice_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="guint">guint</link> codec_id,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method CodecChoice
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>codec_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-codec-choice" role="function"/>tp_svc_media_stream_handler_implement_codec_choice ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_codec_choice</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_codec_choice
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-codec-choice-impl">tp_svc_media_stream_handler_codec_choice_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the CodecChoice method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the CodecChoice method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-codec-choice" role="function"/>tp_svc_media_stream_handler_return_from_codec_choice ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_codec_choice</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_codec_choice
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-error-impl" role="function"/>tp_svc_media_stream_handler_error_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_error_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_error_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="guint">guint</link> errno,
+                                                         const <link linkend="gchar">gchar</link> *message,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method Error
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>errno</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>message</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-error" role="function"/>tp_svc_media_stream_handler_implement_error ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_error</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_error
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-error-impl">tp_svc_media_stream_handler_error_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the Error method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the Error method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-error" role="function"/>tp_svc_media_stream_handler_return_from_error ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_error</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_error
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-native-candidates-prepared-impl" role="function"/>tp_svc_media_stream_handler_native_candidates_prepared_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_native_candidates_prepared_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_native_candidates_prepared_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method NativeCandidatesPrepared
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-native-candidates-prepared" role="function"/>tp_svc_media_stream_handler_implement_native_candidates_prepared ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_native_candidates_prepared</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_native_candidates_prepared
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-native-candidates-prepared-impl">tp_svc_media_stream_handler_native_candidates_prepared_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the NativeCandidatesPrepared method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the NativeCandidatesPrepared method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-native-candidates-prepared" role="function"/>tp_svc_media_stream_handler_return_from_native_candidates_prepared ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_native_candidates_prepared</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_native_candidates_prepared
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-new-active-candidate-pair-impl" role="function"/>tp_svc_media_stream_handler_new_active_candidate_pair_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_new_active_candidate_pair_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_new_active_candidate_pair_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *native_candidate_id,
+                                                         const <link linkend="gchar">gchar</link> *remote_candidate_id,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method NewActiveCandidatePair
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>native_candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>remote_candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-new-active-candidate-pair" role="function"/>tp_svc_media_stream_handler_implement_new_active_candidate_pair ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_new_active_candidate_pair</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_new_active_candidate_pair
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-new-active-candidate-pair-impl">tp_svc_media_stream_handler_new_active_candidate_pair_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the NewActiveCandidatePair method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the NewActiveCandidatePair method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-new-active-candidate-pair" role="function"/>tp_svc_media_stream_handler_return_from_new_active_candidate_pair ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_new_active_candidate_pair</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_new_active_candidate_pair
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-new-native-candidate-impl" role="function"/>tp_svc_media_stream_handler_new_native_candidate_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_new_native_candidate_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_new_native_candidate_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *candidate_id,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *transports,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method NewNativeCandidate
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>transports</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-new-native-candidate" role="function"/>tp_svc_media_stream_handler_implement_new_native_candidate ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_new_native_candidate</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_new_native_candidate
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-new-native-candidate-impl">tp_svc_media_stream_handler_new_native_candidate_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the NewNativeCandidate method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the NewNativeCandidate method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-new-native-candidate" role="function"/>tp_svc_media_stream_handler_return_from_new_native_candidate ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_new_native_candidate</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_new_native_candidate
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-ready-impl" role="function"/>tp_svc_media_stream_handler_ready_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_ready_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_ready_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method Ready
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>codecs</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-ready" role="function"/>tp_svc_media_stream_handler_implement_ready ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_ready</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_ready
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-ready-impl">tp_svc_media_stream_handler_ready_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the Ready method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the Ready method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-ready" role="function"/>tp_svc_media_stream_handler_return_from_ready ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_ready</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_ready
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-set-local-codecs-impl" role="function"/>tp_svc_media_stream_handler_set_local_codecs_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_set_local_codecs_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_set_local_codecs_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method SetLocalCodecs
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>codecs</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-set-local-codecs" role="function"/>tp_svc_media_stream_handler_implement_set_local_codecs ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_set_local_codecs</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_set_local_codecs
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-set-local-codecs-impl">tp_svc_media_stream_handler_set_local_codecs_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SetLocalCodecs method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the SetLocalCodecs method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-set-local-codecs" role="function"/>tp_svc_media_stream_handler_return_from_set_local_codecs ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_set_local_codecs</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_set_local_codecs
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-stream-state-impl" role="function"/>tp_svc_media_stream_handler_stream_state_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_stream_state_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_stream_state_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         <link linkend="guint">guint</link> state,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method StreamState
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>state</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-stream-state" role="function"/>tp_svc_media_stream_handler_implement_stream_state ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_stream_state</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_stream_state
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-stream-state-impl">tp_svc_media_stream_handler_stream_state_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the StreamState method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the StreamState method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-stream-state" role="function"/>tp_svc_media_stream_handler_return_from_stream_state ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_stream_state</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_stream_state
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-supported-codecs-impl" role="function"/>tp_svc_media_stream_handler_supported_codecs_impl ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_supported_codecs_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_media_stream_handler_supported_codecs_impl)
+                                                        (<link linkend="TpSvcMediaStreamHandler">TpSvcMediaStreamHandler</link> *self,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Signature of an implementation of D-Bus method SupportedCodecs
+on interface org.freedesktop.Telepathy.Media.StreamHandler</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>codecs</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus invocation context to use to return values
+          or throw an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-implement-supported-codecs" role="function"/>tp_svc_media_stream_handler_implement_supported_codecs ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_implement_supported_codecs</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_implement_supported_codecs
+                                                        (<link linkend="TpSvcMediaStreamHandlerClass">TpSvcMediaStreamHandlerClass</link> *klass,
+                                                         <link linkend="tp-svc-media-stream-handler-supported-codecs-impl">tp_svc_media_stream_handler_supported_codecs_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SupportedCodecs method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&nbsp;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&nbsp;:</term>
+<listitem><simpara> A callback used to implement the SupportedCodecs method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-return-from-supported-codecs" role="function"/>tp_svc_media_stream_handler_return_from_supported_codecs ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_return_from_supported_codecs</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_return_from_supported_codecs
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *dbus_context);</programlisting>
+<para>
+Return successfully by calling dbus_g_method_return (<parameter>dbus_context</parameter>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>dbus_context</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-add-remote-candidate" role="function"/>tp_svc_media_stream_handler_emit_add_remote_candidate ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_add_remote_candidate</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_add_remote_candidate
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *candidate_id,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *transports);</programlisting>
+<para>
+Emit the AddRemoteCandidate D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>transports</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-close" role="function"/>tp_svc_media_stream_handler_emit_close ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_close</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_close
+                                                        (<link linkend="gpointer">gpointer</link> instance);</programlisting>
+<para>
+Emit the Close D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-remove-remote-candidate" role="function"/>tp_svc_media_stream_handler_emit_remove_remote_candidate ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_remove_remote_candidate</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_remove_remote_candidate
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *candidate_id);</programlisting>
+<para>
+Emit the RemoveRemoteCandidate D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-set-active-candidate-pair" role="function"/>tp_svc_media_stream_handler_emit_set_active_candidate_pair ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_set_active_candidate_pair</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_set_active_candidate_pair
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *native_candidate_id,
+                                                         const <link linkend="gchar">gchar</link> *remote_candidate_id);</programlisting>
+<para>
+Emit the SetActiveCandidatePair D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>native_candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>remote_candidate_id</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-set-remote-candidate-list" role="function"/>tp_svc_media_stream_handler_emit_set_remote_candidate_list ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_set_remote_candidate_list</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_set_remote_candidate_list
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *remote_candidates);</programlisting>
+<para>
+Emit the SetRemoteCandidateList D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>remote_candidates</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-set-remote-codecs" role="function"/>tp_svc_media_stream_handler_emit_set_remote_codecs ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_set_remote_codecs</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_set_remote_codecs
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *codecs);</programlisting>
+<para>
+Emit the SetRemoteCodecs D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>codecs</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-set-stream-playing" role="function"/>tp_svc_media_stream_handler_emit_set_stream_playing ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_set_stream_playing</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_set_stream_playing
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gboolean">gboolean</link> playing);</programlisting>
+<para>
+Emit the SetStreamPlaying D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>playing</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-set-stream-sending" role="function"/>tp_svc_media_stream_handler_emit_set_stream_sending ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_set_stream_sending</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_set_stream_sending
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gboolean">gboolean</link> playing);</programlisting>
+<para>
+Emit the SetStreamSending D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>playing</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-start-telephony-event" role="function"/>tp_svc_media_stream_handler_emit_start_telephony_event ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_start_telephony_event</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_start_telephony_event
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="guchar">guchar</link> event);</programlisting>
+<para>
+Emit the StartTelephonyEvent D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>event</parameter>&nbsp;:</term>
+<listitem><simpara> FIXME: document args in genginterface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-media-stream-handler-emit-stop-telephony-event" role="function"/>tp_svc_media_stream_handler_emit_stop_telephony_event ()</title>
+<indexterm><primary>tp_svc_media_stream_handler_emit_stop_telephony_event</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_media_stream_handler_emit_stop_telephony_event
+                                                        (<link linkend="gpointer">gpointer</link> instance);</programlisting>
+<para>
+Emit the StopTelephonyEvent D-Bus signal from <parameter>instance</parameter> with the given arguments.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing this interface
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1>
+<title>See Also</title>
+<link linkend="TpSvcChannelTypeStreamedMedia"><type>TpSvcChannelTypeStreamedMedia</type></link>
+</refsect1>
+
+</refentry>
