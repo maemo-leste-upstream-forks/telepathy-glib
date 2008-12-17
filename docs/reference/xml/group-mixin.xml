@@ -96,11 +96,11 @@
                                                          <link linkend="GError">GError</link> **error);
 <link linkend="void">void</link>                <link linkend="tp-group-mixin-change-flags">tp_group_mixin_change_flags</link>         (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="TpChannelGroupFlags">TpChannelGroupFlags</link> add,
-                                                         <link linkend="TpChannelGroupFlags">TpChannelGroupFlags</link> remove);
+                                                         <link linkend="TpChannelGroupFlags">TpChannelGroupFlags</link> del);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-group-mixin-change-members">tp_group_mixin_change_members</link>       (<link linkend="GObject">GObject</link> *obj,
                                                          const <link linkend="gchar">gchar</link> *message,
                                                          <link linkend="TpIntSet">TpIntSet</link> *add,
-                                                         <link linkend="TpIntSet">TpIntSet</link> *remove,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *del,
                                                          <link linkend="TpIntSet">TpIntSet</link> *add_local_pending,
                                                          <link linkend="TpIntSet">TpIntSet</link> *add_remote_pending,
                                                          <link linkend="TpHandle">TpHandle</link> actor,
@@ -754,13 +754,13 @@ failure
 <title><anchor id="tp-group-mixin-change-flags" role="function"/>tp_group_mixin_change_flags ()</title>
 <indexterm><primary>tp_group_mixin_change_flags</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_change_flags         (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="TpChannelGroupFlags">TpChannelGroupFlags</link> add,
-                                                         <link linkend="TpChannelGroupFlags">TpChannelGroupFlags</link> remove);</programlisting>
+                                                         <link linkend="TpChannelGroupFlags">TpChannelGroupFlags</link> del);</programlisting>
 <para>
 Request a change to be made to the flags. Emits the
 GroupFlagsChanged signal with the changes which were actually made.
 </para>
 <para>
-It is an error to set any of the same bits in both <parameter>add</parameter> and <parameter>remove</parameter>.</para>
+It is an error to set any of the same bits in both <parameter>add</parameter> and <parameter>del</parameter>.</para>
 <para>
 
 </para><variablelist role="params">
@@ -770,7 +770,7 @@ It is an error to set any of the same bits in both <parameter>add</parameter> an
 <varlistentry><term><parameter>add</parameter>&nbsp;:</term>
 <listitem><simpara> Flags to be added
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>remove</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>del</parameter>&nbsp;:</term>
 <listitem><simpara> Flags to be removed
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
@@ -779,7 +779,7 @@ It is an error to set any of the same bits in both <parameter>add</parameter> an
 <indexterm><primary>tp_group_mixin_change_members</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_group_mixin_change_members       (<link linkend="GObject">GObject</link> *obj,
                                                          const <link linkend="gchar">gchar</link> *message,
                                                          <link linkend="TpIntSet">TpIntSet</link> *add,
-                                                         <link linkend="TpIntSet">TpIntSet</link> *remove,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *del,
                                                          <link linkend="TpIntSet">TpIntSet</link> *add_local_pending,
                                                          <link linkend="TpIntSet">TpIntSet</link> *add_remote_pending,
                                                          <link linkend="TpHandle">TpHandle</link> actor,
@@ -794,7 +794,7 @@ IM protocol, and must not be called in direct response to user input;
 it does not respect the permissions flags, but changes the group directly.
 </para>
 <para>
-If any two of add, remove, add_local_pending and add_remote_pending have
+If any two of add, del, add_local_pending and add_remote_pending have
 a non-empty intersection, the result is undefined. Don't do that.
 </para>
 <para>
@@ -815,7 +815,7 @@ equivalent to an empty set.</para>
  already present) and removed from local pending and remote pending
  (if present)
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>remove</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>del</parameter>&nbsp;:</term>
 <listitem><simpara> A set of contact handles to be removed from members,
  local pending or remote pending, wherever they are present
 </simpara></listitem></varlistentry>

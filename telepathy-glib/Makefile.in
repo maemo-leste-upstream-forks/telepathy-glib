@@ -73,8 +73,8 @@ am_libtelepathy_glib_internal_la_OBJECTS = base-connection.lo \
 	handle.lo handle-repo.lo handle-repo-dynamic.lo \
 	handle-repo-static.lo handle-set.lo heap.lo intset.lo \
 	channel-iface.lo channel-factory-iface.lo media-interfaces.lo \
-	presence-mixin.lo properties-mixin.lo proxy.lo run.lo \
-	text-mixin.lo util.lo
+	presence-mixin.lo properties-mixin.lo proxy.lo \
+	proxy-methods.lo proxy-signals.lo run.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = signals-marshal.lo \
 	telepathy-errors.lo tp-svc-channel.lo tp-svc-connection.lo \
 	tp-svc-connection-manager.lo tp-svc-generic.lo \
@@ -403,6 +403,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     presence-mixin.c \
     properties-mixin.c \
     proxy.c \
+    proxy-internal.h \
+    proxy-methods.c \
+    proxy-signals.c \
     run.c \
     signals-marshal.list \
     text-mixin.c \
@@ -532,6 +535,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/media-interfaces.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/presence-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties-mixin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy-methods.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/run.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals-marshal.Plo@am__quote@
@@ -983,11 +988,12 @@ _gen/tp-signals-marshal.list: ../tools/glib-signals-marshal-gen.py \
 _gen/signals-marshal.list: signals-marshal.list _gen/tp-signals-marshal.list
 	sort -u $^ > $@
 
-_gen/signals-marshal.h: _gen/signals-marshal.list
+_gen/signals-marshal.h: _gen/signals-marshal.list Makefile.am
 	$(GLIB_GENMARSHAL) --header --prefix=_tp_marshal $< > $@
 
-_gen/signals-marshal.c: _gen/signals-marshal.list
-	$(GLIB_GENMARSHAL) --body --prefix=_tp_marshal $< > $@
+_gen/signals-marshal.c: _gen/signals-marshal.list Makefile.am
+	{ echo '#include "_gen/signals-marshal.h"' && \
+	$(GLIB_GENMARSHAL) --body --prefix=_tp_marshal $< ; } > $@
 
 # Things generated per interface
 

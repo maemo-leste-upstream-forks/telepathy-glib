@@ -93,7 +93,7 @@ deep_copy_hashtable (GHashTable *hash_table)
 
 /**
  * tp_presence_status_new
- * @index: Index of the presence status in the provided supported presence
+ * @which: Index of the presence status in the provided supported presence
  *  statuses array
  * @optional_arguments: Optional arguments for the presence statuses. Can be
  *  NULL if there are no optional arguments. The presence status object makes a
@@ -105,12 +105,12 @@ deep_copy_hashtable (GHashTable *hash_table)
  * Returns: A pointer to the newly allocated presence status structure.
  */
 TpPresenceStatus *
-tp_presence_status_new (guint index,
+tp_presence_status_new (guint which,
                         GHashTable *optional_arguments)
 {
   TpPresenceStatus *status = g_slice_new (TpPresenceStatus);
 
-  status->index = index;
+  status->index = which;
   status->optional_arguments = deep_copy_hashtable (optional_arguments);
 
   return status;
@@ -329,20 +329,18 @@ static GHashTable *
 construct_presence_hash (const TpPresenceStatusSpec *supported_statuses,
                          GHashTable *contact_statuses)
 {
-  GHashTable *presence_hash;
+  struct _i_absolutely_love_g_hash_table_foreach data = { supported_statuses,
+    contact_statuses, NULL };
 
   DEBUG ("called.");
 
-  presence_hash = g_hash_table_new_full (NULL, NULL, NULL,
+  data.presence_hash = g_hash_table_new_full (NULL, NULL, NULL,
       (GDestroyNotify) g_value_array_free);
-
-  struct _i_absolutely_love_g_hash_table_foreach data = { supported_statuses,
-    contact_statuses, presence_hash };
 
   g_hash_table_foreach (contact_statuses, construct_presence_hash_foreach,
       &data);
 
-  return presence_hash;
+  return data.presence_hash;
 }
 
 
@@ -598,7 +596,7 @@ tp_presence_mixin_get_statuses (TpSvcConnectionInterfacePresence *iface,
  */
 static void
 tp_presence_mixin_set_last_activity_time (TpSvcConnectionInterfacePresence *iface,
-                                          guint time,
+                                          guint timestamp,
                                           DBusGMethodInvocation *context)
 {
   TpBaseConnection *conn = TP_BASE_CONNECTION (iface);

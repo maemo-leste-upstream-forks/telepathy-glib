@@ -16,13 +16,21 @@ TESTS = $(noinst_PROGRAMS)
 TESTS_ENVIRONMENT = \
     G_DEBUG=fatal_warnings,fatal_criticals
 
+noinst_LTLIBRARIES = libtp-glib-tests.la
+
+libtp_glib_tests_la_SOURCES = \
+    myassert.h \
+    stub-object.c \
+    stub-object.h
+
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
     $(TESTS_ENVIRONMENT) \
     $(top_builddir)/tools/telepathy-glib-env \
     valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
         --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
-        --child-silent-after-fork=yes --num-callers=20 \
+        --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
+        --gen-suppressions=all \
         $(VALGRIND_FLAGS)
 
 check-valgrind:
@@ -31,8 +39,7 @@ check-valgrind:
 		TESTS="$(STATIC_TESTS) $(DYNAMIC_TESTS:%=.libs/%)"
 	$(MAKE) -C dbus check-valgrind
 
-# myassert.h is used by some of the tests in dbus/
-EXTRA_DIST = myassert.h README
+EXTRA_DIST = README
 
 test_handle_set_SOURCES = \
     test-handle-set.c

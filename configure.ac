@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [3])
+m4_define([tp_glib_micro_version], [4])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -31,7 +31,7 @@ m4_define([tp_glib_nano_version], [0])
 # never seen in a release).
 
 m4_define([tp_glib_lt_current], [7])
-m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_revision], [1])
 m4_define([tp_glib_lt_age], [7])
 
 # Some magic
@@ -103,6 +103,12 @@ ifelse(tp_glib_nano_version, 0,
             ERROR_CFLAGS="$ERROR_CFLAGS -Wextra -Wno-missing-field-initializers -Wno-unused-parameter"
         fi
     ])
+
+AS_COMPILER_FLAG(-Wdeclaration-after-statement, ERROR_CFLAGS="$ERROR_CFLAGS -Wdeclaration-after-statement")
+AS_COMPILER_FLAG(-Wshadow, ERROR_CFLAGS="$ERROR_CFLAGS -Wshadow")
+AS_COMPILER_FLAG(-Wstrict-prototypes, ERROR_CFLAGS="$ERROR_CFLAGS -Wstrict-prototypes")
+AS_COMPILER_FLAG(-Wmissing-prototypes, ERROR_CFLAGS="$ERROR_CFLAGS -Wmissing-prototypes")
+AS_COMPILER_FLAG(-Wmissing-declarations, ERROR_CFLAGS="$ERROR_CFLAGS -Wmissing-declarations")
 
 AC_SUBST(ERROR_CFLAGS)
 AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])

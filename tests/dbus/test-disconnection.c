@@ -7,23 +7,7 @@
 #include <telepathy-glib/util.h>
 
 #include "tests/myassert.h"
-
-typedef struct { GObject p; } StubObject;
-typedef struct { GObjectClass p; } StubObjectClass;
-
-static GType stub_object_get_type (void);
-
-G_DEFINE_TYPE (StubObject, stub_object, G_TYPE_OBJECT)
-
-static void
-stub_object_class_init (StubObjectClass *klass)
-{
-}
-
-static void
-stub_object_init (StubObject *self)
-{
-}
+#include "tests/stub-object.h"
 
 /* just for convenience, since it's used a lot */
 #define PTR(ui) GUINT_TO_POINTER(ui)
@@ -37,10 +21,11 @@ static TpDBusDaemon *d;
 static TpDBusDaemon *e;
 static TpDBusDaemon *f;
 static TpDBusDaemon *g;
+static TpDBusDaemon *h;
 static TpDBusDaemon *z;
-TpIntSet *caught_signal;
-TpIntSet *freed_user_data;
-int fail = 0;
+static TpIntSet *caught_signal;
+static TpIntSet *freed_user_data;
+static int fail = 0;
 
 static void
 myassert_failed (void)
@@ -56,9 +41,19 @@ enum {
     TEST_E,
     TEST_F,
     TEST_G,
+    TEST_H,
     TEST_Z = 25,
     N_DAEMONS
 };
+
+static void
+h_stub_destroyed (gpointer data,
+                  GObject *stub)
+{
+  TpProxySignalConnection **p = data;
+
+  tp_proxy_signal_connection_disconnect (*p);
+}
 
 static void
 destroy_user_data (gpointer user_data)
@@ -156,7 +151,7 @@ noc (TpDBusDaemon *proxy,
     }
 }
 
-void
+static void
 set_freed (gpointer user_data)
 {
   gboolean *boolptr = user_data;
@@ -201,6 +196,8 @@ main (int argc,
   g_message ("f=%p", f);
   g = tp_dbus_daemon_new (tp_get_bus ());
   g_message ("g=%p", g);
+  h = tp_dbus_daemon_new (tp_get_bus ());
+  g_message ("h=%p", h);
   z = tp_dbus_daemon_new (tp_get_bus ());
   g_message ("z=%p", z);
 
@@ -229,7 +226,6 @@ main (int argc,
   MYASSERT_NO_ERROR (error_out);
   MYASSERT (!tp_intset_is_member (freed_user_data, TEST_B), "");
   g_object_unref (stub);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_B), "");
 
   /* c gets its signal connection cancelled because it's explicitly
    * invalidated */
@@ -240,7 +236,6 @@ main (int argc,
   MYASSERT (!tp_intset_is_member (freed_user_data, TEST_C), "");
   g_message ("Forcibly invalidating c");
   tp_proxy_invalidate ((TpProxy *) c, &err);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_C), "");
   /* assert that connecting to a signal on an invalid proxy fails */
   freed = FALSE;
   tp_cli_dbus_daemon_connect_to_name_owner_changed (c, dummy_noc, &freed,
@@ -267,7 +262,6 @@ main (int argc,
   g_object_unref (d);
   MYASSERT (tmp_obj == NULL, "");
   d = NULL;
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_D), "");
 
   /* e gets its signal connection cancelled explicitly */
   g_message ("Connecting signal to e");
@@ -277,7 +271,6 @@ main (int argc,
   MYASSERT (!tp_intset_is_member (freed_user_data, TEST_E), "");
   g_message ("Disconnecting signal from e");
   tp_proxy_signal_connection_disconnect (sc);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_E), "");
 
   /* f gets its signal connection cancelled because it's implicitly
    * invalidated by its DBusGProxy being destroyed.
@@ -294,7 +287,6 @@ main (int argc,
       TP_IFACE_QUARK_DBUS_DAEMON, NULL);
   MYASSERT (tmp_obj != NULL, "");
   g_object_run_dispose (tmp_obj);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_F), "");
   /* assert that connecting to a signal on an invalid proxy fails */
   freed = FALSE;
   tp_cli_dbus_daemon_connect_to_name_owner_changed (f, dummy_noc, &freed,
@@ -320,7 +312,18 @@ main (int argc,
   g_object_unref (g);
   MYASSERT (tmp_obj == NULL, "");
   g = NULL;
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_G), "");
+
+  /* h gets its signal connection cancelled because its weak object is
+   * destroyed, meaning there are simultaneously two reasons for it to become
+   * cancelled (fd.o#14750) */
+  stub = g_object_new (stub_object_get_type (), NULL);
+  g_object_weak_ref (stub, h_stub_destroyed, &sc);
+  g_message ("Connecting signal to h");
+  sc = tp_cli_dbus_daemon_connect_to_name_owner_changed (h, noc, PTR (TEST_H),
+      destroy_user_data, stub, &error_out);
+  MYASSERT_NO_ERROR (error_out);
+  MYASSERT (!tp_intset_is_member (freed_user_data, TEST_H), "");
+  g_object_unref (stub);
 
   /* z survives; we assume that the signals are delivered in either
    * forward or reverse order, so if both a and z have had their signal, we
@@ -338,6 +341,16 @@ main (int argc,
   g_message ("Running main loop");
   g_main_loop_run (mainloop);
   g_main_loop_unref (mainloop);
+
+  /* Now that the main loop has run, cancelled signal connections have been
+   * freed */
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_B), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_C), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_D), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_E), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_F), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_G), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_H), "");
 
   /* both A and Z are still listening for signals, so their user data is
    * still held */
@@ -363,6 +376,7 @@ main (int argc,
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_E), "");
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_F), "");
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_G), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_H), "");
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_Z), "");
 
   tp_intset_destroy (freed_user_data);

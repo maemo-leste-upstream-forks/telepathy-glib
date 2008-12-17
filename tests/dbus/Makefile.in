@@ -34,7 +34,7 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-call-cancellation$(EXEEXT) test-dbus$(EXEEXT) \
 	test-disconnection$(EXEEXT) test-example-no-protocols$(EXEEXT) \
-	test-properties$(EXEEXT)
+	test-properties$(EXEEXT) test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
 subdir = tests/dbus
@@ -51,13 +51,15 @@ PROGRAMS = $(noinst_PROGRAMS)
 test_call_cancellation_SOURCES = test-call-cancellation.c
 test_call_cancellation_OBJECTS = test-call-cancellation.$(OBJEXT)
 am__DEPENDENCIES_1 =
-test_call_cancellation_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_call_cancellation_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../libtp-glib-tests.la
 test_dbus_SOURCES = test-dbus.c
 test_dbus_OBJECTS = test-dbus.$(OBJEXT)
 test_dbus_DEPENDENCIES = $(am__DEPENDENCIES_1)
 test_disconnection_SOURCES = test-disconnection.c
 test_disconnection_OBJECTS = test-disconnection.$(OBJEXT)
-test_disconnection_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_disconnection_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../libtp-glib-tests.la
 test_example_no_protocols_SOURCES = test-example-no-protocols.c
 test_example_no_protocols_OBJECTS =  \
 	test-example-no-protocols.$(OBJEXT)
@@ -65,6 +67,11 @@ test_example_no_protocols_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_test_properties_OBJECTS = properties.$(OBJEXT) svc.$(OBJEXT)
 test_properties_OBJECTS = $(am_test_properties_OBJECTS)
 test_properties_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_test_unsupported_interface_OBJECTS =  \
+	unsupported-interface.$(OBJEXT)
+test_unsupported_interface_OBJECTS =  \
+	$(am_test_unsupported_interface_OBJECTS)
+test_unsupported_interface_DEPENDENCIES = $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -78,10 +85,12 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = test-call-cancellation.c test-dbus.c test-disconnection.c \
-	test-example-no-protocols.c $(test_properties_SOURCES)
+	test-example-no-protocols.c $(test_properties_SOURCES) \
+	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = test-call-cancellation.c test-dbus.c \
 	test-disconnection.c test-example-no-protocols.c \
-	$(test_properties_SOURCES)
+	$(test_properties_SOURCES) \
+	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -215,10 +224,18 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TESTS = $(noinst_PROGRAMS)
-test_call_cancellation_LDADD = $(TP_GLIB_LIBS)
+test_call_cancellation_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../libtp-glib-tests.la
+
 test_dbus_LDADD = $(TP_GLIB_LIBS)
-test_disconnection_LDADD = $(TP_GLIB_LIBS)
+test_disconnection_LDADD = \
+    $(TP_GLIB_LIBS) \
+    ../libtp-glib-tests.la
+
 test_example_no_protocols_LDADD = $(TP_GLIB_LIBS)
+test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
+test_unsupported_interface_SOURCES = unsupported-interface.c
 test_properties_LDADD = $(TP_GLIB_LIBS)
 test_properties_SOURCES = \
     properties.c \
@@ -249,7 +266,8 @@ VALGRIND_TESTS_ENVIRONMENT = \
     sh $(top_srcdir)/tools/with-session-bus.sh --session -- \
     valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
         --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
-        --child-silent-after-fork=yes --num-callers=20 \
+        --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
+        --gen-suppressions=all \
         $(VALGRIND_FLAGS)
 
 BUILT_SOURCES = \
@@ -316,6 +334,9 @@ test-example-no-protocols$(EXEEXT): $(test_example_no_protocols_OBJECTS) $(test_
 test-properties$(EXEEXT): $(test_properties_OBJECTS) $(test_properties_DEPENDENCIES) 
 	@rm -f test-properties$(EXEEXT)
 	$(LINK) $(test_properties_OBJECTS) $(test_properties_LDADD) $(LIBS)
+test-unsupported-interface$(EXEEXT): $(test_unsupported_interface_OBJECTS) $(test_unsupported_interface_DEPENDENCIES) 
+	@rm -f test-unsupported-interface$(EXEEXT)
+	$(LINK) $(test_unsupported_interface_OBJECTS) $(test_unsupported_interface_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -329,6 +350,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-disconnection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-example-no-protocols.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unsupported-interface.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

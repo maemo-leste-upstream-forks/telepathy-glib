@@ -1,3 +1,182 @@
+Wed Mar  5 11:19:03 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  tagged telepathy-glib 0.7.4 (libtool c:r:a = 7:1:7)
+
+Wed Mar  5 10:37:44 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Don't use $(builddir) in tests/dbus/Makefile.am (breaks build with older Automake)
+
+Tue Mar  4 19:03:24 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Prepare version 0.7.4 (libtool: c:r:a = 7:1:7)
+
+Tue Mar  4 17:24:03 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Update NEWS
+
+Tue Mar  4 16:11:34 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Refactor TpProxyPendingCall to avoid revenge-of-#14750.
+  Also don't crash if the order of _completed and _idle_invoke gets reversed by a hypothetical dbus-glib behaviour change.
+
+Tue Mar  4 16:10:00 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Relax assertions about how quickly user data gets freed when cancelling pending calls: we probably can't free it synchronously and still fix revenge-of-#14750
+
+Tue Mar  4 16:08:24 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Add yet another failing test case: the equivalent of fd.o #14750, but for pending calls rather than signals
+
+Tue Mar  4 13:24:19 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Now that I've understood fd.o#14750 better, add a properly minimal test case
+
+Tue Mar  4 10:53:32 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Fix fd.o#14750 by delaying destruction of TpProxySignalConnection until we've had a chance to receive the weak-ref callback
+
+Tue Mar  4 13:06:53 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Annotate contents of TpProxyPendingCall a bit more
+
+Tue Mar  4 11:07:00 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Add yet another test case for call cancellation: this time (case J) the call is cancelled, which causes destruction of the weakly referenced object, which currently causes a crash
+
+Tue Mar  4 11:02:49 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * test-call-cancellation: make some more variables static
+
+Tue Mar  4 10:49:15 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * tp_proxy_signal_connection_disconnect_dbus_glib: remove early return if sc->proxy == NULL (a relic of previous code), but make robust against iface_proxy already having gone away (=> idempotent)
+
+Mon Mar  3 10:24:23 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Extend test-call-cancellation case (i) slightly, so there is one signal connection which will lose its weak ref before the pending call does, and one after
+
+Fri Feb 29 16:18:38 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Amend regression test for #14750 to actually cause the crash.
+  
+  It turns out that the problem is caused by:
+  * make a proxy, p, and an object, o, each with one ref
+  * make a function call with o as weak object
+  * connect to a signal with o as weak object
+  * unref p
+  * unref o
+
+Fri Feb 29 16:15:00 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Add an attempt at a regression test for fd.o #14750, a crash in MC
+
+Tue Mar  4 10:03:31 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Relax assertion in test-disconnection: no longer require user data to have been freed immediately, but only after the main loop has run (likely to be necessary to fix #14750)
+
+Mon Mar  3 17:07:16 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Move method- and signal-specific bits of TpProxy to separate source files
+
+Mon Mar  3 15:09:35 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpProxySignalConnection: don't bother weakly referencing the TpProxy - we listen for its invalidated signal anyway
+
+Mon Mar  3 14:27:52 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpProxySignalConnection: ref a DBusGProxy, rather than fetching it from the TpProxy whenever needed
+
+Mon Mar  3 13:31:11 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Get rid of TpProxyPendingCall::member and ::interface (it turns out we don't actually need them any more)
+
+Mon Mar  3 13:23:50 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * tp_proxy_pending_call_v0_new: rename ret to pc for consistency with pending call "methods"
+
+Mon Mar  3 13:21:03 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * tp_proxy_pending_call_cancel: simplify by using our copy of the DBusGProxy
+
+Mon Mar  3 13:12:28 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * tp_proxy_pending_call_proxy_destroyed: rename to _tp_proxy_pending_call_dgproxy_destroy for clarity
+
+Mon Mar  3 13:12:09 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpProxy: add some more comments
+
+Mon Mar  3 11:05:38 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Finish converting self -> {pc,sc} (keep gtkdoc happy)
+
+Mon Mar  3 11:00:03 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * In tp_proxy_signal_connection_disconnect_dbus_glib, assert that the interface proxy has already been created, rather than silently returning
+
+Mon Mar  3 10:54:46 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpProxy: to reduce confusion, never call TpProxyPendingCall instances "self" (call them "pc" instead). Likewise, call TpProxySignalConnection instances "sc" and TpProxySignalInvocation instances "invocation".
+
+Mon Mar  3 10:33:25 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpProxy: never call a DBusGProxy "proxy" (rename to dgproxy where this has happened), to reduce confusion
+
+Mon Mar  3 10:31:39 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpProxy: make some debug messages a little clearer
+
+Mon Mar  3 10:12:52 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Split out StubObject into a convenience library shared by the tests
+
+Fri Feb 29 12:09:40 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Extend #14746 regression test to cover connecting to signals too
+
+Fri Feb 29 12:03:58 GMT 2008  Alberto Mardegan <mardy@users.sourceforge.net>
+  * Fix memory leak on the GError when object does not implement an interface (bugs.fd.o #14746)
+
+Fri Feb 29 12:02:34 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Add regression test for calling methods on unimplemented interfaces (bugs.fd.o #14746)
+
+Fri Feb 29 11:50:51 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Make suppressions file less specific to avoid complaints about dbus_g_bus_get() when no debug symbols are available
+
+Fri Feb 29 11:43:50 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Pass some more useful options to valgrind
+
+Tue Feb 26 12:21:10 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * example_cli_init: only run the registration code once
+
+Mon Feb 25 15:54:50 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Debug on apparently-invalid Connection bus names
+
+Mon Feb 25 15:54:02 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * If protocol name in a bus name is e.g. "local_xmpp", map it back to "local-xmpp" in tp_list_connection_names_helper. fd.o#14667
+
+Fri Feb 22 15:45:46 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Fix shadowing, globals, not-a-prototype in tests
+
+Fri Feb 22 15:45:15 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Fix shadowing in telepathy-glib/*.h as well as *.c, so the gtkdoc comes out right
+
+Fri Feb 22 15:45:01 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Fix sh syntax and not-always-regenerated code in telepathy-glib/Makefile.am
+
+Fri Feb 22 15:44:41 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Fix sh syntax and not-always-regenerated code in examples/extensions/Makefile.am
+
+Fri Feb 22 15:44:14 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Fix shadowing and unintentional globals in the examples
+
+Thu Feb 21 11:54:38 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * configure.ac: build with some extra warnings
+
+Thu Feb 21 11:54:19 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpTextMixin: prototype _pending_get_alloc correctly
+
+Thu Feb 21 11:54:05 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpPropertiesMixin: don't shadow remove()
+
+Thu Feb 21 11:53:54 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpPresenceMixin: don't shadow time()
+
+Thu Feb 21 11:53:30 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpPresenceMixin: fix C99ism
+
+Thu Feb 21 11:53:12 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpPresenceMixin: don't shadow index() from string.h
+
+Thu Feb 21 11:52:53 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpDynamicHandleRepo: prototype handle_priv_new correctly
+
+Thu Feb 21 11:52:24 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpGroupMixin: don't shadow remove() from stdlib.h
+
+Thu Feb 21 11:52:11 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * dbus.c: include dbus-internal.h to verify that prototypes match
+
+Thu Feb 21 11:51:34 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * TpConnectionManager: fix shadowing with two variables called iter (fixes compilation with -Wshadow)
+
+Thu Feb 21 11:51:10 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * telepathy-glib/Makefile.am: fix compilation of signals-marshal.c with -Wmissing-prototypes -Wmissing-declarations -Wstrict-prototypes
+
+Thu Feb 21 11:50:32 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * examples/extensions/: fix compilation with -Wmissing-prototypes -Wmissing-declarations -Wstrict-prototypes
+
+Wed Feb 20 13:49:05 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
+  * Nano version 0.7.3.1
+
 Wed Feb 20 13:30:33 GMT 2008  Simon McVittie <simon.mcvittie@collabora.co.uk>
   tagged telepathy-glib 0.7.3 (libtool c:r:a = 7:0:7)
 

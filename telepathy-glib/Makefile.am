@@ -189,6 +189,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     presence-mixin.c \
     properties-mixin.c \
     proxy.c \
+    proxy-internal.h \
+    proxy-methods.c \
+    proxy-signals.c \
     run.c \
     signals-marshal.list \
     text-mixin.c \
@@ -289,11 +292,12 @@ _gen/tp-signals-marshal.list: ../tools/glib-signals-marshal-gen.py \
 _gen/signals-marshal.list: signals-marshal.list _gen/tp-signals-marshal.list
 	sort -u $^ > $@
 
-_gen/signals-marshal.h: _gen/signals-marshal.list
+_gen/signals-marshal.h: _gen/signals-marshal.list Makefile.am
 	$(GLIB_GENMARSHAL) --header --prefix=_tp_marshal $< > $@
 
-_gen/signals-marshal.c: _gen/signals-marshal.list
-	$(GLIB_GENMARSHAL) --body --prefix=_tp_marshal $< > $@
+_gen/signals-marshal.c: _gen/signals-marshal.list Makefile.am
+	{ echo '#include "_gen/signals-marshal.h"' && \
+	$(GLIB_GENMARSHAL) --body --prefix=_tp_marshal $< ; } > $@
 
 # Things generated per interface
 

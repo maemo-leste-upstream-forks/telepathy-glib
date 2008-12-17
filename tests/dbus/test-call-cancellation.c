@@ -7,23 +7,7 @@
 #include <telepathy-glib/util.h>
 
 #include "tests/myassert.h"
-
-typedef struct { GObject p; } StubObject;
-typedef struct { GObjectClass p; } StubObjectClass;
-
-static GType stub_object_get_type (void);
-
-G_DEFINE_TYPE (StubObject, stub_object, G_TYPE_OBJECT)
-
-static void
-stub_object_class_init (StubObjectClass *klass)
-{
-}
-
-static void
-stub_object_init (StubObject *self)
-{
-}
+#include "tests/stub-object.h"
 
 /* just for convenience, since it's used a lot */
 #define PTR(ui) GUINT_TO_POINTER(ui)
@@ -38,14 +22,18 @@ static TpDBusDaemon *e;
 static TpDBusDaemon *f;
 static TpDBusDaemon *g;
 static TpDBusDaemon *h;
+static TpDBusDaemon *i;
+static TpDBusDaemon *j;
+static TpDBusDaemon *k;
 static TpDBusDaemon *z;
-TpIntSet *method_ok;
-TpIntSet *method_error;
-TpIntSet *freed_user_data;
+static TpIntSet *method_ok;
+static TpIntSet *method_error;
+static TpIntSet *freed_user_data;
 int fail = 0;
-gpointer copy_of_d;
-gpointer copy_of_g;
-gpointer copy_of_h;
+static gpointer copy_of_d;
+static gpointer copy_of_g;
+static gpointer copy_of_h;
+static gpointer copy_of_i;
 
 static void
 myassert_failed (void)
@@ -62,6 +50,9 @@ enum {
     TEST_F,
     TEST_G,
     TEST_H,
+    TEST_I,
+    TEST_J,
+    TEST_K,
     TEST_Z = 25,
     N_DAEMONS
 };
@@ -72,6 +63,22 @@ destroy_user_data (gpointer user_data)
   guint which = GPOINTER_TO_UINT (user_data);
   g_message ("User data %c destroyed", 'A' + which);
   tp_intset_add (freed_user_data, which);
+}
+
+static void
+j_stub_destroyed (gpointer data,
+                  GObject *stub)
+{
+  destroy_user_data (data);
+}
+
+static void
+k_stub_destroyed (gpointer data,
+                  GObject *stub)
+{
+  TpProxyPendingCall **p = data;
+
+  tp_proxy_pending_call_cancel (*p);
 }
 
 static void
@@ -151,11 +158,22 @@ listed_names (TpDBusDaemon *proxy,
     g_main_loop_quit (mainloop);
 }
 
+static void
+noc (TpDBusDaemon *proxy,
+     const gchar *name,
+     const gchar *old,
+     const gchar *new,
+     gpointer user_data,
+     GObject *weak_object)
+{
+  /* do nothing */
+}
+
 int
 main (int argc,
       char **argv)
 {
-  GObject *stub;
+  GObject *b_stub, *i_stub, *j_stub, *k_stub;
   GError err = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT, "Because I said so" };
   TpProxyPendingCall *pc;
   gpointer tmp_obj;
@@ -188,6 +206,12 @@ main (int argc,
   g_message ("g=%p", g);
   h = tp_dbus_daemon_new (tp_get_bus ());
   g_message ("h=%p", h);
+  i = tp_dbus_daemon_new (tp_get_bus ());
+  g_message ("i=%p", i);
+  j = tp_dbus_daemon_new (tp_get_bus ());
+  g_message ("j=%p", j);
+  k = tp_dbus_daemon_new (tp_get_bus ());
+  g_message ("k=%p", k);
   z = tp_dbus_daemon_new (tp_get_bus ());
   g_message ("z=%p", z);
 
@@ -199,15 +223,14 @@ main (int argc,
   MYASSERT (!tp_intset_is_member (method_ok, TEST_A), "");
   MYASSERT (!tp_intset_is_member (method_error, TEST_A), "");
 
-  /* b gets its pending call cancelled because stub is
+  /* b gets its pending call cancelled because the weak object is
    * destroyed */
-  stub = g_object_new (stub_object_get_type (), NULL);
+  b_stub = g_object_new (stub_object_get_type (), NULL);
   g_message ("Starting call on b");
   tp_cli_dbus_daemon_call_list_names (b, -1, listed_names, PTR (TEST_B),
-      destroy_user_data, stub);
+      destroy_user_data, b_stub);
   MYASSERT (!tp_intset_is_member (freed_user_data, TEST_B), "");
-  g_object_unref (stub);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_B), "");
+  g_object_unref (b_stub);
   MYASSERT (!tp_intset_is_member (method_ok, TEST_B), "");
   MYASSERT (!tp_intset_is_member (method_error, TEST_B), "");
 
@@ -246,7 +269,6 @@ main (int argc,
   MYASSERT (!tp_intset_is_member (freed_user_data, TEST_E), "");
   g_message ("Cancelling call on e");
   tp_proxy_pending_call_cancel (pc);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_E), "");
   MYASSERT (!tp_intset_is_member (method_ok, TEST_E), "");
   MYASSERT (!tp_intset_is_member (method_error, TEST_E), "");
 
@@ -306,11 +328,64 @@ main (int argc,
   MYASSERT (!tp_intset_is_member (method_error, TEST_H), "");
   g_message ("Cancelling call on h");
   tp_proxy_pending_call_cancel (pc);
-  MYASSERT (tp_intset_is_member (freed_user_data, TEST_H), "");
   MYASSERT (!tp_intset_is_member (method_ok, TEST_H), "");
   MYASSERT (!tp_intset_is_member (method_error, TEST_H), "");
-  /* Now that it's been cancelled, h will have gone away */
-  MYASSERT (copy_of_h == NULL, "");
+
+  /* i gets its pending call cancelled because i_stub is
+   * destroyed, *and* the pending call holds the last reference to it,
+   * *and* there is a signal connection
+   * (used to reproduce fd.o #14750 - see case h in test-disconnection.c
+   * for the minimal regression test) */
+  i_stub = g_object_new (stub_object_get_type (), NULL);
+  tp_cli_dbus_daemon_connect_to_name_owner_changed (i, noc, PTR (TEST_I),
+      NULL, i_stub, NULL);
+  g_message ("Starting call on i");
+  tp_cli_dbus_daemon_call_list_names (i, -1, listed_names, PTR (TEST_I),
+      destroy_user_data, i_stub);
+  MYASSERT (!tp_intset_is_member (freed_user_data, TEST_I), "");
+  tp_cli_dbus_daemon_connect_to_name_owner_changed (i, noc, PTR (TEST_I),
+      NULL, i_stub, NULL);
+  g_message ("Unreferencing i");
+  copy_of_i = i;
+  g_object_add_weak_pointer (copy_of_i, &copy_of_i);
+  g_object_unref (i);
+  i = NULL;
+  MYASSERT (copy_of_i != NULL, "");
+  MYASSERT (!tp_intset_is_member (freed_user_data, TEST_I), "");
+  MYASSERT (!tp_intset_is_member (method_ok, TEST_I), "");
+  MYASSERT (!tp_intset_is_member (method_error, TEST_I), "");
+  g_object_unref (i_stub);
+  MYASSERT (!tp_intset_is_member (method_ok, TEST_I), "");
+  MYASSERT (!tp_intset_is_member (method_error, TEST_I), "");
+
+  /* j gets its pending call cancelled explicitly, and j_stub is
+   * destroyed in response (related to fd.o #14750) */
+  j_stub = g_object_new (stub_object_get_type (), NULL);
+  g_object_weak_ref (j_stub, j_stub_destroyed, PTR (TEST_J));
+  g_message ("Starting call on j");
+  pc = tp_cli_dbus_daemon_call_list_names (j, -1, listed_names, j_stub,
+      g_object_unref, j_stub);
+  MYASSERT (!tp_intset_is_member (freed_user_data, TEST_J), "");
+  g_message ("Cancelling call on j");
+  tp_proxy_pending_call_cancel (pc);
+  MYASSERT (!tp_intset_is_member (method_ok, TEST_J), "");
+  MYASSERT (!tp_intset_is_member (method_error, TEST_J), "");
+
+  /* k gets its pending call cancelled explicitly because its weak object
+   * is destroyed, meaning there are simultaneously two reasons for it
+   * to become cancelled (equivalent to fd.o#14750, but for pending calls
+   * rather than signal connections) */
+  k_stub = g_object_new (stub_object_get_type (), NULL);
+  g_message ("Starting call on k");
+  g_object_weak_ref (k_stub, k_stub_destroyed, &pc);
+  pc = tp_cli_dbus_daemon_call_list_names (k, -1, listed_names, PTR (TEST_K),
+      destroy_user_data, k_stub);
+  MYASSERT (!tp_intset_is_member (freed_user_data, TEST_K), "");
+  MYASSERT (!tp_intset_is_member (method_ok, TEST_K), "");
+  MYASSERT (!tp_intset_is_member (method_error, TEST_K), "");
+  g_object_unref (k_stub);
+  MYASSERT (!tp_intset_is_member (method_ok, TEST_K), "");
+  MYASSERT (!tp_intset_is_member (method_error, TEST_K), "");
 
   /* z survives too; we assume that method calls succeed in order,
    * so when z has had its reply, we can stop the main loop */
@@ -342,6 +417,19 @@ main (int argc,
   MYASSERT (!tp_intset_is_member (method_ok, TEST_F), "");
   MYASSERT (tp_intset_is_member (method_error, TEST_F), "");
 
+  /* Now that its call has been cancelled, h will have gone away. Likewise
+   * for i */
+  MYASSERT (copy_of_h == NULL, "");
+  MYASSERT (copy_of_i == NULL, "");
+
+  /* User data for all the cancelled calls has also gone away */
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_B), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_E), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_H), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_I), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_J), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_K), "");
+
   /* the calls have been delivered to A, C and Z by now */
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_A), "");
   MYASSERT (tp_intset_is_member (method_ok, TEST_A), "");
@@ -364,6 +452,8 @@ main (int argc,
   g_object_unref (f);
   MYASSERT (g == NULL, "");
   MYASSERT (h == NULL, "");
+  MYASSERT (i == NULL, "");
+  g_object_unref (j);
   g_object_unref (z);
 
   /* we should already have checked each of these at least once, but just to
@@ -376,6 +466,9 @@ main (int argc,
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_F), "");
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_G), "");
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_H), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_I), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_J), "");
+  MYASSERT (tp_intset_is_member (freed_user_data, TEST_K), "");
   MYASSERT (tp_intset_is_member (freed_user_data, TEST_Z), "");
 
   tp_intset_destroy (freed_user_data);

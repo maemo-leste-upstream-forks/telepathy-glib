@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -45,6 +46,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
+LTLIBRARIES = $(noinst_LTLIBRARIES)
+libtp_glib_tests_la_LIBADD =
+am_libtp_glib_tests_la_OBJECTS = stub-object.lo
+libtp_glib_tests_la_OBJECTS = $(am_libtp_glib_tests_la_OBJECTS)
 am__EXEEXT_1 = test-handle-set$(EXEEXT) test-heap$(EXEEXT) \
 	test-intset$(EXEEXT) test-util$(EXEEXT)
 am__EXEEXT_2 = test-internal-debug$(EXEEXT)
@@ -81,10 +86,11 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(test_handle_set_SOURCES) $(test_heap_SOURCES) \
-	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
-	$(test_util_SOURCES)
-DIST_SOURCES = $(test_handle_set_SOURCES) $(test_heap_SOURCES) \
+SOURCES = $(libtp_glib_tests_la_SOURCES) $(test_handle_set_SOURCES) \
+	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+	$(test_intset_SOURCES) $(test_util_SOURCES)
+DIST_SOURCES = $(libtp_glib_tests_la_SOURCES) \
+	$(test_handle_set_SOURCES) $(test_heap_SOURCES) \
 	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
 	$(test_util_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -247,18 +253,23 @@ TESTS = $(noinst_PROGRAMS)
 TESTS_ENVIRONMENT = \
     G_DEBUG=fatal_warnings,fatal_criticals
 
+noinst_LTLIBRARIES = libtp-glib-tests.la
+libtp_glib_tests_la_SOURCES = \
+    myassert.h \
+    stub-object.c \
+    stub-object.h
+
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
     $(TESTS_ENVIRONMENT) \
     $(top_builddir)/tools/telepathy-glib-env \
     valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
         --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
-        --child-silent-after-fork=yes --num-callers=20 \
+        --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
+        --gen-suppressions=all \
         $(VALGRIND_FLAGS)
 
-
-# myassert.h is used by some of the tests in dbus/
-EXTRA_DIST = myassert.h README
+EXTRA_DIST = README
 test_handle_set_SOURCES = \
     test-handle-set.c
 
@@ -333,6 +344,17 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libtp-glib-tests.la: $(libtp_glib_tests_la_OBJECTS) $(libtp_glib_tests_la_DEPENDENCIES) 
+	$(LINK)  $(libtp_glib_tests_la_OBJECTS) $(libtp_glib_tests_la_LIBADD) $(LIBS)
+
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
@@ -361,6 +383,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stub-object.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-internal-debug.Po@am__quote@
@@ -643,7 +666,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS check-local
 check: check-recursive
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -672,8 +695,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -734,18 +757,19 @@ uninstall-am:
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-TESTS check-am check-local clean \
-	clean-generic clean-libtool clean-noinstPROGRAMS ctags \
-	ctags-recursive distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am
+	clean-generic clean-libtool clean-noinstLTLIBRARIES \
+	clean-noinstPROGRAMS ctags ctags-recursive distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
+	uninstall uninstall-am
 
 
 check-valgrind:
