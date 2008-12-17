@@ -134,11 +134,29 @@ void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-gr
                                                          <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> owner_handle);
 void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-iface-init" title="tp_group_mixin_iface_init ()">tp_group_mixin_iface_init</a>           (gpointer g_iface,
                                                          gpointer iface_data);
+void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-add-handle-owners" title="tp_group_mixin_add_handle_owners ()">tp_group_mixin_add_handle_owners</a>    (GObject *obj,
+                                                         GHashTable *local_to_owner_handle);
+void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-dbus-property" title="tp_group_mixin_get_dbus_property ()">tp_group_mixin_get_dbus_property</a>    (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer unused);
+void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-init-dbus-properties" title="tp_group_mixin_init_dbus_properties ()">tp_group_mixin_init_dbus_properties</a> (GObjectClass *cls);
+void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-self-handle" title="tp_group_mixin_change_self_handle ()">tp_group_mixin_change_self_handle</a>   (GObject *obj,
+                                                         <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> new_self_handle);
 void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-iface-init" title="tp_external_group_mixin_iface_init ()">tp_external_group_mixin_iface_init</a>  (gpointer g_iface,
                                                          gpointer iface_data);
 void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-init" title="tp_external_group_mixin_init ()">tp_external_group_mixin_init</a>        (GObject *obj,
                                                          GObject *obj_with_mixin);
 void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-finalize" title="tp_external_group_mixin_finalize ()">tp_external_group_mixin_finalize</a>    (GObject *obj);
+void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-init-dbus-properties" title="tp_external_group_mixin_init_dbus_properties ()">tp_external_group_mixin_init_dbus_properties</a>
+                                                        (GObjectClass *cls);
+void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-get-dbus-property" title="tp_external_group_mixin_get_dbus_property ()">tp_external_group_mixin_get_dbus_property</a>
+                                                        (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer unused);
 </pre>
 </div>
 <div class="refsect1" lang="en">
@@ -169,7 +187,12 @@ in the constructor after the associated object has been set,
 <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-finalize" title="tp_external_group_mixin_finalize ()"><code class="function">tp_external_group_mixin_finalize()</code></a> in the dispose or finalize function, and
 <code class="literal">G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_GROUP,
 tp_external_group_mixin_iface_init)</code> in the fourth argument to
-<code class="literal">G_DEFINE_TYPE_WITH_CODE</code>.</p>
+<code class="literal">G_DEFINE_TYPE_WITH_CODE</code>.
+</p>
+<p>
+Since 0.7.10 you can also implement the properties of Group channels,
+by calling <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-init-dbus-properties" title="tp_group_mixin_init_dbus_properties ()"><code class="function">tp_group_mixin_init_dbus_properties()</code></a> or
+<a class="link" href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-init-dbus-properties" title="tp_external_group_mixin_init_dbus_properties ()"><code class="function">tp_external_group_mixin_init_dbus_properties()</code></a> (as appropriate).</p>
 <p>
 
 </p>
@@ -356,7 +379,7 @@ All fields should be considered read-only.</p>
 <tr>
 <td><p><span class="term"><a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> <em class="structfield"><code>self_handle</code></em>;</span></p></td>
 <td> The local user's handle within this group, or 0 if none.
- Set using (FIXME: how do we do self-renaming?)
+ Set using <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-init" title="tp_group_mixin_init ()"><code class="function">tp_group_mixin_init()</code></a> and <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-self-handle" title="tp_group_mixin_change_self_handle ()"><code class="function">tp_group_mixin_change_self_handle()</code></a>.
 </td>
 </tr>
 <tr>
@@ -1188,7 +1211,13 @@ equivalent to an empty set.</p>
 <p>
 Note that the given local handle is an alias within this group
 for the given globally-valid handle. It will be returned from subsequent
-GetHandleOwner queries where appropriate.</p>
+GetHandleOwner queries where appropriate.
+</p>
+<p>
+Changed in 0.7.10: The <em class="parameter"><code>owner_handle</code></em> may be 0. To comply with telepathy-spec
+ 0.17.6, before adding any channel-specific handle to the members,
+ local-pending members or remote-pending members, you must call either
+ this function or <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-add-handle-owners" title="tp_group_mixin_add_handle_owners ()"><code class="function">tp_group_mixin_add_handle_owners()</code></a>.</p>
 <p>
 
 </p>
@@ -1207,7 +1236,8 @@ GetHandleOwner queries where appropriate.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>owner_handle</code></em> :</span></p></td>
-<td> A contact handle valid globally (may not be 0)
+<td> A contact handle valid globally, or 0 if the owner of the
+ <em class="parameter"><code>local_handle</code></em> is unknown
 </td>
 </tr>
 </tbody>
@@ -1236,6 +1266,145 @@ G_IMPLEMENT_INTERFACE.</p>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>iface_data</code></em> :</span></p></td>
 <td> Unused
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-group-mixin-add-handle-owners"></a><h3>tp_group_mixin_add_handle_owners ()</h3>
+<pre class="programlisting">void                tp_group_mixin_add_handle_owners    (GObject *obj,
+                                                         GHashTable *local_to_owner_handle);</pre>
+<p>
+Note that the given local handles are aliases within this group
+for the given globally-valid handles.
+</p>
+<p>
+To comply with telepathy-spec 0.17.6, before adding any channel-specific
+handle to the members, local-pending members or remote-pending members, you
+must call either this function or <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-add-handle-owner" title="tp_group_mixin_add_handle_owner ()"><code class="function">tp_group_mixin_add_handle_owner()</code></a>.
+</p>
+<p>
+<em class="parameter"><code>since</code></em> 0.7.10</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>obj</code></em> :</span></p></td>
+<td> A GObject implementing the group interface with this mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>local_to_owner_handle</code></em> :</span></p></td>
+<td> A map from contact handles valid within this group
+ (which may not be 0) to either contact handles valid globally, or 0 if the
+ owner of the corresponding key is unknown; all handles are stored using
+ GUINT_TO_POINTER
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-group-mixin-get-dbus-property"></a><h3>tp_group_mixin_get_dbus_property ()</h3>
+<pre class="programlisting">void                tp_group_mixin_get_dbus_property    (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer unused);</pre>
+<p>
+An implementation of <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter" title="TpDBusPropertiesMixinGetter ()"><span class="type">TpDBusPropertiesMixinGetter</span></a> which assumes that the
+<em class="parameter"><code>object</code></em> has the group mixin. It can only be used for the Group interface.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> An object with this mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface</code></em> :</span></p></td>
+<td> Must be <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-QUARK-CHANNEL-INTERFACE-GROUP:CAPS" title="TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP"><code class="literal">TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> A quark representing the D-Bus property name, either
+ "GroupFlags", "HandleOwners", "LocalPendingMembers", "Members",
+ "RemotePendingMembers" or "SelfHandle"
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em> :</span></p></td>
+<td> A GValue pre-initialized to the right type, into which to put the
+ value
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>unused</code></em> :</span></p></td>
+<td> Ignored
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.10
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-group-mixin-init-dbus-properties"></a><h3>tp_group_mixin_init_dbus_properties ()</h3>
+<pre class="programlisting">void                tp_group_mixin_init_dbus_properties (GObjectClass *cls);</pre>
+<p>
+Set up <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a> to use this mixin's implementation of
+the Group interface's properties.
+</p>
+<p>
+This uses <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-dbus-property" title="tp_group_mixin_get_dbus_property ()"><code class="function">tp_group_mixin_get_dbus_property()</code></a> as the property getter and
+sets up a list of the supported properties for it.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>cls</code></em> :</span></p></td>
+<td> The class of an object with this mixin
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.10
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-group-mixin-change-self-handle"></a><h3>tp_group_mixin_change_self_handle ()</h3>
+<pre class="programlisting">void                tp_group_mixin_change_self_handle   (GObject *obj,
+                                                         <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> new_self_handle);</pre>
+<p>
+Change the self-handle for this group to the given value.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>obj</code></em> :</span></p></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>new_self_handle</code></em> :</span></p></td>
+<td> The new self-handle for this group
 </td>
 </tr>
 </tbody>
@@ -1322,6 +1491,84 @@ in the dispose or finalize function.</p>
 </tr></tbody>
 </table></div>
 <p class="since">Since  0.5.13
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-external-group-mixin-init-dbus-properties"></a><h3>tp_external_group_mixin_init_dbus_properties ()</h3>
+<pre class="programlisting">void                tp_external_group_mixin_init_dbus_properties
+                                                        (GObjectClass *cls);</pre>
+<p>
+Set up <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a> to use this mixin's implementation of
+the Group interface's properties.
+</p>
+<p>
+This uses <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-dbus-property" title="tp_group_mixin_get_dbus_property ()"><code class="function">tp_group_mixin_get_dbus_property()</code></a> as the property getter and
+sets up a list of the supported properties for it.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>cls</code></em> :</span></p></td>
+<td> The class of an object with this mixin
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.10
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-external-group-mixin-get-dbus-property"></a><h3>tp_external_group_mixin_get_dbus_property ()</h3>
+<pre class="programlisting">void                tp_external_group_mixin_get_dbus_property
+                                                        (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer unused);</pre>
+<p>
+An implementation of <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter" title="TpDBusPropertiesMixinGetter ()"><span class="type">TpDBusPropertiesMixinGetter</span></a> which assumes that the
+<em class="parameter"><code>object</code></em> has the external group mixin. It can only be used for the Group
+interface.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> An object with this mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface</code></em> :</span></p></td>
+<td> Must be <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-QUARK-CHANNEL-INTERFACE-GROUP:CAPS" title="TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP"><code class="literal">TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> A quark representing the D-Bus property name, either
+ "GroupFlags", "HandleOwners", "LocalPendingMembers", "Members",
+ "RemotePendingMembers" or "SelfHandle"
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em> :</span></p></td>
+<td> A GValue pre-initialized to the right type, into which to put the
+ value
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>unused</code></em> :</span></p></td>
+<td> Ignored
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.10
 </p>
 </div>
 </div>

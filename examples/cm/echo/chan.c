@@ -18,6 +18,7 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/svc-channel.h>
+#include <telepathy-glib/svc-generic.h>
 
 static void text_iface_init (gpointer iface, gpointer data);
 static void channel_iface_init (gpointer iface, gpointer data);
@@ -25,6 +26,8 @@ static void channel_iface_init (gpointer iface, gpointer data);
 G_DEFINE_TYPE_WITH_CODE (ExampleEchoChannel,
     example_echo_channel,
     G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
+      tp_dbus_properties_mixin_iface_init);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL, channel_iface_init);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_TYPE_TEXT, text_iface_init);
     G_IMPLEMENT_INTERFACE (TP_TYPE_CHANNEL_IFACE, NULL))
@@ -38,6 +41,7 @@ enum
   PROP_HANDLE_TYPE,
   PROP_HANDLE,
   PROP_CONNECTION,
+  PROP_INTERFACES,
   N_PROPS
 };
 
@@ -50,6 +54,8 @@ struct _ExampleEchoChannelPrivate
   gboolean closed:1;
   gboolean disposed:1;
 };
+
+static const char * example_echo_channel_interfaces[] = { NULL };
 
 static void
 example_echo_channel_init (ExampleEchoChannel *self)
@@ -112,6 +118,9 @@ get_property (GObject *object,
       break;
     case PROP_CONNECTION:
       g_value_set_object (value, self->priv->conn);
+      break;
+    case PROP_INTERFACES:
+      g_value_set_boxed (value, example_echo_channel_interfaces);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -189,6 +198,21 @@ finalize (GObject *object)
 static void
 example_echo_channel_class_init (ExampleEchoChannelClass *klass)
 {
+  static TpDBusPropertiesMixinPropImpl channel_props[] = {
+      { "TargetHandleType", "handle-type", NULL },
+      { "TargetHandle", "handle", NULL },
+      { "ChannelType", "channel-type", NULL },
+      { "Interfaces", "interfaces", NULL },
+      { NULL }
+  };
+  static TpDBusPropertiesMixinIfaceImpl prop_interfaces[] = {
+      { TP_IFACE_CHANNEL,
+        tp_dbus_properties_mixin_getter_gobject_properties,
+        NULL,
+        channel_props,
+      },
+      { NULL }
+  };
   GObjectClass *object_class = (GObjectClass *) klass;
   GParamSpec *param_spec;
 
@@ -212,11 +236,22 @@ example_echo_channel_class_init (ExampleEchoChannelClass *klass)
       "Connection object that owns this channel",
       TP_TYPE_BASE_CONNECTION,
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
-      G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB);
+      G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NAME);
   g_object_class_install_property (object_class, PROP_CONNECTION, param_spec);
+
+  param_spec = g_param_spec_boxed ("interfaces", "Extra D-Bus interfaces",
+      "Additional Channel.Interface.* interfaces",
+      G_TYPE_STRV,
+      G_PARAM_READABLE |
+      G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NAME);
+  g_object_class_install_property (object_class, PROP_INTERFACES, param_spec);
 
   tp_text_mixin_class_init (object_class,
       G_STRUCT_OFFSET (ExampleEchoChannelClass, text_class));
+
+  klass->dbus_properties_class.interfaces = prop_interfaces;
+  tp_dbus_properties_mixin_class_init (object_class,
+      G_STRUCT_OFFSET (ExampleEchoChannelClass, dbus_properties_class));
 }
 
 static void
@@ -256,9 +291,8 @@ static void
 channel_get_interfaces (TpSvcChannel *iface,
                         DBusGMethodInvocation *context)
 {
-  const char *interfaces[] = { NULL };
-
-  tp_svc_channel_return_from_get_interfaces (context, interfaces);
+  tp_svc_channel_return_from_get_interfaces (context,
+      example_echo_channel_interfaces);
 }
 
 static void

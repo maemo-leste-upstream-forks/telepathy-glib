@@ -13,7 +13,8 @@ ABI_LISTS = \
     versions/0.7.6.abi \
     versions/0.7.7.abi \
     versions/0.7.8.abi \
-    versions/0.7.9.abi
+    versions/0.7.9.abi \
+    versions/0.7.10.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -65,6 +66,11 @@ _gen/version-script.txt: $(ABI_LISTS) _gen/abi.txt Makefile.am \
 	$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
 		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
 		 $(ABI_LISTS:%=$(srcdir)/%) > $@
+	$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
+		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
+		 --dpkg "libtelepathy-glib.so.0 libtelepathy-glib0 #MINVER#" \
+		 --dpkg-build-depends-package "libtelepathy-glib-dev" \
+		 $(ABI_LISTS:%=$(srcdir)/%) > _gen/libtelepathy-glib0.symbols
 	sed -n -e "s/^[	 ]*\\(tp_.*\\);/\\1/p" < $@ > _gen/versioned-abi.tmp
 	sort -u < _gen/versioned-abi.tmp > _gen/versioned-abi.txt
 	: # the versioned API should always match the ^tp API

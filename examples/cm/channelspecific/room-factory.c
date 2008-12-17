@@ -1,7 +1,5 @@
 /*
- * factory.c - an example channel factory for channels talking to a particular
- * contact. Similar code is used for 1-1 IM channels in many protocols
- * (IRC private messages ("/query"), XMPP IM etc.)
+ * room-factory.c: example channel factory for chatrooms
  *
  * Copyright (C) 2007 Collabora Ltd. <http://www.collabora.co.uk/>
  * Copyright (C) 2007 Nokia Corporation
@@ -11,7 +9,7 @@
  * notice and this notice are preserved.
  */
 
-#include "factory.h"
+#include "room-factory.h"
 
 #include <dbus/dbus-glib.h>
 
@@ -20,15 +18,15 @@
 #include <telepathy-glib/errors.h>
 #include <telepathy-glib/interfaces.h>
 
-#include "chan.h"
+#include "room.h"
 
 /* FIXME: we really ought to have a base class in the library for this,
  * it's such a common pattern... */
 
 static void iface_init (gpointer iface, gpointer data);
 
-G_DEFINE_TYPE_WITH_CODE (ExampleEchoFactory,
-    example_echo_factory,
+G_DEFINE_TYPE_WITH_CODE (ExampleCSHRoomFactory,
+    example_csh_room_factory,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE (TP_TYPE_CHANNEL_FACTORY_IFACE, iface_init))
 
@@ -40,19 +38,19 @@ enum
   N_PROPS
 };
 
-struct _ExampleEchoFactoryPrivate
+struct _ExampleCSHRoomFactoryPrivate
 {
   TpBaseConnection *conn;
 
-  /* GUINT_TO_POINTER (handle) => ExampleEchoChannel */
+  /* GUINT_TO_POINTER (room handle) => ExampleCSHRoomChannel */
   GHashTable *channels;
 };
 
 static void
-example_echo_factory_init (ExampleEchoFactory *self)
+example_csh_room_factory_init (ExampleCSHRoomFactory *self)
 {
-  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, EXAMPLE_TYPE_ECHO_FACTORY,
-      ExampleEchoFactoryPrivate);
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+      EXAMPLE_TYPE_CSH_ROOM_FACTORY, ExampleCSHRoomFactoryPrivate);
 
   self->priv->channels = g_hash_table_new_full (g_direct_hash, g_direct_equal,
       NULL, g_object_unref);
@@ -61,12 +59,12 @@ example_echo_factory_init (ExampleEchoFactory *self)
 static void
 dispose (GObject *object)
 {
-  ExampleEchoFactory *self = EXAMPLE_ECHO_FACTORY (object);
+  ExampleCSHRoomFactory *self = EXAMPLE_CSH_ROOM_FACTORY (object);
 
   tp_channel_factory_iface_close_all ((TpChannelFactoryIface *) object);
   g_assert (self->priv->channels == NULL);
 
-  ((GObjectClass *) example_echo_factory_parent_class)->dispose (object);
+  ((GObjectClass *) example_csh_room_factory_parent_class)->dispose (object);
 }
 
 static void
@@ -75,7 +73,7 @@ get_property (GObject *object,
               GValue *value,
               GParamSpec *pspec)
 {
-  ExampleEchoFactory *self = EXAMPLE_ECHO_FACTORY (object);
+  ExampleCSHRoomFactory *self = EXAMPLE_CSH_ROOM_FACTORY (object);
 
   switch (property_id)
     {
@@ -93,7 +91,7 @@ set_property (GObject *object,
               const GValue *value,
               GParamSpec *pspec)
 {
-  ExampleEchoFactory *self = EXAMPLE_ECHO_FACTORY (object);
+  ExampleCSHRoomFactory *self = EXAMPLE_CSH_ROOM_FACTORY (object);
 
   switch (property_id)
     {
@@ -109,7 +107,7 @@ set_property (GObject *object,
 }
 
 static void
-example_echo_factory_class_init (ExampleEchoFactoryClass *klass)
+example_csh_room_factory_class_init (ExampleCSHRoomFactoryClass *klass)
 {
   GParamSpec *param_spec;
   GObjectClass *object_class = (GObjectClass *) klass;
@@ -125,13 +123,13 @@ example_echo_factory_class_init (ExampleEchoFactoryClass *klass)
       G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB);
   g_object_class_install_property (object_class, PROP_CONNECTION, param_spec);
 
-  g_type_class_add_private (klass, sizeof (ExampleEchoFactoryPrivate));
+  g_type_class_add_private (klass, sizeof (ExampleCSHRoomFactoryPrivate));
 }
 
 static void
-example_echo_factory_close_all (TpChannelFactoryIface *iface)
+example_csh_room_factory_close_all (TpChannelFactoryIface *iface)
 {
-  ExampleEchoFactory *self = EXAMPLE_ECHO_FACTORY (iface);
+  ExampleCSHRoomFactory *self = EXAMPLE_CSH_ROOM_FACTORY (iface);
 
   if (self->priv->channels != NULL)
     {
@@ -160,18 +158,18 @@ foreach_helper (gpointer key,
 }
 
 static void
-example_echo_factory_foreach (TpChannelFactoryIface *iface,
-                              TpChannelFunc callback,
-                              gpointer user_data)
+example_csh_room_factory_foreach (TpChannelFactoryIface *iface,
+                                  TpChannelFunc callback,
+                                  gpointer user_data)
 {
-  ExampleEchoFactory *self = EXAMPLE_ECHO_FACTORY (iface);
+  ExampleCSHRoomFactory *self = EXAMPLE_CSH_ROOM_FACTORY (iface);
   struct _ForeachData data = { user_data, callback };
 
   g_hash_table_foreach (self->priv->channels, foreach_helper, &data);
 }
 
 static void
-channel_closed_cb (ExampleEchoChannel *chan, ExampleEchoFactory *self)
+channel_closed_cb (ExampleCSHRoomChannel *chan, ExampleCSHRoomFactory *self)
 {
   TpHandle handle;
 
@@ -185,16 +183,16 @@ channel_closed_cb (ExampleEchoChannel *chan, ExampleEchoFactory *self)
     }
 }
 
-static ExampleEchoChannel *
-new_channel (ExampleEchoFactory *self, TpHandle handle)
+static ExampleCSHRoomChannel *
+new_channel (ExampleCSHRoomFactory *self, TpHandle handle)
 {
-  ExampleEchoChannel *chan;
+  ExampleCSHRoomChannel *chan;
   gchar *object_path;
 
-  object_path = g_strdup_printf ("%s/EchoChannel%u",
+  object_path = g_strdup_printf ("%s/CSHRoomChannel%u",
       self->priv->conn->object_path, handle);
 
-  chan = g_object_new (EXAMPLE_TYPE_ECHO_CHANNEL,
+  chan = g_object_new (EXAMPLE_TYPE_CSH_ROOM_CHANNEL,
       "connection", self->priv->conn,
       "object-path", object_path,
       "handle", handle,
@@ -213,27 +211,27 @@ new_channel (ExampleEchoFactory *self, TpHandle handle)
 }
 
 static TpChannelFactoryRequestStatus
-example_echo_factory_request (TpChannelFactoryIface *iface,
-                              const gchar *chan_type,
-                              TpHandleType handle_type,
-                              guint handle,
-                              gpointer request_id,
-                              TpChannelIface **ret,
-                              GError **error)
+example_csh_room_factory_request (TpChannelFactoryIface *iface,
+                                  const gchar *chan_type,
+                                  TpHandleType handle_type,
+                                  guint handle,
+                                  gpointer request_id,
+                                  TpChannelIface **ret,
+                                  GError **error)
 {
-  ExampleEchoFactory *self = EXAMPLE_ECHO_FACTORY (iface);
-  ExampleEchoChannel *chan;
+  ExampleCSHRoomFactory *self = EXAMPLE_CSH_ROOM_FACTORY (iface);
+  ExampleCSHRoomChannel *chan;
   TpChannelFactoryRequestStatus status;
-  TpHandleRepoIface *contact_repo = tp_base_connection_get_handles
-      (self->priv->conn, TP_HANDLE_TYPE_CONTACT);
+  TpHandleRepoIface *room_repo = tp_base_connection_get_handles
+      (self->priv->conn, TP_HANDLE_TYPE_ROOM);
 
   if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_TEXT))
     return TP_CHANNEL_FACTORY_REQUEST_STATUS_NOT_IMPLEMENTED;
 
-  if (handle_type != TP_HANDLE_TYPE_CONTACT)
+  if (handle_type != TP_HANDLE_TYPE_ROOM)
     return TP_CHANNEL_FACTORY_REQUEST_STATUS_NOT_IMPLEMENTED;
 
-  if (!tp_handle_is_valid (contact_repo, handle, error))
+  if (!tp_handle_is_valid (room_repo, handle, error))
     return TP_CHANNEL_FACTORY_REQUEST_STATUS_ERROR;
 
   chan = g_hash_table_lookup (self->priv->channels, GUINT_TO_POINTER (handle));
@@ -256,7 +254,7 @@ iface_init (gpointer iface,
 {
   TpChannelFactoryIfaceClass *klass = iface;
 
-  klass->close_all = example_echo_factory_close_all;
-  klass->foreach = example_echo_factory_foreach;
-  klass->request = example_echo_factory_request;
+  klass->close_all = example_csh_room_factory_close_all;
+  klass->foreach = example_csh_room_factory_foreach;
+  klass->request = example_csh_room_factory_request;
 }

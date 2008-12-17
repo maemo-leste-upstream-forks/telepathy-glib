@@ -109,11 +109,29 @@
                                                          <link linkend="TpHandle">TpHandle</link> owner_handle);
 <link linkend="void">void</link>                <link linkend="tp-group-mixin-iface-init">tp_group_mixin_iface_init</link>           (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
+<link linkend="void">void</link>                <link linkend="tp-group-mixin-add-handle-owners">tp_group_mixin_add_handle_owners</link>    (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="GHashTable">GHashTable</link> *local_to_owner_handle);
+<link linkend="void">void</link>                <link linkend="tp-group-mixin-get-dbus-property">tp_group_mixin_get_dbus_property</link>    (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> unused);
+<link linkend="void">void</link>                <link linkend="tp-group-mixin-init-dbus-properties">tp_group_mixin_init_dbus_properties</link> (<link linkend="GObjectClass">GObjectClass</link> *cls);
+<link linkend="void">void</link>                <link linkend="tp-group-mixin-change-self-handle">tp_group_mixin_change_self_handle</link>   (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpHandle">TpHandle</link> new_self_handle);
 <link linkend="void">void</link>                <link linkend="tp-external-group-mixin-iface-init">tp_external_group_mixin_iface_init</link>  (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
 <link linkend="void">void</link>                <link linkend="tp-external-group-mixin-init">tp_external_group_mixin_init</link>        (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="GObject">GObject</link> *obj_with_mixin);
 <link linkend="void">void</link>                <link linkend="tp-external-group-mixin-finalize">tp_external_group_mixin_finalize</link>    (<link linkend="GObject">GObject</link> *obj);
+<link linkend="void">void</link>                <link linkend="tp-external-group-mixin-init-dbus-properties">tp_external_group_mixin_init_dbus_properties</link>
+                                                        (<link linkend="GObjectClass">GObjectClass</link> *cls);
+<link linkend="void">void</link>                <link linkend="tp-external-group-mixin-get-dbus-property">tp_external_group_mixin_get_dbus_property</link>
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> unused);
 </synopsis>
 </refsynopsisdiv>
 
@@ -153,7 +171,12 @@ in the constructor after the associated object has been set,
 <link linkend="tp-external-group-mixin-finalize"><function>tp_external_group_mixin_finalize()</function></link> in the dispose or finalize function, and
 <literal>G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_GROUP,
 tp_external_group_mixin_iface_init)</literal> in the fourth argument to
-<literal>G_DEFINE_TYPE_WITH_CODE</literal>.</para>
+<literal>G_DEFINE_TYPE_WITH_CODE</literal>.
+</para>
+<para>
+Since 0.7.10 you can also implement the properties of Group channels,
+by calling <link linkend="tp-group-mixin-init-dbus-properties"><function>tp_group_mixin_init_dbus_properties()</function></link> or
+<link linkend="tp-external-group-mixin-init-dbus-properties"><function>tp_external_group_mixin_init_dbus_properties()</function></link> (as appropriate).</para>
 <para>
 
 </para>
@@ -285,7 +308,7 @@ All fields should be considered read-only.</para>
 <varlistentry>
 <term><link linkend="TpHandle">TpHandle</link>&nbsp;<structfield>self_handle</structfield>;</term>
 <listitem><simpara> The local user's handle within this group, or 0 if none.
- Set using (FIXME: how do we do self-renaming?)
+ Set using <link linkend="tp-group-mixin-init"><function>tp_group_mixin_init()</function></link> and <link linkend="tp-group-mixin-change-self-handle"><function>tp_group_mixin_change_self_handle()</function></link>.
 </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -847,7 +870,13 @@ equivalent to an empty set.</para>
 <para>
 Note that the given local handle is an alias within this group
 for the given globally-valid handle. It will be returned from subsequent
-GetHandleOwner queries where appropriate.</para>
+GetHandleOwner queries where appropriate.
+</para>
+<para>
+Changed in 0.7.10: The <parameter>owner_handle</parameter> may be 0. To comply with telepathy-spec
+ 0.17.6, before adding any channel-specific handle to the members,
+ local-pending members or remote-pending members, you must call either
+ this function or <link linkend="tp-group-mixin-add-handle-owners"><function>tp_group_mixin_add_handle_owners()</function></link>.</para>
 <para>
 
 </para><variablelist role="params">
@@ -858,7 +887,8 @@ GetHandleOwner queries where appropriate.</para>
 <listitem><simpara> A contact handle valid within this group (may not be 0)
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>owner_handle</parameter>&nbsp;:</term>
-<listitem><simpara> A contact handle valid globally (may not be 0)
+<listitem><simpara> A contact handle valid globally, or 0 if the owner of the
+ <parameter>local_handle</parameter> is unknown
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-group-mixin-iface-init" role="function">
@@ -877,6 +907,101 @@ G_IMPLEMENT_INTERFACE.</para>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>iface_data</parameter>&nbsp;:</term>
 <listitem><simpara> Unused
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-group-mixin-add-handle-owners" role="function">
+<title>tp_group_mixin_add_handle_owners ()</title>
+<indexterm zone="tp-group-mixin-add-handle-owners"><primary>tp_group_mixin_add_handle_owners</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_add_handle_owners    (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="GHashTable">GHashTable</link> *local_to_owner_handle);</programlisting>
+<para>
+Note that the given local handles are aliases within this group
+for the given globally-valid handles.
+</para>
+<para>
+To comply with telepathy-spec 0.17.6, before adding any channel-specific
+handle to the members, local-pending members or remote-pending members, you
+must call either this function or <link linkend="tp-group-mixin-add-handle-owner"><function>tp_group_mixin_add_handle_owner()</function></link>.
+</para>
+<para>
+<parameter>since</parameter> 0.7.10</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
+<listitem><simpara> A GObject implementing the group interface with this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>local_to_owner_handle</parameter>&nbsp;:</term>
+<listitem><simpara> A map from contact handles valid within this group
+ (which may not be 0) to either contact handles valid globally, or 0 if the
+ owner of the corresponding key is unknown; all handles are stored using
+ GUINT_TO_POINTER
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-group-mixin-get-dbus-property" role="function" condition="since:0.7.10">
+<title>tp_group_mixin_get_dbus_property ()</title>
+<indexterm zone="tp-group-mixin-get-dbus-property" role="0.7.10"><primary>tp_group_mixin_get_dbus_property</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_get_dbus_property    (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> unused);</programlisting>
+<para>
+An implementation of <link linkend="TpDBusPropertiesMixinGetter"><type>TpDBusPropertiesMixinGetter</type></link> which assumes that the
+<parameter>object</parameter> has the group mixin. It can only be used for the Group interface.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> An object with this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> Must be <link linkend="TP-IFACE-QUARK-CHANNEL-INTERFACE-GROUP:CAPS"><literal>TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus property name, either
+ "GroupFlags", "HandleOwners", "LocalPendingMembers", "Members",
+ "RemotePendingMembers" or "SelfHandle"
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> A GValue pre-initialized to the right type, into which to put the
+ value
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>unused</parameter>&nbsp;:</term>
+<listitem><simpara> Ignored
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.10
+</para></refsect2>
+<refsect2 id="tp-group-mixin-init-dbus-properties" role="function" condition="since:0.7.10">
+<title>tp_group_mixin_init_dbus_properties ()</title>
+<indexterm zone="tp-group-mixin-init-dbus-properties" role="0.7.10"><primary>tp_group_mixin_init_dbus_properties</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_init_dbus_properties (<link linkend="GObjectClass">GObjectClass</link> *cls);</programlisting>
+<para>
+Set up <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link> to use this mixin's implementation of
+the Group interface's properties.
+</para>
+<para>
+This uses <link linkend="tp-group-mixin-get-dbus-property"><function>tp_group_mixin_get_dbus_property()</function></link> as the property getter and
+sets up a list of the supported properties for it.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>cls</parameter>&nbsp;:</term>
+<listitem><simpara> The class of an object with this mixin
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.10
+</para></refsect2>
+<refsect2 id="tp-group-mixin-change-self-handle" role="function">
+<title>tp_group_mixin_change_self_handle ()</title>
+<indexterm zone="tp-group-mixin-change-self-handle"><primary>tp_group_mixin_change_self_handle</primary></indexterm><programlisting><link linkend="void">void</link>                tp_group_mixin_change_self_handle   (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpHandle">TpHandle</link> new_self_handle);</programlisting>
+<para>
+Change the self-handle for this group to the given value.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing the group interface using this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>new_self_handle</parameter>&nbsp;:</term>
+<listitem><simpara> The new self-handle for this group
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-external-group-mixin-iface-init" role="function" condition="since:0.5.13">
@@ -932,6 +1057,60 @@ in the dispose or finalize function.</para>
    mixin
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.5.13
+</para></refsect2>
+<refsect2 id="tp-external-group-mixin-init-dbus-properties" role="function" condition="since:0.7.10">
+<title>tp_external_group_mixin_init_dbus_properties ()</title>
+<indexterm zone="tp-external-group-mixin-init-dbus-properties" role="0.7.10"><primary>tp_external_group_mixin_init_dbus_properties</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_init_dbus_properties
+                                                        (<link linkend="GObjectClass">GObjectClass</link> *cls);</programlisting>
+<para>
+Set up <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link> to use this mixin's implementation of
+the Group interface's properties.
+</para>
+<para>
+This uses <link linkend="tp-group-mixin-get-dbus-property"><function>tp_group_mixin_get_dbus_property()</function></link> as the property getter and
+sets up a list of the supported properties for it.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>cls</parameter>&nbsp;:</term>
+<listitem><simpara> The class of an object with this mixin
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.10
+</para></refsect2>
+<refsect2 id="tp-external-group-mixin-get-dbus-property" role="function" condition="since:0.7.10">
+<title>tp_external_group_mixin_get_dbus_property ()</title>
+<indexterm zone="tp-external-group-mixin-get-dbus-property" role="0.7.10"><primary>tp_external_group_mixin_get_dbus_property</primary></indexterm><programlisting><link linkend="void">void</link>                tp_external_group_mixin_get_dbus_property
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> unused);</programlisting>
+<para>
+An implementation of <link linkend="TpDBusPropertiesMixinGetter"><type>TpDBusPropertiesMixinGetter</type></link> which assumes that the
+<parameter>object</parameter> has the external group mixin. It can only be used for the Group
+interface.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> An object with this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> Must be <link linkend="TP-IFACE-QUARK-CHANNEL-INTERFACE-GROUP:CAPS"><literal>TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus property name, either
+ "GroupFlags", "HandleOwners", "LocalPendingMembers", "Members",
+ "RemotePendingMembers" or "SelfHandle"
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> A GValue pre-initialized to the right type, into which to put the
+ value
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>unused</parameter>&nbsp;:</term>
+<listitem><simpara> Ignored
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.10
 </para></refsect2>
 
 </refsect1>

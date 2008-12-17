@@ -23,6 +23,7 @@
 #ifndef __TP_GROUP_MIXIN_H__
 #define __TP_GROUP_MIXIN_H__
 
+#include <telepathy-glib/dbus-properties-mixin.h>
 #include <telepathy-glib/handle-repo.h>
 #include <telepathy-glib/svc-channel.h>
 #include <telepathy-glib/util.h>
@@ -114,7 +115,7 @@ struct _TpGroupMixinClass {
  * TpGroupMixin:
  * @handle_repo: The connection's contact handle repository
  * @self_handle: The local user's handle within this group, or 0 if none.
- *  Set using (FIXME: how do we do self-renaming?)
+ *  Set using tp_group_mixin_init() and tp_group_mixin_change_self_handle().
  * @group_flags: This group's flags. Set using tp_group_mixin_change_flags();
  *  defaults to 0.
  * @members: The members of the group. Alter using
@@ -204,9 +205,17 @@ gboolean tp_group_mixin_change_members (GObject *obj,
     const gchar *message, TpIntSet *add, TpIntSet *del,
     TpIntSet *add_local_pending, TpIntSet *add_remote_pending, TpHandle actor,
     TpChannelGroupChangeReason reason);
+void tp_group_mixin_change_self_handle (GObject *obj,
+    TpHandle new_self_handle);
 
 void tp_group_mixin_add_handle_owner (GObject *obj,
     TpHandle local_handle, TpHandle owner_handle);
+void tp_group_mixin_add_handle_owners (GObject *obj,
+    GHashTable *local_to_owner_handle);
+
+void tp_group_mixin_get_dbus_property (GObject *object,
+    GQuark interface, GQuark name, GValue *value, gpointer unused);
+void tp_group_mixin_init_dbus_properties (GObjectClass *cls);
 
 void tp_group_mixin_iface_init (gpointer g_iface, gpointer iface_data);
 
@@ -214,6 +223,10 @@ void tp_external_group_mixin_init (GObject *obj, GObject *obj_with_mixin);
 void tp_external_group_mixin_finalize (GObject *obj);
 void tp_external_group_mixin_iface_init (gpointer g_iface,
     gpointer iface_data);
+
+void tp_external_group_mixin_get_dbus_property (GObject *object,
+    GQuark interface, GQuark name, GValue *value, gpointer unused);
+void tp_external_group_mixin_init_dbus_properties (GObjectClass *cls);
 
 G_END_DECLS
 

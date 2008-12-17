@@ -289,7 +289,8 @@ ABI_LISTS = \
     versions/0.7.6.abi \
     versions/0.7.7.abi \
     versions/0.7.8.abi \
-    versions/0.7.9.abi
+    versions/0.7.9.abi \
+    versions/0.7.10.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -1069,6 +1070,11 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 @HAVE_LD_VERSION_SCRIPT_TRUE@	$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
 @HAVE_LD_VERSION_SCRIPT_TRUE@		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
 @HAVE_LD_VERSION_SCRIPT_TRUE@		 $(ABI_LISTS:%=$(srcdir)/%) > $@
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --dpkg "libtelepathy-glib.so.0 libtelepathy-glib0 #MINVER#" \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --dpkg-build-depends-package "libtelepathy-glib-dev" \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 $(ABI_LISTS:%=$(srcdir)/%) > _gen/libtelepathy-glib0.symbols
 @HAVE_LD_VERSION_SCRIPT_TRUE@	sed -n -e "s/^[	 ]*\\(tp_.*\\);/\\1/p" < $@ > _gen/versioned-abi.tmp
 @HAVE_LD_VERSION_SCRIPT_TRUE@	sort -u < _gen/versioned-abi.tmp > _gen/versioned-abi.txt
 @HAVE_LD_VERSION_SCRIPT_TRUE@	: # the versioned API should always match the ^tp API
