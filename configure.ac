@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [2])
+m4_define([tp_glib_micro_version], [3])
 m4_define([tp_glib_nano_version], [0])
 
 # When deciding the following, only consider the shared library, not the
@@ -30,9 +30,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [6])
+m4_define([tp_glib_lt_current], [7])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [6])
+m4_define([tp_glib_lt_age], [7])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -46,7 +46,7 @@ AC_INIT([Telepathy-GLib], [tp_glib_version],
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.8])
+AM_INIT_AUTOMAKE([1.8 -Wno-portability])
 AM_CONFIG_HEADER(config.h)
 
 dnl check for tools
@@ -56,6 +56,8 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 AM_PROG_MKDIR_P
+# pkg-config 0.21 adds CFLAGS from Requires.private, which we need
+PKG_PROG_PKG_CONFIG([0.21])
 
 GTK_DOC_CHECK([1.5])
 

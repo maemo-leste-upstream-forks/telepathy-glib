@@ -1,0 +1,535 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-dbus-properties-mixin">
+<refmeta>
+<refentrytitle role="top_of_page">TpDBusPropertiesMixin</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>TpDBusPropertiesMixin</refname>
+<refpurpose>a mixin implementation of the DBus.Properties interface</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;telepathy-glib/dbus_properties-mixin.h&gt;
+
+
+enum                <link linkend="TpDBusPropertiesMixinFlags">TpDBusPropertiesMixinFlags</link>;
+                    <link linkend="TpDBusPropertiesMixinIfaceInfo">TpDBusPropertiesMixinIfaceInfo</link>;
+                    <link linkend="TpDBusPropertiesMixinPropInfo">TpDBusPropertiesMixinPropInfo</link>;
+<link linkend="void">void</link>                <link linkend="tp-svc-interface-set-dbus-properties-info">tp_svc_interface_set_dbus_properties_info</link>
+                                                        (<link linkend="GType">GType</link> g_interface,
+                                                         <link linkend="TpDBusPropertiesMixinIfaceInfo">TpDBusPropertiesMixinIfaceInfo</link> *info);
+
+                    <link linkend="TpDBusPropertiesMixinClass">TpDBusPropertiesMixinClass</link>;
+                    <link linkend="TpDBusPropertiesMixinIfaceImpl">TpDBusPropertiesMixinIfaceImpl</link>;
+                    <link linkend="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</link>;
+<link linkend="void">void</link>                (<link linkend="TpDBusPropertiesMixinGetter">*TpDBusPropertiesMixinGetter</link>)      (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> getter_data);
+<link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-getter-gobject-properties">tp_dbus_properties_mixin_getter_gobject_properties</link>
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> getter_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="TpDBusPropertiesMixinSetter">*TpDBusPropertiesMixinSetter</link>)      (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         const <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> setter_data,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-dbus-properties-mixin-setter-gobject-properties">tp_dbus_properties_mixin_setter_gobject_properties</link>
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         const <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> setter_data,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-class-init">tp_dbus_properties_mixin_class_init</link> (<link linkend="GObjectClass">GObjectClass</link> *cls,
+                                                         <link linkend="gsize">gsize</link> offset);
+<link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-iface-init">tp_dbus_properties_mixin_iface_init</link> (<link linkend="gpointer">gpointer</link> g_iface,
+                                                         <link linkend="gpointer">gpointer</link> iface_data);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 role="desc">
+<title role="desc.title">Description</title>
+<para>
+This mixin provides an implementation of the org.freedesktop.DBus.Properties
+interface. It relies on the auto-generated service-side GInterfaces from
+telepathy-glib &gt;= 0.7.3, or something similar, to register the abstract
+properties and their GTypes; classes with the mixin can then register
+an implementation of the properties.
+</para>
+<para>
+To register D-Bus properties in a GInterface to be implementable with this
+mixin, either use the code-generation tools from telepathy-glib &gt;= 0.7.3,
+or call <link linkend="tp-svc-interface-set-properties-info"><function>tp_svc_interface_set_properties_info()</function></link> from a section of the
+base_init function that only runs once.
+</para>
+<para>
+To use this mixin, include a <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link> somewhere
+in your class structure, populate it with pointers to statically allocated
+(or duplicated and never freed) data, and call
+<link linkend="tp-dbus-properties-mixin-class-init"><function>tp_dbus_properties_mixin_class_init()</function></link> from your class_init implementation.
+</para>
+<para>
+To use this mixin as the implementation of <link linkend="TpSvcDBusProperties"><type>TpSvcDBusProperties</type></link>,
+call <literal>G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
+tp_dbus_properties_mixin_iface_init)</literal> in the fourth argument to
+<literal>G_DEFINE_TYPE_WITH_CODE</literal>.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 role="details">
+<title role="details.title">Details</title>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinFlags" role="enum" condition="since:0.7.3"/>enum TpDBusPropertiesMixinFlags</title>
+<indexterm role="0.7.3"><primary>TpDBusPropertiesMixinFlags</primary></indexterm><programlisting>typedef enum {
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_READ = 1,
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE = 2
+} TpDBusPropertiesMixinFlags;
+</programlisting>
+<para>
+Bitfield representing allowed access to a property.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry>
+<term><anchor id="TP-DBUS-PROPERTIES-MIXIN-FLAG-READ:CAPS" role="constant"/><literal>TP_DBUS_PROPERTIES_MIXIN_FLAG_READ</literal></term>
+<listitem><simpara> The property can be read using Get and
+ GetAll
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-DBUS-PROPERTIES-MIXIN-FLAG-WRITE:CAPS" role="constant"/><literal>TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE</literal></term>
+<listitem><simpara> The property can be written using Set
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinIfaceInfo" role="struct" condition="since:0.7.3"/>TpDBusPropertiesMixinIfaceInfo</title>
+<indexterm role="0.7.3"><primary>TpDBusPropertiesMixinIfaceInfo</primary></indexterm><programlisting>typedef struct {
+    GQuark dbus_interface;
+    TpDBusPropertiesMixinPropInfo *props;
+} TpDBusPropertiesMixinIfaceInfo;
+</programlisting>
+<para>
+Semi-abstract description of an interface. Each service GInterface that
+has properties must have one of these attached to it via
+<link linkend="tp-svc-interface-set-dbus-properties-info"><function>tp_svc_interface_set_dbus_properties_info()</function></link> in its base_init function;
+service GInterfaces that do not have properties may have one of these
+with no properties.
+</para>
+<para>
+This structure must either be statically allocated, or duplicated and never
+freed, so it always remains valid.
+</para>
+<para>
+In addition to the documented members, there are two private pointers
+for future expansion, which must always be initialized to <link linkend="NULL:CAPS"><literal>NULL</literal></link>.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="GQuark">GQuark</link>&nbsp;<structfield>dbus_interface</structfield>;</term>
+<listitem><simpara> Quark representing the interface's name
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpDBusPropertiesMixinPropInfo">TpDBusPropertiesMixinPropInfo</link>&nbsp;*<structfield>props</structfield>;</term>
+<listitem><simpara> Array of property descriptions, terminated by one with
+ <parameter>name</parameter> == <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinPropInfo" role="struct" condition="since:0.7.3"/>TpDBusPropertiesMixinPropInfo</title>
+<indexterm role="0.7.3"><primary>TpDBusPropertiesMixinPropInfo</primary></indexterm><programlisting>typedef struct {
+    GQuark name;
+    TpDBusPropertiesMixinFlags flags;
+    gchar *dbus_signature;
+    GType type;
+} TpDBusPropertiesMixinPropInfo;
+</programlisting>
+<para>
+Semi-abstract description of a property, as attached to a service
+GInterface. This structure must either be statically allocated, or
+duplicated and never freed, so it always remains valid.
+</para>
+<para>
+In addition to the documented members, there are two private pointers
+for future expansion, which must always be initialized to <link linkend="NULL:CAPS"><literal>NULL</literal></link>.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="GQuark">GQuark</link>&nbsp;<structfield>name</structfield>;</term>
+<listitem><simpara> Quark representing the property's name
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpDBusPropertiesMixinFlags">TpDBusPropertiesMixinFlags</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> Flags representing read/write access to the property
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>dbus_signature</structfield>;</term>
+<listitem><simpara> The D-Bus signature of the property
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GType">GType</link>&nbsp;<structfield>type</structfield>;</term>
+<listitem><simpara> The GType used in a GValue to implement the property
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-svc-interface-set-dbus-properties-info" role="function" condition="since:0.7.3"/>tp_svc_interface_set_dbus_properties_info ()</title>
+<indexterm role="0.7.3"><primary>tp_svc_interface_set_dbus_properties_info</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_interface_set_dbus_properties_info
+                                                        (<link linkend="GType">GType</link> g_interface,
+                                                         <link linkend="TpDBusPropertiesMixinIfaceInfo">TpDBusPropertiesMixinIfaceInfo</link> *info);</programlisting>
+<para>
+Declare that <parameter>g_interface</parameter> implements the given D-Bus interface, with the
+given properties. This may only be called once per GInterface, usually from
+a section of its base_init function that only runs once.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>g_interface</parameter>&nbsp;:</term>
+<listitem><simpara> The <link linkend="GType"><type>GType</type></link> of a service interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>info</parameter>&nbsp;:</term>
+<listitem><simpara> an interface description
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinClass" role="struct" condition="since:0.7.3"/>TpDBusPropertiesMixinClass</title>
+<indexterm role="0.7.3"><primary>TpDBusPropertiesMixinClass</primary></indexterm><programlisting>typedef struct {
+    TpDBusPropertiesMixinIfaceImpl *interfaces;
+} TpDBusPropertiesMixinClass;
+</programlisting>
+<para>
+Structure representing all of a class's property implementations. One of
+these structures may be placed in the layout of an object class structure.
+</para>
+<para>
+In addition to the documented fields, there are 7 pointers reserved for
+future use, which must be initialized to <link linkend="NULL:CAPS"><literal>NULL</literal></link>.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="TpDBusPropertiesMixinIfaceImpl">TpDBusPropertiesMixinIfaceImpl</link>&nbsp;*<structfield>interfaces</structfield>;</term>
+<listitem><simpara> An array of interface implementations, terminated by one with
+ <parameter>name</parameter> equal to <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinIfaceImpl" role="struct" condition="since:0.7.3"/>TpDBusPropertiesMixinIfaceImpl</title>
+<indexterm role="0.7.3"><primary>TpDBusPropertiesMixinIfaceImpl</primary></indexterm><programlisting>typedef struct {
+    const gchar *name;
+    TpDBusPropertiesMixinGetter getter;
+    TpDBusPropertiesMixinSetter setter;
+    TpDBusPropertiesMixinPropImpl *props;
+} TpDBusPropertiesMixinIfaceImpl;
+</programlisting>
+<para>
+Structure representing an implementation of an interface's properties.
+</para>
+<para>
+In addition to the documented fields, there are three pointers which must
+be initialized to <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+This structure must either be statically allocated, or duplicated and never
+freed, so it always remains valid.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term>const&nbsp;<link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> The name of the interface
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpDBusPropertiesMixinGetter">TpDBusPropertiesMixinGetter</link>&nbsp;<structfield>getter</structfield>;</term>
+<listitem><simpara> A callback to get the current value of the property, to which
+ the <parameter>getter_data</parameter> from each property implementation will be passed
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpDBusPropertiesMixinSetter">TpDBusPropertiesMixinSetter</link>&nbsp;<structfield>setter</structfield>;</term>
+<listitem><simpara> A callback to set a new value for the property, to which
+ the <parameter>setter_data</parameter> from each property implementation will be passed
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</link>&nbsp;*<structfield>props</structfield>;</term>
+<listitem><simpara> An array of property implementations, terminated by one with
+ <parameter>name</parameter> equal to <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinPropImpl" role="struct" condition="since:0.7.3"/>TpDBusPropertiesMixinPropImpl</title>
+<indexterm role="0.7.3"><primary>TpDBusPropertiesMixinPropImpl</primary></indexterm><programlisting>typedef struct {
+    const gchar *name;
+    gpointer getter_data;
+    gpointer setter_data;
+} TpDBusPropertiesMixinPropImpl;
+</programlisting>
+<para>
+Structure representing an implementation of a property.
+</para>
+<para>
+In addition to the documented fields, there are three pointers which must
+be initialized to <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+This structure must either be statically allocated, or duplicated and never
+freed, so it always remains valid.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term>const&nbsp;<link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> The name of the property as it appears on D-Bus
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>getter_data</structfield>;</term>
+<listitem><simpara> Arbitrary user-supplied data for the getter function
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>setter_data</structfield>;</term>
+<listitem><simpara> Arbitrary user-supplied data for the setter function
+</simpara></listitem>
+</varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinGetter" role="function"/>TpDBusPropertiesMixinGetter ()</title>
+<indexterm><primary>TpDBusPropertiesMixinGetter</primary></indexterm><programlisting><link linkend="void">void</link>                (*TpDBusPropertiesMixinGetter)      (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> getter_data);</programlisting>
+<para>
+Signature of a callback used to get the value of a property.
+</para>
+<para>
+For simplicity, in this mixin we don't allow getting a property to fail;
+implementations must always be prepared to return *something*.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> The exported object with the properties
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus interface name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus property name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> A GValue pre-initialized to the right type, into which to put
+ the value
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>getter_data</parameter>&nbsp;:</term>
+<listitem><simpara> The getter_data from the <link linkend="TpDBusPropertiesMixinPropImpl"><type>TpDBusPropertiesMixinPropImpl</type></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-dbus-properties-mixin-getter-gobject-properties" role="function"/>tp_dbus_properties_mixin_getter_gobject_properties ()</title>
+<indexterm><primary>tp_dbus_properties_mixin_getter_gobject_properties</primary></indexterm><programlisting><link linkend="void">void</link>                tp_dbus_properties_mixin_getter_gobject_properties
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> getter_data);</programlisting>
+<para>
+An implementation of <link linkend="TpDBusPropertiesMixinGetter"><type>TpDBusPropertiesMixinGetter</type></link> which assumes that
+the <parameter>getter_data</parameter> is the name of a readable <link linkend="GObject"><type>GObject</type></link> property of an
+appropriate type, and uses it for the value of the D-Bus property.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> The exported object with the properties
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus interface name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus property name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> A GValue pre-initialized to the right type, into which to put
+ the value
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>getter_data</parameter>&nbsp;:</term>
+<listitem><simpara> The getter_data from the <link linkend="TpDBusPropertiesMixinPropImpl"><type>TpDBusPropertiesMixinPropImpl</type></link>,
+ which must be a string containing the GObject property's name
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="TpDBusPropertiesMixinSetter" role="function"/>TpDBusPropertiesMixinSetter ()</title>
+<indexterm><primary>TpDBusPropertiesMixinSetter</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*TpDBusPropertiesMixinSetter)      (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         const <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> setter_data,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Signature of a callback used to get the value of a property.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> The exported object with the properties
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus interface name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus property name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> The new value for the property
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>setter_data</parameter>&nbsp;:</term>
+<listitem><simpara> The setter_data from the <link linkend="TpDBusPropertiesMixinPropImpl"><type>TpDBusPropertiesMixinPropImpl</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Used to return an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success, <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> (setting <parameter>error</parameter>) on failure
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-dbus-properties-mixin-setter-gobject-properties" role="function"/>tp_dbus_properties_mixin_setter_gobject_properties ()</title>
+<indexterm><primary>tp_dbus_properties_mixin_setter_gobject_properties</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_dbus_properties_mixin_setter_gobject_properties
+                                                        (<link linkend="GObject">GObject</link> *object,
+                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> name,
+                                                         const <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="gpointer">gpointer</link> setter_data,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+An implementation of <link linkend="TpDBusPropertiesMixinSetter"><type>TpDBusPropertiesMixinSetter</type></link> which assumes that the
+<parameter>setter_data</parameter> is the name of a writable <link linkend="GObject"><type>GObject</type></link> property of an appropriate
+type, and sets that property to the given value.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> The exported object with the properties
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus interface name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> A quark representing the D-Bus property name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> The new value for the property
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>setter_data</parameter>&nbsp;:</term>
+<listitem><simpara> The setter_data from the <link linkend="TpDBusPropertiesMixinPropImpl"><type>TpDBusPropertiesMixinPropImpl</type></link>,
+ which must be a string containing the GObject property's name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Not used
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="tp-dbus-properties-mixin-class-init" role="function" condition="since:0.7.3"/>tp_dbus_properties_mixin_class_init ()</title>
+<indexterm role="0.7.3"><primary>tp_dbus_properties_mixin_class_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_dbus_properties_mixin_class_init (<link linkend="GObjectClass">GObjectClass</link> *cls,
+                                                         <link linkend="gsize">gsize</link> offset);</programlisting>
+<para>
+Initialize the class <parameter>cls</parameter> to use the D-Bus Properties mixin.
+The given struct member, of size sizeof(TpDBusPropertiesMixinClass),
+will be used to store property implementation information.
+</para>
+<para>
+Each property and each interface must have been declared as a member of
+a GInterface implemented by <parameter>cls</parameter>, using
+<link linkend="tp-svc-interface-set-dbus-properties-info"><function>tp_svc_interface_set_dbus_properties_info()</function></link>.
+</para>
+<para>
+Before calling this function, the array of interfaces must have been
+placed in the TpDBusPropertiesMixinClass structure.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>cls</parameter>&nbsp;:</term>
+<listitem><simpara> a subclass of <link linkend="GObjectClass"><type>GObjectClass</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>offset</parameter>&nbsp;:</term>
+<listitem><simpara> the offset within <parameter>cls</parameter> of a TpDBusPropertiesMixinClass structure
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.3
+</para></refsect2>
+<refsect2>
+<title><anchor id="tp-dbus-properties-mixin-iface-init" role="function"/>tp_dbus_properties_mixin_iface_init ()</title>
+<indexterm><primary>tp_dbus_properties_mixin_iface_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_dbus_properties_mixin_iface_init (<link linkend="gpointer">gpointer</link> g_iface,
+                                                         <link linkend="gpointer">gpointer</link> iface_data);</programlisting>
+<para>
+Declare that the DBus.Properties interface represented by <parameter>g_iface</parameter>
+is implemented using this mixin.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>g_iface</parameter>&nbsp;:</term>
+<listitem><simpara> a pointer to a <link linkend="TpSvcDBusPropertiesClass"><type>TpSvcDBusPropertiesClass</type></link> structure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>iface_data</parameter>&nbsp;:</term>
+<listitem><simpara> ignored
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1>
+<title>See Also</title>
+<link linkend="TpSvcDBusProperties"><type>TpSvcDBusProperties</type></link>
+</refsect1>
+
+
+<refsect1><refsect2 /><refsect2 /></refsect1>
+</refentry>

@@ -28,7 +28,7 @@ import xml.dom.minidom
 from getopt import gnu_getopt
 
 from libglibcodegen import Signature, type_to_gtype, cmp_by_name, \
-        camelcase_to_lower, get_docstring
+        camelcase_to_lower, get_docstring, xml_escape
 
 
 NS_TP = "http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
@@ -118,8 +118,8 @@ class Generator(object):
             name, info, tp_type, elt = arg
             ctype, gtype, marshaller, pointer = info
 
-            self.b(' * @%s: <![CDATA[%s]]>' % (name,
-                get_docstring(elt) or '(Undocumented)'))
+            self.b(' * @%s: %s' % (name,
+                xml_escape(get_docstring(elt) or '(Undocumented)')))
 
         self.b(' * @user_data: User-supplied data')
         self.b(' * @weak_object: User-supplied weakly referenced object')
@@ -293,8 +293,7 @@ class Generator(object):
         self.b(' *')
         self.b(' * Connect a handler to the signal %s.' % member)
         self.b(' *')
-        self.b(' * <![CDATA[%s]]>'
-                % (get_docstring(signal) or '(Undocumented)'))
+        self.b(' * %s' % xml_escape(get_docstring(signal) or '(Undocumented)'))
         self.b(' *')
         self.b(' * Returns: a #TpProxySignalConnection containing all of the')
         self.b(' * above, which can be used to disconnect the signal; or')
@@ -406,8 +405,8 @@ class Generator(object):
             ctype, gtype, marshaller, pointer = info
 
             self.b(' * @%s: Used to return an \'out\' argument if @error is '
-                   '%%NULL: <![CDATA[%s]]>'
-                   % (name, get_docstring(elt) or '(Undocumented)'))
+                   '%%NULL: %s'
+                   % (name, xml_escape(get_docstring(elt) or '(Undocumented)')))
 
         self.b(' * @error: %NULL on success, or an error on failure')
         self.b(' * @user_data: user-supplied data')
@@ -463,7 +462,13 @@ class Generator(object):
                 name, info, tp_type, elt = arg
                 ctype, gtype, marshaller, pointer = info
 
-                self.b('  %s%s;' % (ctype, name))
+                # "We handle variants specially; the caller is expected to
+                # have already allocated storage for them". Thanks,
+                # dbus-glib...
+                if gtype == 'G_TYPE_VALUE':
+                    self.b('  GValue *%s = g_new0 (GValue, 1);' % name)
+                else:
+                    self.b('  %s%s;' % (ctype, name))
 
         self.b('')
         self.b('  dbus_g_proxy_end_call (proxy, call, &error,')
@@ -472,7 +477,10 @@ class Generator(object):
             name, info, tp_type, elt = arg
             ctype, gtype, marshaller, pointer = info
 
-            self.b('      %s, &%s,' % (gtype, name))
+            if gtype == 'G_TYPE_VALUE':
+                self.b('      %s, %s,' % (gtype, name))
+            else:
+                self.b('      %s, &%s,' % (gtype, name))
 
         self.b('      G_TYPE_INVALID);')
 
@@ -485,6 +493,13 @@ class Generator(object):
             self.b('    {')
             self.b('      tp_proxy_pending_call_v0_take_results (user_data, error,')
             self.b('          NULL);')
+
+            for arg in out_args:
+                name, info, tp_type, elt = arg
+                ctype, gtype, marshaller, pointer = info
+                if gtype == 'G_TYPE_VALUE':
+                    self.b('      g_free (%s);' % name)
+
             self.b('      return;')
             self.b('    }')
             self.b('')
@@ -636,8 +651,8 @@ class Generator(object):
             name, info, tp_type, elt = arg
             ctype, gtype, marshaller, pointer = info
 
-            self.b(' * @%s: Used to pass an \'in\' argument: <![CDATA[%s]]>'
-                   % (name, get_docstring(elt) or '(Undocumented)'))
+            self.b(' * @%s: Used to pass an \'in\' argument: %s'
+                   % (name, xml_escape(get_docstring(elt) or '(Undocumented)')))
 
         self.b(' * @callback: called when the method call succeeds or fails')
         self.b(' * @user_data: user-supplied data passed to the callback')
@@ -649,8 +664,7 @@ class Generator(object):
         self.b(' *')
         self.b(' * Start a %s method call.' % member)
         self.b(' *')
-        self.b(' * <![CDATA[%s]]>'
-                % (get_docstring(method) or '(Undocumented)'))
+        self.b(' * %s' % xml_escape(get_docstring(method) or '(Undocumented)'))
         self.b(' *')
         self.b(' * Returns: a #TpProxyPendingCall representing the call in')
         self.b(' *  progress. It is borrowed from the object, and will become')
@@ -854,16 +868,16 @@ class Generator(object):
             name, info, tp_type, elt = arg
             ctype, gtype, marshaller, pointer = info
 
-            self.b(' * @%s: Used to pass an \'in\' argument: <![CDATA[%s]]>'
-                   % (name, get_docstring(elt) or '(Undocumented)'))
+            self.b(' * @%s: Used to pass an \'in\' argument: %s'
+                   % (name, xml_escape(get_docstring(elt) or '(Undocumented)')))
 
         for arg in out_args:
             name, info, tp_type, elt = arg
             ctype, gtype, marshaller, pointer = info
 
             self.b(' * @%s: Used to return an \'out\' argument if %%TRUE is '
-                   'returned: <![CDATA[%s]]>'
-                   % (name, get_docstring(elt) or '(Undocumented)'))
+                   'returned: %s'
+                   % (name, xml_escape(get_docstring(elt) or '(Undocumented)')))
 
         self.b(' * @error: If not %NULL, used to return errors if %FALSE ')
         self.b(' *  is returned')
@@ -879,8 +893,7 @@ class Generator(object):
         self.b(' * and generally ensure that everything is in a consistent')
         self.b(' * state.')
         self.b(' *')
-        self.b(' * <![CDATA[%s]]>'
-                % (get_docstring(method) or '(Undocumented)'))
+        self.b(' * %s' % xml_escape(get_docstring(method) or '(Undocumented)'))
         self.b(' *')
         self.b(' * Returns: TRUE on success, FALSE and sets @error on error')
         self.b(' */')

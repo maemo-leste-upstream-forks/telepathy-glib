@@ -431,7 +431,10 @@ gboolean
 tp_proxy_has_interface_by_id (gpointer self,
                               GQuark interface)
 {
-  return tp_proxy_borrow_interface_by_id (self, interface, NULL) != NULL;
+  TpProxy *proxy = TP_PROXY (self);
+
+  return (g_datalist_id_get_data (&proxy->priv->interfaces, interface)
+      != NULL);
 }
 
 /**
@@ -686,6 +689,8 @@ tp_proxy_pending_call_idle_invoke (gpointer p)
 
   g_return_val_if_fail (self->invoke_callback != NULL, FALSE);
 
+  MORE_DEBUG ("%p: invoking user callback", self);
+
   self->invoke_callback = NULL;
   invoke (self->proxy, self->error, self->args, self->callback,
       self->user_data, self->weak_object);
@@ -846,6 +851,7 @@ tp_proxy_pending_call_cancel (TpProxyPendingCall *self)
       GError *error = g_error_new_literal (TP_DBUS_ERRORS,
           TP_DBUS_ERROR_CANCELLED, "Re-entrant D-Bus call cancelled");
 
+      MORE_DEBUG ("Telling user callback");
       invoke (self->proxy, error, NULL, self->callback, self->user_data,
           self->weak_object);
     }
@@ -853,6 +859,7 @@ tp_proxy_pending_call_cancel (TpProxyPendingCall *self)
   if (self->idle_source != 0)
     {
       /* we aren't actually doing dbus-glib things any more anyway */
+      MORE_DEBUG ("Removing idle source");
       g_source_remove (self->idle_source);
       return;
     }
@@ -860,16 +867,36 @@ tp_proxy_pending_call_cancel (TpProxyPendingCall *self)
   iface = g_datalist_id_get_data (&self->proxy->priv->interfaces,
       self->interface);
 
-  if (iface == NULL || iface == self->proxy || self->pending_call == NULL)
-    return;
+  if (iface == NULL || self->pending_call == NULL)
+    {
+      MORE_DEBUG ("I don't actually have a DBusGProxy, never mind; "
+          "iface=%p proxy=%p pending_call=%p", iface, self->proxy,
+          self->pending_call);
+      return;
+    }
 
+  /* if we made a call, then we really ought to actually have a DBusGProxy */
+  g_return_if_fail (iface != self->proxy);
+
+  /* It's possible that the DBusGProxy is only reffed by the TpProxy, and
+   * the TpProxy is only reffed by this TpProxyPendingCall, which will be
+   * freed as a side-effect of cancelling the DBusGProxyCall halfway through
+   * dbus_g_proxy_cancel_call (), so temporarily ref the DBusGProxy to ensure
+   * that it survives for the duration. (fd.o #14576) */
+  g_object_ref (iface);
+  MORE_DEBUG ("Cancelling pending call %p on DBusGProxy %p",
+      self->pending_call, iface);
   dbus_g_proxy_cancel_call (iface, self->pending_call);
+  MORE_DEBUG ("... done");
+  g_object_unref (iface);
 }
 
 static void
 tp_proxy_pending_call_free (gpointer p)
 {
   TpProxyPendingCall *self = p;
+
+  MORE_DEBUG ("%p", self);
 
   g_return_if_fail (self->priv == pending_call_magic);
 
@@ -926,12 +953,15 @@ tp_proxy_pending_call_v0_completed (gpointer p)
 {
   TpProxyPendingCall *self = p;
 
+  MORE_DEBUG ("%p", p);
+
   g_return_if_fail (self->priv == pending_call_magic);
 
   if (self->idle_source != 0)
     {
       /* we've kicked off an idle function, so we don't want to die until
        * that function runs */
+      MORE_DEBUG ("Refusing to die til the idle function runs");
       return;
     }
 
@@ -949,6 +979,7 @@ tp_proxy_pending_call_v0_completed (gpointer p)
         }
     }
 
+  MORE_DEBUG ("Freeing myself");
   tp_proxy_pending_call_free (self);
 }
 
@@ -1003,6 +1034,9 @@ tp_proxy_pending_call_v0_take_results (TpProxyPendingCall *self,
   g_return_if_fail (self->error == NULL);
   g_return_if_fail (self->idle_source == 0);
   g_return_if_fail (error == NULL || args == NULL);
+
+  MORE_DEBUG ("%p (error: %s)", self,
+      error == NULL ? "(none)" : error->message);
 
   self->args = args;
   self->error = tp_proxy_take_and_remap_error (self->proxy, error);
@@ -1439,11 +1473,13 @@ tp_proxy_set_property (GObject *object,
         }
       else
         {
-          TpProxy *daemon_as_proxy = g_value_get_object (value);
+          TpProxy *daemon_as_proxy = TP_PROXY (g_value_get_object (value));
 
           g_assert (self->dbus_daemon == NULL);
 
-          self->dbus_daemon = g_value_dup_object (value);
+          if (daemon_as_proxy != NULL)
+            self->dbus_daemon = TP_DBUS_DAEMON (g_object_ref
+                (daemon_as_proxy));
 
           if (daemon_as_proxy != NULL)
             {

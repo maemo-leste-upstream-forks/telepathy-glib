@@ -1,0 +1,710 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>TpDBusPropertiesMixin</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-service-base.html" title="Service-side implementation">
+<link rel="prev" href="telepathy-glib-TpChannelFactoryIface.html" title="TpChannelFactoryIface">
+<link rel="next" href="telepathy-glib-TpPresenceMixin.html" title="TpPresenceMixin">
+<meta name="generator" content="GTK-Doc V1.9 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="General D-Bus support">
+<link rel="chapter" href="ch-protocol.html" title="The Telepathy protocol">
+<link rel="chapter" href="ch-client.html" title="Client-side proxies">
+<link rel="chapter" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
+<link rel="chapter" href="ch-service-base.html" title="Service-side implementation">
+<link rel="chapter" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-TpChannelFactoryIface.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-service-base.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-TpPresenceMixin.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2601595" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2827961" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-dbus-properties-mixin"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2601595"></a><span class="refentrytitle">TpDBusPropertiesMixin</span>
+</h2>
+<p>TpDBusPropertiesMixin &#8212; a mixin implementation of the DBus.Properties interface</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/dbus_properties-mixin.h&gt;
+
+
+enum                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinFlags">TpDBusPropertiesMixinFlags</a>;
+                    <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinIfaceInfo">TpDBusPropertiesMixinIfaceInfo</a>;
+                    <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropInfo">TpDBusPropertiesMixinPropInfo</a>;
+void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-svc-interface-set-dbus-properties-info">tp_svc_interface_set_dbus_properties_info</a>
+                                                        (GType g_interface,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinIfaceInfo">TpDBusPropertiesMixinIfaceInfo</a> *info);
+
+                    <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass">TpDBusPropertiesMixinClass</a>;
+                    <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinIfaceImpl">TpDBusPropertiesMixinIfaceImpl</a>;
+                    <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</a>;
+void                (<a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter">*TpDBusPropertiesMixinGetter</a>)      (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer getter_data);
+void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-getter-gobject-properties">tp_dbus_properties_mixin_getter_gobject_properties</a>
+                                                        (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer getter_data);
+gboolean            (<a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinSetter">*TpDBusPropertiesMixinSetter</a>)      (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         const GValue *value,
+                                                         gpointer setter_data,
+                                                         GError **error);
+gboolean            <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-setter-gobject-properties">tp_dbus_properties_mixin_setter_gobject_properties</a>
+                                                        (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         const GValue *value,
+                                                         gpointer setter_data,
+                                                         GError **error);
+void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-class-init">tp_dbus_properties_mixin_class_init</a> (GObjectClass *cls,
+                                                         gsize offset);
+void                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-iface-init">tp_dbus_properties_mixin_iface_init</a> (gpointer g_iface,
+                                                         gpointer iface_data);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2827961"></a><h2>Description</h2>
+<p>
+This mixin provides an implementation of the org.freedesktop.DBus.Properties
+interface. It relies on the auto-generated service-side GInterfaces from
+telepathy-glib &gt;= 0.7.3, or something similar, to register the abstract
+properties and their GTypes; classes with the mixin can then register
+an implementation of the properties.
+</p>
+<p>
+To register D-Bus properties in a GInterface to be implementable with this
+mixin, either use the code-generation tools from telepathy-glib &gt;= 0.7.3,
+or call <code class="function">tp_svc_interface_set_properties_info()</code> from a section of the
+base_init function that only runs once.
+</p>
+<p>
+To use this mixin, include a <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a> somewhere
+in your class structure, populate it with pointers to statically allocated
+(or duplicated and never freed) data, and call
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-class-init"><code class="function">tp_dbus_properties_mixin_class_init()</code></a> from your class_init implementation.
+</p>
+<p>
+To use this mixin as the implementation of <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a>,
+call <code class="literal">G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
+tp_dbus_properties_mixin_iface_init)</code> in the fourth argument to
+<code class="literal">G_DEFINE_TYPE_WITH_CODE</code>.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2791313"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2791324"></a><h3>
+<a name="TpDBusPropertiesMixinFlags"></a>enum TpDBusPropertiesMixinFlags</h3>
+<a class="indexterm" name="id2791337"></a><pre class="programlisting">typedef enum {
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_READ = 1,
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE = 2
+} TpDBusPropertiesMixinFlags;
+</pre>
+<p>
+Bitfield representing allowed access to a property.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a name="TP-DBUS-PROPERTIES-MIXIN-FLAG-READ:CAPS"></a><code class="literal">TP_DBUS_PROPERTIES_MIXIN_FLAG_READ</code></span></p></td>
+<td> The property can be read using Get and
+ GetAll
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a name="TP-DBUS-PROPERTIES-MIXIN-FLAG-WRITE:CAPS"></a><code class="literal">TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE</code></span></p></td>
+<td> The property can be written using Set
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2791415"></a><h3>
+<a name="TpDBusPropertiesMixinIfaceInfo"></a>TpDBusPropertiesMixinIfaceInfo</h3>
+<a class="indexterm" name="id2791428"></a><pre class="programlisting">typedef struct {
+    GQuark dbus_interface;
+    TpDBusPropertiesMixinPropInfo *props;
+} TpDBusPropertiesMixinIfaceInfo;
+</pre>
+<p>
+Semi-abstract description of an interface. Each service GInterface that
+has properties must have one of these attached to it via
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-svc-interface-set-dbus-properties-info"><code class="function">tp_svc_interface_set_dbus_properties_info()</code></a> in its base_init function;
+service GInterfaces that do not have properties may have one of these
+with no properties.
+</p>
+<p>
+This structure must either be statically allocated, or duplicated and never
+freed, so it always remains valid.
+</p>
+<p>
+In addition to the documented members, there are two private pointers
+for future expansion, which must always be initialized to <code class="literal">NULL</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term">GQuark&#160;<em class="structfield"><code>dbus_interface</code></em>;</span></p></td>
+<td> Quark representing the interface's name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropInfo">TpDBusPropertiesMixinPropInfo</a>&#160;*<em class="structfield"><code>props</code></em>;</span></p></td>
+<td> Array of property descriptions, terminated by one with
+ <em class="parameter"><code>name</code></em> == <code class="literal">NULL</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2791554"></a><h3>
+<a name="TpDBusPropertiesMixinPropInfo"></a>TpDBusPropertiesMixinPropInfo</h3>
+<a class="indexterm" name="id2830886"></a><pre class="programlisting">typedef struct {
+    GQuark name;
+    TpDBusPropertiesMixinFlags flags;
+    gchar *dbus_signature;
+    GType type;
+} TpDBusPropertiesMixinPropInfo;
+</pre>
+<p>
+Semi-abstract description of a property, as attached to a service
+GInterface. This structure must either be statically allocated, or
+duplicated and never freed, so it always remains valid.
+</p>
+<p>
+In addition to the documented members, there are two private pointers
+for future expansion, which must always be initialized to <code class="literal">NULL</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term">GQuark&#160;<em class="structfield"><code>name</code></em>;</span></p></td>
+<td> Quark representing the property's name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinFlags">TpDBusPropertiesMixinFlags</a>&#160;<em class="structfield"><code>flags</code></em>;</span></p></td>
+<td> Flags representing read/write access to the property
+</td>
+</tr>
+<tr>
+<td><p><span class="term">gchar&#160;*<em class="structfield"><code>dbus_signature</code></em>;</span></p></td>
+<td> The D-Bus signature of the property
+</td>
+</tr>
+<tr>
+<td><p><span class="term">GType&#160;<em class="structfield"><code>type</code></em>;</span></p></td>
+<td> The GType used in a GValue to implement the property
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831022"></a><h3>
+<a name="tp-svc-interface-set-dbus-properties-info"></a>tp_svc_interface_set_dbus_properties_info ()</h3>
+<a class="indexterm" name="id2831039"></a><pre class="programlisting">void                tp_svc_interface_set_dbus_properties_info
+                                                        (GType g_interface,
+                                                         <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinIfaceInfo">TpDBusPropertiesMixinIfaceInfo</a> *info);</pre>
+<p>
+Declare that <em class="parameter"><code>g_interface</code></em> implements the given D-Bus interface, with the
+given properties. This may only be called once per GInterface, usually from
+a section of its base_init function that only runs once.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>g_interface</code></em>&#160;:</span></p></td>
+<td> The <span class="type">GType</span> of a service interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>info</code></em>&#160;:</span></p></td>
+<td> an interface description
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831133"></a><h3>
+<a name="TpDBusPropertiesMixinClass"></a>TpDBusPropertiesMixinClass</h3>
+<a class="indexterm" name="id2831146"></a><pre class="programlisting">typedef struct {
+    TpDBusPropertiesMixinIfaceImpl *interfaces;
+} TpDBusPropertiesMixinClass;
+</pre>
+<p>
+Structure representing all of a class's property implementations. One of
+these structures may be placed in the layout of an object class structure.
+</p>
+<p>
+In addition to the documented fields, there are 7 pointers reserved for
+future use, which must be initialized to <code class="literal">NULL</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinIfaceImpl">TpDBusPropertiesMixinIfaceImpl</a>&#160;*<em class="structfield"><code>interfaces</code></em>;</span></p></td>
+<td> An array of interface implementations, terminated by one with
+ <em class="parameter"><code>name</code></em> equal to <code class="literal">NULL</code>
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831233"></a><h3>
+<a name="TpDBusPropertiesMixinIfaceImpl"></a>TpDBusPropertiesMixinIfaceImpl</h3>
+<a class="indexterm" name="id2831248"></a><pre class="programlisting">typedef struct {
+    const gchar *name;
+    TpDBusPropertiesMixinGetter getter;
+    TpDBusPropertiesMixinSetter setter;
+    TpDBusPropertiesMixinPropImpl *props;
+} TpDBusPropertiesMixinIfaceImpl;
+</pre>
+<p>
+Structure representing an implementation of an interface's properties.
+</p>
+<p>
+In addition to the documented fields, there are three pointers which must
+be initialized to <code class="literal">NULL</code>.
+</p>
+<p>
+This structure must either be statically allocated, or duplicated and never
+freed, so it always remains valid.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term">const&#160;gchar&#160;*<em class="structfield"><code>name</code></em>;</span></p></td>
+<td> The name of the interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter">TpDBusPropertiesMixinGetter</a>&#160;<em class="structfield"><code>getter</code></em>;</span></p></td>
+<td> A callback to get the current value of the property, to which
+ the <em class="parameter"><code>getter_data</code></em> from each property implementation will be passed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinSetter">TpDBusPropertiesMixinSetter</a>&#160;<em class="structfield"><code>setter</code></em>;</span></p></td>
+<td> A callback to set a new value for the property, to which
+ the <em class="parameter"><code>setter_data</code></em> from each property implementation will be passed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</a>&#160;*<em class="structfield"><code>props</code></em>;</span></p></td>
+<td> An array of property implementations, terminated by one with
+ <em class="parameter"><code>name</code></em> equal to <code class="literal">NULL</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831418"></a><h3>
+<a name="TpDBusPropertiesMixinPropImpl"></a>TpDBusPropertiesMixinPropImpl</h3>
+<a class="indexterm" name="id2831434"></a><pre class="programlisting">typedef struct {
+    const gchar *name;
+    gpointer getter_data;
+    gpointer setter_data;
+} TpDBusPropertiesMixinPropImpl;
+</pre>
+<p>
+Structure representing an implementation of a property.
+</p>
+<p>
+In addition to the documented fields, there are three pointers which must
+be initialized to <code class="literal">NULL</code>.
+</p>
+<p>
+This structure must either be statically allocated, or duplicated and never
+freed, so it always remains valid.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term">const&#160;gchar&#160;*<em class="structfield"><code>name</code></em>;</span></p></td>
+<td> The name of the property as it appears on D-Bus
+</td>
+</tr>
+<tr>
+<td><p><span class="term">gpointer&#160;<em class="structfield"><code>getter_data</code></em>;</span></p></td>
+<td> Arbitrary user-supplied data for the getter function
+</td>
+</tr>
+<tr>
+<td><p><span class="term">gpointer&#160;<em class="structfield"><code>setter_data</code></em>;</span></p></td>
+<td> Arbitrary user-supplied data for the setter function
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831553"></a><h3>
+<a name="TpDBusPropertiesMixinGetter"></a>TpDBusPropertiesMixinGetter ()</h3>
+<a class="indexterm" name="id2831565"></a><pre class="programlisting">void                (*TpDBusPropertiesMixinGetter)      (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer getter_data);</pre>
+<p>
+Signature of a callback used to get the value of a property.
+</p>
+<p>
+For simplicity, in this mixin we don't allow getting a property to fail;
+implementations must always be prepared to return *something*.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em>&#160;:</span></p></td>
+<td> The exported object with the properties
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus interface name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus property name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em>&#160;:</span></p></td>
+<td> A GValue pre-initialized to the right type, into which to put
+ the value
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>getter_data</code></em>&#160;:</span></p></td>
+<td> The getter_data from the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl"><span class="type">TpDBusPropertiesMixinPropImpl</span></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831716"></a><h3>
+<a name="tp-dbus-properties-mixin-getter-gobject-properties"></a>tp_dbus_properties_mixin_getter_gobject_properties ()</h3>
+<a class="indexterm" name="id2831730"></a><pre class="programlisting">void                tp_dbus_properties_mixin_getter_gobject_properties
+                                                        (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         GValue *value,
+                                                         gpointer getter_data);</pre>
+<p>
+An implementation of <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinGetter"><span class="type">TpDBusPropertiesMixinGetter</span></a> which assumes that
+the <em class="parameter"><code>getter_data</code></em> is the name of a readable <span class="type">GObject</span> property of an
+appropriate type, and uses it for the value of the D-Bus property.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em>&#160;:</span></p></td>
+<td> The exported object with the properties
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus interface name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus property name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em>&#160;:</span></p></td>
+<td> A GValue pre-initialized to the right type, into which to put
+ the value
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>getter_data</code></em>&#160;:</span></p></td>
+<td> The getter_data from the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl"><span class="type">TpDBusPropertiesMixinPropImpl</span></a>,
+ which must be a string containing the GObject property's name
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2831897"></a><h3>
+<a name="TpDBusPropertiesMixinSetter"></a>TpDBusPropertiesMixinSetter ()</h3>
+<a class="indexterm" name="id2831909"></a><pre class="programlisting">gboolean            (*TpDBusPropertiesMixinSetter)      (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         const GValue *value,
+                                                         gpointer setter_data,
+                                                         GError **error);</pre>
+<p>
+Signature of a callback used to get the value of a property.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em>&#160;:</span></p></td>
+<td> The exported object with the properties
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus interface name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus property name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em>&#160;:</span></p></td>
+<td> The new value for the property
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>setter_data</code></em>&#160;:</span></p></td>
+<td> The setter_data from the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl"><span class="type">TpDBusPropertiesMixinPropImpl</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> Used to return an error on failure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> <code class="literal">TRUE</code> on success, <code class="literal">FALSE</code> (setting <em class="parameter"><code>error</code></em>) on failure
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2832110"></a><h3>
+<a name="tp-dbus-properties-mixin-setter-gobject-properties"></a>tp_dbus_properties_mixin_setter_gobject_properties ()</h3>
+<a class="indexterm" name="id2832125"></a><pre class="programlisting">gboolean            tp_dbus_properties_mixin_setter_gobject_properties
+                                                        (GObject *object,
+                                                         GQuark interface,
+                                                         GQuark name,
+                                                         const GValue *value,
+                                                         gpointer setter_data,
+                                                         GError **error);</pre>
+<p>
+An implementation of <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinSetter"><span class="type">TpDBusPropertiesMixinSetter</span></a> which assumes that the
+<em class="parameter"><code>setter_data</code></em> is the name of a writable <span class="type">GObject</span> property of an appropriate
+type, and sets that property to the given value.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em>&#160;:</span></p></td>
+<td> The exported object with the properties
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus interface name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></p></td>
+<td> A quark representing the D-Bus property name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em>&#160;:</span></p></td>
+<td> The new value for the property
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>setter_data</code></em>&#160;:</span></p></td>
+<td> The setter_data from the <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinPropImpl"><span class="type">TpDBusPropertiesMixinPropImpl</span></a>,
+ which must be a string containing the GObject property's name
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></p></td>
+<td> Not used
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2832333"></a><h3>
+<a name="tp-dbus-properties-mixin-class-init"></a>tp_dbus_properties_mixin_class_init ()</h3>
+<a class="indexterm" name="id2832349"></a><pre class="programlisting">void                tp_dbus_properties_mixin_class_init (GObjectClass *cls,
+                                                         gsize offset);</pre>
+<p>
+Initialize the class <em class="parameter"><code>cls</code></em> to use the D-Bus Properties mixin.
+The given struct member, of size sizeof(TpDBusPropertiesMixinClass),
+will be used to store property implementation information.
+</p>
+<p>
+Each property and each interface must have been declared as a member of
+a GInterface implemented by <em class="parameter"><code>cls</code></em>, using
+<a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-svc-interface-set-dbus-properties-info"><code class="function">tp_svc_interface_set_dbus_properties_info()</code></a>.
+</p>
+<p>
+Before calling this function, the array of interfaces must have been
+placed in the TpDBusPropertiesMixinClass structure.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>cls</code></em>&#160;:</span></p></td>
+<td> a subclass of <span class="type">GObjectClass</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>offset</code></em>&#160;:</span></p></td>
+<td> the offset within <em class="parameter"><code>cls</code></em> of a TpDBusPropertiesMixinClass structure
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.3
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2832474"></a><h3>
+<a name="tp-dbus-properties-mixin-iface-init"></a>tp_dbus_properties_mixin_iface_init ()</h3>
+<a class="indexterm" name="id2832488"></a><pre class="programlisting">void                tp_dbus_properties_mixin_iface_init (gpointer g_iface,
+                                                         gpointer iface_data);</pre>
+<p>
+Declare that the DBus.Properties interface represented by <em class="parameter"><code>g_iface</code></em>
+is implemented using this mixin.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>g_iface</code></em>&#160;:</span></p></td>
+<td> a pointer to a <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusPropertiesClass"><span class="type">TpSvcDBusPropertiesClass</span></a> structure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>iface_data</code></em>&#160;:</span></p></td>
+<td> ignored
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2832573"></a><h2>See Also</h2>
+<a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2832587"></a><div class="refsect2" lang="en"><a name="id2832588"></a></div>
+<hr>
+<div class="refsect2" lang="en"><a name="id2832589"></a></div>
+</div>
+</div>
+</body>
+</html>
