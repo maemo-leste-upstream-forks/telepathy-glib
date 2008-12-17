@@ -1,0 +1,1346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>TpGroupMixin</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.68.1">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-mixins.html" title="Implementation mixins">
+<link rel="prev" href="telepathy-glib-TpPropertiesMixin.html" title="TpPropertiesMixin">
+<link rel="next" href="telepathy-glib-TpTextMixin.html" title="TpTextMixin">
+<meta name="generator" content="GTK-Doc V1.8 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="D-Bus interfaces">
+<link rel="chapter" href="base-classes.html" title="Connections and channels">
+<link rel="chapter" href="ch-mixins.html" title="Implementation mixins">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+<link rel="chapter" href="ch-handle-management.html" title="Handle management">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-TpPropertiesMixin.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-mixins.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-TpTextMixin.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2481410" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2639902" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-TpGroupMixin"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2481410"></a><span class="refentrytitle">TpGroupMixin</span>
+</h2>
+<p>TpGroupMixin &#8212; a mixin implementation of the groups interface</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;telepathy-glib/group-mixin.h&gt;
+
+
+gboolean            (<a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinAddMemberFunc">*TpGroupMixinAddMemberFunc</a>)        (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> handle,
+                                                         const gchar *message,
+                                                         GError **error);
+gboolean            (<a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberFunc">*TpGroupMixinRemMemberFunc</a>)        (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> handle,
+                                                         const gchar *message,
+                                                         GError **error);
+gboolean            (<a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberWithReasonFunc">*TpGroupMixinRemMemberWithReasonFunc</a>)
+                                                        (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> handle,
+                                                         const gchar *message,
+                                                         guint reason,
+                                                         GError **error);
+                    <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixin">TpGroupMixin</a>;
+                    <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinClass">TpGroupMixinClass</a>;
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-init">tp_group_mixin_class_init</a>           (GObjectClass *obj_cls,
+                                                         glong offset,
+                                                         <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinAddMemberFunc">TpGroupMixinAddMemberFunc</a> add_func,
+                                                         <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberFunc">TpGroupMixinRemMemberFunc</a> rem_func);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-set-remove-with-reason-func">tp_group_mixin_class_set_remove_with_reason_func</a>
+                                                        (GObjectClass *cls,
+                                                         <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberWithReasonFunc">TpGroupMixinRemMemberWithReasonFunc</a> func);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-init">tp_group_mixin_init</a>                 (GObject *obj,
+                                                         glong offset,
+                                                         <a href="telepathy-glib-handle-repo.html#TpHandleRepoIface">TpHandleRepoIface</a> *handle_repo,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> self_handle);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-finalize">tp_group_mixin_finalize</a>             (GObject *obj);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-self-handle">tp_group_mixin_get_self_handle</a>      (GObject *obj,
+                                                         guint *ret,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-group-flags">tp_group_mixin_get_group_flags</a>      (GObject *obj,
+                                                         guint *ret,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-add-members">tp_group_mixin_add_members</a>          (GObject *obj,
+                                                         const GArray *contacts,
+                                                         const gchar *message,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-remove-members">tp_group_mixin_remove_members</a>       (GObject *obj,
+                                                         const GArray *contacts,
+                                                         const gchar *message,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-remove-members-with-reason">tp_group_mixin_remove_members_with_reason</a>
+                                                        (GObject *obj,
+                                                         const GArray *contacts,
+                                                         const gchar *message,
+                                                         guint reason,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-members">tp_group_mixin_get_members</a>          (GObject *obj,
+                                                         GArray **ret,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-local-pending-members">tp_group_mixin_get_local_pending_members</a>
+                                                        (GObject *obj,
+                                                         GArray **ret,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-local-pending-members-with-info">tp_group_mixin_get_local_pending_members_with_info</a>
+                                                        (GObject *obj,
+                                                         GPtrArray **ret,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-remote-pending-members">tp_group_mixin_get_remote_pending_members</a>
+                                                        (GObject *obj,
+                                                         GArray **ret,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-all-members">tp_group_mixin_get_all_members</a>      (GObject *obj,
+                                                         GArray **members,
+                                                         GArray **local_pending,
+                                                         GArray **remote_pending,
+                                                         GError **error);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-get-handle-owners">tp_group_mixin_get_handle_owners</a>    (GObject *obj,
+                                                         const GArray *handles,
+                                                         GArray **ret,
+                                                         GError **error);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-flags">tp_group_mixin_change_flags</a>         (GObject *obj,
+                                                         <a href="telepathy-glib-enums.html#TpChannelGroupFlags">TpChannelGroupFlags</a> add,
+                                                         <a href="telepathy-glib-enums.html#TpChannelGroupFlags">TpChannelGroupFlags</a> remove);
+gboolean            <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members">tp_group_mixin_change_members</a>       (GObject *obj,
+                                                         const gchar *message,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *add,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *remove,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *add_local_pending,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *add_remote_pending,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> actor,
+                                                         <a href="telepathy-glib-enums.html#TpChannelGroupChangeReason">TpChannelGroupChangeReason</a> reason);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-add-handle-owner">tp_group_mixin_add_handle_owner</a>     (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> local_handle,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> owner_handle);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-iface-init">tp_group_mixin_iface_init</a>           (gpointer g_iface,
+                                                         gpointer iface_data);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-iface-init">tp_external_group_mixin_iface_init</a>  (gpointer g_iface,
+                                                         gpointer iface_data);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-init">tp_external_group_mixin_init</a>        (GObject *obj,
+                                                         GObject *obj_with_mixin);
+void                <a href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-finalize">tp_external_group_mixin_finalize</a>    (GObject *obj);
+
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2639902"></a><h2>Description</h2>
+<p>
+This mixin can be added to a channel GObject class to implement the
+groups interface in a general way.
+</p>
+<p>
+To use the group mixin, include a <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinClass"><span class="type">TpGroupMixinClass</span></a> somewhere in your
+class structure and a <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixin"><span class="type">TpGroupMixin</span></a> somewhere in your instance structure,
+and call <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-init"><code class="function">tp_group_mixin_class_init()</code></a> from your class_init function,
+<a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-init"><code class="function">tp_group_mixin_init()</code></a> from your init function or constructor, and
+<a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-finalize"><code class="function">tp_group_mixin_finalize()</code></a> from your dispose or finalize function.
+</p>
+<p>
+To use the group mixin as the implementation of
+<a href="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceGroup"><span class="type">TpSvcChannelInterfaceGroup</span></a>, call
+<code class="literal">G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_GROUP,
+tp_group_mixin_iface_init)</code> in the fourth argument to
+<code class="literal">G_DEFINE_TYPE_WITH_CODE</code>.
+</p>
+<p>
+You can also implement the group interface by forwarding all group
+operations to the group mixin of an associated object (mainly useful
+for Tubes channels). To do this, call <a href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-init"><code class="function">tp_external_group_mixin_init()</code></a>
+in the constructor after the associated object has been set,
+<a href="telepathy-glib-TpGroupMixin.html#tp-external-group-mixin-finalize"><code class="function">tp_external_group_mixin_finalize()</code></a> in the dispose or finalize function, and
+<code class="literal">G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_GROUP,
+tp_external_group_mixin_iface_init)</code> in the fourth argument to
+<code class="literal">G_DEFINE_TYPE_WITH_CODE</code>.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2640027"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2640037"></a><h3>
+<a name="TpGroupMixinAddMemberFunc"></a>TpGroupMixinAddMemberFunc ()</h3>
+<a class="indexterm" name="id2640048"></a><pre class="programlisting">gboolean            (*TpGroupMixinAddMemberFunc)        (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> handle,
+                                                         const gchar *message,
+                                                         GError **error);</pre>
+<p>
+Signature of the callback used to add a member to the group.
+This should perform the necessary operations in the underlying IM protocol
+to cause the member to be added.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface with this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle</code></em>&#160;:</span></td>
+<td> The handle of the contact to be added
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message to be sent if the protocol supports it
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return a Telepathy D-Bus error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> on success, <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2640211"></a><h3>
+<a name="TpGroupMixinRemMemberFunc"></a>TpGroupMixinRemMemberFunc ()</h3>
+<a class="indexterm" name="id2640223"></a><pre class="programlisting">gboolean            (*TpGroupMixinRemMemberFunc)        (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> handle,
+                                                         const gchar *message,
+                                                         GError **error);</pre>
+<p>
+Signature of the callback used to remove a member from the group.
+This should perform the necessary operations in the underlying IM protocol
+to cause the member to be removed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface with this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle</code></em>&#160;:</span></td>
+<td> The handle of the contact to be removed
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message to be sent if the protocol supports it
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return a Telepathy D-Bus error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> on success, <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2640387"></a><h3>
+<a name="TpGroupMixinRemMemberWithReasonFunc"></a>TpGroupMixinRemMemberWithReasonFunc ()</h3>
+<a class="indexterm" name="id2640401"></a><pre class="programlisting">gboolean            (*TpGroupMixinRemMemberWithReasonFunc)
+                                                        (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> handle,
+                                                         const gchar *message,
+                                                         guint reason,
+                                                         GError **error);</pre>
+<p>
+Signature of the callback used to remove a member from the group.
+This should perform the necessary operations in the underlying IM protocol
+to cause the member to be removed.
+</p>
+<p>
+Set this with <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-set-remove-with-reason-func"><code class="function">tp_group_mixin_class_set_remove_with_reason_func()</code></a>, .</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface with this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle</code></em>&#160;:</span></td>
+<td> The handle of the contact to be removed
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message to be sent if the protocol supports it
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>reason</code></em>&#160;:</span></td>
+<td> A <a href="telepathy-glib-enums.html#TpChannelGroupChangeReason"><span class="type">TpChannelGroupChangeReason</span></a> indicating the reason
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return a Telepathy D-Bus error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> on success, <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2640608"></a><h3>
+<a name="TpGroupMixin"></a>TpGroupMixin</h3>
+<a class="indexterm" name="id2640620"></a><pre class="programlisting">typedef struct {
+  TpHandleRepoIface *handle_repo;
+  TpHandle self_handle;
+
+  TpChannelGroupFlags group_flags;
+
+  TpHandleSet *members;
+  TpHandleSet *local_pending;
+  TpHandleSet *remote_pending;
+
+  TpGroupMixinPrivate *priv;
+} TpGroupMixin;
+</pre>
+<p>
+Structure representing the group mixin as used in a particular class.
+To be placed in the implementation's instance structure.
+</p>
+<p>
+All fields should be considered read-only.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><a href="telepathy-glib-handle-repo.html#TpHandleRepoIface">TpHandleRepoIface</a>&#160;*<em class="structfield"><code>handle_repo</code></em>;</span></td>
+<td> The connection's contact handle repository
+</td>
+</tr>
+<tr>
+<td><span class="term"><a href="telepathy-glib-handle.html#TpHandle">TpHandle</a>&#160;<em class="structfield"><code>self_handle</code></em>;</span></td>
+<td> The local user's handle within this group, or 0 if none.
+ Set using (FIXME: how do we do self-renaming?)
+</td>
+</tr>
+<tr>
+<td><span class="term"><a href="telepathy-glib-enums.html#TpChannelGroupFlags">TpChannelGroupFlags</a>&#160;<em class="structfield"><code>group_flags</code></em>;</span></td>
+<td> This group's flags. Set using <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-flags"><code class="function">tp_group_mixin_change_flags()</code></a>.
+</td>
+</tr>
+<tr>
+<td><span class="term"><a href="telepathy-glib-handle-repo.html#TpHandleSet">TpHandleSet</a>&#160;*<em class="structfield"><code>members</code></em>;</span></td>
+<td> The members of the group. Alter using
+ <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members"><code class="function">tp_group_mixin_change_members()</code></a>.
+</td>
+</tr>
+<tr>
+<td><span class="term"><a href="telepathy-glib-handle-repo.html#TpHandleSet">TpHandleSet</a>&#160;*<em class="structfield"><code>local_pending</code></em>;</span></td>
+<td> Members awaiting the local user's approval to join the
+ group. Alter using <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members"><code class="function">tp_group_mixin_change_members()</code></a>.
+</td>
+</tr>
+<tr>
+<td><span class="term"><a href="telepathy-glib-handle-repo.html#TpHandleSet">TpHandleSet</a>&#160;*<em class="structfield"><code>remote_pending</code></em>;</span></td>
+<td> Members awaiting remote (e.g. remote user or server)
+ approval to join the group. Alter using <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members"><code class="function">tp_group_mixin_change_members()</code></a>.
+</td>
+</tr>
+<tr>
+<td><span class="term">TpGroupMixinPrivate&#160;*<em class="structfield"><code>priv</code></em>;</span></td>
+<td> Pointer to opaque private data
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2640816"></a><h3>
+<a name="TpGroupMixinClass"></a>TpGroupMixinClass</h3>
+<a class="indexterm" name="id2640826"></a><pre class="programlisting">typedef struct {
+  TpGroupMixinAddMemberFunc add_member;
+  TpGroupMixinRemMemberFunc remove_member;
+  TpGroupMixinClassPrivate *priv;
+} TpGroupMixinClass;
+</pre>
+<p>
+Structure representing the group mixin as used in a particular class.
+To be placed in the implementation's class structure.
+</p>
+<p>
+Initialize this with <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-init"><code class="function">tp_group_mixin_class_init()</code></a>.
+</p>
+<p>
+All fields should be considered read-only.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinAddMemberFunc">TpGroupMixinAddMemberFunc</a>&#160;<em class="structfield"><code>add_member</code></em>;</span></td>
+<td> The add-member function that was passed to
+ <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-init"><code class="function">tp_group_mixin_class_init()</code></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberFunc">TpGroupMixinRemMemberFunc</a>&#160;<em class="structfield"><code>remove_member</code></em>;</span></td>
+<td> The remove-member function that was passed to
+ <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-init"><code class="function">tp_group_mixin_class_init()</code></a>
+</td>
+</tr>
+<tr>
+<td><span class="term">TpGroupMixinClassPrivate&#160;*<em class="structfield"><code>priv</code></em>;</span></td>
+<td> Pointer to opaque private data
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2640940"></a><h3>
+<a name="tp-group-mixin-class-init"></a>tp_group_mixin_class_init ()</h3>
+<a class="indexterm" name="id2640952"></a><pre class="programlisting">void                tp_group_mixin_class_init           (GObjectClass *obj_cls,
+                                                         glong offset,
+                                                         <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinAddMemberFunc">TpGroupMixinAddMemberFunc</a> add_func,
+                                                         <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberFunc">TpGroupMixinRemMemberFunc</a> rem_func);</pre>
+<p>
+Configure the mixin for use with the given class.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj_cls</code></em>&#160;:</span></td>
+<td> The class of an object implementing the group interface using this
+ mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>offset</code></em>&#160;:</span></td>
+<td> The offset of the TpGroupMixinClass structure within the class
+ structure
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>add_func</code></em>&#160;:</span></td>
+<td> A callback to be used to add contacts to this group
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>rem_func</code></em>&#160;:</span></td>
+<td> A callback to be used to remove contacts from this group.
+ This must be <code class="literal">NULL</code> if you will subsequently call
+ <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-set-remove-with-reason-func"><code class="function">tp_group_mixin_class_set_remove_with_reason_func()</code></a>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641078"></a><h3>
+<a name="tp-group-mixin-class-set-remove-with-reason-func"></a>tp_group_mixin_class_set_remove_with_reason_func ()</h3>
+<a class="indexterm" name="id2641091"></a><pre class="programlisting">void                tp_group_mixin_class_set_remove_with_reason_func
+                                                        (GObjectClass *cls,
+                                                         <a href="telepathy-glib-TpGroupMixin.html#TpGroupMixinRemMemberWithReasonFunc">TpGroupMixinRemMemberWithReasonFunc</a> func);</pre>
+<p>
+Set a callback to be used to implement <code class="function">RemoveMembers()</code> and
+<code class="function">RemoveMembersWithReason()</code>. If this function is called during class
+initialization, the given callback will be used instead of the remove
+callback passed to <a href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-class-init"><code class="function">tp_group_mixin_class_init()</code></a> (which must be <code class="literal">NULL</code>
+in this case).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>cls</code></em>&#160;:</span></td>
+<td> The class of an object implementing the group interface using this
+ mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>func</code></em>&#160;:</span></td>
+<td> A callback to be used to remove contacts from this group with a
+ specified reason.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641197"></a><h3>
+<a name="tp-group-mixin-init"></a>tp_group_mixin_init ()</h3>
+<a class="indexterm" name="id2641207"></a><pre class="programlisting">void                tp_group_mixin_init                 (GObject *obj,
+                                                         glong offset,
+                                                         <a href="telepathy-glib-handle-repo.html#TpHandleRepoIface">TpHandleRepoIface</a> *handle_repo,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> self_handle);</pre>
+<p>
+Initialize the mixin.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>offset</code></em>&#160;:</span></td>
+<td> The offset of the TpGroupMixin structure within the instance
+ structure
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_repo</code></em>&#160;:</span></td>
+<td> The connection's handle repository for contacts
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>self_handle</code></em>&#160;:</span></td>
+<td> The handle of the local user in this group, if any
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641313"></a><h3>
+<a name="tp-group-mixin-finalize"></a>tp_group_mixin_finalize ()</h3>
+<a class="indexterm" name="id2641323"></a><pre class="programlisting">void                tp_group_mixin_finalize             (GObject *obj);</pre>
+<p>
+Unreference handles and free resources used by this mixin.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641370"></a><h3>
+<a name="tp-group-mixin-get-self-handle"></a>tp_group_mixin_get_self_handle ()</h3>
+<a class="indexterm" name="id2641382"></a><pre class="programlisting">gboolean            tp_group_mixin_get_self_handle      (GObject *obj,
+                                                         guint *ret,
+                                                         GError **error);</pre>
+<p>
+Set the guint pointed to by ret to the local user's handle in this
+group, or to 0 if the local user is not present in this group.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group mixin using this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return the local user's handle in this group
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641487"></a><h3>
+<a name="tp-group-mixin-get-group-flags"></a>tp_group_mixin_get_group_flags ()</h3>
+<a class="indexterm" name="id2641500"></a><pre class="programlisting">gboolean            tp_group_mixin_get_group_flags      (GObject *obj,
+                                                         guint *ret,
+                                                         GError **error);</pre>
+<p>
+Set the guint pointed to by ret to this group's flags, to be
+interpreted according to TpChannelGroupFlags.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group mixin using this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return the flags
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641603"></a><h3>
+<a name="tp-group-mixin-add-members"></a>tp_group_mixin_add_members ()</h3>
+<a class="indexterm" name="id2641614"></a><pre class="programlisting">gboolean            tp_group_mixin_add_members          (GObject *obj,
+                                                         const GArray *contacts,
+                                                         const gchar *message,
+                                                         GError **error);</pre>
+<p>
+Request that the given contacts be added to the group as if in response
+to user action. If the group's flags prohibit this, raise
+PermissionDenied. If any of the handles is invalid, raise InvalidHandle.
+Otherwise attempt to add the contacts by calling the callbacks provided
+by the channel implementation.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> A GArray of guint representing contacts
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message associated with the addition request, if supported
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return an error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> on success
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641751"></a><h3>
+<a name="tp-group-mixin-remove-members"></a>tp_group_mixin_remove_members ()</h3>
+<a class="indexterm" name="id2641763"></a><pre class="programlisting">gboolean            tp_group_mixin_remove_members       (GObject *obj,
+                                                         const GArray *contacts,
+                                                         const gchar *message,
+                                                         GError **error);</pre>
+<p>
+Request that the given contacts be removed from the group as if in response
+to user action. If the group's flags prohibit this, raise
+PermissionDenied. If any of the handles is invalid, raise InvalidHandle.
+If any of the handles is absent from the group, raise NotAvailable.
+Otherwise attempt to remove the contacts by calling the callbacks provided
+by the channel implementation.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> A GArray of guint representing contacts
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message to be sent to those contacts, if supported
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return an error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> on success
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2641902"></a><h3>
+<a name="tp-group-mixin-remove-members-with-reason"></a>tp_group_mixin_remove_members_with_reason ()</h3>
+<a class="indexterm" name="id2641916"></a><pre class="programlisting">gboolean            tp_group_mixin_remove_members_with_reason
+                                                        (GObject *obj,
+                                                         const GArray *contacts,
+                                                         const gchar *message,
+                                                         guint reason,
+                                                         GError **error);</pre>
+<p>
+Request that the given contacts be removed from the group as if in response
+to user action. If the group's flags prohibit this, raise
+PermissionDenied. If any of the handles is invalid, raise InvalidHandle.
+If any of the handles is absent from the group, raise NotAvailable.
+Otherwise attempt to remove the contacts by calling the callbacks provided
+by the channel implementation.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> A GArray of guint representing contacts
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message to be sent to those contacts, if supported
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>reason</code></em>&#160;:</span></td>
+<td> A <a href="telepathy-glib-enums.html#TpChannelGroupChangeReason"><span class="type">TpChannelGroupChangeReason</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return an error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> on success
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642080"></a><h3>
+<a name="tp-group-mixin-get-members"></a>tp_group_mixin_get_members ()</h3>
+<a class="indexterm" name="id2642091"></a><pre class="programlisting">gboolean            tp_group_mixin_get_members          (GObject *obj,
+                                                         GArray **ret,
+                                                         GError **error);</pre>
+<p>
+Get the group's current members</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return a GArray of guint contact handles
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642194"></a><h3>
+<a name="tp-group-mixin-get-local-pending-members"></a>tp_group_mixin_get_local_pending_members ()</h3>
+<a class="indexterm" name="id2642206"></a><pre class="programlisting">gboolean            tp_group_mixin_get_local_pending_members
+                                                        (GObject *obj,
+                                                         GArray **ret,
+                                                         GError **error);</pre>
+<p>
+Get the group's local-pending members.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return a GArray of guint contact handles
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642311"></a><h3>
+<a name="tp-group-mixin-get-local-pending-members-with-info"></a>tp_group_mixin_get_local_pending_members_with_info ()</h3>
+<a class="indexterm" name="id2642324"></a><pre class="programlisting">gboolean            tp_group_mixin_get_local_pending_members_with_info
+                                                        (GObject *obj,
+                                                         GPtrArray **ret,
+                                                         GError **error);</pre>
+<p>
+Get the group's local-pending members and information about their
+requests to join the channel.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return a GPtrArray of D-Bus structures each containing
+ the handle of a local-pending contact, the handle of a contact
+ responsible for adding them to the group (or 0), the reason code
+ and a related message (e.g. their request to join the group)
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642434"></a><h3>
+<a name="tp-group-mixin-get-remote-pending-members"></a>tp_group_mixin_get_remote_pending_members ()</h3>
+<a class="indexterm" name="id2642447"></a><pre class="programlisting">gboolean            tp_group_mixin_get_remote_pending_members
+                                                        (GObject *obj,
+                                                         GArray **ret,
+                                                         GError **error);</pre>
+<p>
+Get the group's remote-pending members.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return a GArray of guint representing the handles
+ of the group's remote pending members
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642552"></a><h3>
+<a name="tp-group-mixin-get-all-members"></a>tp_group_mixin_get_all_members ()</h3>
+<a class="indexterm" name="id2642564"></a><pre class="programlisting">gboolean            tp_group_mixin_get_all_members      (GObject *obj,
+                                                         GArray **members,
+                                                         GArray **local_pending,
+                                                         GArray **remote_pending,
+                                                         GError **error);</pre>
+<p>
+Get the group's current and pending members.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>members</code></em>&#160;:</span></td>
+<td> Used to return a GArray of guint representing the handles
+ of the group's members
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>local_pending</code></em>&#160;:</span></td>
+<td> Used to return a GArray of guint representing the handles
+ of the group's local pending members
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remote_pending</code></em>&#160;:</span></td>
+<td> Used to return a GArray of guint representing the handles
+ of the group's remote pending members
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642711"></a><h3>
+<a name="tp-group-mixin-get-handle-owners"></a>tp_group_mixin_get_handle_owners ()</h3>
+<a class="indexterm" name="id2642723"></a><pre class="programlisting">gboolean            tp_group_mixin_get_handle_owners    (GObject *obj,
+                                                         const GArray *handles,
+                                                         GArray **ret,
+                                                         GError **error);</pre>
+<p>
+If the mixin has the flag <a href="telepathy-glib-enums.html#TP-CHANNEL-GROUP-FLAG-CHANNEL-SPECIFIC-HANDLES:CAPS"><code class="literal">TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES</code></a>,
+return the global owners of the given local handles, or 0 where
+unavailable.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface with this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handles</code></em>&#160;:</span></td>
+<td> An array of guint representing locally valid handles
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> Used to return an array of guint representing globally valid
+ handles, or 0 where unavailable, if <code class="literal">TRUE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> Used to return an error if <code class="literal">FALSE</code> is returned
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> (setting <em class="parameter"><code>ret</code></em>) on success, <code class="literal">FALSE</code> (setting <em class="parameter"><code>error</code></em>) on
+failure
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2642894"></a><h3>
+<a name="tp-group-mixin-change-flags"></a>tp_group_mixin_change_flags ()</h3>
+<a class="indexterm" name="id2642906"></a><pre class="programlisting">void                tp_group_mixin_change_flags         (GObject *obj,
+                                                         <a href="telepathy-glib-enums.html#TpChannelGroupFlags">TpChannelGroupFlags</a> add,
+                                                         <a href="telepathy-glib-enums.html#TpChannelGroupFlags">TpChannelGroupFlags</a> remove);</pre>
+<p>
+Request a change to be made to the flags. Emits the
+GroupFlagsChanged signal with the changes which were actually made.
+</p>
+<p>
+It is an error to set any of the same bits in both <em class="parameter"><code>add</code></em> and <em class="parameter"><code>remove</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the groups interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>add</code></em>&#160;:</span></td>
+<td> Flags to be added
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remove</code></em>&#160;:</span></td>
+<td> Flags to be removed
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2643006"></a><h3>
+<a name="tp-group-mixin-change-members"></a>tp_group_mixin_change_members ()</h3>
+<a class="indexterm" name="id2643018"></a><pre class="programlisting">gboolean            tp_group_mixin_change_members       (GObject *obj,
+                                                         const gchar *message,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *add,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *remove,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *add_local_pending,
+                                                         <a href="telepathy-glib-TpIntSet.html#TpIntSet">TpIntSet</a> *add_remote_pending,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> actor,
+                                                         <a href="telepathy-glib-enums.html#TpChannelGroupChangeReason">TpChannelGroupChangeReason</a> reason);</pre>
+<p>
+Change the sets of members as given by the arguments, and emit the
+MembersChanged signal if the changes were not a no-op.
+</p>
+<p>
+This function must be called in response to events on the underlying
+IM protocol, and must not be called in direct response to user input;
+it does not respect the permissions flags, but changes the group directly.
+</p>
+<p>
+If any two of add, remove, add_local_pending and add_remote_pending have
+a non-empty intersection, the result is undefined. Don't do that.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td> A message to be sent to the affected contacts if possible
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>add</code></em>&#160;:</span></td>
+<td> A set of contact handles to be added to the members (if not
+ already present) and removed from local pending and remote pending
+ (if present)
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remove</code></em>&#160;:</span></td>
+<td> A set of contact handles to be removed from members,
+ local pending or remote pending, wherever they are present
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>add_local_pending</code></em>&#160;:</span></td>
+<td> A set of contact handles to be added to local pending,
+ and removed from members and remote pending
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>add_remote_pending</code></em>&#160;:</span></td>
+<td> A set of contact handles to be added to remote pending,
+ and removed from members and local pending
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>actor</code></em>&#160;:</span></td>
+<td> The handle of the contact responsible for this change
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>reason</code></em>&#160;:</span></td>
+<td> The reason for this change
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> <code class="literal">TRUE</code> if the group was changed and the MembersChanged signal
+ was emitted; <code class="literal">FALSE</code> if nothing actually changed and the signal was
+ suppressed.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2643252"></a><h3>
+<a name="tp-group-mixin-add-handle-owner"></a>tp_group_mixin_add_handle_owner ()</h3>
+<a class="indexterm" name="id2643265"></a><pre class="programlisting">void                tp_group_mixin_add_handle_owner     (GObject *obj,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> local_handle,
+                                                         <a href="telepathy-glib-handle.html#TpHandle">TpHandle</a> owner_handle);</pre>
+<p>
+Note that the given local handle is an alias within this group
+for the given globally-valid handle. It will be returned from subsequent
+GetHandleOwner queries where appropriate.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> A GObject implementing the group interface with this mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>local_handle</code></em>&#160;:</span></td>
+<td> A contact handle valid within this group (may not be 0)
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>owner_handle</code></em>&#160;:</span></td>
+<td> A contact handle valid globally (may not be 0)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2643354"></a><h3>
+<a name="tp-group-mixin-iface-init"></a>tp_group_mixin_iface_init ()</h3>
+<a class="indexterm" name="id2643365"></a><pre class="programlisting">void                tp_group_mixin_iface_init           (gpointer g_iface,
+                                                         gpointer iface_data);</pre>
+<p>
+Fill in the vtable entries needed to implement the group interface using
+this mixin. This function should usually be called via
+G_IMPLEMENT_INTERFACE.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>g_iface</code></em>&#160;:</span></td>
+<td> A <a href="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceGroupClass"><span class="type">TpSvcChannelInterfaceGroupClass</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>iface_data</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2643438"></a><h3>
+<a name="tp-external-group-mixin-iface-init"></a>tp_external_group_mixin_iface_init ()</h3>
+<a class="indexterm" name="id2643452"></a><pre class="programlisting">void                tp_external_group_mixin_iface_init  (gpointer g_iface,
+                                                         gpointer iface_data);</pre>
+<p>
+Fill in the vtable entries needed to implement the group interface using
+the group mixin of another object. This function should usually be called
+via G_IMPLEMENT_INTERFACE.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>g_iface</code></em>&#160;:</span></td>
+<td> A <a href="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceGroupClass"><span class="type">TpSvcChannelInterfaceGroupClass</span></a>
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>iface_data</code></em>&#160;:</span></td>
+<td> Unused
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2643525"></a><h3>
+<a name="tp-external-group-mixin-init"></a>tp_external_group_mixin_init ()</h3>
+<a class="indexterm" name="id2643538"></a><pre class="programlisting">void                tp_external_group_mixin_init        (GObject *obj,
+                                                         GObject *obj_with_mixin);</pre>
+<p>
+Fill in the qdata needed to implement the group interface using
+the group mixin of another object. This function should usually be called
+in the instance constructor.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the groups interface using an external group
+   mixin
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>obj_with_mixin</code></em>&#160;:</span></td>
+<td> A GObject with the group mixin
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2643607"></a><h3>
+<a name="tp-external-group-mixin-finalize"></a>tp_external_group_mixin_finalize ()</h3>
+<a class="indexterm" name="id2643621"></a><pre class="programlisting">void                tp_external_group_mixin_finalize    (GObject *obj);</pre>
+<p>
+Remove the external group mixin. This function should usually be called
+in the dispose or finalize function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>obj</code></em>&#160;:</span></td>
+<td> An object implementing the groups interface using an external group
+   mixin
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2643675"></a><h2>See Also</h2>
+<a href="telepathy-glib-svc-channel.html#TpSvcChannelInterfaceGroup"><span class="type">TpSvcChannelInterfaceGroup</span></a>
+</div>
+</div>
+</body>
+</html>

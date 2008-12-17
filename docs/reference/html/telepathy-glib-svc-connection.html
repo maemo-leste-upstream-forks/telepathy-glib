@@ -1,0 +1,3690 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Service-side Connection interfaces</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.68.1">
+<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="up" href="ch-dbus.html" title="D-Bus interfaces">
+<link rel="prev" href="telepathy-glib-svc-channel.html" title="Service-side Channel types and interfaces">
+<link rel="next" href="telepathy-glib-svc-media-interfaces.html" title="Service-side media streaming helper interfaces">
+<meta name="generator" content="GTK-Doc V1.8 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch-dbus.html" title="D-Bus interfaces">
+<link rel="chapter" href="base-classes.html" title="Connections and channels">
+<link rel="chapter" href="ch-mixins.html" title="Implementation mixins">
+<link rel="chapter" href="ch-utilities.html" title="Utilities">
+<link rel="chapter" href="ch-handle-management.html" title="Handle management">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-svc-channel.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-dbus.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-svc-media-interfaces.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2563576" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2603345" class="shortcut">Description</a>
+                  &#160;|&#160;
+                  <a href="#id2603305" class="shortcut">Object Hierarchy</a>
+                  &#160;|&#160;
+                  <a href="#id2603325" class="shortcut">Known Implementations</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="telepathy-glib-svc-connection"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2563576"></a><span class="refentrytitle">Service-side Connection interfaces</span>
+</h2>
+<p>Service-side Connection interfaces &#8212; GInterfaces for Telepathy Connection objects</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<a name="TpSvcConnection"></a><pre class="synopsis">
+
+#include &lt;telepathy-glib/svc-connection.h&gt;
+
+
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnection-struct">TpSvcConnection</a>;
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a>;
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-connect-impl">*tp_svc_connection_connect_impl</a>)   (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-connect">tp_svc_connection_implement_connect</a> (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-connect-impl">tp_svc_connection_connect_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-connect">tp_svc_connection_return_from_connect</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-disconnect-impl">*tp_svc_connection_disconnect_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-disconnect">tp_svc_connection_implement_disconnect</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-disconnect-impl">tp_svc_connection_disconnect_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-disconnect">tp_svc_connection_return_from_disconnect</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-interfaces-impl">*tp_svc_connection_get_interfaces_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-get-interfaces">tp_svc_connection_implement_get_interfaces</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-interfaces-impl">tp_svc_connection_get_interfaces_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-get-interfaces">tp_svc_connection_return_from_get_interfaces</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-protocol-impl">*tp_svc_connection_get_protocol_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-get-protocol">tp_svc_connection_implement_get_protocol</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-protocol-impl">tp_svc_connection_get_protocol_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-get-protocol">tp_svc_connection_return_from_get_protocol</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar *ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-self-handle-impl">*tp_svc_connection_get_self_handle_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-get-self-handle">tp_svc_connection_implement_get_self_handle</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-self-handle-impl">tp_svc_connection_get_self_handle_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-get-self-handle">tp_svc_connection_return_from_get_self_handle</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         guint ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-status-impl">*tp_svc_connection_get_status_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-get-status">tp_svc_connection_implement_get_status</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-status-impl">tp_svc_connection_get_status_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-get-status">tp_svc_connection_return_from_get_status</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         guint ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-hold-handles-impl">*tp_svc_connection_hold_handles_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-hold-handles">tp_svc_connection_implement_hold_handles</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-hold-handles-impl">tp_svc_connection_hold_handles_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-hold-handles">tp_svc_connection_return_from_hold_handles</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-inspect-handles-impl">*tp_svc_connection_inspect_handles_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-inspect-handles">tp_svc_connection_implement_inspect_handles</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-inspect-handles-impl">tp_svc_connection_inspect_handles_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-inspect-handles">tp_svc_connection_return_from_inspect_handles</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-list-channels-impl">*tp_svc_connection_list_channels_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-list-channels">tp_svc_connection_implement_list_channels</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-list-channels-impl">tp_svc_connection_list_channels_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-list-channels">tp_svc_connection_return_from_list_channels</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GPtrArray *ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-release-handles-impl">*tp_svc_connection_release_handles_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-release-handles">tp_svc_connection_implement_release_handles</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-release-handles-impl">tp_svc_connection_release_handles_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-release-handles">tp_svc_connection_return_from_release_handles</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-request-channel-impl">*tp_svc_connection_request_channel_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         const gchar *type,
+                                                         guint handle_type,
+                                                         guint handle,
+                                                         gboolean suppress_handler,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-request-channel">tp_svc_connection_implement_request_channel</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-request-channel-impl">tp_svc_connection_request_channel_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-request-channel">tp_svc_connection_return_from_request_channel</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar *ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-request-handles-impl">*tp_svc_connection_request_handles_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const gchar **names,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-implement-request-handles">tp_svc_connection_implement_request_handles</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-request-handles-impl">tp_svc_connection_request_handles_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-return-from-request-handles">tp_svc_connection_return_from_request_handles</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GArray *ret);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-emit-new-channel">tp_svc_connection_emit_new_channel</a>  (gpointer instance,
+                                                         const gchar *object_path,
+                                                         const gchar *channel_type,
+                                                         const guint handle_type,
+                                                         const guint handle,
+                                                         const gboolean suppress_handler);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-emit-status-changed">tp_svc_connection_emit_status_changed</a>
+                                                        (gpointer instance,
+                                                         const guint status,
+                                                         const guint reason);
+
+
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a>;
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a>;
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-add-status-impl">*tp_svc_connection_interface_presence_add_status_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const gchar *status,
+                                                         GHashTable *parms,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-add-status">tp_svc_connection_interface_presence_implement_add_status</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-add-status-impl">tp_svc_connection_interface_presence_add_status_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-add-status">tp_svc_connection_interface_presence_return_from_add_status</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-clear-status-impl">*tp_svc_connection_interface_presence_clear_status_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-clear-status">tp_svc_connection_interface_presence_implement_clear_status</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-clear-status-impl">tp_svc_connection_interface_presence_clear_status_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-clear-status">tp_svc_connection_interface_presence_return_from_clear_status</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-get-presence-impl">*tp_svc_connection_interface_presence_get_presence_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-get-presence">tp_svc_connection_interface_presence_implement_get_presence</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-get-presence-impl">tp_svc_connection_interface_presence_get_presence_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-get-presence">tp_svc_connection_interface_presence_return_from_get_presence</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         GHashTable *presence);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-get-statuses-impl">*tp_svc_connection_interface_presence_get_statuses_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-get-statuses">tp_svc_connection_interface_presence_implement_get_statuses</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-get-statuses-impl">tp_svc_connection_interface_presence_get_statuses_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-get-statuses">tp_svc_connection_interface_presence_return_from_get_statuses</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         GHashTable *ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-remove-status-impl">*tp_svc_connection_interface_presence_remove_status_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const gchar *status,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-remove-status">tp_svc_connection_interface_presence_implement_remove_status</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-remove-status-impl">tp_svc_connection_interface_presence_remove_status_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-remove-status">tp_svc_connection_interface_presence_return_from_remove_status</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-request-presence-impl">*tp_svc_connection_interface_presence_request_presence_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-request-presence">tp_svc_connection_interface_presence_implement_request_presence</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-request-presence-impl">tp_svc_connection_interface_presence_request_presence_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-request-presence">tp_svc_connection_interface_presence_return_from_request_presence</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-set-last-activity-time-impl">*tp_svc_connection_interface_presence_set_last_activity_time_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         guint time,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-set-last-activity-time">tp_svc_connection_interface_presence_implement_set_last_activity_time</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-set-last-activity-time-impl">tp_svc_connection_interface_presence_set_last_activity_time_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-set-last-activity-time">tp_svc_connection_interface_presence_return_from_set_last_activity_time</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-set-status-impl">*tp_svc_connection_interface_presence_set_status_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         GHashTable *statuses,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-implement-set-status">tp_svc_connection_interface_presence_implement_set_status</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-set-status-impl">tp_svc_connection_interface_presence_set_status_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-return-from-set-status">tp_svc_connection_interface_presence_return_from_set_status</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-emit-presence-update">tp_svc_connection_interface_presence_emit_presence_update</a>
+                                                        (gpointer instance,
+                                                         const GHashTable *presence);
+
+
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a>;
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a>;
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-clear-avatar-impl">*tp_svc_connection_interface_avatars_clear_avatar_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-clear-avatar">tp_svc_connection_interface_avatars_implement_clear_avatar</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-clear-avatar-impl">tp_svc_connection_interface_avatars_clear_avatar_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-clear-avatar">tp_svc_connection_interface_avatars_return_from_clear_avatar</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-avatar-requirements-impl">*tp_svc_connection_interface_avatars_get_avatar_requirements_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-get-avatar-requirements">tp_svc_connection_interface_avatars_implement_get_avatar_requirements</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-avatar-requirements-impl">tp_svc_connection_interface_avatars_get_avatar_requirements_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-get-avatar-requirements">tp_svc_connection_interface_avatars_return_from_get_avatar_requirements</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret,
+                                                         guint ret1,
+                                                         guint ret2,
+                                                         guint ret3,
+                                                         guint ret4,
+                                                         guint ret5);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-avatar-tokens-impl">*tp_svc_connection_interface_avatars_get_avatar_tokens_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-get-avatar-tokens">tp_svc_connection_interface_avatars_implement_get_avatar_tokens</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-avatar-tokens-impl">tp_svc_connection_interface_avatars_get_avatar_tokens_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-get-avatar-tokens">tp_svc_connection_interface_avatars_return_from_get_avatar_tokens</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatar-impl">*tp_svc_connection_interface_avatars_request_avatar_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         guint contact,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-request-avatar">tp_svc_connection_interface_avatars_implement_request_avatar</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatar-impl">tp_svc_connection_interface_avatars_request_avatar_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-request-avatar">tp_svc_connection_interface_avatars_return_from_request_avatar</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GArray *ret,
+                                                         const gchar *ret1);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-set-avatar-impl">*tp_svc_connection_interface_avatars_set_avatar_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         const GArray *avatar,
+                                                         const gchar *mime_type,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-set-avatar">tp_svc_connection_interface_avatars_implement_set_avatar</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-set-avatar-impl">tp_svc_connection_interface_avatars_set_avatar_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-set-avatar">tp_svc_connection_interface_avatars_return_from_set_avatar</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar *ret);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-emit-avatar-updated">tp_svc_connection_interface_avatars_emit_avatar_updated</a>
+                                                        (gpointer instance,
+                                                         const guint contact,
+                                                         const gchar *new_avatar_token);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-emit-avatar-retrieved">tp_svc_connection_interface_avatars_emit_avatar_retrieved</a>
+                                                        (gpointer instance,
+                                                         const guint contact,
+                                                         const gchar *token,
+                                                         const GArray *avatar,
+                                                         const gchar *type);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-implement-request-avatars">tp_svc_connection_interface_avatars_implement_request_avatars</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatars-impl">tp_svc_connection_interface_avatars_request_avatars_impl</a> impl);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatars-impl">*tp_svc_connection_interface_avatars_request_avatars_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-return-from-request-avatars">tp_svc_connection_interface_avatars_return_from_request_avatars</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+
+
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a>;
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a>;
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-get-alias-flags-impl">*tp_svc_connection_interface_aliasing_get_alias_flags_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a> *self,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-implement-get-alias-flags">tp_svc_connection_interface_aliasing_implement_get_alias_flags</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-get-alias-flags-impl">tp_svc_connection_interface_aliasing_get_alias_flags_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-return-from-get-alias-flags">tp_svc_connection_interface_aliasing_return_from_get_alias_flags</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         guint ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-request-aliases-impl">*tp_svc_connection_interface_aliasing_request_aliases_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-implement-request-aliases">tp_svc_connection_interface_aliasing_implement_request_aliases</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-request-aliases-impl">tp_svc_connection_interface_aliasing_request_aliases_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-return-from-request-aliases">tp_svc_connection_interface_aliasing_return_from_request_aliases</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-set-aliases-impl">*tp_svc_connection_interface_aliasing_set_aliases_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a> *self,
+                                                         GHashTable *aliases,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-implement-set-aliases">tp_svc_connection_interface_aliasing_implement_set_aliases</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-set-aliases-impl">tp_svc_connection_interface_aliasing_set_aliases_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-return-from-set-aliases">tp_svc_connection_interface_aliasing_return_from_set_aliases</a>
+                                                        (DBusGMethodInvocation *dbus_context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-emit-aliases-changed">tp_svc_connection_interface_aliasing_emit_aliases_changed</a>
+                                                        (gpointer instance,
+                                                         const GPtrArray *aliases);
+
+
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</a>;
+                    <a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</a>;
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-advertise-capabilities-impl">*tp_svc_connection_interface_capabilities_advertise_capabilities_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</a> *self,
+                                                         const GPtrArray *add,
+                                                         const gchar **remove,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-implement-advertise-capabilities">tp_svc_connection_interface_capabilities_implement_advertise_capabilities</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-advertise-capabilities-impl">tp_svc_connection_interface_capabilities_advertise_capabilities_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-return-from-advertise-capabilities">tp_svc_connection_interface_capabilities_return_from_advertise_capabilities</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GPtrArray *ret);
+void                (<a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-get-capabilities-impl">*tp_svc_connection_interface_capabilities_get_capabilities_impl</a>)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</a> *self,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-implement-get-capabilities">tp_svc_connection_interface_capabilities_implement_get_capabilities</a>
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-get-capabilities-impl">tp_svc_connection_interface_capabilities_get_capabilities_impl</a> impl);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-return-from-get-capabilities">tp_svc_connection_interface_capabilities_return_from_get_capabilities</a>
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GPtrArray *ret);
+void                <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-emit-capabilities-changed">tp_svc_connection_interface_capabilities_emit_capabilities_changed</a>
+                                                        (gpointer instance,
+                                                         const GPtrArray *caps);
+
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603305"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+
+  GInterface
+   +----TpSvcConnection
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603325"></a><h2>Known Implementations</h2>
+<p>
+TpSvcConnection is implemented by
+ <a href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a>.</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603345"></a><h2>Description</h2>
+<p>
+These interfaces (auto-generated from the Telepathy spec) make it easier
+to export objects implementing the Telepathy Connection and its
+optional interfaces, with the correct method and signal signatures,
+and emit signals from those objects in a type-safe way.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603366"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2603376"></a><h3>
+<a name="TpSvcConnection-struct"></a>TpSvcConnection</h3>
+<a class="indexterm" name="id2603386"></a><pre class="programlisting">typedef struct _TpSvcConnection TpSvcConnection;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603405"></a><h3>
+<a name="TpSvcConnectionClass"></a>TpSvcConnectionClass</h3>
+<a class="indexterm" name="id2603415"></a><pre class="programlisting">typedef struct _TpSvcConnectionClass TpSvcConnectionClass;</pre>
+<p>
+The class of TpSvcConnection.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603434"></a><h3>
+<a name="tp-svc-connection-connect-impl"></a>tp_svc_connection_connect_impl ()</h3>
+<a class="indexterm" name="id2603446"></a><pre class="programlisting">void                (*tp_svc_connection_connect_impl)   (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method Connect
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603514"></a><h3>
+<a name="tp-svc-connection-implement-connect"></a>tp_svc_connection_implement_connect ()</h3>
+<a class="indexterm" name="id2603527"></a><pre class="programlisting">void                tp_svc_connection_implement_connect (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-connect-impl">tp_svc_connection_connect_impl</a> impl);</pre>
+<p>
+Register an implementation for the Connect method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the Connect method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603596"></a><h3>
+<a name="tp-svc-connection-return-from-connect"></a>tp_svc_connection_return_from_connect ()</h3>
+<a class="indexterm" name="id2603609"></a><pre class="programlisting">void                tp_svc_connection_return_from_connect
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603663"></a><h3>
+<a name="tp-svc-connection-disconnect-impl"></a>tp_svc_connection_disconnect_impl ()</h3>
+<a class="indexterm" name="id2603677"></a><pre class="programlisting">void                (*tp_svc_connection_disconnect_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method Disconnect
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603745"></a><h3>
+<a name="tp-svc-connection-implement-disconnect"></a>tp_svc_connection_implement_disconnect ()</h3>
+<a class="indexterm" name="id2603758"></a><pre class="programlisting">void                tp_svc_connection_implement_disconnect
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-disconnect-impl">tp_svc_connection_disconnect_impl</a> impl);</pre>
+<p>
+Register an implementation for the Disconnect method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the Disconnect method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603828"></a><h3>
+<a name="tp-svc-connection-return-from-disconnect"></a>tp_svc_connection_return_from_disconnect ()</h3>
+<a class="indexterm" name="id2603841"></a><pre class="programlisting">void                tp_svc_connection_return_from_disconnect
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603896"></a><h3>
+<a name="tp-svc-connection-get-interfaces-impl"></a>tp_svc_connection_get_interfaces_impl ()</h3>
+<a class="indexterm" name="id2603908"></a><pre class="programlisting">void                (*tp_svc_connection_get_interfaces_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetInterfaces
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603977"></a><h3>
+<a name="tp-svc-connection-implement-get-interfaces"></a>tp_svc_connection_implement_get_interfaces ()</h3>
+<a class="indexterm" name="id2603991"></a><pre class="programlisting">void                tp_svc_connection_implement_get_interfaces
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-interfaces-impl">tp_svc_connection_get_interfaces_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetInterfaces method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetInterfaces method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604062"></a><h3>
+<a name="tp-svc-connection-return-from-get-interfaces"></a>tp_svc_connection_return_from_get_interfaces ()</h3>
+<a class="indexterm" name="id2604075"></a><pre class="programlisting">void                tp_svc_connection_return_from_get_interfaces
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604150"></a><h3>
+<a name="tp-svc-connection-get-protocol-impl"></a>tp_svc_connection_get_protocol_impl ()</h3>
+<a class="indexterm" name="id2604163"></a><pre class="programlisting">void                (*tp_svc_connection_get_protocol_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetProtocol
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604231"></a><h3>
+<a name="tp-svc-connection-implement-get-protocol"></a>tp_svc_connection_implement_get_protocol ()</h3>
+<a class="indexterm" name="id2604244"></a><pre class="programlisting">void                tp_svc_connection_implement_get_protocol
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-protocol-impl">tp_svc_connection_get_protocol_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetProtocol method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetProtocol method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604315"></a><h3>
+<a name="tp-svc-connection-return-from-get-protocol"></a>tp_svc_connection_return_from_get_protocol ()</h3>
+<a class="indexterm" name="id2604328"></a><pre class="programlisting">void                tp_svc_connection_return_from_get_protocol
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604402"></a><h3>
+<a name="tp-svc-connection-get-self-handle-impl"></a>tp_svc_connection_get_self_handle_impl ()</h3>
+<a class="indexterm" name="id2604415"></a><pre class="programlisting">void                (*tp_svc_connection_get_self_handle_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetSelfHandle
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604484"></a><h3>
+<a name="tp-svc-connection-implement-get-self-handle"></a>tp_svc_connection_implement_get_self_handle ()</h3>
+<a class="indexterm" name="id2604498"></a><pre class="programlisting">void                tp_svc_connection_implement_get_self_handle
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-self-handle-impl">tp_svc_connection_get_self_handle_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetSelfHandle method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetSelfHandle method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604568"></a><h3>
+<a name="tp-svc-connection-return-from-get-self-handle"></a>tp_svc_connection_return_from_get_self_handle ()</h3>
+<a class="indexterm" name="id2604581"></a><pre class="programlisting">void                tp_svc_connection_return_from_get_self_handle
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         guint ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604656"></a><h3>
+<a name="tp-svc-connection-get-status-impl"></a>tp_svc_connection_get_status_impl ()</h3>
+<a class="indexterm" name="id2604669"></a><pre class="programlisting">void                (*tp_svc_connection_get_status_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetStatus
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604737"></a><h3>
+<a name="tp-svc-connection-implement-get-status"></a>tp_svc_connection_implement_get_status ()</h3>
+<a class="indexterm" name="id2604750"></a><pre class="programlisting">void                tp_svc_connection_implement_get_status
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-get-status-impl">tp_svc_connection_get_status_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetStatus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604821"></a><h3>
+<a name="tp-svc-connection-return-from-get-status"></a>tp_svc_connection_return_from_get_status ()</h3>
+<a class="indexterm" name="id2604834"></a><pre class="programlisting">void                tp_svc_connection_return_from_get_status
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         guint ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604908"></a><h3>
+<a name="tp-svc-connection-hold-handles-impl"></a>tp_svc_connection_hold_handles_impl ()</h3>
+<a class="indexterm" name="id2604921"></a><pre class="programlisting">void                (*tp_svc_connection_hold_handles_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method HoldHandles
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handles</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605029"></a><h3>
+<a name="tp-svc-connection-implement-hold-handles"></a>tp_svc_connection_implement_hold_handles ()</h3>
+<a class="indexterm" name="id2605042"></a><pre class="programlisting">void                tp_svc_connection_implement_hold_handles
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-hold-handles-impl">tp_svc_connection_hold_handles_impl</a> impl);</pre>
+<p>
+Register an implementation for the HoldHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the HoldHandles method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605113"></a><h3>
+<a name="tp-svc-connection-return-from-hold-handles"></a>tp_svc_connection_return_from_hold_handles ()</h3>
+<a class="indexterm" name="id2605127"></a><pre class="programlisting">void                tp_svc_connection_return_from_hold_handles
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605180"></a><h3>
+<a name="tp-svc-connection-inspect-handles-impl"></a>tp_svc_connection_inspect_handles_impl ()</h3>
+<a class="indexterm" name="id2605193"></a><pre class="programlisting">void                (*tp_svc_connection_inspect_handles_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method InspectHandles
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handles</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605302"></a><h3>
+<a name="tp-svc-connection-implement-inspect-handles"></a>tp_svc_connection_implement_inspect_handles ()</h3>
+<a class="indexterm" name="id2605316"></a><pre class="programlisting">void                tp_svc_connection_implement_inspect_handles
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-inspect-handles-impl">tp_svc_connection_inspect_handles_impl</a> impl);</pre>
+<p>
+Register an implementation for the InspectHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the InspectHandles method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605387"></a><h3>
+<a name="tp-svc-connection-return-from-inspect-handles"></a>tp_svc_connection_return_from_inspect_handles ()</h3>
+<a class="indexterm" name="id2605400"></a><pre class="programlisting">void                tp_svc_connection_return_from_inspect_handles
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605474"></a><h3>
+<a name="tp-svc-connection-list-channels-impl"></a>tp_svc_connection_list_channels_impl ()</h3>
+<a class="indexterm" name="id2605487"></a><pre class="programlisting">void                (*tp_svc_connection_list_channels_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method ListChannels
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605556"></a><h3>
+<a name="tp-svc-connection-implement-list-channels"></a>tp_svc_connection_implement_list_channels ()</h3>
+<a class="indexterm" name="id2605570"></a><pre class="programlisting">void                tp_svc_connection_implement_list_channels
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-list-channels-impl">tp_svc_connection_list_channels_impl</a> impl);</pre>
+<p>
+Register an implementation for the ListChannels method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the ListChannels method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605647"></a><h3>
+<a name="tp-svc-connection-return-from-list-channels"></a>tp_svc_connection_return_from_list_channels ()</h3>
+<a class="indexterm" name="id2605663"></a><pre class="programlisting">void                tp_svc_connection_return_from_list_channels
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GPtrArray *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605745"></a><h3>
+<a name="tp-svc-connection-release-handles-impl"></a>tp_svc_connection_release_handles_impl ()</h3>
+<a class="indexterm" name="id2605759"></a><pre class="programlisting">void                (*tp_svc_connection_release_handles_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method ReleaseHandles
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handles</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605880"></a><h3>
+<a name="tp-svc-connection-implement-release-handles"></a>tp_svc_connection_implement_release_handles ()</h3>
+<a class="indexterm" name="id2605896"></a><pre class="programlisting">void                tp_svc_connection_implement_release_handles
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-release-handles-impl">tp_svc_connection_release_handles_impl</a> impl);</pre>
+<p>
+Register an implementation for the ReleaseHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the ReleaseHandles method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2605973"></a><h3>
+<a name="tp-svc-connection-return-from-release-handles"></a>tp_svc_connection_return_from_release_handles ()</h3>
+<a class="indexterm" name="id2605988"></a><pre class="programlisting">void                tp_svc_connection_return_from_release_handles
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606049"></a><h3>
+<a name="tp-svc-connection-request-channel-impl"></a>tp_svc_connection_request_channel_impl ()</h3>
+<a class="indexterm" name="id2606063"></a><pre class="programlisting">void                (*tp_svc_connection_request_channel_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         const gchar *type,
+                                                         guint handle_type,
+                                                         guint handle,
+                                                         gboolean suppress_handler,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RequestChannel
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>suppress_handler</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606227"></a><h3>
+<a name="tp-svc-connection-implement-request-channel"></a>tp_svc_connection_implement_request_channel ()</h3>
+<a class="indexterm" name="id2606243"></a><pre class="programlisting">void                tp_svc_connection_implement_request_channel
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-request-channel-impl">tp_svc_connection_request_channel_impl</a> impl);</pre>
+<p>
+Register an implementation for the RequestChannel method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RequestChannel method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606320"></a><h3>
+<a name="tp-svc-connection-return-from-request-channel"></a>tp_svc_connection_return_from_request_channel ()</h3>
+<a class="indexterm" name="id2606335"></a><pre class="programlisting">void                tp_svc_connection_return_from_request_channel
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606418"></a><h3>
+<a name="tp-svc-connection-request-handles-impl"></a>tp_svc_connection_request_handles_impl ()</h3>
+<a class="indexterm" name="id2606433"></a><pre class="programlisting">void                (*tp_svc_connection_request_handles_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnection">TpSvcConnection</a> *self,
+                                                         guint handle_type,
+                                                         const gchar **names,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RequestHandles
+on interface org.freedesktop.Telepathy.Connection</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>names</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606553"></a><h3>
+<a name="tp-svc-connection-implement-request-handles"></a>tp_svc_connection_implement_request_handles ()</h3>
+<a class="indexterm" name="id2606568"></a><pre class="programlisting">void                tp_svc_connection_implement_request_handles
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionClass">TpSvcConnectionClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-request-handles-impl">tp_svc_connection_request_handles_impl</a> impl);</pre>
+<p>
+Register an implementation for the RequestHandles method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RequestHandles method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606646"></a><h3>
+<a name="tp-svc-connection-return-from-request-handles"></a>tp_svc_connection_return_from_request_handles ()</h3>
+<a class="indexterm" name="id2606661"></a><pre class="programlisting">void                tp_svc_connection_return_from_request_handles
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GArray *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606743"></a><h3>
+<a name="tp-svc-connection-emit-new-channel"></a>tp_svc_connection_emit_new_channel ()</h3>
+<a class="indexterm" name="id2606758"></a><pre class="programlisting">void                tp_svc_connection_emit_new_channel  (gpointer instance,
+                                                         const gchar *object_path,
+                                                         const gchar *channel_type,
+                                                         const guint handle_type,
+                                                         const guint handle,
+                                                         const gboolean suppress_handler);</pre>
+<p>
+Emit the NewChannel D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>object_path</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>channel_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handle</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>suppress_handler</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606925"></a><h3>
+<a name="tp-svc-connection-emit-status-changed"></a>tp_svc_connection_emit_status_changed ()</h3>
+<a class="indexterm" name="id2606940"></a><pre class="programlisting">void                tp_svc_connection_emit_status_changed
+                                                        (gpointer instance,
+                                                         const guint status,
+                                                         const guint reason);</pre>
+<p>
+Emit the StatusChanged D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>status</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>reason</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607042"></a><h3>
+<a name="TpSvcConnectionInterfacePresence"></a>TpSvcConnectionInterfacePresence</h3>
+<a class="indexterm" name="id2607056"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfacePresence TpSvcConnectionInterfacePresence;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607078"></a><h3>
+<a name="TpSvcConnectionInterfacePresenceClass"></a>TpSvcConnectionInterfacePresenceClass</h3>
+<a class="indexterm" name="id2607093"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfacePresenceClass TpSvcConnectionInterfacePresenceClass;</pre>
+<p>
+The class of TpSvcConnectionInterfacePresence.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607115"></a><h3>
+<a name="tp-svc-connection-interface-presence-add-status-impl"></a>tp_svc_connection_interface_presence_add_status_impl ()</h3>
+<a class="indexterm" name="id2607130"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_add_status_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const gchar *status,
+                                                         GHashTable *parms,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method AddStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>status</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>parms</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607252"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-add-status"></a>tp_svc_connection_interface_presence_implement_add_status ()</h3>
+<a class="indexterm" name="id2607267"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_add_status
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-add-status-impl">tp_svc_connection_interface_presence_add_status_impl</a> impl);</pre>
+<p>
+Register an implementation for the AddStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the AddStatus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607347"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-add-status"></a>tp_svc_connection_interface_presence_return_from_add_status ()</h3>
+<a class="indexterm" name="id2607362"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_add_status
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607424"></a><h3>
+<a name="tp-svc-connection-interface-presence-clear-status-impl"></a>tp_svc_connection_interface_presence_clear_status_impl ()</h3>
+<a class="indexterm" name="id2607439"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_clear_status_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method ClearStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607517"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-clear-status"></a>tp_svc_connection_interface_presence_implement_clear_status ()</h3>
+<a class="indexterm" name="id2607533"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_clear_status
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-clear-status-impl">tp_svc_connection_interface_presence_clear_status_impl</a> impl);</pre>
+<p>
+Register an implementation for the ClearStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the ClearStatus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607612"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-clear-status"></a>tp_svc_connection_interface_presence_return_from_clear_status ()</h3>
+<a class="indexterm" name="id2607628"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_clear_status
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607690"></a><h3>
+<a name="tp-svc-connection-interface-presence-get-presence-impl"></a>tp_svc_connection_interface_presence_get_presence_impl ()</h3>
+<a class="indexterm" name="id2607705"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_get_presence_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetPresence
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607805"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-get-presence"></a>tp_svc_connection_interface_presence_implement_get_presence ()</h3>
+<a class="indexterm" name="id2607821"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_get_presence
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-get-presence-impl">tp_svc_connection_interface_presence_get_presence_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetPresence method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetPresence method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607900"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-get-presence"></a>tp_svc_connection_interface_presence_return_from_get_presence ()</h3>
+<a class="indexterm" name="id2607916"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_get_presence
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         GHashTable *presence);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>presence</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2607999"></a><h3>
+<a name="tp-svc-connection-interface-presence-get-statuses-impl"></a>tp_svc_connection_interface_presence_get_statuses_impl ()</h3>
+<a class="indexterm" name="id2608014"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_get_statuses_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetStatuses
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608092"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-get-statuses"></a>tp_svc_connection_interface_presence_implement_get_statuses ()</h3>
+<a class="indexterm" name="id2608108"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_get_statuses
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-get-statuses-impl">tp_svc_connection_interface_presence_get_statuses_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetStatuses method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetStatuses method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608188"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-get-statuses"></a>tp_svc_connection_interface_presence_return_from_get_statuses ()</h3>
+<a class="indexterm" name="id2608203"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_get_statuses
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         GHashTable *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608287"></a><h3>
+<a name="tp-svc-connection-interface-presence-remove-status-impl"></a>tp_svc_connection_interface_presence_remove_status_impl ()</h3>
+<a class="indexterm" name="id2608302"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_remove_status_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const gchar *status,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RemoveStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>status</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608402"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-remove-status"></a>tp_svc_connection_interface_presence_implement_remove_status ()</h3>
+<a class="indexterm" name="id2608417"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_remove_status
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-remove-status-impl">tp_svc_connection_interface_presence_remove_status_impl</a> impl);</pre>
+<p>
+Register an implementation for the RemoveStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RemoveStatus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608497"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-remove-status"></a>tp_svc_connection_interface_presence_return_from_remove_status ()</h3>
+<a class="indexterm" name="id2608512"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_remove_status
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608574"></a><h3>
+<a name="tp-svc-connection-interface-presence-request-presence-impl"></a>tp_svc_connection_interface_presence_request_presence_impl ()</h3>
+<a class="indexterm" name="id2608589"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_request_presence_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RequestPresence
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608689"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-request-presence"></a>tp_svc_connection_interface_presence_implement_request_presence ()</h3>
+<a class="indexterm" name="id2608705"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_request_presence
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-request-presence-impl">tp_svc_connection_interface_presence_request_presence_impl</a> impl);</pre>
+<p>
+Register an implementation for the RequestPresence method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RequestPresence method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608785"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-request-presence"></a>tp_svc_connection_interface_presence_return_from_request_presence ()</h3>
+<a class="indexterm" name="id2608802"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_request_presence
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608863"></a><h3>
+<a name="tp-svc-connection-interface-presence-set-last-activity-time-impl"></a>tp_svc_connection_interface_presence_set_last_activity_time_impl ()</h3>
+<a class="indexterm" name="id2608878"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_set_last_activity_time_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         guint time,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method SetLastActivityTime
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>time</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2608979"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-set-last-activity-time"></a>tp_svc_connection_interface_presence_implement_set_last_activity_time ()</h3>
+<a class="indexterm" name="id2608995"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_set_last_activity_time
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-set-last-activity-time-impl">tp_svc_connection_interface_presence_set_last_activity_time_impl</a> impl);</pre>
+<p>
+Register an implementation for the SetLastActivityTime method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the SetLastActivityTime method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609076"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-set-last-activity-time"></a>tp_svc_connection_interface_presence_return_from_set_last_activity_time ()</h3>
+<a class="indexterm" name="id2609092"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_set_last_activity_time
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609154"></a><h3>
+<a name="tp-svc-connection-interface-presence-set-status-impl"></a>tp_svc_connection_interface_presence_set_status_impl ()</h3>
+<a class="indexterm" name="id2609169"></a><pre class="programlisting">void                (*tp_svc_connection_interface_presence_set_status_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence">TpSvcConnectionInterfacePresence</a> *self,
+                                                         GHashTable *statuses,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method SetStatus
+on interface org.freedesktop.Telepathy.Connection.Interface.Presence</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>statuses</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609269"></a><h3>
+<a name="tp-svc-connection-interface-presence-implement-set-status"></a>tp_svc_connection_interface_presence_implement_set_status ()</h3>
+<a class="indexterm" name="id2609285"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_implement_set_status
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-presence-set-status-impl">tp_svc_connection_interface_presence_set_status_impl</a> impl);</pre>
+<p>
+Register an implementation for the SetStatus method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the SetStatus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609364"></a><h3>
+<a name="tp-svc-connection-interface-presence-return-from-set-status"></a>tp_svc_connection_interface_presence_return_from_set_status ()</h3>
+<a class="indexterm" name="id2609380"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_return_from_set_status
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609441"></a><h3>
+<a name="tp-svc-connection-interface-presence-emit-presence-update"></a>tp_svc_connection_interface_presence_emit_presence_update ()</h3>
+<a class="indexterm" name="id2609457"></a><pre class="programlisting">void                tp_svc_connection_interface_presence_emit_presence_update
+                                                        (gpointer instance,
+                                                         const GHashTable *presence);</pre>
+<p>
+Emit the PresenceUpdate D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>presence</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609538"></a><h3>
+<a name="TpSvcConnectionInterfaceAvatars"></a>TpSvcConnectionInterfaceAvatars</h3>
+<a class="indexterm" name="id2609552"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfaceAvatars TpSvcConnectionInterfaceAvatars;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609574"></a><h3>
+<a name="TpSvcConnectionInterfaceAvatarsClass"></a>TpSvcConnectionInterfaceAvatarsClass</h3>
+<a class="indexterm" name="id2609588"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfaceAvatarsClass TpSvcConnectionInterfaceAvatarsClass;</pre>
+<p>
+The class of TpSvcConnectionInterfaceAvatars.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609610"></a><h3>
+<a name="tp-svc-connection-interface-avatars-clear-avatar-impl"></a>tp_svc_connection_interface_avatars_clear_avatar_impl ()</h3>
+<a class="indexterm" name="id2609626"></a><pre class="programlisting">void                (*tp_svc_connection_interface_avatars_clear_avatar_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method ClearAvatar
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609704"></a><h3>
+<a name="tp-svc-connection-interface-avatars-implement-clear-avatar"></a>tp_svc_connection_interface_avatars_implement_clear_avatar ()</h3>
+<a class="indexterm" name="id2609719"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_implement_clear_avatar
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-clear-avatar-impl">tp_svc_connection_interface_avatars_clear_avatar_impl</a> impl);</pre>
+<p>
+Register an implementation for the ClearAvatar method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the ClearAvatar method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609799"></a><h3>
+<a name="tp-svc-connection-interface-avatars-return-from-clear-avatar"></a>tp_svc_connection_interface_avatars_return_from_clear_avatar ()</h3>
+<a class="indexterm" name="id2609815"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_return_from_clear_avatar
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609876"></a><h3>
+<a name="tp-svc-connection-interface-avatars-get-avatar-requirements-impl"></a>tp_svc_connection_interface_avatars_get_avatar_requirements_impl ()</h3>
+<a class="indexterm" name="id2609892"></a><pre class="programlisting">void                (*tp_svc_connection_interface_avatars_get_avatar_requirements_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetAvatarRequirements
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2609971"></a><h3>
+<a name="tp-svc-connection-interface-avatars-implement-get-avatar-requirements"></a>tp_svc_connection_interface_avatars_implement_get_avatar_requirements ()</h3>
+<a class="indexterm" name="id2609987"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_implement_get_avatar_requirements
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-avatar-requirements-impl">tp_svc_connection_interface_avatars_get_avatar_requirements_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetAvatarRequirements method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetAvatarRequirements method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610068"></a><h3>
+<a name="tp-svc-connection-interface-avatars-return-from-get-avatar-requirements"></a>tp_svc_connection_interface_avatars_return_from_get_avatar_requirements ()</h3>
+<a class="indexterm" name="id2610084"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_return_from_get_avatar_requirements
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret,
+                                                         guint ret1,
+                                                         guint ret2,
+                                                         guint ret3,
+                                                         guint ret4,
+                                                         guint ret5);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret1</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret2</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret3</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret4</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret5</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610276"></a><h3>
+<a name="tp-svc-connection-interface-avatars-get-avatar-tokens-impl"></a>tp_svc_connection_interface_avatars_get_avatar_tokens_impl ()</h3>
+<a class="indexterm" name="id2610292"></a><pre class="programlisting">void                (*tp_svc_connection_interface_avatars_get_avatar_tokens_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetAvatarTokens
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610392"></a><h3>
+<a name="tp-svc-connection-interface-avatars-implement-get-avatar-tokens"></a>tp_svc_connection_interface_avatars_implement_get_avatar_tokens ()</h3>
+<a class="indexterm" name="id2610408"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_implement_get_avatar_tokens
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-get-avatar-tokens-impl">tp_svc_connection_interface_avatars_get_avatar_tokens_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetAvatarTokens method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetAvatarTokens method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610488"></a><h3>
+<a name="tp-svc-connection-interface-avatars-return-from-get-avatar-tokens"></a>tp_svc_connection_interface_avatars_return_from_get_avatar_tokens ()</h3>
+<a class="indexterm" name="id2610505"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_return_from_get_avatar_tokens
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610587"></a><h3>
+<a name="tp-svc-connection-interface-avatars-request-avatar-impl"></a>tp_svc_connection_interface_avatars_request_avatar_impl ()</h3>
+<a class="indexterm" name="id2610603"></a><pre class="programlisting">void                (*tp_svc_connection_interface_avatars_request_avatar_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         guint contact,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RequestAvatar
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contact</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610703"></a><h3>
+<a name="tp-svc-connection-interface-avatars-implement-request-avatar"></a>tp_svc_connection_interface_avatars_implement_request_avatar ()</h3>
+<a class="indexterm" name="id2610718"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_implement_request_avatar
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatar-impl">tp_svc_connection_interface_avatars_request_avatar_impl</a> impl);</pre>
+<p>
+Register an implementation for the RequestAvatar method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RequestAvatar method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610798"></a><h3>
+<a name="tp-svc-connection-interface-avatars-return-from-request-avatar"></a>tp_svc_connection_interface_avatars_return_from_request_avatar ()</h3>
+<a class="indexterm" name="id2610814"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_return_from_request_avatar
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GArray *ret,
+                                                         const gchar *ret1);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret1</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2610919"></a><h3>
+<a name="tp-svc-connection-interface-avatars-set-avatar-impl"></a>tp_svc_connection_interface_avatars_set_avatar_impl ()</h3>
+<a class="indexterm" name="id2610934"></a><pre class="programlisting">void                (*tp_svc_connection_interface_avatars_set_avatar_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         const GArray *avatar,
+                                                         const gchar *mime_type,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method SetAvatar
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>avatar</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>mime_type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611056"></a><h3>
+<a name="tp-svc-connection-interface-avatars-implement-set-avatar"></a>tp_svc_connection_interface_avatars_implement_set_avatar ()</h3>
+<a class="indexterm" name="id2611071"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_implement_set_avatar
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-set-avatar-impl">tp_svc_connection_interface_avatars_set_avatar_impl</a> impl);</pre>
+<p>
+Register an implementation for the SetAvatar method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the SetAvatar method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611150"></a><h3>
+<a name="tp-svc-connection-interface-avatars-return-from-set-avatar"></a>tp_svc_connection_interface_avatars_return_from_set_avatar ()</h3>
+<a class="indexterm" name="id2611166"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_return_from_set_avatar
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611249"></a><h3>
+<a name="tp-svc-connection-interface-avatars-emit-avatar-updated"></a>tp_svc_connection_interface_avatars_emit_avatar_updated ()</h3>
+<a class="indexterm" name="id2611264"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_emit_avatar_updated
+                                                        (gpointer instance,
+                                                         const guint contact,
+                                                         const gchar *new_avatar_token);</pre>
+<p>
+Emit the AvatarUpdated D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contact</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>new_avatar_token</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611367"></a><h3>
+<a name="tp-svc-connection-interface-avatars-emit-avatar-retrieved"></a>tp_svc_connection_interface_avatars_emit_avatar_retrieved ()</h3>
+<a class="indexterm" name="id2611383"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_emit_avatar_retrieved
+                                                        (gpointer instance,
+                                                         const guint contact,
+                                                         const gchar *token,
+                                                         const GArray *avatar,
+                                                         const gchar *type);</pre>
+<p>
+Emit the AvatarRetrieved D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contact</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>token</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>avatar</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>type</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611530"></a><h3>
+<a name="tp-svc-connection-interface-avatars-implement-request-avatars"></a>tp_svc_connection_interface_avatars_implement_request_avatars ()</h3>
+<a class="indexterm" name="id2611545"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_implement_request_avatars
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-avatars-request-avatars-impl">tp_svc_connection_interface_avatars_request_avatars_impl</a> impl);</pre>
+<p>
+Register an implementation for the RequestAvatars method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RequestAvatars method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611625"></a><h3>
+<a name="tp-svc-connection-interface-avatars-request-avatars-impl"></a>tp_svc_connection_interface_avatars_request_avatars_impl ()</h3>
+<a class="indexterm" name="id2611641"></a><pre class="programlisting">void                (*tp_svc_connection_interface_avatars_request_avatars_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAvatars">TpSvcConnectionInterfaceAvatars</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RequestAvatars
+on interface org.freedesktop.Telepathy.Connection.Interface.Avatars</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611741"></a><h3>
+<a name="tp-svc-connection-interface-avatars-return-from-request-avatars"></a>tp_svc_connection_interface_avatars_return_from_request_avatars ()</h3>
+<a class="indexterm" name="id2611757"></a><pre class="programlisting">void                tp_svc_connection_interface_avatars_return_from_request_avatars
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611818"></a><h3>
+<a name="TpSvcConnectionInterfaceAliasing"></a>TpSvcConnectionInterfaceAliasing</h3>
+<a class="indexterm" name="id2611832"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfaceAliasing TpSvcConnectionInterfaceAliasing;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611854"></a><h3>
+<a name="TpSvcConnectionInterfaceAliasingClass"></a>TpSvcConnectionInterfaceAliasingClass</h3>
+<a class="indexterm" name="id2611869"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfaceAliasingClass TpSvcConnectionInterfaceAliasingClass;</pre>
+<p>
+The class of TpSvcConnectionInterfaceAliasing.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611891"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-get-alias-flags-impl"></a>tp_svc_connection_interface_aliasing_get_alias_flags_impl ()</h3>
+<a class="indexterm" name="id2611907"></a><pre class="programlisting">void                (*tp_svc_connection_interface_aliasing_get_alias_flags_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a> *self,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetAliasFlags
+on interface org.freedesktop.Telepathy.Connection.Interface.Aliasing</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2611985"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-implement-get-alias-flags"></a>tp_svc_connection_interface_aliasing_implement_get_alias_flags ()</h3>
+<a class="indexterm" name="id2612001"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_implement_get_alias_flags
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-get-alias-flags-impl">tp_svc_connection_interface_aliasing_get_alias_flags_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetAliasFlags method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetAliasFlags method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612080"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-return-from-get-alias-flags"></a>tp_svc_connection_interface_aliasing_return_from_get_alias_flags ()</h3>
+<a class="indexterm" name="id2612096"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_return_from_get_alias_flags
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         guint ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612179"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-request-aliases-impl"></a>tp_svc_connection_interface_aliasing_request_aliases_impl ()</h3>
+<a class="indexterm" name="id2612195"></a><pre class="programlisting">void                (*tp_svc_connection_interface_aliasing_request_aliases_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a> *self,
+                                                         const GArray *contacts,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method RequestAliases
+on interface org.freedesktop.Telepathy.Connection.Interface.Aliasing</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>contacts</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612295"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-implement-request-aliases"></a>tp_svc_connection_interface_aliasing_implement_request_aliases ()</h3>
+<a class="indexterm" name="id2612311"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_implement_request_aliases
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-request-aliases-impl">tp_svc_connection_interface_aliasing_request_aliases_impl</a> impl);</pre>
+<p>
+Register an implementation for the RequestAliases method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the RequestAliases method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612390"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-return-from-request-aliases"></a>tp_svc_connection_interface_aliasing_return_from_request_aliases ()</h3>
+<a class="indexterm" name="id2612406"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_return_from_request_aliases
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const gchar **ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612490"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-set-aliases-impl"></a>tp_svc_connection_interface_aliasing_set_aliases_impl ()</h3>
+<a class="indexterm" name="id2612505"></a><pre class="programlisting">void                (*tp_svc_connection_interface_aliasing_set_aliases_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasing">TpSvcConnectionInterfaceAliasing</a> *self,
+                                                         GHashTable *aliases,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method SetAliases
+on interface org.freedesktop.Telepathy.Connection.Interface.Aliasing</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>aliases</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612605"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-implement-set-aliases"></a>tp_svc_connection_interface_aliasing_implement_set_aliases ()</h3>
+<a class="indexterm" name="id2612621"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_implement_set_aliases
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-aliasing-set-aliases-impl">tp_svc_connection_interface_aliasing_set_aliases_impl</a> impl);</pre>
+<p>
+Register an implementation for the SetAliases method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the SetAliases method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612700"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-return-from-set-aliases"></a>tp_svc_connection_interface_aliasing_return_from_set_aliases ()</h3>
+<a class="indexterm" name="id2612716"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_return_from_set_aliases
+                                                        (DBusGMethodInvocation *dbus_context);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612778"></a><h3>
+<a name="tp-svc-connection-interface-aliasing-emit-aliases-changed"></a>tp_svc_connection_interface_aliasing_emit_aliases_changed ()</h3>
+<a class="indexterm" name="id2612793"></a><pre class="programlisting">void                tp_svc_connection_interface_aliasing_emit_aliases_changed
+                                                        (gpointer instance,
+                                                         const GPtrArray *aliases);</pre>
+<p>
+Emit the AliasesChanged D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>aliases</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612874"></a><h3>
+<a name="TpSvcConnectionInterfaceCapabilities"></a>TpSvcConnectionInterfaceCapabilities</h3>
+<a class="indexterm" name="id2612889"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfaceCapabilities TpSvcConnectionInterfaceCapabilities;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612911"></a><h3>
+<a name="TpSvcConnectionInterfaceCapabilitiesClass"></a>TpSvcConnectionInterfaceCapabilitiesClass</h3>
+<a class="indexterm" name="id2612926"></a><pre class="programlisting">typedef struct _TpSvcConnectionInterfaceCapabilitiesClass TpSvcConnectionInterfaceCapabilitiesClass;</pre>
+<p>
+The class of TpSvcConnectionInterfaceCapabilities.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2612948"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-advertise-capabilities-impl"></a>tp_svc_connection_interface_capabilities_advertise_capabilities_impl ()</h3>
+<a class="indexterm" name="id2612964"></a><pre class="programlisting">void                (*tp_svc_connection_interface_capabilities_advertise_capabilities_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</a> *self,
+                                                         const GPtrArray *add,
+                                                         const gchar **remove,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method AdvertiseCapabilities
+on interface org.freedesktop.Telepathy.Connection.Interface.Capabilities</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>add</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>remove</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613087"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-implement-advertise-capabilities"></a>tp_svc_connection_interface_capabilities_implement_advertise_capabilities ()</h3>
+<a class="indexterm" name="id2613104"></a><pre class="programlisting">void                tp_svc_connection_interface_capabilities_implement_advertise_capabilities
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-advertise-capabilities-impl">tp_svc_connection_interface_capabilities_advertise_capabilities_impl</a> impl);</pre>
+<p>
+Register an implementation for the AdvertiseCapabilities method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the AdvertiseCapabilities method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613184"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-return-from-advertise-capabilities"></a>tp_svc_connection_interface_capabilities_return_from_advertise_capabilities ()</h3>
+<a class="indexterm" name="id2613200"></a><pre class="programlisting">void                tp_svc_connection_interface_capabilities_return_from_advertise_capabilities
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GPtrArray *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613284"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-get-capabilities-impl"></a>tp_svc_connection_interface_capabilities_get_capabilities_impl ()</h3>
+<a class="indexterm" name="id2613300"></a><pre class="programlisting">void                (*tp_svc_connection_interface_capabilities_get_capabilities_impl)
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilities">TpSvcConnectionInterfaceCapabilities</a> *self,
+                                                         const GArray *handles,
+                                                         DBusGMethodInvocation *context);</pre>
+<p>
+Signature of an implementation of D-Bus method GetCapabilities
+on interface org.freedesktop.Telepathy.Connection.Interface.Capabilities</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></td>
+<td> The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>handles</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>context</code></em>&#160;:</span></td>
+<td> The D-Bus invocation context to use to return values
+          or throw an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613401"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-implement-get-capabilities"></a>tp_svc_connection_interface_capabilities_implement_get_capabilities ()</h3>
+<a class="indexterm" name="id2613418"></a><pre class="programlisting">void                tp_svc_connection_interface_capabilities_implement_get_capabilities
+                                                        (<a href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</a> *klass,
+                                                         <a href="telepathy-glib-svc-connection.html#tp-svc-connection-interface-capabilities-get-capabilities-impl">tp_svc_connection_interface_capabilities_get_capabilities_impl</a> impl);</pre>
+<p>
+Register an implementation for the GetCapabilities method in the vtable of an
+implementation of this interface. To be called from the interface
+init function.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>klass</code></em>&#160;:</span></td>
+<td> A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>impl</code></em>&#160;:</span></td>
+<td> A callback used to implement the GetCapabilities method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613497"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-return-from-get-capabilities"></a>tp_svc_connection_interface_capabilities_return_from_get_capabilities ()</h3>
+<a class="indexterm" name="id2613513"></a><pre class="programlisting">void                tp_svc_connection_interface_capabilities_return_from_get_capabilities
+                                                        (DBusGMethodInvocation *dbus_context,
+                                                         const GPtrArray *ret);</pre>
+<p>
+Return successfully by calling dbus_g_method_return (<em class="parameter"><code>dbus_context</code></em>,
+...). This inline function is just a type-safe wrapper for
+dbus_g_method_return.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>dbus_context</code></em>&#160;:</span></td>
+<td> The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>ret</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2613596"></a><h3>
+<a name="tp-svc-connection-interface-capabilities-emit-capabilities-changed"></a>tp_svc_connection_interface_capabilities_emit_capabilities_changed ()</h3>
+<a class="indexterm" name="id2613614"></a><pre class="programlisting">void                tp_svc_connection_interface_capabilities_emit_capabilities_changed
+                                                        (gpointer instance,
+                                                         const GPtrArray *caps);</pre>
+<p>
+Emit the CapabilitiesChanged D-Bus signal from <em class="parameter"><code>instance</code></em> with the given arguments.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>instance</code></em>&#160;:</span></td>
+<td> An object implementing this interface
+</td>
+</tr>
+<tr>
+<td><span class="term"><em class="parameter"><code>caps</code></em>&#160;:</span></td>
+<td> FIXME: document args in genginterface
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2613695"></a><h2>See Also</h2>
+<a href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>
+</div>
+</div>
+</body>
+</html>
