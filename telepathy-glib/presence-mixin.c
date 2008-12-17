@@ -295,8 +295,6 @@ construct_presence_hash_foreach (gpointer key,
   GHashTable *contact_status;
   GValueArray *vals;
 
-  DEBUG ("called.");
-
   contact_status = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
       (GDestroyNotify) g_hash_table_destroy);
 
@@ -357,7 +355,8 @@ construct_presence_hash (const TpPresenceStatusSpec *supported_statuses,
  * #tp_presence_mixin_emit_one_presence_update.
  */
 void
-tp_presence_mixin_emit_presence_update (GObject *obj, GHashTable *contact_statuses)
+tp_presence_mixin_emit_presence_update (GObject *obj,
+                                        GHashTable *contact_statuses)
 {
   TpPresenceMixinClass *mixin_cls =
     TP_PRESENCE_MIXIN_CLASS (G_OBJECT_GET_CLASS (obj));
@@ -384,7 +383,9 @@ tp_presence_mixin_emit_presence_update (GObject *obj, GHashTable *contact_status
  * convenience wrapper around #tp_presence_mixin_emit_presence_update.
  */
 void
-tp_presence_mixin_emit_one_presence_update (GObject *obj, TpHandle handle, const TpPresenceStatus *status)
+tp_presence_mixin_emit_one_presence_update (GObject *obj,
+                                            TpHandle handle,
+                                            const TpPresenceStatus *status)
 {
   GHashTable *contact_statuses;
 
@@ -500,6 +501,7 @@ tp_presence_mixin_get_presence (TpSvcConnectionInterfacePresence *iface,
   tp_svc_connection_interface_presence_return_from_get_presence (context,
       presence_hash);
   g_hash_table_destroy (presence_hash);
+  g_hash_table_destroy (contact_statuses);
 }
 
 
@@ -508,8 +510,6 @@ get_statuses_arguments (const TpPresenceStatusOptionalArgumentSpec *specs)
 {
   GHashTable *arguments = g_hash_table_new (g_str_hash, g_str_equal);
   int i;
-
-  DEBUG ("called.");
 
   for (i=0; specs != NULL && specs[i].name != NULL; i++)
     g_hash_table_insert (arguments, (gchar *) specs[i].name,
@@ -745,6 +745,7 @@ set_status_foreach (gpointer key, gpointer value, gpointer user_data)
     (struct _i_hate_g_hash_table_foreach*) user_data;
   TpPresenceMixinClass *mixin_cls =
     TP_PRESENCE_MIXIN_CLASS (G_OBJECT_GET_CLASS (data->obj));
+  TpPresenceStatus status_to_set = { 0, };
   int i;
 
   DEBUG ("called.");
@@ -763,7 +764,7 @@ set_status_foreach (gpointer key, gpointer value, gpointer user_data)
 
   if (mixin_cls->statuses[i].name != NULL)
     {
-      TpPresenceStatus *status_to_set;
+      GHashTable *optional_arguments = NULL;
 
       DEBUG ("Found status \"%s\", checking if it's available...",
           (const gchar *) key);
@@ -781,8 +782,6 @@ set_status_foreach (gpointer key, gpointer value, gpointer user_data)
 
       DEBUG ("The status is available.");
 
-      GHashTable *optional_arguments = NULL;
-
       if (value)
         {
           GHashTable *provided_arguments = (GHashTable *) value;
@@ -798,10 +797,7 @@ set_status_foreach (gpointer key, gpointer value, gpointer user_data)
 
               if (!provided_value)
                 continue;
-
-              new_value = g_slice_new0 (GValue);
-              g_value_init (new_value, G_VALUE_TYPE (provided_value));
-              g_value_copy (provided_value, new_value);
+              new_value = tp_g_value_slice_dup (provided_value);
 
               if (!optional_arguments)
                 optional_arguments =
@@ -821,17 +817,16 @@ set_status_foreach (gpointer key, gpointer value, gpointer user_data)
             }
         }
 
-      status_to_set = tp_presence_status_new (i, optional_arguments);
+      status_to_set.index = i;
+      status_to_set.optional_arguments = optional_arguments;
 
       DEBUG ("About to try setting status \"%s\"", mixin_cls->statuses[i].name);
 
-      if (!mixin_cls->set_own_status (data->obj, status_to_set, data->error))
+      if (!mixin_cls->set_own_status (data->obj, &status_to_set, data->error))
         {
           DEBUG ("failed to set status");
           data->retval = FALSE;
         }
-
-      tp_presence_status_free (status_to_set);
 
       if (optional_arguments)
         g_hash_table_destroy (optional_arguments);

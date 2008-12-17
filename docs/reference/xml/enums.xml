@@ -61,6 +61,14 @@ enum                <link linkend="TpMediaStreamBaseProto">TpMediaStreamBaseProt
 enum                <link linkend="TpMediaStreamTransportType">TpMediaStreamTransportType</link>;
 #define             <link linkend="NUM-TP-MEDIA-STREAM-TRANSPORT-TYPES:CAPS">NUM_TP_MEDIA_STREAM_TRANSPORT_TYPES</link>
 enum                <link linkend="TpPropertyFlags">TpPropertyFlags</link>;
+#define             <link linkend="NUM-TP-SOCKET-ACCESS-CONTROLS:CAPS">NUM_TP_SOCKET_ACCESS_CONTROLS</link>
+enum                <link linkend="TpSocketAccessControl">TpSocketAccessControl</link>;
+#define             <link linkend="NUM-TP-SOCKET-ADDRESS-TYPES:CAPS">NUM_TP_SOCKET_ADDRESS_TYPES</link>
+enum                <link linkend="TpSocketAddressType">TpSocketAddressType</link>;
+#define             <link linkend="NUM-TP-TUBE-STATES:CAPS">NUM_TP_TUBE_STATES</link>
+enum                <link linkend="TpTubeState">TpTubeState</link>;
+#define             <link linkend="NUM-TP-TUBE-TYPES:CAPS">NUM_TP_TUBE_TYPES</link>
+enum                <link linkend="TpTubeType">TpTubeType</link>;
 </synopsis>
 </refsynopsisdiv>
 
@@ -954,6 +962,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
     TP_CHANNEL_GROUP_CHANGE_REASON_NO_ANSWER = 8,
     TP_CHANNEL_GROUP_CHANGE_REASON_RENAMED = 9,
     TP_CHANNEL_GROUP_CHANGE_REASON_PERMISSION_DENIED = 10,
+    TP_CHANNEL_GROUP_CHANGE_REASON_SEPARATED = 11,
 } TpChannelGroupChangeReason;
 </programlisting>
 <para>
@@ -1014,6 +1023,11 @@ Enumeration generated from the Telepathy specification.</para>
 <varlistentry>
 <term><anchor id="TP-CHANNEL-GROUP-CHANGE-REASON-PERMISSION-DENIED:CAPS" role="constant"/><literal>TP_CHANNEL_GROUP_CHANGE_REASON_PERMISSION_DENIED</literal></term>
 <listitem><simpara> <![CDATA[             The change is because there was no permission to contact the             requested handle.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-CHANNEL-GROUP-CHANGE-REASON-SEPARATED:CAPS" role="constant"/><literal>TP_CHANNEL_GROUP_CHANGE_REASON_SEPARATED</literal></term>
+<listitem><simpara> <![CDATA[           If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text or Tubes channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                    ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -1161,6 +1175,160 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry>
 <term><anchor id="TP-PROPERTY-FLAG-WRITE:CAPS" role="constant"/><literal>TP_PROPERTY_FLAG_WRITE</literal></term>
 <listitem><simpara> <![CDATA[The property can be written]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="NUM-TP-SOCKET-ACCESS-CONTROLS:CAPS" role="macro"/>NUM_TP_SOCKET_ACCESS_CONTROLS</title>
+<indexterm><primary>NUM_TP_SOCKET_ACCESS_CONTROLS</primary></indexterm><programlisting>#define             NUM_TP_SOCKET_ACCESS_CONTROLS</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpSocketAccessControl"><type>TpSocketAccessControl</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSocketAccessControl" role="enum"/>enum TpSocketAccessControl</title>
+<indexterm><primary>TpSocketAccessControl</primary></indexterm><programlisting>typedef enum {
+    TP_SOCKET_ACCESS_CONTROL_LOCALHOST = 0,
+    TP_SOCKET_ACCESS_CONTROL_PORT = 1,
+    TP_SOCKET_ACCESS_CONTROL_NETMASK = 2,
+    TP_SOCKET_ACCESS_CONTROL_CREDENTIALS = 3,
+} TpSocketAccessControl;
+</programlisting>
+<para>
+Enumeration generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry>
+<term><anchor id="TP-SOCKET-ACCESS-CONTROL-LOCALHOST:CAPS" role="constant"/><literal>TP_SOCKET_ACCESS_CONTROL_LOCALHOST</literal></term>
+<listitem><simpara> <![CDATA[           The IP or Unix socket can be accessed by any local user (e.g.           a Unix socket that accepts all local connections, or an IP socket           listening on 127.0.0.1 (or ::1) or rejecting connections not from           that address). The associated variant must be ignored.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-SOCKET-ACCESS-CONTROL-PORT:CAPS" role="constant"/><literal>TP_SOCKET_ACCESS_CONTROL_PORT</literal></term>
+<listitem><simpara> <![CDATA[           May only be used on IP sockets. The associated variant must contain           a struct with signature (sq) containing the string form of an           IP address of the appropriate version, and a port number.           The socket can only be accessed if the connecting process has that           address and port number; all other connections will be rejected.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-SOCKET-ACCESS-CONTROL-NETMASK:CAPS" role="constant"/><literal>TP_SOCKET_ACCESS_CONTROL_NETMASK</literal></term>
+<listitem><simpara> <![CDATA[           May only be used on IP sockets. The associated variant must contain           a struct with signature (sy) containing the string form of an           IP address of the appropriate version, and a prefix length "n".           The socket can only be accessed if the first n bits of the           connecting address match the first n bits of the given address.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-SOCKET-ACCESS-CONTROL-CREDENTIALS:CAPS" role="constant"/><literal>TP_SOCKET_ACCESS_CONTROL_CREDENTIALS</literal></term>
+<listitem><simpara> <![CDATA[           The connecting process must send a single zero (NUL) byte when             it first connects, which is not considered to be part of the data             stream. If the operating system uses sendmsg() with SCM_CREDS or             SCM_CREDENTIALS to pass credentials over sockets, the connecting             process must do so if possible; if not, it must still send the             byte.            The listening process will disconnect the connection unless it             can determine by OS-specific means that the connecting process             has the same user ID as the listening process.            The associated variant must be ignored.         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="NUM-TP-SOCKET-ADDRESS-TYPES:CAPS" role="macro"/>NUM_TP_SOCKET_ADDRESS_TYPES</title>
+<indexterm><primary>NUM_TP_SOCKET_ADDRESS_TYPES</primary></indexterm><programlisting>#define             NUM_TP_SOCKET_ADDRESS_TYPES</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpSocketAddressType"><type>TpSocketAddressType</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpSocketAddressType" role="enum"/>enum TpSocketAddressType</title>
+<indexterm><primary>TpSocketAddressType</primary></indexterm><programlisting>typedef enum {
+    TP_SOCKET_ADDRESS_TYPE_UNIX = 0,
+    TP_SOCKET_ADDRESS_TYPE_ABSTRACT_UNIX = 1,
+    TP_SOCKET_ADDRESS_TYPE_IPV4 = 2,
+    TP_SOCKET_ADDRESS_TYPE_IPV6 = 3,
+} TpSocketAddressType;
+</programlisting>
+<para>
+Enumeration generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry>
+<term><anchor id="TP-SOCKET-ADDRESS-TYPE-UNIX:CAPS" role="constant"/><literal>TP_SOCKET_ADDRESS_TYPE_UNIX</literal></term>
+<listitem><simpara> <![CDATA[           A Unix socket. The variant contains a byte-array, signature 'ay',           containing the path of the socket.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-SOCKET-ADDRESS-TYPE-ABSTRACT-UNIX:CAPS" role="constant"/><literal>TP_SOCKET_ADDRESS_TYPE_ABSTRACT_UNIX</literal></term>
+<listitem><simpara> <![CDATA[           An abstract Unix socket. The variant contains a byte-array,           signature 'ay', containing the path of the socket including the           leading null byte.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-SOCKET-ADDRESS-TYPE-IPV4:CAPS" role="constant"/><literal>TP_SOCKET_ADDRESS_TYPE_IPV4</literal></term>
+<listitem><simpara> <![CDATA[           An IPv4 socket. The variant contains a struct with signature (sq)           in which the string is an IPv4 dotted-quad address literal           (and must not be a DNS name), while the 16-bit unsigned integer is           the port number.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-SOCKET-ADDRESS-TYPE-IPV6:CAPS" role="constant"/><literal>TP_SOCKET_ADDRESS_TYPE_IPV6</literal></term>
+<listitem><simpara> <![CDATA[           An IPv6 socket. The variant contains a struct with signature (sq)           in which the string is an IPv6 address literal as specified in           RFC2373 (and must not be a DNS name), while the 16-bit unsigned           integer is the port number.         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="NUM-TP-TUBE-STATES:CAPS" role="macro"/>NUM_TP_TUBE_STATES</title>
+<indexterm><primary>NUM_TP_TUBE_STATES</primary></indexterm><programlisting>#define             NUM_TP_TUBE_STATES</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpTubeState"><type>TpTubeState</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpTubeState" role="enum"/>enum TpTubeState</title>
+<indexterm><primary>TpTubeState</primary></indexterm><programlisting>typedef enum {
+    TP_TUBE_STATE_LOCAL_PENDING = 0,
+    TP_TUBE_STATE_REMOTE_PENDING = 1,
+    TP_TUBE_STATE_OPEN = 2,
+} TpTubeState;
+</programlisting>
+<para>
+Enumeration generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry>
+<term><anchor id="TP-TUBE-STATE-LOCAL-PENDING:CAPS" role="constant"/><literal>TP_TUBE_STATE_LOCAL_PENDING</literal></term>
+<listitem><simpara> <![CDATA[           The tube is waiting to be accepted/closed locally.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-TUBE-STATE-REMOTE-PENDING:CAPS" role="constant"/><literal>TP_TUBE_STATE_REMOTE_PENDING</literal></term>
+<listitem><simpara> <![CDATA[           The tube is waiting to be accepted/closed remotely.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-TUBE-STATE-OPEN:CAPS" role="constant"/><literal>TP_TUBE_STATE_OPEN</literal></term>
+<listitem><simpara> <![CDATA[           The tube is open for traffic.         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2>
+<title><anchor id="NUM-TP-TUBE-TYPES:CAPS" role="macro"/>NUM_TP_TUBE_TYPES</title>
+<indexterm><primary>NUM_TP_TUBE_TYPES</primary></indexterm><programlisting>#define             NUM_TP_TUBE_TYPES</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpTubeType"><type>TpTubeType</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2>
+<title><anchor id="TpTubeType" role="enum"/>enum TpTubeType</title>
+<indexterm><primary>TpTubeType</primary></indexterm><programlisting>typedef enum {
+    TP_TUBE_TYPE_DBUS = 0,
+    TP_TUBE_TYPE_STREAM = 1,
+} TpTubeType;
+</programlisting>
+<para>
+Enumeration generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry>
+<term><anchor id="TP-TUBE-TYPE-DBUS:CAPS" role="constant"/><literal>TP_TUBE_TYPE_DBUS</literal></term>
+<listitem><simpara> <![CDATA[           An ordered reliable transport, for transporting D-Bus             traffic.            For each D-Bus tube, the connection manager listens on a D-Bus             server address, as detailed in the D-Bus specification. On this             address, it emulates a bus upon which each tube participant appears             as an endpoint.            The objects and interfaces which are expected to exist on the             emulated bus depend on the well-known name; typically, either the             participant who initiated the tube is expected to export the same             objects/interfaces that would be exported by a service of that name             on a bus, or all participants are expected to export those             objects/interfaces.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><anchor id="TP-TUBE-TYPE-STREAM:CAPS" role="constant"/><literal>TP_TUBE_TYPE_STREAM</literal></term>
+<listitem><simpara> <![CDATA[           A transport for ordered, reliable data transfer, similar to             SOCK_STREAM sockets.            When accepting a Stream Unix tube, a new listening local socket is             created. Each time the client connects to this socket, the             connection manager of the initiator of the tube opens a new             connection to its local socket. Both sides can then use this pair             of sockets to communicate together.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

@@ -322,6 +322,9 @@ tp_group_mixin_finalize (GObject *obj)
   g_hash_table_destroy (mixin->priv->handle_owners);
   g_hash_table_destroy (mixin->priv->local_pending_info);
 
+  if (mixin->priv->externals)
+    g_ptr_array_free (mixin->priv->externals, TRUE);
+
   g_slice_free (TpGroupMixinPrivate, mixin->priv);
 
   tp_handle_set_destroy (mixin->members);
@@ -1280,6 +1283,12 @@ tp_group_mixin_change_members (GObject *obj,
   if (add_remote_pending == NULL)
     add_remote_pending = empty;
 
+  /* remember the actor handle before any handle unreffing happens */
+  if (actor)
+    {
+      tp_handle_set_add (mixin->priv->actors, actor);
+    }
+
   /* members + add */
   new_add = tp_handle_set_update (mixin->members, add);
 
@@ -1385,10 +1394,6 @@ tp_group_mixin_change_members (GObject *obj,
           g_free (remote_str);
         }
 
-      if (actor)
-        {
-          tp_handle_set_add (mixin->priv->actors, actor);
-        }
       /* emit signal */
       tp_svc_channel_interface_group_emit_members_changed (obj, message,
           arr_add, arr_remove, arr_local, arr_remote, actor, reason);

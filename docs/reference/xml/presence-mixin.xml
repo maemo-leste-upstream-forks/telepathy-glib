@@ -119,8 +119,8 @@ Structure specifying a supported optional argument for a presence status.
 </para>
 <para>
 In addition to the fields documented here, there are two gpointer fields
-which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link>. A meaning may be defined for these in a future
-version of telepathy-glib.</para>
+which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link>. A meaning may be defined for these in a
+future version of telepathy-glib.</para>
 <para>
 
 </para><variablelist role="struct">
@@ -149,8 +149,8 @@ Structure specifying a supported presence status.
 </para>
 <para>
 In addition to the fields documented here, there are two gpointer fields
-which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link>. A meaning may be defined for these in a future
-version of telepathy-glib.</para>
+which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link>. A meaning may be defined for these in a
+future version of telepathy-glib.</para>
 <para>
 
 </para><variablelist role="struct">
@@ -173,8 +173,8 @@ version of telepathy-glib.</para>
 <term>const&nbsp;<link linkend="TpPresenceStatusOptionalArgumentSpec">TpPresenceStatusOptionalArgumentSpec</link>&nbsp;*<structfield>optional_arguments</structfield>;</term>
 <listitem><simpara> An array of <link linkend="TpPresenceStatusOptionalArgumentSpec"><type>TpPresenceStatusOptionalArgumentSpec</type></link>
  structures representing the optional arguments for this status, terminated
- by a NULL name. If there are no optional arguments for a status, this can be
- NULL.
+ by a NULL name. If there are no optional arguments for a status, this can
+ be NULL.
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -207,8 +207,13 @@ available.</para>
                                                          <link linkend="GError">GError</link> **error);</programlisting>
 <para>
 Signature of the callback used to get the stored presence status of
-contacts. The returned hash table should have contact handles mapped to their
-respective presence statuses in <link linkend="TpPresenceStatus"><type>TpPresenceStatus</type></link> structs.</para>
+contacts. The returned hash table should have contact handles mapped to
+their respective presence statuses in <link linkend="TpPresenceStatus"><type>TpPresenceStatus</type></link> structs.
+</para>
+<para>
+The returned hash table will be freed with g_hash_table_destroy. The
+callback is responsible for ensuring that this does any cleanup that
+may be necessary.</para>
 <para>
 
 </para><variablelist role="params">
@@ -233,7 +238,18 @@ respective presence statuses in <link linkend="TpPresenceStatus"><type>TpPresenc
 Signature of the callback used to commit changes to the user's own presence
 status in SetStatuses. It is also used in ClearStatus and RemoveStatus to
 reset the user's own status back to the "default" one with a <link linkend="NULL:CAPS"><literal>NULL</literal></link> status
-argument.</para>
+argument.
+</para>
+<para>
+The optional_arguments hash table in <parameter>status</parameter>, if not NULL, will have been
+filtered so it only contains recognised parameters, so the callback
+need not (and cannot) check for unrecognised parameters. However, the
+types of the parameters are not currently checked, so the callback is
+responsible for doing so.
+</para>
+<para>
+The callback is responsible for emitting PresenceUpdate, if appropriate,
+by calling <link linkend="tp-presence-mixin-emit-presence-update"><function>tp_presence_mixin_emit_presence_update()</function></link>.</para>
 <para>
 
 </para><variablelist role="params">
@@ -262,8 +278,8 @@ Structure representing a presence status.
 </para>
 <para>
 In addition to the fields documented here, there are two gpointer fields
-which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link>. A meaning may be defined for these in a future
-version of telepathy-glib.</para>
+which must currently be <link linkend="NULL:CAPS"><literal>NULL</literal></link>. A meaning may be defined for these in a
+future version of telepathy-glib.</para>
 <para>
 
 </para><variablelist role="struct">
@@ -275,8 +291,9 @@ version of telepathy-glib.</para>
 </varlistentry>
 <varlistentry>
 <term><link linkend="GHashTable">GHashTable</link>&nbsp;*<structfield>optional_arguments</structfield>;</term>
-<listitem><simpara> A mapping of string identifiers to GValues of the
- optional status arguments, if any
+<listitem><simpara> A GHashTable mapping of string identifiers to GValues
+ of the optional status arguments, if any. If there are no optional
+ arguments, this pointer may be NULL.
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

@@ -76,7 +76,7 @@ am__objects_1 = svc-Connection_Manager.lo svc-Connection.lo \
 	svc-Channel_Type_Contact_List.lo \
 	svc-Channel_Type_Streamed_Media.lo \
 	svc-Channel_Type_Room_List.lo svc-Channel_Type_Text.lo \
-	svc-Channel_Interface_Chat_State.lo \
+	svc-Channel_Type_Tubes.lo svc-Channel_Interface_Chat_State.lo \
 	svc-Channel_Interface_DTMF.lo svc-Channel_Interface_Group.lo \
 	svc-Channel_Interface_Password.lo \
 	svc-Channel_Interface_Media_Signalling.lo \
@@ -95,7 +95,7 @@ am__objects_4 = svc-Connection_Interface_Contact_Info.lo \
 	svc-Connection_Interface_Forwarding.lo \
 	svc-Connection_Interface_Privacy.lo \
 	svc-Connection_Interface_Renaming.lo \
-	svc-Channel_Type_Contact_Search.lo svc-Channel_Type_Tubes.lo \
+	svc-Channel_Type_Contact_Search.lo \
 	svc-Channel_Interface_Hold.lo \
 	svc-Channel_Interface_Transfer.lo
 am__objects_5 = $(am__objects_4) $(am__objects_2) $(am__objects_2) \
@@ -206,6 +206,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PYTHON = @PYTHON@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -278,7 +279,7 @@ STABLE_SPEC_INTERFACES = Connection_Manager Connection \
 	Connection_Interface_Capabilities \
 	Connection_Interface_Presence Channel \
 	Channel_Type_Contact_List Channel_Type_Streamed_Media \
-	Channel_Type_Room_List Channel_Type_Text \
+	Channel_Type_Room_List Channel_Type_Text Channel_Type_Tubes \
 	Channel_Interface_Chat_State Channel_Interface_DTMF \
 	Channel_Interface_Group Channel_Interface_Password \
 	Channel_Interface_Media_Signalling Media_Session_Handler \
@@ -286,8 +287,7 @@ STABLE_SPEC_INTERFACES = Connection_Manager Connection \
 UNSTABLE_SPEC_INTERFACES = Connection_Interface_Contact_Info \
 	Connection_Interface_Forwarding Connection_Interface_Privacy \
 	Connection_Interface_Renaming Channel_Type_Contact_Search \
-	Channel_Type_Tubes Channel_Interface_Hold \
-	Channel_Interface_Transfer
+	Channel_Interface_Hold Channel_Interface_Transfer
 STABLE_SPEC_INTERFACE_XMLS =  \
 	$(top_srcdir)/spec/Connection_Manager.xml \
 	$(top_srcdir)/spec/Connection.xml \
@@ -300,6 +300,7 @@ STABLE_SPEC_INTERFACE_XMLS =  \
 	$(top_srcdir)/spec/Channel_Type_Streamed_Media.xml \
 	$(top_srcdir)/spec/Channel_Type_Room_List.xml \
 	$(top_srcdir)/spec/Channel_Type_Text.xml \
+	$(top_srcdir)/spec/Channel_Type_Tubes.xml \
 	$(top_srcdir)/spec/Channel_Interface_Chat_State.xml \
 	$(top_srcdir)/spec/Channel_Interface_DTMF.xml \
 	$(top_srcdir)/spec/Channel_Interface_Group.xml \
@@ -314,7 +315,6 @@ UNSTABLE_SPEC_INTERFACE_XMLS =  \
 	$(top_srcdir)/spec/Connection_Interface_Privacy.xml \
 	$(top_srcdir)/spec/Connection_Interface_Renaming.xml \
 	$(top_srcdir)/spec/Channel_Type_Contact_Search.xml \
-	$(top_srcdir)/spec/Channel_Type_Tubes.xml \
 	$(top_srcdir)/spec/Channel_Interface_Hold.xml \
 	$(top_srcdir)/spec/Channel_Interface_Transfer.xml
 STABLE_SPEC_GENERATED_CS = _gen/svc-Connection_Manager.c \
@@ -325,6 +325,7 @@ STABLE_SPEC_GENERATED_CS = _gen/svc-Connection_Manager.c \
 	_gen/svc-Channel_Type_Contact_List.c \
 	_gen/svc-Channel_Type_Streamed_Media.c \
 	_gen/svc-Channel_Type_Room_List.c _gen/svc-Channel_Type_Text.c \
+	_gen/svc-Channel_Type_Tubes.c \
 	_gen/svc-Channel_Interface_Chat_State.c \
 	_gen/svc-Channel_Interface_DTMF.c \
 	_gen/svc-Channel_Interface_Group.c \
@@ -339,7 +340,6 @@ UNSTABLE_SPEC_GENERATED_CS =  \
 	_gen/svc-Connection_Interface_Privacy.c \
 	_gen/svc-Connection_Interface_Renaming.c \
 	_gen/svc-Channel_Type_Contact_Search.c \
-	_gen/svc-Channel_Type_Tubes.c \
 	_gen/svc-Channel_Interface_Hold.c \
 	_gen/svc-Channel_Interface_Transfer.c
 STABLE_SPEC_GENERATED_HS = _gen/svc-Connection_Manager.h \
@@ -350,6 +350,7 @@ STABLE_SPEC_GENERATED_HS = _gen/svc-Connection_Manager.h \
 	_gen/svc-Channel_Type_Contact_List.h \
 	_gen/svc-Channel_Type_Streamed_Media.h \
 	_gen/svc-Channel_Type_Room_List.h _gen/svc-Channel_Type_Text.h \
+	_gen/svc-Channel_Type_Tubes.h \
 	_gen/svc-Channel_Interface_Chat_State.h \
 	_gen/svc-Channel_Interface_DTMF.h \
 	_gen/svc-Channel_Interface_Group.h \
@@ -364,7 +365,6 @@ UNSTABLE_SPEC_GENERATED_HS =  \
 	_gen/svc-Connection_Interface_Privacy.h \
 	_gen/svc-Connection_Interface_Renaming.h \
 	_gen/svc-Channel_Type_Contact_Search.h \
-	_gen/svc-Channel_Type_Tubes.h \
 	_gen/svc-Channel_Interface_Hold.h \
 	_gen/svc-Channel_Interface_Transfer.h
 STABLE_SPEC_GENERATED_LISTS =  \
@@ -379,6 +379,7 @@ STABLE_SPEC_GENERATED_LISTS =  \
 	_gen/svc-Channel_Type_Streamed_Media-signals-marshal.list \
 	_gen/svc-Channel_Type_Room_List-signals-marshal.list \
 	_gen/svc-Channel_Type_Text-signals-marshal.list \
+	_gen/svc-Channel_Type_Tubes-signals-marshal.list \
 	_gen/svc-Channel_Interface_Chat_State-signals-marshal.list \
 	_gen/svc-Channel_Interface_DTMF-signals-marshal.list \
 	_gen/svc-Channel_Interface_Group-signals-marshal.list \
@@ -392,7 +393,6 @@ UNSTABLE_SPEC_GENERATED_LISTS = _gen/svc-Connection_Interface_Contact_Info-signa
 	_gen/svc-Connection_Interface_Privacy-signals-marshal.list \
 	_gen/svc-Connection_Interface_Renaming-signals-marshal.list \
 	_gen/svc-Channel_Type_Contact_Search-signals-marshal.list \
-	_gen/svc-Channel_Type_Tubes-signals-marshal.list \
 	_gen/svc-Channel_Interface_Hold-signals-marshal.list \
 	_gen/svc-Channel_Interface_Transfer-signals-marshal.list
 STABLE_SPEC_GLUE_HS = _gen/svc-Connection_Manager-glue.h \
@@ -406,6 +406,7 @@ STABLE_SPEC_GLUE_HS = _gen/svc-Connection_Manager-glue.h \
 	_gen/svc-Channel_Type_Streamed_Media-glue.h \
 	_gen/svc-Channel_Type_Room_List-glue.h \
 	_gen/svc-Channel_Type_Text-glue.h \
+	_gen/svc-Channel_Type_Tubes-glue.h \
 	_gen/svc-Channel_Interface_Chat_State-glue.h \
 	_gen/svc-Channel_Interface_DTMF-glue.h \
 	_gen/svc-Channel_Interface_Group-glue.h \
@@ -420,7 +421,6 @@ UNSTABLE_SPEC_GLUE_HS =  \
 	_gen/svc-Connection_Interface_Privacy-glue.h \
 	_gen/svc-Connection_Interface_Renaming-glue.h \
 	_gen/svc-Channel_Type_Contact_Search-glue.h \
-	_gen/svc-Channel_Type_Tubes-glue.h \
 	_gen/svc-Channel_Interface_Hold-glue.h \
 	_gen/svc-Channel_Interface_Transfer-glue.h
 SPEC_INTERFACES = $(STABLE_SPEC_INTERFACES) $(UNSTABLE_SPEC_INTERFACES)
@@ -811,6 +811,13 @@ svc-Channel_Type_Text.lo: _gen/svc-Channel_Type_Text.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o svc-Channel_Type_Text.lo `test -f '_gen/svc-Channel_Type_Text.c' || echo '$(srcdir)/'`_gen/svc-Channel_Type_Text.c
 
+svc-Channel_Type_Tubes.lo: _gen/svc-Channel_Type_Tubes.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT svc-Channel_Type_Tubes.lo -MD -MP -MF "$(DEPDIR)/svc-Channel_Type_Tubes.Tpo" -c -o svc-Channel_Type_Tubes.lo `test -f '_gen/svc-Channel_Type_Tubes.c' || echo '$(srcdir)/'`_gen/svc-Channel_Type_Tubes.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/svc-Channel_Type_Tubes.Tpo" "$(DEPDIR)/svc-Channel_Type_Tubes.Plo"; else rm -f "$(DEPDIR)/svc-Channel_Type_Tubes.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/svc-Channel_Type_Tubes.c' object='svc-Channel_Type_Tubes.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o svc-Channel_Type_Tubes.lo `test -f '_gen/svc-Channel_Type_Tubes.c' || echo '$(srcdir)/'`_gen/svc-Channel_Type_Tubes.c
+
 svc-Channel_Interface_Chat_State.lo: _gen/svc-Channel_Interface_Chat_State.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT svc-Channel_Interface_Chat_State.lo -MD -MP -MF "$(DEPDIR)/svc-Channel_Interface_Chat_State.Tpo" -c -o svc-Channel_Interface_Chat_State.lo `test -f '_gen/svc-Channel_Interface_Chat_State.c' || echo '$(srcdir)/'`_gen/svc-Channel_Interface_Chat_State.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/svc-Channel_Interface_Chat_State.Tpo" "$(DEPDIR)/svc-Channel_Interface_Chat_State.Plo"; else rm -f "$(DEPDIR)/svc-Channel_Interface_Chat_State.Tpo"; exit 1; fi
@@ -908,13 +915,6 @@ svc-Channel_Type_Contact_Search.lo: _gen/svc-Channel_Type_Contact_Search.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/svc-Channel_Type_Contact_Search.c' object='svc-Channel_Type_Contact_Search.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o svc-Channel_Type_Contact_Search.lo `test -f '_gen/svc-Channel_Type_Contact_Search.c' || echo '$(srcdir)/'`_gen/svc-Channel_Type_Contact_Search.c
-
-svc-Channel_Type_Tubes.lo: _gen/svc-Channel_Type_Tubes.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT svc-Channel_Type_Tubes.lo -MD -MP -MF "$(DEPDIR)/svc-Channel_Type_Tubes.Tpo" -c -o svc-Channel_Type_Tubes.lo `test -f '_gen/svc-Channel_Type_Tubes.c' || echo '$(srcdir)/'`_gen/svc-Channel_Type_Tubes.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/svc-Channel_Type_Tubes.Tpo" "$(DEPDIR)/svc-Channel_Type_Tubes.Plo"; else rm -f "$(DEPDIR)/svc-Channel_Type_Tubes.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/svc-Channel_Type_Tubes.c' object='svc-Channel_Type_Tubes.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o svc-Channel_Type_Tubes.lo `test -f '_gen/svc-Channel_Type_Tubes.c' || echo '$(srcdir)/'`_gen/svc-Channel_Type_Tubes.c
 
 svc-Channel_Interface_Hold.lo: _gen/svc-Channel_Interface_Hold.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT svc-Channel_Interface_Hold.lo -MD -MP -MF "$(DEPDIR)/svc-Channel_Interface_Hold.Tpo" -c -o svc-Channel_Interface_Hold.lo `test -f '_gen/svc-Channel_Interface_Hold.c' || echo '$(srcdir)/'`_gen/svc-Channel_Interface_Hold.c; \
@@ -1267,24 +1267,28 @@ _gen/unstable-spec.xml: ../spec/all.xml \
 _gen/telepathy-enums.h: _gen/stable-spec.xml \
 	../tools/c-constants-generator.xsl
 	$(XSLTPROC) --xinclude $(XSLTPROCFLAGS) \
+		--stringparam mixed-case-prefix Tp \
 		$(srcdir)/../tools/c-constants-generator.xsl \
 		_gen/stable-spec.xml > $@
 
 _gen/unstable-enums.h: _gen/unstable-spec.xml \
 	../tools/c-constants-generator.xsl
 	$(XSLTPROC) --xinclude $(XSLTPROCFLAGS) \
+		--stringparam mixed-case-prefix Tp \
 		$(srcdir)/../tools/c-constants-generator.xsl \
 		_gen/unstable-spec.xml > $@
 
 _gen/telepathy-interfaces.h: _gen/stable-spec.xml \
 	../tools/c-interfaces-generator.xsl
 	$(XSLTPROC) --xinclude $(XSLTPROCFLAGS) \
+		--stringparam mixed-case-prefix Tp \
 		$(srcdir)/../tools/c-interfaces-generator.xsl \
 		_gen/stable-spec.xml > $@
 
 _gen/unstable-interfaces.h: _gen/unstable-spec.xml \
 	../tools/c-interfaces-generator.xsl
 	$(XSLTPROC) --xinclude $(XSLTPROCFLAGS) \
+		--stringparam mixed-case-prefix Tp \
 		$(srcdir)/../tools/c-interfaces-generator.xsl \
 		_gen/unstable-spec.xml > $@
 

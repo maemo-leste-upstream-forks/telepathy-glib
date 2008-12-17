@@ -38,6 +38,8 @@
 #include <dbus/dbus-protocol.h>
 
 #include <telepathy-glib/dbus.h>
+#include <telepathy-glib/util.h>
+
 #define DEBUG_FLAG TP_DEBUG_PARAMS
 #include "internal-debug.h"
 
@@ -203,8 +205,7 @@ param_default_value (const TpCMParamSpec *params, int i)
 {
   GValue *value;
 
-  value = g_slice_new0 (GValue);
-  g_value_init (value, params[i].gtype);
+  value = tp_g_value_slice_new (params[i].gtype);
 
   /* If HAS_DEFAULT is false, we don't really care what the value is, so we'll
    * just use whatever's in the user-supplied param spec. As long as we're

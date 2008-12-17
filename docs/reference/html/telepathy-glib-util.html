@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Utilities</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.68.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.72.0">
 <link rel="start" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-utilities.html" title="Utilities">
 <link rel="prev" href="ch-utilities.html" title="Utilities">
@@ -25,16 +25,16 @@
 <th width="100%" align="center">telepathy-glib Reference Manual</th>
 <td><a accesskey="n" href="telepathy-glib-run.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
-<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2561443" class="shortcut">Top</a>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2570289" class="shortcut">Top</a>
                   &#160;|&#160;
-                  <a href="#id2615963" class="shortcut">Description</a></nobr></td></tr>
+                  <a href="#id2618046" class="shortcut">Description</a></nobr></td></tr>
 </table>
 <div class="refentry" lang="en">
 <a name="telepathy-glib-util"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
 <h2>
-<a name="id2561443"></a><span class="refentrytitle">Utilities</span>
+<a name="id2570289"></a><span class="refentrytitle">Utilities</span>
 </h2>
 <p>Utilities &#8212; Non-Telepathy utility functions</p>
 </td>
@@ -49,7 +49,9 @@
 
 gboolean            <a href="telepathy-glib-util.html#tp-g-ptr-array-contains">tp_g_ptr_array_contains</a>             (GPtrArray *haystack,
                                                          gpointer needle);
+GValue*             <a href="telepathy-glib-util.html#tp-g-value-slice-new">tp_g_value_slice_new</a>                (GType type);
 void                <a href="telepathy-glib-util.html#tp-g-value-slice-free">tp_g_value_slice_free</a>               (GValue *value);
+GValue*             <a href="telepathy-glib-util.html#tp-g-value-slice-dup">tp_g_value_slice_dup</a>                (const GValue *value);
 gboolean            <a href="telepathy-glib-util.html#tp-strdiff">tp_strdiff</a>                          (const gchar *left,
                                                          const gchar *right);
 gpointer            <a href="telepathy-glib-util.html#tp-mixin-offset-cast">tp_mixin_offset_cast</a>                (gpointer instance,
@@ -58,7 +60,7 @@ gchar*              <a href="telepathy-glib-util.html#tp-escape-as-identifier">t
 </pre>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2615963"></a><h2>Description</h2>
+<a name="id2618046"></a><h2>Description</h2>
 <p>
 Some utility functions used in telepathy-glib which could have been in
 GLib, but aren't.</p>
@@ -67,11 +69,11 @@ GLib, but aren't.</p>
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id2615984"></a><h2>Details</h2>
+<a name="id2618067"></a><h2>Details</h2>
 <div class="refsect2" lang="en">
-<a name="id2615994"></a><h3>
+<a name="id2618078"></a><h3>
 <a name="tp-g-ptr-array-contains"></a>tp_g_ptr_array_contains ()</h3>
-<a class="indexterm" name="id2616005"></a><pre class="programlisting">gboolean            tp_g_ptr_array_contains             (GPtrArray *haystack,
+<a class="indexterm" name="id2618089"></a><pre class="programlisting">gboolean            tp_g_ptr_array_contains             (GPtrArray *haystack,
                                                          gpointer needle);</pre>
 <p>
 </p>
@@ -101,9 +103,36 @@ GLib, but aren't.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2630331"></a><h3>
+<a name="id2665144"></a><h3>
+<a name="tp-g-value-slice-new"></a>tp_g_value_slice_new ()</h3>
+<a class="indexterm" name="id2665155"></a><pre class="programlisting">GValue*             tp_g_value_slice_new                (GType type);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>type</code></em>&#160;:</span></td>
+<td> The type desired for the new GValue
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a newly allocated, newly initialized <span class="type">GValue</span>, to be freed with
+<a href="telepathy-glib-util.html#tp-g-value-slice-free"><code class="function">tp_g_value_slice_free()</code></a> or <code class="function">g_slice_free()</code>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2669322"></a><h3>
 <a name="tp-g-value-slice-free"></a>tp_g_value_slice_free ()</h3>
-<a class="indexterm" name="id2630342"></a><pre class="programlisting">void                tp_g_value_slice_free               (GValue *value);</pre>
+<a class="indexterm" name="id2669333"></a><pre class="programlisting">void                tp_g_value_slice_free               (GValue *value);</pre>
 <p>
 Unset and free a slice-allocated GValue.</p>
 <p>
@@ -120,9 +149,36 @@ Unset and free a slice-allocated GValue.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2630392"></a><h3>
+<a name="id2669383"></a><h3>
+<a name="tp-g-value-slice-dup"></a>tp_g_value_slice_dup ()</h3>
+<a class="indexterm" name="id2666198"></a><pre class="programlisting">GValue*             tp_g_value_slice_dup                (const GValue *value);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><span class="term"><em class="parameter"><code>value</code></em>&#160;:</span></td>
+<td> A GValue
+</td>
+</tr>
+<tr>
+<td><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a newly allocated copy of <em class="parameter"><code>value</code></em>, to be freed with
+<a href="telepathy-glib-util.html#tp-g-value-slice-free"><code class="function">tp_g_value_slice_free()</code></a> or <code class="function">g_slice_free()</code>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2666283"></a><h3>
 <a name="tp-strdiff"></a>tp_strdiff ()</h3>
-<a class="indexterm" name="id2630403"></a><pre class="programlisting">gboolean            tp_strdiff                          (const gchar *left,
+<a class="indexterm" name="id2666295"></a><pre class="programlisting">gboolean            tp_strdiff                          (const gchar *left,
                                                          const gchar *right);</pre>
 <p>
 Return <code class="literal">TRUE</code> if the given strings are different. Unlike <span class="type">strcmp</span> this
@@ -155,9 +211,9 @@ string.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2630552"></a><h3>
+<a name="id2671302"></a><h3>
 <a name="tp-mixin-offset-cast"></a>tp_mixin_offset_cast ()</h3>
-<a class="indexterm" name="id2630563"></a><pre class="programlisting">gpointer            tp_mixin_offset_cast                (gpointer instance,
+<a class="indexterm" name="id2671314"></a><pre class="programlisting">gpointer            tp_mixin_offset_cast                (gpointer instance,
                                                          guint offset);</pre>
 <p>
 Extend a pointer by an offset, provided the offset is not 0.
@@ -189,9 +245,9 @@ mixin classes.</p>
 </div>
 <hr>
 <div class="refsect2" lang="en">
-<a name="id2630659"></a><h3>
+<a name="id2671410"></a><h3>
 <a name="tp-escape-as-identifier"></a>tp_escape_as_identifier ()</h3>
-<a class="indexterm" name="id2630670"></a><pre class="programlisting">gchar*              tp_escape_as_identifier             (const gchar *name);</pre>
+<a class="indexterm" name="id2671421"></a><pre class="programlisting">gchar*              tp_escape_as_identifier             (const gchar *name);</pre>
 <p>
 Escape an arbitrary string so it follows the rules for a C identifier,
 and hence an object path component, interface element component,

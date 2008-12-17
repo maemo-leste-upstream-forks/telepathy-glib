@@ -392,12 +392,21 @@ tp_properties_mixin_set_properties (GObject *obj,
     {
       error = g_error_new (TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
                            "A SetProperties request is already in progress");
-      goto ERROR;
+      dbus_g_method_return_error (context, error);
+      g_error_free (error);
+      return;
     }
 
   ctx->dbus_ctx = context;
   ctx->remaining = tp_intset_new ();
   error = NULL;
+
+  if (properties->len == 0)
+    {
+      DEBUG ("immediately returning from SetProperties with 0 properties");
+      tp_properties_context_return (ctx, NULL);
+      return;
+    }
 
   /* Check input property identifiers */
   for (i = 0; i < properties->len; i++)
@@ -779,8 +788,7 @@ tp_properties_mixin_change_value (GObject *obj,
     }
   else
     {
-      prop->value = g_slice_new0 (GValue);
-      g_value_init (prop->value, mixin_cls->signatures[prop_id].type);
+      prop->value = tp_g_value_slice_new (mixin_cls->signatures[prop_id].type);
     }
 
   g_value_copy (new_value, prop->value);
@@ -1103,6 +1111,8 @@ list_properties (TpSvcPropertiesInterface *iface,
   GError *error = NULL;
   gboolean ok = tp_properties_mixin_list_properties (G_OBJECT (iface), &ret,
       &error);
+  guint i;
+
   if (!ok)
     {
       dbus_g_method_return_error (context, error);
@@ -1110,6 +1120,10 @@ list_properties (TpSvcPropertiesInterface *iface,
     }
   tp_svc_properties_interface_return_from_list_properties (
       context, ret);
+
+  for (i = 0; i < ret->len; i++)
+    g_boxed_free (TP_TYPE_PROPERTY_INFO_STRUCT, ret->pdata[i]);
+
   g_ptr_array_free (ret, TRUE);
 }
 

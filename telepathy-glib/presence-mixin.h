@@ -40,8 +40,8 @@ typedef struct _TpPresenceStatusSpec TpPresenceStatusSpec;
  * Structure specifying a supported optional argument for a presence status.
  *
  * In addition to the fields documented here, there are two gpointer fields
- * which must currently be %NULL. A meaning may be defined for these in a future
- * version of telepathy-glib.
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
  */
 struct _TpPresenceStatusOptionalArgumentSpec {
     const gchar *name;
@@ -59,14 +59,14 @@ struct _TpPresenceStatusOptionalArgumentSpec {
  * @self: Indicates if this status may be set on yourself
  * @optional_arguments: An array of #TpPresenceStatusOptionalArgumentSpec
  *  structures representing the optional arguments for this status, terminated
- *  by a NULL name. If there are no optional arguments for a status, this can be
- *  NULL.
+ *  by a NULL name. If there are no optional arguments for a status, this can
+ *  be NULL.
  *
  * Structure specifying a supported presence status.
  *
  * In addition to the fields documented here, there are two gpointer fields
- * which must currently be %NULL. A meaning may be defined for these in a future
- * version of telepathy-glib.
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
  */
 struct _TpPresenceStatusSpec {
     const gchar *name;
@@ -85,14 +85,15 @@ typedef struct _TpPresenceStatus TpPresenceStatus;
  * TpPresenceStatus:
  * @index: Index of the presence status in the provided supported presence
  *  statuses array
- * @optional_arguments: A mapping of string identifiers to GValues of the
- *  optional status arguments, if any
+ * @optional_arguments: A GHashTable mapping of string identifiers to GValues
+ *  of the optional status arguments, if any. If there are no optional
+ *  arguments, this pointer may be NULL.
  *
  * Structure representing a presence status.
  *
  * In addition to the fields documented here, there are two gpointer fields
- * which must currently be %NULL. A meaning may be defined for these in a future
- * version of telepathy-glib.
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
  */
 struct _TpPresenceStatus {
     guint index;
@@ -103,7 +104,8 @@ struct _TpPresenceStatus {
     gpointer _future2;
 };
 
-TpPresenceStatus *tp_presence_status_new (guint index, GHashTable *optional_arguments);
+TpPresenceStatus *tp_presence_status_new (guint index,
+    GHashTable *optional_arguments);
 void tp_presence_status_free (TpPresenceStatus *status);
 
 /**
@@ -127,8 +129,12 @@ typedef gboolean (*TpPresenceMixinStatusAvailableFunc) (GObject *obj,
  * @error: Used to return a Telepathy D-Bus error if %NULL is returned
  *
  * Signature of the callback used to get the stored presence status of
- * contacts. The returned hash table should have contact handles mapped to their
- * respective presence statuses in #TpPresenceStatus structs.
+ * contacts. The returned hash table should have contact handles mapped to
+ * their respective presence statuses in #TpPresenceStatus structs.
+ *
+ * The returned hash table will be freed with g_hash_table_destroy. The
+ * callback is responsible for ensuring that this does any cleanup that
+ * may be necessary.
  *
  * Returns: The contact presence on success, %NULL with error set on error
  */
@@ -146,6 +152,15 @@ typedef GHashTable *(*TpPresenceMixinGetContactStatusesFunc) (GObject *obj,
  * status in SetStatuses. It is also used in ClearStatus and RemoveStatus to
  * reset the user's own status back to the "default" one with a %NULL status
  * argument.
+ *
+ * The optional_arguments hash table in @status, if not NULL, will have been
+ * filtered so it only contains recognised parameters, so the callback
+ * need not (and cannot) check for unrecognised parameters. However, the
+ * types of the parameters are not currently checked, so the callback is
+ * responsible for doing so.
+ *
+ * The callback is responsible for emitting PresenceUpdate, if appropriate,
+ * by calling tp_presence_mixin_emit_presence_update().
  *
  * Returns: %TRUE if the operation was successful, %FALSE if not.
  */
@@ -230,8 +245,10 @@ void tp_presence_mixin_class_init (GObjectClass *obj_cls, glong offset,
 void tp_presence_mixin_init (GObject *obj, glong offset);
 void tp_presence_mixin_finalize (GObject *obj);
 
-void tp_presence_mixin_emit_presence_update (GObject *obj, GHashTable *contact_presences);
-void tp_presence_mixin_emit_one_presence_update (GObject *obj, TpHandle handle, const TpPresenceStatus *status);
+void tp_presence_mixin_emit_presence_update (GObject *obj,
+    GHashTable *contact_presences);
+void tp_presence_mixin_emit_one_presence_update (GObject *obj,
+    TpHandle handle, const TpPresenceStatus *status);
 
 void tp_presence_mixin_iface_init (gpointer g_iface, gpointer iface_data);
 
