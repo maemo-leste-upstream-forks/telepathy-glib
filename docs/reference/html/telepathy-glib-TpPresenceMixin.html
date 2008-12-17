@@ -127,6 +127,17 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
                                                          <a
 href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
 >gpointer</a> iface_data);
+void                <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-simple-presence-iface-init" title="tp_presence_mixin_simple_presence_iface_init ()">tp_presence_mixin_simple_presence_iface_init</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> g_iface,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> iface_data);
+void                <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-simple-presence-init-dbus-properties" title="tp_presence_mixin_simple_presence_init_dbus_properties ()">tp_presence_mixin_simple_presence_init_dbus_properties</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObjectClass"
+>GObjectClass</a> *cls);
 </pre>
 </div>
 <div class="refsect1" lang="en">
@@ -156,7 +167,18 @@ To use the presence mixin as the implementation of
 <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence" title="TpSvcConnectionInterfacePresence"><span class="type">TpSvcConnectionInterfacePresence</span></a>, in the function you pass to
 G_IMPLEMENT_INTERFACE, you should call tp_presence_mixin_iface_init.
 TpPresenceMixin implements all of the D-Bus methods in the Presence
-interface.</p>
+interface.
+</p>
+<p>
+Since 0.7.13 you can also implement
+<a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceSimplePresence" title="TpSvcConnectionInterfaceSimplePresence"><span class="type">TpSvcConnectionInterfaceSimplePresence</span></a> by using this mixin, in this case
+you should pass tp_presence_mixin_iface_init as an argument to
+G_IMPLEMENT_INTERFACE. Note that this can cause the status_available
+callback to be called while disconnected. Also to fully implement this
+interface some dbus properties need to be supported. To do that using this
+mixin the instance needs to use the dbus properties mixin and call
+tp_presence_mixin_simple_presence_init_dbus_properties in the class init
+function</p>
 <p>
 
 </p>
@@ -271,7 +293,13 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
 >guint</a> which);</pre>
 <p>
 Signature of the callback used to determine if a given status is currently
-available to be set on the connection.</p>
+available to be set on the connection.
+</p>
+<p>
+When implementing the
+org.freedesktop.Telepathy.Connection.Interface.SimplePresence interface
+this can be called while DISCONNECTED to determine which statuses can be set
+in that state.</p>
 <p>
 
 </p>
@@ -820,6 +848,70 @@ this mixin. This function should usually be called via G_IMPLEMENT_INTERFACE.</p
 </tr>
 </tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-presence-mixin-simple-presence-iface-init"></a><h3>tp_presence_mixin_simple_presence_iface_init ()</h3>
+<pre class="programlisting">void                tp_presence_mixin_simple_presence_iface_init
+                                                        (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> g_iface,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> iface_data);</pre>
+<p>
+Fill in the vtable entries needed to implement the simple presence interface
+using this mixin. This function should usually be called via
+G_IMPLEMENT_INTERFACE.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>g_iface</code></em> :</span></p></td>
+<td> A pointer to the <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceSimplePresenceClass" title="TpSvcConnectionInterfaceSimplePresenceClass"><span class="type">TpSvcConnectionInterfaceSimplePresenceClass</span></a> in
+an object class
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>iface_data</code></em> :</span></p></td>
+<td> Ignored
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.13
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-presence-mixin-simple-presence-init-dbus-properties"></a><h3>tp_presence_mixin_simple_presence_init_dbus_properties ()</h3>
+<pre class="programlisting">void                tp_presence_mixin_simple_presence_init_dbus_properties
+                                                        (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObjectClass"
+>GObjectClass</a> *cls);</pre>
+<p>
+Set up <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinClass" title="TpDBusPropertiesMixinClass"><span class="type">TpDBusPropertiesMixinClass</span></a> to use this mixin's implementation of
+the SimplePresence interface's properties.
+</p>
+<p>
+This uses <code class="function">tp_presence_mixin_get_simple_dbus_property()</code> as the property
+getter and sets up a list of the supported properties for it.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>cls</code></em> :</span></p></td>
+<td> The class of an object with this mixin
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since  0.7.13
+</p>
 </div>
 </div>
 <div class="refsect1" lang="en">

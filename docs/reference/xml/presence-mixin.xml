@@ -58,6 +58,11 @@ struct              <link linkend="TpPresenceStatusOptionalArgumentSpec">TpPrese
                                                          const <link linkend="TpPresenceStatus">TpPresenceStatus</link> *status);
 <link linkend="void">void</link>                <link linkend="tp-presence-mixin-iface-init">tp_presence_mixin_iface_init</link>        (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
+<link linkend="void">void</link>                <link linkend="tp-presence-mixin-simple-presence-iface-init">tp_presence_mixin_simple_presence_iface_init</link>
+                                                        (<link linkend="gpointer">gpointer</link> g_iface,
+                                                         <link linkend="gpointer">gpointer</link> iface_data);
+<link linkend="void">void</link>                <link linkend="tp-presence-mixin-simple-presence-init-dbus-properties">tp_presence_mixin_simple_presence_init_dbus_properties</link>
+                                                        (<link linkend="GObjectClass">GObjectClass</link> *cls);
 </synopsis>
 </refsynopsisdiv>
 
@@ -96,7 +101,18 @@ To use the presence mixin as the implementation of
 <link linkend="TpSvcConnectionInterfacePresence"><type>TpSvcConnectionInterfacePresence</type></link>, in the function you pass to
 G_IMPLEMENT_INTERFACE, you should call tp_presence_mixin_iface_init.
 TpPresenceMixin implements all of the D-Bus methods in the Presence
-interface.</para>
+interface.
+</para>
+<para>
+Since 0.7.13 you can also implement
+<link linkend="TpSvcConnectionInterfaceSimplePresence"><type>TpSvcConnectionInterfaceSimplePresence</type></link> by using this mixin, in this case
+you should pass tp_presence_mixin_iface_init as an argument to
+G_IMPLEMENT_INTERFACE. Note that this can cause the status_available
+callback to be called while disconnected. Also to fully implement this
+interface some dbus properties need to be supported. To do that using this
+mixin the instance needs to use the dbus properties mixin and call
+tp_presence_mixin_simple_presence_init_dbus_properties in the class init
+function</para>
 <para>
 
 </para>
@@ -182,7 +198,13 @@ future version of telepathy-glib.</para>
                                                          <link linkend="guint">guint</link> which);</programlisting>
 <para>
 Signature of the callback used to determine if a given status is currently
-available to be set on the connection.</para>
+available to be set on the connection.
+</para>
+<para>
+When implementing the
+org.freedesktop.Telepathy.Connection.Interface.SimplePresence interface
+this can be called while DISCONNECTED to determine which statuses can be set
+in that state.</para>
 <para>
 
 </para><variablelist role="params">
@@ -529,6 +551,46 @@ this mixin. This function should usually be called via G_IMPLEMENT_INTERFACE.</p
 <listitem><simpara> Ignored
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="tp-presence-mixin-simple-presence-iface-init" role="function" condition="since:0.7.13">
+<title>tp_presence_mixin_simple_presence_iface_init ()</title>
+<indexterm zone="tp-presence-mixin-simple-presence-iface-init" role="0.7.13"><primary>tp_presence_mixin_simple_presence_iface_init</primary></indexterm><programlisting><link linkend="void">void</link>                tp_presence_mixin_simple_presence_iface_init
+                                                        (<link linkend="gpointer">gpointer</link> g_iface,
+                                                         <link linkend="gpointer">gpointer</link> iface_data);</programlisting>
+<para>
+Fill in the vtable entries needed to implement the simple presence interface
+using this mixin. This function should usually be called via
+G_IMPLEMENT_INTERFACE.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>g_iface</parameter>&nbsp;:</term>
+<listitem><simpara> A pointer to the <link linkend="TpSvcConnectionInterfaceSimplePresenceClass"><type>TpSvcConnectionInterfaceSimplePresenceClass</type></link> in
+an object class
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>iface_data</parameter>&nbsp;:</term>
+<listitem><simpara> Ignored
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.13
+</para></refsect2>
+<refsect2 id="tp-presence-mixin-simple-presence-init-dbus-properties" role="function" condition="since:0.7.13">
+<title>tp_presence_mixin_simple_presence_init_dbus_properties ()</title>
+<indexterm zone="tp-presence-mixin-simple-presence-init-dbus-properties" role="0.7.13"><primary>tp_presence_mixin_simple_presence_init_dbus_properties</primary></indexterm><programlisting><link linkend="void">void</link>                tp_presence_mixin_simple_presence_init_dbus_properties
+                                                        (<link linkend="GObjectClass">GObjectClass</link> *cls);</programlisting>
+<para>
+Set up <link linkend="TpDBusPropertiesMixinClass"><type>TpDBusPropertiesMixinClass</type></link> to use this mixin's implementation of
+the SimplePresence interface's properties.
+</para>
+<para>
+This uses <link linkend="tp-presence-mixin-get-simple-dbus-property"><function>tp_presence_mixin_get_simple_dbus_property()</function></link> as the property
+getter and sets up a list of the supported properties for it.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>cls</parameter>&nbsp;:</term>
+<listitem><simpara> The class of an object with this mixin
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.13
+</para></refsect2>
 
 </refsect1>
 

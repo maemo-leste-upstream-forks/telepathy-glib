@@ -440,6 +440,8 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
     TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY = 4,
     TP_CONNECTION_PRESENCE_TYPE_HIDDEN = 5,
     TP_CONNECTION_PRESENCE_TYPE_BUSY = 6,
+    TP_CONNECTION_PRESENCE_TYPE_UNKNOWN = 7,
+    TP_CONNECTION_PRESENCE_TYPE_ERROR = 8,
 } TpConnectionPresenceType;
 </pre>
 <p>
@@ -452,7 +454,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tbody>
 <tr>
 <td><p><a name="TP-CONNECTION-PRESENCE-TYPE-UNSET:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_PRESENCE_TYPE_UNSET</code></span></p></td>
-<td>            An invalid presence type used as a null value         
+<td>            An invalid presence type used as a null value. This value MUST NOT           appear in the result of GetStatuses, or in the Statuses property           of the SimplePresence interface.         
 </td>
 </tr>
 <tr>
@@ -483,6 +485,16 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tr>
 <td><p><a name="TP-CONNECTION-PRESENCE-TYPE-BUSY:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_PRESENCE_TYPE_BUSY</code></span></p></td>
 <td>            Busy, Do Not Disturb.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CONNECTION-PRESENCE-TYPE-UNKNOWN:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_PRESENCE_TYPE_UNKNOWN</code></span></p></td>
+<td>            Unknown, unable to determine presence for this contact, for example           if the protocol only allows presence of subscribed contacts.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CONNECTION-PRESENCE-TYPE-ERROR:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_PRESENCE_TYPE_ERROR</code></span></p></td>
+<td>            Error, an error occurred while trying to determine presence.  The           message, if set, is an error from the server.         
 </td>
 </tr>
 </tbody>
@@ -1116,7 +1128,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-FLAG-HANDLE-OWNERS-NOT-AVAILABLE:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE</code></span></p></td>
-<td>            In rooms with channel specific handles (ie Channel_Specific_Handles           flag is set), this flag indicates that none of the handle owners are           available, and that GetHandleOwners method will always return 0 for           channel members other than the self handle.         
+<td>            In rooms with channel specific handles (ie Channel_Specific_Handles           flag is set), this flag indicates that no handle owners are           available, apart from the owner of the SelfHandle.                         This used to be an important optimization to avoid repeated             GetHandleOwners calls, before we introduced the HandleOwner             property and HandleOwnerChanged signal.                    
 </td>
 </tr>
 <tr>

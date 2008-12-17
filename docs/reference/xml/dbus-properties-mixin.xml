@@ -65,6 +65,11 @@ enum                <link linkend="TpDBusPropertiesMixinFlags">TpDBusPropertiesM
                                                          <link linkend="TpDBusPropertiesMixinPropImpl">TpDBusPropertiesMixinPropImpl</link> *props);
 <link linkend="void">void</link>                <link linkend="tp-dbus-properties-mixin-iface-init">tp_dbus_properties_mixin_iface_init</link> (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-dbus-properties-mixin-get">tp_dbus_properties_mixin_get</link>        (<link linkend="GObject">GObject</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *interface_name,
+                                                         const <link linkend="gchar">gchar</link> *property_name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="GError">GError</link> **error);
 </synopsis>
 </refsynopsisdiv>
 
@@ -591,6 +596,44 @@ is implemented using this mixin.</para>
 <listitem><simpara> ignored
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="tp-dbus-properties-mixin-get" role="function" condition="since:0.7.13">
+<title>tp_dbus_properties_mixin_get ()</title>
+<indexterm zone="tp-dbus-properties-mixin-get" role="0.7.13"><primary>tp_dbus_properties_mixin_get</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_dbus_properties_mixin_get        (<link linkend="GObject">GObject</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *interface_name,
+                                                         const <link linkend="gchar">gchar</link> *property_name,
+                                                         <link linkend="GValue">GValue</link> *value,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Initialize <parameter>value</parameter> with the type of the property <parameter>property_name</parameter> on
+<parameter>interface_name</parameter>, and write the value of that property into it as if
+by calling the D-Bus method org.freedesktop.DBus.Properties.Get.
+</para>
+<para>
+If Get would return a D-Bus error, <parameter>value</parameter> remains unset and <parameter>error</parameter>
+is filled in instead.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> an object with this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>interface_name</parameter>&nbsp;:</term>
+<listitem><simpara> a D-Bus interface name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>property_name</parameter>&nbsp;:</term>
+<listitem><simpara> a D-Bus property name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> an unset GValue (initialized to all zeroes)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> used to return an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> (filling <parameter>value</parameter>) on success, <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> (setting <parameter>error</parameter>)
+ on failure
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.13
+</para></refsect2>
 
 </refsect1>
 

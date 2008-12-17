@@ -51,6 +51,8 @@
                                                          <link linkend="GArray">GArray</link> **ret,
                                                          <link linkend="GError">GError</link> **error);
 <link linkend="void">void</link>                <link linkend="tp-text-mixin-clear">tp_text_mixin_clear</link>                 (<link linkend="GObject">GObject</link> *obj);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-text-mixin-has-pending-messages">tp_text_mixin_has_pending_messages</link>  (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpHandle">TpHandle</link> *first_sender);
 <link linkend="void">void</link>                <link linkend="tp-text-mixin-iface-init">tp_text_mixin_iface_init</link>            (<link linkend="gpointer">gpointer</link> g_iface,
                                                          <link linkend="gpointer">gpointer</link> iface_data);
 </synopsis>
@@ -342,6 +344,27 @@ Clear the pending message queue, deleting all messages.</para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
 <listitem><simpara> An object with this mixin
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-text-mixin-has-pending-messages" role="function">
+<title>tp_text_mixin_has_pending_messages ()</title>
+<indexterm zone="tp-text-mixin-has-pending-messages"><primary>tp_text_mixin_has_pending_messages</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_text_mixin_has_pending_messages  (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpHandle">TpHandle</link> *first_sender);</programlisting>
+<para>
+Return whether the channel <parameter>obj</parameter> has unacknowledged messages. If so, and
+<parameter>first_sender</parameter> is not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, the handle of the sender of the first message
+is placed in it, without incrementing the handle's reference count.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
+<listitem><simpara> An object with this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>first_sender</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to store the sender of the oldest pending
+ message
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if there are pending messages
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-text-mixin-iface-init" role="function">
