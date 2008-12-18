@@ -34,6 +34,7 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-connection$(EXEEXT) \
+	test-connection-bug-18845$(EXEEXT) \
 	test-connection-handles$(EXEEXT) \
 	test-connection-inject-bug16307$(EXEEXT) \
 	test-connection-getinterfaces-failure$(EXEEXT) \
@@ -51,10 +52,7 @@ subdir = tests/dbus
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-compiler-flag.m4 \
 	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/gtk-doc.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/linker.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -63,89 +61,130 @@ CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 test_call_cancellation_SOURCES = test-call-cancellation.c
 test_call_cancellation_OBJECTS = test-call-cancellation.$(OBJEXT)
-am__DEPENDENCIES_1 =
-test_call_cancellation_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_call_cancellation_LDADD = $(LDADD)
+test_call_cancellation_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_channel_introspect_OBJECTS = channel-introspect.$(OBJEXT)
 test_channel_introspect_OBJECTS =  \
 	$(am_test_channel_introspect_OBJECTS)
-test_channel_introspect_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_channel_introspect_LDADD = $(LDADD)
+test_channel_introspect_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_connection_OBJECTS = connection.$(OBJEXT)
 test_connection_OBJECTS = $(am_test_connection_OBJECTS)
-test_connection_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_connection_LDADD = $(LDADD)
+test_connection_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_connection_bug_18845_OBJECTS = connection-bug-18845.$(OBJEXT)
+test_connection_bug_18845_OBJECTS =  \
+	$(am_test_connection_bug_18845_OBJECTS)
+test_connection_bug_18845_LDADD = $(LDADD)
+test_connection_bug_18845_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_connection_getinterfaces_failure_OBJECTS =  \
 	connection-getinterfaces-failure.$(OBJEXT)
 test_connection_getinterfaces_failure_OBJECTS =  \
 	$(am_test_connection_getinterfaces_failure_OBJECTS)
+test_connection_getinterfaces_failure_LDADD = $(LDADD)
 test_connection_getinterfaces_failure_DEPENDENCIES =  \
-	$(am__DEPENDENCIES_1) ../lib/libtp-glib-tests.la
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_connection_handles_OBJECTS = connection-handles.$(OBJEXT)
 test_connection_handles_OBJECTS =  \
 	$(am_test_connection_handles_OBJECTS)
-test_connection_handles_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_connection_handles_LDADD = $(LDADD)
+test_connection_handles_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_connection_inject_bug16307_OBJECTS =  \
 	connection-inject-bug16307.$(OBJEXT)
 test_connection_inject_bug16307_OBJECTS =  \
 	$(am_test_connection_inject_bug16307_OBJECTS)
-test_connection_inject_bug16307_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_connection_inject_bug16307_LDADD = $(LDADD)
+test_connection_inject_bug16307_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_contacts_OBJECTS = contacts.$(OBJEXT)
 test_contacts_OBJECTS = $(am_test_contacts_OBJECTS)
-test_contacts_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_contacts_LDADD = $(LDADD)
+test_contacts_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_contacts_mixin_OBJECTS = contacts-mixin.$(OBJEXT)
 test_contacts_mixin_OBJECTS = $(am_test_contacts_mixin_OBJECTS)
-test_contacts_mixin_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_contacts_mixin_LDADD = $(LDADD)
+test_contacts_mixin_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 test_dbus_SOURCES = test-dbus.c
 test_dbus_OBJECTS = test-dbus.$(OBJEXT)
-test_dbus_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_dbus_LDADD = $(LDADD)
+test_dbus_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 test_disconnection_SOURCES = test-disconnection.c
 test_disconnection_OBJECTS = test-disconnection.$(OBJEXT)
-test_disconnection_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libtp-glib-tests.la
+test_disconnection_LDADD = $(LDADD)
+test_disconnection_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 test_example_no_protocols_SOURCES = test-example-no-protocols.c
 test_example_no_protocols_OBJECTS =  \
 	test-example-no-protocols.$(OBJEXT)
-test_example_no_protocols_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_example_no_protocols_LDADD = $(LDADD)
+test_example_no_protocols_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_finalized_in_invalidated_handler_OBJECTS =  \
 	finalized-in-invalidated-handler.$(OBJEXT)
 test_finalized_in_invalidated_handler_OBJECTS =  \
 	$(am_test_finalized_in_invalidated_handler_OBJECTS)
+test_finalized_in_invalidated_handler_LDADD = $(LDADD)
 test_finalized_in_invalidated_handler_DEPENDENCIES =  \
-	$(am__DEPENDENCIES_1) ../lib/libtp-glib-tests.la
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_handle_set_OBJECTS = handle-set.$(OBJEXT)
 test_handle_set_OBJECTS = $(am_test_handle_set_OBJECTS)
-test_handle_set_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_handle_set_LDADD = $(LDADD)
+test_handle_set_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_invalidated_while_invoking_signals_OBJECTS =  \
 	invalidated-while-invoking-signals.$(OBJEXT)
 test_invalidated_while_invoking_signals_OBJECTS =  \
 	$(am_test_invalidated_while_invoking_signals_OBJECTS)
+test_invalidated_while_invoking_signals_LDADD = $(LDADD)
 test_invalidated_while_invoking_signals_DEPENDENCIES =  \
-	$(am__DEPENDENCIES_1) ../lib/libtp-glib-tests.la
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_properties_OBJECTS = properties.$(OBJEXT)
 nodist_test_properties_OBJECTS = svc.$(OBJEXT)
 test_properties_OBJECTS = $(am_test_properties_OBJECTS) \
 	$(nodist_test_properties_OBJECTS)
-test_properties_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_properties_LDADD = $(LDADD)
+test_properties_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_text_mixin_OBJECTS = text-mixin.$(OBJEXT)
 test_text_mixin_OBJECTS = $(am_test_text_mixin_OBJECTS)
-test_text_mixin_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+test_text_mixin_DEPENDENCIES = $(LDADD) \
 	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 am_test_text_respawn_OBJECTS = text-respawn.$(OBJEXT)
 test_text_respawn_OBJECTS = $(am_test_text_respawn_OBJECTS)
-test_text_respawn_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+test_text_respawn_DEPENDENCIES = $(LDADD) \
 	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 am_test_unsupported_interface_OBJECTS =  \
 	unsupported-interface.$(OBJEXT)
 test_unsupported_interface_OBJECTS =  \
 	$(am_test_unsupported_interface_OBJECTS)
-test_unsupported_interface_DEPENDENCIES = $(am__DEPENDENCIES_1)
+test_unsupported_interface_LDADD = $(LDADD)
+test_unsupported_interface_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -160,6 +199,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_connection_SOURCES) \
+	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
@@ -173,6 +213,7 @@ SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = test-call-cancellation.c \
 	$(test_channel_introspect_SOURCES) $(test_connection_SOURCES) \
+	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
@@ -200,13 +241,17 @@ CFLAGS = @CFLAGS@
 COVERAGE_CFLAGS = @COVERAGE_CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DSYMUTIL = @DSYMUTIL@
-DUMPBIN = @DUMPBIN@
+ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -214,7 +259,8 @@ EGREP = @EGREP@
 ENABLE_CODING_STYLE_CHECKS = @ENABLE_CODING_STYLE_CHECKS@
 ERROR_CFLAGS = @ERROR_CFLAGS@
 EXEEXT = @EXEEXT@
-FGREP = @FGREP@
+F77 = @F77@
+FFLAGS = @FFLAGS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
@@ -227,12 +273,10 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
-LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
@@ -243,8 +287,6 @@ MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
-OTOOL = @OTOOL@
-OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -260,7 +302,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
-TP_GLIB_LIBS = @TP_GLIB_LIBS@
 VERSION = @VERSION@
 VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
 XSLTPROC = @XSLTPROC@
@@ -269,7 +310,8 @@ abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
-ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+ac_ct_CXX = @ac_ct_CXX@
+ac_ct_F77 = @ac_ct_F77@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -300,7 +342,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -316,88 +357,42 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TESTS = $(noinst_PROGRAMS)
-test_call_cancellation_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
-test_channel_introspect_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
+LDADD = \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la
 
 test_channel_introspect_SOURCES = channel-introspect.c
-test_connection_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_connection_SOURCES = connection.c
-test_connection_handles_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
+test_connection_bug_18845_SOURCES = connection-bug-18845.c
 test_connection_handles_SOURCES = connection-handles.c
-test_connection_inject_bug16307_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_connection_inject_bug16307_SOURCES = connection-inject-bug16307.c
-test_connection_getinterfaces_failure_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_connection_getinterfaces_failure_SOURCES = \
     connection-getinterfaces-failure.c
 
-test_contacts_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_contacts_SOURCES = contacts.c
-test_contacts_mixin_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_contacts_mixin_SOURCES = contacts-mixin.c
-test_dbus_LDADD = $(TP_GLIB_LIBS)
-test_disconnection_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
-test_example_no_protocols_LDADD = $(TP_GLIB_LIBS)
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
 
-test_finalized_in_invalidated_handler_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_handle_set_SOURCES = handle-set.c
-test_handle_set_LDADD = $(TP_GLIB_LIBS)
-test_invalidated_while_invoking_signals_LDADD = \
-    $(TP_GLIB_LIBS) \
-    ../lib/libtp-glib-tests.la
-
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
 
-test_properties_LDADD = $(TP_GLIB_LIBS)
 test_properties_SOURCES = properties.c
 nodist_test_properties_SOURCES = \
     _gen/svc.h \
     _gen/svc.c
 
 test_text_mixin_LDADD = \
-    $(TP_GLIB_LIBS) \
-    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(LDADD) \
     $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 
 test_text_mixin_SOURCES = text-mixin.c
 test_text_respawn_LDADD = \
-    $(TP_GLIB_LIBS) \
-    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(LDADD) \
     $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 
 test_text_respawn_SOURCES = text-respawn.c
-test_unsupported_interface_LDADD = $(TP_GLIB_LIBS)
 test_unsupported_interface_SOURCES = unsupported-interface.c
 check_c_sources = *.c
 AM_CFLAGS = \
@@ -485,6 +480,9 @@ test-channel-introspect$(EXEEXT): $(test_channel_introspect_OBJECTS) $(test_chan
 test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENCIES) 
 	@rm -f test-connection$(EXEEXT)
 	$(LINK) $(test_connection_OBJECTS) $(test_connection_LDADD) $(LIBS)
+test-connection-bug-18845$(EXEEXT): $(test_connection_bug_18845_OBJECTS) $(test_connection_bug_18845_DEPENDENCIES) 
+	@rm -f test-connection-bug-18845$(EXEEXT)
+	$(LINK) $(test_connection_bug_18845_OBJECTS) $(test_connection_bug_18845_LDADD) $(LIBS)
 test-connection-getinterfaces-failure$(EXEEXT): $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_DEPENDENCIES) 
 	@rm -f test-connection-getinterfaces-failure$(EXEEXT)
 	$(LINK) $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_LDADD) $(LIBS)
@@ -538,6 +536,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-bug-18845.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-getinterfaces-failure.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-inject-bug16307.Po@am__quote@

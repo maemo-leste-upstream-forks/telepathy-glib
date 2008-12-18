@@ -41,14 +41,14 @@
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Contacts,
-                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="gchar">gchar</link> ***out_Tokens,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-avatars-run-get-known-avatar-tokens">tp_cli_connection_interface_avatars_run_get_known_avatar_tokens</link>
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Contacts,
-                                                         <link linkend="GHashTable">GHashTable</link> **out0,
+                                                         <link linkend="GHashTable">GHashTable</link> **out_Tokens,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-avatars-run-request-avatar">tp_cli_connection_interface_avatars_run_request_avatar</link>
@@ -70,7 +70,7 @@
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Avatar,
                                                          const <link linkend="gchar">gchar</link> *in_MIME_Type,
-                                                         <link linkend="gchar">gchar</link> **out0,
+                                                         <link linkend="gchar">gchar</link> **out_Token,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-interface-avatars-call-clear-avatar">tp_cli_connection_interface_avatars_call_clear_avatar</link>
@@ -146,13 +146,13 @@
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-avatars-callback-for-get-avatar-tokens">*tp_cli_connection_interface_avatars_callback_for_get_avatar_tokens</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="gchar">gchar</link> **out_Tokens,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-avatars-callback-for-get-known-avatar-tokens">*tp_cli_connection_interface_avatars_callback_for_get_known_avatar_tokens</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         <link linkend="GHashTable">GHashTable</link> *out0,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Tokens,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -170,7 +170,7 @@
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-avatars-callback-for-set-avatar">*tp_cli_connection_interface_avatars_callback_for_set_avatar</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> *out0,
+                                                         const <link linkend="gchar">gchar</link> *out_Token,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -334,7 +334,7 @@ Get the required format of avatars on this connection.</para>
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Contacts,
-                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="gchar">gchar</link> ***out_Tokens,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -345,7 +345,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Get the unique tokens for all of the given contacts&apos; avatars.          Using this method in new Telepathy clients is deprecated; use         GetKnownAvatarTokens instead.</para>
+Get the unique tokens for all of the given contacts&apos; avatars.          Using this method in new Telepathy clients is deprecated; use         &lt;tp:member-ref&gt;GetKnownAvatarTokens&lt;/tp:member-ref&gt; instead.</para>
 <para>
 
 </para><variablelist role="params">
@@ -358,7 +358,7 @@ Get the unique tokens for all of the given contacts&apos; avatars.          Usin
 <varlistentry><term><parameter>in_Contacts</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: An array of handles representing contacts
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Tokens</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: An array of avatar tokens or empty strings (if no avatar is set) in the           same order as the given array of contact handles
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -381,7 +381,7 @@ Get the unique tokens for all of the given contacts&apos; avatars.          Usin
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Contacts,
-                                                         <link linkend="GHashTable">GHashTable</link> **out0,
+                                                         <link linkend="GHashTable">GHashTable</link> **out_Tokens,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -405,7 +405,7 @@ Get the unique tokens for the given contacts&apos; avatars. These tokens        
 <varlistentry><term><parameter>in_Contacts</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: An array of handles representing contacts
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Tokens</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: A dictionary of handles mapped to avatar tokens, containing only           the known avatar tokens.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -489,7 +489,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Request avatars for a number of contacts. The AvatarRetrieved signal         is emitted for each avatar retrieved. If the handles are valid but         retrieving an avatar fails (for any reason, including the contact not         having an avatar) the AvatarRetrieved signal is not emitted for that         contact.</para>
+Request avatars for a number of contacts. The         &lt;tp:member-ref&gt;AvatarRetrieved&lt;/tp:member-ref&gt; signal is emitted for         each avatar retrieved. If the handles are valid but retrieving an         avatar fails (for any reason, including the contact not having an         avatar) the AvatarRetrieved signal is not emitted for that contact.</para>
 <para>
 
 </para><variablelist role="params">
@@ -523,7 +523,7 @@ Request avatars for a number of contacts. The AvatarRetrieved signal         is 
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Avatar,
                                                          const <link linkend="gchar">gchar</link> *in_MIME_Type,
-                                                         <link linkend="gchar">gchar</link> **out0,
+                                                         <link linkend="gchar">gchar</link> **out_Token,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -534,7 +534,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Set a new avatar image for this connection. The avatar image must         respect the requirements obtained by GetAvatarRequirements.</para>
+Set a new avatar image for this connection. The avatar image must         respect the requirements obtained by         &lt;tp:member-ref&gt;GetAvatarRequirements&lt;/tp:member-ref&gt;.</para>
 <para>
 
 </para><variablelist role="params">
@@ -550,7 +550,7 @@ Set a new avatar image for this connection. The avatar image must         respec
 <varlistentry><term><parameter>in_MIME_Type</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: A string representing the image MIME type
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Token</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The string token of the new avatar
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -681,7 +681,7 @@ Get the required format of avatars on this connection.</para>
 Start a GetAvatarTokens method call.
 </para>
 <para>
-Get the unique tokens for all of the given contacts&apos; avatars.          Using this method in new Telepathy clients is deprecated; use         GetKnownAvatarTokens instead.</para>
+Get the unique tokens for all of the given contacts&apos; avatars.          Using this method in new Telepathy clients is deprecated; use         &lt;tp:member-ref&gt;GetKnownAvatarTokens&lt;/tp:member-ref&gt; instead.</para>
 <para>
 
 </para><variablelist role="params">
@@ -843,7 +843,7 @@ Request the avatar for a given contact. Using this method in new         Telepat
 Start a RequestAvatars method call.
 </para>
 <para>
-Request avatars for a number of contacts. The AvatarRetrieved signal         is emitted for each avatar retrieved. If the handles are valid but         retrieving an avatar fails (for any reason, including the contact not         having an avatar) the AvatarRetrieved signal is not emitted for that         contact.</para>
+Request avatars for a number of contacts. The         &lt;tp:member-ref&gt;AvatarRetrieved&lt;/tp:member-ref&gt; signal is emitted for         each avatar retrieved. If the handles are valid but retrieving an         avatar fails (for any reason, including the contact not having an         avatar) the AvatarRetrieved signal is not emitted for that contact.</para>
 <para>
 
 </para><variablelist role="params">
@@ -898,7 +898,7 @@ Request avatars for a number of contacts. The AvatarRetrieved signal         is 
 Start a SetAvatar method call.
 </para>
 <para>
-Set a new avatar image for this connection. The avatar image must         respect the requirements obtained by GetAvatarRequirements.</para>
+Set a new avatar image for this connection. The avatar image must         respect the requirements obtained by         &lt;tp:member-ref&gt;GetAvatarRequirements&lt;/tp:member-ref&gt;.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1021,7 +1021,7 @@ succeeds or fails.</para>
 <title>tp_cli_connection_interface_avatars_callback_for_get_avatar_tokens ()</title>
 <indexterm zone="tp-cli-connection-interface-avatars-callback-for-get-avatar-tokens"><primary>tp_cli_connection_interface_avatars_callback_for_get_avatar_tokens</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_avatars_callback_for_get_avatar_tokens)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="gchar">gchar</link> **out_Tokens,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -1034,7 +1034,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Tokens</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: An array of avatar tokens or empty strings (if no avatar is set) in the           same order as the given array of contact handles
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -1051,7 +1051,7 @@ succeeds or fails.</para>
 <title>tp_cli_connection_interface_avatars_callback_for_get_known_avatar_tokens ()</title>
 <indexterm zone="tp-cli-connection-interface-avatars-callback-for-get-known-avatar-tokens"><primary>tp_cli_connection_interface_avatars_callback_for_get_known_avatar_tokens</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_avatars_callback_for_get_known_avatar_tokens)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         <link linkend="GHashTable">GHashTable</link> *out0,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Tokens,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -1064,7 +1064,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Tokens</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: A dictionary of handles mapped to avatar tokens, containing only           the known avatar tokens.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -1141,7 +1141,7 @@ succeeds or fails.</para>
 <title>tp_cli_connection_interface_avatars_callback_for_set_avatar ()</title>
 <indexterm zone="tp-cli-connection-interface-avatars-callback-for-set-avatar"><primary>tp_cli_connection_interface_avatars_callback_for_set_avatar</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_avatars_callback_for_set_avatar)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> *out0,
+                                                         const <link linkend="gchar">gchar</link> *out_Token,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -1154,7 +1154,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Token</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The string token of the new avatar
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -1227,7 +1227,7 @@ or has become invalid.
 Connect a handler to the signal AvatarUpdated.
 </para>
 <para>
-Emitted when the avatar for a contact has been updated, or first         discovered on this connection. If the token differs from the token         associated with the client&apos;s cached avatar for this contact, the new         avatar should be requested with RequestAvatars.</para>
+Emitted when the avatar for a contact has been updated, or first         discovered on this connection. If the token differs from the token         associated with the client&apos;s cached avatar for this contact, the new         avatar should be requested with         &lt;tp:member-ref&gt;RequestAvatars&lt;/tp:member-ref&gt;.</para>
 <para>
 
 </para><variablelist role="params">

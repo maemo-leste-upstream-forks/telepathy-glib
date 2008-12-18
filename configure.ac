@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [19])
+m4_define([tp_glib_micro_version], [20])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -172,12 +172,11 @@ PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.95, dbus-glib-1 >= 0.73])
 AC_SUBST(DBUS_CFLAGS)
 AC_SUBST(DBUS_LIBS)
 
-dnl We want the examples to be able to use TP_GLIB_CFLAGS, TP_GLIB_LIBS
-dnl as though they were independent programs
+dnl We want the examples to be able to use TP_GLIB_CFLAGS as though they were
+dnl independent programs, but subst'ing TP_GLIB_LIBS interferes with
+dnl dependency tracking
 TP_GLIB_CFLAGS='-I${top_builddir} -I${top_srcdir}'
-TP_GLIB_LIBS='${top_builddir}/telepathy-glib/libtelepathy-glib.la'
 AC_SUBST(TP_GLIB_CFLAGS)
-AC_SUBST(TP_GLIB_LIBS)
 
 dnl Check for code generation tools
 XSLTPROC=

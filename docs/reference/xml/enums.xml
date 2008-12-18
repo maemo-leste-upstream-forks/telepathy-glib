@@ -73,6 +73,11 @@ enum                <link linkend="TpChannelCallStateFlags">TpChannelCallStateFl
 enum                <link linkend="TpLocalHoldState">TpLocalHoldState</link>;
 #define             <link linkend="NUM-TP-LOCAL-HOLD-STATE-REASONS:CAPS">NUM_TP_LOCAL_HOLD_STATE_REASONS</link>
 enum                <link linkend="TpLocalHoldStateReason">TpLocalHoldStateReason</link>;
+enum                <link linkend="TpDeliveryReportingSupportFlags">TpDeliveryReportingSupportFlags</link>;
+#define             <link linkend="NUM-TP-DELIVERY-STATUSES:CAPS">NUM_TP_DELIVERY_STATUSES</link>
+enum                <link linkend="TpDeliveryStatus">TpDeliveryStatus</link>;
+enum                <link linkend="TpMessagePartSupportFlags">TpMessagePartSupportFlags</link>;
+enum                <link linkend="TpMessageSendingFlags">TpMessageSendingFlags</link>;
 </synopsis>
 </refsynopsisdiv>
 
@@ -167,6 +172,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
     TP_CONN_MGR_PARAM_FLAG_REGISTER = 2,
     TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT = 4,
     TP_CONN_MGR_PARAM_FLAG_SECRET = 8,
+    TP_CONN_MGR_PARAM_FLAG_DBUS_PROPERTY = 16,
 } TpConnMgrParamFlags;
 </programlisting>
 <para>
@@ -192,6 +198,11 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry id="TP-CONN-MGR-PARAM-FLAG-SECRET:CAPS" role="constant">
 <term><literal>TP_CONN_MGR_PARAM_FLAG_SECRET</literal></term>
 <listitem><simpara> <![CDATA[           This parameter should be considered private or secret; for             instance, clients should store it in a "password safe" like             gnome-keyring or kwallet, omit it from debug logs, and use a             text input widget that hides the value of the parameter.            (Clients that support older connection managers may also treat             any parameter whose name contains "password" as though it had this             flag.)         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CONN-MGR-PARAM-FLAG-DBUS-PROPERTY:CAPS" role="constant">
+<term><literal>TP_CONN_MGR_PARAM_FLAG_DBUS_PROPERTY</literal></term>
+<listitem><simpara> <![CDATA[           This parameter is also a D-Bus property on the resulting Connection; a           parameter named com.example.Duck.Macaroni with this flag           corresponds to the Macaroni property on the           com.example.Duck interface.  Its value can be queried           and possibly changed on an existing Connection using methods on the           org.freedesktop.DBus.Properties interface.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -366,7 +377,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-CONNECTION-CAPABILITY-FLAG-CREATE:CAPS" role="constant">
 <term><literal>TP_CONNECTION_CAPABILITY_FLAG_CREATE</literal></term>
-<listitem><simpara> <![CDATA[           The given channel type and handle can be given to RequestChannel to           create a new channel of this type.         ]]>
+<listitem><simpara> <![CDATA[           The given channel type and handle can be given to RequestChannel           to create a new channel of this type.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-CAPABILITY-FLAG-INVITE:CAPS" role="constant">
@@ -396,7 +407,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-CONNECTION-PRESENCE-TYPE-UNSET:CAPS" role="constant">
 <term><literal>TP_CONNECTION_PRESENCE_TYPE_UNSET</literal></term>
-<listitem><simpara> <![CDATA[           An invalid presence type used as a null value. This value MUST NOT           appear in the result of GetStatuses, or in the Statuses property           of the SimplePresence interface.         ]]>
+<listitem><simpara> <![CDATA[           An invalid presence type used as a null value. This value MUST NOT           appear in the result of GetStatuses,           or in the Statuses           property of the SimplePresence           interface.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-PRESENCE-TYPE-OFFLINE:CAPS" role="constant">
@@ -688,12 +699,12 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-MEDIA-STREAM-PENDING-LOCAL-SEND:CAPS" role="constant">
 <term><literal>TP_MEDIA_STREAM_PENDING_LOCAL_SEND</literal></term>
-<listitem><simpara> <![CDATA[             The local user has been asked to send media by the remote user.             Call RequestStreamDirection to indicate whether or not this is             acceptable.         ]]>
+<listitem><simpara> <![CDATA[             The local user has been asked to send media by the remote user.             Call RequestStreamDirection to             indicate whether or not this is acceptable.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-MEDIA-STREAM-PENDING-REMOTE-SEND:CAPS" role="constant">
 <term><literal>TP_MEDIA_STREAM_PENDING_REMOTE_SEND</literal></term>
-<listitem><simpara> <![CDATA[             The remote user has been asked to send media by the local user.             The StreamDirectionChanged signal will be emitted when the remote             user accepts or rejects this change.         ]]>
+<listitem><simpara> <![CDATA[             The remote user has been asked to send media by the local user.             The StreamDirectionChanged signal             will be emitted when the remote user accepts or rejects this             change.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -863,7 +874,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-NON-TEXT-CONTENT:CAPS" role="constant">
 <term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT</literal></term>
-<listitem><simpara> <![CDATA[           The incoming message contained non-text content which cannot be             represented by this interface, but has been signalled             in the Messages interface.            Connection managers SHOULD only set this flag if the non-text             content appears to be relatively significant (exactly how             significant is up to the implementor). The intention is that             if this flag is set, clients using this interface SHOULD inform             the user that part of the message was not understood.         ]]>
+<listitem><simpara> <![CDATA[           The incoming message contained non-text content which cannot be             represented by this interface, but has been signalled             in the Messages             interface.            Connection managers SHOULD only set this flag if the non-text             content appears to be relatively significant (exactly how             significant is up to the implementor). The intention is that             if this flag is set, clients using this interface SHOULD inform             the user that part of the message was not understood.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-SCROLLBACK:CAPS" role="constant">
@@ -873,7 +884,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-TEXT-MESSAGE-FLAG-RESCUED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_TEXT_MESSAGE_FLAG_RESCUED</literal></term>
-<listitem><simpara> <![CDATA[           The incoming message has been seen in a previous channel during             the lifetime of the Connection, but had not been acknowledged             when that channel closed, causing an identical channel (the             channel in which the message now appears) to open.                         This means that a logger (which should already have seen the               message in the previous channel) is able to recognise and ignore               these replayed messages.                    ]]>
+<listitem><simpara> <![CDATA[           The incoming message has been seen in a previous channel during             the lifetime of the Connection, but             had not been acknowledged             when that channel closed, causing an identical channel (the             channel in which the message now appears) to open.                         This means that a logger (which should already have seen the               message in the previous channel) is able to recognise and ignore               these replayed messages.                    ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -941,6 +952,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
     TP_CHANNEL_GROUP_FLAG_ONLY_ONE_GROUP = 512,
     TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE = 1024,
     TP_CHANNEL_GROUP_FLAG_PROPERTIES = 2048,
+    TP_CHANNEL_GROUP_FLAG_MEMBERS_CHANGED_DETAILED = 4096,
 } TpChannelGroupFlags;
 </programlisting>
 <para>
@@ -950,47 +962,47 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-CAN-ADD:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_CAN_ADD</literal></term>
-<listitem><simpara> <![CDATA[             The AddMembers method can be used to add or invite members who are             not already in the local pending list (which is always valid).         ]]>
+<listitem><simpara> <![CDATA[             The AddMembers method can be used to             add or invite members who are             not already in the local pending list (which is always valid).         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-CAN-REMOVE:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_CAN_REMOVE</literal></term>
-<listitem><simpara> <![CDATA[             The RemoveMembers method can be used to remove channel members             (removing those on the pending local list is always valid).         ]]>
+<listitem><simpara> <![CDATA[             The RemoveMembers method can be used             to remove channel members             (removing those on the pending local list is always valid).         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-CAN-RESCIND:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_CAN_RESCIND</literal></term>
-<listitem><simpara> <![CDATA[             The RemoveMembers method can be used on people on the remote             pending list.         ]]>
+<listitem><simpara> <![CDATA[             The RemoveMembers method can be used             on people on the remote             pending list.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-MESSAGE-ADD:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_MESSAGE_ADD</literal></term>
-<listitem><simpara> <![CDATA[             A message may be sent to the server when calling AddMembers on             contacts who are not currently pending members.         ]]>
+<listitem><simpara> <![CDATA[             A message may be sent to the server when calling             AddMembers on             contacts who are not currently pending members.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-MESSAGE-REMOVE:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_MESSAGE_REMOVE</literal></term>
-<listitem><simpara> <![CDATA[             A message may be sent to the server when calling RemoveMembers on             contacts who are currently channel members.         ]]>
+<listitem><simpara> <![CDATA[             A message may be sent to the server when calling             RemoveMembers on             contacts who are currently channel members.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-MESSAGE-ACCEPT:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_MESSAGE_ACCEPT</literal></term>
-<listitem><simpara> <![CDATA[             A message may be sent to the server when calling AddMembers on             contacts who are locally pending.         ]]>
+<listitem><simpara> <![CDATA[             A message may be sent to the server when calling             AddMembers on             contacts who are locally pending.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-MESSAGE-REJECT:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_MESSAGE_REJECT</literal></term>
-<listitem><simpara> <![CDATA[             A message may be sent to the server when calling RemoveMembers on             contacts who are locally pending.         ]]>
+<listitem><simpara> <![CDATA[             A message may be sent to the server when calling             RemoveMembers on             contacts who are locally pending.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-MESSAGE-RESCIND:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_MESSAGE_RESCIND</literal></term>
-<listitem><simpara> <![CDATA[             A message may be sent to the server when calling RemoveMembers on             contacts who are remote pending.         ]]>
+<listitem><simpara> <![CDATA[             A message may be sent to the server when calling             RemoveMembers on             contacts who are remote pending.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-CHANNEL-SPECIFIC-HANDLES:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES</literal></term>
-<listitem><simpara> <![CDATA[                        The members of this group have handles which are specific to             this channel, and are not valid as general-purpose handles on             the connection. Depending on the channel, it may be possible to             call GetHandleOwners to find the owners of these handles, which             should be done if you wish to eg subscribe to the contact's             presence.                                    Connection managers must ensure that any given handle is not             simultaneously a general-purpose handle and a channel-specific             handle.                    ]]>
+<listitem><simpara> <![CDATA[                        The members of this group have handles which are specific to             this channel, and are not valid as general-purpose handles on             the connection. Depending on the channel, it may be possible to             check the HandleOwners property or             call GetHandleOwners to find the             owners of these handles, which should be done if you wish to (e.g.)             subscribe to the contact's presence.                                    Connection managers must ensure that any given handle is not             simultaneously a general-purpose handle and a channel-specific             handle.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-ONLY-ONE-GROUP:CAPS" role="constant">
@@ -1000,12 +1012,17 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-HANDLE-OWNERS-NOT-AVAILABLE:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_HANDLE_OWNERS_NOT_AVAILABLE</literal></term>
-<listitem><simpara> <![CDATA[           In rooms with channel specific handles (ie Channel_Specific_Handles           flag is set), this flag indicates that no handle owners are           available, apart from the owner of the SelfHandle.                         This used to be an important optimization to avoid repeated             GetHandleOwners calls, before we introduced the HandleOwner             property and HandleOwnerChanged signal.                    ]]>
+<listitem><simpara> <![CDATA[           In rooms with channel specific handles (ie Channel_Specific_Handles           flag is set), this flag indicates that no handle owners are           available, apart from the owner of the           SelfHandle.                         This used to be an important optimization to avoid repeated             GetHandleOwners calls, before we introduced the             HandleOwners property and             HandleOwnersChanged signal.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-FLAG-PROPERTIES:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_FLAG_PROPERTIES</literal></term>
 <listitem><simpara> <![CDATA[           This flag indicates that all the properties introduced in           specification 0.17.6 are fully supported.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-CHANNEL-GROUP-FLAG-MEMBERS-CHANGED-DETAILED:CAPS" role="constant">
+<term><literal>TP_CHANNEL_GROUP_FLAG_MEMBERS_CHANGED_DETAILED</literal></term>
+<listitem><simpara> <![CDATA[           Indicates that MembersChangedDetailed           will be emitted for changes to this group's members in addition to           MembersChanged.           Clients can then connect to the former and ignore emission of the latter.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -1078,7 +1095,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-RENAMED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_RENAMED</literal></term>
-<listitem><simpara> <![CDATA[           The change is because a contact's unique identifier changed.           There must be exactly one handle in the removed set and exactly           one handle in one of the added sets. The Renamed signal on the           Renaming interface will have been emitted for the same handles,           shortly before this MembersChanged signal is emitted.         ]]>
+<listitem><simpara> <![CDATA[           The change is because a contact's unique identifier changed.           There must be exactly one handle in the removed set and exactly           one handle in one of the added sets. The Renamed           signal on the           Renaming           interface will have been emitted for the same handles,           shortly before this MembersChanged signal is emitted.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-PERMISSION-DENIED:CAPS" role="constant">
@@ -1088,7 +1105,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-SEPARATED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_SEPARATED</literal></term>
-<listitem><simpara> <![CDATA[           If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text or Tubes channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                    ]]>
+<listitem><simpara> <![CDATA[           If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text             or Tubes             channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                    ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -1113,7 +1130,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-CHANNEL-PASSWORD-FLAG-PROVIDE:CAPS" role="constant">
 <term><literal>TP_CHANNEL_PASSWORD_FLAG_PROVIDE</literal></term>
-<listitem><simpara> <![CDATA[           The ProvidePassword method must be called now for the user to join           the channel         ]]>
+<listitem><simpara> <![CDATA[           The ProvidePassword method must be           called now for the user to join the channel         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -1306,22 +1323,22 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-SOCKET-ADDRESS-TYPE-UNIX:CAPS" role="constant">
 <term><literal>TP_SOCKET_ADDRESS_TYPE_UNIX</literal></term>
-<listitem><simpara> <![CDATA[           A Unix socket. The variant contains a byte-array, signature 'ay',           containing the path of the socket.         ]]>
+<listitem><simpara> <![CDATA[           A Unix socket. The address variant contains a byte-array, signature 'ay',           containing the path of the socket.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-SOCKET-ADDRESS-TYPE-ABSTRACT-UNIX:CAPS" role="constant">
 <term><literal>TP_SOCKET_ADDRESS_TYPE_ABSTRACT_UNIX</literal></term>
-<listitem><simpara> <![CDATA[           An abstract Unix socket. The variant contains a byte-array,           signature 'ay', containing the path of the socket including the           leading null byte.         ]]>
+<listitem><simpara> <![CDATA[           An abstract Unix socket. The address variant contains a byte-array,           signature 'ay', containing the path of the socket including the           leading null byte.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-SOCKET-ADDRESS-TYPE-IPV4:CAPS" role="constant">
 <term><literal>TP_SOCKET_ADDRESS_TYPE_IPV4</literal></term>
-<listitem><simpara> <![CDATA[           An IPv4 socket. The variant contains a Socket_Address_IPv4,           i.e. a structure with signature (sq)           in which the string is an IPv4 dotted-quad address literal           (and must not be a DNS name), while the 16-bit unsigned integer is           the port number.         ]]>
+<listitem><simpara> <![CDATA[           An IPv4 socket. The address variant contains a Socket_Address_IPv4,           i.e. a structure with signature (sq)           in which the string is an IPv4 dotted-quad address literal           (and must not be a DNS name), while the 16-bit unsigned integer is           the port number.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-SOCKET-ADDRESS-TYPE-IPV6:CAPS" role="constant">
 <term><literal>TP_SOCKET_ADDRESS_TYPE_IPV6</literal></term>
-<listitem><simpara> <![CDATA[           An IPv6 socket. The variant contains a Socket_Address_IPv6,           i.e. a structure with signature (sq)           in which the string is an IPv6 address literal as specified in           RFC2373 (and must not be a DNS name), while the 16-bit unsigned           integer is the port number.         ]]>
+<listitem><simpara> <![CDATA[           An IPv6 socket. The address variant contains a Socket_Address_IPv6,           i.e. a structure with signature (sq)           in which the string is an IPv6 address literal as specified in           RFC2373 (and must not be a DNS name), while the 16-bit unsigned           integer is the port number.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -1384,12 +1401,12 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </para><variablelist role="enum">
 <varlistentry id="TP-TUBE-TYPE-DBUS:CAPS" role="constant">
 <term><literal>TP_TUBE_TYPE_DBUS</literal></term>
-<listitem><simpara> <![CDATA[           An ordered reliable transport, for transporting D-Bus             traffic.            For each D-Bus tube, the connection manager listens on a D-Bus             server address, as detailed in the D-Bus specification. On this             address, it emulates a bus upon which each tube participant appears             as an endpoint.            The objects and interfaces which are expected to exist on the             emulated bus depend on the well-known name; typically, either the             participant who initiated the tube is expected to export the same             objects/interfaces that would be exported by a service of that name             on a bus, or all participants are expected to export those             objects/interfaces.            In a multi-user context (Handle_Type_Room) the tube behaves             like the D-Bus bus daemon, so participants can send each other             private messages, or can send broadcast messages which are             received by everyone in the tube (including themselves).             Each participant has a D-Bus unique name; connection managers             must prevent participants from sending messages with the wrong             sender unique name, and should attempt to avoid participants             receiving messages not intended for them.            In a 1-1 context (Handle_Type_Contact) the tube behaves like             a peer-to-peer D-Bus connection - arbitrary D-Bus messages with             any sender and/or destination can be sent by each participant,             and each participant receives all messages sent by the other             participant.         ]]>
+<listitem><simpara> <![CDATA[           The tube is D-Bus tube as described by the             org.freedesktop.Telepathy.Channel.Type.DBusTube interface.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-TUBE-TYPE-STREAM:CAPS" role="constant">
 <term><literal>TP_TUBE_TYPE_STREAM</literal></term>
-<listitem><simpara> <![CDATA[           A transport for ordered, reliable data transfer, similar to             SOCK_STREAM sockets.            When accepting a Stream Unix tube, a new listening local socket is             created. Each time the client connects to this socket, the             connection manager of the initiator of the tube opens a new             connection to its local socket. Both sides can then use this pair             of sockets to communicate together.         ]]>
+<listitem><simpara> <![CDATA[           The tube is stream tube as described by the             org.freedesktop.Telepathy.Channel.Type.StreamTube interface.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -1514,6 +1531,130 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 <varlistentry id="TP-LOCAL-HOLD-STATE-REASON-RESOURCE-NOT-AVAILABLE:CAPS" role="constant">
 <term><literal>TP_LOCAL_HOLD_STATE_REASON_RESOURCE_NOT_AVAILABLE</literal></term>
 <listitem><simpara> <![CDATA[           The change is because some resource was not available         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="TpDeliveryReportingSupportFlags" role="enum">
+<title>enum TpDeliveryReportingSupportFlags</title>
+<indexterm zone="TpDeliveryReportingSupportFlags"><primary>TpDeliveryReportingSupportFlags</primary></indexterm><programlisting>typedef enum {
+    TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES = 1,
+    TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_SUCCESSES = 2,
+} TpDeliveryReportingSupportFlags;
+</programlisting>
+<para>
+<![CDATA[         Flags indicating the level of support for delivery reporting on this         channel. Any future flags added to this set will conform to the         convention that the presence of an extra flag implies that         more operations will succeed.       ]]>
+</para>
+<para>
+Bitfield/set of flags generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-DELIVERY-REPORTING-SUPPORT-FLAG-RECEIVE-FAILURES:CAPS" role="constant">
+<term><literal>TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES</literal></term>
+<listitem><simpara> <![CDATA[           Clients MAY expect to receive negative delivery reports if           Message_Sending_Flag_Report_Delivery is specified when sending.                         If senders want delivery reports, they should ask for them.             If they don't want delivery reports, they can just ignore them,             so there's no need to have capability discovery for what will             happen if a delivery report isn't requested.                    ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-DELIVERY-REPORTING-SUPPORT-FLAG-RECEIVE-SUCCESSES:CAPS" role="constant">
+<term><literal>TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_SUCCESSES</literal></term>
+<listitem><simpara> <![CDATA[           Clients MAY expect to receive positive delivery reports if           Message_Sending_Flag_Report_Delivery is specified when sending.                         Same rationale as Receive_Failures.                    ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="NUM-TP-DELIVERY-STATUSES:CAPS" role="macro">
+<title>NUM_TP_DELIVERY_STATUSES</title>
+<indexterm zone="NUM-TP-DELIVERY-STATUSES:CAPS"><primary>NUM_TP_DELIVERY_STATUSES</primary></indexterm><programlisting>#define             NUM_TP_DELIVERY_STATUSES</programlisting>
+<para>
+1 higher than the highest valid value of <link linkend="TpDeliveryStatus"><type>TpDeliveryStatus</type></link>.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="TpDeliveryStatus" role="enum">
+<title>enum TpDeliveryStatus</title>
+<indexterm zone="TpDeliveryStatus"><primary>TpDeliveryStatus</primary></indexterm><programlisting>typedef enum {
+    TP_DELIVERY_STATUS_UNKNOWN = 0,
+    TP_DELIVERY_STATUS_DELIVERED = 1,
+    TP_DELIVERY_STATUS_TEMPORARILY_FAILED = 2,
+    TP_DELIVERY_STATUS_PERMANENTLY_FAILED = 3,
+    TP_DELIVERY_STATUS_ACCEPTED = 4,
+} TpDeliveryStatus;
+</programlisting>
+<para>
+<![CDATA[         The status of a message as indicated by a delivery report.          If this enum is extended in future specifications, this should           only be to add new, non-overlapping conditions (i.e. all failures           should still be signalled as either Temporarily_Failed           or Permanently_Failed). If additional detail is required (e.g.           distinguishing between the various types of permanent failure) this           will be done using additional keys in the Message_Part.       ]]>
+</para>
+<para>
+Bitfield/set of flags generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-DELIVERY-STATUS-UNKNOWN:CAPS" role="constant">
+<term><literal>TP_DELIVERY_STATUS_UNKNOWN</literal></term>
+<listitem><simpara> <![CDATA[           The message's disposition is unknown.           Clients SHOULD consider all messages to have status           Delivery_Status_Unknown unless otherwise specified; connection           managers SHOULD NOT signal this delivery status explicitly.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-DELIVERY-STATUS-DELIVERED:CAPS" role="constant">
+<term><literal>TP_DELIVERY_STATUS_DELIVERED</literal></term>
+<listitem><simpara> <![CDATA[           The message has been delivered to the intended recipient.         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-DELIVERY-STATUS-TEMPORARILY-FAILED:CAPS" role="constant">
+<term><literal>TP_DELIVERY_STATUS_TEMPORARILY_FAILED</literal></term>
+<listitem><simpara> <![CDATA[           Delivery of the message has failed. Clients SHOULD notify the user,           but MAY automatically try sending another copy of the message.                         Similar to errors with type="wait" in XMPP; analogous to             4xx errors in SMTP.                    ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-DELIVERY-STATUS-PERMANENTLY-FAILED:CAPS" role="constant">
+<term><literal>TP_DELIVERY_STATUS_PERMANENTLY_FAILED</literal></term>
+<listitem><simpara> <![CDATA[           Delivery of the message has failed. Clients SHOULD NOT try again           unless by specific user action. If the user does not modify the           message or alter configuration before re-sending, this error is           likely to happen again.                         Similar to errors with type="cancel", type="modify"             or type="auth" in XMPP; analogous to 5xx errors in SMTP.                    ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-DELIVERY-STATUS-ACCEPTED:CAPS" role="constant">
+<term><literal>TP_DELIVERY_STATUS_ACCEPTED</literal></term>
+<listitem><simpara> <![CDATA[           An intermediate server has accepted the message but the message           has not been yet delivered to the ultimate recipient. The           connection manager might send a Failed report or Delivered report           later.                         Similar to "202 Accepted" success code in SIP; analogous to             251 and 252 responses in SMTP.                    ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="TpMessagePartSupportFlags" role="enum">
+<title>enum TpMessagePartSupportFlags</title>
+<indexterm zone="TpMessagePartSupportFlags"><primary>TpMessagePartSupportFlags</primary></indexterm><programlisting>typedef enum {
+    TP_MESSAGE_PART_SUPPORT_FLAG_ONE_ATTACHMENT = 1,
+    TP_MESSAGE_PART_SUPPORT_FLAG_MULTIPLE_ATTACHMENTS = 2,
+} TpMessagePartSupportFlags;
+</programlisting>
+<para>
+<![CDATA[         Flags indicating the level of support for message parts on this           channel. They are designed such that setting more flags always           implies that the channel has more capabilities.          If no flags are set, this indicates that messages may contain           a single message part whose content-type is any of the types           from SupportedContentTypes, possibly with some alternatives.          There is no flag indicating support for alternatives. This is           because the SendMessage implementation can always accept messages           containing alternatives, even if the underlying protocol does not,           by deleting all alternatives except the first (most preferred)           that is supported.                     Each of the flags so far implies the previous flag, so we could           have used a simple enumeration here; however, we've defined           the message-part support indicator as a flag set for future           expansion.                   See SupportedContentTypes for some           examples.       ]]>
+</para>
+<para>
+Bitfield/set of flags generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-MESSAGE-PART-SUPPORT-FLAG-ONE-ATTACHMENT:CAPS" role="constant">
+<term><literal>TP_MESSAGE_PART_SUPPORT_FLAG_ONE_ATTACHMENT</literal></term>
+<listitem><simpara> <![CDATA[           SendMessage will accept messages           containing a textual message body,           plus a single attachment of any type listed in the           SupportedContentTypes property. It does not make sense for this           flag to be set if Message_Part_Support_Flag_Data_Only is not also set           (because the connection manager can trivially provide an empty text           part if necessary).         ]]>
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-MESSAGE-PART-SUPPORT-FLAG-MULTIPLE-ATTACHMENTS:CAPS" role="constant">
+<term><literal>TP_MESSAGE_PART_SUPPORT_FLAG_MULTIPLE_ATTACHMENTS</literal></term>
+<listitem><simpara> <![CDATA[           SendMessage will accept messages containing a textual message body,           plus an arbitrary number of attachments of any type listed in the           SupportedContentTypes property. It does not make sense for this           flag to be set if Message_Part_Support_Flag_One_Attachment is not           also set.         ]]>
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="TpMessageSendingFlags" role="enum">
+<title>enum TpMessageSendingFlags</title>
+<indexterm zone="TpMessageSendingFlags"><primary>TpMessageSendingFlags</primary></indexterm><programlisting>typedef enum {
+    TP_MESSAGE_SENDING_FLAG_REPORT_DELIVERY = 1,
+} TpMessageSendingFlags;
+</programlisting>
+<para>
+<![CDATA[         Flags altering the way a message is sent. The "most usual" action         should always be to have these flags unset.       ]]>
+</para>
+<para>
+Bitfield/set of flags generated from the Telepathy specification.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="TP-MESSAGE-SENDING-FLAG-REPORT-DELIVERY:CAPS" role="constant">
+<term><literal>TP_MESSAGE_SENDING_FLAG_REPORT_DELIVERY</literal></term>
+<listitem><simpara> <![CDATA[           Provide a successful delivery report if possible, even if this is             not the default for this protocol. Ignored if delivery reports are             not possible on this protocol.                         In some protocols, like XMPP, it is not conventional to request               or send positive delivery notifications.                       Delivery failure reports SHOULD always be sent, but if this flag             is present, the connection manager MAY also try harder to obtain             failed delivery reports or allow them to be matched to outgoing             messages.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

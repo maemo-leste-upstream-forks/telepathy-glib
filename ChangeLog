@@ -1,3 +1,179 @@
+commit c7079a56ebbae04325fbeffdf36643c4626703c6
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Sun Dec 14 19:03:01 2008 +0000
+
+    Prepare version 0.7.20
+
+ NEWS                               |   12 +++++++++---
+ configure.ac                       |    4 ++--
+ telepathy-glib/Makefile.am         |    3 ++-
+ telepathy-glib/versions/0.7.20.abi |   20 ++++++++++++++++++++
+ 4 files changed, 33 insertions(+), 6 deletions(-)
+
+commit 3be288293efd9723b8b327df73fbef88078bbe45
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Fri Dec 12 18:03:45 2008 +0000
+
+    Upgrade to spec 0.17.16 and generate code for Messages
+
+ docs/reference/telepathy-glib-sections.txt         |   45 ++-
+ spec/Account.xml                                   |   95 +++--
+ spec/Account_Interface_Avatar.xml                  |   14 +-
+ spec/Account_Manager.xml                           |   20 +-
+ spec/Channel.xml                                   |   93 +++--
+ spec/Channel_Dispatch_Operation.xml                |   49 ++-
+ spec/Channel_Dispatcher.xml                        |   22 +
+ ...Channel_Dispatcher_Interface_Operation_List.xml |   13 +-
+ spec/Channel_Future.xml                            |    4 +-
+ spec/Channel_Handler.xml                           |    8 +-
+ spec/Channel_Interface_Call_Merging.xml            |    2 +-
+ spec/Channel_Interface_Chat_State.xml              |    6 +-
+ spec/Channel_Interface_DTMF.xml                    |    8 +-
+ spec/Channel_Interface_Group.xml                   |  233 +++++++--
+ spec/Channel_Interface_Hold.xml                    |    6 +-
+ spec/Channel_Interface_Media_Signalling.xml        |    4 +-
+ spec/Channel_Interface_Messages.xml                |   97 +++-
+ spec/Channel_Interface_Password.xml                |   10 +-
+ spec/Channel_Interface_Tube.xml                    |  127 +++++
+ spec/Channel_Request.xml                           |   24 +-
+ spec/Channel_Type_Contact_List.xml                 |   32 +-
+ spec/Channel_Type_DBus_Tube.xml                    |  183 +++++++
+ spec/Channel_Type_File_Transfer.xml                |  513 ++++++++++++++++++++
+ spec/Channel_Type_Room_List.xml                    |   57 ++-
+ spec/Channel_Type_Stream_Tube.xml                  |  198 ++++++++
+ spec/Channel_Type_Streamed_Media.xml               |  103 +++--
+ spec/Channel_Type_Text.xml                         |   79 ++--
+ spec/Channel_Type_Tubes.xml                        |   49 +--
+ spec/Client_Handler.xml                            |   17 +-
+ spec/Client_Observer.xml                           |   28 +-
+ spec/Connection_Interface_Aliasing.xml             |   22 +-
+ spec/Connection_Interface_Avatars.xml              |  118 ++++-
+ spec/Connection_Interface_Capabilities.xml         |   27 +-
+ spec/Connection_Interface_Contact_Capabilities.xml |  165 +++++++
+ spec/Connection_Interface_Contacts.xml             |   20 +-
+ spec/Connection_Interface_Presence.xml             |  118 +++--
+ spec/Connection_Interface_Renaming.xml             |   12 +-
+ spec/Connection_Interface_Requests.xml             |   27 +-
+ spec/Connection_Interface_Simple_Presence.xml      |    9 +-
+ spec/Connection_Manager.xml                        |  117 +++--
+ spec/Makefile.am                                   |    5 +
+ spec/all.xml                                       |    7 +-
+ spec/generic-types.xml                             |    2 +-
+ telepathy-glib/channel.xml                         |    1 +
+ 44 files changed, 2296 insertions(+), 493 deletions(-)
+
+commit 21d65484164f3f3bd11af46118e0858f41075e52
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Fri Dec 12 16:35:54 2008 +0000
+
+    Mention that #18845 is fixed in NEWS
+
+ NEWS |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit fe940aaef21b340488c299f581c364a3cee0943d
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Fri Dec 12 15:57:33 2008 +0000
+
+    More shared DBus connection and g_type_init suppressions
+
+ examples/tp-glib-examples.supp |  208 ++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 208 insertions(+), 0 deletions(-)
+
+commit b3c73ef7028d105a182b08b3bff9616e2b9086fa
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Fri Dec 12 16:31:43 2008 +0000
+
+    NULLify proxies' dbus connection and daemon after emitting invalidated.
+    
+    This fixes fd.o bug #18845: the handle ref cleanup code needs to use the
+    DBusGConnection in response to ::invalidated being emitted, but if the service
+    fell off the bus the DBusGConnection was destroyed before the signal was
+    emitted.
+
+ telepathy-glib/proxy.c |   28 ++++++++++++----------------
+ 1 files changed, 12 insertions(+), 16 deletions(-)
+
+commit 8bff6ecf838709c7d3962cd4c76a26c56ad72642
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   Fri Dec 12 11:34:02 2008 +0000
+
+    Add regression test for fd.o bug #18845
+    
+    When a CM falls off the bus, _tp_connection_clean_up_handle_refs tries to use a
+    DBusGConnection that's become NULL.  The test simulates the CM falling off the
+    bus by emitting a spurious "destroy" signal on a connection proxy.
+
+ tests/dbus/Makefile.am            |    3 +
+ tests/dbus/connection-bug-18845.c |  130 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 133 insertions(+), 0 deletions(-)
+
+commit 0d849ba4cc50ea8e2ce2d2b4145d813132ee8194
+Author: Luis Menina <liberforce@freeside.fr>
+Date:   Mon Dec 8 15:10:58 2008 +0000
+
+    fd.o #18926: avoid using a non-top-level GLib header
+
+ telepathy-glib/interfaces.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1cef8b61eee436cb9a21736b4df2a6ec869cbf19
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Dec 3 13:01:57 2008 +0000
+
+    `make upload-branch-docs`: automatically work out the name of the branch
+
+ Makefile.am               |    2 +-
+ tools/Makefile.am         |    1 +
+ tools/git-which-branch.sh |   25 +++++++++++++++++++++++++
+ 3 files changed, 27 insertions(+), 1 deletions(-)
+
+commit b1fa39f2c83b24aa172d8c3d9039d18ebc0173e3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   Wed Dec 3 12:57:34 2008 +0000
+
+    Simplify makefiles and avoid using $(TP_GLIB_LIBS)
+    
+    Autoconf substitutions in *_LDADD do not generate Makefile dependencies,
+    so using $(TP_GLIB_LIBS) meant that the tests were not automatically
+    rebuilt when telepathy-glib changed.
+    
+    Also, we overlooked the existence of LDADD, which has an effect analogous
+    to AM_CFLAGS and allows a lot of simplification.
+
+ configure.ac                            |    7 ++--
+ examples/client/Makefile.am             |   15 +++------
+ examples/cm/channelspecific/Makefile.am |    6 +++-
+ examples/cm/echo/Makefile.am            |    6 +++-
+ examples/cm/extended/Makefile.am        |    8 ++++-
+ examples/cm/no-protocols/Makefile.am    |    8 +++--
+ examples/extensions/Makefile.am         |    6 +++-
+ tests/Makefile.am                       |   13 ++------
+ tests/dbus/Makefile.am                  |   48 +++---------------------------
+ 9 files changed, 42 insertions(+), 75 deletions(-)
+
+commit db2f4e0dc80195cb1f2672adc1cd48381c67cb09
+Author: Senko Rasic <senko.rasic@collabora.co.uk>
+Date:   Mon Dec 1 14:44:40 2008 +0100
+
+    Start 0.7.20 development
+
+ NEWS         |    9 +++++++++
+ configure.ac |    2 +-
+ 2 files changed, 10 insertions(+), 1 deletions(-)
+
+commit 9c861e87db63a8e707ccbdda0aedb2ebef14516c
+Author: Senko Rasic <senko.rasic@collabora.co.uk>
+Date:   Mon Dec 1 14:43:01 2008 +0100
+
+    Prepare version 0.7.19
+
+ NEWS                               |    8 ++++++--
+ configure.ac                       |    8 ++++----
+ telepathy-glib/Makefile.am         |    3 ++-
+ telepathy-glib/versions/0.7.19.abi |    9 +++++++++
+ 4 files changed, 21 insertions(+), 7 deletions(-)
+
 commit c6582df2f2f83786e37ecd25488671e5dec642a5
 Merge: 2b649e3... a786cf2...
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
