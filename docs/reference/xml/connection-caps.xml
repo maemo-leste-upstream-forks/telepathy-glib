@@ -26,14 +26,14 @@
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GPtrArray">GPtrArray</link> *in_Add,
                                                          const <link linkend="gchar">gchar</link> **in_Remove,
-                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out_Self_Capabilities,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-capabilities-run-get-capabilities">tp_cli_connection_interface_capabilities_run_get_capabilities</link>
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Handles,
-                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out_Contact_Capabilities,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-connection-interface-capabilities-call-advertise-capabilities">tp_cli_connection_interface_capabilities_call_advertise_capabilities</link>
@@ -55,13 +55,13 @@
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-capabilities-callback-for-advertise-capabilities">*tp_cli_connection_interface_capabilities_callback_for_advertise_capabilities</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Self_Capabilities,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-capabilities-callback-for-get-capabilities">*tp_cli_connection_interface_capabilities_callback_for_get_capabilities</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Contact_Capabilities,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -113,7 +113,7 @@ Capabilities interface, used with <link linkend="TpConnection"><type>TpConnectio
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GPtrArray">GPtrArray</link> *in_Add,
                                                          const <link linkend="gchar">gchar</link> **in_Remove,
-                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out_Self_Capabilities,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -140,7 +140,7 @@ state.
 <varlistentry><term><parameter>in_Remove</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: An array of D-Bus interface names of channel types to remove
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Self_Capabilities</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: An array of structures describing the current capabilities containing:           &lt;ul&gt;             &lt;li&gt;a string channel type&lt;/li&gt;             &lt;li&gt;a bitwise OR of type specific capability flags&lt;/li&gt;           &lt;/ul&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -163,7 +163,7 @@ state.
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="GArray">GArray</link> *in_Handles,
-                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out_Contact_Capabilities,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -187,7 +187,7 @@ Returns an array of capabilities for the given contact handles.</para>
 <varlistentry><term><parameter>in_Handles</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;An array of contact handles for this connection.&lt;/p&gt;            &lt;p&gt;This may include zero, which originally meant a query for             capabilities available on the connection itself. This usage             is deprecated; clients SHOULD NOT do this, and connection managers             SHOULD proceed as though zero had not been present in this             list.&lt;/p&gt;
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Contact_Capabilities</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           An array of structures containing:           &lt;ul&gt;             &lt;li&gt;an integer handle representing the contact&lt;/li&gt;             &lt;li&gt;a string channel type&lt;/li&gt;             &lt;li&gt;a bitwise OR of generic capability flags for the type&lt;/li&gt;             &lt;li&gt;a bitwise OR of type specific capability flags for the type&lt;/li&gt;           &lt;/ul&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -320,7 +320,7 @@ Returns an array of capabilities for the given contact handles.</para>
 <title>tp_cli_connection_interface_capabilities_callback_for_advertise_capabilities ()</title>
 <indexterm zone="tp-cli-connection-interface-capabilities-callback-for-advertise-capabilities"><primary>tp_cli_connection_interface_capabilities_callback_for_advertise_capabilities</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_capabilities_callback_for_advertise_capabilities)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Self_Capabilities,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -333,7 +333,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Self_Capabilities</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: An array of structures describing the current capabilities containing:           &lt;ul&gt;             &lt;li&gt;a string channel type&lt;/li&gt;             &lt;li&gt;a bitwise OR of type specific capability flags&lt;/li&gt;           &lt;/ul&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -350,7 +350,7 @@ succeeds or fails.</para>
 <title>tp_cli_connection_interface_capabilities_callback_for_get_capabilities ()</title>
 <indexterm zone="tp-cli-connection-interface-capabilities-callback-for-get-capabilities"><primary>tp_cli_connection_interface_capabilities_callback_for_get_capabilities</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_capabilities_callback_for_get_capabilities)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Contact_Capabilities,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -363,7 +363,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Contact_Capabilities</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           An array of structures containing:           &lt;ul&gt;             &lt;li&gt;an integer handle representing the contact&lt;/li&gt;             &lt;li&gt;a string channel type&lt;/li&gt;             &lt;li&gt;a bitwise OR of generic capability flags for the type&lt;/li&gt;             &lt;li&gt;a bitwise OR of type specific capability flags for the type&lt;/li&gt;           &lt;/ul&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>

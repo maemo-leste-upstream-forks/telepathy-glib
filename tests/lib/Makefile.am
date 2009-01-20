@@ -1,6 +1,8 @@
 noinst_LTLIBRARIES = libtp-glib-tests.la
 
 libtp_glib_tests_la_SOURCES = \
+    bug-19101-conn.c \
+    bug-19101-conn.h \
     bug16307-conn.c \
     bug16307-conn.h \
     contacts-conn.c \
@@ -15,6 +17,8 @@ libtp_glib_tests_la_SOURCES = \
     stub-object.h \
     textchan-null.c \
     textchan-null.h \
+    textchan-group.c \
+    textchan-group.h \
     util.c \
     util.h
 

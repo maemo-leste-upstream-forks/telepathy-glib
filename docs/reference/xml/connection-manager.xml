@@ -51,7 +51,7 @@ enum                <link linkend="TpCMInfoSource">TpCMInfoSource</link>;
 
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-callback-for-get-parameters">*tp_cli_connection_manager_callback_for_get_parameters</link>)
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
-                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Parameters,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -67,12 +67,12 @@ enum                <link linkend="TpCMInfoSource">TpCMInfoSource</link>;
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="gchar">gchar</link> *in_Protocol,
-                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out_Parameters,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-callback-for-list-protocols">*tp_cli_connection_manager_callback_for_list_protocols</link>)
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="gchar">gchar</link> **out_Protocols,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -86,13 +86,13 @@ enum                <link linkend="TpCMInfoSource">TpCMInfoSource</link>;
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-manager-run-list-protocols">tp_cli_connection_manager_run_list_protocols</link>
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
-                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="gchar">gchar</link> ***out_Protocols,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-callback-for-request-connection">*tp_cli_connection_manager_callback_for_request_connection</link>)
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> *out0,
-                                                         const <link linkend="gchar">gchar</link> *out1,
+                                                         const <link linkend="gchar">gchar</link> *out_Bus_Name,
+                                                         const <link linkend="gchar">gchar</link> *out_Object_Path,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -110,8 +110,8 @@ enum                <link linkend="TpCMInfoSource">TpCMInfoSource</link>;
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="gchar">gchar</link> *in_Protocol,
                                                          <link linkend="GHashTable">GHashTable</link> *in_Parameters,
-                                                         <link linkend="gchar">gchar</link> **out0,
-                                                         <link linkend="gchar">gchar</link> **out1,
+                                                         <link linkend="gchar">gchar</link> **out_Bus_Name,
+                                                         <link linkend="gchar">gchar</link> **out_Object_Path,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-manager-signal-callback-new-connection">*tp_cli_connection_manager_signal_callback_new_connection</link>)
@@ -469,15 +469,17 @@ Convenience function to create a new connection manager proxy.</para>
 <listitem><simpara> Proxy for the D-Bus daemon
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>name</parameter>&nbsp;:</term>
-<listitem><simpara> The connection manager name
+<listitem><simpara> The connection manager name (such as "gabble")
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>manager_filename</parameter>&nbsp;:</term>
-<listitem><simpara> The <link linkend="TpConnectionManager-manager-file"><type>"manager-file"</type></link> property
+<listitem><simpara> The <link linkend="TpConnectionManager--manager-file"><type>"manager-file"</type></link> property, which may
+                   (and generally should) be <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> used to return an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is returned
 </simpara></listitem></varlistentry>
-<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a new reference to a connection manager proxy
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a new reference to a connection manager proxy, or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>error</parameter>
+         is set.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-connection-manager-activate" role="function" condition="since:0.7.1">
@@ -560,7 +562,7 @@ with a letter.</para>
 <title>tp_cli_connection_manager_callback_for_get_parameters ()</title>
 <indexterm zone="tp-cli-connection-manager-callback-for-get-parameters"><primary>tp_cli_connection_manager_callback_for_get_parameters</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_callback_for_get_parameters)
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
-                                                         const <link linkend="GPtrArray">GPtrArray</link> *out0,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Parameters,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -573,7 +575,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Parameters</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           An array of structs representing possible parameters.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -646,7 +648,7 @@ Get a list of the parameters which must or may be provided to the         &lt;tp
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="gchar">gchar</link> *in_Protocol,
-                                                         <link linkend="GPtrArray">GPtrArray</link> **out0,
+                                                         <link linkend="GPtrArray">GPtrArray</link> **out_Parameters,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -670,7 +672,7 @@ Get a list of the parameters which must or may be provided to the         &lt;tp
 <varlistentry><term><parameter>in_Protocol</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: The required protocol name
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Parameters</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           An array of structs representing possible parameters.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -691,7 +693,7 @@ Get a list of the parameters which must or may be provided to the         &lt;tp
 <title>tp_cli_connection_manager_callback_for_list_protocols ()</title>
 <indexterm zone="tp-cli-connection-manager-callback-for-list-protocols"><primary>tp_cli_connection_manager_callback_for_list_protocols</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_callback_for_list_protocols)
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> **out0,
+                                                         const <link linkend="gchar">gchar</link> **out_Protocols,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -704,7 +706,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Protocols</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: A array of string protocol identifiers supported by this manager
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -772,7 +774,7 @@ Get a list of protocol identifiers that are implemented by this         connecti
 <indexterm zone="tp-cli-connection-manager-run-list-protocols"><primary>tp_cli_connection_manager_run_list_protocols</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_manager_run_list_protocols
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
-                                                         <link linkend="gchar">gchar</link> ***out0,
+                                                         <link linkend="gchar">gchar</link> ***out_Protocols,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -793,7 +795,7 @@ Get a list of protocol identifiers that are implemented by this         connecti
 <varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
 <listitem><simpara> Timeout in milliseconds, or -1 for default
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Protocols</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: A array of string protocol identifiers supported by this manager
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -814,8 +816,8 @@ Get a list of protocol identifiers that are implemented by this         connecti
 <title>tp_cli_connection_manager_callback_for_request_connection ()</title>
 <indexterm zone="tp-cli-connection-manager-callback-for-request-connection"><primary>tp_cli_connection_manager_callback_for_request_connection</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_manager_callback_for_request_connection)
                                                         (<link linkend="TpConnectionManager">TpConnectionManager</link> *proxy,
-                                                         const <link linkend="gchar">gchar</link> *out0,
-                                                         const <link linkend="gchar">gchar</link> *out1,
+                                                         const <link linkend="gchar">gchar</link> *out_Bus_Name,
+                                                         const <link linkend="gchar">gchar</link> *out_Object_Path,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -828,10 +830,10 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Bus_Name</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: A D-Bus service name where the new Connection object can be found
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out1</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Object_Path</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: The D-Bus object path to the Connection on this service
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -909,8 +911,8 @@ Start a RequestConnection method call.
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          const <link linkend="gchar">gchar</link> *in_Protocol,
                                                          <link linkend="GHashTable">GHashTable</link> *in_Parameters,
-                                                         <link linkend="gchar">gchar</link> **out0,
-                                                         <link linkend="gchar">gchar</link> **out1,
+                                                         <link linkend="gchar">gchar</link> **out_Bus_Name,
+                                                         <link linkend="gchar">gchar</link> **out_Object_Path,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -937,10 +939,10 @@ state.
 <varlistentry><term><parameter>in_Parameters</parameter>&nbsp;:</term>
 <listitem><simpara> Used to pass an 'in' argument: A dictionary mapping parameter names to values of the appropriate           type, as indicated by &lt;tp:member-ref&gt;GetParameters&lt;/tp:member-ref&gt;           and the above well-known list.
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Bus_Name</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: A D-Bus service name where the new Connection object can be found
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out1</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Object_Path</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: The D-Bus object path to the Connection on this service
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -1044,20 +1046,43 @@ or has become invalid.
 <title role="property_details.title">Property Details</title>
 <refsect2 id="TpConnectionManager--always-introspect"><title>The <literal>&quot;always-introspect&quot;</literal> property</title>
 <indexterm zone="TpConnectionManager--always-introspect"><primary>TpConnectionManager:always-introspect</primary></indexterm><programlisting>  &quot;always-introspect&quot;        <link linkend="gboolean">gboolean</link>              : Read / Write</programlisting>
-<para>Opportunistically introspect the CM when it's run.</para><para>Default value: FALSE</para>
+<para>
+If <link linkend="TRUE:CAPS"><literal>TRUE</literal></link>, always introspect the connection manager as it comes online,
+even if we already have its info from a .manager file. Default <link linkend="FALSE:CAPS"><literal>FALSE</literal></link>.</para>
+<para>
+
+</para><para>Default value: FALSE</para>
 </refsect2>
 <refsect2 id="TpConnectionManager--connection-manager"><title>The <literal>&quot;connection-manager&quot;</literal> property</title>
 <indexterm zone="TpConnectionManager--connection-manager"><primary>TpConnectionManager:connection-manager</primary></indexterm><programlisting>  &quot;connection-manager&quot;       <link linkend="gchar">gchar</link>*                : Read</programlisting>
-<para>The name of the connection manager, e.g. "gabble" (read-only).</para><para>Default value: NULL</para>
+<para>
+The name of the connection manager, e.g. "gabble" (read-only).</para>
+<para>
+
+</para><para>Default value: NULL</para>
 </refsect2>
 <refsect2 id="TpConnectionManager--info-source"><title>The <literal>&quot;info-source&quot;</literal> property</title>
 <indexterm zone="TpConnectionManager--info-source"><primary>TpConnectionManager:info-source</primary></indexterm><programlisting>  &quot;info-source&quot;              <link linkend="guint">guint</link>                 : Read</programlisting>
-<para>Where we got the current information on supported protocols.</para><para>Allowed values: &lt;= 2</para>
+<para>
+Where we got the current information on supported protocols
+(a <link linkend="TpCMInfoSource"><type>TpCMInfoSource</type></link>).</para>
+<para>
+
+</para><para>Allowed values: &lt;= 2</para>
 <para>Default value: 0</para>
 </refsect2>
 <refsect2 id="TpConnectionManager--manager-file"><title>The <literal>&quot;manager-file&quot;</literal> property</title>
 <indexterm zone="TpConnectionManager--manager-file"><primary>TpConnectionManager:manager-file</primary></indexterm><programlisting>  &quot;manager-file&quot;             <link linkend="gchar">gchar</link>*                : Read / Write / Construct</programlisting>
-<para>The .manager filename.</para><para>Default value: NULL</para>
+<para>
+The absolute path of the .manager file. If set to <link linkend="NULL:CAPS"><literal>NULL</literal></link> (the default),
+the XDG data directories will be searched for a .manager file of the
+correct name.
+</para>
+<para>
+If set to the empty string, no .manager file will be read.</para>
+<para>
+
+</para><para>Default value: NULL</para>
 </refsect2>
 
 </refsect1>

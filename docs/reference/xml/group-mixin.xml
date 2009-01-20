@@ -104,6 +104,13 @@
                                                          <link linkend="TpIntSet">TpIntSet</link> *add_remote_pending,
                                                          <link linkend="TpHandle">TpHandle</link> actor,
                                                          <link linkend="TpChannelGroupChangeReason">TpChannelGroupChangeReason</link> reason);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-group-mixin-change-members-detailed">tp_group_mixin_change_members_detailed</link>
+                                                        (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *add,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *del,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *add_local_pending,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *add_remote_pending,
+                                                         const <link linkend="GHashTable">GHashTable</link> *details);
 <link linkend="void">void</link>                <link linkend="tp-group-mixin-add-handle-owner">tp_group_mixin_add_handle_owner</link>     (<link linkend="GObject">GObject</link> *obj,
                                                          <link linkend="TpHandle">TpHandle</link> local_handle,
                                                          <link linkend="TpHandle">TpHandle</link> owner_handle);
@@ -810,7 +817,8 @@ Changed in 0.7.7: the signal is not emitted if adding <parameter>add</parameter>
                                                          <link linkend="TpChannelGroupChangeReason">TpChannelGroupChangeReason</link> reason);</programlisting>
 <para>
 Change the sets of members as given by the arguments, and emit the
-MembersChanged signal if the changes were not a no-op.
+MembersChanged and MembersChangedDetailed signals if the changes were not a
+no-op.
 </para>
 <para>
 This function must be called in response to events on the underlying
@@ -857,9 +865,85 @@ equivalent to an empty set.</para>
 <varlistentry><term><parameter>reason</parameter>&nbsp;:</term>
 <listitem><simpara> The reason for this change
 </simpara></listitem></varlistentry>
-<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if the group was changed and the MembersChanged signal
- was emitted; <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> if nothing actually changed and the signal was
- suppressed.
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if the group was changed and the MembersChanged(Detailed)
+ signals were emitted; <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> if nothing actually changed and the signals
+ were suppressed.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-group-mixin-change-members-detailed" role="function">
+<title>tp_group_mixin_change_members_detailed ()</title>
+<indexterm zone="tp-group-mixin-change-members-detailed"><primary>tp_group_mixin_change_members_detailed</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_group_mixin_change_members_detailed
+                                                        (<link linkend="GObject">GObject</link> *obj,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *add,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *del,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *add_local_pending,
+                                                         <link linkend="TpIntSet">TpIntSet</link> *add_remote_pending,
+                                                         const <link linkend="GHashTable">GHashTable</link> *details);</programlisting>
+<para>
+Change the sets of members as given by the arguments, and emit the
+MembersChanged and MembersChangedDetailed signals if the changes were not a
+no-op.
+</para>
+<para>
+This function must be called in response to events on the underlying
+IM protocol, and must not be called in direct response to user input;
+it does not respect the permissions flags, but changes the group directly.
+</para>
+<para>
+If any two of add, del, add_local_pending and add_remote_pending have
+a non-empty intersection, the result is undefined. Don't do that.
+</para>
+<para>
+Each of the TpIntSet arguments may be <link linkend="NULL:CAPS"><literal>NULL</literal></link>, which is treated as
+equivalent to an empty set.
+</para>
+<para>
+details may contain, among other entries, the well-known
+keys (and corresponding type, wrapped in a GValue) defined by the
+Group.MembersChangedDetailed signal's specification; these include "actor"
+(a handle as G_TYPE_UINT), "change-reason" (an element of
+<link linkend="TpChannelGroupChangeReason"><type>TpChannelGroupChangeReason</type></link> as G_TYPE_UINT), "message" (G_TYPE_STRING),
+"error" (G_TYPE_STRING), "debug-message" (G_TYPE_STRING).
+</para>
+<para>
+If all of the information in details could be passed to
+<link linkend="tp-group-mixin-change-members"><function>tp_group_mixin_change_members()</function></link> then calling this function instead provides
+no benefit. Calling this function without setting
+<link linkend="TP-CHANNEL-GROUP-FLAG-MEMBERS-CHANGED-DETAILED:CAPS"><type>TP_CHANNEL_GROUP_FLAG_MEMBERS_CHANGED_DETAILED</type></link> with
+<link linkend="tp-group-mixin-change-members"><function>tp_group_mixin_change_members()</function></link> first is not very useful, as clients will
+not know to listen for MembersChangedDetailed and thus will miss the
+details.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>obj</parameter>&nbsp;:</term>
+<listitem><simpara> An object implementing the group interface using this mixin
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&nbsp;:</term>
+<listitem><simpara> A set of contact handles to be added to the members (if not
+ already present) and removed from local pending and remote pending
+ (if present)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>del</parameter>&nbsp;:</term>
+<listitem><simpara> A set of contact handles to be removed from members,
+ local pending or remote pending, wherever they are present
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add_local_pending</parameter>&nbsp;:</term>
+<listitem><simpara> A set of contact handles to be added to local pending,
+ and removed from members and remote pending
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add_remote_pending</parameter>&nbsp;:</term>
+<listitem><simpara> A set of contact handles to be added to remote pending,
+ and removed from members and local pending
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>details</parameter>&nbsp;:</term>
+<listitem><simpara> a map from strings to GValues detailing the change
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if the group was changed and the MembersChanged(Detailed)
+ signals were emitted; <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> if nothing actually changed and the signals
+ were suppressed.
+
+<parameter>since</parameter> 0.7.21
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-group-mixin-add-handle-owner" role="function">

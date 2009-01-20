@@ -8,7 +8,7 @@
  * notice and this notice are preserved.
  */
 
-#include "manager.h"
+#include "connection-manager.h"
 
 #include <dbus/dbus-protocol.h>
 #include <dbus/dbus-glib.h>
@@ -18,14 +18,15 @@
 
 #include "conn.h"
 
-G_DEFINE_TYPE (ExampleEchoConnectionManager,
-    example_echo_connection_manager,
+G_DEFINE_TYPE (ExampleEcho2ConnectionManager,
+    example_echo_2_connection_manager,
     TP_TYPE_BASE_CONNECTION_MANAGER)
 
 /* type definition stuff */
 
 static void
-example_echo_connection_manager_init (ExampleEchoConnectionManager *self)
+example_echo_2_connection_manager_init (
+    ExampleEcho2ConnectionManager *self)
 {
 }
 
@@ -73,23 +74,23 @@ new_connection (TpBaseConnectionManager *self,
                 GError **error)
 {
   ExampleParams *params = parsed_params;
-  ExampleEchoConnection *conn = EXAMPLE_ECHO_CONNECTION
-      (g_object_new (EXAMPLE_TYPE_ECHO_CONNECTION,
-          "account", params->account,
-          "protocol", proto,
-          NULL));
+  ExampleEcho2Connection *conn =
+      EXAMPLE_ECHO_2_CONNECTION (g_object_new (EXAMPLE_TYPE_ECHO_2_CONNECTION,
+            "account", params->account,
+            "protocol", proto,
+            NULL));
 
   return (TpBaseConnection *) conn;
 }
 
 static void
-example_echo_connection_manager_class_init (
-    ExampleEchoConnectionManagerClass *klass)
+example_echo_2_connection_manager_class_init (
+    ExampleEcho2ConnectionManagerClass *klass)
 {
   TpBaseConnectionManagerClass *base_class =
       (TpBaseConnectionManagerClass *) klass;
 
   base_class->new_connection = new_connection;
-  base_class->cm_dbus_name = "example_echo";
+  base_class->cm_dbus_name = "example_echo_2";
   base_class->protocol_params = example_protocols;
 }

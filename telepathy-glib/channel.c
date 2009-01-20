@@ -84,6 +84,7 @@ enum
   PROP_CHANNEL_TYPE,
   PROP_HANDLE_TYPE,
   PROP_HANDLE,
+  PROP_IDENTIFIER,
   PROP_CHANNEL_READY,
   PROP_CHANNEL_PROPERTIES,
   PROP_GROUP_SELF_HANDLE,
@@ -94,6 +95,7 @@ enum
 enum {
   SIGNAL_GROUP_FLAGS_CHANGED,
   SIGNAL_GROUP_MEMBERS_CHANGED,
+  SIGNAL_GROUP_MEMBERS_CHANGED_DETAILED,
   N_SIGNALS
 };
 
@@ -188,6 +190,25 @@ tp_channel_get_handle (TpChannel *self,
   return self->priv->handle;
 }
 
+/**
+ * tp_channel_get_identifier:
+ * @self: a channel
+ *
+ * This channel's associated identifier, or NULL if no identifier or unknown.
+ *
+ * The identifier is the result of inspecting #TpChannel:handle.
+ * This is the same as the #TpChannel:identifier property.
+ *
+ * Returns: the identifier
+ * Since: 0.7.FUTURE
+ */
+const gchar *
+tp_channel_get_identifier (TpChannel *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
+
+  return self->priv->identifier;
+}
 
 /**
  * tp_channel_is_ready:
@@ -284,6 +305,9 @@ tp_channel_get_property (GObject *object,
     case PROP_HANDLE:
       g_value_set_uint (value, self->priv->handle);
       break;
+    case PROP_IDENTIFIER:
+      g_value_set_string (value, self->priv->identifier);
+      break;
     case PROP_CHANNEL_PROPERTIES:
       g_value_set_boxed (value, self->priv->channel_properties);
       break;
@@ -355,6 +379,22 @@ _tp_channel_maybe_set_handle_type (TpChannel *self,
       self->priv->handle_type = handle_type;
       g_hash_table_insert (self->priv->channel_properties,
           g_strdup (TP_IFACE_CHANNEL ".TargetHandleType"), value);
+    }
+}
+
+
+static void
+_tp_channel_maybe_set_identifier (TpChannel *self,
+                                  const gchar *identifier)
+{
+  if (identifier != NULL && self->priv->identifier == NULL)
+    {
+      GValue *value = tp_g_value_slice_new (G_TYPE_STRING);
+
+      g_value_set_string (value, identifier);
+      self->priv->identifier = g_strdup (identifier);
+      g_hash_table_insert (self->priv->channel_properties,
+          g_strdup (TP_IFACE_CHANNEL ".TargetID"), value);
     }
 }
 
@@ -441,6 +481,10 @@ tp_channel_set_property (GObject *object,
               u = tp_asv_get_uint32 (self->priv->channel_properties,
                   TP_IFACE_CHANNEL ".TargetHandle", &valid);
               _tp_channel_maybe_set_handle (self, u, valid);
+
+              _tp_channel_maybe_set_identifier (self,
+                  tp_asv_get_string (self->priv->channel_properties,
+                      TP_IFACE_CHANNEL ".TargetID"));
 
               _tp_channel_maybe_set_channel_type (self,
                   tp_asv_get_string (self->priv->channel_properties,
@@ -661,6 +705,63 @@ _tp_channel_get_handle (TpChannel *self)
 }
 
 
+
+static void
+tp_channel_got_identifier_cb (TpConnection *connection,
+                              const gchar **identifier,
+                              const GError *error,
+                              gpointer user_data,
+                              GObject *unused2)
+{
+  TpChannel *self = user_data;
+
+  if (error == NULL)
+    {
+      GValue *value;
+
+      DEBUG ("%p: Introspected identifier %s", self, *identifier);
+      self->priv->identifier = g_strdup (*identifier);
+
+      value = tp_g_value_slice_new (G_TYPE_STRING);
+      g_value_set_string (value, *identifier);
+      g_hash_table_insert (self->priv->channel_properties,
+          g_strdup (TP_IFACE_CHANNEL ".TargetID"), value);
+
+      g_object_notify ((GObject *) self, "identifier");
+
+      _tp_channel_continue_introspection (self);
+    }
+  else
+    {
+      _tp_channel_abort_introspection (self, "InspectHandles failed", error);
+    }
+
+  g_object_unref (self);
+}
+
+
+static void
+_tp_channel_get_identifier (TpChannel *self)
+{
+  if (self->priv->identifier == NULL && self->priv->handle != 0 &&
+      self->priv->handle_type != TP_HANDLE_TYPE_NONE)
+    {
+      GArray handles = {(gchar *) &self->priv->handle, 1};
+
+      DEBUG ("%p: calling InspectHandles", self);
+      tp_cli_connection_call_inspect_handles (self->priv->connection, -1,
+          self->priv->handle_type, &handles,
+          tp_channel_got_identifier_cb, g_object_ref (self), NULL, NULL);
+    }
+  else
+    {
+      DEBUG ("%p: identifier already known to be %s", self,
+          self->priv->identifier);
+      _tp_channel_continue_introspection (self);
+    }
+}
+
+
 static void
 _tp_channel_got_properties (TpProxy *proxy,
                             GHashTable *asv,
@@ -693,15 +794,8 @@ _tp_channel_got_properties (TpProxy *proxy,
       u = tp_asv_get_uint32 (asv, "TargetHandle", &valid);
       _tp_channel_maybe_set_handle (self, u, valid);
 
-      s = tp_asv_get_string (asv, "TargetID");
-
-      if (s != NULL)
-        {
-          value = tp_g_value_slice_new (G_TYPE_STRING);
-          g_value_set_string (value, s);
-          g_hash_table_insert (self->priv->channel_properties,
-              g_strdup (TP_IFACE_CHANNEL ".TargetID"), value);
-        }
+      _tp_channel_maybe_set_identifier (self,
+          tp_asv_get_string (asv, "TargetID"));
 
       u = tp_asv_get_uint32 (asv, "InitiatorHandle", &valid);
 
@@ -734,8 +828,10 @@ _tp_channel_got_properties (TpProxy *proxy,
         }
 
       g_object_notify ((GObject *) self, "channel-type");
+      g_object_notify ((GObject *) self, "interfaces");
       g_object_notify ((GObject *) self, "handle-type");
       g_object_notify ((GObject *) self, "handle");
+      g_object_notify ((GObject *) self, "identifier");
     }
   else
     {
@@ -876,6 +972,10 @@ tp_channel_constructor (GType type,
   g_queue_push_tail (self->priv->introspect_needed,
       _tp_channel_get_handle);
 
+  /* this does nothing if we already know the identifier */
+  g_queue_push_tail (self->priv->introspect_needed,
+      _tp_channel_get_identifier);
+
   /* this does nothing if we already know the channel type */
   g_queue_push_tail (self->priv->introspect_needed,
       _tp_channel_get_channel_type);
@@ -980,6 +1080,8 @@ tp_channel_finalize (GObject *object)
   g_assert (self->priv->channel_properties != NULL);
   g_hash_table_destroy (self->priv->channel_properties);
 
+  g_free (self->priv->identifier);
+
   ((GObjectClass *) tp_channel_parent_class)->finalize (object);
 }
 
@@ -1044,6 +1146,21 @@ tp_channel_class_init (TpChannelClass *klass)
    */
   g_object_class_override_property (object_class, PROP_HANDLE,
       "handle");
+
+  /**
+   * TpChannel:identifier:
+   *
+   * This channel's associated identifier, or NULL if no identifier or unknown.
+   *
+   * The identifier is the result of inspecting #TpChannel:handle.
+   */
+  param_spec = g_param_spec_string ("identifier",
+      "The identifier",
+      "The identifier of the channel",
+      NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_IDENTIFIER,
+      param_spec);
 
   /**
    * TpChannel:channel-properties:
@@ -1195,6 +1312,36 @@ tp_channel_class_init (TpChannelClass *klass)
       G_TYPE_NONE, 7,
       G_TYPE_STRING, au_type, au_type, au_type, au_type, G_TYPE_UINT,
       G_TYPE_UINT);
+
+  /**
+   * TpChannel::group-members-changed-detailed:
+   * @self: a channel
+   * @added: a #GArray of #guint containing the full members added
+   * @removed: a #GArray of #guint containing the members (full,
+   *  local-pending or remote-pending) removed
+   * @local_pending: a #GArray of #guint containing the local-pending
+   *  members added
+   * @remote_pending: a #GArray of #guint containing the remote-pending
+   *  members added
+   * @details: a #GHashTable mapping (gchar *) to #GValue containing details
+   *  about the change, as described in the specification of the
+   *  MembersChangedDetailed signal.
+   *
+   * Emitted when the group members change in a Group channel that is ready.
+   * Contains a superset of the information in the
+   * TpChannel::group-members-changed signal, and is emitted at the same time;
+   * applications can connect to this signal and ignore the other.
+   *
+   * Since: 0.7.21
+   */
+  signals[SIGNAL_GROUP_MEMBERS_CHANGED_DETAILED] = g_signal_new (
+      "group-members-changed-detailed", G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL,
+      _tp_marshal_VOID__BOXED_BOXED_BOXED_BOXED_BOXED,
+      G_TYPE_NONE, 5,
+      au_type, au_type, au_type, au_type, TP_HASH_TYPE_STRING_VARIANT_MAP);
 }
 
 
@@ -1211,6 +1358,8 @@ tp_channel_class_init (TpChannelClass *klass)
  * <!-- -->
  *
  * Returns: a new channel proxy, or %NULL on invalid arguments
+ *
+ * Since: 0.7.19
  */
 TpChannel *
 tp_channel_new_from_properties (TpConnection *conn,

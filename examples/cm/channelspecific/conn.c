@@ -18,8 +18,9 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/errors.h>
 #include <telepathy-glib/handle-repo-dynamic.h>
+#include <telepathy-glib/interfaces.h>
 
-#include "room-factory.h"
+#include "room-manager.h"
 
 G_DEFINE_TYPE (ExampleCSHConnection,
     example_csh_connection,
@@ -116,7 +117,7 @@ example_csh_normalize_contact (TpHandleRepoIface *repo,
 
   if (id[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "ID must not be empty");
       return NULL;
     }
@@ -125,28 +126,28 @@ example_csh_normalize_contact (TpHandleRepoIface *repo,
 
   if (at == NULL || at == id || at[1] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "ID must look like aaa@bbb");
       return NULL;
     }
 
   if (strchr (at + 1, '@') != NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "ID cannot contain more than one '@'");
       return NULL;
     }
 
   if (at[1] == '#' && at[2] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "chatroom name cannot be empty");
       return NULL;
     }
 
   if (strchr (at + 2, '#') != NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "realm/chatroom cannot contain '#' except at the beginning");
       return NULL;
     }
@@ -164,20 +165,20 @@ example_csh_normalize_room (TpHandleRepoIface *repo,
 
   if (id[0] != '#')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "Chatroom names in this protocol start with #");
     }
 
   if (id[1] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "Chatroom name cannot be empty");
       return NULL;
     }
 
   if (strchr (id, '@') != NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
           "Chatroom names in this protocol cannot contain '@'");
       return NULL;
     }
@@ -197,11 +198,11 @@ create_handle_repos (TpBaseConnection *conn,
 }
 
 static GPtrArray *
-create_channel_factories (TpBaseConnection *conn)
+create_channel_managers (TpBaseConnection *conn)
 {
   GPtrArray *ret = g_ptr_array_sized_new (1);
 
-  g_ptr_array_add (ret, g_object_new (EXAMPLE_TYPE_CSH_ROOM_FACTORY,
+  g_ptr_array_add (ret, g_object_new (EXAMPLE_TYPE_CSH_ROOM_MANAGER,
         "connection", conn,
         NULL));
 
@@ -244,6 +245,9 @@ shut_down (TpBaseConnection *conn)
 static void
 example_csh_connection_class_init (ExampleCSHConnectionClass *klass)
 {
+  static const gchar *interfaces_always_present[] = {
+      TP_IFACE_CONNECTION_INTERFACE_REQUESTS,
+      NULL };
   TpBaseConnectionClass *base_class =
       (TpBaseConnectionClass *) klass;
   GObjectClass *object_class = (GObjectClass *) klass;
@@ -256,9 +260,10 @@ example_csh_connection_class_init (ExampleCSHConnectionClass *klass)
 
   base_class->create_handle_repos = create_handle_repos;
   base_class->get_unique_connection_name = get_unique_connection_name;
-  base_class->create_channel_factories = create_channel_factories;
+  base_class->create_channel_managers = create_channel_managers;
   base_class->start_connecting = start_connecting;
   base_class->shut_down = shut_down;
+  base_class->interfaces_always_present = interfaces_always_present;
 
   param_spec = g_param_spec_string ("account", "Account name",
       "The username of this user", NULL,
