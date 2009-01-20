@@ -43,7 +43,7 @@
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-presence-run-get-statuses">tp_cli_connection_interface_presence_run_get_statuses</link>
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
-                                                         <link linkend="GHashTable">GHashTable</link> **out0,
+                                                         <link linkend="GHashTable">GHashTable</link> **out_Available_Statuses,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-connection-interface-presence-run-remove-status">tp_cli_connection_interface_presence_run_remove_status</link>
@@ -151,7 +151,7 @@
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="void">void</link>                (<link linkend="tp-cli-connection-interface-presence-callback-for-get-statuses">*tp_cli_connection_interface_presence_callback_for_get_statuses</link>)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         <link linkend="GHashTable">GHashTable</link> *out0,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Available_Statuses,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
@@ -354,7 +354,7 @@ Get presence previously emitted by         &lt;tp:member-ref&gt;PresenceUpdate&l
 <indexterm zone="tp-cli-connection-interface-presence-run-get-statuses"><primary>tp_cli_connection_interface_presence_run_get_statuses</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_connection_interface_presence_run_get_statuses
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
-                                                         <link linkend="GHashTable">GHashTable</link> **out0,
+                                                         <link linkend="GHashTable">GHashTable</link> **out_Available_Statuses,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
 <para>
@@ -375,7 +375,7 @@ Get a dictionary of the valid presence statuses for this connection.         Thi
 <varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
 <listitem><simpara> Timeout in milliseconds, or -1 for default
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Available_Statuses</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> is returned: A dictionary of string identifiers mapped to a struct for each status, containing:         &lt;ul&gt;           &lt;li&gt;a type value from one of the values above&lt;/li&gt;           &lt;li&gt;a boolean to indicate if this status may be set on yourself&lt;/li&gt;           &lt;li&gt;a boolean to indicate if this is an exclusive status which you             may not set alongside any other&lt;/li&gt;           &lt;li&gt;a dictionary of valid optional string argument names mapped to             their types&lt;/li&gt;         &lt;/ul&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -1078,7 +1078,7 @@ succeeds or fails.</para>
 <title>tp_cli_connection_interface_presence_callback_for_get_statuses ()</title>
 <indexterm zone="tp-cli-connection-interface-presence-callback-for-get-statuses"><primary>tp_cli_connection_interface_presence_callback_for_get_statuses</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_interface_presence_callback_for_get_statuses)
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
-                                                         <link linkend="GHashTable">GHashTable</link> *out0,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Available_Statuses,
                                                          const <link linkend="GError">GError</link> *error,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);</programlisting>
@@ -1091,7 +1091,7 @@ succeeds or fails.</para>
 <varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>out0</parameter>&nbsp;:</term>
+<varlistentry><term><parameter>out_Available_Statuses</parameter>&nbsp;:</term>
 <listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>: A dictionary of string identifiers mapped to a struct for each status, containing:         &lt;ul&gt;           &lt;li&gt;a type value from one of the values above&lt;/li&gt;           &lt;li&gt;a boolean to indicate if this status may be set on yourself&lt;/li&gt;           &lt;li&gt;a boolean to indicate if this is an exclusive status which you             may not set alongside any other&lt;/li&gt;           &lt;li&gt;a dictionary of valid optional string argument names mapped to             their types&lt;/li&gt;         &lt;/ul&gt;
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
@@ -1272,7 +1272,7 @@ Represents the signature of a callback for the signal PresenceUpdate.</para>
  was called
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>arg_Presence</parameter>&nbsp;:</term>
-<listitem><simpara> A dictionary of contact handles mapped to a struct containing         a UNIX timestamp of the last activity time (in UTC), and         a dictionary mapping the contact&apos;s current status identifiers to           a dictionary of optional parameter names mapped to their            variant-boxed values
+<listitem><simpara> A dictionary of contact handles mapped to a struct containing         a UNIX timestamp of the last activity time (in UTC), and         a dictionary mapping the contact&apos;s current status identifiers to           a dictionary of optional parameter names mapped to their           variant-boxed values
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
 <listitem><simpara> User-supplied data

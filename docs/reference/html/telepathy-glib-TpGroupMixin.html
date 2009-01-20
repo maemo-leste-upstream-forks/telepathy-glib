@@ -277,6 +277,19 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
                                                          <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add_remote_pending,
                                                          <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle">TpHandle</a> actor,
                                                          <a class="link" href="telepathy-glib-enums.html#TpChannelGroupChangeReason" title="enum TpChannelGroupChangeReason">TpChannelGroupChangeReason</a> reason);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members-detailed" title="tp_group_mixin_change_members_detailed ()">tp_group_mixin_change_members_detailed</a>
+                                                        (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *obj,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *del,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add_local_pending,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add_remote_pending,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *details);
 void                <a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-add-handle-owner" title="tp_group_mixin_add_handle_owner ()">tp_group_mixin_add_handle_owner</a>     (<a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 >GObject</a> *obj,
@@ -1524,7 +1537,8 @@ href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
                                                          <a class="link" href="telepathy-glib-enums.html#TpChannelGroupChangeReason" title="enum TpChannelGroupChangeReason">TpChannelGroupChangeReason</a> reason);</pre>
 <p>
 Change the sets of members as given by the arguments, and emit the
-MembersChanged signal if the changes were not a no-op.
+MembersChanged and MembersChangedDetailed signals if the changes were not a
+no-op.
 </p>
 <p>
 This function must be called in response to events on the underlying
@@ -1598,11 +1612,120 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td> <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> if the group was changed and the MembersChanged signal
- was emitted; <a
+><code class="literal">TRUE</code></a> if the group was changed and the MembersChanged(Detailed)
+ signals were emitted; <a
 href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> if nothing actually changed and the signal was
- suppressed.
+><code class="literal">FALSE</code></a> if nothing actually changed and the signals
+ were suppressed.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-group-mixin-change-members-detailed"></a><h3>tp_group_mixin_change_members_detailed ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            tp_group_mixin_change_members_detailed
+                                                        (<a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a> *obj,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *del,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add_local_pending,
+                                                         <a class="link" href="telepathy-glib-TpIntSet.html#TpIntSet" title="TpIntSet">TpIntSet</a> *add_remote_pending,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *details);</pre>
+<p>
+Change the sets of members as given by the arguments, and emit the
+MembersChanged and MembersChangedDetailed signals if the changes were not a
+no-op.
+</p>
+<p>
+This function must be called in response to events on the underlying
+IM protocol, and must not be called in direct response to user input;
+it does not respect the permissions flags, but changes the group directly.
+</p>
+<p>
+If any two of add, del, add_local_pending and add_remote_pending have
+a non-empty intersection, the result is undefined. Don't do that.
+</p>
+<p>
+Each of the TpIntSet arguments may be <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a>, which is treated as
+equivalent to an empty set.
+</p>
+<p>
+details may contain, among other entries, the well-known
+keys (and corresponding type, wrapped in a GValue) defined by the
+Group.MembersChangedDetailed signal's specification; these include "actor"
+(a handle as G_TYPE_UINT), "change-reason" (an element of
+<a class="link" href="telepathy-glib-enums.html#TpChannelGroupChangeReason" title="enum TpChannelGroupChangeReason"><span class="type">TpChannelGroupChangeReason</span></a> as G_TYPE_UINT), "message" (G_TYPE_STRING),
+"error" (G_TYPE_STRING), "debug-message" (G_TYPE_STRING).
+</p>
+<p>
+If all of the information in details could be passed to
+<a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members" title="tp_group_mixin_change_members ()"><code class="function">tp_group_mixin_change_members()</code></a> then calling this function instead provides
+no benefit. Calling this function without setting
+<a class="link" href="telepathy-glib-enums.html#TP-CHANNEL-GROUP-FLAG-MEMBERS-CHANGED-DETAILED:CAPS"><span class="type">TP_CHANNEL_GROUP_FLAG_MEMBERS_CHANGED_DETAILED</span></a> with
+<a class="link" href="telepathy-glib-TpGroupMixin.html#tp-group-mixin-change-members" title="tp_group_mixin_change_members ()"><code class="function">tp_group_mixin_change_members()</code></a> first is not very useful, as clients will
+not know to listen for MembersChangedDetailed and thus will miss the
+details.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>obj</code></em> :</span></p></td>
+<td> An object implementing the group interface using this mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>add</code></em> :</span></p></td>
+<td> A set of contact handles to be added to the members (if not
+ already present) and removed from local pending and remote pending
+ (if present)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>del</code></em> :</span></p></td>
+<td> A set of contact handles to be removed from members,
+ local pending or remote pending, wherever they are present
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>add_local_pending</code></em> :</span></p></td>
+<td> A set of contact handles to be added to local pending,
+ and removed from members and remote pending
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>add_remote_pending</code></em> :</span></p></td>
+<td> A set of contact handles to be added to remote pending,
+ and removed from members and local pending
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
+<td> a map from strings to GValues detailing the change
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><code class="literal">TRUE</code></a> if the group was changed and the MembersChanged(Detailed)
+ signals were emitted; <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><code class="literal">FALSE</code></a> if nothing actually changed and the signals
+ were suppressed.
+
+<em class="parameter"><code>since</code></em> 0.7.21
 </td>
 </tr>
 </tbody>

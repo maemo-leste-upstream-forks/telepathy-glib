@@ -1001,8 +1001,6 @@ tp_dbus_daemon_class_init (TpDBusDaemonClass *klass)
  *
  * Otherwise return %FALSE, and set *@valid to %FALSE if @valid is not %NULL.
  *
- * (FIXME: should we also allow 'i' and 'u' with nonzero <=> True?)
- *
  * Returns: a boolean value for @key
  * Since: 0.7.9
  */
@@ -1441,8 +1439,6 @@ return_invalid:
 }
 
 
-/* FIXME: reviewers: should this succeed on all numeric types, or just on
- * doubles? */
 /**
  * tp_asv_get_double:
  * @asv: A GHashTable where the keys are strings and the values are GValues

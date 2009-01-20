@@ -1,19 +1,23 @@
 noinst_PROGRAMS = \
     test-call-cancellation \
     test-channel-introspect \
+    test-cli-group \
     test-connection \
     test-connection-bug-18845 \
     test-connection-handles \
     test-connection-inject-bug16307 \
     test-connection-getinterfaces-failure \
     test-contacts \
+    test-contacts-bug-19101 \
     test-contacts-mixin \
     test-dbus \
     test-disconnection \
     test-example-no-protocols \
     test-finalized-in-invalidated-handler \
+    test-group-mixin \
     test-handle-set \
     test-invalidated-while-invoking-signals \
+    test-message-mixin \
     test-properties \
     test-text-mixin \
     test-text-respawn \
@@ -26,6 +30,8 @@ LDADD = \
     $(top_builddir)/tests/lib/libtp-glib-tests.la
 
 test_channel_introspect_SOURCES = channel-introspect.c
+
+test_cli_group_SOURCES = cli-group.c
 
 test_connection_SOURCES = connection.c
 
@@ -40,15 +46,25 @@ test_connection_getinterfaces_failure_SOURCES = \
 
 test_contacts_SOURCES = contacts.c
 
+test_contacts_bug_19101_SOURCES = contacts-bug-19101.c
+
 test_contacts_mixin_SOURCES = contacts-mixin.c
 
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
 
+test_group_mixin_SOURCES = group-mixin.c
+
 test_handle_set_SOURCES = handle-set.c
 
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
+
+test_message_mixin_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
+test_message_mixin_SOURCES = \
+    message-mixin.c
 
 test_properties_SOURCES = properties.c
 nodist_test_properties_SOURCES = \

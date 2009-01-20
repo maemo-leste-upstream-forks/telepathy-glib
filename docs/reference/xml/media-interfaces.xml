@@ -432,6 +432,25 @@
                                                          <link linkend="gboolean">gboolean</link> arg_Held,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* <link linkend="tp-cli-media-stream-handler-call-codecs-updated">tp_cli_media_stream_handler_call_codecs_updated</link>
+                                                        (<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_Codecs,
+                                                         <link linkend="tp-cli-media-stream-handler-callback-for-codecs-updated">tp_cli_media_stream_handler_callback_for_codecs_updated</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-media-stream-handler-callback-for-codecs-updated">*tp_cli_media_stream_handler_callback_for_codecs_updated</link>)
+                                                        (<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="gboolean">gboolean</link>            <link linkend="tp-cli-media-stream-handler-run-codecs-updated">tp_cli_media_stream_handler_run_codecs_updated</link>
+                                                        (<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_Codecs,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);
 </synopsis>
 </refsynopsisdiv>
 
@@ -934,7 +953,7 @@ succeeds or fails.</para>
 Start a CodecChoice method call.
 </para>
 <para>
-Inform the connection manager of the current codec choice.</para>
+Inform the connection manager of codec used to receive data.</para>
 <para>
 
 </para><variablelist role="params">
@@ -990,7 +1009,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Inform the connection manager of the current codec choice.</para>
+Inform the connection manager of codec used to receive data.</para>
 <para>
 
 </para><variablelist role="params">
@@ -1577,7 +1596,7 @@ Inform the connection manager that a client is ready to handle         this Stre
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> Used to pass an 'in' argument: As for SupportedCodecs.
+<listitem><simpara> Used to pass an 'in' argument: Locally-supported codecs.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
 <listitem><simpara> called when the method call succeeds or fails;
@@ -1632,7 +1651,7 @@ Inform the connection manager that a client is ready to handle         this Stre
 <listitem><simpara> Timeout in milliseconds, or -1 for default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> Used to pass an 'in' argument: As for SupportedCodecs.
+<listitem><simpara> Used to pass an 'in' argument: Locally-supported codecs.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
@@ -1688,7 +1707,7 @@ succeeds or fails.</para>
 Start a SetLocalCodecs method call.
 </para>
 <para>
-Used to provide codecs after <link linkend="Ready"><function>Ready()</function></link>, so the media client can go         ready for an incoming call and exchange candidates/codecs before         knowing what local codecs are available.</para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Used to provide codecs after <link linkend="Ready"><function>Ready()</function></link>, so the media client can go           ready for an incoming call and exchange candidates/codecs before           knowing what local codecs are available.&lt;/p&gt;          &lt;p&gt;This is useful for gatewaying calls between two connection managers.           Given an incoming call, you need to call           &lt;tp:member-ref&gt;Ready&lt;/tp:member-ref&gt; to get the remote codecs before           you can use them as the &amp;quot;local&amp;quot; codecs to place the outgoing call,           and hence receive the outgoing call&apos;s remote codecs to use as the           incoming call&apos;s &amp;quot;local&amp;quot; codecs.&lt;/p&gt;          &lt;p&gt;In this situation, you would pass an empty list of codecs to the           incoming call&apos;s Ready method, then later call SetLocalCodecs on the           incoming call in order to respond to the offer.&lt;/p&gt;</para>
 <para>
 
 </para><variablelist role="params">
@@ -1700,7 +1719,7 @@ Used to provide codecs after <link linkend="Ready"><function>Ready()</function><
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> Used to pass an 'in' argument: Codecs in the same format as for           SupportedCodecs, which have the same semantics as the           local codecs passed to Ready
+<listitem><simpara> Used to pass an 'in' argument: Locally-supported codecs
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
 <listitem><simpara> called when the method call succeeds or fails;
@@ -1744,7 +1763,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Used to provide codecs after <link linkend="Ready"><function>Ready()</function></link>, so the media client can go         ready for an incoming call and exchange candidates/codecs before         knowing what local codecs are available.</para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Used to provide codecs after <link linkend="Ready"><function>Ready()</function></link>, so the media client can go           ready for an incoming call and exchange candidates/codecs before           knowing what local codecs are available.&lt;/p&gt;          &lt;p&gt;This is useful for gatewaying calls between two connection managers.           Given an incoming call, you need to call           &lt;tp:member-ref&gt;Ready&lt;/tp:member-ref&gt; to get the remote codecs before           you can use them as the &amp;quot;local&amp;quot; codecs to place the outgoing call,           and hence receive the outgoing call&apos;s remote codecs to use as the           incoming call&apos;s &amp;quot;local&amp;quot; codecs.&lt;/p&gt;          &lt;p&gt;In this situation, you would pass an empty list of codecs to the           incoming call&apos;s Ready method, then later call SetLocalCodecs on the           incoming call in order to respond to the offer.&lt;/p&gt;</para>
 <para>
 
 </para><variablelist role="params">
@@ -1755,7 +1774,7 @@ Used to provide codecs after <link linkend="Ready"><function>Ready()</function><
 <listitem><simpara> Timeout in milliseconds, or -1 for default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> Used to pass an 'in' argument: Codecs in the same format as for           SupportedCodecs, which have the same semantics as the           local codecs passed to Ready
+<listitem><simpara> Used to pass an 'in' argument: Locally-supported codecs
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
@@ -1946,7 +1965,7 @@ Inform the connection manager of the supported codecs for this session.         
   default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> Used to pass an 'in' argument: List of codec info structures, each containing:           &lt;ul&gt;             &lt;li&gt;ID of codec&lt;/li&gt;             &lt;li&gt;Codec name&lt;/li&gt;             &lt;li&gt;Media type&lt;/li&gt;             &lt;li&gt;Clock rate of codec&lt;/li&gt;             &lt;li&gt;Number of supported channels&lt;/li&gt;             &lt;li&gt;String key-value pairs for supported optional parameters&lt;/li&gt;           &lt;/ul&gt;
+<listitem><simpara> Used to pass an 'in' argument: Locally supported codecs.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
 <listitem><simpara> called when the method call succeeds or fails;
@@ -2001,7 +2020,7 @@ Inform the connection manager of the supported codecs for this session.         
 <listitem><simpara> Timeout in milliseconds, or -1 for default
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> Used to pass an 'in' argument: List of codec info structures, each containing:           &lt;ul&gt;             &lt;li&gt;ID of codec&lt;/li&gt;             &lt;li&gt;Codec name&lt;/li&gt;             &lt;li&gt;Media type&lt;/li&gt;             &lt;li&gt;Clock rate of codec&lt;/li&gt;             &lt;li&gt;Number of supported channels&lt;/li&gt;             &lt;li&gt;String key-value pairs for supported optional parameters&lt;/li&gt;           &lt;/ul&gt;
+<listitem><simpara> Used to pass an 'in' argument: Locally supported codecs.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&nbsp;:</term>
 <listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
@@ -2202,7 +2221,7 @@ Represents the signature of a callback for the signal RemoveRemoteCandidate.</pa
 Connect a handler to the signal RemoveRemoteCandidate.
 </para>
 <para>
-Signal emitted when the connection manager wishes to inform the         client that the remote end has removed a previously usable         candidate.</para>
+Signal emitted when the connection manager wishes to inform the         client that the remote end has removed a previously usable         candidate.          &lt;tp:rationale&gt;           It seemed like a good idea at the time, but wasn&apos;t.         &lt;/tp:rationale&gt;</para>
 <para>
 
 </para><variablelist role="params">
@@ -2403,7 +2422,7 @@ Represents the signature of a callback for the signal SetRemoteCodecs.</para>
  was called
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>arg_Codecs</parameter>&nbsp;:</term>
-<listitem><simpara> As for SupportedCodecs
+<listitem><simpara> Codecs supported by the remote peer.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
 <listitem><simpara> User-supplied data
@@ -2425,7 +2444,7 @@ Represents the signature of a callback for the signal SetRemoteCodecs.</para>
 Connect a handler to the signal SetRemoteCodecs.
 </para>
 <para>
-Signal emitted when the connection manager wishes to inform the         client of the codecs supported by the remote end.</para>
+Signal emitted when the connection manager wishes to inform the         client of the codecs supported by the remote end. 	If these codecs are compatible with the remote codecs, then the client         must call &lt;tp:member-ref&gt;SupportedCodecs&lt;/tp:member-ref&gt;,         otherwise call &lt;tp:member-ref&gt;Error&lt;/tp:member-ref&gt;.</para>
 <para>
 
 </para><variablelist role="params">
@@ -2498,7 +2517,7 @@ Represents the signature of a callback for the signal SetStreamPlaying.</para>
 Connect a handler to the signal SetStreamPlaying.
 </para>
 <para>
-Signal emitted when the connection manager wishes to set the         stream playing or stopped.</para>
+If emitted with argument TRUE, this means that the connection manager         wishes to set the stream playing; this means that the streaming         implementation should expect to receive data. If emitted with argument         FALSE this signal is basically meaningless and should be ignored.          &lt;tp:rationale&gt;           We&apos;re very sorry.         &lt;/tp:rationale&gt;</para>
 <para>
 
 </para><variablelist role="params">
@@ -3056,6 +3075,129 @@ Represents the signature of a callback for the signal SetStreamHeld.</para>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
 <listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-media-stream-handler-call-codecs-updated" role="function">
+<title>tp_cli_media_stream_handler_call_codecs_updated ()</title>
+<indexterm zone="tp-cli-media-stream-handler-call-codecs-updated"><primary>tp_cli_media_stream_handler_call_codecs_updated</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link>* tp_cli_media_stream_handler_call_codecs_updated
+                                                        (<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_Codecs,
+                                                         <link linkend="tp-cli-media-stream-handler-callback-for-codecs-updated">tp_cli_media_stream_handler_callback_for_codecs_updated</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a CodecsUpdated method call.
+</para>
+<para>
+Inform the connection manager that the parameters of the supported         codecs for this session have changed. The connection manager should         send the new parameters to the remote contact.          &lt;tp:rationale&gt;           This is required for H.264 and Theora, for example.         &lt;/tp:rationale&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: Locally supported codecs, which SHOULD be the same as were previously           in effect, but possibly with different parameters.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL:CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL:CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-media-stream-handler-callback-for-codecs-updated" role="function">
+<title>tp_cli_media_stream_handler_callback_for_codecs_updated ()</title>
+<indexterm zone="tp-cli-media-stream-handler-callback-for-codecs-updated"><primary>tp_cli_media_stream_handler_callback_for_codecs_updated</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_media_stream_handler_callback_for_codecs_updated)
+                                                        (<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a CodecsUpdated method call
+succeeds or fails.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="NULL:CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-media-stream-handler-run-codecs-updated" role="function">
+<title>tp_cli_media_stream_handler_run_codecs_updated ()</title>
+<indexterm zone="tp-cli-media-stream-handler-run-codecs-updated"><primary>tp_cli_media_stream_handler_run_codecs_updated</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            tp_cli_media_stream_handler_run_codecs_updated
+                                                        (<link linkend="TpMediaStreamHandler">TpMediaStreamHandler</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *in_Codecs,
+                                                         <link linkend="GError">GError</link> **error,
+                                                         <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
+<para>
+Call the method CodecsUpdated and run the main loop
+until it returns. Before calling this method, you must
+add a reference to any borrowed objects you need to keep,
+and generally ensure that everything is in a consistent
+state.
+</para>
+<para>
+Inform the connection manager that the parameters of the supported         codecs for this session have changed. The connection manager should         send the new parameters to the remote contact.          &lt;tp:rationale&gt;           This is required for H.264 and Theora, for example.         &lt;/tp:rationale&gt;</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpMediaStreamHandler"><type>TpMediaStreamHandler</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&nbsp;:</term>
+<listitem><simpara> Timeout in milliseconds, or -1 for default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Codecs</parameter>&nbsp;:</term>
+<listitem><simpara> Used to pass an 'in' argument: Locally supported codecs, which SHOULD be the same as were previously           in effect, but possibly with different parameters.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> 
+ is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>loop</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, set before re-entering 
+ the main loop, to point to a <link linkend="GMainLoop"><type>GMainLoop</type></link> 
+ which can be used to cancel this call with 
+ <link linkend="g-main-loop-quit"><function>g_main_loop_quit()</function></link>, causing a return of 
+ <link linkend="FALSE:CAPS"><literal>FALSE</literal></link> with <parameter>error</parameter> set to <link linkend="TP-DBUS-ERROR-CANCELLED:CAPS"><literal>TP_DBUS_ERROR_CANCELLED</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE and sets <parameter>error</parameter> on error
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 

@@ -45,8 +45,15 @@ struct _TpChannelPrivate {
     GQuark channel_type;
     TpHandleType handle_type;
     TpHandle handle;
+    gchar *identifier;
     /* owned string (iface + "." + prop) => slice-allocated GValue */
     GHashTable *channel_properties;
+
+    /* Set until introspection discovers which to use; both NULL after one has
+     * been disconnected.
+     */
+    TpProxySignalConnection *members_changed_sig;
+    TpProxySignalConnection *members_changed_detailed_sig;
 
     TpHandle group_self_handle;
     TpChannelGroupFlags group_flags;
