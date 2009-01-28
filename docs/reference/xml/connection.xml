@@ -381,6 +381,19 @@
                                                          <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
                                                          <link linkend="GObject">GObject</link> *weak_object,
                                                          <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-connection-signal-callback-connection-error">*tp_cli_connection_signal_callback_connection_error</link>)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *arg_Error,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Details,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* <link linkend="tp-cli-connection-connect-to-connection-error">tp_cli_connection_connect_to_connection_error</link>
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="tp-cli-connection-signal-callback-connection-error">tp_cli_connection_signal_callback_connection_error</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
 </synopsis>
 </refsynopsisdiv>
 
@@ -2827,6 +2840,83 @@ Connect a handler to the signal StatusChanged.
 </para>
 <para>
 Emitted when the status of the connection changes.  All states and         reasons have numerical values, as defined in ConnectionStatus         and ConnectionStatusReason.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="TpConnection"><type>TpConnection</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&nbsp;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> If not <link linkend="NULL:CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL:CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-signal-callback-connection-error" role="function">
+<title>tp_cli_connection_signal_callback_connection_error ()</title>
+<indexterm zone="tp-cli-connection-signal-callback-connection-error"><primary>tp_cli_connection_signal_callback_connection_error</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_connection_signal_callback_connection_error)
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> *arg_Error,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Details,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal ConnectionError.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&nbsp;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-connection-connect-to-connection-error"><function>tp_cli_connection_connect_to_connection_error()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Error</parameter>&nbsp;:</term>
+<listitem><simpara> The name of a D-Bus error describing the error that occurred,           which may correspond to a           &lt;tp:type&gt;Connection_Status_Reason&lt;/tp:type&gt; or be a           protocol-specific or connection-manager-specific error in a           suitable namespace.            &lt;tp:rationale&gt;             For instance, a SIP connection manager could signal             &amp;quot;402 Payment Required&amp;quot; as an error in a             connection-manager-specific namespace, or a link-local             XMPP implementation that used Avahi could provide the error             given to it by the avahi-daemon.           &lt;/tp:rationale&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Details</parameter>&nbsp;:</term>
+<listitem><simpara> &lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;           &lt;p&gt;Additional information about the error, which may include             the following well-known keys:&lt;/p&gt;            &lt;dl&gt;             &lt;dt&gt;debug-message (s)&lt;/dt&gt;             &lt;dd&gt;Debugging information on the change, corresponding to the               message part of a D-Bus error message, which SHOULD NOT be               displayed to users under normal circumstances&lt;/dd&gt;           &lt;/dl&gt;            &lt;tp:rationale&gt;             &lt;p&gt;This argument allows for future extensions. For instance,               if indicating DNS lookup failure, we could define a key               that indicates the hostname that could not be found.&lt;/p&gt;           &lt;/tp:rationale&gt;
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&nbsp;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-connection-connect-to-connection-error" role="function">
+<title>tp_cli_connection_connect_to_connection_error ()</title>
+<indexterm zone="tp-cli-connection-connect-to-connection-error"><primary>tp_cli_connection_connect_to_connection_error</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link>* tp_cli_connection_connect_to_connection_error
+                                                        (<link linkend="TpConnection">TpConnection</link> *proxy,
+                                                         <link linkend="tp-cli-connection-signal-callback-connection-error">tp_cli_connection_signal_callback_connection_error</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal ConnectionError.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Emitted when an error occurs that renders this connection unusable.         &lt;/p&gt;          &lt;p&gt;Whenever this signal is emitted, it MUST immediately be followed by           a &lt;tp:member-ref&gt;StatusChanged&lt;/tp:member-ref&gt; signal with status           Connection_Status_Reason_Disconnected and an appropriate reason           code.&lt;/p&gt;          &lt;p&gt;Connection managers SHOULD emit this signal on disconnection, but           need not do so. Clients MUST support connection managers that emit           StatusChanged(Disconnected, ...) without first emitting           ConnectionError.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This signal provides additional information about the reason             for disconnection. The reason for connection is always             straightforward - it was requested - so it does not need further             explanation. However, on errors, it can be useful to provide             additional information.&lt;/p&gt;            &lt;p&gt;The &lt;tp:type&gt;Connection_Status_Reason&lt;/tp:type&gt; is not given             here, since it will be signalled in             &lt;tp:member-ref&gt;StatusChanged&lt;/tp:member-ref&gt;. A reasonable client             implementation would be to store the information given by this             signal until StatusChanged is received, at which point the             information given by this signal can be used to supplement the             StatusChanged signal.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
 <para>
 
 </para><variablelist role="params">

@@ -308,6 +308,9 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 } TpConnectionStatusReason;
 </pre>
 <p>
+         A reason why the status of the connection changed. Apart from           Requested, the values of this enumeration only make sense as           reasons why the status changed to Disconnected.       
+</p>
+<p>
 Bitfield/set of flags generated from the Telepathy specification.</p>
 <p>
 
@@ -317,72 +320,72 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tbody>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-NONE-SPECIFIED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED</code></span></p></td>
-<td>              There is no reason set for this state change.         
+<td>            There is no reason set for this state change. Unknown status             reasons SHOULD be treated like this reason.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Disconnected.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-REQUESTED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_REQUESTED</code></span></p></td>
-<td>              The change is in response to a user request.         
+<td>            The change is in response to a user request. Changes to the             Connecting or Connected status SHOULD always indicate this reason;             changes to the Disconnected status SHOULD indicate this reason             if and only if the disconnection was requested by the user.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cancelled.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-NETWORK-ERROR:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_NETWORK_ERROR</code></span></p></td>
-<td>              There was an error sending or receiving on the network socket.         
+<td>            There was an error sending or receiving on the network socket.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NetworkError.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-AUTHENTICATION-FAILED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_AUTHENTICATION_FAILED</code></span></p></td>
-<td>              The username or password was invalid.         
+<td>            The username or password was invalid.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.AuthenticationFailed.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-ENCRYPTION-ERROR:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_ENCRYPTION_ERROR</code></span></p></td>
-<td>              There was an error negotiating SSL on this connection, or             encryption was unavailable and require-encryption was set when the             connection was created.         
+<td>            There was an error negotiating SSL on this connection, or             encryption was unavailable and require-encryption was set when the             connection was created.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.EncryptionNotAvailable             if encryption was not available at all, or             org.freedesktop.Telepathy.Error.EncryptionError             if encryption failed.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-NAME-IN-USE:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_NAME_IN_USE</code></span></p></td>
-<td>              Someone is already connected to the server using the name             you are trying to connect with.         
+<td>            In general, this reason indicates that the requested account             name or other identification could not be used due to conflict             with another connection. It can be divided into three cases:                         If the status change is from Connecting to Disconnected               and the 'register' parameter to RequestConnection was present               and true, the requested account could not be created on the               server because it already exists.              If the status change is from Connecting to Disconnected               but the 'register' parameter is absent or false, the connection               manager could not connect to the specified account because               a connection to that account already exists.                                 In some protocols, like XMPP (when connecting with the same                 JID and resource as an existing connection), the existing                 connection "wins" and the new one fails to connect.                                          If the status change is from Connected to Disconnected,               the existing connection was automatically disconnected because               a new connection to the same account (perhaps from a different               client or location) was established.                                 In some protocols, like MSNP (when connecting twice with the                 same Passport), the new connection "wins" and the                 existing one is automatically disconnected.                                                   When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NotYours.                                    These three errors are distinct but very similar, and can be             distinguished by other factors.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-NOT-PROVIDED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_NOT_PROVIDED</code></span></p></td>
-<td>              The server did not provide a SSL certificate.         
+<td>            The server did not provide a SSL certificate.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.NotProvided.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-UNTRUSTED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_UNTRUSTED</code></span></p></td>
-<td>              The server's SSL certificate could not be trusted.         
+<td>            The server's SSL certificate is signed by an untrusted certifying             authority. This error SHOULD NOT be used to represent a self-signed             certificate: use the more specific Cert_Self_Signed reason for             that.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Untrusted.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-EXPIRED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_EXPIRED</code></span></p></td>
-<td>              The server's SSL certificate has expired.         
+<td>            The server's SSL certificate has expired.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Expired.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-NOT-ACTIVATED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_NOT_ACTIVATED</code></span></p></td>
-<td>              The server's SSL certificate is not yet valid.         
+<td>            The server's SSL certificate is not yet valid.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.NotActivated.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-HOSTNAME-MISMATCH:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_HOSTNAME_MISMATCH</code></span></p></td>
-<td>              The server's SSL certificate did not match its hostname.         
+<td>            The server's SSL certificate did not match its hostname.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.HostnameMismatch.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-FINGERPRINT-MISMATCH:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_FINGERPRINT_MISMATCH</code></span></p></td>
-<td>              The server's SSL certificate does not have the expected             fingerprint.         
+<td>            The server's SSL certificate does not have the expected             fingerprint.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.FingerprintMismatch.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-SELF-SIGNED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_SELF_SIGNED</code></span></p></td>
-<td>              The server's SSL certificate is self-signed.         
+<td>            The server's SSL certificate is self-signed.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.HostnameMismatch.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-OTHER-ERROR:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_OTHER_ERROR</code></span></p></td>
-<td>              There was some other error validating the server's SSL certificate.         
+<td>            There was some other error validating the server's SSL             certificate.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Invalid.                    
 </td>
 </tr>
 </tbody>
@@ -827,7 +830,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 } TpChannelMediaCapabilities;
 </pre>
 <p>
-         The channel-type-specific capability flags used for         Channel.Type.StreamedMedia in the Connection.Interface.Capabilities         interface.       
+         The channel-type-specific capability flags used for         Channel.Type.StreamedMedia in the Connection.Interface.Capabilities         interface. See the FUTURE.InitialAudio         property for details of the mechanisms that will replace this.       
 </p>
 <p>
 Bitfield/set of flags generated from the Telepathy specification.</p>
@@ -1209,27 +1212,27 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-OFFLINE:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_OFFLINE</code></span></p></td>
-<td>              The change is due to a user going offline. Also used when             user is already offline, but this wasn't known previously.         
+<td>            The change is due to a user going offline. Also used when             user is already offline, but this wasn't known previously.            If a one-to-one StreamedMedia             call fails because the contact being called is offline, the             connection manager SHOULD indicate this by removing both the             SelfHandle and the other contact's             handle from the Group interface with reason Offline.                         For 1-1 calls, the call terminates as a result of removing the             remote contact, so the SelfHandle should be removed at the same             time as the remote contact and for the same reason.                       If a handle is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Offline.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-KICKED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_KICKED</code></span></p></td>
-<td>              The change is due to a kick operation.         
+<td>            The change is due to a kick operation.            If the SelfHandle is removed             from a group for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Channel.Kicked.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-BUSY:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_BUSY</code></span></p></td>
-<td>              The change is due to a busy indication.         
+<td>            The change is due to a busy indication.            If a one-to-one StreamedMedia             call fails because the contact being called is busy, the             connection manager SHOULD indicate this by removing both the             SelfHandle and the other contact's             handle from the Group interface with reason Busy.                         For 1-1 calls, the call terminates as a result of removing the             remote contact, so the SelfHandle should be removed at the same             time as the remote contact and for the same reason.                       If the SelfHandle is removed             from a group for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Busy.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-INVITED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_INVITED</code></span></p></td>
-<td>              The change is due to an invitation.         
+<td>            The change is due to an invitation. This reason SHOULD only be used           when contacts are added to the remote-pending set (to indicate that           the contact has been invited) or to the members (to indicate that           the contact has accepted the invitation).                         Otherwise, what would it mean?                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-BANNED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_BANNED</code></span></p></td>
-<td>              The change is due to a kick+ban operation.         
+<td>            The change is due to a kick+ban operation.            If the SelfHandle is removed             from a group for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Channel.Banned.                    
 </td>
 </tr>
 <tr>
@@ -1239,12 +1242,12 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-INVALID-CONTACT:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_INVALID_CONTACT</code></span></p></td>
-<td>              The change is because the requested contact does not exist.         
+<td>            The change is because the requested contact does not exist.            For instance, if the user invites a nonexistent contact to a             chatroom or attempts to call a nonexistent contact, this could             be indicated by the CM adding that contact's handle to             remote-pending for reason None or Invited, then removing it for             reason Invalid_Contact. In the case of a 1-1 StreamedMedia             call, the CM SHOULD remove the self handle from the Group             in the same signal.                         For 1-1 calls, the call terminates as a result of removing the             remote contact, so the SelfHandle should be removed at the same             time as the remote contact and for the same reason.                       If a contact is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.DoesNotExist.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-NO-ANSWER:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_NO_ANSWER</code></span></p></td>
-<td>              The change is because the requested contact did not respond.         
+<td>            The change is because the requested contact did not respond.            If a one-to-one StreamedMedia             call fails because the contact being called did not respond, the             connection manager SHOULD indicate this by removing both the             SelfHandle and the other contact's             handle from the Group interface with reason No_Answer.                         Documenting existing practice.                       If a contact is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NoAnswer.                    
 </td>
 </tr>
 <tr>
@@ -1254,12 +1257,12 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-PERMISSION-DENIED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_PERMISSION_DENIED</code></span></p></td>
-<td>              The change is because there was no permission to contact the             requested handle.         
+<td>            The change is because there was no permission to contact the             requested handle.            If a contact is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.PermissionDenied.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-GROUP-CHANGE-REASON-SEPARATED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_GROUP_CHANGE_REASON_SEPARATED</code></span></p></td>
-<td>            If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text             or Tubes             channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                    
+<td>            If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text             or Tubes             channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                       The SelfHandle SHOULD NOT be             removed from channels with this reason.         
 </td>
 </tr>
 </tbody>
