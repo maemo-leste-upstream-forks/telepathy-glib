@@ -50,6 +50,11 @@
 <link linkend="void">void</link>                <link linkend="tp-base-connection-change-status">tp_base_connection_change_status</link>    (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
                                                          <link linkend="TpConnectionStatus">TpConnectionStatus</link> status,
                                                          <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> reason);
+<link linkend="void">void</link>                <link linkend="tp-base-connection-disconnect-with-dbus-error">tp_base_connection_disconnect_with_dbus_error</link>
+                                                        (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *error_name,
+                                                         <link linkend="GHashTable">GHashTable</link> *details,
+                                                         <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> reason);
 <link linkend="void">void</link>                <link linkend="tp-base-connection-finish-shutdown">tp_base_connection_finish_shutdown</link>  (<link linkend="TpBaseConnection">TpBaseConnection</link> *self);
 <link linkend="void">void</link>                <link linkend="tp-base-connection-add-interfaces">tp_base_connection_add_interfaces</link>   (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
                                                          const <link linkend="gchar">gchar</link> **interfaces);
@@ -596,6 +601,41 @@ any, and set it to 0</listitem>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>reason</parameter>&nbsp;:</term>
 <listitem><simpara> The reason for the status change
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-base-connection-disconnect-with-dbus-error" role="function">
+<title>tp_base_connection_disconnect_with_dbus_error ()</title>
+<indexterm zone="tp-base-connection-disconnect-with-dbus-error"><primary>tp_base_connection_disconnect_with_dbus_error</primary></indexterm><programlisting><link linkend="void">void</link>                tp_base_connection_disconnect_with_dbus_error
+                                                        (<link linkend="TpBaseConnection">TpBaseConnection</link> *self,
+                                                         const <link linkend="gchar">gchar</link> *error_name,
+                                                         <link linkend="GHashTable">GHashTable</link> *details,
+                                                         <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> reason);</programlisting>
+<para>
+Change the status of the connection to <link linkend="TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><literal>TP_CONNECTION_STATUS_DISCONNECTED</literal></link>,
+as if by a call to <link linkend="tp-base-connection-change-status"><function>tp_base_connection_change_status()</function></link>. Before doing so,
+emit the ConnectionError D-Bus signal to give more details of the error.
+</para>
+<para>
+<parameter>details</parameter> may contain, among other entries, the well-known key
+"debug-message", whose value should have type G_TYPE_STRING.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error_name</parameter>&nbsp;:</term>
+<listitem><simpara> The D-Bus error with which the connection changed status to
+             Disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>details</parameter>&nbsp;:</term>
+<listitem><simpara> Further details of the error, as a hash table where the keys
+          are strings as defined in the Telepathy specification, and the
+          values are GValues. <link linkend="NULL:CAPS"><literal>NULL</literal></link> is allowed, and treated as empty.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>reason</parameter>&nbsp;:</term>
+<listitem><simpara> The reason code to use in the StatusChanged signal
+         (a less specific, non-extensible version of <parameter>error_name</parameter>)
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-base-connection-finish-shutdown" role="function">

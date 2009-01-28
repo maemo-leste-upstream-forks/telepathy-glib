@@ -271,78 +271,81 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 } TpConnectionStatusReason;
 </programlisting>
 <para>
+<![CDATA[         A reason why the status of the connection changed. Apart from           Requested, the values of this enumeration only make sense as           reasons why the status changed to Disconnected.       ]]>
+</para>
+<para>
 Bitfield/set of flags generated from the Telepathy specification.</para>
 <para>
 
 </para><variablelist role="enum">
 <varlistentry id="TP-CONNECTION-STATUS-REASON-NONE-SPECIFIED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED</literal></term>
-<listitem><simpara> <![CDATA[             There is no reason set for this state change.         ]]>
+<listitem><simpara> <![CDATA[           There is no reason set for this state change. Unknown status             reasons SHOULD be treated like this reason.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Disconnected.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-REQUESTED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_REQUESTED</literal></term>
-<listitem><simpara> <![CDATA[             The change is in response to a user request.         ]]>
+<listitem><simpara> <![CDATA[           The change is in response to a user request. Changes to the             Connecting or Connected status SHOULD always indicate this reason;             changes to the Disconnected status SHOULD indicate this reason             if and only if the disconnection was requested by the user.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cancelled.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-NETWORK-ERROR:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_NETWORK_ERROR</literal></term>
-<listitem><simpara> <![CDATA[             There was an error sending or receiving on the network socket.         ]]>
+<listitem><simpara> <![CDATA[           There was an error sending or receiving on the network socket.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NetworkError.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-AUTHENTICATION-FAILED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_AUTHENTICATION_FAILED</literal></term>
-<listitem><simpara> <![CDATA[             The username or password was invalid.         ]]>
+<listitem><simpara> <![CDATA[           The username or password was invalid.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.AuthenticationFailed.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-ENCRYPTION-ERROR:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_ENCRYPTION_ERROR</literal></term>
-<listitem><simpara> <![CDATA[             There was an error negotiating SSL on this connection, or             encryption was unavailable and require-encryption was set when the             connection was created.         ]]>
+<listitem><simpara> <![CDATA[           There was an error negotiating SSL on this connection, or             encryption was unavailable and require-encryption was set when the             connection was created.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.EncryptionNotAvailable             if encryption was not available at all, or             org.freedesktop.Telepathy.Error.EncryptionError             if encryption failed.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-NAME-IN-USE:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_NAME_IN_USE</literal></term>
-<listitem><simpara> <![CDATA[             Someone is already connected to the server using the name             you are trying to connect with.         ]]>
+<listitem><simpara> <![CDATA[           In general, this reason indicates that the requested account             name or other identification could not be used due to conflict             with another connection. It can be divided into three cases:                         If the status change is from Connecting to Disconnected               and the 'register' parameter to RequestConnection was present               and true, the requested account could not be created on the               server because it already exists.              If the status change is from Connecting to Disconnected               but the 'register' parameter is absent or false, the connection               manager could not connect to the specified account because               a connection to that account already exists.                                 In some protocols, like XMPP (when connecting with the same                 JID and resource as an existing connection), the existing                 connection "wins" and the new one fails to connect.                                          If the status change is from Connected to Disconnected,               the existing connection was automatically disconnected because               a new connection to the same account (perhaps from a different               client or location) was established.                                 In some protocols, like MSNP (when connecting twice with the                 same Passport), the new connection "wins" and the                 existing one is automatically disconnected.                                                   When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NotYours.                                    These three errors are distinct but very similar, and can be             distinguished by other factors.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-NOT-PROVIDED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_NOT_PROVIDED</literal></term>
-<listitem><simpara> <![CDATA[             The server did not provide a SSL certificate.         ]]>
+<listitem><simpara> <![CDATA[           The server did not provide a SSL certificate.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.NotProvided.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-UNTRUSTED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_UNTRUSTED</literal></term>
-<listitem><simpara> <![CDATA[             The server's SSL certificate could not be trusted.         ]]>
+<listitem><simpara> <![CDATA[           The server's SSL certificate is signed by an untrusted certifying             authority. This error SHOULD NOT be used to represent a self-signed             certificate: use the more specific Cert_Self_Signed reason for             that.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Untrusted.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-EXPIRED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_EXPIRED</literal></term>
-<listitem><simpara> <![CDATA[             The server's SSL certificate has expired.         ]]>
+<listitem><simpara> <![CDATA[           The server's SSL certificate has expired.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Expired.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-NOT-ACTIVATED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_NOT_ACTIVATED</literal></term>
-<listitem><simpara> <![CDATA[             The server's SSL certificate is not yet valid.         ]]>
+<listitem><simpara> <![CDATA[           The server's SSL certificate is not yet valid.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.NotActivated.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-HOSTNAME-MISMATCH:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_HOSTNAME_MISMATCH</literal></term>
-<listitem><simpara> <![CDATA[             The server's SSL certificate did not match its hostname.         ]]>
+<listitem><simpara> <![CDATA[           The server's SSL certificate did not match its hostname.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.HostnameMismatch.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-FINGERPRINT-MISMATCH:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_FINGERPRINT_MISMATCH</literal></term>
-<listitem><simpara> <![CDATA[             The server's SSL certificate does not have the expected             fingerprint.         ]]>
+<listitem><simpara> <![CDATA[           The server's SSL certificate does not have the expected             fingerprint.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.FingerprintMismatch.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-SELF-SIGNED:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_SELF_SIGNED</literal></term>
-<listitem><simpara> <![CDATA[             The server's SSL certificate is self-signed.         ]]>
+<listitem><simpara> <![CDATA[           The server's SSL certificate is self-signed.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.HostnameMismatch.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CONNECTION-STATUS-REASON-CERT-OTHER-ERROR:CAPS" role="constant">
 <term><literal>TP_CONNECTION_STATUS_REASON_CERT_OTHER_ERROR</literal></term>
-<listitem><simpara> <![CDATA[             There was some other error validating the server's SSL certificate.         ]]>
+<listitem><simpara> <![CDATA[           There was some other error validating the server's SSL             certificate.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Invalid.                    ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>
@@ -726,7 +729,7 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 } TpChannelMediaCapabilities;
 </programlisting>
 <para>
-<![CDATA[         The channel-type-specific capability flags used for         Channel.Type.StreamedMedia in the Connection.Interface.Capabilities         interface.       ]]>
+<![CDATA[         The channel-type-specific capability flags used for         Channel.Type.StreamedMedia in the Connection.Interface.Capabilities         interface. See the FUTURE.InitialAudio         property for details of the mechanisms that will replace this.       ]]>
 </para>
 <para>
 Bitfield/set of flags generated from the Telepathy specification.</para>
@@ -1063,27 +1066,27 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-OFFLINE:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_OFFLINE</literal></term>
-<listitem><simpara> <![CDATA[             The change is due to a user going offline. Also used when             user is already offline, but this wasn't known previously.         ]]>
+<listitem><simpara> <![CDATA[           The change is due to a user going offline. Also used when             user is already offline, but this wasn't known previously.            If a one-to-one StreamedMedia             call fails because the contact being called is offline, the             connection manager SHOULD indicate this by removing both the             SelfHandle and the other contact's             handle from the Group interface with reason Offline.                         For 1-1 calls, the call terminates as a result of removing the             remote contact, so the SelfHandle should be removed at the same             time as the remote contact and for the same reason.                       If a handle is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Offline.         ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-KICKED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_KICKED</literal></term>
-<listitem><simpara> <![CDATA[             The change is due to a kick operation.         ]]>
+<listitem><simpara> <![CDATA[           The change is due to a kick operation.            If the SelfHandle is removed             from a group for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Channel.Kicked.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-BUSY:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_BUSY</literal></term>
-<listitem><simpara> <![CDATA[             The change is due to a busy indication.         ]]>
+<listitem><simpara> <![CDATA[           The change is due to a busy indication.            If a one-to-one StreamedMedia             call fails because the contact being called is busy, the             connection manager SHOULD indicate this by removing both the             SelfHandle and the other contact's             handle from the Group interface with reason Busy.                         For 1-1 calls, the call terminates as a result of removing the             remote contact, so the SelfHandle should be removed at the same             time as the remote contact and for the same reason.                       If the SelfHandle is removed             from a group for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Busy.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-INVITED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_INVITED</literal></term>
-<listitem><simpara> <![CDATA[             The change is due to an invitation.         ]]>
+<listitem><simpara> <![CDATA[           The change is due to an invitation. This reason SHOULD only be used           when contacts are added to the remote-pending set (to indicate that           the contact has been invited) or to the members (to indicate that           the contact has accepted the invitation).                         Otherwise, what would it mean?                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-BANNED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_BANNED</literal></term>
-<listitem><simpara> <![CDATA[             The change is due to a kick+ban operation.         ]]>
+<listitem><simpara> <![CDATA[           The change is due to a kick+ban operation.            If the SelfHandle is removed             from a group for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Channel.Banned.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-ERROR:CAPS" role="constant">
@@ -1093,12 +1096,12 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-INVALID-CONTACT:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_INVALID_CONTACT</literal></term>
-<listitem><simpara> <![CDATA[             The change is because the requested contact does not exist.         ]]>
+<listitem><simpara> <![CDATA[           The change is because the requested contact does not exist.            For instance, if the user invites a nonexistent contact to a             chatroom or attempts to call a nonexistent contact, this could             be indicated by the CM adding that contact's handle to             remote-pending for reason None or Invited, then removing it for             reason Invalid_Contact. In the case of a 1-1 StreamedMedia             call, the CM SHOULD remove the self handle from the Group             in the same signal.                         For 1-1 calls, the call terminates as a result of removing the             remote contact, so the SelfHandle should be removed at the same             time as the remote contact and for the same reason.                       If a contact is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.DoesNotExist.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-NO-ANSWER:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_NO_ANSWER</literal></term>
-<listitem><simpara> <![CDATA[             The change is because the requested contact did not respond.         ]]>
+<listitem><simpara> <![CDATA[           The change is because the requested contact did not respond.            If a one-to-one StreamedMedia             call fails because the contact being called did not respond, the             connection manager SHOULD indicate this by removing both the             SelfHandle and the other contact's             handle from the Group interface with reason No_Answer.                         Documenting existing practice.                       If a contact is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NoAnswer.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-RENAMED:CAPS" role="constant">
@@ -1108,12 +1111,12 @@ Bitfield/set of flags generated from the Telepathy specification.</para>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-PERMISSION-DENIED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_PERMISSION_DENIED</literal></term>
-<listitem><simpara> <![CDATA[             The change is because there was no permission to contact the             requested handle.         ]]>
+<listitem><simpara> <![CDATA[           The change is because there was no permission to contact the             requested handle.            If a contact is removed from a group for this reason, the             equivalent D-Bus error is             org.freedesktop.Telepathy.Error.PermissionDenied.                    ]]>
 </simpara></listitem>
 </varlistentry>
 <varlistentry id="TP-CHANNEL-GROUP-CHANGE-REASON-SEPARATED:CAPS" role="constant">
 <term><literal>TP_CHANNEL_GROUP_CHANGE_REASON_SEPARATED</literal></term>
-<listitem><simpara> <![CDATA[           If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text             or Tubes             channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                    ]]>
+<listitem><simpara> <![CDATA[           If members are removed with this reason code, the change is             because the group has split into unconnected parts which can only             communicate within themselves (e.g. netsplits on IRC use this             reason code).                                   If members are added with this reason code, the change is because             unconnected parts of the group have rejoined. If this channel             carries messages (e.g. Text             or Tubes             channels) applications must             assume that the contacts being added are likely to have missed some             messages as a result of the separation, and that the contacts             in the group are likely to have missed some messages from the             contacts being added.                      Note that from the added contacts' perspective, they have been             in the group all along, and the contacts we indicate to be in             the group (including the local user) have just rejoined             the group with reason Separated. Application protocols in Tubes             should be prepared to cope with this situation.                       The SelfHandle SHOULD NOT be             removed from channels with this reason.         ]]>
 </simpara></listitem>
 </varlistentry>
 </variablelist></refsect2>

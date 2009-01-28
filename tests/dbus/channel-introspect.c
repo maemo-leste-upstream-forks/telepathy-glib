@@ -118,6 +118,7 @@ main (int argc,
 
   g_type_init ();
   tp_debug_set_flags ("all");
+  dbus = tp_dbus_daemon_new (tp_get_bus ());
 
   service_conn = SIMPLE_CONNECTION (g_object_new (SIMPLE_TYPE_CONNECTION,
         "account", "me@example.com",
@@ -131,7 +132,6 @@ main (int argc,
         &name, &conn_path, &error), "");
   MYASSERT_NO_ERROR (error);
 
-  dbus = tp_dbus_daemon_new (tp_get_bus ());
   conn = tp_connection_new (dbus, name, conn_path, &error);
   MYASSERT (conn != NULL, "");
   MYASSERT_NO_ERROR (error);
@@ -462,10 +462,10 @@ main (int argc,
   tp_channel_call_when_ready (chan, channel_ready, &was_ready);
   MYASSERT (was_ready == TRUE, "");
   MYASSERT (invalidated != NULL, "");
-  MYASSERT (invalidated->domain == TP_ERRORS_DISCONNECTED,
-      "%s", g_quark_to_string (invalidated->domain));
-  MYASSERT (invalidated->code == TP_CONNECTION_STATUS_REASON_REQUESTED,
-      "%u", invalidated->code);
+  MYASSERT (invalidated->domain == TP_ERRORS,
+      ": %s", g_quark_to_string (invalidated->domain));
+  MYASSERT (invalidated->code == TP_ERROR_CANCELLED,
+      ": %u", invalidated->code);
   g_error_free (invalidated);
   invalidated = NULL;
 

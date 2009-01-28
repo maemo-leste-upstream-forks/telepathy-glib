@@ -36,6 +36,10 @@
 const <link linkend="gchar">gchar</link>*        <link linkend="tp-proxy-get-bus-name">tp_proxy_get_bus_name</link>               (<link linkend="gpointer">gpointer</link> self);
 const <link linkend="gchar">gchar</link>*        <link linkend="tp-proxy-get-object-path">tp_proxy_get_object_path</link>            (<link linkend="gpointer">gpointer</link> self);
 const <link linkend="GError">GError</link>*       <link linkend="tp-proxy-get-invalidated">tp_proxy_get_invalidated</link>            (<link linkend="gpointer">gpointer</link> self);
+<link linkend="void">void</link>                <link linkend="tp-proxy-dbus-error-to-gerror">tp_proxy_dbus_error_to_gerror</link>       (<link linkend="gpointer">gpointer</link> self,
+                                                         const <link linkend="char">char</link> *dbus_error,
+                                                         const <link linkend="char">char</link> *debug_message,
+                                                         <link linkend="GError">GError</link> **error);
 #define             <link linkend="TP-DBUS-ERRORS:CAPS">TP_DBUS_ERRORS</link>
 enum                <link linkend="TpDBusError">TpDBusError</link>;
 </synopsis>
@@ -329,6 +333,34 @@ explicitly free it either.</para>
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.17
 </para></refsect2>
+<refsect2 id="tp-proxy-dbus-error-to-gerror" role="function">
+<title>tp_proxy_dbus_error_to_gerror ()</title>
+<indexterm zone="tp-proxy-dbus-error-to-gerror"><primary>tp_proxy_dbus_error_to_gerror</primary></indexterm><programlisting><link linkend="void">void</link>                tp_proxy_dbus_error_to_gerror       (<link linkend="gpointer">gpointer</link> self,
+                                                         const <link linkend="char">char</link> *dbus_error,
+                                                         const <link linkend="char">char</link> *debug_message,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Convert a D-Bus error name into a GError as if it was returned by a method
+on this proxy. This method is useful when D-Bus error names are emitted in
+signals, such as Connection.ConnectionError and
+Group.MembersChangedDetailed.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a <link linkend="TpProxy"><type>TpProxy</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>dbus_error</parameter>&nbsp;:</term>
+<listitem><simpara> a D-Bus error name, for instance from the callback for
+             <link linkend="tp-cli-connection-connect-to-connection-error"><function>tp_cli_connection_connect_to_connection_error()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>debug_message</parameter>&nbsp;:</term>
+<listitem><simpara> a debug message that accompanied the error name, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> used to return the corresponding <link linkend="GError"><type>GError</type></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="TP-DBUS-ERRORS:CAPS" role="macro" condition="since:0.7.1">
 <title>TP_DBUS_ERRORS</title>
 <indexterm zone="TP-DBUS-ERRORS:CAPS" role="0.7.1"><primary>TP_DBUS_ERRORS</primary></indexterm><programlisting>#define TP_DBUS_ERRORS (tp_dbus_errors_quark ())

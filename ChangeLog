@@ -1,3 +1,233 @@
+commit ab7714cbe5332c2c71e583c94108b176f99daf24
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 17:45:15 +0000
+
+    Prepare version 0.7.24
+
+ NEWS                               |   18 +++++++++++++++++-
+ configure.ac                       |    8 ++++----
+ telepathy-glib/Makefile.am         |    3 ++-
+ telepathy-glib/versions/0.7.24.abi |    8 ++++++++
+ 4 files changed, 31 insertions(+), 6 deletions(-)
+
+commit 59e00e929529661a5b527e8e57c7bf97c59936a7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 16:46:29 +0000
+
+    Update to spec 0.17.19 release
+
+ spec/Channel_Interface_Group.xml                   |  124 +++++++++++---
+ spec/Channel_Interface_Media_Signalling.xml        |   46 ++++--
+ spec/Channel_Interface_Media_Signalling_Future.xml |  189 ++++++++++++++++++++
+ spec/Channel_Type_Streamed_Media.xml               |   12 +-
+ spec/Channel_Type_Streamed_Media_Future.xml        |  166 +++++++++++++++++
+ spec/Connection.xml                                |   69 ++++----
+ spec/Makefile.am                                   |    2 +
+ spec/all.xml                                       |    4 +-
+ spec/errors.xml                                    |   61 +++++++
+ 9 files changed, 604 insertions(+), 69 deletions(-)
+
+commit ee694d522887c28ec677a1c35931113854f72f41
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 12:42:24 +0000
+
+    tests/dbus/connection-error.c: exercise custom error remapping and the client side of ConnectionError
+
+ tests/dbus/connection-error.c |   58 +++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 58 insertions(+), 0 deletions(-)
+
+commit c27b970f8407ffac4134544d387afdd033bbc994
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 12:41:52 +0000
+
+    tests/dbus/connection.c: add a simple regression test for mapping user-requested disconnection to TP_ERROR_CANCELLED
+    
+    This goes via the old code path in TpConnection, using the status
+    reason.
+
+ tests/dbus/connection.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 3082d66135a91af874baf9b02a448eab027d82aa
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 12:40:58 +0000
+
+    TpConnection: add the client side of ConnectionError
+    
+    This includes a behaviour change which affects the regression
+    tests. Previously, all disconnections were mapped to
+    the TP_ERROR_DISCONNECTED domain; now, they use the errors
+    introduced in telepathy-spec 0.17.19 whenever possible.
+
+ telepathy-glib/connection-internal.h          |    1 +
+ telepathy-glib/connection.c                   |  124 ++++++++++++++++++++++++-
+ tests/dbus/channel-introspect.c               |    8 +-
+ tests/dbus/finalized-in-invalidated-handler.c |    4 +-
+ 4 files changed, 126 insertions(+), 11 deletions(-)
+
+commit d0cd24c55aa7a78cf0dbe6a17ca47c9de68d9566
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 12:38:56 +0000
+
+    TpProxy: expose a method to map D-Bus errors to GErrors
+    
+    This is useful for ConnectionError and MembersChangedDetailed.
+    
+    Code adapted from the internal function
+    _tp_proxy_take_and_remap_error.
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/proxy.c                     |  109 +++++++++++++++++++---------
+ telepathy-glib/proxy.h                     |    3 +
+ 3 files changed, 77 insertions(+), 36 deletions(-)
+
+commit 12ecb8a4e195d74dddb6a4261fb5b9537b54ff9d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 12:26:06 +0000
+
+    glib-errors-enum-body-gen.py: explicitly 0-terminate the value array
+    
+    Previously, it worked only by coincidence.
+
+ tools/glib-errors-enum-body-gen.py |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 7378059c99de6a4be93f0e4a856f04374dde2ada
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 11:30:15 +0000
+
+    Add a feature test for emitting ConnectionError
+
+ .gitignore                    |    1 +
+ tests/dbus/Makefile.am        |    3 +
+ tests/dbus/connection-error.c |  115 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 119 insertions(+), 0 deletions(-)
+
+commit 0a25436a8caa2579eb3a29d933b3ba8d093e0ac1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 11:30:02 +0000
+
+    Add a simple C binding for ConnectionError
+    
+    Unfortunately, dbus-glib doesn't expose the algorithm it uses to
+    map from a GError to a D-Bus error name, so we can't just take a
+    GError as argument. When that's fixed, we can add a version that
+    takes a GError, so I've reserved the simpler name for that.
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/base-connection.c           |   42 ++++++++++++++++++++++++++++
+ telepathy-glib/base-connection.h           |   10 ++++++
+ 3 files changed, 53 insertions(+), 0 deletions(-)
+
+commit e5532f0138978e0936fa9c4445ffe96f1c005a8f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 10:56:28 +0000
+
+    Update spec to 0.17.19 prerelease
+
+ docs/reference/telepathy-glib-sections.txt |    3 +
+ spec/Channel_Interface_Group.xml           |   29 +++-
+ spec/Channel_Interface_Tube.xml            |    6 +-
+ spec/Channel_Type_DBus_Tube.xml            |    2 +-
+ spec/Channel_Type_File_Transfer.xml        |    2 +-
+ spec/Connection.xml                        |  259 ++++++++++++++++++++++++----
+ spec/Connection_Interface_Contact_Info.xml |    2 +-
+ spec/Connection_Interface_Location.xml     |    2 +-
+ spec/Connection_Interface_Requests.xml     |   18 ++-
+ spec/all.xml                               |    2 +-
+ spec/errors.xml                            |  162 +++++++++++++++++-
+ 11 files changed, 437 insertions(+), 50 deletions(-)
+
+commit 5e3f547b948e4f9f36aa0154b5565494b3da0b22
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 10:27:29 +0000
+
+    tests: call tp_get_bus() earlier, to initialize specialized types
+    
+    Instantiating a DBusGConnection (which is done by tp_get_bus()) is
+    the only safe way to ensure that dbus-glib is initialized (see
+    fd.o #13908 for why dbus_g_type_specialized_init() isn't safe).
+    In principle, we need to do this initialization before creating
+    TpBaseConnection subclasses.
+    
+    Previously, this was coincidentally avoided because Connection
+    didn't actually use any specialized types, but the ConnectionError
+    signal that will be in the next spec release introduces a
+    specialized type.
+    
+    Mitigating factor: connection managers should all be using
+    tp_run_connection_manager(), which already calls tp_get_bus().
+
+ tests/dbus/channel-introspect.c                 |    2 +-
+ tests/dbus/cli-group.c                          |    2 +-
+ tests/dbus/connection-getinterfaces-failure.c   |    2 +-
+ tests/dbus/finalized-in-invalidated-handler.c   |    2 +-
+ tests/dbus/group-mixin.c                        |    2 +-
+ tests/dbus/invalidated-while-invoking-signals.c |    2 +-
+ tests/dbus/message-mixin.c                      |    2 +-
+ tests/dbus/text-mixin.c                         |    2 +-
+ tests/dbus/text-respawn.c                       |    2 +-
+ 9 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 1f4242baa58082cc2e96f560682f67718005336a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 10:21:00 +0000
+
+    Update NEWS
+
+ NEWS |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit 379817aec4010a2ff0700be2fc19c1dde0f4aa95
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-22 10:59:11 +0000
+
+    Fix generation of docs for File Transfer auto-generated stuff
+
+ docs/reference/telepathy-glib-docs.sgml |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 690cd4d899ef6a45087e634bd1de296c72853e70
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-21 13:53:23 +0000
+
+    Use xincludator.py (from telepathy-qt4) rather than abusing xsltproc to do XInclude.
+    
+    This helps with portability/cross-compilation. Our only remaining
+    use of XSLT is doc-generator.xsl which is used to compile docs for
+    the example extensions - I'd rather not disable this until we have
+    a Python script that will do sanity checking on spec extensions.
+
+ examples/extensions/Makefile.am |   10 ++++------
+ telepathy-glib/Makefile.am      |   13 ++++---------
+ tools/Makefile.am               |    4 ++--
+ tools/identity.xsl              |    7 -------
+ tools/xincludator.py            |   39 +++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 49 insertions(+), 24 deletions(-)
+
+commit 51bb01ccf6bd863ce80486400ff5b14c0a08a38a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-20 17:55:58 +0000
+
+    with-session-bus.sh: optionally sleep after running the test
+    
+    This is useful for the telepathy-gabble tests, to let Gabble exit
+    gracefully rather than being killed by libdbus when dbus-daemon exits;
+    exiting gracefully means that coverage data gets saved.
+
+ tools/with-session-bus.sh |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 2e7c84ecacf269b510e693e234ce64de5b99b7e3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-20 16:08:32 +0000
+
+    Start 0.7.24 development
+
+ NEWS         |    3 +++
+ configure.ac |    2 +-
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
 commit 00c5a864ed589f605ee59fe299540d85f5f56814
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-01-20 15:45:14 +0000

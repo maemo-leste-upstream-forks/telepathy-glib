@@ -39,6 +39,7 @@ host_triplet = @host@
 noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-cli-group$(EXEEXT) \
 	test-connection$(EXEEXT) test-connection-bug-18845$(EXEEXT) \
+	test-connection-error$(EXEEXT) \
 	test-connection-handles$(EXEEXT) \
 	test-connection-inject-bug16307$(EXEEXT) \
 	test-connection-getinterfaces-failure$(EXEEXT) \
@@ -96,6 +97,12 @@ test_connection_bug_18845_OBJECTS =  \
 	$(am_test_connection_bug_18845_OBJECTS)
 test_connection_bug_18845_LDADD = $(LDADD)
 test_connection_bug_18845_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_connection_error_OBJECTS = connection-error.$(OBJEXT)
+test_connection_error_OBJECTS = $(am_test_connection_error_OBJECTS)
+test_connection_error_LDADD = $(LDADD)
+test_connection_error_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_connection_getinterfaces_failure_OBJECTS =  \
@@ -232,6 +239,7 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_cli_group_SOURCES) $(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
+	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
@@ -249,6 +257,7 @@ DIST_SOURCES = test-call-cancellation.c \
 	$(test_channel_introspect_SOURCES) $(test_cli_group_SOURCES) \
 	$(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
+	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
@@ -410,6 +419,7 @@ test_cli_group_SOURCES = cli-group.c
 test_connection_SOURCES = connection.c
 test_connection_bug_18845_SOURCES = connection-bug-18845.c
 test_connection_handles_SOURCES = connection-handles.c
+test_connection_error_SOURCES = connection-error.c
 test_connection_inject_bug16307_SOURCES = connection-inject-bug16307.c
 test_connection_getinterfaces_failure_SOURCES = \
     connection-getinterfaces-failure.c
@@ -540,6 +550,9 @@ test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENC
 test-connection-bug-18845$(EXEEXT): $(test_connection_bug_18845_OBJECTS) $(test_connection_bug_18845_DEPENDENCIES) 
 	@rm -f test-connection-bug-18845$(EXEEXT)
 	$(LINK) $(test_connection_bug_18845_LDFLAGS) $(test_connection_bug_18845_OBJECTS) $(test_connection_bug_18845_LDADD) $(LIBS)
+test-connection-error$(EXEEXT): $(test_connection_error_OBJECTS) $(test_connection_error_DEPENDENCIES) 
+	@rm -f test-connection-error$(EXEEXT)
+	$(LINK) $(test_connection_error_LDFLAGS) $(test_connection_error_OBJECTS) $(test_connection_error_LDADD) $(LIBS)
 test-connection-getinterfaces-failure$(EXEEXT): $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_DEPENDENCIES) 
 	@rm -f test-connection-getinterfaces-failure$(EXEEXT)
 	$(LINK) $(test_connection_getinterfaces_failure_LDFLAGS) $(test_connection_getinterfaces_failure_OBJECTS) $(test_connection_getinterfaces_failure_LDADD) $(LIBS)
@@ -604,6 +617,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli-group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-bug-18845.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-getinterfaces-failure.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-inject-bug16307.Po@am__quote@

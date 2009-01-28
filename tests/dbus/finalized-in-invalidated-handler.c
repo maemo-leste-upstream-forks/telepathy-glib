@@ -36,9 +36,9 @@ on_invalidated (TpChannel *chan,
 {
   TpChannel **client = user_data;
 
-  MYASSERT (domain == TP_ERRORS_DISCONNECTED, ": domain \"%s\"",
+  MYASSERT (domain == TP_ERRORS, ": domain \"%s\"",
       g_quark_to_string (domain));
-  MYASSERT (code == TP_CONNECTION_STATUS_REASON_REQUESTED, ": code %u", code);
+  MYASSERT (code == TP_ERROR_CANCELLED, ": code %u", code);
 
   MYASSERT (*client == chan, "%p vs %p", *client, chan);
   g_object_unref (*client);
@@ -80,6 +80,7 @@ main (int argc,
   g_type_init ();
   tp_debug_set_flags ("all");
   mainloop = g_main_loop_new (NULL, FALSE);
+  dbus = tp_dbus_daemon_new (tp_get_bus ());
 
   service_conn = SIMPLE_CONNECTION (g_object_new (SIMPLE_TYPE_CONNECTION,
         "account", "me@example.com",
@@ -96,7 +97,6 @@ main (int argc,
         &name, &conn_path, &error), "");
   MYASSERT_NO_ERROR (error);
 
-  dbus = tp_dbus_daemon_new (tp_get_bus ());
   conn = tp_connection_new (dbus, name, conn_path, &error);
   MYASSERT (conn != NULL, "");
   MYASSERT_NO_ERROR (error);

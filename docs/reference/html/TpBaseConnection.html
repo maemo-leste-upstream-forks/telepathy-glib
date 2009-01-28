@@ -103,6 +103,15 @@ void                <a class="link" href="TpBaseConnection.html#tp-base-connecti
 void                <a class="link" href="TpBaseConnection.html#tp-base-connection-change-status" title="tp_base_connection_change_status ()">tp_base_connection_change_status</a>    (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a> *self,
                                                          <a class="link" href="telepathy-glib-enums.html#TpConnectionStatus" title="enum TpConnectionStatus">TpConnectionStatus</a> status,
                                                          <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason">TpConnectionStatusReason</a> reason);
+void                <a class="link" href="TpBaseConnection.html#tp-base-connection-disconnect-with-dbus-error" title="tp_base_connection_disconnect_with_dbus_error ()">tp_base_connection_disconnect_with_dbus_error</a>
+                                                        (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a> *self,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *error_name,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *details,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason">TpConnectionStatusReason</a> reason);
 void                <a class="link" href="TpBaseConnection.html#tp-base-connection-finish-shutdown" title="tp_base_connection_finish_shutdown ()">tp_base_connection_finish_shutdown</a>  (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a> *self);
 void                <a class="link" href="TpBaseConnection.html#tp-base-connection-add-interfaces" title="tp_base_connection_add_interfaces ()">tp_base_connection_add_interfaces</a>   (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a> *self,
                                                          const <a
@@ -888,6 +897,61 @@ any, and set it to 0</li>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>reason</code></em> :</span></p></td>
 <td> The reason for the status change
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="tp-base-connection-disconnect-with-dbus-error"></a><h3>tp_base_connection_disconnect_with_dbus_error ()</h3>
+<pre class="programlisting">void                tp_base_connection_disconnect_with_dbus_error
+                                                        (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a> *self,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *error_name,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"
+>GHashTable</a> *details,
+                                                         <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason">TpConnectionStatusReason</a> reason);</pre>
+<p>
+Change the status of the connection to <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><code class="literal">TP_CONNECTION_STATUS_DISCONNECTED</code></a>,
+as if by a call to <a class="link" href="TpBaseConnection.html#tp-base-connection-change-status" title="tp_base_connection_change_status ()"><code class="function">tp_base_connection_change_status()</code></a>. Before doing so,
+emit the ConnectionError D-Bus signal to give more details of the error.
+</p>
+<p>
+<em class="parameter"><code>details</code></em> may contain, among other entries, the well-known key
+"debug-message", whose value should have type G_TYPE_STRING.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td> The connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error_name</code></em> :</span></p></td>
+<td> The D-Bus error with which the connection changed status to
+             Disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
+<td> Further details of the error, as a hash table where the keys
+          are strings as defined in the Telepathy specification, and the
+          values are GValues. <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
+><code class="literal">NULL</code></a> is allowed, and treated as empty.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>reason</code></em> :</span></p></td>
+<td> The reason code to use in the StatusChanged signal
+         (a less specific, non-extensible version of <em class="parameter"><code>error_name</code></em>)
 </td>
 </tr>
 </tbody>
