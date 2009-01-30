@@ -1,3 +1,298 @@
+commit 6079d00dcf2ccc3b38c0fea3d3d6c237a25a8e0e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 18:43:19 +0000
+
+    tests/dbus/Makefile.am: fix clean build by creating _gen directory
+
+ tests/dbus/Makefile.am |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 5c33c2d48abe5a3d0a39b8416b42dfbb570c7805
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 18:38:27 +0000
+
+    Prepare version 0.7.25 (bugfix only, no new ABI).
+
+ NEWS         |    4 +++-
+ configure.ac |    6 +++---
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+commit f03420a2eaaaab9774f43688f63aa7ad78b4af9e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 18:08:40 +0000
+
+    Update NEWS
+
+ NEWS |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 70a1a3a5c89ddb6af3c90d368c185c0f7f9dcba0
+Merge: 718f12f... 56632f8...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 12:18:55 +0000
+
+    Merge branch 'errors'
+    
+    Signed-off-by: Senko Rasic <senko.rasic@collabora.co.uk>
+
+commit 56632f85b8df31d0892243ed819830cc72965f0d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 12:02:19 +0000
+
+    Remove glib-errors-enum-*-gen.py (no longer used)
+
+ tools/Makefile.am                    |    2 -
+ tools/glib-errors-enum-body-gen.py   |   63 ----------------------------
+ tools/glib-errors-enum-header-gen.py |   75 ----------------------------------
+ 3 files changed, 0 insertions(+), 140 deletions(-)
+
+commit f6fa6861862acfcd55410716403e61cd66149769
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 12:01:46 +0000
+
+    Add a test that asserts that TP_ERRORS contains every error defined by the spec
+    
+    Now that we don't auto-generate TP_ERRORS, we need to verify that
+    errors added in the spec get added to the TpError enum by the
+    maintainer when a new spec is imported. This is done by generating
+    a test that will be run during `make check`.
+    
+    Sample output:
+    
+      /* org.freedesktop.Telepathy.Error.Busy */
+      value_by_name = g_enum_get_value_by_name (klass, "TP_ERROR_BUSY");
+      value_by_nick = g_enum_get_value_by_nick (klass, "Busy");
+      g_assert (value_by_name != NULL);
+      g_assert (value_by_nick != NULL);
+      g_assert_cmpint (value_by_name->value, ==, TP_ERROR_BUSY);
+      g_assert_cmpint (value_by_nick->value, ==, TP_ERROR_BUSY);
+      g_assert_cmpstr (value_by_name->value_name, ==, "TP_ERROR_BUSY");
+      g_assert_cmpstr (value_by_nick->value_name, ==, "TP_ERROR_BUSY");
+      g_assert_cmpstr (value_by_name->value_nick, ==, "Busy");
+      g_assert_cmpstr (value_by_nick->value_nick, ==, "Busy");
+
+ .gitignore                     |    1 +
+ tests/dbus/Makefile.am         |    9 ++++++
+ tests/dbus/error-enum.c        |   18 +++++++++++++
+ tools/Makefile.am              |    1 +
+ tools/glib-errors-check-gen.py |   54 ++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 83 insertions(+), 0 deletions(-)
+
+commit 6a091c37e5344a0b21db10093eb0186cf23a9691
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 11:18:17 +0000
+
+    fd.o #17588: stop generating the error enum, and hard-code the current one
+    
+    Preserving ABI while generating enums from a specification that
+    doesn't explicitly guarantee order is error-prone, to say the least.
+
+ telepathy-glib/Makefile.am |   12 ----
+ telepathy-glib/errors.c    |  156 ++++++++++++++++++++++++++++++++++++++++----
+ telepathy-glib/errors.h    |   44 +++++++++++--
+ 3 files changed, 183 insertions(+), 29 deletions(-)
+
+commit 66ec78a1292fc09dd8a31a34b8bb3ede604e228e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 10:50:12 +0000
+
+    errors.h: add parentheses to macro for better defensive programming
+
+ telepathy-glib/errors.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 71274bb0f488e630e99bc2b32bc36e4a7cb665ab
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-30 10:41:01 +0000
+
+    errors.[ch]: move docs to .c
+
+ telepathy-glib/errors.c |    8 ++++++++
+ telepathy-glib/errors.h |    6 ------
+ 2 files changed, 8 insertions(+), 6 deletions(-)
+
+commit 718f12f0bdbf0966e2827d6274bcc99311e2dc13
+Merge: ee761c3... 066d590...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 15:38:38 +0000
+
+    Merge branch 'misc'
+    
+    Signed-off-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 066d5905081382f5c16c44a8578dd3567653eb4c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 15:31:49 +0000
+
+    Update NEWS
+
+ NEWS |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 4183b9dfa99b939dd2026e71b6d8bb0d6c82776b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 15:30:20 +0000
+
+    fd.o #19688: add a regression test
+
+ tests/dbus/contacts.c |   25 +++++++++++++++++++++++++
+ 1 files changed, 25 insertions(+), 0 deletions(-)
+
+commit bc76737fa3455fcd0d3c93e9b2aaf1b14ae3a9c9
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 15:29:50 +0000
+
+    fd.o #19688: tp_connection_get_contacts_by_id: don't assert if all contacts' IDs are bad
+    
+    tp_connection_get_contact_attributes asserts that there is at least
+    one handle, so if this is not true, we need to avoid calling it.
+
+ telepathy-glib/contact.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit ee761c3c8ab83e6bb4eb69f3adc17d60c6747408
+Merge: 778da2d... b720b7d...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 13:48:19 +0000
+
+    Merge branch 'presence'
+    
+    Signed-off-by: Senko Rasic <senko.rasic@collabora.co.uk>
+
+commit b720b7d80e4491072a9d097cbaea35fddceb2e25
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 13:27:18 +0000
+
+    tests/dbus/self-presence.c: exercise setting our own presence
+
+ tests/dbus/self-presence.c |   35 +++++++++++++++++++++++++++++++++++
+ 1 files changed, 35 insertions(+), 0 deletions(-)
+
+commit c9254da4182b90fc47a8c6afa3837bbdf28cb03c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 13:27:02 +0000
+
+    ContactsConnection: add support for setting our own presence
+
+ tests/lib/contacts-conn.c |   19 ++++++++++++++++---
+ 1 files changed, 16 insertions(+), 3 deletions(-)
+
+commit b927a66ec183be00b40a41c17c804bec6f0590b1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 13:12:05 +0000
+
+    Add a regression test for GetStatuses and the Statuses property
+
+ .gitignore                 |    1 +
+ tests/dbus/Makefile.am     |    3 +
+ tests/dbus/self-presence.c |  232 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 236 insertions(+), 0 deletions(-)
+
+commit b99db141373c3191df7d4eccc8465dc3afb3087b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 13:11:23 +0000
+
+    TpPresenceMixin: include everything in Statuses even if it can't be set on yourself
+    
+    There's a boolean indicating whether statuses can be set on
+    yourself, so clearly everything ought to be listed there...
+
+ telepathy-glib/presence-mixin.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit c756bb87881fdbe77be68e592d56355bdbc3438e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 12:48:09 +0000
+
+    contacts-conn: fix obvious errors in definition of "offline" status
+
+ tests/lib/contacts-conn.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit bcd1b0f66304147161fec8fc25073c5e85f57263
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 12:45:05 +0000
+
+    Fix argument name
+
+ telepathy-glib/presence-mixin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 64a21de0c546616daba458969d0a9347f07dfa77
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 12:45:00 +0000
+
+    Move check_status_available up so the changes actually compile
+
+ telepathy-glib/presence-mixin.c |   95 +++++++++++++++++++--------------------
+ 1 files changed, 47 insertions(+), 48 deletions(-)
+
+commit 7860dd4e110f1b9dcf4188f1c74c947deda38eba
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 12:22:23 +0000
+
+    TpPresenceMixin: enforce the "may set on self" flag
+    
+    Also explicitly check for OFFLINE, UNKNOWN or ERROR, and don't allow
+    those to be set on yourself, whatever the CM might say to the
+    contrary.
+
+ telepathy-glib/presence-mixin.c |   38 ++++++++++++++++++++++++++++++++++----
+ 1 files changed, 34 insertions(+), 4 deletions(-)
+
+commit 0f408228cfe7ee077e80476fd117835760a4459b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 12:06:04 +0000
+
+    TpPresenceMixin: factor out calling status_available() into a function
+
+ telepathy-glib/presence-mixin.c |   36 +++++++++++++++++++++++-------------
+ 1 files changed, 23 insertions(+), 13 deletions(-)
+
+commit 49482ba4edb9a34f8b7b5caefdb0abb8a693a431
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 11:41:19 +0000
+
+    TpPresenceMixin: warn if a CM sets an offline status to be available for setting on yourself
+
+ telepathy-glib/presence-mixin.c |   21 +++++++++++++++++++++
+ 1 files changed, 21 insertions(+), 0 deletions(-)
+
+commit 351a17744caa0c8a137155693c3129a51275fa43
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-29 11:40:48 +0000
+
+    TpPresenceMixin: fix some bad indentation
+
+ telepathy-glib/presence-mixin.c |   14 +++++++-------
+ 1 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 778da2dd56ca2f7f1762b666be28d6a24b7b8f88
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 18:34:08 +0000
+
+    Oops, jonner's patch didn't get into the release. Add it to NEWS for the next one
+
+ NEWS |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 28f468053f997d7f69adb9fa417d781df663efef
+Merge: a5e2369... 5946517...
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 18:25:26 +0000
+
+    Merge commit 'upstream/master'
+
+commit a5e236978bf646ad63f4587a187b432e021d404e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-01-28 18:24:26 +0000
+
+    Start 0.7.25 development
+
+ NEWS         |    5 +++++
+ configure.ac |    2 +-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
 commit ab7714cbe5332c2c71e583c94108b176f99daf24
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-01-28 17:45:15 +0000
@@ -177,6 +472,39 @@ Date:   2009-01-28 10:21:00 +0000
 
  NEWS |    9 +++++++++
  1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit 5946517f1fe9a3ed1483deb4000fa62acb9be8de
+Author: Jonathon Jongsma <jonathon.jongsma@collabora.co.uk>
+Date:   2009-01-23 17:10:41 -0600
+
+    Attempt to fix a rather large leak in tp_presence_mixin_get_statuses()
+    
+    While valgrinding telepathy-idle with my new presence support and joining
+    various large freenode channels (e.g. #emacs, #vim, #ubuntu, etc), I got the
+    following valgrind message:
+    
+    ==16957== 134,989 (10,055 direct, 124,934 indirect) bytes in 746 blocks are definitely lost in loss record 12 of 13
+    ==16957==    at 0x4025D2E: malloc (vg_replace_malloc.c:207)
+    ==16957==    by 0x43893E8: g_malloc (gmem.c:131)
+    ==16957==    by 0x43A1DDC: g_slice_alloc (gslice.c:824)
+    ==16957==    by 0x436FCF6: g_hash_table_new_full (ghash.c:511)
+    ==16957==    by 0x436FCD2: g_hash_table_new (ghash.c:482)
+    ==16957==    by 0x4260B13: get_statuses_arguments (presence-mixin.c:541)
+    ==16957==    by 0x4260E3A: tp_presence_mixin_get_statuses (presence-mixin.c:606)
+    ==16957==    by 0x4277BE4: tp_svc_connection_interface_presence_get_statuses (tp-svc-connection.c:2042)
+    ==16957==    by 0x432419E: g_cclosure_marshal_VOID__POINTER (gmarshal.c:601)
+    ==16957==    by 0x42A60DD: gobject_message_function (dbus-gobject.c:1339)
+    ==16957==    by 0x42DF399: _dbus_object_tree_dispatch_and_unlock (dbus-object-tree.c:856)
+    ==16957==    by 0x42CE43F: dbus_connection_dispatch (dbus-connection.c:4447)
+    
+    It appears that we're passing a dynamically allocated hash table (from
+    get_statuses_arguments()) to g_value_set_static_boxed(), leaking the hash table
+    every time we call GetStatuses().  After the following patch, I no longer get
+    this valgrind loss record (though I do get other massive losses from other areas
+    that need investigation)
+
+ telepathy-glib/presence-mixin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 commit 379817aec4010a2ff0700be2fc19c1dde0f4aa95
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>

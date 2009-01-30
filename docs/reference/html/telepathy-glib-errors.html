@@ -97,11 +97,20 @@ the trailing '.' character.</p>
 <hr>
 <div class="refsect2" lang="en">
 <a name="TP-ERRORS:CAPS"></a><h3>TP_ERRORS</h3>
-<pre class="programlisting">#define TP_ERRORS tp_errors_quark ()
+<pre class="programlisting">#define TP_ERRORS (tp_errors_quark ())
 </pre>
 <p>
 The error domain for the D-Bus errors described in the Telepathy
-specification.</p>
+specification. Error codes in this domain come from the <a class="link" href="telepathy-glib-errors.html#TpError" title="enum TpError"><span class="type">TpError</span></a>
+enumeration.
+</p>
+<p>
+This macro expands to a call to a function returning the Telepathy error
+domain. Since 0.7.17, this function automatically registers the domain with
+dbus-glib for server-side use (using <a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGError.html#dbus-g-error-domain-register"
+><code class="function">dbus_g_error_domain_register()</code></a>) when
+called.</p>
 <p>
 
 </p>
@@ -109,7 +118,8 @@ specification.</p>
 <hr>
 <div class="refsect2" lang="en">
 <a name="TP-TYPE-ERROR:CAPS"></a><h3>TP_TYPE_ERROR</h3>
-<pre class="programlisting">#define             TP_TYPE_ERROR</pre>
+<pre class="programlisting">#define TP_TYPE_ERROR (tp_error_get_type())
+</pre>
 <p>
 The GType of the Telepathy error enumeration.</p>
 <p>
@@ -162,175 +172,197 @@ Enumerated type representing the Telepathy D-Bus errors.</p>
 <tr>
 <td><p><a name="TP-ERROR-NETWORK-ERROR:CAPS"></a><span class="term"><code class="literal">TP_ERROR_NETWORK_ERROR</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.NetworkError:
-    Raised when there is an error reading from or writing to the network.    
+    Raised when there is an error reading from or writing to the network.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-NOT-IMPLEMENTED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_NOT_IMPLEMENTED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.NotImplemented:
-    Raised when the requested method, channel, etc is not available on this connection.    
+    Raised when the requested method, channel, etc is not available on this
+    connection.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-INVALID-ARGUMENT:CAPS"></a><span class="term"><code class="literal">TP_ERROR_INVALID_ARGUMENT</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.InvalidArgument:
-    Raised when one of the provided arguments is invalid.    
+    Raised when one of the provided arguments is invalid.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-NOT-AVAILABLE:CAPS"></a><span class="term"><code class="literal">TP_ERROR_NOT_AVAILABLE</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.NotAvailable:
-    Raised when the requested functionality is temporarily unavailable.    
+    Raised when the requested functionality is temporarily unavailable.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-PERMISSION-DENIED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_PERMISSION_DENIED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.PermissionDenied:
-    The user is not permitted to perform the requested operation.    
+    The user is not permitted to perform the requested operation.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-DISCONNECTED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_DISCONNECTED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Disconnected:
-    The connection is not currently connected and cannot be used.       This error may also be raised when operations are performed on a       Connection for which       <span style="color: red">&lt;dbus-ref&gt;StatusChanged&lt;/dbus-ref&gt;</span>       has signalled status Disconnected for reason None.        <span style="color: red">&lt;rationale&gt;         The second usage corresponds to None in the         <span class="type">Connection_Status_Reason</span> enum; if a better reason         is available, the corresponding error should be used instead.       &lt;/rationale&gt;</span>    
+    The connection is not currently connected and cannot be used.
+    This error may also be raised when operations are performed on a
+    Connection for which StatusChanged has signalled status Disconnected
+    for reason None.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-INVALID-HANDLE:CAPS"></a><span class="term"><code class="literal">TP_ERROR_INVALID_HANDLE</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.InvalidHandle:
-    The contact name specified is unknown on this channel or connection.    
+    An identifier being converted to a handle was syntactically invalid,
+    or an invalid handle was used.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CHANNEL-BANNED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CHANNEL_BANNED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Channel.Banned:
-    You are banned from the channel.    
+    You are banned from the channel.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CHANNEL-FULL:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CHANNEL_FULL</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Channel.Full:
-    The channel is full.    
+    The channel is full.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CHANNEL-INVITE-ONLY:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CHANNEL_INVITE_ONLY</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Channel.InviteOnly:
-    The requested channel is invite-only.    
+    The requested channel is invite-only.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-NOT-YOURS:CAPS"></a><span class="term"><code class="literal">TP_ERROR_NOT_YOURS</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.NotYours:
-    The requested channel or other resource already exists, and another       client is responsible for it    
+    The requested channel or other resource already exists, and another
+    client is responsible for it
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CANCELLED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CANCELLED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cancelled:
-    Raised by an ongoing request if it is cancelled by user request before       it has completed, or when operations are performed on an object which       the user has asked to close (for instance, a Connection where the user       has called Disconnect, or a Channel where the user has called Close).        <span style="color: red">&lt;rationale&gt;         The second form can be used to correspond to the Requested member in         the <span class="type">Connection_Status_Reason</span> enum, or to         to represent the situation where disconnecting a Connection,         closing a Channel, etc. has been requested by the user but this         request has not yet been acted on, for instance because the         service will only act on the request when it has finished processing         an event queue.       &lt;/rationale&gt;</span>    
+    Raised by an ongoing request if it is cancelled by user request before
+    it has completed, or when operations are performed on an object which
+    the user has asked to close (for instance, a Connection where the user
+    has called Disconnect, or a Channel where the user has called Close).
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-AUTHENTICATION-FAILED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_AUTHENTICATION_FAILED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.AuthenticationFailed:
-    Raised when authentication with a service was unsuccessful.       <span style="color: red">&lt;rationale&gt;         This corresponds to Authentication_Failed in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised when authentication with a service was unsuccessful.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-ENCRYPTION-NOT-AVAILABLE:CAPS"></a><span class="term"><code class="literal">TP_ERROR_ENCRYPTION_NOT_AVAILABLE</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.EncryptionNotAvailable:
-    Raised if a user request insisted that encryption should be used,       but encryption was not actually available.        <span style="color: red">&lt;rationale&gt;         This corresponds to part of Encryption_Error in the         <span class="type">Connection_Status_Reason</span> enum. It's been separated         into a distinct error here because the two concepts that were part         of EncryptionError seem to be things that could reasonably appear         differently in the UI.       &lt;/rationale&gt;</span>    
+    Raised if a user request insisted that encryption should be used,
+    but encryption was not actually available.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-ENCRYPTION-ERROR:CAPS"></a><span class="term"><code class="literal">TP_ERROR_ENCRYPTION_ERROR</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.EncryptionError:
-    Raised if encryption appears to be available, but could not actually be       used (for instance if SSL/TLS negotiation fails).       <span style="color: red">&lt;rationale&gt;         This corresponds to part of Encryption_Error in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if encryption appears to be available, but could not actually be
+    used (for instance if SSL/TLS negotiation fails).
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-NOT-PROVIDED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_NOT_PROVIDED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.NotProvided:
-    Raised if the server did not provide a SSL/TLS certificate. This error       MUST NOT be used to represent the absence of a client certificate       provided by the Telepathy connection manager.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Not_Provided in the         <span class="type">Connection_Status_Reason</span> enum. That error         explicitly applied only to server SSL certificates, so this one         is similarly limited; having the CM present a client certificate         is a possible future feature, but it should have its own error         handling.       &lt;/rationale&gt;</span>    
+    Raised if the server did not provide a SSL/TLS certificate.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-UNTRUSTED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_UNTRUSTED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.Untrusted:
-    Raised if the server provided a SSL/TLS certificate signed by an       untrusted certifying authority. This error SHOULD NOT be used to       represent a self-signed certificate: see the Self Signed error for that.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Untrusted in the         <span class="type">Connection_Status_Reason</span> enum, with a clarification         to avoid ambiguity.       &lt;/rationale&gt;</span>    
+    Raised if the server provided a SSL/TLS certificate signed by an
+    untrusted certifying authority.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-EXPIRED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_EXPIRED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.Expired:
-    Raised if the server provided an expired SSL/TLS certificate.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Expired in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if the server provided an expired SSL/TLS certificate.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-NOT-ACTIVATED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_NOT_ACTIVATED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.NotActivated:
-    Raised if the server provided an SSL/TLS certificate that will become       valid at some point in the future.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Not_Activated in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if the server provided an SSL/TLS certificate that will become
+    valid at some point in the future.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-FINGERPRINT-MISMATCH:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_FINGERPRINT_MISMATCH</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.FingerprintMismatch:
-    Raised if the server provided an SSL/TLS certificate that did not have       the expected fingerprint.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Fingerprint_Mismatch in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if the server provided an SSL/TLS certificate that did not have
+    the expected fingerprint.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-HOSTNAME-MISMATCH:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_HOSTNAME_MISMATCH</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.HostnameMismatch:
-    Raised if the server provided an SSL/TLS certificate that did not match       its hostname.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Hostname_Mismatch in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if the server provided an SSL/TLS certificate that did not
+    match its hostname.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-SELF-SIGNED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_SELF_SIGNED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.SelfSigned:
-    Raised if the server provided an SSL/TLS certificate that is self-signed       and untrusted.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Hostname_Mismatch in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if the server provided an SSL/TLS certificate that is
+    self-signed and untrusted.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CERT-INVALID:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CERT_INVALID</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Cert.Invalid:
-    Raised if the server provided an SSL/TLS certificate that is       unacceptable in some way that does not have a more specific error.       <span style="color: red">&lt;rationale&gt;         This corresponds to Cert_Other_Error in the         <span class="type">Connection_Status_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised if the server provided an SSL/TLS certificate that is
+    unacceptable in some way that does not have a more specific error.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-NOT-CAPABLE:CAPS"></a><span class="term"><code class="literal">TP_ERROR_NOT_CAPABLE</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.NotCapable:
-    Raised when requested functionality is unavailable due to contact     not having required capabilities.    
+    Raised when requested functionality is unavailable due to a contact
+    not having the required capabilities.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-OFFLINE:CAPS"></a><span class="term"><code class="literal">TP_ERROR_OFFLINE</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Offline:
-    Raised when requested functionality is unavailable because a contact is       offline.        <span style="color: red">&lt;rationale&gt;         This corresponds to Offline in the         <span class="type">Channel_Group_Change_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Raised when requested functionality is unavailable because a contact is
+    offline.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-CHANNEL-KICKED:CAPS"></a><span class="term"><code class="literal">TP_ERROR_CHANNEL_KICKED</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Channel.Kicked:
-    Used to represent a user being ejected from a channel by another user,       for instance being kicked from a chatroom.        <span style="color: red">&lt;rationale&gt;         This corresponds to Kicked in the         <span class="type">Channel_Group_Change_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Used to represent a user being ejected from a channel by another user,
+    for instance being kicked from a chatroom.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-BUSY:CAPS"></a><span class="term"><code class="literal">TP_ERROR_BUSY</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.Busy:
-    Used to represent a user being removed from a channel because of a       "busy" indication.        <span style="color: red">&lt;rationale&gt;         This corresponds to Busy in the         <span class="type">Channel_Group_Change_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Used to represent a user being removed from a channel because of a
+    "busy" indication.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-NO-ANSWER:CAPS"></a><span class="term"><code class="literal">TP_ERROR_NO_ANSWER</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.NoAnswer:
-    Used to represent a user being removed from a channel because they did       not respond, e.g. to a StreamedMedia call.        <span style="color: red">&lt;rationale&gt;         This corresponds to No_Answer in the         <span class="type">Channel_Group_Change_Reason</span> enum.       &lt;/rationale&gt;</span>    
+    Used to represent a user being removed from a channel because they did
+    not respond, e.g. to a StreamedMedia call.
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-ERROR-DOES-NOT-EXIST:CAPS"></a><span class="term"><code class="literal">TP_ERROR_DOES_NOT_EXIST</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.DoesNotExist:
-    Raised when the requested user does not, in fact, exist.        <span style="color: red">&lt;rationale&gt;         This corresponds to Invalid_Contact in the         <span class="type">Channel_Group_Change_Reason</span> enum, but can also be         used to represent other things not existing (like chatrooms, perhaps).       &lt;/rationale&gt;</span>    
+    Raised when the requested user does not, in fact, exist.
 </td>
 </tr>
 </tbody>

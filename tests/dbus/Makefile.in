@@ -45,13 +45,14 @@ noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
 	test-connection-getinterfaces-failure$(EXEEXT) \
 	test-contacts$(EXEEXT) test-contacts-bug-19101$(EXEEXT) \
 	test-contacts-mixin$(EXEEXT) test-dbus$(EXEEXT) \
-	test-disconnection$(EXEEXT) test-example-no-protocols$(EXEEXT) \
+	test-disconnection$(EXEEXT) test-error-enum$(EXEEXT) \
+	test-example-no-protocols$(EXEEXT) \
 	test-finalized-in-invalidated-handler$(EXEEXT) \
 	test-group-mixin$(EXEEXT) test-handle-set$(EXEEXT) \
 	test-invalidated-while-invoking-signals$(EXEEXT) \
 	test-message-mixin$(EXEEXT) test-properties$(EXEEXT) \
-	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
-	test-unsupported-interface$(EXEEXT)
+	test-self-presence$(EXEEXT) test-text-mixin$(EXEEXT) \
+	test-text-respawn$(EXEEXT) test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
 subdir = tests/dbus
@@ -159,6 +160,14 @@ test_disconnection_LDADD = $(LDADD)
 test_disconnection_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_error_enum_OBJECTS = error-enum.$(OBJEXT)
+nodist_test_error_enum_OBJECTS =
+test_error_enum_OBJECTS = $(am_test_error_enum_OBJECTS) \
+	$(nodist_test_error_enum_OBJECTS)
+test_error_enum_LDADD = $(LDADD)
+test_error_enum_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 test_example_no_protocols_SOURCES = test-example-no-protocols.c
 test_example_no_protocols_OBJECTS =  \
 	test-example-no-protocols.$(OBJEXT)
@@ -209,6 +218,12 @@ test_properties_LDADD = $(LDADD)
 test_properties_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_self_presence_OBJECTS = self-presence.$(OBJEXT)
+test_self_presence_OBJECTS = $(am_test_self_presence_OBJECTS)
+test_self_presence_LDADD = $(LDADD)
+test_self_presence_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_text_mixin_OBJECTS = text-mixin.$(OBJEXT)
 test_text_mixin_OBJECTS = $(am_test_text_mixin_OBJECTS)
 test_text_mixin_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -245,12 +260,14 @@ SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
 	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
 	$(test_contacts_mixin_SOURCES) test-dbus.c \
-	test-disconnection.c test-example-no-protocols.c \
+	test-disconnection.c $(test_error_enum_SOURCES) \
+	$(nodist_test_error_enum_SOURCES) test-example-no-protocols.c \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_properties_SOURCES) \
-	$(nodist_test_properties_SOURCES) $(test_text_mixin_SOURCES) \
+	$(nodist_test_properties_SOURCES) \
+	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
 	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = test-call-cancellation.c \
@@ -263,12 +280,14 @@ DIST_SOURCES = test-call-cancellation.c \
 	$(test_connection_inject_bug16307_SOURCES) \
 	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
 	$(test_contacts_mixin_SOURCES) test-dbus.c \
-	test-disconnection.c test-example-no-protocols.c \
+	test-disconnection.c $(test_error_enum_SOURCES) \
+	test-example-no-protocols.c \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_properties_SOURCES) \
-	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
+	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -427,6 +446,8 @@ test_connection_getinterfaces_failure_SOURCES = \
 test_contacts_SOURCES = contacts.c
 test_contacts_bug_19101_SOURCES = contacts-bug-19101.c
 test_contacts_mixin_SOURCES = contacts-mixin.c
+test_error_enum_SOURCES = error-enum.c
+nodist_test_error_enum_SOURCES = _gen/errors-check.h
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
 
@@ -447,6 +468,7 @@ nodist_test_properties_SOURCES = \
     _gen/svc.h \
     _gen/svc.c
 
+test_self_presence_SOURCES = self-presence.c
 test_text_mixin_LDADD = \
     $(LDADD) \
     $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
@@ -487,6 +509,7 @@ VALGRIND_TESTS_ENVIRONMENT = \
         $(VALGRIND_FLAGS)
 
 BUILT_SOURCES = \
+	_gen/errors-check.h \
 	_gen/svc.h \
 	_gen/svc.c
 
@@ -577,6 +600,9 @@ test-dbus$(EXEEXT): $(test_dbus_OBJECTS) $(test_dbus_DEPENDENCIES)
 test-disconnection$(EXEEXT): $(test_disconnection_OBJECTS) $(test_disconnection_DEPENDENCIES) 
 	@rm -f test-disconnection$(EXEEXT)
 	$(LINK) $(test_disconnection_LDFLAGS) $(test_disconnection_OBJECTS) $(test_disconnection_LDADD) $(LIBS)
+test-error-enum$(EXEEXT): $(test_error_enum_OBJECTS) $(test_error_enum_DEPENDENCIES) 
+	@rm -f test-error-enum$(EXEEXT)
+	$(LINK) $(test_error_enum_LDFLAGS) $(test_error_enum_OBJECTS) $(test_error_enum_LDADD) $(LIBS)
 test-example-no-protocols$(EXEEXT): $(test_example_no_protocols_OBJECTS) $(test_example_no_protocols_DEPENDENCIES) 
 	@rm -f test-example-no-protocols$(EXEEXT)
 	$(LINK) $(test_example_no_protocols_LDFLAGS) $(test_example_no_protocols_OBJECTS) $(test_example_no_protocols_LDADD) $(LIBS)
@@ -598,6 +624,9 @@ test-message-mixin$(EXEEXT): $(test_message_mixin_OBJECTS) $(test_message_mixin_
 test-properties$(EXEEXT): $(test_properties_OBJECTS) $(test_properties_DEPENDENCIES) 
 	@rm -f test-properties$(EXEEXT)
 	$(LINK) $(test_properties_LDFLAGS) $(test_properties_OBJECTS) $(test_properties_LDADD) $(LIBS)
+test-self-presence$(EXEEXT): $(test_self_presence_OBJECTS) $(test_self_presence_DEPENDENCIES) 
+	@rm -f test-self-presence$(EXEEXT)
+	$(LINK) $(test_self_presence_LDFLAGS) $(test_self_presence_OBJECTS) $(test_self_presence_LDADD) $(LIBS)
 test-text-mixin$(EXEEXT): $(test_text_mixin_OBJECTS) $(test_text_mixin_DEPENDENCIES) 
 	@rm -f test-text-mixin$(EXEEXT)
 	$(LINK) $(test_text_mixin_LDFLAGS) $(test_text_mixin_OBJECTS) $(test_text_mixin_LDADD) $(LIBS)
@@ -625,12 +654,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-bug-19101.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-enum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/finalized-in-invalidated-handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidated-while-invoking-signals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-presence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-call-cancellation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-dbus.Po@am__quote@
@@ -965,6 +996,11 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
 		$< Test_Svc_
+
+_gen/errors-check.h: $(top_srcdir)/spec/errors.xml \
+	$(top_srcdir)/tools/glib-errors-check-gen.py
+	$(mkdir_p) _gen
+	$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -13,6 +13,7 @@ noinst_PROGRAMS = \
     test-contacts-mixin \
     test-dbus \
     test-disconnection \
+    test-error-enum \
     test-example-no-protocols \
     test-finalized-in-invalidated-handler \
     test-group-mixin \
@@ -20,6 +21,7 @@ noinst_PROGRAMS = \
     test-invalidated-while-invoking-signals \
     test-message-mixin \
     test-properties \
+    test-self-presence \
     test-text-mixin \
     test-text-respawn \
     test-unsupported-interface
@@ -53,6 +55,9 @@ test_contacts_bug_19101_SOURCES = contacts-bug-19101.c
 
 test_contacts_mixin_SOURCES = contacts-mixin.c
 
+test_error_enum_SOURCES = error-enum.c
+nodist_test_error_enum_SOURCES = _gen/errors-check.h
+
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
 
@@ -73,6 +78,8 @@ test_properties_SOURCES = properties.c
 nodist_test_properties_SOURCES = \
     _gen/svc.h \
     _gen/svc.c
+
+test_self_presence_SOURCES = self-presence.c
 
 test_text_mixin_LDADD = \
     $(LDADD) \
@@ -123,6 +130,7 @@ VALGRIND_TESTS_ENVIRONMENT = \
         $(VALGRIND_FLAGS)
 
 BUILT_SOURCES = \
+	_gen/errors-check.h \
 	_gen/svc.h \
 	_gen/svc.c
 
@@ -142,3 +150,8 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
 		$< Test_Svc_
+
+_gen/errors-check.h: $(top_srcdir)/spec/errors.xml \
+	$(top_srcdir)/tools/glib-errors-check-gen.py
+	$(mkdir_p) _gen
+	$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@
