@@ -50,6 +50,7 @@
 <link linkend="gboolean">gboolean</link>            <link linkend="tp-connection-is-ready">tp_connection_is_ready</link>              (<link linkend="TpConnection">TpConnection</link> *self);
 <link linkend="TpConnectionStatus">TpConnectionStatus</link>  <link linkend="tp-connection-get-status">tp_connection_get_status</link>            (<link linkend="TpConnection">TpConnection</link> *self,
                                                          <link linkend="TpConnectionStatusReason">TpConnectionStatusReason</link> *reason);
+<link linkend="TpHandle">TpHandle</link>            <link linkend="tp-connection-get-self-handle">tp_connection_get_self_handle</link>       (<link linkend="TpConnection">TpConnection</link> *self);
 <link linkend="void">void</link>                (<link linkend="TpConnectionRequestHandlesCb">*TpConnectionRequestHandlesCb</link>)     (<link linkend="TpConnection">TpConnection</link> *connection,
                                                          <link linkend="TpHandleType">TpHandleType</link> handle_type,
                                                          <link linkend="guint">guint</link> n_handles,
@@ -415,6 +416,7 @@
 <title role="properties.title">Properties</title>
 <synopsis>
   &quot;<link linkend="TpConnection--connection-ready">connection-ready</link>&quot;         <link linkend="gboolean">gboolean</link>              : Read
+  &quot;<link linkend="TpConnection--self-handle">self-handle</link>&quot;              <link linkend="guint">guint</link>                 : Read
   &quot;<link linkend="TpConnection--status">status</link>&quot;                   <link linkend="guint">guint</link>                 : Read
   &quot;<link linkend="TpConnection--status-reason">status-reason</link>&quot;            <link linkend="guint">guint</link>                 : Read
 </synopsis>
@@ -687,6 +689,32 @@ don't know yet.
 
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since  0.7.14
+</para></refsect2>
+<refsect2 id="tp-connection-get-self-handle" role="function" condition="since:0.7.26">
+<title>tp_connection_get_self_handle ()</title>
+<indexterm zone="tp-connection-get-self-handle" role="0.7.26"><primary>tp_connection_get_self_handle</primary></indexterm><programlisting><link linkend="TpHandle">TpHandle</link>            tp_connection_get_self_handle       (<link linkend="TpConnection">TpConnection</link> *self);</programlisting>
+<para>
+Return the <link linkend="TP-HANDLE-TYPE-CONTACT:CAPS"><literal>TP_HANDLE_TYPE_CONTACT</literal></link> handle of the local user on this
+connection, or 0 if the connection is not ready (the
+TpConnection:connection-ready property is false) or has become invalid
+(the TpProxy::invalidated signal).
+</para>
+<para>
+The returned handle is not necessarily valid forever (the
+notify::self-handle signal will be emitted if it changes, which can happen
+on protocols such as IRC). Construct a <link linkend="TpContact"><type>TpContact</type></link> object if you want to
+track the local user's identifier in the protocol, or other information
+like their presence status, over time.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> a connection
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the value of the TpConnection:self-handle property
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.26
 </para></refsect2>
 <refsect2 id="TpConnectionRequestHandlesCb" role="function">
 <title>TpConnectionRequestHandlesCb ()</title>
@@ -2967,6 +2995,15 @@ populated.</para>
 <para>
 
 </para><para>Default value: FALSE</para>
+</refsect2>
+<refsect2 id="TpConnection--self-handle"><title>The <literal>&quot;self-handle&quot;</literal> property</title>
+<indexterm zone="TpConnection--self-handle"><primary>TpConnection:self-handle</primary></indexterm><programlisting>  &quot;self-handle&quot;              <link linkend="guint">guint</link>                 : Read</programlisting>
+<para>
+The <link linkend="TP-HANDLE-TYPE-CONTACT:CAPS"><literal>TP_HANDLE_TYPE_CONTACT</literal></link> handle of the local user on this connection,
+or 0 if we don't know yet or if the connection has become invalid.</para>
+<para>
+
+</para><para>Default value: 0</para>
 </refsect2>
 <refsect2 id="TpConnection--status"><title>The <literal>&quot;status&quot;</literal> property</title>
 <indexterm zone="TpConnection--status"><primary>TpConnection:status</primary></indexterm><programlisting>  &quot;status&quot;                   <link linkend="guint">guint</link>                 : Read</programlisting>

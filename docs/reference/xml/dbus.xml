@@ -38,6 +38,7 @@ enum                <link linkend="TpDBusNameType">TpDBusNameType</link>;
 
                     <link linkend="TpDBusDaemon-struct">TpDBusDaemon</link>;
                     <link linkend="TpDBusDaemonClass">TpDBusDaemonClass</link>;
+<link linkend="TpDBusDaemon">TpDBusDaemon</link>*       <link linkend="tp-dbus-daemon-dup">tp_dbus_daemon_dup</link>                  (<link linkend="GError">GError</link> **error);
 <link linkend="TpDBusDaemon">TpDBusDaemon</link>*       <link linkend="tp-dbus-daemon-new">tp_dbus_daemon_new</link>                  (<link linkend="DBusGConnection">DBusGConnection</link> *connection);
 <link linkend="void">void</link>                (<link linkend="TpDBusDaemonNameOwnerChangedCb">*TpDBusDaemonNameOwnerChangedCb</link>)   (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *bus_daemon,
                                                          const <link linkend="gchar">gchar</link> *name,
@@ -454,22 +455,36 @@ given by <parameter>context</parameter>.</para>
 <title>tp_get_bus ()</title>
 <indexterm zone="tp-get-bus"><primary>tp_get_bus</primary></indexterm><programlisting><link linkend="DBusGConnection">DBusGConnection</link>*    tp_get_bus                          (void);</programlisting>
 <para>
-<!--Returns: says it all--></para>
+Returns a connection to the D-Bus daemon on which this process was
+activated if it was launched by D-Bus service activation, or the session
+bus otherwise.
+</para>
+<para>
+If <link linkend="dbus-bus-get"><function>dbus_bus_get()</function></link> fails, exit with error code 1.
+</para>
+<para>
+Note that this function is not suitable for use in applications which can
+be useful even in the absence of D-Bus - it is designed for use in
+connection managers, which are not at all useful without a D-Bus
+connection. See &lt;https://bugs.freedesktop.org/show_bug.cgi?id=18832&gt;.
+Most processes should use <link linkend="tp-dbus-daemon-dup"><function>tp_dbus_daemon_dup()</function></link> instead.</para>
 <para>
 
 </para><variablelist role="params">
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a connection to the starter or session D-Bus daemon.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
-<refsect2 id="tp-get-bus-proxy" role="function">
+<refsect2 id="tp-get-bus-proxy" role="function" condition="deprecated:0.7.26: Use tp_dbus_daemon_dup() in new code.">
 <title>tp_get_bus_proxy ()</title>
-<indexterm zone="tp-get-bus-proxy"><primary>tp_get_bus_proxy</primary></indexterm><programlisting><link linkend="DBusGProxy">DBusGProxy</link>*         tp_get_bus_proxy                    (void);</programlisting>
+<indexterm zone="tp-get-bus-proxy" role="deprecated"><primary>tp_get_bus_proxy</primary></indexterm><programlisting><link linkend="DBusGProxy">DBusGProxy</link>*         tp_get_bus_proxy                    (void);</programlisting>
+<warning><para><literal>tp_get_bus_proxy</literal> has been deprecated since version 0.7.26 and should not be used in newly-written code. Use <link linkend="tp-dbus-daemon-dup"><function>tp_dbus_daemon_dup()</function></link> in new code.</para></warning>
 <para>
-<!--Returns: says it all--></para>
+Return a <link linkend="DBusGProxy"><type>DBusGProxy</type></link> for the bus daemon object.</para>
 <para>
 
 </para><variablelist role="params">
 <varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a proxy for the bus daemon object on the starter or session bus.
+
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 <refsect2 id="TpDBusNameType" role="enum" condition="since:0.7.1">
@@ -636,11 +651,45 @@ The class of <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link>.</par
 
 </para><para role="since">Since  0.7.1
 </para></refsect2>
+<refsect2 id="tp-dbus-daemon-dup" role="function" condition="since:0.7.26">
+<title>tp_dbus_daemon_dup ()</title>
+<indexterm zone="tp-dbus-daemon-dup" role="0.7.26"><primary>tp_dbus_daemon_dup</primary></indexterm><programlisting><link linkend="TpDBusDaemon">TpDBusDaemon</link>*       tp_dbus_daemon_dup                  (<link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Returns a proxy for signals and method calls on the D-Bus daemon on which
+this process was activated (if it was launched by D-Bus service
+activation), or the session bus (otherwise).
+</para>
+<para>
+If it is not possible to connect to the appropriate bus, raise an error
+and return <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</para>
+<para>
+The returned <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> is cached; the same <link linkend="TpDBusDaemon"><type>TpDBusDaemon</type></link> object will
+be returned by this function repeatedly, as long as at least one reference
+exists.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Used to indicate error if <link linkend="NULL:CAPS"><literal>NULL</literal></link> is returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a reference to a proxy for signals and method calls on the bus
+ daemon, or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+
+</simpara></listitem></varlistentry>
+</variablelist><para role="since">Since  0.7.26
+</para></refsect2>
 <refsect2 id="tp-dbus-daemon-new" role="function" condition="since:0.7.1">
 <title>tp_dbus_daemon_new ()</title>
 <indexterm zone="tp-dbus-daemon-new" role="0.7.1"><primary>tp_dbus_daemon_new</primary></indexterm><programlisting><link linkend="TpDBusDaemon">TpDBusDaemon</link>*       tp_dbus_daemon_new                  (<link linkend="DBusGConnection">DBusGConnection</link> *connection);</programlisting>
 <para>
-<!-- --></para>
+Returns a proxy for signals and method calls on a particular bus
+connection.
+</para>
+<para>
+Use <link linkend="tp-dbus-daemon-dup"><function>tp_dbus_daemon_dup()</function></link> instead if you just want a connection to the
+starter or session bus (which is almost always the right thing for
+Telepathy).</para>
 <para>
 
 </para><variablelist role="params">
