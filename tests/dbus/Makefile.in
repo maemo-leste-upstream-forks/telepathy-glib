@@ -38,7 +38,8 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-cli-group$(EXEEXT) \
-	test-connection$(EXEEXT) test-connection-bug-18845$(EXEEXT) \
+	test-cm$(EXEEXT) test-connection$(EXEEXT) \
+	test-connection-bug-18845$(EXEEXT) \
 	test-connection-error$(EXEEXT) \
 	test-connection-handles$(EXEEXT) \
 	test-connection-inject-bug16307$(EXEEXT) \
@@ -51,8 +52,9 @@ noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
 	test-group-mixin$(EXEEXT) test-handle-set$(EXEEXT) \
 	test-invalidated-while-invoking-signals$(EXEEXT) \
 	test-message-mixin$(EXEEXT) test-properties$(EXEEXT) \
-	test-self-presence$(EXEEXT) test-text-mixin$(EXEEXT) \
-	test-text-respawn$(EXEEXT) test-unsupported-interface$(EXEEXT)
+	test-self-handle$(EXEEXT) test-self-presence$(EXEEXT) \
+	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
+	test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
 subdir = tests/dbus
@@ -87,6 +89,13 @@ test_cli_group_LDADD = $(LDADD)
 test_cli_group_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_cm_OBJECTS = cm.$(OBJEXT)
+test_cm_OBJECTS = $(am_test_cm_OBJECTS)
+am__DEPENDENCIES_1 =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
+test_cm_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 am_test_connection_OBJECTS = connection.$(OBJEXT)
 test_connection_OBJECTS = $(am_test_connection_OBJECTS)
 test_connection_LDADD = $(LDADD)
@@ -205,9 +214,6 @@ test_invalidated_while_invoking_signals_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_message_mixin_OBJECTS = message-mixin.$(OBJEXT)
 test_message_mixin_OBJECTS = $(am_test_message_mixin_OBJECTS)
-am__DEPENDENCIES_1 =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-	$(top_builddir)/tests/lib/libtp-glib-tests.la
 test_message_mixin_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 am_test_properties_OBJECTS = properties.$(OBJEXT)
@@ -216,6 +222,12 @@ test_properties_OBJECTS = $(am_test_properties_OBJECTS) \
 	$(nodist_test_properties_OBJECTS)
 test_properties_LDADD = $(LDADD)
 test_properties_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_self_handle_OBJECTS = self-handle.$(OBJEXT)
+test_self_handle_OBJECTS = $(am_test_self_handle_OBJECTS)
+test_self_handle_LDADD = $(LDADD)
+test_self_handle_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_self_presence_OBJECTS = self-presence.$(OBJEXT)
@@ -252,7 +264,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
-	$(test_cli_group_SOURCES) $(test_connection_SOURCES) \
+	$(test_cli_group_SOURCES) $(test_cm_SOURCES) \
+	$(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
@@ -266,13 +279,13 @@ SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
 	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_properties_SOURCES) \
-	$(nodist_test_properties_SOURCES) \
+	$(nodist_test_properties_SOURCES) $(test_self_handle_SOURCES) \
 	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
 	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = test-call-cancellation.c \
 	$(test_channel_introspect_SOURCES) $(test_cli_group_SOURCES) \
-	$(test_connection_SOURCES) \
+	$(test_cm_SOURCES) $(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
@@ -286,8 +299,8 @@ DIST_SOURCES = test-call-cancellation.c \
 	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_properties_SOURCES) \
-	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
-	$(test_text_respawn_SOURCES) \
+	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
+	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -435,6 +448,11 @@ LDADD = \
 
 test_channel_introspect_SOURCES = channel-introspect.c
 test_cli_group_SOURCES = cli-group.c
+test_cm_SOURCES = cm.c
+test_cm_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+
 test_connection_SOURCES = connection.c
 test_connection_bug_18845_SOURCES = connection-bug-18845.c
 test_connection_handles_SOURCES = connection-handles.c
@@ -468,6 +486,7 @@ nodist_test_properties_SOURCES = \
     _gen/svc.h \
     _gen/svc.c
 
+test_self_handle_SOURCES = self-handle.c
 test_self_presence_SOURCES = self-presence.c
 test_text_mixin_LDADD = \
     $(LDADD) \
@@ -516,7 +535,13 @@ BUILT_SOURCES = \
 CLEANFILES = \
     $(BUILT_SOURCES)
 
-EXTRA_DIST = with-properties.xml
+EXTRA_DIST = \
+    dbus-1/services/spurious.service \
+    telepathy/managers/spurious.manager \
+    telepathy/managers/test_manager_file.manager \
+    telepathy/managers/test_manager_file_invalid.manager \
+    with-properties.xml
+
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -567,6 +592,9 @@ test-channel-introspect$(EXEEXT): $(test_channel_introspect_OBJECTS) $(test_chan
 test-cli-group$(EXEEXT): $(test_cli_group_OBJECTS) $(test_cli_group_DEPENDENCIES) 
 	@rm -f test-cli-group$(EXEEXT)
 	$(LINK) $(test_cli_group_LDFLAGS) $(test_cli_group_OBJECTS) $(test_cli_group_LDADD) $(LIBS)
+test-cm$(EXEEXT): $(test_cm_OBJECTS) $(test_cm_DEPENDENCIES) 
+	@rm -f test-cm$(EXEEXT)
+	$(LINK) $(test_cm_LDFLAGS) $(test_cm_OBJECTS) $(test_cm_LDADD) $(LIBS)
 test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENCIES) 
 	@rm -f test-connection$(EXEEXT)
 	$(LINK) $(test_connection_LDFLAGS) $(test_connection_OBJECTS) $(test_connection_LDADD) $(LIBS)
@@ -624,6 +652,9 @@ test-message-mixin$(EXEEXT): $(test_message_mixin_OBJECTS) $(test_message_mixin_
 test-properties$(EXEEXT): $(test_properties_OBJECTS) $(test_properties_DEPENDENCIES) 
 	@rm -f test-properties$(EXEEXT)
 	$(LINK) $(test_properties_LDFLAGS) $(test_properties_OBJECTS) $(test_properties_LDADD) $(LIBS)
+test-self-handle$(EXEEXT): $(test_self_handle_OBJECTS) $(test_self_handle_DEPENDENCIES) 
+	@rm -f test-self-handle$(EXEEXT)
+	$(LINK) $(test_self_handle_LDFLAGS) $(test_self_handle_OBJECTS) $(test_self_handle_LDADD) $(LIBS)
 test-self-presence$(EXEEXT): $(test_self_presence_OBJECTS) $(test_self_presence_DEPENDENCIES) 
 	@rm -f test-self-presence$(EXEEXT)
 	$(LINK) $(test_self_presence_LDFLAGS) $(test_self_presence_OBJECTS) $(test_self_presence_LDADD) $(LIBS)
@@ -645,6 +676,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli-group.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-bug-18845.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-getinterfaces-failure.Po@am__quote@
@@ -661,6 +693,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidated-while-invoking-signals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-presence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-call-cancellation.Po@am__quote@
@@ -838,7 +871,7 @@ check-TESTS: $(TESTS)
 	else :; fi
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/../../tools
+	$(mkdir_p) $(distdir)/../../tools $(distdir)/dbus-1/services $(distdir)/telepathy/managers
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

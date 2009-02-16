@@ -95,6 +95,9 @@ href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
 
                     <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon-struct" title="TpDBusDaemon">TpDBusDaemon</a>;
                     <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemonClass" title="TpDBusDaemonClass">TpDBusDaemonClass</a>;
+<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>*       <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()">tp_dbus_daemon_dup</a>                  (<a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+>GError</a> **error);
 <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>*       <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-new" title="tp_dbus_daemon_new ()">tp_dbus_daemon_new</a>                  (<a
 href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConnection"
 >DBusGConnection</a> *connection);
@@ -1034,7 +1037,19 @@ given by <em class="parameter"><code>context</code></em>.</p>
 href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConnection"
 >DBusGConnection</a>*    tp_get_bus                          (void);</pre>
 <p>
+Returns a connection to the D-Bus daemon on which this process was
+activated if it was launched by D-Bus service activation, or the session
+bus otherwise.
 </p>
+<p>
+If <code class="function">dbus_bus_get()</code> fails, exit with error code 1.
+</p>
+<p>
+Note that this function is not suitable for use in applications which can
+be useful even in the absence of D-Bus - it is designed for use in
+connection managers, which are not at all useful without a D-Bus
+connection. See &lt;https://bugs.freedesktop.org/show_bug.cgi?id=18832&gt;.
+Most processes should use <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()"><code class="function">tp_dbus_daemon_dup()</code></a> instead.</p>
 <p>
 
 </p>
@@ -1053,8 +1068,14 @@ href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConn
 <pre class="programlisting"><a
 href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
 >DBusGProxy</a>*         tp_get_bus_proxy                    (void);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_get_bus_proxy</code> has been deprecated since version 0.7.26 and should not be used in newly-written code. Use <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()"><code class="function">tp_dbus_daemon_dup()</code></a> in new code.</p>
+</div>
 <p>
-</p>
+Return a <a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
+><span class="type">DBusGProxy</span></a> for the bus daemon object.</p>
 <p>
 
 </p>
@@ -1063,6 +1084,7 @@ href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td> a proxy for the bus daemon object on the starter or session bus.
+
 </td>
 </tr></tbody>
 </table></div>
@@ -1163,16 +1185,12 @@ type.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-BUS-NAME:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_BUS_NAME</code></a> if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> is returned
+<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-BUS-NAME:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_BUS_NAME</code></a> if <code class="literal">FALSE</code> is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> if <em class="parameter"><code>name</code></em> is valid
+<td> <code class="literal">TRUE</code> if <em class="parameter"><code>name</code></em> is valid
 
 </td>
 </tr>
@@ -1208,17 +1226,13 @@ also appropriate to use to check for valid error names.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-INTERFACE-NAME:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_INTERFACE_NAME</code></a> if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> is
+<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-INTERFACE-NAME:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_INTERFACE_NAME</code></a> if <code class="literal">FALSE</code> is
  returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> if <em class="parameter"><code>name</code></em> is valid
+<td> <code class="literal">TRUE</code> if <em class="parameter"><code>name</code></em> is valid
 
 </td>
 </tr>
@@ -1253,17 +1267,13 @@ Check that the given string is a valid D-Bus member (method or signal) name.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-MEMBER-NAME:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_MEMBER_NAME</code></a> if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> is
+<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-MEMBER-NAME:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_MEMBER_NAME</code></a> if <code class="literal">FALSE</code> is
  returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> if <em class="parameter"><code>name</code></em> is valid
+<td> <code class="literal">TRUE</code> if <em class="parameter"><code>name</code></em> is valid
 
 </td>
 </tr>
@@ -1298,17 +1308,13 @@ Check that the given string is a valid D-Bus object path.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-OBJECT-PATH:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_OBJECT_PATH</code></a> if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> is
+<td> used to raise <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-INVALID-OBJECT-PATH:CAPS"><code class="literal">TP_DBUS_ERROR_INVALID_OBJECT_PATH</code></a> if <code class="literal">FALSE</code> is
  returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> if <em class="parameter"><code>path</code></em> is valid
+<td> <code class="literal">TRUE</code> if <em class="parameter"><code>path</code></em> is valid
 
 </td>
 </tr>
@@ -1344,12 +1350,60 @@ The class of <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span 
 </div>
 <hr>
 <div class="refsect2" lang="en">
+<a name="tp-dbus-daemon-dup"></a><h3>tp_dbus_daemon_dup ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>*       tp_dbus_daemon_dup                  (<a
+href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"
+>GError</a> **error);</pre>
+<p>
+Returns a proxy for signals and method calls on the D-Bus daemon on which
+this process was activated (if it was launched by D-Bus service
+activation), or the session bus (otherwise).
+</p>
+<p>
+If it is not possible to connect to the appropriate bus, raise an error
+and return <code class="literal">NULL</code>.
+</p>
+<p>
+The returned <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> is cached; the same <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> object will
+be returned by this function repeatedly, as long as at least one reference
+exists.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> Used to indicate error if <code class="literal">NULL</code> is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a reference to a proxy for signals and method calls on the bus
+ daemon, or <code class="literal">NULL</code>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since  0.7.26
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
 <a name="tp-dbus-daemon-new"></a><h3>tp_dbus_daemon_new ()</h3>
 <pre class="programlisting"><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>*       tp_dbus_daemon_new                  (<a
 href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGConnection.html#DBusGConnection"
 >DBusGConnection</a> *connection);</pre>
 <p>
+Returns a proxy for signals and method calls on a particular bus
+connection.
 </p>
+<p>
+Use <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()"><code class="function">tp_dbus_daemon_dup()</code></a> instead if you just want a connection to the
+starter or session bus (which is almost always the right thing for
+Telepathy).</p>
 <p>
 
 </p>
@@ -1528,11 +1582,7 @@ only the most recently added one.</p>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> if there was such a watch, <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> otherwise
+<td> <code class="literal">TRUE</code> if there was such a watch, <code class="literal">FALSE</code> otherwise
 
 </td>
 </tr>
@@ -1591,47 +1641,31 @@ Start a AddMatch method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -1696,47 +1730,31 @@ Start a GetConnectionSELinuxSecurityContext method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -1801,47 +1819,31 @@ Start a GetConnectionUnixProcessID method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -1906,47 +1908,31 @@ Start a GetConnectionUnixUser method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2002,47 +1988,31 @@ Start a GetId method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2107,47 +2077,31 @@ Start a GetNameOwner method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2203,47 +2157,31 @@ Start a Hello method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2300,47 +2238,31 @@ Start a ListActivatableNames method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2396,47 +2318,31 @@ Start a ListNames method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2501,47 +2407,31 @@ Start a ListQueuedOwners method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2606,47 +2496,31 @@ Start a NameHasOwner method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2711,47 +2585,31 @@ Start a ReleaseName method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2808,47 +2666,31 @@ Start a ReloadConfig method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -2913,47 +2755,31 @@ Start a RemoveMatch method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -3026,47 +2852,31 @@ Start a RequestName method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -3139,47 +2949,31 @@ Start a StartServiceByName method call.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td> called when the method call succeeds or fails;
-  may be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> to make a "fire and forget" call with no 
+  may be <code class="literal">NULL</code> to make a "fire and forget" call with no 
   reply tracking
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td> user-supplied data passed to the callback;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> called with the user_data as argument, after the
   call has succeeded, failed or been cancelled;
-  must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, a <a
+<td> If not <code class="literal">NULL</code>, a <a
 href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 ><span class="type">GObject</span></a> which will be 
   weakly referenced; if it is destroyed, this call 
-  will automatically be cancelled. Must be <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if 
-  <em class="parameter"><code>callback</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  will automatically be cancelled. Must be <code class="literal">NULL</code> if 
+  <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -3243,19 +3037,13 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3263,9 +3051,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3330,26 +3116,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3357,9 +3135,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3424,26 +3200,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3451,9 +3219,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3518,26 +3284,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3545,9 +3303,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3603,26 +3359,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3630,9 +3378,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3697,26 +3443,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3724,9 +3462,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3782,26 +3518,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3809,9 +3537,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3868,26 +3594,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3895,9 +3613,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -3953,26 +3669,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -3980,9 +3688,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4047,26 +3753,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4074,9 +3772,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4141,26 +3837,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4168,9 +3856,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4234,26 +3920,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4261,9 +3939,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4317,19 +3993,13 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4337,9 +4007,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4400,19 +4068,13 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4420,9 +4082,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4494,26 +4154,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4521,9 +4173,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4596,26 +4246,18 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
-><code class="literal">TRUE</code></a> is returned: (Undocumented)
+<td> Used to return an 'out' argument if <code class="literal">TRUE</code> is returned: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to return errors if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> 
+<td> If not <code class="literal">NULL</code>, used to return errors if <code class="literal">FALSE</code> 
  is returned
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, set before re-entering 
+<td> If not <code class="literal">NULL</code>, set before re-entering 
  the main loop, to point to a <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
 ><span class="type">GMainLoop</span></a> 
@@ -4623,9 +4265,7 @@ href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#GMainLoop"
  <a
 href="/usr/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#g-main-loop-quit"
 ><code class="function">g_main_loop_quit()</code></a>, causing a return of 
- <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
-><code class="literal">FALSE</code></a> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
+ <code class="literal">FALSE</code> with <em class="parameter"><code>error</code></em> set to <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERROR-CANCELLED:CAPS"><code class="literal">TP_DBUS_ERROR_CANCELLED</code></a>
 </td>
 </tr>
 <tr>
@@ -4666,9 +4306,7 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -4717,16 +4355,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -4775,16 +4409,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -4833,16 +4463,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -4891,16 +4517,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -4949,16 +4571,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5007,16 +4625,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5065,16 +4679,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5123,16 +4733,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5181,16 +4787,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5239,16 +4841,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5297,16 +4895,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5352,9 +4946,7 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5400,9 +4992,7 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5451,16 +5041,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5509,16 +5095,12 @@ succeeds or fails.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out0</code></em> :</span></p></td>
-<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>: (Undocumented)
+<td> Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: (Undocumented)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> on success, or an error on failure
+<td> <code class="literal">NULL</code> on success, or an error on failure
 </td>
 </tr>
 <tr>
@@ -5583,9 +5165,7 @@ Connect a handler to the signal NameAcquired.
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> Destructor for the user-supplied data, which
   will be called when this signal is disconnected, or
-  before this function returns <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  before this function returns <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -5599,11 +5179,7 @@ href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to raise an error if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> is
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
   returned
 </td>
 </tr>
@@ -5611,9 +5187,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
 above, which can be used to disconnect the signal; or
-<a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+<code class="literal">NULL</code> if the proxy does not have the desired interface
 or has become invalid.
 </td>
 </tr>
@@ -5669,9 +5243,7 @@ Connect a handler to the signal NameLost.
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> Destructor for the user-supplied data, which
   will be called when this signal is disconnected, or
-  before this function returns <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  before this function returns <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -5685,11 +5257,7 @@ href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to raise an error if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> is
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
   returned
 </td>
 </tr>
@@ -5697,9 +5265,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
 above, which can be used to disconnect the signal; or
-<a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+<code class="literal">NULL</code> if the proxy does not have the desired interface
 or has become invalid.
 </td>
 </tr>
@@ -5755,9 +5321,7 @@ Connect a handler to the signal NameOwnerChanged.
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td> Destructor for the user-supplied data, which
   will be called when this signal is disconnected, or
-  before this function returns <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>
+  before this function returns <code class="literal">NULL</code>
 </td>
 </tr>
 <tr>
@@ -5771,11 +5335,7 @@ href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> If not <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a>, used to raise an error if <a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> is
+<td> If not <code class="literal">NULL</code>, used to raise an error if <code class="literal">NULL</code> is
   returned
 </td>
 </tr>
@@ -5783,9 +5343,7 @@ href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
 above, which can be used to disconnect the signal; or
-<a
-href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"
-><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+<code class="literal">NULL</code> if the proxy does not have the desired interface
 or has become invalid.
 </td>
 </tr>
