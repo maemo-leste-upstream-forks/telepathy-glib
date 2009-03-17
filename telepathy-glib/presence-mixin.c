@@ -1171,7 +1171,6 @@ tp_presence_mixin_simple_presence_set_presence (
   int s;
   GError *error = NULL;
   GHashTable *optional_arguments = NULL;
-  GValue vmessage = { 0, };
 
   DEBUG ("called.");
 
@@ -1183,13 +1182,10 @@ tp_presence_mixin_simple_presence_set_presence (
 
   if (*message != '\0')
     {
-      g_value_init (&vmessage, G_TYPE_STRING);
-      g_value_set_string (&vmessage, message);
-
-      optional_arguments = g_hash_table_new (g_str_hash, g_str_equal);
-
-      g_hash_table_insert (optional_arguments, "message", &vmessage);
-
+      optional_arguments = g_hash_table_new_full (g_str_hash, g_str_equal,
+          NULL, (GDestroyNotify) tp_g_value_slice_free);
+      g_hash_table_insert (optional_arguments, "message",
+          tp_g_value_slice_new_string (message));
       status_to_set.optional_arguments = optional_arguments;
     }
 
@@ -1383,19 +1379,15 @@ simple_presence_fill_contact_attributes_foreach (gpointer key,
   TpPresenceStatus *status = (TpPresenceStatus *) value;
   struct _i_absolutely_love_g_hash_table_foreach *data =
     (struct _i_absolutely_love_g_hash_table_foreach *) user_data;
-  GValue *val;
   GValueArray *presence;
 
   presence = construct_simple_presence_value_array (status,
     data->supported_statuses);
 
-  val = tp_g_value_slice_new (G_TYPE_VALUE_ARRAY);
-  g_value_set_boxed (val, presence);
-
   tp_contacts_mixin_set_contact_attribute (data->presence_hash,
     handle,
     TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE"/presence",
-    val);
+    tp_g_value_slice_new_take_boxed (G_TYPE_VALUE_ARRAY, presence));
 }
 
 static void

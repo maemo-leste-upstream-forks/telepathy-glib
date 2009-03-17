@@ -1,5 +1,6 @@
 noinst_PROGRAMS = \
     test-call-cancellation \
+    test-callable-example \
     test-channel-introspect \
     test-cli-group \
     test-cm \
@@ -34,7 +35,14 @@ LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
     $(top_builddir)/tests/lib/libtp-glib-tests.la
 
+test_call_cancellation_SOURCES = call-cancellation.c
+
 test_channel_introspect_SOURCES = channel-introspect.c
+
+test_callable_example_SOURCES = callable-example.c
+test_callable_example_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/callable/libexample-cm-callable.la
 
 test_cli_group_SOURCES = cli-group.c
 
@@ -62,8 +70,14 @@ test_contacts_bug_19101_SOURCES = contacts-bug-19101.c
 
 test_contacts_mixin_SOURCES = contacts-mixin.c
 
+test_dbus_SOURCES = dbus.c
+
+test_disconnection_SOURCES = disconnection.c
+
 test_error_enum_SOURCES = error-enum.c
 nodist_test_error_enum_SOURCES = _gen/errors-check.h
+
+test_example_no_protocols_SOURCES = example-no-protocols.c
 
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
@@ -112,26 +126,20 @@ AM_CFLAGS = \
     $(GLIB_CFLAGS) \
     $(TP_GLIB_CFLAGS)
 
-TESTS_ENV = \
+TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     XDG_DATA_HOME=@abs_builddir@ \
     XDG_DATA_DIRS=@abs_srcdir@ \
     G_DEBUG=fatal_warnings,fatal_criticals
 
-TESTS_ENVIRONMENT = \
-    $(TESTS_ENV) \
-    sh $(top_srcdir)/tools/with-session-bus.sh --session --
-
 check-valgrind:
 	$(MAKE) check-TESTS \
-		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)" \
-		TESTS="$(TESTS:%=.libs/%)"
+		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
-    $(TESTS_ENV) \
-    $(top_builddir)/tools/telepathy-glib-env \
-    sh $(top_srcdir)/tools/with-session-bus.sh --session -- \
+    $(TESTS_ENVIRONMENT) \
+    $(top_builddir)/libtool --mode=execute \
     valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
         --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
         --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \

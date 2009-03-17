@@ -195,16 +195,13 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE(TpBaseConnectionManager,
     G_IMPLEMENT_INTERFACE(TP_TYPE_SVC_CONNECTION_MANAGER,
         service_iface_init))
 
-#define TP_BASE_CONNECTION_MANAGER_GET_PRIVATE(obj) \
-    ((TpBaseConnectionManagerPrivate *) obj->priv)
-
-typedef struct _TpBaseConnectionManagerPrivate
+struct _TpBaseConnectionManagerPrivate
 {
   /* if TRUE, the object has gone away */
   gboolean dispose_has_run;
   /* used as a set: key is TpBaseConnection *, value is TRUE */
   GHashTable *connections;
-} TpBaseConnectionManagerPrivate;
+};
 
 /* signal enum */
 enum
@@ -219,8 +216,7 @@ static void
 tp_base_connection_manager_dispose (GObject *object)
 {
   TpBaseConnectionManager *self = TP_BASE_CONNECTION_MANAGER (object);
-  TpBaseConnectionManagerPrivate *priv =
-    TP_BASE_CONNECTION_MANAGER_GET_PRIVATE (self);
+  TpBaseConnectionManagerPrivate *priv = self->priv;
 
   if (priv->dispose_has_run)
     return;
@@ -232,8 +228,7 @@ static void
 tp_base_connection_manager_finalize (GObject *object)
 {
   TpBaseConnectionManager *self = TP_BASE_CONNECTION_MANAGER (object);
-  TpBaseConnectionManagerPrivate *priv =
-    TP_BASE_CONNECTION_MANAGER_GET_PRIVATE (self);
+  TpBaseConnectionManagerPrivate *priv = self->priv;
 
   g_hash_table_destroy (priv->connections);
 
@@ -312,8 +307,7 @@ connection_shutdown_finished_cb (TpBaseConnection *conn,
                                  gpointer data)
 {
   TpBaseConnectionManager *self = TP_BASE_CONNECTION_MANAGER (data);
-  TpBaseConnectionManagerPrivate *priv =
-    TP_BASE_CONNECTION_MANAGER_GET_PRIVATE (self);
+  TpBaseConnectionManagerPrivate *priv = self->priv;
 
   g_assert (g_hash_table_lookup (priv->connections, conn));
   g_hash_table_remove (priv->connections, conn);
@@ -766,8 +760,7 @@ tp_base_connection_manager_request_connection (TpSvcConnectionManager *iface,
   TpBaseConnectionManager *self = TP_BASE_CONNECTION_MANAGER (iface);
   TpBaseConnectionManagerClass *cls =
     TP_BASE_CONNECTION_MANAGER_GET_CLASS (self);
-  TpBaseConnectionManagerPrivate *priv =
-    TP_BASE_CONNECTION_MANAGER_GET_PRIVATE (self);
+  TpBaseConnectionManagerPrivate *priv = self->priv;
   TpBaseConnection *conn;
   gchar *bus_name;
   gchar *object_path;
@@ -893,13 +886,12 @@ tp_base_connection_manager_register (TpBaseConnectionManager *self)
       return FALSE;
     }
 
-  g_object_unref (bus_proxy);
-
   g_string_assign (string, TP_CM_OBJECT_PATH_BASE);
   g_string_append (string, cls->cm_dbus_name);
   dbus_g_connection_register_g_object (
       tp_proxy_get_dbus_connection (bus_proxy), string->str, G_OBJECT (self));
 
+  g_object_unref (bus_proxy);
   g_string_free (string, TRUE);
 
   return TRUE;

@@ -22,15 +22,8 @@
 
 #define IDENTIFIER "them@example.org"
 
-static int fail = 0;
 static GError *invalidated = NULL;
 static GMainLoop *mainloop;
-
-static void
-myassert_failed (void)
-{
-  fail = 1;
-}
 
 static void
 channel_ready (TpChannel *channel,
@@ -114,7 +107,6 @@ main (int argc,
   GError invalidated_for_test = { TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
       "No channel for you!" };
   GHashTable *asv;
-  GValue *value;
 
   g_type_init ();
   tp_debug_set_flags ("all");
@@ -130,22 +122,22 @@ main (int argc,
 
   MYASSERT (tp_base_connection_register (service_conn_as_base, "simple",
         &name, &conn_path, &error), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   conn = tp_connection_new (dbus, name, conn_path, &error);
   MYASSERT (conn != NULL, "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_connection_run_until_ready (conn, TRUE, &error, NULL),
       "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   contact_repo = tp_base_connection_get_handles (service_conn_as_base,
       TP_HANDLE_TYPE_CONTACT);
   MYASSERT (contact_repo != NULL, "");
 
   handle = tp_handle_ensure (contact_repo, IDENTIFIER, NULL, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   chan_path = g_strdup_printf ("%s/Channel", conn_path);
 
@@ -171,7 +163,7 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_HANDLE_TYPE_CONTACT, handle, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   tp_proxy_invalidate ((TpProxy *) chan, &invalidated_for_test);
 
   MYASSERT (!tp_channel_run_until_ready (chan, &error, NULL), "");
@@ -187,7 +179,7 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_HANDLE_TYPE_CONTACT, handle, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   was_ready = FALSE;
   tp_channel_call_when_ready (chan, channel_ready, &was_ready);
@@ -211,10 +203,10 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_HANDLE_TYPE_CONTACT, handle, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   MYASSERT_SAME_UINT (service_chan->get_handle_called, 0);
   MYASSERT_SAME_UINT (service_chan->get_interfaces_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_channel_type_called, 0);
@@ -235,10 +227,10 @@ main (int argc,
 
   chan = tp_channel_new (conn, props_chan_path, NULL,
       TP_UNKNOWN_HANDLE_TYPE, 0, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   MYASSERT_SAME_UINT (service_props_chan->get_handle_called, 0);
   MYASSERT_SAME_UINT (service_props_chan->get_channel_type_called, 0);
   MYASSERT_SAME_UINT (service_props_chan->get_interfaces_called, 0);
@@ -260,34 +252,23 @@ main (int argc,
   asv = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
       (GDestroyNotify) tp_g_value_slice_free);
 
-  value = tp_g_value_slice_new (G_TYPE_STRING);
-  g_value_set_static_string (value, TP_IFACE_CHANNEL_TYPE_TEXT);
   g_hash_table_insert (asv, g_strdup (TP_IFACE_CHANNEL ".ChannelType"),
-      tp_g_value_slice_dup (value));
-
-  value = tp_g_value_slice_new (G_TYPE_UINT);
-  g_value_set_uint (value, TP_HANDLE_TYPE_CONTACT);
+      tp_g_value_slice_new_static_string (TP_IFACE_CHANNEL_TYPE_TEXT));
   g_hash_table_insert (asv, g_strdup (TP_IFACE_CHANNEL ".TargetHandleType"),
-      tp_g_value_slice_dup (value));
-
-  value = tp_g_value_slice_new (G_TYPE_UINT);
-  g_value_set_uint (value, handle);
+      tp_g_value_slice_new_uint (TP_HANDLE_TYPE_CONTACT));
   g_hash_table_insert (asv, g_strdup (TP_IFACE_CHANNEL ".TargetHandle"),
-      tp_g_value_slice_dup (value));
-
-  value = tp_g_value_slice_new (G_TYPE_STRV);
-  g_value_set_static_boxed (value, NULL);
+      tp_g_value_slice_new_uint (handle));
   g_hash_table_insert (asv, g_strdup (TP_IFACE_CHANNEL ".Interfaces"),
-      tp_g_value_slice_dup (value));
+      tp_g_value_slice_new_static_boxed (G_TYPE_STRV, NULL));
 
   chan = tp_channel_new_from_properties (conn, chan_path, asv, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   g_hash_table_destroy (asv);
   asv = NULL;
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   MYASSERT_SAME_UINT (service_chan->get_handle_called, 0);
   MYASSERT_SAME_UINT (service_chan->get_channel_type_called, 0);
   /* FIXME: with an improved fast-path we could avoid this one too maybe? */
@@ -309,10 +290,10 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, NULL,
       TP_HANDLE_TYPE_CONTACT, handle, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   MYASSERT_SAME_UINT (service_chan->get_handle_called, 0);
   MYASSERT_SAME_UINT (service_chan->get_interfaces_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_channel_type_called, 1);
@@ -333,10 +314,10 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_UNKNOWN_HANDLE_TYPE, 0, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   MYASSERT_SAME_UINT (service_chan->get_handle_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_interfaces_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_channel_type_called, 0);
@@ -357,10 +338,10 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_HANDLE_TYPE_CONTACT, 0, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   MYASSERT_SAME_UINT (service_chan->get_handle_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_interfaces_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_channel_type_called, 0);
@@ -375,7 +356,7 @@ main (int argc,
   bad_chan_path = g_strdup_printf ("%s/Does/Not/Actually/Exist", conn_path);
   chan = tp_channel_new (conn, bad_chan_path, NULL,
       TP_UNKNOWN_HANDLE_TYPE, 0, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   was_ready = FALSE;
   tp_channel_call_when_ready (chan, channel_ready, &was_ready);
@@ -399,7 +380,7 @@ main (int argc,
   bad_chan_path = g_strdup_printf ("%s/Does/Not/Actually/Exist", conn_path);
   chan = tp_channel_new (conn, bad_chan_path, NULL,
       TP_UNKNOWN_HANDLE_TYPE, 0, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (!tp_channel_run_until_ready (chan, &error, NULL), "");
   MYASSERT (error != NULL, "");
@@ -425,7 +406,7 @@ main (int argc,
 
   chan = tp_channel_new (conn, chan_path, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_HANDLE_TYPE_CONTACT, handle, &error);
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   was_ready = FALSE;
   tp_channel_call_when_ready (chan, channel_ready, &was_ready);
@@ -433,7 +414,7 @@ main (int argc,
   g_main_loop_run (mainloop);
   g_message ("Leaving main loop");
   MYASSERT (was_ready == TRUE, "");
-  MYASSERT_NO_ERROR (invalidated);
+  test_assert_no_error (invalidated);
   MYASSERT_SAME_UINT (service_chan->get_handle_called, 0);
   MYASSERT_SAME_UINT (service_chan->get_interfaces_called, 1);
   MYASSERT_SAME_UINT (service_chan->get_channel_type_called, 0);
@@ -447,7 +428,7 @@ main (int argc,
   was_ready = FALSE;
   tp_channel_call_when_ready (chan, channel_ready, &was_ready);
   MYASSERT (was_ready == TRUE, "");
-  MYASSERT_NO_ERROR (invalidated);
+  test_assert_no_error (invalidated);
 
   assert_chan_sane (chan, handle);
 
@@ -456,7 +437,7 @@ main (int argc,
   g_message ("Channel already dead, so we are called back synchronously");
 
   MYASSERT (tp_cli_connection_run_disconnect (conn, -1, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   was_ready = FALSE;
   tp_channel_call_when_ready (chan, channel_ready, &was_ready);
@@ -489,6 +470,7 @@ main (int argc,
   g_free (name);
   g_free (conn_path);
   g_free (chan_path);
+  g_free (props_chan_path);
 
-  return fail;
+  return 0;
 }
