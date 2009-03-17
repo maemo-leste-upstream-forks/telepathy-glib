@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -36,7 +37,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = telepathy-example-no-protocols$(EXEEXT)
+@INSTALL_EXAMPLES_TRUE@libexec_PROGRAMS = $(am__EXEEXT_1)
+@INSTALL_EXAMPLES_FALSE@noinst_PROGRAMS = $(am__EXEEXT_1)
 subdir = examples/cm/no-protocols
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,7 +52,11 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-PROGRAMS = $(noinst_PROGRAMS)
+am__EXEEXT_1 = telepathy-example-no-protocols$(EXEEXT)
+am__installdirs = "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(managerdir)" \
+	"$(DESTDIR)$(servicedir)"
+libexecPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+PROGRAMS = $(libexec_PROGRAMS) $(noinst_PROGRAMS)
 am_telepathy_example_no_protocols_OBJECTS =  \
 	connection-manager.$(OBJEXT) main.$(OBJEXT)
 telepathy_example_no_protocols_OBJECTS =  \
@@ -72,6 +78,15 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(telepathy_example_no_protocols_SOURCES)
 DIST_SOURCES = $(telepathy_example_no_protocols_SOURCES)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+managerDATA_INSTALL = $(INSTALL_DATA)
+serviceDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(manager_DATA) $(service_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -126,6 +141,8 @@ HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
 HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
+INSTALL_EXAMPLES_FALSE = @INSTALL_EXAMPLES_FALSE@
+INSTALL_EXAMPLES_TRUE = @INSTALL_EXAMPLES_TRUE@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -155,6 +172,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PYTHON = @PYTHON@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -204,13 +225,18 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+EXAMPLES = telepathy-example-no-protocols
 telepathy_example_no_protocols_SOURCES = \
     connection-manager.c \
     connection-manager.h \
@@ -230,7 +256,15 @@ AM_CFLAGS = \
     @GLIB_CFLAGS@ \
     @TP_GLIB_CFLAGS@
 
-all: all-am
+EXTRA_DIST = manager-file.py
+@INSTALL_EXAMPLES_TRUE@servicedir = ${datadir}/dbus-1/services
+@INSTALL_EXAMPLES_TRUE@service_DATA = _gen/org.freedesktop.Telepathy.ConnectionManager.example_no_protocols.service
+@INSTALL_EXAMPLES_TRUE@managerdir = ${datadir}/telepathy/managers
+@INSTALL_EXAMPLES_TRUE@manager_DATA = _gen/example_no_protocols.manager
+BUILT_SOURCES = _gen/param-spec-struct.h
+CLEANFILES = $(BUILT_SOURCES)
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -263,6 +297,34 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libexecPROGRAMS: $(libexec_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(libexecdir)" || $(mkdir_p) "$(DESTDIR)$(libexecdir)"
+	@list='$(libexec_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	     || test -f $$p1 \
+	  ; then \
+	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(libexecPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(libexecdir)/$$f'"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(libexecPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(libexecdir)/$$f" || exit 1; \
+	  else :; fi; \
+	done
+
+uninstall-libexecPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(libexec_PROGRAMS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f '$(DESTDIR)$(libexecdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(libexecdir)/$$f"; \
+	done
+
+clean-libexecPROGRAMS:
+	@list='$(libexec_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
 
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
@@ -313,6 +375,40 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-managerDATA: $(manager_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(managerdir)" || $(mkdir_p) "$(DESTDIR)$(managerdir)"
+	@list='$(manager_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(managerDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(managerdir)/$$f'"; \
+	  $(managerDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(managerdir)/$$f"; \
+	done
+
+uninstall-managerDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(manager_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(managerdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(managerdir)/$$f"; \
+	done
+install-serviceDATA: $(service_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(servicedir)" || $(mkdir_p) "$(DESTDIR)$(servicedir)"
+	@list='$(service_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(serviceDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(servicedir)/$$f'"; \
+	  $(serviceDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(servicedir)/$$f"; \
+	done
+
+uninstall-serviceDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(service_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(servicedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(servicedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -390,10 +486,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
-all-am: Makefile $(PROGRAMS)
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
-install: install-am
+	for dir in "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(managerdir)" "$(DESTDIR)$(servicedir)"; do \
+	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
+	done
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -410,6 +511,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -417,10 +519,11 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-libexecPROGRAMS clean-libtool \
+	clean-local clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -438,9 +541,9 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-managerDATA install-serviceDATA
 
-install-exec-am:
+install-exec-am: install-libexecPROGRAMS
 
 install-info: install-info-am
 
@@ -466,20 +569,37 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-libexecPROGRAMS \
+	uninstall-managerDATA uninstall-serviceDATA
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstPROGRAMS ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
+	clean-libexecPROGRAMS clean-libtool clean-local \
+	clean-noinstPROGRAMS ctags distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-libexecPROGRAMS \
+	install-man install-managerDATA install-serviceDATA \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-info-am
+	uninstall-info-am uninstall-libexecPROGRAMS \
+	uninstall-managerDATA uninstall-serviceDATA
 
+@INSTALL_EXAMPLES_TRUE@$(service_DATA): %: Makefile
+@INSTALL_EXAMPLES_TRUE@	$(mkdir_p) _gen
+@INSTALL_EXAMPLES_TRUE@	{ echo "[D-BUS Service]" && \
+@INSTALL_EXAMPLES_TRUE@	echo "Name=org.freedesktop.Telepathy.ConnectionManager.example_no_protocols" && \
+@INSTALL_EXAMPLES_TRUE@	echo "Exec=${libexecdir}/telepathy-example-cm-no-protocols"; } > $@
+
+_gen/example_no_protocols.manager _gen/param-spec-struct.h: \
+		manager-file.py $(top_srcdir)/tools/manager-file.py
+	$(mkdir_p) _gen
+	$(PYTHON) $(top_srcdir)/tools/manager-file.py $(srcdir)/manager-file.py _gen
+
+clean-local:
+	rm -rf _gen
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

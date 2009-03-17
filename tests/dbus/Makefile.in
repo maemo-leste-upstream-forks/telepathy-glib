@@ -37,6 +37,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-call-cancellation$(EXEEXT) \
+	test-callable-example$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-cli-group$(EXEEXT) \
 	test-cm$(EXEEXT) test-connection$(EXEEXT) \
 	test-connection-bug-18845$(EXEEXT) \
@@ -70,12 +71,19 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-test_call_cancellation_SOURCES = test-call-cancellation.c
-test_call_cancellation_OBJECTS = test-call-cancellation.$(OBJEXT)
+am_test_call_cancellation_OBJECTS = call-cancellation.$(OBJEXT)
+test_call_cancellation_OBJECTS = $(am_test_call_cancellation_OBJECTS)
 test_call_cancellation_LDADD = $(LDADD)
 test_call_cancellation_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_callable_example_OBJECTS = callable-example.$(OBJEXT)
+test_callable_example_OBJECTS = $(am_test_callable_example_OBJECTS)
+am__DEPENDENCIES_1 =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
+test_callable_example_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(top_builddir)/examples/cm/callable/libexample-cm-callable.la
 am_test_channel_introspect_OBJECTS = channel-introspect.$(OBJEXT)
 test_channel_introspect_OBJECTS =  \
 	$(am_test_channel_introspect_OBJECTS)
@@ -91,9 +99,6 @@ test_cli_group_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_cm_OBJECTS = cm.$(OBJEXT)
 test_cm_OBJECTS = $(am_test_cm_OBJECTS)
-am__DEPENDENCIES_1 =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-	$(top_builddir)/tests/lib/libtp-glib-tests.la
 test_cm_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 am_test_connection_OBJECTS = connection.$(OBJEXT)
@@ -157,14 +162,14 @@ test_contacts_mixin_LDADD = $(LDADD)
 test_contacts_mixin_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
-test_dbus_SOURCES = test-dbus.c
-test_dbus_OBJECTS = test-dbus.$(OBJEXT)
+am_test_dbus_OBJECTS = dbus.$(OBJEXT)
+test_dbus_OBJECTS = $(am_test_dbus_OBJECTS)
 test_dbus_LDADD = $(LDADD)
 test_dbus_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
-test_disconnection_SOURCES = test-disconnection.c
-test_disconnection_OBJECTS = test-disconnection.$(OBJEXT)
+am_test_disconnection_OBJECTS = disconnection.$(OBJEXT)
+test_disconnection_OBJECTS = $(am_test_disconnection_OBJECTS)
 test_disconnection_LDADD = $(LDADD)
 test_disconnection_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
@@ -177,9 +182,9 @@ test_error_enum_LDADD = $(LDADD)
 test_error_enum_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
-test_example_no_protocols_SOURCES = test-example-no-protocols.c
+am_test_example_no_protocols_OBJECTS = example-no-protocols.$(OBJEXT)
 test_example_no_protocols_OBJECTS =  \
-	test-example-no-protocols.$(OBJEXT)
+	$(am_test_example_no_protocols_OBJECTS)
 test_example_no_protocols_LDADD = $(LDADD)
 test_example_no_protocols_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
@@ -263,27 +268,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = test-call-cancellation.c $(test_channel_introspect_SOURCES) \
-	$(test_cli_group_SOURCES) $(test_cm_SOURCES) \
-	$(test_connection_SOURCES) \
-	$(test_connection_bug_18845_SOURCES) \
-	$(test_connection_error_SOURCES) \
-	$(test_connection_getinterfaces_failure_SOURCES) \
-	$(test_connection_handles_SOURCES) \
-	$(test_connection_inject_bug16307_SOURCES) \
-	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
-	$(test_contacts_mixin_SOURCES) test-dbus.c \
-	test-disconnection.c $(test_error_enum_SOURCES) \
-	$(nodist_test_error_enum_SOURCES) test-example-no-protocols.c \
-	$(test_finalized_in_invalidated_handler_SOURCES) \
-	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
-	$(test_invalidated_while_invoking_signals_SOURCES) \
-	$(test_message_mixin_SOURCES) $(test_properties_SOURCES) \
-	$(nodist_test_properties_SOURCES) $(test_self_handle_SOURCES) \
-	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
-	$(test_text_respawn_SOURCES) \
-	$(test_unsupported_interface_SOURCES)
-DIST_SOURCES = test-call-cancellation.c \
+SOURCES = $(test_call_cancellation_SOURCES) \
+	$(test_callable_example_SOURCES) \
 	$(test_channel_introspect_SOURCES) $(test_cli_group_SOURCES) \
 	$(test_cm_SOURCES) $(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
@@ -292,9 +278,31 @@ DIST_SOURCES = test-call-cancellation.c \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
 	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
-	$(test_contacts_mixin_SOURCES) test-dbus.c \
-	test-disconnection.c $(test_error_enum_SOURCES) \
-	test-example-no-protocols.c \
+	$(test_contacts_mixin_SOURCES) $(test_dbus_SOURCES) \
+	$(test_disconnection_SOURCES) $(test_error_enum_SOURCES) \
+	$(nodist_test_error_enum_SOURCES) \
+	$(test_example_no_protocols_SOURCES) \
+	$(test_finalized_in_invalidated_handler_SOURCES) \
+	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
+	$(test_invalidated_while_invoking_signals_SOURCES) \
+	$(test_message_mixin_SOURCES) $(test_properties_SOURCES) \
+	$(nodist_test_properties_SOURCES) $(test_self_handle_SOURCES) \
+	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_text_respawn_SOURCES) \
+	$(test_unsupported_interface_SOURCES)
+DIST_SOURCES = $(test_call_cancellation_SOURCES) \
+	$(test_callable_example_SOURCES) \
+	$(test_channel_introspect_SOURCES) $(test_cli_group_SOURCES) \
+	$(test_cm_SOURCES) $(test_connection_SOURCES) \
+	$(test_connection_bug_18845_SOURCES) \
+	$(test_connection_error_SOURCES) \
+	$(test_connection_getinterfaces_failure_SOURCES) \
+	$(test_connection_handles_SOURCES) \
+	$(test_connection_inject_bug16307_SOURCES) \
+	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
+	$(test_contacts_mixin_SOURCES) $(test_dbus_SOURCES) \
+	$(test_disconnection_SOURCES) $(test_error_enum_SOURCES) \
+	$(test_example_no_protocols_SOURCES) \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
@@ -356,6 +364,8 @@ HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
 HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
+INSTALL_EXAMPLES_FALSE = @INSTALL_EXAMPLES_FALSE@
+INSTALL_EXAMPLES_TRUE = @INSTALL_EXAMPLES_TRUE@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -385,6 +395,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PYTHON = @PYTHON@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -434,9 +448,13 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -446,7 +464,13 @@ LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
     $(top_builddir)/tests/lib/libtp-glib-tests.la
 
+test_call_cancellation_SOURCES = call-cancellation.c
 test_channel_introspect_SOURCES = channel-introspect.c
+test_callable_example_SOURCES = callable-example.c
+test_callable_example_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/callable/libexample-cm-callable.la
+
 test_cli_group_SOURCES = cli-group.c
 test_cm_SOURCES = cm.c
 test_cm_LDADD = \
@@ -464,8 +488,11 @@ test_connection_getinterfaces_failure_SOURCES = \
 test_contacts_SOURCES = contacts.c
 test_contacts_bug_19101_SOURCES = contacts-bug-19101.c
 test_contacts_mixin_SOURCES = contacts-mixin.c
+test_dbus_SOURCES = dbus.c
+test_disconnection_SOURCES = disconnection.c
 test_error_enum_SOURCES = error-enum.c
 nodist_test_error_enum_SOURCES = _gen/errors-check.h
+test_example_no_protocols_SOURCES = example-no-protocols.c
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
 
@@ -506,21 +533,16 @@ AM_CFLAGS = \
     $(GLIB_CFLAGS) \
     $(TP_GLIB_CFLAGS)
 
-TESTS_ENV = \
+TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     XDG_DATA_HOME=@abs_builddir@ \
     XDG_DATA_DIRS=@abs_srcdir@ \
     G_DEBUG=fatal_warnings,fatal_criticals
 
-TESTS_ENVIRONMENT = \
-    $(TESTS_ENV) \
-    sh $(top_srcdir)/tools/with-session-bus.sh --session --
-
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
-    $(TESTS_ENV) \
-    $(top_builddir)/tools/telepathy-glib-env \
-    sh $(top_srcdir)/tools/with-session-bus.sh --session -- \
+    $(TESTS_ENVIRONMENT) \
+    $(top_builddir)/libtool --mode=execute \
     valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
         --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
         --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
@@ -586,6 +608,9 @@ clean-noinstPROGRAMS:
 test-call-cancellation$(EXEEXT): $(test_call_cancellation_OBJECTS) $(test_call_cancellation_DEPENDENCIES) 
 	@rm -f test-call-cancellation$(EXEEXT)
 	$(LINK) $(test_call_cancellation_LDFLAGS) $(test_call_cancellation_OBJECTS) $(test_call_cancellation_LDADD) $(LIBS)
+test-callable-example$(EXEEXT): $(test_callable_example_OBJECTS) $(test_callable_example_DEPENDENCIES) 
+	@rm -f test-callable-example$(EXEEXT)
+	$(LINK) $(test_callable_example_LDFLAGS) $(test_callable_example_OBJECTS) $(test_callable_example_LDADD) $(LIBS)
 test-channel-introspect$(EXEEXT): $(test_channel_introspect_OBJECTS) $(test_channel_introspect_DEPENDENCIES) 
 	@rm -f test-channel-introspect$(EXEEXT)
 	$(LINK) $(test_channel_introspect_LDFLAGS) $(test_channel_introspect_OBJECTS) $(test_channel_introspect_LDADD) $(LIBS)
@@ -674,6 +699,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call-cancellation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callable-example.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli-group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm.Po@am__quote@
@@ -686,7 +713,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-bug-19101.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disconnection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-enum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/example-no-protocols.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/finalized-in-invalidated-handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-set.Po@am__quote@
@@ -696,10 +726,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-presence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-call-cancellation.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-dbus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-disconnection.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-example-no-protocols.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-respawn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unsupported-interface.Po@am__quote@
@@ -1015,8 +1041,7 @@ check-local: check-coding-style
 
 check-valgrind:
 	$(MAKE) check-TESTS \
-		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)" \
-		TESTS="$(TESTS:%=.libs/%)"
+		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 
 distclean-local:
 	rm -rf _gen

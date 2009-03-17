@@ -15,3 +15,16 @@ test_connection_run_until_dbus_queue_processed (TpConnection *connection)
 {
   tp_cli_connection_run_get_protocol (connection, -1, NULL, NULL, NULL);
 }
+
+void
+_test_assert_no_error (const GError *error,
+                       const char *file,
+                       int line)
+{
+  if (error != NULL)
+    {
+      g_error ("%s:%d:%s: code %u: %s",
+          file, line, g_quark_to_string (error->domain),
+          error->code, error->message);
+    }
+}

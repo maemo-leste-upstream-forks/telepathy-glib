@@ -36,7 +36,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+noinst_PROGRAMS = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
+	test-heap$(EXEEXT) test-internal-debug$(EXEEXT) \
+	test-intset$(EXEEXT) test-util$(EXEEXT)
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
 subdir = tests
@@ -51,35 +53,32 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-am__EXEEXT_1 = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
-	test-heap$(EXEEXT) test-intset$(EXEEXT) test-util$(EXEEXT)
-am__EXEEXT_2 = test-internal-debug$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_test_asv_OBJECTS = asv.$(OBJEXT)
 test_asv_OBJECTS = $(am_test_asv_OBJECTS)
 test_asv_LDADD = $(LDADD)
 test_asv_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
-am_test_availability_cmp_OBJECTS = test-availability-cmp.$(OBJEXT)
+am_test_availability_cmp_OBJECTS = availability-cmp.$(OBJEXT)
 test_availability_cmp_OBJECTS = $(am_test_availability_cmp_OBJECTS)
 test_availability_cmp_LDADD = $(LDADD)
 test_availability_cmp_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
-am_test_heap_OBJECTS = test-heap.$(OBJEXT)
+am_test_heap_OBJECTS = heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
 test_heap_LDADD = $(LDADD)
 test_heap_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
-am_test_internal_debug_OBJECTS = test-internal-debug.$(OBJEXT)
+am_test_internal_debug_OBJECTS = internal-debug.$(OBJEXT)
 test_internal_debug_OBJECTS = $(am_test_internal_debug_OBJECTS)
 test_internal_debug_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
-am_test_intset_OBJECTS = test-intset.$(OBJEXT)
+am_test_intset_OBJECTS = intset.$(OBJEXT)
 test_intset_OBJECTS = $(am_test_intset_OBJECTS)
 test_intset_LDADD = $(LDADD)
 test_intset_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
-am_test_util_OBJECTS = test-util.$(OBJEXT)
+am_test_util_OBJECTS = util.$(OBJEXT)
 test_util_OBJECTS = $(am_test_util_OBJECTS)
 test_util_LDADD = $(LDADD)
 test_util_DEPENDENCIES =  \
@@ -162,6 +161,8 @@ HAVE_VERSION_SCRIPT_ARG_FALSE = @HAVE_VERSION_SCRIPT_ARG_FALSE@
 HAVE_VERSION_SCRIPT_ARG_TRUE = @HAVE_VERSION_SCRIPT_ARG_TRUE@
 HTML_DIR = @HTML_DIR@
 INSTALL_DATA = @INSTALL_DATA@
+INSTALL_EXAMPLES_FALSE = @INSTALL_EXAMPLES_FALSE@
+INSTALL_EXAMPLES_TRUE = @INSTALL_EXAMPLES_TRUE@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -191,6 +192,10 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PYTHON = @PYTHON@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -240,9 +245,13 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -253,24 +262,15 @@ SUBDIRS = \
     dbus \
     tools
 
-DYNAMIC_TESTS = \
-    test-asv \
-    test-availability-cmp \
-    test-heap \
-    test-intset \
-    test-util
-
-STATIC_TESTS = \
-    test-internal-debug
-
 TESTS = $(noinst_PROGRAMS)
 TESTS_ENVIRONMENT = \
+    abs_top_builddir=@abs_top_builddir@ \
     G_DEBUG=fatal_warnings,fatal_criticals
 
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
     $(TESTS_ENVIRONMENT) \
-    $(top_builddir)/tools/telepathy-glib-env \
+    $(top_builddir)/libtool --mode=execute \
     valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
         --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
         --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
@@ -282,22 +282,22 @@ test_asv_SOURCES = \
     asv.c
 
 test_heap_SOURCES = \
-    test-heap.c
+    heap.c
 
 test_util_SOURCES = \
-    test-util.c
+    util.c
 
 test_intset_SOURCES = \
-    test-intset.c
+    intset.c
 
 test_availability_cmp_SOURCES = \
-    test-availability-cmp.c
+    availability-cmp.c
 
 
 # this needs to link against the static convenience library so that
 # _tp_debug is still visible
 test_internal_debug_SOURCES = \
-    test-internal-debug.c
+    internal-debug.c
 
 test_internal_debug_LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
@@ -378,11 +378,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-availability-cmp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-heap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-internal-debug.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-intset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/availability-cmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/internal-debug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -764,8 +764,7 @@ uninstall-info: uninstall-info-recursive
 
 check-valgrind:
 	$(MAKE) check-TESTS \
-		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)" \
-		TESTS="$(STATIC_TESTS) $(DYNAMIC_TESTS:%=.libs/%)"
+		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 	$(MAKE) -C dbus check-valgrind
 check-coding-style:
 	@fail=0; \

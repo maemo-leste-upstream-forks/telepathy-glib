@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [26])
+m4_define([tp_glib_micro_version], [27])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [23])
-m4_define([tp_glib_lt_revision], [1])
-m4_define([tp_glib_lt_age], [23])
+m4_define([tp_glib_lt_current], [24])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [24])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -134,6 +134,13 @@ fi
 AC_SUBST(HANDLE_LEAK_DEBUG_CFLAGS)
 AC_SUBST(COVERAGE_CFLAGS)
 
+AC_ARG_ENABLE([installed-examples],
+  AC_HELP_STRING([--enable-installed-examples],
+    [install examples as well as the library]),
+    [enable_installed_examples="$enableval"],
+    [enable_installed_examples=no])
+AM_CONDITIONAL([INSTALL_EXAMPLES], [test "$enable_installed_examples" = yes])
+
 AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
 
 dnl docs/Makefile.am needs to know whether it's an out of tree build
@@ -167,11 +174,7 @@ AC_CHECK_PROGS([XSLTPROC], [xsltproc])
 if test -z "$XSLTPROC"; then
   AC_MSG_ERROR([xsltproc (from the libxslt source package) is required])
 fi
-PYTHON=
-AC_CHECK_PROGS([PYTHON], [python2.3 python2.4 python2.5 python])
-if test -z "$PYTHON"; then
-  AC_MSG_ERROR([Python is required to compile this package])
-fi
+AM_PATH_PYTHON([2.3])
 
 dnl glibc backtrace functions
 AC_CHECK_FUNCS(backtrace backtrace_symbols_fd)
@@ -197,7 +200,9 @@ AC_OUTPUT( Makefile \
 	   examples/Makefile \
 	   examples/client/Makefile \
 	   examples/cm/Makefile \
+	   examples/cm/callable/Makefile \
 	   examples/cm/channelspecific/Makefile \
+	   examples/cm/contactlist/Makefile \
 	   examples/cm/echo/Makefile \
 	   examples/cm/echo-message-parts/Makefile \
 	   examples/cm/extended/Makefile \

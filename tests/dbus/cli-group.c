@@ -24,7 +24,6 @@
 #include "tests/lib/textchan-group.h"
 #include "tests/lib/util.h"
 
-static int fail = 0;
 static GMainLoop *mainloop;
 SimpleConnection *service_conn;
 gchar *conn_path;
@@ -36,12 +35,6 @@ gboolean expecting_group_members_changed = FALSE;
 gboolean expecting_group_members_changed_detailed = FALSE;
 TpChannelGroupChangeReason expected_reason = TP_CHANNEL_GROUP_CHANGE_REASON_NONE;
 gboolean expecting_invalidated = FALSE;
-
-static void
-myassert_failed (void)
-{
-  fail = 1;
-}
 
 static void
 group_members_changed_cb (TpChannel *chan_,
@@ -97,7 +90,7 @@ test_channel_proxy (TestTextChannelGroup *service_chan,
   gboolean has_detailed_flag, has_properties_flag;
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   /* We want to ensure that each of these signals fires exactly once per
    * change.  The channel emits both MembersChanged and MembersChangedDetailed,
@@ -274,7 +267,7 @@ run_membership_test (guint channel_number,
   chan = tp_channel_new (conn, chan_path, NULL, TP_UNKNOWN_HANDLE_TYPE, 0,
       &error);
 
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   expecting_invalidated = FALSE;
   g_signal_connect (chan, "invalidated", (GCallback) channel_invalidated_cb,
@@ -339,7 +332,6 @@ check_removed_error_in_invalidated (void)
   TpIntSet *self_handle_singleton = tp_intset_new ();
   GHashTable *details = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
       (GDestroyNotify) tp_g_value_slice_free);
-  GValue *v;
   gboolean invalidated = FALSE;
   GError *error = NULL;
 
@@ -354,10 +346,10 @@ check_removed_error_in_invalidated (void)
   chan = tp_channel_new (conn, chan_path, NULL, TP_UNKNOWN_HANDLE_TYPE, 0,
       &error);
 
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_channel_run_until_ready (chan, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
   DEBUG ("ready!");
 
   g_signal_connect (chan, "invalidated", (GCallback) check_invalidated_cb,
@@ -370,17 +362,14 @@ check_removed_error_in_invalidated (void)
 
   test_connection_run_until_dbus_queue_processed (conn);
 
-  v = tp_g_value_slice_new (G_TYPE_UINT);
-  g_value_set_uint (v, REMOVED_REASON);
-  g_hash_table_insert (details, "change-reason", v);
+  g_hash_table_insert (details, "change-reason",
+      tp_g_value_slice_new_uint (REMOVED_REASON));
 
-  v = tp_g_value_slice_new (G_TYPE_STRING);
-  g_value_set_static_string (v, REMOVED_MESSAGE);
-  g_hash_table_insert (details, "message", v);
+  g_hash_table_insert (details, "message",
+      tp_g_value_slice_new_static_string (REMOVED_MESSAGE));
 
-  v = tp_g_value_slice_new (G_TYPE_STRING);
-  g_value_set_static_string (v, REMOVED_ERROR);
-  g_hash_table_insert (details, "error", v);
+  g_hash_table_insert (details, "error",
+      tp_g_value_slice_new_static_string (REMOVED_ERROR));
 
   tp_group_mixin_change_members_detailed ((GObject *) service_chan, NULL,
       self_handle_singleton, NULL, NULL, details);
@@ -398,6 +387,7 @@ check_removed_error_in_invalidated (void)
   g_object_unref (chan);
   g_object_unref (service_chan);
   g_free (chan_path);
+  tp_intset_destroy (self_handle_singleton);
 }
 
 int
@@ -423,15 +413,15 @@ main (int argc,
 
   MYASSERT (tp_base_connection_register (service_conn_as_base, "simple",
         &name, &conn_path, &error), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   conn = tp_connection_new (dbus, name, conn_path, &error);
   MYASSERT (conn != NULL, "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   MYASSERT (tp_connection_run_until_ready (conn, TRUE, &error, NULL),
       "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   contact_repo = tp_base_connection_get_handles (service_conn_as_base,
       TP_HANDLE_TYPE_CONTACT);
@@ -444,13 +434,13 @@ main (int argc,
   mainloop = g_main_loop_new (NULL, FALSE);
 
   MYASSERT (tp_cli_connection_run_connect (conn, -1, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   run_membership_tests ();
   check_removed_error_in_invalidated ();
 
   MYASSERT (tp_cli_connection_run_disconnect (conn, -1, &error, NULL), "");
-  MYASSERT_NO_ERROR (error);
+  test_assert_no_error (error);
 
   /* clean up */
 
@@ -465,5 +455,5 @@ main (int argc,
   g_free (name);
   g_free (conn_path);
 
-  return fail;
+  return 0;
 }
