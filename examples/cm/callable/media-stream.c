@@ -45,6 +45,7 @@ enum
   PROP_DIRECTION,
   PROP_STREAM_INFO,
   PROP_SIMULATION_DELAY,
+  PROP_LOCALLY_REQUESTED,
   N_PROPS
 };
 
@@ -74,6 +75,7 @@ struct _ExampleCallableMediaStreamPrivate
 
   guint connected_event_id;
 
+  gboolean locally_requested;
   gboolean removed;
 };
 
@@ -84,10 +86,10 @@ example_callable_media_stream_init (ExampleCallableMediaStream *self)
       EXAMPLE_TYPE_CALLABLE_MEDIA_STREAM,
       ExampleCallableMediaStreamPrivate);
 
-  /* FIXME: no particular "implicit" direction is currently mandated by
-   * telepathy-spec */
+  /* start off directionless */
   self->priv->direction = TP_MEDIA_STREAM_DIRECTION_NONE;
   self->priv->pending_send = 0;
+  self->priv->state = TP_MEDIA_STREAM_STATE_DISCONNECTED;
 }
 
 static void
@@ -188,6 +190,10 @@ get_property (GObject *object,
       g_value_set_uint (value, self->priv->simulation_delay);
       break;
 
+    case PROP_LOCALLY_REQUESTED:
+      g_value_set_boolean (value, self->priv->locally_requested);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -223,6 +229,22 @@ set_property (GObject *object,
 
     case PROP_SIMULATION_DELAY:
       self->priv->simulation_delay = g_value_get_uint (value);
+      break;
+
+    case PROP_LOCALLY_REQUESTED:
+      self->priv->locally_requested = g_value_get_boolean (value);
+
+      if (self->priv->locally_requested)
+        {
+          example_callable_media_stream_change_direction (self,
+              TP_MEDIA_STREAM_DIRECTION_BIDIRECTIONAL, NULL);
+        }
+      else
+        {
+          example_callable_media_stream_receive_direction_request (self,
+              TP_MEDIA_STREAM_DIRECTION_BIDIRECTIONAL);
+        }
+
       break;
 
     default:
@@ -339,6 +361,13 @@ example_callable_media_stream_class_init (ExampleCallableMediaStreamClass *klass
   g_object_class_install_property (object_class, PROP_SIMULATION_DELAY,
       param_spec);
 
+  param_spec = g_param_spec_boolean ("locally-requested", "Locally requested?",
+      "True if this channel was requested by the local user",
+      FALSE,
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_LOCALLY_REQUESTED,
+      param_spec);
+
   signals[SIGNAL_REMOVED] = g_signal_new ("removed",
       G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_VOID__VOID,
@@ -367,6 +396,23 @@ example_callable_media_stream_close (ExampleCallableMediaStream *self)
           g_source_remove (self->priv->connected_event_id);
         }
     }
+}
+
+void
+example_callable_media_stream_accept_proposed_direction (
+    ExampleCallableMediaStream *self)
+{
+  if (self->priv->removed ||
+      !(self->priv->pending_send & TP_MEDIA_STREAM_PENDING_LOCAL_SEND))
+    return;
+
+  g_message ("SIGNALLING: send: OK, I'll send you media on stream %u",
+      self->priv->id);
+
+  self->priv->direction |= TP_MEDIA_STREAM_DIRECTION_SEND;
+  self->priv->pending_send &= ~TP_MEDIA_STREAM_PENDING_LOCAL_SEND;
+
+  g_signal_emit (self, signals[SIGNAL_DIRECTION_CHANGED], 0);
 }
 
 void
@@ -503,4 +549,100 @@ example_callable_media_stream_connect (ExampleCallableMediaStream *self)
   /* simulate it taking a short time to connect */
   self->priv->connected_event_id = g_timeout_add (self->priv->simulation_delay,
       simulate_stream_connected_cb, self);
+}
+
+void
+example_callable_media_stream_receive_direction_request (
+    ExampleCallableMediaStream *self,
+    TpMediaStreamDirection direction)
+{
+  /* The remote user wants to change the direction of this stream to
+   * @direction. Shall we let him? */
+  gboolean sending =
+    ((self->priv->direction & TP_MEDIA_STREAM_DIRECTION_SEND) != 0);
+  gboolean receiving =
+    ((self->priv->direction & TP_MEDIA_STREAM_DIRECTION_RECEIVE) != 0);
+  gboolean send_requested =
+    ((direction & TP_MEDIA_STREAM_DIRECTION_RECEIVE) != 0);
+  gboolean receive_requested =
+    ((direction & TP_MEDIA_STREAM_DIRECTION_RECEIVE) != 0);
+  gboolean pending_remote_send =
+    ((self->priv->pending_send & TP_MEDIA_STREAM_PENDING_REMOTE_SEND) != 0);
+  gboolean pending_local_send =
+    ((self->priv->pending_send & TP_MEDIA_STREAM_PENDING_LOCAL_SEND) != 0);
+  gboolean changed = FALSE;
+
+  if (send_requested)
+    {
+      g_message ("SIGNALLING: receive: Please start sending me stream %u",
+          self->priv->id);
+
+      if (!sending)
+        {
+          /* ask the user for permission */
+          self->priv->pending_send |= TP_MEDIA_STREAM_PENDING_LOCAL_SEND;
+          changed = TRUE;
+        }
+      else
+        {
+          /* nothing to do, we're already sending on that stream */
+        }
+    }
+  else
+    {
+      g_message ("SIGNALLING: receive: Please stop sending me stream %u",
+          self->priv->id);
+      g_message ("SIGNALLING: send: OK, not sending stream %u",
+          self->priv->id);
+
+      if (sending)
+        {
+          g_message ("MEDIA: No longer sending media to peer for stream %u",
+              self->priv->id);
+          self->priv->direction &= ~TP_MEDIA_STREAM_DIRECTION_SEND;
+          changed = TRUE;
+        }
+      else if (pending_local_send)
+        {
+          self->priv->pending_send &= ~TP_MEDIA_STREAM_PENDING_LOCAL_SEND;
+          changed = TRUE;
+        }
+      else
+        {
+          /* nothing to do, we're not sending on that stream anyway */
+        }
+    }
+
+  if (receive_requested)
+    {
+      g_message ("SIGNALLING: receive: I will now send you media on stream %u",
+          self->priv->id);
+
+      if (!receiving)
+        {
+          self->priv->pending_send &= ~TP_MEDIA_STREAM_PENDING_REMOTE_SEND;
+          self->priv->direction |= TP_MEDIA_STREAM_DIRECTION_RECEIVE;
+          changed = TRUE;
+        }
+    }
+  else
+    {
+      if (pending_remote_send)
+        {
+          g_message ("SIGNALLING: receive: No, I refuse to send you media on "
+              "stream %u", self->priv->id);
+          self->priv->pending_send &= ~TP_MEDIA_STREAM_PENDING_REMOTE_SEND;
+          changed = TRUE;
+        }
+      else if (receiving)
+        {
+          g_message ("SIGNALLING: receive: I will no longer send you media on "
+              "stream %u", self->priv->id);
+          self->priv->direction &= ~TP_MEDIA_STREAM_DIRECTION_RECEIVE;
+          changed = TRUE;
+        }
+    }
+
+  if (changed)
+    g_signal_emit (self, signals[SIGNAL_DIRECTION_CHANGED], 0);
 }
