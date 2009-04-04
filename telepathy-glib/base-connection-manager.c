@@ -1,8 +1,8 @@
 /*
  * base-connection-manager.c - Source for TpBaseConnectionManager
  *
- * Copyright (C) 2007-2008 Collabora Ltd.
- * Copyright (C) 2007-2008 Nokia Corporation
+ * Copyright (C) 2007-2009 Collabora Ltd.
+ * Copyright (C) 2007-2009 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -368,20 +368,75 @@ param_default_value (const TpCMParamSpec *param)
         else
           g_value_set_static_string (value, param->def);
         break;
+
       case DBUS_TYPE_INT16:
       case DBUS_TYPE_INT32:
         g_assert (param->gtype == G_TYPE_INT);
         g_value_set_int (value, GPOINTER_TO_INT (param->def));
         break;
+
       case DBUS_TYPE_UINT16:
       case DBUS_TYPE_UINT32:
         g_assert (param->gtype == G_TYPE_UINT);
         g_value_set_uint (value, GPOINTER_TO_UINT (param->def));
         break;
+
+      case DBUS_TYPE_UINT64:
+        g_assert (param->gtype == G_TYPE_UINT64);
+        g_value_set_uint64 (value, param->def == NULL ? 0
+            : *(const guint64 *) param->def);
+        break;
+
+      case DBUS_TYPE_INT64:
+        g_assert (param->gtype == G_TYPE_INT64);
+        g_value_set_int64 (value, param->def == NULL ? 0
+            : *(const gint64 *) param->def);
+        break;
+
+      case DBUS_TYPE_DOUBLE:
+        g_assert (param->gtype == G_TYPE_DOUBLE);
+        g_value_set_double (value, param->def == NULL ? 0.0
+            : *(const double *) param->def);
+        break;
+
+      case DBUS_TYPE_OBJECT_PATH:
+        g_assert (param->gtype == DBUS_TYPE_G_OBJECT_PATH);
+        g_value_set_static_boxed (value, param->def == NULL ? "/"
+            : param->def);
+        break;
+
+      case DBUS_TYPE_ARRAY:
+        switch (param->dtype[1])
+          {
+          case DBUS_TYPE_STRING:
+            g_assert (param->gtype == G_TYPE_STRV);
+            g_value_set_static_boxed (value, param->def);
+            break;
+
+          case DBUS_TYPE_BYTE:
+            g_assert (param->gtype == DBUS_TYPE_G_UCHAR_ARRAY);
+            if (param->def == NULL)
+              {
+                GArray *array = g_array_new (FALSE, FALSE, sizeof (guint8));
+                g_value_take_boxed (value, array);
+              }
+            else
+              {
+                g_value_set_static_boxed (value, param->def);
+              }
+            break;
+
+          default:
+            g_error ("parameter_defaults: encountered unknown type %s on "
+                "argument %s", param->dtype, param->name);
+          }
+        break;
+
       case DBUS_TYPE_BOOLEAN:
         g_assert (param->gtype == G_TYPE_BOOLEAN);
         g_value_set_boolean (value, GPOINTER_TO_INT (param->def));
         break;
+
       default:
         g_error ("parameter_defaults: encountered unknown type %s on "
             "argument %s", param->dtype, param->name);
@@ -446,6 +501,7 @@ tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
             }
         }
         break;
+
       case DBUS_TYPE_INT16:
       case DBUS_TYPE_INT32:
         {
@@ -457,6 +513,7 @@ tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
           DEBUG ("%s = %d = 0x%x", paramspec->name, i, i);
         }
         break;
+
       case DBUS_TYPE_UINT16:
       case DBUS_TYPE_UINT32:
         {
@@ -468,6 +525,52 @@ tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
           DEBUG ("%s = %u = 0x%x", paramspec->name, i, i);
         }
         break;
+
+      case DBUS_TYPE_INT64:
+        {
+          gint64 *save_to = (gint64 *) (params_mem + paramspec->offset);
+          gint64 i = g_value_get_int64 (value);
+
+          g_assert (paramspec->gtype == G_TYPE_INT64);
+          *save_to = i;
+          DEBUG ("%s = %" G_GINT64_FORMAT, paramspec->name, i);
+        }
+        break;
+
+      case DBUS_TYPE_UINT64:
+        {
+          guint64 *save_to = (guint64 *) (params_mem + paramspec->offset);
+          guint64 i = g_value_get_uint64 (value);
+
+          g_assert (paramspec->gtype == G_TYPE_UINT64);
+          *save_to = i;
+          DEBUG ("%s = %" G_GUINT64_FORMAT, paramspec->name, i);
+        }
+        break;
+
+      case DBUS_TYPE_DOUBLE:
+        {
+          gdouble *save_to = (gdouble *) (params_mem + paramspec->offset);
+          gdouble i = g_value_get_double (value);
+
+          g_assert (paramspec->gtype == G_TYPE_DOUBLE);
+          *save_to = i;
+          DEBUG ("%s = %f", paramspec->name, i);
+        }
+        break;
+
+      case DBUS_TYPE_OBJECT_PATH:
+        {
+          gchar **save_to = (gchar **) (params_mem + paramspec->offset);
+
+          g_assert (paramspec->gtype == DBUS_TYPE_G_OBJECT_PATH);
+          g_free (*save_to);
+
+          *save_to = g_value_dup_boxed (value);
+          DEBUG ("%s = \"%s\"", paramspec->name, *save_to);
+        }
+        break;
+
       case DBUS_TYPE_BOOLEAN:
         {
           gboolean *save_to = (gboolean *) (params_mem + paramspec->offset);
@@ -479,23 +582,40 @@ tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
           DEBUG ("%s = %s", paramspec->name, b ? "TRUE" : "FALSE");
         }
         break;
+
       case DBUS_TYPE_ARRAY:
         switch (paramspec->dtype[1])
           {
+            case DBUS_TYPE_STRING:
+              {
+                GStrv *save_to = (GStrv *) (params_mem + paramspec->offset);
+
+                g_strfreev (*save_to);
+                *save_to = g_value_dup_boxed (value);
+
+                if (DEBUGGING)
+                  {
+                    gchar *joined = g_strjoinv (", ", *save_to);
+
+                    DEBUG ("%s = [%s]", paramspec->name, joined);
+                    g_free (joined);
+                  }
+              }
+              break;
+
             case DBUS_TYPE_BYTE:
               {
                 GArray **save_to = (GArray **) (params_mem + paramspec->offset);
-                GArray *a = g_value_get_boxed (value);
 
                 if (*save_to != NULL)
                   {
                     g_array_free (*save_to, TRUE);
                   }
-                *save_to = g_array_sized_new (FALSE, FALSE, sizeof(guint8), a->len);
-                g_array_append_vals (*save_to, a->data, a->len);
-                DEBUG ("%s = ...[%u]", paramspec->name, a->len);
+                *save_to = g_value_dup_boxed (value);
+                DEBUG ("%s = ...[%u]", paramspec->name, (*save_to)->len);
               }
               break;
+
             default:
               g_error ("%s: encountered unhandled D-Bus array type %s on "
                        "argument %s", G_STRFUNC, paramspec->dtype,
@@ -503,6 +623,7 @@ tp_cm_param_setter_offset (const TpCMParamSpec *paramspec,
               g_assert_not_reached ();
           }
         break;
+
       default:
         g_error ("%s: encountered unhandled D-Bus type %s on argument %s",
                  G_STRFUNC, paramspec->dtype, paramspec->name);
