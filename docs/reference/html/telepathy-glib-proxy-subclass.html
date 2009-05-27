@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpProxy subclasses and mixins</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
-<link rel="start" href="index.html" title="telepathy-glib Reference Manual">
+<meta name="generator" content="DocBook XSL Stylesheets V1.74.3">
+<link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-dbus.html" title="General D-Bus support">
 <link rel="prev" href="telepathy-glib-asv.html" title="Manipulating a{sv} mappings">
 <link rel="next" href="ch-protocol.html" title="The Telepathy protocol">
@@ -220,10 +220,7 @@ href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
 href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"
 >GQuark</a> interface);</pre>
 <p>
-Declare that this proxy supports a given interface, and allocate a
-<a
-href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
-><span class="type">DBusGProxy</span></a> to access it.
+Declare that this proxy supports a given interface.
 </p>
 <p>
 To use methods and signals of that interface, either call
@@ -242,7 +239,7 @@ added, then do nothing.</p>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
-<td> the TpProxy
+<td> the TpProxy, which must not have become <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>.
 </td>
 </tr>
 <tr>
@@ -252,7 +249,16 @@ added, then do nothing.</p>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> the borrowed DBusGProxy
+<td> either <a
+href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL--CAPS"
+><code class="literal">NULL</code></a> or a borrowed <a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
+><span class="type">DBusGProxy</span></a> corresponding to <em class="parameter"><code>interface</code></em>,
+depending on implementation details. To reliably borrow the <a
+href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
+><span class="type">DBusGProxy</span></a>, use
+<a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-borrow-interface-by-id" title="tp_proxy_borrow_interface_by_id ()"><code class="function">tp_proxy_borrow_interface_by_id()</code></a>. (This method should probably have
+returned void; sorry.)
 
 </td>
 </tr>
@@ -291,8 +297,9 @@ href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GEr
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> used to raise TP_DBUS_ERROR_NO_INTERFACE if this object does not
-have the required interface
+<td> used to raise an error in the <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERRORS--CAPS" title="TP_DBUS_ERRORS"><span class="type">TP_DBUS_ERRORS</span></a> domain if <em class="parameter"><code>interface</code></em>
+        is invalid, <em class="parameter"><code>self</code></em> has been invalidated or <em class="parameter"><code>self</code></em> does not implement
+        <em class="parameter"><code>interface</code></em>
 </td>
 </tr>
 <tr>
@@ -303,7 +310,7 @@ href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGProxy.html#DBusGProxy"
 for which the bus name and object path are the same as for <em class="parameter"><code>self</code></em>, but the
 interface is as given (or <a
 href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL--CAPS"
-><code class="literal">NULL</code></a> if this proxy does not implement it).
+><code class="literal">NULL</code></a> if an <em class="parameter"><code>error</code></em> is raised).
 The reference is only valid as long as <em class="parameter"><code>self</code></em> is.
 
 </td>

@@ -114,8 +114,7 @@ be auto-generated, by copying tools/glib-client-gen.py from telepathy-glib.</par
 <indexterm zone="tp-proxy-add-interface-by-id" role="0.7.1"><primary sortas="tp_proxy_add_interface_by_id">tp_proxy_add_interface_by_id</primary></indexterm><programlisting><link linkend="DBusGProxy">DBusGProxy</link> *        tp_proxy_add_interface_by_id        (<link linkend="TpProxy">TpProxy</link> *self,
                                                          <link linkend="GQuark">GQuark</link> interface);</programlisting>
 <para>
-Declare that this proxy supports a given interface, and allocate a
-<link linkend="DBusGProxy"><type>DBusGProxy</type></link> to access it.
+Declare that this proxy supports a given interface.
 </para>
 <para>
 To use methods and signals of that interface, either call
@@ -128,12 +127,15 @@ added, then do nothing.</para>
 <para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>self</parameter>&#160;:</term>
-<listitem><simpara> the TpProxy
+<listitem><simpara> the TpProxy, which must not have become <link linkend="TpProxy-invalidated"><type>"invalidated"</type></link>.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>interface</parameter>&#160;:</term>
 <listitem><simpara> quark representing the interface to be added
 </simpara></listitem></varlistentry>
-<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> the borrowed DBusGProxy
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> either <link linkend="NULL--CAPS"><literal>NULL</literal></link> or a borrowed <link linkend="DBusGProxy"><type>DBusGProxy</type></link> corresponding to <parameter>interface</parameter>,
+depending on implementation details. To reliably borrow the <link linkend="DBusGProxy"><type>DBusGProxy</type></link>, use
+<link linkend="tp-proxy-borrow-interface-by-id"><function>tp_proxy_borrow_interface_by_id()</function></link>. (This method should probably have
+returned void; sorry.)
 
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since 0.7.1</para></refsect2>
@@ -153,12 +155,13 @@ added, then do nothing.</para>
 <listitem><simpara> quark representing the interface required
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&#160;:</term>
-<listitem><simpara> used to raise TP_DBUS_ERROR_NO_INTERFACE if this object does not
-have the required interface
+<listitem><simpara> used to raise an error in the <link linkend="TP-DBUS-ERRORS--CAPS"><type>TP_DBUS_ERRORS</type></link> domain if <parameter>interface</parameter>
+        is invalid, <parameter>self</parameter> has been invalidated or <parameter>self</parameter> does not implement
+        <parameter>interface</parameter>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a borrowed reference to a <link linkend="DBusGProxy"><type>DBusGProxy</type></link>
 for which the bus name and object path are the same as for <parameter>self</parameter>, but the
-interface is as given (or <link linkend="NULL--CAPS"><literal>NULL</literal></link> if this proxy does not implement it).
+interface is as given (or <link linkend="NULL--CAPS"><literal>NULL</literal></link> if an <parameter>error</parameter> is raised).
 The reference is only valid as long as <parameter>self</parameter> is.
 
 </simpara></listitem></varlistentry>
