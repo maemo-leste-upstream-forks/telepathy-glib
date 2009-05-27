@@ -1,3 +1,5 @@
+include $(top_srcdir)/tools/shave.mk
+
 noinst_PROGRAMS = \
     test-call-cancellation \
     test-callable-example \
@@ -18,6 +20,7 @@ noinst_PROGRAMS = \
     test-error-enum \
     test-example-no-protocols \
     test-finalized-in-invalidated-handler \
+    test-get-interface-after-invalidate \
     test-group-mixin \
     test-handle-set \
     test-invalidated-while-invoking-signals \
@@ -83,6 +86,9 @@ test_example_no_protocols_SOURCES = example-no-protocols.c
 test_finalized_in_invalidated_handler_SOURCES = \
     finalized-in-invalidated-handler.c
 
+test_get_interface_after_invalidate_SOURCES = \
+    get-interface-after-invalidate.c
+
 test_group_mixin_SOURCES = group-mixin.c
 
 test_handle_set_SOURCES = handle-set.c
@@ -134,7 +140,8 @@ TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     XDG_DATA_HOME=@abs_builddir@ \
     XDG_DATA_DIRS=@abs_srcdir@ \
-    G_DEBUG=fatal_warnings,fatal_criticals
+    G_DEBUG=fatal_warnings,fatal_criticals \
+    sh $(top_srcdir)/tools/with-session-bus.sh --session --
 
 check-valgrind:
 	$(MAKE) check-TESTS \
@@ -172,7 +179,7 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 	$(top_srcdir)/tools/glib-ginterface-gen.py \
 	Makefile.am
 	$(mkdir_p) _gen
-	$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
+	$(QUIET_GEN)$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
 		$< Test_Svc_
@@ -180,4 +187,4 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 _gen/errors-check.h: $(top_srcdir)/spec/errors.xml \
 	$(top_srcdir)/tools/glib-errors-check-gen.py
 	$(mkdir_p) _gen
-	$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@
+	$(QUIET_GEN)$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@

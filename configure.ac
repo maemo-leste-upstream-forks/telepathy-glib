@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [7])
-m4_define([tp_glib_micro_version], [29])
+m4_define([tp_glib_micro_version], [30])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -194,6 +194,8 @@ if test -z "$NM"; then
 fi
 AM_CONDITIONAL([HAVE_LD_VERSION_SCRIPT], [test $HAVE_LD_VERSION_SCRIPT = yes])
 
+SHAVE_INIT(.)
+
 AC_OUTPUT( Makefile \
 	   docs/Makefile \
 	   docs/reference/Makefile \
@@ -218,4 +220,6 @@ AC_OUTPUT( Makefile \
 	   tests/tools/Makefile \
 	   tools/Makefile \
 	   m4/Makefile \
+	   shave \
+	   shave-libtool
 )
