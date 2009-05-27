@@ -12,10 +12,14 @@ noinst_PROGRAMS = \
     test-intset \
     test-util
 
-TESTS = $(noinst_PROGRAMS)
+TESTS = $(noinst_PROGRAMS) \
+    all-errors-documented.py
+
 TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
-    G_DEBUG=fatal_warnings,fatal_criticals
+    abs_top_srcdir=@abs_top_srcdir@ \
+    G_DEBUG=fatal_warnings,fatal_criticals \
+    PYTHONPATH=@abs_top_srcdir@/tools
 
 VALGRIND_TESTS_ENVIRONMENT = \
     G_SLICE=always-malloc \
@@ -32,7 +36,8 @@ check-valgrind:
 		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 	$(MAKE) -C dbus check-valgrind
 
-EXTRA_DIST = README
+EXTRA_DIST = README \
+    all-errors-documented.py
 
 test_asv_SOURCES = \
     asv.c

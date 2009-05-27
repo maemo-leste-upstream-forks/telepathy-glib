@@ -187,6 +187,9 @@ struct _TpConnectionManagerPrivate {
     /* TRUE if we're waiting for ListProtocols */
     unsigned listing_protocols:1;
 
+    /* TRUE if dispose() has run already */
+    unsigned disposed:1;
+
     /* GPtrArray of TpConnectionManagerProtocol *. This is the implementation
      * for self->protocols.
      *
@@ -225,10 +228,18 @@ typedef struct {
     GObject *weak_object;
 } WhenReadyContext;
 
+static void when_ready_context_cancel (gpointer d, GObject *corpse);
+
 static void
 when_ready_context_free (gpointer d)
 {
   WhenReadyContext *c = d;
+
+  if (c->weak_object != NULL)
+    {
+      g_object_weak_unref (c->weak_object, when_ready_context_cancel, c);
+      c->weak_object = NULL;
+    }
 
   if (c->cm != NULL)
     {
@@ -753,70 +764,6 @@ init_gvalue_from_dbus_sig (const gchar *sig,
   return FALSE;
 }
 
-static gint64
-tp_g_key_file_get_int64 (GKeyFile *key_file,
-                         const gchar *group_name,
-                         const gchar *key,
-                         GError **error)
-{
-  gchar *s, *end;
-  gint64 v;
-
-  g_return_val_if_fail (key_file != NULL, -1);
-  g_return_val_if_fail (group_name != NULL, -1);
-  g_return_val_if_fail (key != NULL, -1);
-
-  s = g_key_file_get_value (key_file, group_name, key, error);
-
-  if (s == NULL)
-    return 0;
-
-  v = g_ascii_strtoll (s, &end, 10);
-
-  if (*s == '\0' || *end != '\0')
-    {
-      g_set_error (error, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_INVALID_VALUE,
-          "Key '%s' in group '%s' has value '%s' where int64 was expected",
-          key, group_name, s);
-      return 0;
-    }
-
-  g_free (s);
-  return v;
-}
-
-static guint64
-tp_g_key_file_get_uint64 (GKeyFile *key_file,
-                          const gchar *group_name,
-                          const gchar *key,
-                          GError **error)
-{
-  gchar *s, *end;
-  guint64 v;
-
-  g_return_val_if_fail (key_file != NULL, -1);
-  g_return_val_if_fail (group_name != NULL, -1);
-  g_return_val_if_fail (key != NULL, -1);
-
-  s = g_key_file_get_value (key_file, group_name, key, error);
-
-  if (s == NULL)
-    return 0;
-
-  v = g_ascii_strtoull (s, &end, 10);
-
-  if (*s == '\0' || *end != '\0')
-    {
-      g_set_error (error, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_INVALID_VALUE,
-          "Key '%s' in group '%s' has value '%s' where uint64 was expected",
-          key, group_name, s);
-      return 0;
-    }
-
-  g_free (s);
-  return v;
-}
-
 static gboolean
 parse_default_value (GValue *value,
                      const gchar *sig,
@@ -1286,11 +1233,19 @@ tp_connection_manager_init (TpConnectionManager *self)
 static void
 tp_connection_manager_dispose (GObject *object)
 {
-  TpProxy *as_proxy = TP_PROXY (object);
+  TpConnectionManager *self = TP_CONNECTION_MANAGER (object);
+  TpProxy *as_proxy = (TpProxy *) self;
+
+  if (self->priv->disposed)
+    goto finally;
+
+  self->priv->disposed = TRUE;
 
   tp_dbus_daemon_cancel_name_owner_watch (as_proxy->dbus_daemon,
-      as_proxy->bus_name, tp_connection_manager_name_owner_changed_cb, object);
+      as_proxy->bus_name, tp_connection_manager_name_owner_changed_cb,
+      object);
 
+finally:
   G_OBJECT_CLASS (tp_connection_manager_parent_class)->dispose (object);
 }
 
