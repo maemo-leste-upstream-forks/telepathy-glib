@@ -1,3 +1,522 @@
+commit 2469e1bf3af4546c95467feb19436555e9492a21
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-12 17:14:08 +0100
+
+    Prepare 0.7.32
+
+ NEWS                                        |    9 ++-
+ configure.ac                                |    8 +-
+ telepathy-glib/Makefile.am                  |    3 +-
+ telepathy-glib/account-manager.c            |    6 +-
+ telepathy-glib/account.c                    |    6 +-
+ telepathy-glib/channel-dispatch-operation.c |    4 +-
+ telepathy-glib/channel-dispatcher.c         |    4 +-
+ telepathy-glib/channel-request.c            |    4 +-
+ telepathy-glib/client.c                     |    6 +-
+ telepathy-glib/connection-manager.c         |    2 +-
+ telepathy-glib/dbus.c                       |    2 +-
+ telepathy-glib/media-interfaces.c           |    4 +-
+ telepathy-glib/versions/0.7.32.abi          |  102 +++++++++++++++++++++++++++
+ 13 files changed, 133 insertions(+), 27 deletions(-)
+
+commit 30e212a22b35bd177360e5e34d9ffec3e1fdab54
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-12 16:42:34 +0100
+
+    fd.o #22182: fix a potential use-after-free in the callable example CM
+    
+    In some environments (I'm not sure why my laptop isn't among them),
+    closing the stream causes the channel to remove the last ref to the
+    stream, resulting in a use-after-free and a possible segfault.
+    
+    This could be avoided by holding another ref for the duration of
+    example_callable_media_stream_close, but Sjoerd and I agreed that this
+    simpler fix (re-ordering to put the possible free last) was more
+    appropriate.
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+ examples/cm/callable/media-stream.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 0649d9ffd4bc9f0d03701623d7e85489f83eb3a2
+Merge: 99c7389 5586a8f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-12 12:57:11 +0100
+
+    Merge branch 'more-types'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 5586a8fbd53e77d7d65db4c259d034ab3e02debc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-12 12:10:35 +0100
+
+    Extend .manager regression test coverage to all the types with a serialization defined by telepathy-spec
+
+ tests/dbus/cm.c                                    |   23 ++++++++++++++++++++
+ .../telepathy/managers/test_manager_file.manager   |    7 ++++++
+ 2 files changed, 30 insertions(+), 0 deletions(-)
+
+commit f2c30c9909d62d5764c35c48dff0fe990cce6d74
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 11:55:12 +0100
+
+    TpConnectionManager: improve validation of object paths from .manager files
+
+ telepathy-glib/connection-manager.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit fc9d74daa94da8d4a55bb78ebf0983fe0cddfe5a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 11:54:52 +0100
+
+    fd.o #22230: TpConnectionManager: add support for parsing 'y' in .manager files
+
+ telepathy-glib/connection-manager.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+commit 99c73891227f62cf23ecb40768ce52b3680fca00
+Merge: 6eb255e 7115345
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 17:58:00 +0100
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 71153454e19f4d3a9a6b7a42ce78851f46fa2efd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 17:51:32 +0100
+
+    Explain how to drive the new glib-client-gen.py
+
+ NEWS |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 65dfad6e9fbe02b880695dcdddf3b3b94a53176e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 17:38:04 +0100
+
+    NEWS so far
+
+ NEWS |   26 ++++++++++++++++++++++++++
+ 1 files changed, 26 insertions(+), 0 deletions(-)
+
+commit 6eb255e535dd0860606ba3ce1182f37d99e6215c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 17:37:44 +0100
+
+    Add missing svc-* headers to telepathy-glib/Makefile.am to fix distcheck
+
+ telepathy-glib/Makefile.am |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 97f2ba983a68ec2ccefe4c8b7f389c3e826fb9bc
+Merge: a577ba2 79c483d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 16:41:47 +0100
+
+    Merge branches 'reentrant', 'undraft' and 'knowninterfaces'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 79c483dbeef86c8b45cdb329db8d5ceb0842aae9
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 16:23:49 +0100
+
+    Amend svc-client description in extra-gtkdoc.h as per Will's review
+
+ telepathy-glib/extra-gtkdoc.h |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit a577ba260dc8949a971297e7328998434d944ded
+Merge: c54861d 0cb63c2
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2009-06-10 15:48:17 +0100
+
+    Merge branch 'idempotent-dispose'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit ffc8dced420921fa79f40d580bb459485facbc06
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 15:24:24 +0100
+
+    Include all init_known_interfaces functions in docs
+
+ docs/reference/telepathy-glib-sections.txt |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 30c621196a9a5ed32d9cfbd4697f52c27a398ade
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 15:20:08 +0100
+
+    spec 0.17.26 classes: make safe to extend
+
+ telepathy-glib/account-manager.c            |   37 ++++++++++++++++++++++---
+ telepathy-glib/account-manager.h            |    2 +
+ telepathy-glib/account.c                    |   37 ++++++++++++++++++++++---
+ telepathy-glib/account.h                    |    2 +
+ telepathy-glib/channel-dispatch-operation.c |   38 +++++++++++++++++++++++---
+ telepathy-glib/channel-dispatch-operation.h |    2 +
+ telepathy-glib/channel-dispatcher.c         |   37 ++++++++++++++++++++++---
+ telepathy-glib/channel-dispatcher.h         |    2 +
+ telepathy-glib/channel-request.c            |   37 ++++++++++++++++++++++---
+ telepathy-glib/channel-request.h            |    2 +
+ telepathy-glib/client.c                     |   37 ++++++++++++++++++++++---
+ telepathy-glib/client.h                     |    2 +
+ 12 files changed, 205 insertions(+), 30 deletions(-)
+
+commit c85d9262108a830d0dee3b42ef73e9691e3ecdac
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 15:19:47 +0100
+
+    TpConnectionManager, TpDBusDaemon, media interfaces: make safe to extend
+    
+    As with TpChannel, a function like
+    tp_connection_manager_init_known_interfaces needs to be called before you
+    add signals, to ensure that extensions correctly override code in
+    telepathy-glib itself.
+
+ telepathy-glib/connection-manager.c |   38 +++++++++++++++--
+ telepathy-glib/connection-manager.h |    2 +
+ telepathy-glib/dbus.c               |   31 ++++++++++++++-
+ telepathy-glib/dbus.h               |   10 +++--
+ telepathy-glib/media-interfaces.c   |   74 ++++++++++++++++++++++++++++++-----
+ telepathy-glib/media-interfaces.h   |    3 +
+ 6 files changed, 137 insertions(+), 21 deletions(-)
+
+commit 103d0afb4369bee6123e15b4f4d4d1b95061d70e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 15:12:25 +0100
+
+    TpConnection: use tp_connection_init_known_interfaces() to add interfaces rather than reimplementing it
+
+ telepathy-glib/connection.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
+commit c966ea9734f741fbaa3d5cc9569270925460afc1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 14:53:38 +0100
+
+    Remove _run_ methods for the classes that are new in spec 0.17.26
+    
+    These have never appeared in a release, and we're on the way to
+    deprecating them in general, so we might as well just not have them on
+    these classes.
+
+ docs/reference/telepathy-glib-sections.txt |   27 ---------------------------
+ telepathy-glib/Makefile.am                 |    6 ------
+ 2 files changed, 0 insertions(+), 33 deletions(-)
+
+commit 9085a25a06f39865b0d748464ed7be231bcaaae8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 13:40:03 +0100
+
+    Update to telepathy-spec 0.17.26
+
+ spec/Channel_Dispatch_Operation.xml                |    5 +++--
+ spec/Channel_Dispatcher.xml                        |    1 +
+ ...Channel_Dispatcher_Interface_Operation_List.xml |    5 +++--
+ spec/Channel_Request.xml                           |    1 +
+ spec/Client.xml                                    |    6 +++---
+ spec/Client_Approver.xml                           |    6 +++---
+ spec/Client_Handler.xml                            |    6 +++---
+ spec/Client_Interface_Requests.xml                 |    3 +--
+ spec/Client_Observer.xml                           |    8 ++++----
+ spec/all.xml                                       |    8 ++++----
+ 10 files changed, 26 insertions(+), 23 deletions(-)
+
+commit 83a5de557c926f1de5d0ffc81f3994b063093673
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-09 09:28:11 +0100
+
+    Add basic proxies for Client
+
+ docs/reference/telepathy-glib-docs.sgml    |    2 +
+ docs/reference/telepathy-glib-sections.txt |  116 ++++++++++++++++++++++++++++
+ docs/reference/telepathy-glib.types        |    8 ++
+ spec/Client.xml                            |    3 +-
+ spec/Client_Approver.xml                   |    3 +-
+ spec/Client_Handler.xml                    |    3 +-
+ spec/Client_Interface_Requests.xml         |    3 +-
+ spec/Client_Observer.xml                   |    3 +-
+ telepathy-glib/Makefile.am                 |   12 +++
+ telepathy-glib/client.c                    |  114 +++++++++++++++++++++++++++
+ telepathy-glib/client.h                    |   70 +++++++++++++++++
+ telepathy-glib/client.xml                  |   13 +++
+ telepathy-glib/defs.h                      |   14 ++++
+ telepathy-glib/extra-gtkdoc.h              |   10 +++
+ telepathy-glib/stable-interfaces.xml       |    2 +
+ telepathy-glib/svc-client.h                |    6 ++
+ tests/dbus/Makefile.am                     |    3 +
+ tests/dbus/client.c                        |   74 ++++++++++++++++++
+ 18 files changed, 449 insertions(+), 10 deletions(-)
+
+commit f0743304591969845663ebf3ab7ba57fadd5b85e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-09 09:27:57 +0100
+
+    Add basic proxies for ChannelDispatchOperation, ChannelRequest
+
+ docs/reference/telepathy-glib-docs.sgml         |    4 +
+ docs/reference/telepathy-glib-sections.txt      |  114 ++++++++++
+ docs/reference/telepathy-glib.types             |    8 +
+ spec/Channel_Dispatch_Operation.xml             |    3 +-
+ spec/Channel_Request.xml                        |    3 +-
+ telepathy-glib/Makefile.am                      |   25 ++
+ telepathy-glib/channel-dispatch-operation.c     |  223 ++++++++++++++++++
+ telepathy-glib/channel-dispatch-operation.h     |   78 +++++++
+ telepathy-glib/channel-dispatch-operation.xml   |    9 +
+ telepathy-glib/channel-request.c                |  250 ++++++++++++++++++++
+ telepathy-glib/channel-request.h                |   74 ++++++
+ telepathy-glib/channel-request.xml              |    9 +
+ telepathy-glib/extra-gtkdoc.h                   |   45 ++++
+ telepathy-glib/stable-interfaces.xml            |    2 +
+ telepathy-glib/svc-channel-dispatch-operation.h |    6 +
+ telepathy-glib/svc-channel-request.h            |    6 +
+ tests/dbus/Makefile.am                          |    6 +
+ tests/dbus/channel-dispatch-operation.c         |  232 +++++++++++++++++++
+ tests/dbus/channel-request.c                    |  276 +++++++++++++++++++++++
+ 19 files changed, 1369 insertions(+), 4 deletions(-)
+
+commit 2e184d2d313e9b30a9f81f4cf9376dbe1e4811c3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-09 09:25:39 +0100
+
+    Add channel dispatcher generated code and a very basic proxy
+
+ docs/reference/telepathy-glib-docs.sgml            |    2 +
+ docs/reference/telepathy-glib-sections.txt         |   76 +++++++++++
+ docs/reference/telepathy-glib.types                |    5 +
+ spec/Channel_Dispatcher.xml                        |    3 +-
+ ...Channel_Dispatcher_Interface_Operation_List.xml |    3 +-
+ telepathy-glib/Makefile.am                         |   11 ++
+ telepathy-glib/channel-dispatcher.c                |  141 ++++++++++++++++++++
+ telepathy-glib/channel-dispatcher.h                |   73 ++++++++++
+ telepathy-glib/channel-dispatcher.xml              |   10 ++
+ telepathy-glib/debug-internal.h                    |    3 +-
+ telepathy-glib/debug.c                             |    1 +
+ telepathy-glib/defs.h                              |   14 ++
+ telepathy-glib/extra-gtkdoc.h                      |   17 +++
+ telepathy-glib/stable-interfaces.xml               |    2 +
+ telepathy-glib/svc-channel-dispatcher.h            |    6 +
+ tests/dbus/Makefile.am                             |    3 +
+ tests/dbus/channel-dispatcher.c                    |   70 ++++++++++
+ 17 files changed, 435 insertions(+), 5 deletions(-)
+
+commit 4e3e02159e6bfbf95408f30b524832feb292cb10
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-09 15:55:12 +0100
+
+    tests/lib/util.h: add test_proxy_run_until_dbus_queue_processed
+    
+    This spins the main loop until Introspect() returns.
+
+ tests/lib/util.c |    6 ++++++
+ tests/lib/util.h |    3 +++
+ 2 files changed, 9 insertions(+), 0 deletions(-)
+
+commit c91e52e37aae3005ce6652c873b12ce6d7a57292
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-09 09:29:28 +0100
+
+    Add account, AM to docs
+
+ docs/reference/telepathy-glib-docs.sgml |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit a56972077bd9903c020e295a8b64a3776af52c65
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-08 17:36:39 +0100
+
+    Add a trivial test for TpAccount, TpAccountManager
+    
+    These just test that nothing actually crashes when we make a TpAccount
+    and a TpAccountManager.
+
+ tests/dbus/Makefile.am       |    6 +++
+ tests/dbus/account-manager.c |   69 ++++++++++++++++++++++++++++++++++++
+ tests/dbus/account.c         |   79 ++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 154 insertions(+), 0 deletions(-)
+
+commit 576d73425fcb49ab5f4533a3d49a45badd4cb7b7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-08 17:36:01 +0100
+
+    Add generated code and skeletal proxies for Account, AccountManager
+
+ docs/reference/telepathy-glib-sections.txt |  133 +++++++++++++++++++
+ docs/reference/telepathy-glib.types        |    9 ++
+ telepathy-glib/Makefile.am                 |   24 ++++
+ telepathy-glib/account-manager.c           |  138 ++++++++++++++++++++
+ telepathy-glib/account-manager.h           |   72 +++++++++++
+ telepathy-glib/account-manager.xml         |    9 ++
+ telepathy-glib/account.c                   |  191 ++++++++++++++++++++++++++++
+ telepathy-glib/account.h                   |   73 +++++++++++
+ telepathy-glib/account.xml                 |   11 ++
+ telepathy-glib/debug-internal.h            |    3 +-
+ telepathy-glib/debug.c                     |    3 +
+ telepathy-glib/defs.h                      |   25 ++++-
+ telepathy-glib/extra-gtkdoc.h              |   28 ++++
+ telepathy-glib/stable-interfaces.xml       |    3 +
+ telepathy-glib/svc-account-manager.h       |    6 +
+ telepathy-glib/svc-account.h               |    6 +
+ 16 files changed, 731 insertions(+), 3 deletions(-)
+
+commit 879d6e41f1b50661a887937fddc2d66d3800a816
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-10 14:34:11 +0100
+
+    glib-client-gen.py: add support for deprecating or not generating _run_ methods
+
+ examples/extensions/Makefile.am |    3 ++-
+ telepathy-glib/Makefile.am      |   10 ++++++++++
+ tools/glib-client-gen.py        |   31 +++++++++++++++++++++++++------
+ 3 files changed, 37 insertions(+), 7 deletions(-)
+
+commit c54861d1425f8f3c2bc34d07f23269501344683c
+Merge: db0637d a17fdf9
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-08 17:56:41 +0100
+
+    Merge branch 'no-alias-flags'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit a17fdf987f41baf5a28260507c81cd6d1adb3ba5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-08 16:31:51 +0100
+
+    TpConnection: don't introspect alias flags, and remove some dead code
+    
+    This was not, it turns out, a good idea. See TpContact or telepathy-qt4
+    for what we should have been doing.
+
+ telepathy-glib/connection-internal.h |    2 -
+ telepathy-glib/connection.c          |   54 ----------------------------------
+ 2 files changed, 0 insertions(+), 56 deletions(-)
+
+commit 8fcba3acbcd23cd597bf3afba8b67c0c43816201
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-08 16:25:43 +0100
+
+    Revert "Add "alias-flags" property and tp_connection_get_alias_flags method on TpConnection"
+    
+    This reverts commit 21a6a922027d62ee29e93123fa16815a6ea811e3.
+    
+    This is not the way to do miscellaneous non-core interfaces. Instead, we need
+    something like the "feature" concept in TpContact and telepathy-qt4.
+
+ docs/reference/telepathy-glib-sections.txt |    1 -
+ telepathy-glib/connection.c                |   32 +---------------------------
+ telepathy-glib/connection.h                |    2 -
+ 3 files changed, 1 insertions(+), 34 deletions(-)
+
+commit db0637d938ad53b80d38e8a44db9c17d4953241e
+Merge: ea35ffa d8a0cbc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-08 16:16:37 +0100
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 0cb63c2aecbfb99e091fb4ebf07d85a56266110c
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2009-06-06 13:18:35 +0100
+
+    Make tp_channel_dispose idempotent
+
+ telepathy-glib/channel.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit ea35ffac42f22a649952852a4870207abc481840
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2009-06-04 21:51:37 +0100
+
+    Add flymake.mk to EXTRA_DIST.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+ tools/Makefile.am |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 3b0bd2974c2df6525682b484773eedaafe86517c
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2009-06-04 18:28:27 +0100
+
+    Add simple flymake support.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+ telepathy-glib/Makefile.am |    1 +
+ tools/flymake.mk           |    4 ++++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 21a6a922027d62ee29e93123fa16815a6ea811e3
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2009-05-29 15:33:09 +0200
+
+    Add "alias-flags" property and tp_connection_get_alias_flags method on TpConnection
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/connection.c                |   32 +++++++++++++++++++++++++++-
+ telepathy-glib/connection.h                |    2 +
+ 3 files changed, 34 insertions(+), 1 deletions(-)
+
+commit db5c49716c12c09b294a5531104fab538a438030
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2009-05-28 11:46:50 +0100
+
+    Document client-side handle reference counting.
+    
+    Fixes fd.o #19741
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+ telepathy-glib/connection-handles.c |   15 +++++++++++++--
+ 1 files changed, 13 insertions(+), 2 deletions(-)
+
+commit e5916e318fed0715246df8261b259ca762c1d245
+Author: Patryk Zawadzki <patrys@pld-linux.org>
+Date:   2009-05-28 11:26:04 +0100
+
+    Don't list media-interfaces.h twice in Makefile.am
+    
+    Fixes fd.o #21977
+    
+    Signed-off-by: Will Thompson <will.thompson@collabora.co.uk>
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+ telepathy-glib/Makefile.am |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit d8a0cbcd03efcbbde95bd6aaab12badd71a7ef4c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-05-27 18:51:24 +0100
+
+    Make sure _gen/error-str.h and .c end with a newline
+    
+    Some compilers don't like it otherwise.
+    
+    This appears to remove the need for the hack that wjt used, where a
+    pointless comment was the last thing in the header.
+
+ tools/glib-errors-str-gen.py |    9 ++++-----
+ 1 files changed, 4 insertions(+), 5 deletions(-)
+
+commit 61588053a440473581b872588cbd81f326f15f91
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-05-27 18:02:28 +0100
+
+    Start developing 0.7.32
+
+ NEWS         |   11 +++++++++++
+ configure.ac |    2 +-
+ 2 files changed, 12 insertions(+), 1 deletions(-)
+
 commit d22c658670fe7cf80d5b900bf7c5063f01479337
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-05-27 17:23:54 +0100

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpConnection</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.0">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="telepathy-glib-connection-manager.html" title="TpConnectionManager">
@@ -1789,7 +1789,11 @@ if they are valid and <em class="parameter"><code>hold</code></em> is TRUE, hold
 <p>
 This is a thin wrapper around the GetContactAttributes D-Bus method, and
 should be used in preference to
-<code class="function">tp_cli_connection_interface_contacts_get_contact_attributes()</code>.
+<code class="function">tp_cli_connection_interface_contacts_get_contact_attributes()</code>; mixing this
+function, <a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()"><code class="function">tp_connection_hold_handles()</code></a>, <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>, and
+<a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> with direct use of the RequestHandles, HoldHandles and
+GetContactAttributes D-Bus methods is unwise, as <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> and
+<a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> perform client-side reference counting of handles.
 The <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> API provides a higher-level abstraction which should
 usually be used instead.
 </p>
@@ -1898,7 +1902,14 @@ Hold (ensure a reference to) the given handles, if they are valid.
 <p>
 If they are valid, the callback will later be called with the given
 handles; if not all of them are valid, the callback will be called with
-an error.</p>
+an error.
+</p>
+<p>
+This function, along with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>,
+<a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()"><code class="function">tp_connection_get_contact_attributes()</code></a> and <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>, keeps a client-side
+reference count of handles; you should not use the RequestHandles,
+HoldHandles and GetContactAttributes D-Bus methods directly as well as these
+functions.</p>
 <p>
 </p>
 <div class="variablelist"><table border="0">
@@ -1980,7 +1991,8 @@ This function might release any references held by calling
 <a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-run-get-contact-attributes" title="tp_cli_connection_interface_contacts_run_get_contact_attributes ()"><code class="function">tp_cli_connection_interface_contacts_run_get_contact_attributes()</code></a> directly.
 Those functions should be avoided in favour of using <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>,
 <a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()"><code class="function">tp_connection_hold_handles()</code></a>, <a class="link" href="telepathy-glib-connection.html#tp-connection-request-handles" title="tp_connection_request_handles ()"><code class="function">tp_connection_request_handles()</code></a> and
-<a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()"><code class="function">tp_connection_get_contact_attributes()</code></a>.
+<a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()"><code class="function">tp_connection_get_contact_attributes()</code></a>, which along with this function
+perform client-side reference counting of handles.
 </p>
 <p>
 If <em class="parameter"><code>self</code></em> has already become invalid, this function does nothing.</p>
