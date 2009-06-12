@@ -1,4 +1,5 @@
 include $(top_srcdir)/tools/shave.mk
+include $(top_srcdir)/tools/flymake.mk
 
 tpgincludedir=$(includedir)/telepathy-1.0/telepathy-glib
 genincludedir=$(tpgincludedir)/_gen
@@ -34,11 +35,18 @@ ABI_LISTS = \
     versions/0.7.28.abi \
     versions/0.7.29.abi \
     versions/0.7.30.abi \
-    versions/0.7.31.abi
+    versions/0.7.31.abi \
+    versions/0.7.32.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
+    account.xml \
+    account-manager.xml \
     channel.xml \
+    channel-dispatcher.xml \
+    channel-dispatch-operation.xml \
+    channel-request.xml \
+    client.xml \
     connection.xml \
     connection-manager.xml \
     dbus-daemon.xml \
@@ -113,13 +121,18 @@ libtelepathy_glib_la_LDFLAGS += -export-symbols-regex '^tp'
 endif # !HAVE_LD_VERSION_SCRIPT
 
 tpginclude_HEADERS = \
+    account.h \
+    account-manager.h \
     base-connection.h \
     base-connection-manager.h \
     channel.h \
     channel-iface.h \
+    channel-dispatcher.h \
+    channel-dispatch-operation.h \
     channel-factory-iface.h \
     channel-manager.h \
-    media-interfaces.h \
+    channel-request.h \
+    client.h \
     connection.h \
     connection-manager.h \
     contact.h \
@@ -148,7 +161,13 @@ tpginclude_HEADERS = \
     proxy.h \
     proxy-subclass.h \
     run.h \
+    svc-account.h \
+    svc-account-manager.h \
+    svc-channel-dispatcher.h \
+    svc-channel-dispatch-operation.h \
     svc-channel.h \
+    svc-channel-request.h \
+    svc-client.h \
     svc-connection.h \
     svc-connection-manager.h \
     svc-generic.h \
@@ -166,14 +185,26 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/interfaces-body.h \
     _gen/gtypes-body.h \
     _gen/register-dbus-glib-marshallers-body.h \
+    _gen/tp-cli-account-body.h \
+    _gen/tp-cli-account-manager-body.h \
     _gen/tp-cli-channel-body.h \
+    _gen/tp-cli-channel-dispatcher-body.h \
+    _gen/tp-cli-channel-dispatch-operation-body.h \
+    _gen/tp-cli-channel-request-body.h \
+    _gen/tp-cli-client-body.h \
     _gen/tp-cli-connection-body.h \
     _gen/tp-cli-connection-manager-body.h \
     _gen/tp-cli-dbus-daemon-body.h \
     _gen/tp-cli-generic-body.h \
     _gen/tp-cli-media-session-handler-body.h \
     _gen/tp-cli-media-stream-handler-body.h \
+    _gen/tp-svc-account.c \
+    _gen/tp-svc-account-manager.c \
     _gen/tp-svc-channel.c \
+    _gen/tp-svc-channel-dispatcher.c \
+    _gen/tp-svc-channel-dispatch-operation.c \
+    _gen/tp-svc-channel-request.c \
+    _gen/tp-svc-client.c \
     _gen/tp-svc-connection.c \
     _gen/tp-svc-connection-manager.c \
     _gen/tp-svc-generic.c \
@@ -185,14 +216,26 @@ nodist_geninclude_HEADERS = \
     _gen/telepathy-enums.h \
     _gen/telepathy-interfaces.h \
     _gen/gtypes.h \
+    _gen/tp-cli-account.h \
+    _gen/tp-cli-account-manager.h \
     _gen/tp-cli-channel.h \
+    _gen/tp-cli-channel-dispatcher.h \
+    _gen/tp-cli-channel-dispatch-operation.h \
+    _gen/tp-cli-channel-request.h \
+    _gen/tp-cli-client.h \
     _gen/tp-cli-connection.h \
     _gen/tp-cli-connection-manager.h \
     _gen/tp-cli-dbus-daemon.h \
     _gen/tp-cli-generic.h \
     _gen/tp-cli-media-session-handler.h \
     _gen/tp-cli-media-stream-handler.h \
+    _gen/tp-svc-account.h \
+    _gen/tp-svc-account-manager.h \
     _gen/tp-svc-channel.h \
+    _gen/tp-svc-channel-dispatcher.h \
+    _gen/tp-svc-channel-dispatch-operation.h \
+    _gen/tp-svc-channel-request.h \
+    _gen/tp-svc-client.h \
     _gen/tp-svc-connection.h \
     _gen/tp-svc-connection-manager.h \
     _gen/tp-svc-generic.h \
@@ -221,12 +264,18 @@ check-local: check-coding-style
 
 libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)
 libtelepathy_glib_internal_la_SOURCES = \
+    account.c \
+    account-manager.c \
     base-connection.c \
     base-connection-manager.c \
     channel.c \
     channel-group.c \
     channel-internal.h \
+    channel-dispatcher.c \
+    channel-dispatch-operation.c \
     channel-manager.c \
+    channel-request.c \
+    client.c \
     connection.c \
     connection-internal.h \
     connection-handles.c \
@@ -362,29 +411,62 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 	subclass= ; \
 	subclass_assert= ; \
 	case $* in \
+		generic) \
+			maybe_reentrant=--generate-reentrant; \
+			;; \
+		account-manager) \
+			subclass=--subclass=TpAccountManager; \
+			subclass_assert=--subclass-assert=TP_IS_ACCOUNT_MANAGER; \
+			;; \
+		account) \
+			subclass=--subclass=TpAccount; \
+			subclass_assert=--subclass-assert=TP_IS_ACCOUNT; \
+			;; \
 		channel) \
 			subclass=--subclass=TpChannel; \
 			subclass_assert=--subclass-assert=TP_IS_CHANNEL; \
+			maybe_reentrant=--generate-reentrant; \
+			;; \
+		channel-dispatcher) \
+			subclass=--subclass=TpChannelDispatcher; \
+			subclass_assert=--subclass-assert=TP_IS_CHANNEL_DISPATCHER; \
+			;; \
+		channel-dispatch-operation) \
+			subclass=--subclass=TpChannelDispatchOperation; \
+			subclass_assert=--subclass-assert=TP_IS_CHANNEL_DISPATCH_OPERATION; \
+			;; \
+		channel-request) \
+			subclass=--subclass=TpChannelRequest; \
+			subclass_assert=--subclass-assert=TP_IS_CHANNEL_REQUEST; \
+			;; \
+		client) \
+			subclass=--subclass=TpClient; \
+			subclass_assert=--subclass-assert=TP_IS_CLIENT; \
 			;; \
 		connection-manager) \
 			subclass=--subclass=TpConnectionManager; \
 			subclass_assert=--subclass-assert=TP_IS_CONNECTION_MANAGER \
+			maybe_reentrant=--generate-reentrant; \
 			;; \
 		connection) \
 			subclass=--subclass=TpConnection; \
 			subclass_assert=--subclass-assert=TP_IS_CONNECTION; \
+			maybe_reentrant=--generate-reentrant; \
 			;; \
 		media-session-handler) \
 			subclass=--subclass=TpMediaSessionHandler; \
 			subclass_assert=--subclass-assert=TP_IS_MEDIA_SESSION_HANDLER; \
+			maybe_reentrant=--generate-reentrant; \
 			;; \
 		media-stream-handler) \
 			subclass=--subclass=TpMediaStreamHandler; \
 			subclass_assert=--subclass-assert=TP_IS_MEDIA_STREAM_HANDLER; \
+			maybe_reentrant=--generate-reentrant; \
 			;; \
 		dbus-daemon) \
 			subclass=--subclass=TpDBusDaemon; \
 			subclass_assert=--subclass-assert=TP_IS_DBUS_DAEMON; \
+			maybe_reentrant=--generate-reentrant; \
 			;; \
 	esac; \
 	$(PYTHON) $(tools_dir)/glib-client-gen.py \
@@ -392,4 +474,5 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		--group `echo $* | tr - _` \
 		--iface-quark-prefix=TP_IFACE_QUARK \
 		--tp-proxy-api=0.7.6 \
+		$$maybe_reentrant \
 		$< Tp_Cli _gen/tp-cli-$*

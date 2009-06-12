@@ -1,0 +1,654 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-account">
+<refmeta>
+<refentrytitle role="top_of_page" id="telepathy-glib-account.top_of_page">TpAccount</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>TpAccount</refname>
+<refpurpose>proxy object for an account in the Telepathy account
+ manager</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="telepathy-glib-account.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+<anchor id="TpAccount"/>
+<synopsis>
+
+#include &lt;telepathy-glib/account.h&gt;
+
+                    <link linkend="TpAccount-struct">TpAccount</link>;
+                    <link linkend="TpAccountClass">TpAccountClass</link>;
+<link linkend="TpAccount">TpAccount</link> *         <link linkend="tp-account-new">tp_account_new</link>                      (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *bus_daemon,
+                                                         const <link linkend="gchar">gchar</link> *object_path,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                <link linkend="tp-account-init-known-interfaces">tp_account_init_known_interfaces</link>    (void);
+
+<link linkend="void">void</link>                (<link linkend="tp-cli-account-callback-for-reconnect">*tp_cli_account_callback_for_reconnect</link>)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * <link linkend="tp-cli-account-call-reconnect">tp_cli_account_call_reconnect</link>      (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-account-callback-for-reconnect">tp_cli_account_callback_for_reconnect</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-account-callback-for-remove">*tp_cli_account_callback_for_remove</link>)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * <link linkend="tp-cli-account-call-remove">tp_cli_account_call_remove</link>         (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-account-callback-for-remove">tp_cli_account_callback_for_remove</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-account-callback-for-update-parameters">*tp_cli_account_callback_for_update_parameters</link>)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> **out_Reconnect_Required,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * <link linkend="tp-cli-account-call-update-parameters">tp_cli_account_call_update_parameters</link>
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Set,
+                                                         const <link linkend="gchar">gchar</link> **in_Unset,
+                                                         <link linkend="tp-cli-account-callback-for-update-parameters">tp_cli_account_callback_for_update_parameters</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="void">void</link>                (<link linkend="tp-cli-account-signal-callback-account-property-changed">*tp_cli_account_signal_callback_account_property_changed</link>)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Properties,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * <link linkend="tp-cli-account-connect-to-account-property-changed">tp_cli_account_connect_to_account_property_changed</link>
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="tp-cli-account-signal-callback-account-property-changed">tp_cli_account_signal_callback_account_property_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="tp-cli-account-signal-callback-removed">*tp_cli_account_signal_callback_removed</link>)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * <link linkend="tp-cli-account-connect-to-removed">tp_cli_account_connect_to_removed</link>
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="tp-cli-account-signal-callback-removed">tp_cli_account_signal_callback_removed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+
+<link linkend="void">void</link>                (<link linkend="tp-cli-account-interface-avatar-signal-callback-avatar-changed">*tp_cli_account_interface_avatar_signal_callback_avatar_changed</link>)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);
+<link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * <link linkend="tp-cli-account-interface-avatar-connect-to-avatar-changed">tp_cli_account_interface_avatar_connect_to_avatar_changed</link>
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="tp-cli-account-interface-avatar-signal-callback-avatar-changed">tp_cli_account_interface_avatar_signal_callback_avatar_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="telepathy-glib-account.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----<link linkend="TpProxy">TpProxy</link>
+         +----TpAccount
+</synopsis>
+</refsect1>
+
+
+
+
+
+
+
+
+<refsect1 id="telepathy-glib-account.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+The Telepathy Account Manager stores the user's configured real-time
+communication accounts. The <link linkend="TpAccount"><type>TpAccount</type></link> object represents a stored account.</para>
+<para>
+</para>
+</refsect1>
+
+<refsect1 id="telepathy-glib-account.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="TpAccount-struct" role="struct">
+<title>TpAccount</title>
+<indexterm zone="TpAccount-struct" role="0.7.UNRELEASED"><primary sortas="TpAccount">TpAccount</primary></indexterm><programlisting>typedef struct _TpAccount TpAccount;</programlisting>
+<para>
+The Telepathy Account Manager stores the user's configured real-time
+communication accounts. This object represents a stored account.
+</para>
+<para>
+If this account is deleted from the account manager, the
+<link linkend="TpProxy-invalidated"><type>"invalidated"</type></link> signal will be emitted
+with the domain <link linkend="TP-DBUS-ERRORS--CAPS"><literal>TP_DBUS_ERRORS</literal></link> and the error code
+<link linkend="TP-DBUS-ERROR-OBJECT-REMOVED--CAPS"><literal>TP_DBUS_ERROR_OBJECT_REMOVED</literal></link>.
+</para>
+<para>
+This proxy is usable but very incomplete: accessors for the
+Account's D-Bus properties will be added in a later version of
+telepathy-glib, along with a mechanism similar to
+<link linkend="tp-connection-call-when-ready"><function>tp_connection_call_when_ready()</function></link>.
+</para>
+<para>
+Most operations performed on an Account are done via D-Bus properties.
+Until convenience methods for this are implemented, use of the generic
+<link linkend="tp-cli-dbus-properties-call-get-all"><function>tp_cli_dbus_properties_call_get_all()</function></link> and <link linkend="tp-cli-dbus-properties-call-set"><function>tp_cli_dbus_properties_call_set()</function></link>
+methods is recommended.
+</para>
+<para>
+Other useful auto-generated method wrappers on an Account include
+<link linkend="tp-cli-account-call-remove"><function>tp_cli_account_call_remove()</function></link>, <link linkend="tp-cli-account-call-update-parameters"><function>tp_cli_account_call_update_parameters()</function></link> and
+<link linkend="tp-cli-account-call-reconnect"><function>tp_cli_account_call_reconnect()</function></link>.</para>
+<para>
+</para><para role="since">Since 0.7.UNRELEASED</para></refsect2>
+<refsect2 id="TpAccountClass" role="struct">
+<title>TpAccountClass</title>
+<indexterm zone="TpAccountClass"><primary sortas="TpAccountClass">TpAccountClass</primary></indexterm><programlisting>typedef struct {
+} TpAccountClass;
+</programlisting>
+<para>
+The class of a <link linkend="TpAccount"><type>TpAccount</type></link>.</para>
+<para>
+</para></refsect2>
+<refsect2 id="tp-account-new" role="function">
+<title>tp_account_new ()</title>
+<indexterm zone="tp-account-new"><primary sortas="tp_account_new">tp_account_new</primary></indexterm><programlisting><link linkend="TpAccount">TpAccount</link> *         tp_account_new                      (<link linkend="TpDBusDaemon">TpDBusDaemon</link> *bus_daemon,
+                                                         const <link linkend="gchar">gchar</link> *object_path,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Convenience function to create a new account proxy.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>bus_daemon</parameter>&#160;:</term>
+<listitem><simpara> Proxy for the D-Bus daemon
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>object_path</parameter>&#160;:</term>
+<listitem><simpara> The non-NULL object path of this account
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> Used to raise an error if <parameter>object_path</parameter> is not valid
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a new reference to an account proxy, or <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>object_path</parameter> is
+   not valid
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-account-init-known-interfaces" role="function" condition="since:0.7.UNRELEASED">
+<title>tp_account_init_known_interfaces ()</title>
+<indexterm zone="tp-account-init-known-interfaces" role="0.7.UNRELEASED"><primary sortas="tp_account_init_known_interfaces">tp_account_init_known_interfaces</primary></indexterm><programlisting><link linkend="void">void</link>                tp_account_init_known_interfaces    (void);</programlisting>
+<para>
+Ensure that the known interfaces for TpAccount have been set up.
+This is done automatically when necessary, but for correct
+overriding of library interfaces by local extensions, you should
+call this function before calling
+<link linkend="tp-proxy-or-subclass-hook-on-interface-add"><function>tp_proxy_or_subclass_hook_on_interface_add()</function></link> with first argument
+<link linkend="TP-TYPE-ACCOUNT--CAPS"><literal>TP_TYPE_ACCOUNT</literal></link>.</para>
+<para>
+</para><para role="since">Since 0.7.UNRELEASED</para></refsect2>
+<refsect2 id="tp-cli-account-callback-for-reconnect" role="function">
+<title>tp_cli_account_callback_for_reconnect ()</title>
+<indexterm zone="tp-cli-account-callback-for-reconnect"><primary sortas="tp_cli_account_callback_for_reconnect">tp_cli_account_callback_for_reconnect</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_account_callback_for_reconnect)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a Reconnect method call
+succeeds or fails.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> <link linkend="NULL--CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-call-reconnect" role="function">
+<title>tp_cli_account_call_reconnect ()</title>
+<indexterm zone="tp-cli-account-call-reconnect"><primary sortas="tp_cli_account_call_reconnect">tp_cli_account_call_reconnect</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * tp_cli_account_call_reconnect      (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-account-callback-for-reconnect">tp_cli_account_callback_for_reconnect</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a Reconnect method call.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Re-connect this account. If the account is currently disconnected           and the requested presence is offline, or if the account           is not &lt;tp:member-ref&gt;Enabled&lt;/tp:member-ref&gt; or not           &lt;tp:member-ref&gt;Valid&lt;/tp:member-ref&gt;, this does nothing.&lt;/p&gt;          &lt;p&gt;If the account is disconnected and the requested presence is not           offline, this forces an attempt to connect with the requested           presence immediately.&lt;/p&gt;          &lt;p&gt;If the account is connecting or connected, this is equivalent to           remembering the current value of           &lt;tp:member-ref&gt;RequestedPresence&lt;/tp:member-ref&gt;, setting its value           to (OFFLINE, &amp;quot;offline&amp;quot;, &amp;quot;&amp;quot;), waiting for the change to take effect,           then setting its value to the value that was previously           remembered.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Clients desiring &amp;quot;instant apply&amp;quot; semantics for CM parameters MAY             call this method to achieve that.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;In particular, if the account&apos;s           &lt;tp:member-ref&gt;Connection&lt;/tp:member-ref&gt; is in the Connecting           state, calling this method causes the attempt to connect to be           aborted and re-tried.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This is necessary to ensure that the new parameters are             picked up.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&#160;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&#160;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL--CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&#160;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-callback-for-remove" role="function">
+<title>tp_cli_account_callback_for_remove ()</title>
+<indexterm zone="tp-cli-account-callback-for-remove"><primary sortas="tp_cli_account_callback_for_remove">tp_cli_account_callback_for_remove</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_account_callback_for_remove)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a Remove method call
+succeeds or fails.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> <link linkend="NULL--CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-call-remove" role="function">
+<title>tp_cli_account_call_remove ()</title>
+<indexterm zone="tp-cli-account-call-remove"><primary sortas="tp_cli_account_call_remove">tp_cli_account_call_remove</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * tp_cli_account_call_remove         (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="tp-cli-account-callback-for-remove">tp_cli_account_callback_for_remove</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a Remove method call.
+</para>
+<para>
+Delete the account.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&#160;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&#160;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL--CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&#160;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-callback-for-update-parameters" role="function">
+<title>tp_cli_account_callback_for_update_parameters ()</title>
+<indexterm zone="tp-cli-account-callback-for-update-parameters"><primary sortas="tp_cli_account_callback_for_update_parameters">tp_cli_account_callback_for_update_parameters</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_account_callback_for_update_parameters)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         const <link linkend="gchar">gchar</link> **out_Reconnect_Required,
+                                                         const <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Signature of the callback called when a UpdateParameters method call
+succeeds or fails.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> the proxy on which the call was made
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Reconnect_Required</parameter>&#160;:</term>
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>: A list of the names of parameters with changes that will not take           effect until the account is reconnected (this may be empty, e.g. if           all the parameters are D-Bus properties or parameters for which the           account manager has specific support). User interfaces that           require &amp;quot;instant apply&amp;quot; semantics MAY call           &lt;tp:member-ref&gt;Reconnect&lt;/tp:member-ref&gt; in response to receiving           a non-empty list.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> <link linkend="NULL--CAPS"><literal>NULL</literal></link> on success, or an error on failure
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> user-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> user-supplied object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-call-update-parameters" role="function">
+<title>tp_cli_account_call_update_parameters ()</title>
+<indexterm zone="tp-cli-account-call-update-parameters"><primary sortas="tp_cli_account_call_update_parameters">tp_cli_account_call_update_parameters</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * tp_cli_account_call_update_parameters
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gint">gint</link> timeout_ms,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Set,
+                                                         const <link linkend="gchar">gchar</link> **in_Unset,
+                                                         <link linkend="tp-cli-account-callback-for-update-parameters">tp_cli_account_callback_for_update_parameters</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Start a UpdateParameters method call.
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;         &lt;p&gt;Change the value of the &lt;tp:member-ref&gt;Parameters&lt;/tp:member-ref&gt;           property.&lt;/p&gt;          &lt;p&gt;If any of the changed parameters&apos;           &lt;tp:type&gt;Conn_Mgr_Param_Flags&lt;/tp:type&gt; include           &lt;code&gt;DBus_Property&lt;/code&gt;, the change will be applied to the           corresponding D-Bus Property on the active           &lt;tp:member-ref&gt;Connection&lt;/tp:member-ref&gt;, if there is one. Changes to           other parameters will not take effect until the next time the account           is disconnected and reconnected.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;In general, reconnecting is a destructive operation that shouldn&apos;t             happen as a side-effect. In particular, migration tools that             twiddle the settings of all accounts shouldn&apos;t cause an automatic             disconnect and reconnect.&lt;/p&gt;         &lt;/tp:rationale&gt;</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> the <link linkend="TpProxy"><type>TpProxy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>timeout_ms</parameter>&#160;:</term>
+<listitem><simpara> the timeout in milliseconds, or -1 to use the
+  default
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Set</parameter>&#160;:</term>
+<listitem><simpara> Used to pass an 'in' argument: A mapping from parameter names to their values. These parameters           should be stored for future use.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Unset</parameter>&#160;:</term>
+<listitem><simpara> Used to pass an 'in' argument: A list of the names of parameters to be removed from the set of           stored values, allowing the default values to be used.           If the given parameters were not, in fact, stored, or even if they           do not exist at all, the account manager MUST accept this without           error.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&#160;:</term>
+<listitem><simpara> called when the method call succeeds or fails;
+  may be <link linkend="NULL--CAPS"><literal>NULL</literal></link> to make a "fire and forget" call with no 
+  reply tracking
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> user-supplied data passed to the callback;
+  must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&#160;:</term>
+<listitem><simpara> called with the user_data as argument, after the
+  call has succeeded, failed or been cancelled;
+  must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, a <link linkend="GObject"><type>GObject</type></link> which will be 
+  weakly referenced; if it is destroyed, this call 
+  will automatically be cancelled. Must be <link linkend="NULL--CAPS"><literal>NULL</literal></link> if 
+  <parameter>callback</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a <link linkend="TpProxyPendingCall"><type>TpProxyPendingCall</type></link> representing the call in
+ progress. It is borrowed from the object, and will become
+ invalid when the callback is called, the call is
+ cancelled or the <link linkend="TpProxy"><type>TpProxy</type></link> becomes invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-signal-callback-account-property-changed" role="function">
+<title>tp_cli_account_signal_callback_account_property_changed ()</title>
+<indexterm zone="tp-cli-account-signal-callback-account-property-changed"><primary sortas="tp_cli_account_signal_callback_account_property_changed">tp_cli_account_signal_callback_account_property_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_account_signal_callback_account_property_changed)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Properties,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal AccountPropertyChanged.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-account-connect-to-account-property-changed"><function>tp_cli_account_connect_to_account_property_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Properties</parameter>&#160;:</term>
+<listitem><simpara> A map from property names in this namespace (e.g.           &lt;tp:member-ref&gt;Nickname&lt;/tp:member-ref&gt;) to           values. Properties whose values have not changed SHOULD be           omitted, but this need not be done.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-connect-to-account-property-changed" role="function">
+<title>tp_cli_account_connect_to_account_property_changed ()</title>
+<indexterm zone="tp-cli-account-connect-to-account-property-changed"><primary sortas="tp_cli_account_connect_to_account_property_changed">tp_cli_account_connect_to_account_property_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * tp_cli_account_connect_to_account_property_changed
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="tp-cli-account-signal-callback-account-property-changed">tp_cli_account_signal_callback_account_property_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal AccountPropertyChanged.
+</para>
+<para>
+The values of one or more properties on this interface (that do not         specify that this signal does not apply to them) may have changed.         This does not cover properties of other interfaces, which must         provide their own change notification if appropriate.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> A <link linkend="TpAccount"><type>TpAccount</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&#160;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&#160;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL--CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL--CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-signal-callback-removed" role="function">
+<title>tp_cli_account_signal_callback_removed ()</title>
+<indexterm zone="tp-cli-account-signal-callback-removed"><primary sortas="tp_cli_account_signal_callback_removed">tp_cli_account_signal_callback_removed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_account_signal_callback_removed)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal Removed.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-account-connect-to-removed"><function>tp_cli_account_connect_to_removed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-connect-to-removed" role="function">
+<title>tp_cli_account_connect_to_removed ()</title>
+<indexterm zone="tp-cli-account-connect-to-removed"><primary sortas="tp_cli_account_connect_to_removed">tp_cli_account_connect_to_removed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * tp_cli_account_connect_to_removed
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="tp-cli-account-signal-callback-removed">tp_cli_account_signal_callback_removed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal Removed.
+</para>
+<para>
+This account has been removed.          &lt;tp:rationale&gt;           This is redundant with &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy.AccountManager&quot;&gt;AccountRemoved&lt;/tp:dbus-ref&gt;,           but it&apos;s still worth having,           to avoid having to bind to AccountManager.AccountRemoved to tell           you whether your Account is valid — ideally, an account-editing UI           should only care about a single Account.         &lt;/tp:rationale&gt;</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> A <link linkend="TpAccount"><type>TpAccount</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&#160;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&#160;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL--CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL--CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-interface-avatar-signal-callback-avatar-changed" role="function">
+<title>tp_cli_account_interface_avatar_signal_callback_avatar_changed ()</title>
+<indexterm zone="tp-cli-account-interface-avatar-signal-callback-avatar-changed"><primary sortas="tp_cli_account_interface_avatar_signal_callback_avatar_changed">tp_cli_account_interface_avatar_signal_callback_avatar_changed</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_cli_account_interface_avatar_signal_callback_avatar_changed)
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GObject">GObject</link> *weak_object);</programlisting>
+<para>
+Represents the signature of a callback for the signal AvatarChanged.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> The proxy on which <link linkend="tp-cli-account-interface-avatar-connect-to-avatar-changed"><function>tp_cli_account_interface_avatar_connect_to_avatar_changed()</function></link>
+ was called
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> User-supplied data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> User-supplied weakly referenced object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-cli-account-interface-avatar-connect-to-avatar-changed" role="function">
+<title>tp_cli_account_interface_avatar_connect_to_avatar_changed ()</title>
+<indexterm zone="tp-cli-account-interface-avatar-connect-to-avatar-changed"><primary sortas="tp_cli_account_interface_avatar_connect_to_avatar_changed">tp_cli_account_interface_avatar_connect_to_avatar_changed</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * tp_cli_account_interface_avatar_connect_to_avatar_changed
+                                                        (<link linkend="TpAccount">TpAccount</link> *proxy,
+                                                         <link linkend="tp-cli-account-interface-avatar-signal-callback-avatar-changed">tp_cli_account_interface_avatar_signal_callback_avatar_changed</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> user_data,
+                                                         <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
+                                                         <link linkend="GObject">GObject</link> *weak_object,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Connect a handler to the signal AvatarChanged.
+</para>
+<para>
+Emitted when the Avatar property changes.          &lt;tp:rationale&gt;The avatar itself is deliberately not included in this           signal, to reduce bus traffic in the (likely common) case where no           running application cares about the user&apos;s own avatar.&lt;/tp:rationale&gt;</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>proxy</parameter>&#160;:</term>
+<listitem><simpara> A <link linkend="TpAccount"><type>TpAccount</type></link> or subclass
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&#160;:</term>
+<listitem><simpara> Callback to be called when the signal is
+  received
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara> User-supplied data for the callback
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>destroy</parameter>&#160;:</term>
+<listitem><simpara> Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <link linkend="NULL--CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>weak_object</parameter>&#160;:</term>
+<listitem><simpara> A <link linkend="GObject"><type>GObject</type></link> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&#160;:</term>
+<listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, used to raise an error if <link linkend="NULL--CAPS"><literal>NULL</literal></link> is
+  returned
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a <link linkend="TpProxySignalConnection"><type>TpProxySignalConnection</type></link> containing all of the
+above, which can be used to disconnect the signal; or
+<link linkend="NULL--CAPS"><literal>NULL</literal></link> if the proxy does not have the desired interface
+or has become invalid.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1 id="telepathy-glib-account.see-also">
+<title>See Also</title>
+#TpAccountManager
+</refsect1>
+
+</refentry>

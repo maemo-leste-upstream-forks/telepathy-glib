@@ -184,35 +184,6 @@ tp_connection_continue_introspection (TpConnection *self)
 }
 
 static void
-got_aliasing_flags (TpConnection *self,
-                    guint flags,
-                    const GError *error,
-                    gpointer user_data,
-                    GObject *weak_object)
-{
-  if (error == NULL)
-    {
-      DEBUG ("Introspected aliasing flags: 0x%x", flags);
-      self->priv->alias_flags = flags;
-    }
-  else
-    {
-      DEBUG ("GetAliasFlags(): %s", error->message);
-    }
-
-  tp_connection_continue_introspection (self);
-}
-
-static void
-introspect_aliasing (TpConnection *self)
-{
-  g_assert (self->priv->introspect_needed != NULL);
-
-  tp_cli_connection_interface_aliasing_call_get_alias_flags
-      (self, -1, got_aliasing_flags, NULL, NULL, NULL);
-}
-
-static void
 got_contact_attribute_interfaces (TpProxy *proxy,
                                   const GValue *value,
                                   const GError *error,
@@ -386,31 +357,6 @@ tp_connection_got_interfaces_cb (TpConnection *self,
                   func = introspect_contacts;
                   g_array_append_val (self->priv->introspect_needed, func);
                 }
-              else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING)
-                {
-                  /* call GetAliasFlags */
-                  func = introspect_aliasing;
-                  g_array_append_val (self->priv->introspect_needed,
-                      func);
-                }
-#if 0
-              else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_AVATARS)
-                {
-                  /* call GetAvatarRequirements */
-                  func = introspect_avatars;
-                  g_array_append_val (self->priv->introspect_needed,
-                      func);
-                }
-              else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_PRESENCE)
-                {
-                  /* call GetStatuses */
-                  func = introspect_presence;
-                  g_array_append_val (self->priv->introspect_needed,
-                      func);
-                }
-              /* if Privacy was stable, we'd also queue GetPrivacyModes
-               * here */
-#endif
             }
           else
             {
@@ -714,10 +660,11 @@ tp_connection_dispose (GObject *object)
 static void
 tp_connection_class_init (TpConnectionClass *klass)
 {
-  GType tp_type = TP_TYPE_CONNECTION;
   GParamSpec *param_spec;
   TpProxyClass *proxy_class = (TpProxyClass *) klass;
   GObjectClass *object_class = (GObjectClass *) klass;
+
+  tp_connection_init_known_interfaces ();
 
   g_type_class_add_private (klass, sizeof (TpConnectionPrivate));
 
@@ -730,10 +677,6 @@ tp_connection_class_init (TpConnectionClass *klass)
   /* If you change this, you must also change TpChannel to stop asserting
    * that its connection has a unique name */
   proxy_class->must_have_unique_name = TRUE;
-  tp_proxy_or_subclass_hook_on_interface_add (tp_type,
-      tp_cli_connection_add_signals);
-  tp_proxy_subclass_add_error_mapping (tp_type,
-      TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
 
   /**
    * TpConnection:status:
