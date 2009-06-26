@@ -1,3 +1,58 @@
+commit 876c97e5c68b1023c5fcb3449853c3924fa9b379
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-26 18:24:08 +0100
+
+    Prepare version 0.7.33
+
+ NEWS         |   12 ++++++++++--
+ configure.ac |    6 +++---
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+commit feb34a6b1d00ef710d714ce0e138aeee95ada017
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-25 19:07:08 +0100
+
+    tests/lib/params-cm.h: allocate enough storage for the D-Bus representation of int16/int32
+    
+    Even though the D-Bus types are 16 and 32 bits respectively, we store them
+    in the struct as gint/guint, following the usual dbus-glib convention.
+    
+    On architectures like i386 that pad 16-bit struct members to 32 bits
+    and are little-endian, we happen to get away with it, but on powerpc we don't.
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+ tests/lib/params-cm.h |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 9411159ebb88667933ec83f9cf53bc57d56fb27f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-25 15:20:19 +0100
+
+    TpConnection: avoid calling GetInterfaces more than once
+    
+    tp_connection_got_interfaces_cb (effectively) asserts that it hasn't been
+    called more than once. If we get StatusChanged(=> CONNECTED) followed
+    immediately by GetStatus returning CONNECTED, which is rare but possible
+    (we'd have to call GetStatus at the same moment that the status changed),
+    then we could end up scheduling two calls to GetInterfaces.
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+ telepathy-glib/connection-internal.h |    1 +
+ telepathy-glib/connection.c          |    4 +++-
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 1cb51cb2599cf44cb6c930cb7a3bb642009fb46e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-06-12 17:54:28 +0100
+
+    Start 0.7.33 development
+
+ NEWS         |    5 +++++
+ configure.ac |    2 +-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
 commit 2469e1bf3af4546c95467feb19436555e9492a21
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-06-12 17:14:08 +0100
