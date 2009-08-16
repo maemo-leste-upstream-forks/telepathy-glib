@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Telepathy protocol errors</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-protocol.html" title="The Telepathy protocol">
 <link rel="prev" href="telepathy-glib-enums.html" title="Telepathy protocol enumerations">
@@ -102,6 +102,11 @@ href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"
 #define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-CONNECTION-REFUSED--CAPS" title="TP_ERROR_STR_CONNECTION_REFUSED">TP_ERROR_STR_CONNECTION_REFUSED</a>
 #define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-CONNECTION-FAILED--CAPS" title="TP_ERROR_STR_CONNECTION_FAILED">TP_ERROR_STR_CONNECTION_FAILED</a>
 #define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-CONNECTION-LOST--CAPS" title="TP_ERROR_STR_CONNECTION_LOST">TP_ERROR_STR_CONNECTION_LOST</a>
+#define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-ALREADY-CONNECTED--CAPS" title="TP_ERROR_STR_ALREADY_CONNECTED">TP_ERROR_STR_ALREADY_CONNECTED</a>
+#define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-CONNECTION-REPLACED--CAPS" title="TP_ERROR_STR_CONNECTION_REPLACED">TP_ERROR_STR_CONNECTION_REPLACED</a>
+#define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-REGISTRATION-EXISTS--CAPS" title="TP_ERROR_STR_REGISTRATION_EXISTS">TP_ERROR_STR_REGISTRATION_EXISTS</a>
+#define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-SERVICE-BUSY--CAPS" title="TP_ERROR_STR_SERVICE_BUSY">TP_ERROR_STR_SERVICE_BUSY</a>
+#define             <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-RESOURCE-UNAVAILABLE--CAPS" title="TP_ERROR_STR_RESOURCE_UNAVAILABLE">TP_ERROR_STR_RESOURCE_UNAVAILABLE</a>
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -196,6 +201,11 @@ The GType of the Telepathy error enumeration.</p>
     TP_ERROR_CONNECTION_REFUSED,
     TP_ERROR_CONNECTION_FAILED,
     TP_ERROR_CONNECTION_LOST,
+    TP_ERROR_ALREADY_CONNECTED,
+    TP_ERROR_CONNECTION_REPLACED,
+    TP_ERROR_REGISTRATION_EXISTS,
+    TP_ERROR_SERVICE_BUSY,
+    TP_ERROR_RESOURCE_UNAVAILABLE,
 } TpError;
 </pre>
 <p>
@@ -426,6 +436,46 @@ Enumerated type representing the Telepathy D-Bus errors.</p>
 <td><p><a name="TP-ERROR-CONNECTION-LOST--CAPS"></a><span class="term"><code class="literal">TP_ERROR_CONNECTION_LOST</code></span></p></td>
 <td> org.freedesktop.Telepathy.Error.ConnectionLost:
     Raised when a connection is broken.
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ERROR-ALREADY-CONNECTED--CAPS"></a><span class="term"><code class="literal">TP_ERROR_ALREADY_CONNECTED</code></span></p></td>
+<td> org.freedesktop.Telepathy.Error.AlreadyConnected:
+    Raised on attempts to connect again to an account that is already
+    connected, if the protocol or server does not allow this.
+    Since 0.7.34
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ERROR-CONNECTION-REPLACED--CAPS"></a><span class="term"><code class="literal">TP_ERROR_CONNECTION_REPLACED</code></span></p></td>
+<td> org.freedesktop.Telepathy.Error.ConnectionReplaced:
+    Used as disconnection reason for an existing connection if it is
+    disconnected because a second connection to the same account is made.
+    Since 0.7.34
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ERROR-REGISTRATION-EXISTS--CAPS"></a><span class="term"><code class="literal">TP_ERROR_REGISTRATION_EXISTS</code></span></p></td>
+<td> org.freedesktop.Telepathy.Error.RegistrationExists:
+    Raised on attempts to register an account on a server when the account
+    already exists.
+    Since 0.7.34
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ERROR-SERVICE-BUSY--CAPS"></a><span class="term"><code class="literal">TP_ERROR_SERVICE_BUSY</code></span></p></td>
+<td> org.freedesktop.Telepathy.Error.ServiceBusy:
+    Raised when a server or other infrastructure rejects a request because
+    it is too busy.
+    Since 0.7.34
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ERROR-RESOURCE-UNAVAILABLE--CAPS"></a><span class="term"><code class="literal">TP_ERROR_RESOURCE_UNAVAILABLE</code></span></p></td>
+<td> org.freedesktop.Telepathy.Error.ResourceUnavailable:
+    Raised when a local process rejects a request because it does not have
+    enough of a resource, such as memory.
+    Since 0.7.34
 </td>
 </tr>
 </tbody>
@@ -660,7 +710,7 @@ The requested channel is invite-only.</p>
 The D-Bus error name org.freedesktop.Telepathy.Error.NotYours
 </p>
 <p>
-The requested channel or other resource already exists, and another       client is responsible for it</p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;       &lt;p&gt;The requested channel or other resource already exists, and another         user interface in this session is responsible for it.&lt;/p&gt;        &lt;p&gt;User interfaces SHOULD handle this error unobtrusively, since it         indicates that some other user interface is already processing the         channel.&lt;/p&gt;</p>
 <p>
 </p>
 </div>
@@ -852,7 +902,7 @@ Used to represent a user being ejected from a channel by another user,       for
 The D-Bus error name org.freedesktop.Telepathy.Error.Busy
 </p>
 <p>
-Used to represent a user being removed from a channel because of a       &amp;quot;busy&amp;quot; indication.        &lt;tp:rationale&gt;         This corresponds to Busy in the         &lt;tp:type&gt;Channel_Group_Change_Reason&lt;/tp:type&gt; enum.       &lt;/tp:rationale&gt;</p>
+Used to represent a user being removed from a channel because of a       &amp;quot;busy&amp;quot; indication. This error SHOULD NOT be used to represent a server       or other infrastructure being too busy to process a request - for that,       see ServerBusy.        &lt;tp:rationale&gt;         This corresponds to Busy in the         &lt;tp:type&gt;Channel_Group_Change_Reason&lt;/tp:type&gt; enum.       &lt;/tp:rationale&gt;</p>
 <p>
 </p>
 </div>
@@ -925,6 +975,66 @@ The D-Bus error name org.freedesktop.Telepathy.Error.ConnectionLost
 </p>
 <p>
 Raised when a connection is broken.</p>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ERROR_STR_ALREADY_CONNECTED">
+<a name="TP-ERROR-STR-ALREADY-CONNECTED--CAPS"></a><h3>TP_ERROR_STR_ALREADY_CONNECTED</h3>
+<pre class="programlisting">#define             TP_ERROR_STR_ALREADY_CONNECTED</pre>
+<p>
+The D-Bus error name org.freedesktop.Telepathy.Error.AlreadyConnected
+</p>
+<p>
+Raised when the user attempts to connect to an account but they are       already connected (perhaps from another client or computer), and the       protocol or account settings do not allow this.        &lt;tp:rationale&gt;         XMPP can have this behaviour if the user chooses the same resource         in both clients (it is server-dependent whether the result is         AlreadyConnected on the new connection, ConnectionReplaced on the         old connection, or two successful connections).       &lt;/tp:rationale&gt;</p>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ERROR_STR_CONNECTION_REPLACED">
+<a name="TP-ERROR-STR-CONNECTION-REPLACED--CAPS"></a><h3>TP_ERROR_STR_CONNECTION_REPLACED</h3>
+<pre class="programlisting">#define             TP_ERROR_STR_CONNECTION_REPLACED</pre>
+<p>
+The D-Bus error name org.freedesktop.Telepathy.Error.ConnectionReplaced
+</p>
+<p>
+Raised by an existing connection to an account if it is replaced by       a new connection (perhaps from another client or computer).        &lt;tp:rationale&gt;         In MSNP, when connecting twice with the same Passport, the new         connection &amp;quot;wins&amp;quot; and the old one is automatically disconnected.         XMPP can also have this behaviour if the user chooses the same         resource in two clients (it is server-dependent whether the result is         AlreadyConnected on the new connection, ConnectionReplaced on the         old connection, or two successful connections).       &lt;/tp:rationale&gt;</p>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ERROR_STR_REGISTRATION_EXISTS">
+<a name="TP-ERROR-STR-REGISTRATION-EXISTS--CAPS"></a><h3>TP_ERROR_STR_REGISTRATION_EXISTS</h3>
+<pre class="programlisting">#define             TP_ERROR_STR_REGISTRATION_EXISTS</pre>
+<p>
+The D-Bus error name org.freedesktop.Telepathy.Error.RegistrationExists
+</p>
+<p>
+Raised during in-band registration if the server indicates that the       requested account already exists.</p>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ERROR_STR_SERVICE_BUSY">
+<a name="TP-ERROR-STR-SERVICE-BUSY--CAPS"></a><h3>TP_ERROR_STR_SERVICE_BUSY</h3>
+<pre class="programlisting">#define             TP_ERROR_STR_SERVICE_BUSY</pre>
+<p>
+The D-Bus error name org.freedesktop.Telepathy.Error.ServiceBusy
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;       Raised if a server or some other piece of infrastructure cannot process       the request, e.g. due to resource limitations. Clients MAY try again       later.        &lt;tp:rationale&gt;         This is not the same error as Busy, which indicates that a         &lt;em&gt;user&lt;/em&gt; is busy.       &lt;/tp:rationale&gt;</p>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ERROR_STR_RESOURCE_UNAVAILABLE">
+<a name="TP-ERROR-STR-RESOURCE-UNAVAILABLE--CAPS"></a><h3>TP_ERROR_STR_RESOURCE_UNAVAILABLE</h3>
+<pre class="programlisting">#define             TP_ERROR_STR_RESOURCE_UNAVAILABLE</pre>
+<p>
+The D-Bus error name org.freedesktop.Telepathy.Error.ResourceUnavailable
+</p>
+<p>
+Raised if a request cannot be satisfied because a process local to the       user has insufficient resources. Clients MAY try again       later.        &lt;tp:rationale&gt;         For instance, the &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;ChannelDispatcher&lt;/tp:dbus-ref&gt;         might raise this error for some or all channel requests if it has         detected that there is not enough free memory.       &lt;/tp:rationale&gt;</p>
 <p>
 </p>
 </div>

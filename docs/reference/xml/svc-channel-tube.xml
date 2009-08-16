@@ -126,7 +126,11 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcChannelInterfaceTubeClass</title>
 <indexterm zone="TpSvcChannelInterfaceTubeClass"><primary sortas="TpSvcChannelInterfaceTubeClass">TpSvcChannelInterfaceTubeClass</primary></indexterm><programlisting>typedef struct _TpSvcChannelInterfaceTubeClass TpSvcChannelInterfaceTubeClass;</programlisting>
 <para>
-The class of TpSvcChannelInterfaceTube.</para>
+The class of TpSvcChannelInterfaceTube.
+This interface has no D-Bus methods, so an
+implementation can typically pass <link linkend="NULL--CAPS"><literal>NULL</literal></link> to
+<link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> as the interface
+initialization function.</para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-channel-interface-tube-emit-tube-channel-state-changed" role="function">
@@ -157,7 +161,27 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcChannelTypeStreamTubeClass</title>
 <indexterm zone="TpSvcChannelTypeStreamTubeClass"><primary sortas="TpSvcChannelTypeStreamTubeClass">TpSvcChannelTypeStreamTubeClass</primary></indexterm><programlisting>typedef struct _TpSvcChannelTypeStreamTubeClass TpSvcChannelTypeStreamTubeClass;</programlisting>
 <para>
-The class of TpSvcChannelTypeStreamTube.</para>
+The class of TpSvcChannelTypeStreamTube.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_channel_type_stream_tube (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_type_stream_tube_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (offer);
+  IMPLEMENT (accept);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-channel-type-stream-tube-offer-impl" role="function">
@@ -366,7 +390,27 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcChannelTypeDBusTubeClass</title>
 <indexterm zone="TpSvcChannelTypeDBusTubeClass"><primary sortas="TpSvcChannelTypeDBusTubeClass">TpSvcChannelTypeDBusTubeClass</primary></indexterm><programlisting>typedef struct _TpSvcChannelTypeDBusTubeClass TpSvcChannelTypeDBusTubeClass;</programlisting>
 <para>
-The class of TpSvcChannelTypeDBusTube.</para>
+The class of TpSvcChannelTypeDBusTube.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_channel_type_dbus_tube (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_type_dbus_tube_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (offer);
+  IMPLEMENT (accept);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-channel-type-dbus-tube-offer-impl" role="function">

@@ -117,7 +117,29 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcChannelClass</title>
 <indexterm zone="TpSvcChannelClass"><primary sortas="TpSvcChannelClass">TpSvcChannelClass</primary></indexterm><programlisting>typedef struct _TpSvcChannelClass TpSvcChannelClass;</programlisting>
 <para>
-The class of TpSvcChannel.</para>
+The class of TpSvcChannel.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_channel (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (close);
+  IMPLEMENT (get_channel_type);
+  IMPLEMENT (get_handle);
+  IMPLEMENT (get_interfaces);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-channel-close-impl" role="function">
@@ -346,7 +368,26 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcChannelInterfaceDestroyableClass</title>
 <indexterm zone="TpSvcChannelInterfaceDestroyableClass"><primary sortas="TpSvcChannelInterfaceDestroyableClass">TpSvcChannelInterfaceDestroyableClass</primary></indexterm><programlisting>typedef struct _TpSvcChannelInterfaceDestroyableClass TpSvcChannelInterfaceDestroyableClass;</programlisting>
 <para>
-The class of TpSvcChannelInterfaceDestroyable.</para>
+The class of TpSvcChannelInterfaceDestroyable.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_channel_interface_destroyable (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_interface_destroyable_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (destroy);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-channel-interface-destroyable-destroy-impl" role="function">

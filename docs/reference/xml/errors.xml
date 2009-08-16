@@ -64,6 +64,11 @@ const <link linkend="gchar">gchar</link> *       <link linkend="tp-error-get-dbu
 #define             <link linkend="TP-ERROR-STR-CONNECTION-REFUSED--CAPS">TP_ERROR_STR_CONNECTION_REFUSED</link>
 #define             <link linkend="TP-ERROR-STR-CONNECTION-FAILED--CAPS">TP_ERROR_STR_CONNECTION_FAILED</link>
 #define             <link linkend="TP-ERROR-STR-CONNECTION-LOST--CAPS">TP_ERROR_STR_CONNECTION_LOST</link>
+#define             <link linkend="TP-ERROR-STR-ALREADY-CONNECTED--CAPS">TP_ERROR_STR_ALREADY_CONNECTED</link>
+#define             <link linkend="TP-ERROR-STR-CONNECTION-REPLACED--CAPS">TP_ERROR_STR_CONNECTION_REPLACED</link>
+#define             <link linkend="TP-ERROR-STR-REGISTRATION-EXISTS--CAPS">TP_ERROR_STR_REGISTRATION_EXISTS</link>
+#define             <link linkend="TP-ERROR-STR-SERVICE-BUSY--CAPS">TP_ERROR_STR_SERVICE_BUSY</link>
+#define             <link linkend="TP-ERROR-STR-RESOURCE-UNAVAILABLE--CAPS">TP_ERROR_STR_RESOURCE_UNAVAILABLE</link>
 </synopsis>
 </refsynopsisdiv>
 
@@ -159,6 +164,11 @@ The GType of the Telepathy error enumeration.</para>
     TP_ERROR_CONNECTION_REFUSED,
     TP_ERROR_CONNECTION_FAILED,
     TP_ERROR_CONNECTION_LOST,
+    TP_ERROR_ALREADY_CONNECTED,
+    TP_ERROR_CONNECTION_REPLACED,
+    TP_ERROR_REGISTRATION_EXISTS,
+    TP_ERROR_SERVICE_BUSY,
+    TP_ERROR_RESOURCE_UNAVAILABLE,
 } TpError;
 </programlisting>
 <para>
@@ -388,6 +398,46 @@ Enumerated type representing the Telepathy D-Bus errors.</para>
     Raised when a connection is broken.
 </simpara></listitem>
 </varlistentry>
+<varlistentry id="TP-ERROR-ALREADY-CONNECTED--CAPS" role="constant">
+<term><literal>TP_ERROR_ALREADY_CONNECTED</literal></term>
+<listitem><simpara> org.freedesktop.Telepathy.Error.AlreadyConnected:
+    Raised on attempts to connect again to an account that is already
+    connected, if the protocol or server does not allow this.
+    Since 0.7.34
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-ERROR-CONNECTION-REPLACED--CAPS" role="constant">
+<term><literal>TP_ERROR_CONNECTION_REPLACED</literal></term>
+<listitem><simpara> org.freedesktop.Telepathy.Error.ConnectionReplaced:
+    Used as disconnection reason for an existing connection if it is
+    disconnected because a second connection to the same account is made.
+    Since 0.7.34
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-ERROR-REGISTRATION-EXISTS--CAPS" role="constant">
+<term><literal>TP_ERROR_REGISTRATION_EXISTS</literal></term>
+<listitem><simpara> org.freedesktop.Telepathy.Error.RegistrationExists:
+    Raised on attempts to register an account on a server when the account
+    already exists.
+    Since 0.7.34
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-ERROR-SERVICE-BUSY--CAPS" role="constant">
+<term><literal>TP_ERROR_SERVICE_BUSY</literal></term>
+<listitem><simpara> org.freedesktop.Telepathy.Error.ServiceBusy:
+    Raised when a server or other infrastructure rejects a request because
+    it is too busy.
+    Since 0.7.34
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="TP-ERROR-RESOURCE-UNAVAILABLE--CAPS" role="constant">
+<term><literal>TP_ERROR_RESOURCE_UNAVAILABLE</literal></term>
+<listitem><simpara> org.freedesktop.Telepathy.Error.ResourceUnavailable:
+    Raised when a local process rejects a request because it does not have
+    enough of a resource, such as memory.
+    Since 0.7.34
+</simpara></listitem>
+</varlistentry>
 </variablelist></refsect2>
 <refsect2 id="tp-g-set-error-invalid-handle-type" role="function">
 <title>tp_g_set_error_invalid_handle_type ()</title>
@@ -551,7 +601,7 @@ The requested channel is invite-only.</para>
 The D-Bus error name org.freedesktop.Telepathy.Error.NotYours
 </para>
 <para>
-The requested channel or other resource already exists, and another       client is responsible for it</para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;       &lt;p&gt;The requested channel or other resource already exists, and another         user interface in this session is responsible for it.&lt;/p&gt;        &lt;p&gt;User interfaces SHOULD handle this error unobtrusively, since it         indicates that some other user interface is already processing the         channel.&lt;/p&gt;</para>
 <para>
 </para></refsect2>
 <refsect2 id="TP-ERROR-STR-CANCELLED--CAPS" role="macro">
@@ -711,7 +761,7 @@ Used to represent a user being ejected from a channel by another user,       for
 The D-Bus error name org.freedesktop.Telepathy.Error.Busy
 </para>
 <para>
-Used to represent a user being removed from a channel because of a       &amp;quot;busy&amp;quot; indication.        &lt;tp:rationale&gt;         This corresponds to Busy in the         &lt;tp:type&gt;Channel_Group_Change_Reason&lt;/tp:type&gt; enum.       &lt;/tp:rationale&gt;</para>
+Used to represent a user being removed from a channel because of a       &amp;quot;busy&amp;quot; indication. This error SHOULD NOT be used to represent a server       or other infrastructure being too busy to process a request - for that,       see ServerBusy.        &lt;tp:rationale&gt;         This corresponds to Busy in the         &lt;tp:type&gt;Channel_Group_Change_Reason&lt;/tp:type&gt; enum.       &lt;/tp:rationale&gt;</para>
 <para>
 </para></refsect2>
 <refsect2 id="TP-ERROR-STR-NO-ANSWER--CAPS" role="macro">
@@ -772,6 +822,56 @@ The D-Bus error name org.freedesktop.Telepathy.Error.ConnectionLost
 </para>
 <para>
 Raised when a connection is broken.</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-ERROR-STR-ALREADY-CONNECTED--CAPS" role="macro">
+<title>TP_ERROR_STR_ALREADY_CONNECTED</title>
+<indexterm zone="TP-ERROR-STR-ALREADY-CONNECTED--CAPS"><primary sortas="TP_ERROR_STR_ALREADY_CONNECTED">TP_ERROR_STR_ALREADY_CONNECTED</primary></indexterm><programlisting>#define             TP_ERROR_STR_ALREADY_CONNECTED</programlisting>
+<para>
+The D-Bus error name org.freedesktop.Telepathy.Error.AlreadyConnected
+</para>
+<para>
+Raised when the user attempts to connect to an account but they are       already connected (perhaps from another client or computer), and the       protocol or account settings do not allow this.        &lt;tp:rationale&gt;         XMPP can have this behaviour if the user chooses the same resource         in both clients (it is server-dependent whether the result is         AlreadyConnected on the new connection, ConnectionReplaced on the         old connection, or two successful connections).       &lt;/tp:rationale&gt;</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-ERROR-STR-CONNECTION-REPLACED--CAPS" role="macro">
+<title>TP_ERROR_STR_CONNECTION_REPLACED</title>
+<indexterm zone="TP-ERROR-STR-CONNECTION-REPLACED--CAPS"><primary sortas="TP_ERROR_STR_CONNECTION_REPLACED">TP_ERROR_STR_CONNECTION_REPLACED</primary></indexterm><programlisting>#define             TP_ERROR_STR_CONNECTION_REPLACED</programlisting>
+<para>
+The D-Bus error name org.freedesktop.Telepathy.Error.ConnectionReplaced
+</para>
+<para>
+Raised by an existing connection to an account if it is replaced by       a new connection (perhaps from another client or computer).        &lt;tp:rationale&gt;         In MSNP, when connecting twice with the same Passport, the new         connection &amp;quot;wins&amp;quot; and the old one is automatically disconnected.         XMPP can also have this behaviour if the user chooses the same         resource in two clients (it is server-dependent whether the result is         AlreadyConnected on the new connection, ConnectionReplaced on the         old connection, or two successful connections).       &lt;/tp:rationale&gt;</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-ERROR-STR-REGISTRATION-EXISTS--CAPS" role="macro">
+<title>TP_ERROR_STR_REGISTRATION_EXISTS</title>
+<indexterm zone="TP-ERROR-STR-REGISTRATION-EXISTS--CAPS"><primary sortas="TP_ERROR_STR_REGISTRATION_EXISTS">TP_ERROR_STR_REGISTRATION_EXISTS</primary></indexterm><programlisting>#define             TP_ERROR_STR_REGISTRATION_EXISTS</programlisting>
+<para>
+The D-Bus error name org.freedesktop.Telepathy.Error.RegistrationExists
+</para>
+<para>
+Raised during in-band registration if the server indicates that the       requested account already exists.</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-ERROR-STR-SERVICE-BUSY--CAPS" role="macro">
+<title>TP_ERROR_STR_SERVICE_BUSY</title>
+<indexterm zone="TP-ERROR-STR-SERVICE-BUSY--CAPS"><primary sortas="TP_ERROR_STR_SERVICE_BUSY">TP_ERROR_STR_SERVICE_BUSY</primary></indexterm><programlisting>#define             TP_ERROR_STR_SERVICE_BUSY</programlisting>
+<para>
+The D-Bus error name org.freedesktop.Telepathy.Error.ServiceBusy
+</para>
+<para>
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;       Raised if a server or some other piece of infrastructure cannot process       the request, e.g. due to resource limitations. Clients MAY try again       later.        &lt;tp:rationale&gt;         This is not the same error as Busy, which indicates that a         &lt;em&gt;user&lt;/em&gt; is busy.       &lt;/tp:rationale&gt;</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-ERROR-STR-RESOURCE-UNAVAILABLE--CAPS" role="macro">
+<title>TP_ERROR_STR_RESOURCE_UNAVAILABLE</title>
+<indexterm zone="TP-ERROR-STR-RESOURCE-UNAVAILABLE--CAPS"><primary sortas="TP_ERROR_STR_RESOURCE_UNAVAILABLE">TP_ERROR_STR_RESOURCE_UNAVAILABLE</primary></indexterm><programlisting>#define             TP_ERROR_STR_RESOURCE_UNAVAILABLE</programlisting>
+<para>
+The D-Bus error name org.freedesktop.Telepathy.Error.ResourceUnavailable
+</para>
+<para>
+Raised if a request cannot be satisfied because a process local to the       user has insufficient resources. Clients MAY try again       later.        &lt;tp:rationale&gt;         For instance, the &lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy&quot;&gt;ChannelDispatcher&lt;/tp:dbus-ref&gt;         might raise this error for some or all channel requests if it has         detected that there is not enough free memory.       &lt;/tp:rationale&gt;</para>
 <para>
 </para></refsect2>
 

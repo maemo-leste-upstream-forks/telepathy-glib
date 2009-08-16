@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Service-side media streaming helper interfaces</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-connection.html" title="Service-side Connection interfaces">
@@ -419,7 +419,30 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcMediaSessionHandlerClass"></a><h3>TpSvcMediaSessionHandlerClass</h3>
 <pre class="programlisting">typedef struct _TpSvcMediaSessionHandlerClass TpSvcMediaSessionHandlerClass;</pre>
 <p>
-The class of TpSvcMediaSessionHandler.</p>
+The class of TpSvcMediaSessionHandler.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_media_session_handler (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_media_session_handler_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (error);
+  IMPLEMENT (ready);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
@@ -668,7 +691,40 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcMediaStreamHandlerClass"></a><h3>TpSvcMediaStreamHandlerClass</h3>
 <pre class="programlisting">typedef struct _TpSvcMediaStreamHandlerClass TpSvcMediaStreamHandlerClass;</pre>
 <p>
-The class of TpSvcMediaStreamHandler.</p>
+The class of TpSvcMediaStreamHandler.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_media_stream_handler (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_media_stream_handler_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (codec_choice);
+  IMPLEMENT (error);
+  IMPLEMENT (native_candidates_prepared);
+  IMPLEMENT (new_active_candidate_pair);
+  IMPLEMENT (new_native_candidate);
+  IMPLEMENT (ready);
+  IMPLEMENT (set_local_codecs);
+  IMPLEMENT (stream_state);
+  IMPLEMENT (supported_codecs);
+  IMPLEMENT (codecs_updated);
+  IMPLEMENT (hold_state);
+  IMPLEMENT (unhold_failure);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>

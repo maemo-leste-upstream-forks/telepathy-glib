@@ -90,7 +90,27 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcChannelTypeFileTransferClass</title>
 <indexterm zone="TpSvcChannelTypeFileTransferClass"><primary sortas="TpSvcChannelTypeFileTransferClass">TpSvcChannelTypeFileTransferClass</primary></indexterm><programlisting>typedef struct _TpSvcChannelTypeFileTransferClass TpSvcChannelTypeFileTransferClass;</programlisting>
 <para>
-The class of TpSvcChannelTypeFileTransfer.</para>
+The class of TpSvcChannelTypeFileTransfer.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_channel_type_file_transfer (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_type_file_transfer_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (accept_file);
+  IMPLEMENT (provide_file);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-channel-type-file-transfer-accept-file-impl" role="function">

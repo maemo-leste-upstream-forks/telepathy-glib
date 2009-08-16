@@ -22,6 +22,7 @@
 #include &lt;telepathy-glib/gtypes.h&gt;
 
 <link linkend="GValue">GValue</link> *            <link linkend="tp-dbus-specialized-value-slice-new">tp_dbus_specialized_value_slice_new</link> (<link linkend="GType">GType</link> type);
+#define             <link linkend="TP-ARRAY-TYPE-OBJECT-PATH-LIST--CAPS">TP_ARRAY_TYPE_OBJECT_PATH_LIST</link>
 #define             <link linkend="TP-HASH-TYPE-STRING-STRING-MAP--CAPS">TP_HASH_TYPE_STRING_STRING_MAP</link>
 #define             <link linkend="TP-ARRAY-TYPE-STRING-STRING-MAP-LIST--CAPS">TP_ARRAY_TYPE_STRING_STRING_MAP_LIST</link>
 #define             <link linkend="TP-HASH-TYPE-STRING-VARIANT-MAP--CAPS">TP_HASH_TYPE_STRING_VARIANT_MAP</link>
@@ -75,6 +76,9 @@
 #define             <link linkend="TP-HASH-TYPE-STATUS-SPEC-MAP--CAPS">TP_HASH_TYPE_STATUS_SPEC_MAP</link>
 #define             <link linkend="TP-STRUCT-TYPE-LAST-ACTIVITY-AND-STATUSES--CAPS">TP_STRUCT_TYPE_LAST_ACTIVITY_AND_STATUSES</link>
 #define             <link linkend="TP-STRUCT-TYPE-STATUS-SPEC--CAPS">TP_STRUCT_TYPE_STATUS_SPEC</link>
+
+#define             <link linkend="TP-HASH-TYPE-LOCATION--CAPS">TP_HASH_TYPE_LOCATION</link>
+#define             <link linkend="TP-HASH-TYPE-CONTACT-LOCATIONS--CAPS">TP_HASH_TYPE_CONTACT_LOCATIONS</link>
 
 #define             <link linkend="TP-STRUCT-TYPE-LOCAL-PENDING-INFO--CAPS">TP_STRUCT_TYPE_LOCAL_PENDING_INFO</link>
 #define             <link linkend="TP-ARRAY-TYPE-LOCAL-PENDING-INFO-LIST--CAPS">TP_ARRAY_TYPE_LOCAL_PENDING_INFO_LIST</link>
@@ -163,6 +167,16 @@ representing a D-Bus struct)
 given type.
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
+<refsect2 id="TP-ARRAY-TYPE-OBJECT-PATH-LIST--CAPS" role="macro" condition="since:0.7.34">
+<title>TP_ARRAY_TYPE_OBJECT_PATH_LIST</title>
+<indexterm zone="TP-ARRAY-TYPE-OBJECT-PATH-LIST--CAPS" role="0.7.34"><primary sortas="TP_ARRAY_TYPE_OBJECT_PATH_LIST">TP_ARRAY_TYPE_OBJECT_PATH_LIST</primary></indexterm><programlisting>#define TP_ARRAY_TYPE_OBJECT_PATH_LIST (tp_type_dbus_array_of_o ())
+</programlisting>
+<para>
+Expands to a call to a function
+that returns the <link linkend="GType"><type>GType</type></link> of a <link linkend="GPtrArray"><type>GPtrArray</type></link>
+of DBUS_TYPE_G_OBJECT_PATH.</para>
+<para>
+</para><para role="since">Since 0.7.34</para></refsect2>
 <refsect2 id="TP-HASH-TYPE-STRING-STRING-MAP--CAPS" role="macro">
 <title>TP_HASH_TYPE_STRING_STRING_MAP</title>
 <indexterm zone="TP-HASH-TYPE-STRING-STRING-MAP--CAPS"><primary sortas="TP_HASH_TYPE_STRING_STRING_MAP">TP_HASH_TYPE_STRING_STRING_MAP</primary></indexterm><programlisting>#define             TP_HASH_TYPE_STRING_STRING_MAP</programlisting>
@@ -1066,7 +1080,7 @@ An access control mode for extended presence items like geolocation.
         it&apos;s included here so it can be referenced by rich presence interfaces
         such as 
 	&lt;tp:dbus-ref namespace=&quot;org.freedesktop.Telepathy.Connection.Interface&quot;&gt;
-		Location.DRAFT
+		Location
 	&lt;/tp:dbus-ref&gt;
 	.
       
@@ -1225,6 +1239,56 @@ Member 3 (D-Bus type <literal>a{ss}</literal>,
 type <literal>String_String_Map</literal>,
 named <literal>Parameter_Types</literal>):
 (Undocumented)</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-HASH-TYPE-LOCATION--CAPS" role="macro">
+<title>TP_HASH_TYPE_LOCATION</title>
+<indexterm zone="TP-HASH-TYPE-LOCATION--CAPS"><primary sortas="TP_HASH_TYPE_LOCATION">TP_HASH_TYPE_LOCATION</primary></indexterm><programlisting>#define             TP_HASH_TYPE_LOCATION</programlisting>
+<para>
+A user&apos;s location, represented as an extensible mapping.
+</para>
+<para>
+This macro expands to a call to a function
+that returns the <link linkend="GType"><type>GType</type></link> of a <link linkend="GHashTable"><type>GHashTable</type></link>
+appropriate for representing a D-Bus
+dictionary of signature
+<literal>a{sv}</literal>.
+</para>
+<para>
+Keys (D-Bus type <literal>s</literal>,
+named <literal>Key</literal>):
+&lt;tp:docstring xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;            &lt;p&gt;Civic addresses are represented by the following well-known             keys (all of which have string values), which should be kept in             sync with those used in XEP-0080 and in the Geoclue project:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;countrycode - s: an ISO-3166-1 alpha-2 (two-letter) country               code, e.g. &amp;quot;us&amp;quot;, &amp;quot;gb&amp;quot;, &amp;quot;fr&amp;quot;&lt;/li&gt;             &lt;li&gt;country - s: a country name in unspecified locale, e.g.               &amp;quot;USA&amp;quot;&lt;/li&gt;             &lt;li&gt;region - s: an administrative region of the nation, such as a               state or province&lt;/li&gt;             &lt;li&gt;locality - s: a locality within the administrative region, such               as a town or city&lt;/li&gt;             &lt;li&gt;area - s: a named area such as a campus or neighborhood&lt;/li&gt;             &lt;li&gt;postalcode - s: a code used for postal delivery&lt;/li&gt;             &lt;li&gt;street - s: a thoroughfare within the locality, or a crossing of               two thoroughfares&lt;/li&gt;           &lt;/ul&gt;            &lt;p&gt;The following address keys are defined in XEP-0080 but not by             Geoclue, and are also allowed:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;building - s: a specific building on a street or in an area&lt;/li&gt;             &lt;li&gt;floor - s: a particular floor in a building&lt;/li&gt;             &lt;li&gt;room - s: a particular room in a building&lt;/li&gt;             &lt;li&gt;text - s: any more specific information, e.g.               &amp;quot;Northwest corner of the lobby&amp;quot;&lt;/li&gt;             &lt;li&gt;description - s: A natural-language name for or description of               the location, e.g. &amp;quot;Bill&apos;s house&amp;quot;&lt;/li&gt;             &lt;li&gt;uri - s: a URI representing the location or pointing to more               information about it&lt;/li&gt;           &lt;/ul&gt;            &lt;p&gt;Since the previous strings have data intended to be read by users,             the language used should be stated using:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;language - s: a specific language or locale of location               information in a format compatible to RFC 4646. Note that UTF-8               is the only allowed encoding, e.g. &amp;quot;en&amp;quot; or &amp;quot;fr-CA&amp;quot;.&lt;/li&gt;           &lt;/ul&gt;            &lt;p&gt;Positions are represented by the following well-known keys:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;lat - d: latitude in decimal degrees north, -90 to +90,               relative to the WGS-84 datum               &lt;tp:rationale&gt;                 This is from XEP-0080; the XEP allows use of a different                 datum, but recommends this one. We enforce sanity by requiring                 a consistent datum: a minimal compliant implementation of this                 specification in terms of XEP-0080 would simply ignore the                 &amp;lt;lat&amp;gt; and &amp;lt;lon&amp;gt; elements if &amp;lt;datum&amp;gt; exists                 and has a value other than WGS-84, while an advanced                 implementation might correct for the different datum.               &lt;/tp:rationale&gt;             &lt;/li&gt;             &lt;li&gt;lon - d: Longitude in decimal degrees east, -180 to +180,               relative to the WGS-84 datum               &lt;tp:rationale&gt;                 Same rationale as &apos;lat&apos;               &lt;/tp:rationale&gt;             &lt;/li&gt;             &lt;li&gt;alt - d: altitude in metres above sea level (negative               if below sea level)               &lt;tp:rationale&gt;                 This is from XEP-0080               &lt;/tp:rationale&gt;             &lt;/li&gt;              &lt;!-- Potentially to be reinstated later:                  http://bugs.freedesktop.org/show_bug.cgi?id=19585             &lt;li&gt;accuracy-level - i (&lt;tp:type&gt;Location_Accuracy_Level&lt;/tp:type&gt;):               an indication of accuracy, which SHOULD be omitted if it would be               Location_Accuracy_Level_None or               Location_Accuracy_Level_Detailed               &lt;tp:rationale&gt;                 This is a struct field in GeoClue; the name is new in this                 specification, and was chosen in an attempt to avoid clashing                 with any future XEP-0080 terminology.               &lt;/tp:rationale&gt;             &lt;/li&gt;             --&gt;              &lt;li&gt;accuracy - d: horizontal position error in metres if               known               &lt;tp:rationale&gt;                 This is from XEP-0080               &lt;/tp:rationale&gt;             &lt;/li&gt;           &lt;/ul&gt;            &lt;p&gt;Velocities are represented by the following well-known keys:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;speed - d: speed in metres per second               &lt;tp:rationale&gt;                 This is from XEP-0080               &lt;/tp:rationale&gt;             &lt;/li&gt;             &lt;li&gt;bearing - d: direction of movement in decimal degrees,               where North is 0 and East is 90               &lt;tp:rationale&gt;                 This is from XEP-0080, and is equivalent to the struct field                 called &amp;quot;direction&amp;quot; in GeoClue               &lt;/tp:rationale&gt;             &lt;/li&gt;           &lt;/ul&gt;            &lt;p&gt;Other well-known keys:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;timestamp - x (&lt;tp:type&gt;Unix_Timestamp64&lt;/tp:type&gt;): the time               that the contact was at this location, in seconds since               1970-01-01T00:00:00Z (i.e. the beginning of 1970 in UTC)               &lt;tp:rationale&gt;                 XEP-0080 uses an ISO 8601 string for this, but a number of                 seconds since the epoch is probably easier to work with.               &lt;/tp:rationale&gt;             &lt;/li&gt;           &lt;/ul&gt;
+</para>
+<para>
+Values (D-Bus type <literal>v</literal>,
+named <literal>Value</literal>):
+The value corresponding to the well-known key.</para>
+<para>
+</para></refsect2>
+<refsect2 id="TP-HASH-TYPE-CONTACT-LOCATIONS--CAPS" role="macro">
+<title>TP_HASH_TYPE_CONTACT_LOCATIONS</title>
+<indexterm zone="TP-HASH-TYPE-CONTACT-LOCATIONS--CAPS"><primary sortas="TP_HASH_TYPE_CONTACT_LOCATIONS">TP_HASH_TYPE_CONTACT_LOCATIONS</primary></indexterm><programlisting>#define             TP_HASH_TYPE_CONTACT_LOCATIONS</programlisting>
+<para>
+A map from contacts to their locations.
+</para>
+<para>
+This macro expands to a call to a function
+that returns the <link linkend="GType"><type>GType</type></link> of a <link linkend="GHashTable"><type>GHashTable</type></link>
+appropriate for representing a D-Bus
+dictionary of signature
+<literal>a{ua{sv}}</literal>.
+</para>
+<para>
+Keys (D-Bus type <literal>u</literal>,
+type <literal>Contact_Handle</literal>,
+named <literal>Contact</literal>):
+A contact
+</para>
+<para>
+Values (D-Bus type <literal>a{sv}</literal>,
+type <literal>Location</literal>,
+named <literal>Location</literal>):
+The contact&apos;s location, which MAY be empty to indicate           that the contact&apos;s location is unknown</para>
 <para>
 </para></refsect2>
 <refsect2 id="TP-STRUCT-TYPE-LOCAL-PENDING-INFO--CAPS" role="macro">

@@ -634,7 +634,18 @@ a hash mapping the fully-qualified name of the property to its value.  This
 is equivalent to calling <link linkend="tp-dbus-properties-mixin-get"><function>tp_dbus_properties_mixin_get()</function></link> for each property
 and building the table yourself, with the proviso that this function will
 <link linkend="g-assert"><function>g_assert()</function></link> if retrieving a property fails (for instance, because it does not
-exist).</para>
+exist).
+</para>
+<para>
+Additional keys and values can be inserted into the returned hash table;
+if this is done, the inserted keys and values will be freed when the
+hash table is destroyed. The keys must be allocated with <link linkend="g-strdup"><function>g_strdup()</function></link> or
+equivalent, and the values must be slice-allocated (for instance with
+<link linkend="tp-g-value-slice-new-string"><function>tp_g_value_slice_new_string()</function></link> or a similar function).
+</para>
+<para>
+Note that in particular, <link linkend="tp-asv-set-string"><function>tp_asv_set_string()</function></link> and similar functions should
+not be used with this hash table.</para>
 <para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>object</parameter>&#160;:</term>

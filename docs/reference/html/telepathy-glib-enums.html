@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Telepathy protocol enumerations</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-protocol.html" title="The Telepathy protocol">
 <link rel="prev" href="telepathy-glib-interfaces.html" title="Telepathy protocol interface strings">
@@ -327,7 +327,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-NETWORK-ERROR--CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_NETWORK_ERROR</code></span></p></td>
-<td>            There was an error sending or receiving on the network socket.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NetworkError.         
+<td>            There was an error sending or receiving on the network socket.            When the status changes from Connecting to Disconnected for this             reason, the equivalent D-Bus error is either             org.freedesktop.Telepathy.Error.NetworkError,             org.freedesktop.Telepathy.Error.ConnectionRefused,             org.freedesktop.Telepathy.Error.ConnectionFailed             or some more specific error.            When the status changes from Connected to Disconnected for this             reason, the equivalent D-Bus error is either             org.freedesktop.Telepathy.Error.NetworkError,             org.freedesktop.Telepathy.Error.ConnectionLost             or some more specific error.         
 </td>
 </tr>
 <tr>
@@ -342,7 +342,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-NAME-IN-USE--CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_NAME_IN_USE</code></span></p></td>
-<td>            In general, this reason indicates that the requested account             name or other identification could not be used due to conflict             with another connection. It can be divided into three cases:                         If the status change is from Connecting to Disconnected               and the 'register' parameter to RequestConnection was present               and true, the requested account could not be created on the               server because it already exists.              If the status change is from Connecting to Disconnected               but the 'register' parameter is absent or false, the connection               manager could not connect to the specified account because               a connection to that account already exists.                                 In some protocols, like XMPP (when connecting with the same                 JID and resource as an existing connection), the existing                 connection "wins" and the new one fails to connect.                                          If the status change is from Connected to Disconnected,               the existing connection was automatically disconnected because               a new connection to the same account (perhaps from a different               client or location) was established.                                 In some protocols, like MSNP (when connecting twice with the                 same Passport), the new connection "wins" and the                 existing one is automatically disconnected.                                                   When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.NotYours.                                    These three errors are distinct but very similar, and can be             distinguished by other factors.                    
+<td>            In general, this reason indicates that the requested account             name or other identification could not be used due to conflict             with another connection. It can be divided into three cases:                         If the status change is from Connecting to Disconnected               and the 'register' parameter to RequestConnection was present               and true, the requested account could not be created on the               server because it already exists.               The equivalent D-Bus error is               org.freedesktop.Telepathy.Error.RegistrationExists.                           If the status change is from Connecting to Disconnected               but the 'register' parameter is absent or false, the connection               manager could not connect to the specified account because               a connection to that account already exists.               The equivalent D-Bus error is               org.freedesktop.Telepathy.Error.AlreadyConnected.                                 In some protocols, like XMPP (when connecting with the same                 JID and resource as an existing connection), the existing                 connection "wins" and the new one fails to connect.                                          If the status change is from Connected to Disconnected,               the existing connection was automatically disconnected because               a new connection to the same account (perhaps from a different               client or location) was established.               The equivalent D-Bus error is               org.freedesktop.Telepathy.Error.ConnectionReplaced.                                 In some protocols, like MSNP (when connecting twice with the                 same Passport), the new connection "wins" and the                 existing one is automatically disconnected.                                                
 </td>
 </tr>
 <tr>
@@ -811,6 +811,7 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
     TP_CHANNEL_MEDIA_CAPABILITY_NAT_TRAVERSAL_STUN = 4,
     TP_CHANNEL_MEDIA_CAPABILITY_NAT_TRAVERSAL_GTALK_P2P = 8,
     TP_CHANNEL_MEDIA_CAPABILITY_NAT_TRAVERSAL_ICE_UDP = 16,
+    TP_CHANNEL_MEDIA_CAPABILITY_IMMUTABLE_STREAMS = 32,
 } TpChannelMediaCapabilities;
 </pre>
 <p>
@@ -846,6 +847,11 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tr>
 <td><p><a name="TP-CHANNEL-MEDIA-CAPABILITY-NAT-TRAVERSAL-ICE-UDP--CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_MEDIA_CAPABILITY_NAT_TRAVERSAL_ICE_UDP</code></span></p></td>
 <td>            The handle is capable of establishing ICE UDP peer-to-peer           connections (as defined by the IETF MMUSIC working group) to traverse           NATs.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-MEDIA-CAPABILITY-IMMUTABLE-STREAMS--CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_MEDIA_CAPABILITY_IMMUTABLE_STREAMS</code></span></p></td>
+<td>            Once streams have been requested for a channel to this handle (either           by calling RequestStreams on a channel           with no streams, or by specifying InitialAudio           or InitialAudio           = True in the channel request), then they cannot be changed;           subsequent calls to RequestStreams or           RemoveStreams will fail.                         For example, once an audio-only Google Talk call has started, it is             not possible to add a video stream; both audio and video must be             requested at the start of the call if video is desired. User             interfaces may use this pseudo-capability as a hint to display             separate "Audio call" and "Video call" buttons, rather than a             single "Call" button with the option to add and remove video once             the call has started for contacts without this flag.                    
 </td>
 </tr>
 </tbody>
@@ -1377,6 +1383,12 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <pre class="programlisting">typedef enum {
     TP_MEDIA_STREAM_ERROR_UNKNOWN = 0,
     TP_MEDIA_STREAM_ERROR_EOS = 1,
+    TP_MEDIA_STREAM_ERROR_CODEC_NEGOTIATION_FAILED = 2,
+    TP_MEDIA_STREAM_ERROR_CONNECTION_FAILED = 3,
+    TP_MEDIA_STREAM_ERROR_NETWORK_ERROR = 4,
+    TP_MEDIA_STREAM_ERROR_NO_CODECS = 5,
+    TP_MEDIA_STREAM_ERROR_INVALID_CM_BEHAVIOR = 6,
+    TP_MEDIA_STREAM_ERROR_MEDIA_ERROR = 7,
 } TpMediaStreamError;
 </pre>
 <p>
@@ -1388,12 +1400,42 @@ Bitfield/set of flags generated from the Telepathy specification.</p>
 <tbody>
 <tr>
 <td><p><a name="TP-MEDIA-STREAM-ERROR-UNKNOWN--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_UNKNOWN</code></span></p></td>
-<td>          An unknown error occured.         
+<td>            An unknown error occured.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-MEDIA-STREAM-ERROR-EOS--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_EOS</code></span></p></td>
-<td>          The end of the stream was reached.         
+<td>            The end of the stream was reached.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-MEDIA-STREAM-ERROR-CODEC-NEGOTIATION-FAILED--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_CODEC_NEGOTIATION_FAILED</code></span></p></td>
+<td>            There are no common codecs between the local side           and the other particpants in the call. The possible codecs are not           signalled here: the streaming implementation is assumed to report           them in an implementation-dependent way, e.g. Farsight should use           GstMissingElement.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-MEDIA-STREAM-ERROR-CONNECTION-FAILED--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_CONNECTION_FAILED</code></span></p></td>
+<td>            A network connection for the Media could not be established or was           lost.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-MEDIA-STREAM-ERROR-NETWORK-ERROR--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_NETWORK_ERROR</code></span></p></td>
+<td>            There was an error in the networking stack           (other than the connection failure).         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-MEDIA-STREAM-ERROR-NO-CODECS--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_NO_CODECS</code></span></p></td>
+<td>            There are no installed codecs for this media type.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-MEDIA-STREAM-ERROR-INVALID-CM-BEHAVIOR--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_INVALID_CM_BEHAVIOR</code></span></p></td>
+<td>            The CM is doing something wrong.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-MEDIA-STREAM-ERROR-MEDIA-ERROR--CAPS"></a><span class="term"><code class="literal">TP_MEDIA_STREAM_ERROR_MEDIA_ERROR</code></span></p></td>
+<td>            There was an error in the media processing stack.         
 </td>
 </tr>
 </tbody>

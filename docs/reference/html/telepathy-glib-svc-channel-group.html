@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Service-side Channel Group interface</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-channel.html" title="Service-side Channel base interface">
@@ -379,7 +379,39 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcChannelInterfaceGroupClass"></a><h3>TpSvcChannelInterfaceGroupClass</h3>
 <pre class="programlisting">typedef struct _TpSvcChannelInterfaceGroupClass TpSvcChannelInterfaceGroupClass;</pre>
 <p>
-The class of TpSvcChannelInterfaceGroup.</p>
+The class of TpSvcChannelInterfaceGroup.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_channel_interface_group (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_interface_group_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (add_members);
+  IMPLEMENT (get_all_members);
+  IMPLEMENT (get_group_flags);
+  IMPLEMENT (get_handle_owners);
+  IMPLEMENT (get_local_pending_members);
+  IMPLEMENT (get_local_pending_members_with_info);
+  IMPLEMENT (get_members);
+  IMPLEMENT (get_remote_pending_members);
+  IMPLEMENT (get_self_handle);
+  IMPLEMENT (remove_members);
+  IMPLEMENT (remove_members_with_reason);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
