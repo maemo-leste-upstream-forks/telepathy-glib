@@ -211,6 +211,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
@@ -314,7 +315,8 @@ ABI_LISTS = \
     versions/0.7.29.abi \
     versions/0.7.30.abi \
     versions/0.7.31.abi \
-    versions/0.7.32.abi
+    versions/0.7.32.abi \
+    versions/0.7.34.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -362,7 +364,9 @@ libtelepathy_glib_la_DEPENDENCIES = libtelepathy-glib-internal.la \
 
 # don't allow undocumented ABI
 @HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_TRUE@MAKE_VERSION_SCRIPT_FLAGS = 
-tpginclude_HEADERS = \
+
+# headers that are subject to coding-style checks
+our_headers = \
     account.h \
     account-manager.h \
     base-connection.h \
@@ -417,6 +421,10 @@ tpginclude_HEADERS = \
     svc-properties-interface.h \
     text-mixin.h \
     util.h
+
+tpginclude_HEADERS = \
+    $(our_headers) \
+    verify.h
 
 nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/error-str.c \
@@ -495,7 +503,7 @@ CLEANFILES = \
     $(BUILT_SOURCES)
 
 check_c_sources = \
-    $(tpginclude_HEADERS) \
+    $(our_headers) \
     $(libtelepathy_glib_internal_la_SOURCES)
 
 libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)

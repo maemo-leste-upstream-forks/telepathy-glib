@@ -112,7 +112,28 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcAccountClass</title>
 <indexterm zone="TpSvcAccountClass"><primary sortas="TpSvcAccountClass">TpSvcAccountClass</primary></indexterm><programlisting>typedef struct _TpSvcAccountClass TpSvcAccountClass;</programlisting>
 <para>
-The class of TpSvcAccount.</para>
+The class of TpSvcAccount.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_account (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_account_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (remove);
+  IMPLEMENT (update_parameters);
+  IMPLEMENT (reconnect);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-account-emit-account-property-changed" role="function">
@@ -306,7 +327,11 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcAccountInterfaceAvatarClass</title>
 <indexterm zone="TpSvcAccountInterfaceAvatarClass"><primary sortas="TpSvcAccountInterfaceAvatarClass">TpSvcAccountInterfaceAvatarClass</primary></indexterm><programlisting>typedef struct _TpSvcAccountInterfaceAvatarClass TpSvcAccountInterfaceAvatarClass;</programlisting>
 <para>
-The class of TpSvcAccountInterfaceAvatar.</para>
+The class of TpSvcAccountInterfaceAvatar.
+This interface has no D-Bus methods, so an
+implementation can typically pass <link linkend="NULL--CAPS"><literal>NULL</literal></link> to
+<link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> as the interface
+initialization function.</para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-account-interface-avatar-emit-avatar-changed" role="function">

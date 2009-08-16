@@ -20,6 +20,9 @@
 
 #include &lt;telepathy-glib/util.h&gt;
 
+#define             <link linkend="tp-verify">tp_verify</link>                           (R)
+#define             <link linkend="tp-verify-true">tp_verify_true</link>                      (R)
+#define             <link linkend="tp-verify-statement">tp_verify_statement</link>                 (R)
 <link linkend="void">void</link>                <link linkend="tp-g-hash-table-update">tp_g_hash_table_update</link>              (<link linkend="GHashTable">GHashTable</link> *target,
                                                          <link linkend="GHashTable">GHashTable</link> *source,
                                                          <link linkend="GBoxedCopyFunc">GBoxedCopyFunc</link> key_dup,
@@ -85,6 +88,68 @@ GLib, but aren't.</para>
 
 <refsect1 id="telepathy-glib-util.details" role="details">
 <title role="details.title">Details</title>
+<refsect2 id="tp-verify" role="macro">
+<title>tp_verify()</title>
+<indexterm zone="tp-verify"><primary sortas="tp_verify">tp_verify</primary></indexterm><programlisting># define tp_verify(R) extern int (* tp_verify_function__ (void)) [tp_verify_true (R)]
+</programlisting>
+<para>
+Make an assertion at compile time, like C++0x's proposed static_assert
+keyword. If <parameter>R</parameter> is determined to be true, there is no overhead at runtime;
+if <parameter>R</parameter> is determined to be false, compilation will fail.
+</para>
+<para>
+This macro can be used at file scope (it expands to a dummy extern
+declaration).
+</para>
+<para>
+(This is gnulib's verify macro, written by Paul Eggert, Bruno Haible and
+Jim Meyering.)</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>R</parameter>&#160;:</term>
+<listitem><simpara> a requirement (constant expression) to be checked at compile-time
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-verify-true" role="macro">
+<title>tp_verify_true()</title>
+<indexterm zone="tp-verify-true"><primary sortas="tp_verify_true">tp_verify_true</primary></indexterm><programlisting>#define             tp_verify_true(R)</programlisting>
+<para>
+Make an assertion at compile time, like C++0x's proposed static_assert
+keyword. If <parameter>R</parameter> is determined to be true, there is no overhead at runtime,
+and the macro evaluates to 1 as an integer constant expression;
+if <parameter>R</parameter> is determined to be false, compilation will fail.
+</para>
+<para>
+This macro can be used anywhere that an integer constant expression would
+be allowed.
+</para>
+<para>
+(This is gnulib's verify_true macro, written by Paul Eggert, Bruno Haible
+and Jim Meyering.)</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>R</parameter>&#160;:</term>
+<listitem><simpara> a requirement (constant expression) to be checked at compile-time
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-verify-statement" role="macro">
+<title>tp_verify_statement()</title>
+<indexterm zone="tp-verify-statement"><primary sortas="tp_verify_statement">tp_verify_statement</primary></indexterm><programlisting>#define tp_verify_statement(R) ((void) tp_verify_true (R))
+</programlisting>
+<para>
+Make an assertion at compile time, like C++0x's proposed static_assert
+keyword. If <parameter>R</parameter> is determined to be true, there is no overhead at runtime;
+if <parameter>R</parameter> is determined to be false, compilation will fail.
+</para>
+<para>
+This macro can be used anywhere that a statement would be allowed; it
+is equivalent to ((void) tp_verify_true (R)).</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>R</parameter>&#160;:</term>
+<listitem><simpara> a requirement (constant expression) to be checked at compile-time
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 <refsect2 id="tp-g-hash-table-update" role="function" condition="since:0.7.0">
 <title>tp_g_hash_table_update ()</title>
 <indexterm zone="tp-g-hash-table-update" role="0.7.0"><primary sortas="tp_g_hash_table_update">tp_g_hash_table_update</primary></indexterm><programlisting><link linkend="void">void</link>                tp_g_hash_table_update              (<link linkend="GHashTable">GHashTable</link> *target,

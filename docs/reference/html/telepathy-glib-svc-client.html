@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Service-side Client interfaces</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-channel-request.html" title="Service-side Channel Request interface">
@@ -236,7 +236,15 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcClientClass"></a><h3>TpSvcClientClass</h3>
 <pre class="programlisting">typedef struct _TpSvcClientClass TpSvcClientClass;</pre>
 <p>
-The class of TpSvcClient.</p>
+The class of TpSvcClient.
+This interface has no D-Bus methods, so an
+implementation can typically pass <a
+href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL--CAPS"
+><code class="literal">NULL</code></a> to
+<a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> as the interface
+initialization function.</p>
 <p>
 </p>
 </div>
@@ -254,7 +262,29 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcClientApproverClass"></a><h3>TpSvcClientApproverClass</h3>
 <pre class="programlisting">typedef struct _TpSvcClientApproverClass TpSvcClientApproverClass;</pre>
 <p>
-The class of TpSvcClientApprover.</p>
+The class of TpSvcClientApprover.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_client_approver (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_client_approver_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (add_dispatch_operation);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
@@ -376,7 +406,29 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcClientHandlerClass"></a><h3>TpSvcClientHandlerClass</h3>
 <pre class="programlisting">typedef struct _TpSvcClientHandlerClass TpSvcClientHandlerClass;</pre>
 <p>
-The class of TpSvcClientHandler.</p>
+The class of TpSvcClientHandler.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_client_handler (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_client_handler_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (handle_channels);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
@@ -522,7 +574,30 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcClientInterfaceRequestsClass"></a><h3>TpSvcClientInterfaceRequestsClass</h3>
 <pre class="programlisting">typedef struct _TpSvcClientInterfaceRequestsClass TpSvcClientInterfaceRequestsClass;</pre>
 <p>
-The class of TpSvcClientInterfaceRequests.</p>
+The class of TpSvcClientInterfaceRequests.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_client_interface_requests (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_client_interface_requests_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (add_request);
+  IMPLEMENT (remove_request);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
@@ -740,7 +815,29 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcClientObserverClass"></a><h3>TpSvcClientObserverClass</h3>
 <pre class="programlisting">typedef struct _TpSvcClientObserverClass TpSvcClientObserverClass;</pre>
 <p>
-The class of TpSvcClientObserver.</p>
+The class of TpSvcClientObserver.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_client_observer (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_client_observer_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (observe_channels);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>

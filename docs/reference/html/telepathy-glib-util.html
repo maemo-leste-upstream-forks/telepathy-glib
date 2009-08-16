@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Utilities</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-utilities.html" title="Utilities">
 <link rel="prev" href="ch-utilities.html" title="Utilities">
@@ -48,6 +48,9 @@
 
 #include &lt;telepathy-glib/util.h&gt;
 
+#define             <a class="link" href="telepathy-glib-util.html#tp-verify" title="tp_verify()">tp_verify</a>                           (R)
+#define             <a class="link" href="telepathy-glib-util.html#tp-verify-true" title="tp_verify_true()">tp_verify_true</a>                      (R)
+#define             <a class="link" href="telepathy-glib-util.html#tp-verify-statement" title="tp_verify_statement()">tp_verify_statement</a>                 (R)
 void                <a class="link" href="telepathy-glib-util.html#tp-g-hash-table-update" title="tp_g_hash_table_update ()">tp_g_hash_table_update</a>              (<a
 href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"
 >GHashTable</a> *target,
@@ -233,6 +236,86 @@ GLib, but aren't.</p>
 </div>
 <div class="refsect1" title="Details">
 <a name="telepathy-glib-util.details"></a><h2>Details</h2>
+<div class="refsect2" title="tp_verify()">
+<a name="tp-verify"></a><h3>tp_verify()</h3>
+<pre class="programlisting"># define tp_verify(R) extern int (* tp_verify_function__ (void)) [tp_verify_true (R)]
+</pre>
+<p>
+Make an assertion at compile time, like C++0x's proposed static_assert
+keyword. If <em class="parameter"><code>R</code></em> is determined to be true, there is no overhead at runtime;
+if <em class="parameter"><code>R</code></em> is determined to be false, compilation will fail.
+</p>
+<p>
+This macro can be used at file scope (it expands to a dummy extern
+declaration).
+</p>
+<p>
+(This is gnulib's verify macro, written by Paul Eggert, Bruno Haible and
+Jim Meyering.)</p>
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>R</code></em> :</span></p></td>
+<td> a requirement (constant expression) to be checked at compile-time
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_verify_true()">
+<a name="tp-verify-true"></a><h3>tp_verify_true()</h3>
+<pre class="programlisting">#define             tp_verify_true(R)</pre>
+<p>
+Make an assertion at compile time, like C++0x's proposed static_assert
+keyword. If <em class="parameter"><code>R</code></em> is determined to be true, there is no overhead at runtime,
+and the macro evaluates to 1 as an integer constant expression;
+if <em class="parameter"><code>R</code></em> is determined to be false, compilation will fail.
+</p>
+<p>
+This macro can be used anywhere that an integer constant expression would
+be allowed.
+</p>
+<p>
+(This is gnulib's verify_true macro, written by Paul Eggert, Bruno Haible
+and Jim Meyering.)</p>
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>R</code></em> :</span></p></td>
+<td> a requirement (constant expression) to be checked at compile-time
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_verify_statement()">
+<a name="tp-verify-statement"></a><h3>tp_verify_statement()</h3>
+<pre class="programlisting">#define tp_verify_statement(R) ((void) tp_verify_true (R))
+</pre>
+<p>
+Make an assertion at compile time, like C++0x's proposed static_assert
+keyword. If <em class="parameter"><code>R</code></em> is determined to be true, there is no overhead at runtime;
+if <em class="parameter"><code>R</code></em> is determined to be false, compilation will fail.
+</p>
+<p>
+This macro can be used anywhere that a statement would be allowed; it
+is equivalent to ((void) tp_verify_true (R)).</p>
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>R</code></em> :</span></p></td>
+<td> a requirement (constant expression) to be checked at compile-time
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title="tp_g_hash_table_update ()">
 <a name="tp-g-hash-table-update"></a><h3>tp_g_hash_table_update ()</h3>
 <pre class="programlisting">void                tp_g_hash_table_update              (<a

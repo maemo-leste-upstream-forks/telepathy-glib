@@ -469,6 +469,43 @@
 <link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-capabilities-emit-capabilities-changed">tp_svc_connection_interface_capabilities_emit_capabilities_changed</link>
                                                         (<link linkend="gpointer">gpointer</link> instance,
                                                          const <link linkend="GPtrArray">GPtrArray</link> *arg_Caps);
+
+
+                    <link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link>;
+                    <link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link>;
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-emit-location-updated">tp_svc_connection_interface_location_emit_location_updated</link>
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         <link linkend="guint">guint</link> arg_Contact,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Location);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-location-get-locations-impl">*tp_svc_connection_interface_location_get_locations_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *in_Contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-return-from-get-locations">tp_svc_connection_interface_location_return_from_get_locations</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Locations);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-implement-get-locations">tp_svc_connection_interface_location_implement_get_locations</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-location-get-locations-impl">tp_svc_connection_interface_location_get_locations_impl</link> impl);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-location-request-location-impl">*tp_svc_connection_interface_location_request_location_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link> *self,
+                                                         <link linkend="guint">guint</link> in_Contact,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-return-from-request-location">tp_svc_connection_interface_location_return_from_request_location</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Location);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-implement-request-location">tp_svc_connection_interface_location_implement_request_location</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-location-request-location-impl">tp_svc_connection_interface_location_request_location_impl</link> impl);
+<link linkend="void">void</link>                (<link linkend="tp-svc-connection-interface-location-set-location-impl">*tp_svc_connection_interface_location_set_location_impl</link>)
+                                                        (<link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link> *self,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Location,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-return-from-set-location">tp_svc_connection_interface_location_return_from_set_location</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-connection-interface-location-implement-set-location">tp_svc_connection_interface_location_implement_set_location</link>
+                                                        (<link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-location-set-location-impl">tp_svc_connection_interface_location_set_location_impl</link> impl);
 </synopsis>
 </refsynopsisdiv>
 
@@ -565,7 +602,37 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionClass</title>
 <indexterm zone="TpSvcConnectionClass"><primary sortas="TpSvcConnectionClass">TpSvcConnectionClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionClass TpSvcConnectionClass;</programlisting>
 <para>
-The class of TpSvcConnection.</para>
+The class of TpSvcConnection.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (connect);
+  IMPLEMENT (disconnect);
+  IMPLEMENT (get_interfaces);
+  IMPLEMENT (get_protocol);
+  IMPLEMENT (get_self_handle);
+  IMPLEMENT (get_status);
+  IMPLEMENT (hold_handles);
+  IMPLEMENT (inspect_handles);
+  IMPLEMENT (list_channels);
+  IMPLEMENT (release_handles);
+  IMPLEMENT (request_channel);
+  IMPLEMENT (request_handles);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-connect-impl" role="function">
@@ -1324,7 +1391,26 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfaceContactsClass</title>
 <indexterm zone="TpSvcConnectionInterfaceContactsClass"><primary sortas="TpSvcConnectionInterfaceContactsClass">TpSvcConnectionInterfaceContactsClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceContactsClass TpSvcConnectionInterfaceContactsClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfaceContacts.</para>
+The class of TpSvcConnectionInterfaceContacts.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_contacts (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_contacts_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (get_contact_attributes);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-contacts-get-contact-attributes-impl" role="function">
@@ -1402,7 +1488,27 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfaceRequestsClass</title>
 <indexterm zone="TpSvcConnectionInterfaceRequestsClass"><primary sortas="TpSvcConnectionInterfaceRequestsClass">TpSvcConnectionInterfaceRequestsClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceRequestsClass TpSvcConnectionInterfaceRequestsClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfaceRequests.</para>
+The class of TpSvcConnectionInterfaceRequests.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_requests (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_requests_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (create_channel);
+  IMPLEMENT (ensure_channel);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-requests-create-channel-impl" role="function">
@@ -1574,7 +1680,27 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfaceSimplePresenceClass</title>
 <indexterm zone="TpSvcConnectionInterfaceSimplePresenceClass"><primary sortas="TpSvcConnectionInterfaceSimplePresenceClass">TpSvcConnectionInterfaceSimplePresenceClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceSimplePresenceClass TpSvcConnectionInterfaceSimplePresenceClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfaceSimplePresence.</para>
+The class of TpSvcConnectionInterfaceSimplePresence.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_simple_presence (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_simple_presence_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (set_presence);
+  IMPLEMENT (get_presences);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-simple-presence-emit-presences-changed" role="function">
@@ -1717,7 +1843,33 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfacePresenceClass</title>
 <indexterm zone="TpSvcConnectionInterfacePresenceClass"><primary sortas="TpSvcConnectionInterfacePresenceClass">TpSvcConnectionInterfacePresenceClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfacePresenceClass TpSvcConnectionInterfacePresenceClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfacePresence.</para>
+The class of TpSvcConnectionInterfacePresence.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_presence (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_presence_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (add_status);
+  IMPLEMENT (clear_status);
+  IMPLEMENT (get_presence);
+  IMPLEMENT (get_statuses);
+  IMPLEMENT (remove_status);
+  IMPLEMENT (request_presence);
+  IMPLEMENT (set_last_activity_time);
+  IMPLEMENT (set_status);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-presence-add-status-impl" role="function">
@@ -2168,7 +2320,32 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfaceAvatarsClass</title>
 <indexterm zone="TpSvcConnectionInterfaceAvatarsClass"><primary sortas="TpSvcConnectionInterfaceAvatarsClass">TpSvcConnectionInterfaceAvatarsClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceAvatarsClass TpSvcConnectionInterfaceAvatarsClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfaceAvatars.</para>
+The class of TpSvcConnectionInterfaceAvatars.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_avatars (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_avatars_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (get_avatar_requirements);
+  IMPLEMENT (get_avatar_tokens);
+  IMPLEMENT (get_known_avatar_tokens);
+  IMPLEMENT (request_avatar);
+  IMPLEMENT (request_avatars);
+  IMPLEMENT (set_avatar);
+  IMPLEMENT (clear_avatar);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-avatars-clear-avatar-impl" role="function">
@@ -2636,7 +2813,29 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfaceAliasingClass</title>
 <indexterm zone="TpSvcConnectionInterfaceAliasingClass"><primary sortas="TpSvcConnectionInterfaceAliasingClass">TpSvcConnectionInterfaceAliasingClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceAliasingClass TpSvcConnectionInterfaceAliasingClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfaceAliasing.</para>
+The class of TpSvcConnectionInterfaceAliasing.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_aliasing (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_aliasing_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (get_alias_flags);
+  IMPLEMENT (request_aliases);
+  IMPLEMENT (get_aliases);
+  IMPLEMENT (set_aliases);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-aliasing-get-alias-flags-impl" role="function">
@@ -2883,7 +3082,27 @@ Dummy typedef representing any implementation of this interface.</para>
 <title>TpSvcConnectionInterfaceCapabilitiesClass</title>
 <indexterm zone="TpSvcConnectionInterfaceCapabilitiesClass"><primary sortas="TpSvcConnectionInterfaceCapabilitiesClass">TpSvcConnectionInterfaceCapabilitiesClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceCapabilitiesClass TpSvcConnectionInterfaceCapabilitiesClass;</programlisting>
 <para>
-The class of TpSvcConnectionInterfaceCapabilities.</para>
+The class of TpSvcConnectionInterfaceCapabilities.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_capabilities (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_capabilities_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (advertise_capabilities);
+  IMPLEMENT (get_capabilities);
+#undef IMPLEMENT
+}
+</programlisting></para>
 <para>
 </para></refsect2>
 <refsect2 id="tp-svc-connection-interface-capabilities-advertise-capabilities-impl" role="function">
@@ -3017,6 +3236,226 @@ CapabilitiesChanged signal on interface org.freedesktop.Telepathy.Connection.Int
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>arg_Caps</parameter>&#160;:</term>
 <listitem><simpara> const GPtrArray * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="TpSvcConnectionInterfaceLocation" role="struct">
+<title>TpSvcConnectionInterfaceLocation</title>
+<indexterm zone="TpSvcConnectionInterfaceLocation"><primary sortas="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceLocation TpSvcConnectionInterfaceLocation;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+</para></refsect2>
+<refsect2 id="TpSvcConnectionInterfaceLocationClass" role="struct">
+<title>TpSvcConnectionInterfaceLocationClass</title>
+<indexterm zone="TpSvcConnectionInterfaceLocationClass"><primary sortas="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</primary></indexterm><programlisting>typedef struct _TpSvcConnectionInterfaceLocationClass TpSvcConnectionInterfaceLocationClass;</programlisting>
+<para>
+The class of TpSvcConnectionInterfaceLocation.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_connection_interface_location (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_interface_location_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (get_locations);
+  IMPLEMENT (request_location);
+  IMPLEMENT (set_location);
+#undef IMPLEMENT
+}
+</programlisting></para>
+<para>
+</para></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-emit-location-updated" role="function">
+<title>tp_svc_connection_interface_location_emit_location_updated ()</title>
+<indexterm zone="tp-svc-connection-interface-location-emit-location-updated"><primary sortas="tp_svc_connection_interface_location_emit_location_updated">tp_svc_connection_interface_location_emit_location_updated</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_emit_location_updated
+                                                        (<link linkend="gpointer">gpointer</link> instance,
+                                                         <link linkend="guint">guint</link> arg_Contact,
+                                                         <link linkend="GHashTable">GHashTable</link> *arg_Location);</programlisting>
+<para>
+Type-safe wrapper around g_signal_emit to emit the
+LocationUpdated signal on interface org.freedesktop.Telepathy.Connection.Interface.Location.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&#160;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Contact</parameter>&#160;:</term>
+<listitem><simpara> guint  (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_Location</parameter>&#160;:</term>
+<listitem><simpara> GHashTable * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-get-locations-impl" role="function">
+<title>tp_svc_connection_interface_location_get_locations_impl ()</title>
+<indexterm zone="tp-svc-connection-interface-location-get-locations-impl"><primary sortas="tp_svc_connection_interface_location_get_locations_impl">tp_svc_connection_interface_location_get_locations_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_location_get_locations_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link> *self,
+                                                         const <link linkend="GArray">GArray</link> *in_Contacts,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+The signature of an implementation of the D-Bus method
+GetLocations on interface org.freedesktop.Telepathy.Connection.Interface.Location.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&#160;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Contacts</parameter>&#160;:</term>
+<listitem><simpara> const GArray * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> Used to return values or throw an error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-return-from-get-locations" role="function">
+<title>tp_svc_connection_interface_location_return_from_get_locations ()</title>
+<indexterm zone="tp-svc-connection-interface-location-return-from-get-locations"><primary sortas="tp_svc_connection_interface_location_return_from_get_locations">tp_svc_connection_interface_location_return_from_get_locations</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_return_from_get_locations
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Locations);</programlisting>
+<para>
+Return successfully by calling <link linkend="dbus-g-method-return"><function>dbus_g_method_return()</function></link>.
+This inline function exists only to provide type-safety.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Locations</parameter>&#160;:</term>
+<listitem><simpara> GHashTable * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-implement-get-locations" role="function">
+<title>tp_svc_connection_interface_location_implement_get_locations ()</title>
+<indexterm zone="tp-svc-connection-interface-location-implement-get-locations"><primary sortas="tp_svc_connection_interface_location_implement_get_locations">tp_svc_connection_interface_location_implement_get_locations</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_implement_get_locations
+                                                        (<link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-location-get-locations-impl">tp_svc_connection_interface_location_get_locations_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetLocations method in the vtable
+of an implementation of this interface. To be called from
+the interface init function.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&#160;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&#160;:</term>
+<listitem><simpara> A callback used to implement the GetLocations D-Bus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-request-location-impl" role="function">
+<title>tp_svc_connection_interface_location_request_location_impl ()</title>
+<indexterm zone="tp-svc-connection-interface-location-request-location-impl"><primary sortas="tp_svc_connection_interface_location_request_location_impl">tp_svc_connection_interface_location_request_location_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_location_request_location_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link> *self,
+                                                         <link linkend="guint">guint</link> in_Contact,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+The signature of an implementation of the D-Bus method
+RequestLocation on interface org.freedesktop.Telepathy.Connection.Interface.Location.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&#160;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Contact</parameter>&#160;:</term>
+<listitem><simpara> guint  (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> Used to return values or throw an error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-return-from-request-location" role="function">
+<title>tp_svc_connection_interface_location_return_from_request_location ()</title>
+<indexterm zone="tp-svc-connection-interface-location-return-from-request-location"><primary sortas="tp_svc_connection_interface_location_return_from_request_location">tp_svc_connection_interface_location_return_from_request_location</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_return_from_request_location
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context,
+                                                         <link linkend="GHashTable">GHashTable</link> *out_Location);</programlisting>
+<para>
+Return successfully by calling <link linkend="dbus-g-method-return"><function>dbus_g_method_return()</function></link>.
+This inline function exists only to provide type-safety.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Location</parameter>&#160;:</term>
+<listitem><simpara> GHashTable * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-implement-request-location" role="function">
+<title>tp_svc_connection_interface_location_implement_request_location ()</title>
+<indexterm zone="tp-svc-connection-interface-location-implement-request-location"><primary sortas="tp_svc_connection_interface_location_implement_request_location">tp_svc_connection_interface_location_implement_request_location</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_implement_request_location
+                                                        (<link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-location-request-location-impl">tp_svc_connection_interface_location_request_location_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the RequestLocation method in the vtable
+of an implementation of this interface. To be called from
+the interface init function.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&#160;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&#160;:</term>
+<listitem><simpara> A callback used to implement the RequestLocation D-Bus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-set-location-impl" role="function">
+<title>tp_svc_connection_interface_location_set_location_impl ()</title>
+<indexterm zone="tp-svc-connection-interface-location-set-location-impl"><primary sortas="tp_svc_connection_interface_location_set_location_impl">tp_svc_connection_interface_location_set_location_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_connection_interface_location_set_location_impl)
+                                                        (<link linkend="TpSvcConnectionInterfaceLocation">TpSvcConnectionInterfaceLocation</link> *self,
+                                                         <link linkend="GHashTable">GHashTable</link> *in_Location,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+The signature of an implementation of the D-Bus method
+SetLocation on interface org.freedesktop.Telepathy.Connection.Interface.Location.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&#160;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>in_Location</parameter>&#160;:</term>
+<listitem><simpara> GHashTable * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> Used to return values or throw an error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-return-from-set-location" role="function">
+<title>tp_svc_connection_interface_location_return_from_set_location ()</title>
+<indexterm zone="tp-svc-connection-interface-location-return-from-set-location"><primary sortas="tp_svc_connection_interface_location_return_from_set_location">tp_svc_connection_interface_location_return_from_set_location</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_return_from_set_location
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+Return successfully by calling <link linkend="dbus-g-method-return"><function>dbus_g_method_return()</function></link>.
+This inline function exists only to provide type-safety.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-connection-interface-location-implement-set-location" role="function">
+<title>tp_svc_connection_interface_location_implement_set_location ()</title>
+<indexterm zone="tp-svc-connection-interface-location-implement-set-location"><primary sortas="tp_svc_connection_interface_location_implement_set_location">tp_svc_connection_interface_location_implement_set_location</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_connection_interface_location_implement_set_location
+                                                        (<link linkend="TpSvcConnectionInterfaceLocationClass">TpSvcConnectionInterfaceLocationClass</link> *klass,
+                                                         <link linkend="tp-svc-connection-interface-location-set-location-impl">tp_svc_connection_interface_location_set_location_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the SetLocation method in the vtable
+of an implementation of this interface. To be called from
+the interface init function.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&#160;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&#160;:</term>
+<listitem><simpara> A callback used to implement the SetLocation D-Bus method
 </simpara></listitem></varlistentry>
 </variablelist></refsect2>
 

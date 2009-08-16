@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Tube channels</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-channel-tubes.html" title="Tubes channels">
@@ -218,7 +218,15 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcChannelInterfaceTubeClass"></a><h3>TpSvcChannelInterfaceTubeClass</h3>
 <pre class="programlisting">typedef struct _TpSvcChannelInterfaceTubeClass TpSvcChannelInterfaceTubeClass;</pre>
 <p>
-The class of TpSvcChannelInterfaceTube.</p>
+The class of TpSvcChannelInterfaceTube.
+This interface has no D-Bus methods, so an
+implementation can typically pass <a
+href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL--CAPS"
+><code class="literal">NULL</code></a> to
+<a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> as the interface
+initialization function.</p>
 <p>
 </p>
 </div>
@@ -267,7 +275,30 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcChannelTypeStreamTubeClass"></a><h3>TpSvcChannelTypeStreamTubeClass</h3>
 <pre class="programlisting">typedef struct _TpSvcChannelTypeStreamTubeClass TpSvcChannelTypeStreamTubeClass;</pre>
 <p>
-The class of TpSvcChannelTypeStreamTube.</p>
+The class of TpSvcChannelTypeStreamTube.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_channel_type_stream_tube (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_type_stream_tube_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (offer);
+  IMPLEMENT (accept);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
@@ -636,7 +667,30 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcChannelTypeDBusTubeClass"></a><h3>TpSvcChannelTypeDBusTubeClass</h3>
 <pre class="programlisting">typedef struct _TpSvcChannelTypeDBusTubeClass TpSvcChannelTypeDBusTubeClass;</pre>
 <p>
-The class of TpSvcChannelTypeDBusTube.</p>
+The class of TpSvcChannelTypeDBusTube.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_channel_type_dbus_tube (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_type_dbus_tube_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (offer);
+  IMPLEMENT (accept);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>

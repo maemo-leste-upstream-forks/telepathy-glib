@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Service-side Connection Manager interface</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-media-interfaces.html" title="Service-side media streaming helper interfaces">
@@ -172,7 +172,31 @@ Dummy typedef representing any implementation of this interface.</p>
 <a name="TpSvcConnectionManagerClass"></a><h3>TpSvcConnectionManagerClass</h3>
 <pre class="programlisting">typedef struct _TpSvcConnectionManagerClass TpSvcConnectionManagerClass;</pre>
 <p>
-The class of TpSvcConnectionManager.</p>
+The class of TpSvcConnectionManager.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a
+href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE--CAPS"
+><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_connection_manager (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_connection_manager_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (get_parameters);
+  IMPLEMENT (list_protocols);
+  IMPLEMENT (request_connection);
+#undef IMPLEMENT
+}
+</pre>
 <p>
 </p>
 </div>
