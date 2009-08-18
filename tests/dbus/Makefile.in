@@ -56,7 +56,8 @@ noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
 	test-example-no-protocols$(EXEEXT) \
 	test-finalized-in-invalidated-handler$(EXEEXT) \
 	test-get-interface-after-invalidate$(EXEEXT) \
-	test-group-mixin$(EXEEXT) test-handle-set$(EXEEXT) \
+	test-group-mixin$(EXEEXT) test-handle-repo$(EXEEXT) \
+	test-handle-set$(EXEEXT) \
 	test-invalidated-while-invoking-signals$(EXEEXT) \
 	test-message-mixin$(EXEEXT) test-params-cm$(EXEEXT) \
 	test-properties$(EXEEXT) test-self-handle$(EXEEXT) \
@@ -257,6 +258,12 @@ test_group_mixin_LDADD = $(LDADD)
 test_group_mixin_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_handle_repo_OBJECTS = handle-repo.$(OBJEXT)
+test_handle_repo_OBJECTS = $(am_test_handle_repo_OBJECTS)
+test_handle_repo_LDADD = $(LDADD)
+test_handle_repo_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la
 am_test_handle_set_OBJECTS = handle-set.$(OBJEXT)
 test_handle_set_OBJECTS = $(am_test_handle_set_OBJECTS)
 test_handle_set_LDADD = $(LDADD)
@@ -349,7 +356,8 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_example_no_protocols_SOURCES) \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_get_interface_after_invalidate_SOURCES) \
-	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
+	$(test_group_mixin_SOURCES) $(test_handle_repo_SOURCES) \
+	$(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(nodist_test_properties_SOURCES) \
@@ -376,7 +384,8 @@ DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_example_no_protocols_SOURCES) \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
 	$(test_get_interface_after_invalidate_SOURCES) \
-	$(test_group_mixin_SOURCES) $(test_handle_set_SOURCES) \
+	$(test_group_mixin_SOURCES) $(test_handle_repo_SOURCES) \
+	$(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(test_self_handle_SOURCES) \
@@ -588,6 +597,7 @@ test_get_interface_after_invalidate_SOURCES = \
     get-interface-after-invalidate.c
 
 test_group_mixin_SOURCES = group-mixin.c
+test_handle_repo_SOURCES = handle-repo.c
 test_handle_set_SOURCES = handle-set.c
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
@@ -781,6 +791,9 @@ test-get-interface-after-invalidate$(EXEEXT): $(test_get_interface_after_invalid
 test-group-mixin$(EXEEXT): $(test_group_mixin_OBJECTS) $(test_group_mixin_DEPENDENCIES) 
 	@rm -f test-group-mixin$(EXEEXT)
 	$(LINK) $(test_group_mixin_LDFLAGS) $(test_group_mixin_OBJECTS) $(test_group_mixin_LDADD) $(LIBS)
+test-handle-repo$(EXEEXT): $(test_handle_repo_OBJECTS) $(test_handle_repo_DEPENDENCIES) 
+	@rm -f test-handle-repo$(EXEEXT)
+	$(LINK) $(test_handle_repo_LDFLAGS) $(test_handle_repo_OBJECTS) $(test_handle_repo_LDADD) $(LIBS)
 test-handle-set$(EXEEXT): $(test_handle_set_OBJECTS) $(test_handle_set_DEPENDENCIES) 
 	@rm -f test-handle-set$(EXEEXT)
 	$(LINK) $(test_handle_set_LDFLAGS) $(test_handle_set_OBJECTS) $(test_handle_set_LDADD) $(LIBS)
@@ -845,6 +858,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/finalized-in-invalidated-handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get-interface-after-invalidate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidated-while-invoking-signals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message-mixin.Po@am__quote@

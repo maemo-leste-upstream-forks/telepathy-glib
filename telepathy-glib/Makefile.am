@@ -37,7 +37,8 @@ ABI_LISTS = \
     versions/0.7.30.abi \
     versions/0.7.31.abi \
     versions/0.7.32.abi \
-    versions/0.7.34.abi
+    versions/0.7.34.abi \
+    versions/0.7.35.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -140,6 +141,7 @@ our_headers = \
     contact.h \
     contacts-mixin.h \
     dbus.h \
+    dbus-daemon.h \
     dbus-properties-mixin.h \
     defs.h \
     debug.h \
@@ -289,6 +291,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     contact.c \
     contacts-mixin.c \
     dbus.c \
+    dbus-daemon.c \
     dbus-internal.h \
     dbus-properties-mixin.c \
     debug.c \

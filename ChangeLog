@@ -1,3 +1,336 @@
+commit ce4b516bb1cce8ca7151276bb42eda2fc567cc25
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-18 18:26:03 +0100
+
+    Prepare 0.7.35
+
+ NEWS                               |    2 +-
+ configure.ac                       |    8 ++++----
+ telepathy-glib/Makefile.am         |    3 ++-
+ telepathy-glib/versions/0.7.35.abi |    7 +++++++
+ 4 files changed, 14 insertions(+), 6 deletions(-)
+
+commit a00dea7410e9ca89af56efc0bd83a62b3cc268db
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-18 18:23:26 +0100
+
+    fd.o #17751: document that TpBaseConnection's self_handle member remains valid longer
+
+ NEWS                             |   10 ++++++++++
+ telepathy-glib/base-connection.c |    6 ++++--
+ 2 files changed, 14 insertions(+), 2 deletions(-)
+
+commit 29c4157f57f079b960f1c60ddedad2be0a7e6ed3
+Merge: 9a92db2 a27b035
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-18 18:15:01 +0100
+
+    Merge commit 'cassidy/self_handle-17751'
+    
+    Tested-by: Will Thompson <will.thompson@collabora.co.uk>
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 9a92db25d57c81a0d761518d8859502025c1c6e6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-18 17:44:50 +0100
+
+    When removing the last TpDBusDaemon from a DBusConnection, forcibly free the GSList ** too
+    
+    You might think (and indeed I did) that
+    dbus_connection_free_data_slot (&daemons_slot) would automatically clear
+    out that slot on every DBusConnection, calling the registered
+    free-function for the old contents.
+    
+    This is, as it turns out, untrue; you have to do that yourself, first.
+    
+    This turns out to crash git master (the MC 4 branch) of Empathy during
+    startup: it briefly creates a TpDBusDaemon, then deallocates it again.
+    The GSList ** is placed in slot 2 on the DBusConnection. We then
+    deallocate slot 2. When dbus-glib allocates a new slot number for its
+    DBusGProxyManager objects, it is also told to use slot 2; it looks in
+    slot 2, finds our GSList ** still there, interprets it as a
+    DBusGProxyManager *, and crashes with an assertion failure.
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+ telepathy-glib/dbus-daemon.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 5e52541b19b62a0d3833d934db8fe5520f6ed9cd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-18 15:25:34 +0100
+
+    Last-minute NEWS
+
+ NEWS |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 684bfcd57fc028fc0ec4a06fd31c7b68f2a6ab79
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 18:58:07 +0100
+
+    TpConnection: in responding to StatusChanged, map NameInUse to CONNECTION_REPLACED or ALREADY_CONNECTED
+    
+    Using NOT_YOURS was a design error in telepathy-spec, corrected in 0.17.27.
+
+ telepathy-glib/connection.c |   22 +++++++++++++++++++---
+ 1 files changed, 19 insertions(+), 3 deletions(-)
+
+commit 87a87c5dee78472a3a1a391abc6b4b960d3c19b3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-18 15:24:01 +0100
+
+    NEWS, version annotations for 0.7.35
+
+ NEWS                         |   28 +++++++++++++++++++++++++++-
+ telepathy-glib/dbus-daemon.c |    8 ++++----
+ 2 files changed, 31 insertions(+), 5 deletions(-)
+
+commit a9a5b6448e37907083656a4b21998a6fb309fa7f
+Merge: 54a117b b517f4c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 19:10:24 +0100
+
+    Merge branch 'libdbus'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 54a117b8141cb18fa4b71bf21e86fee61b5940f1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 17:09:12 +0100
+
+    fd.o #22957: omit return keyword when doing a tail-call in functions returning void
+    
+    Not all compilers will let you do this, apparently.
+    
+    Based on a patch from Elaine Xiong <elaine.xiong@sun.com>
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+ telepathy-glib/base-connection.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 148222cf7281fed606b23d4ccf77ff46aa75c15e
+Merge: cc896e5 8ba4639
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 19:09:57 +0100
+
+    Merge branch 'callable-hold'
+
+commit 8ba46394fe46dd937e8b5aa5b362eb6f2c47a276
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 17:50:53 +0100
+
+    ExampleCallableMediaChannel: stylistic fixes for Andre's Hold code
+    
+    Whitespace, English, and avoiding C99
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+ examples/cm/callable/media-channel.c |   16 ++++++++++++----
+ 1 files changed, 12 insertions(+), 4 deletions(-)
+
+commit b517f4c4e0515600129a5feffe6de194496e75a4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 17:36:41 +0100
+
+    tp_dbus_daemon_get_unique_name: fix docs
+
+ telepathy-glib/dbus-daemon.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9eaa74ee2e065c2d44f144a3281d22fd1fd04f85
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 17:36:35 +0100
+
+    tp_dbus_daemon_watch_name_owner: don't leak the match rule
+
+ telepathy-glib/dbus-daemon.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit dfa01dacdfb9dfc3276443e066fe941c479e99a7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 17:36:19 +0100
+
+    TpDBusDaemon: remove redundant check
+    
+    tp_dbus_check_valid_bus_name criticals and returns FALSE if name is NULL,
+    so we don't need to check that separately (also, this was done in the
+    wrong order).
+
+ telepathy-glib/dbus-daemon.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 36fba3248ebee2622979e7be49c6175974210eac
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 15:31:25 +0100
+
+    TpConnectionManager: use tp_dbus_daemon_list_names, tp_dbus_daemon_list_activatable_names
+
+ telepathy-glib/connection-manager.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 57fcb47c979e872f725ba53c092151dc38dd5466
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 15:31:05 +0100
+
+    TpConnection: use tp_dbus_daemon_list_names
+    
+    The signature changes a little, because tp_dbus_daemon_list_names is more
+    const-correct. (Nobody understands const in C, part 7,143 in an ongoing
+    series.)
+
+ telepathy-glib/connection.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 48b48dca4a73d3bee4d1311163001e1cac26adb8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 15:30:16 +0100
+
+    Add tp_dbus_daemon_list_names, tp_dbus_daemon_list_activatable_names
+    
+    These use libdbus directly, to avoid DBusGProxy's undesirable
+    signal-binding (which causes us to wake up on every NameOwnerChanged).
+
+ docs/reference/telepathy-glib-sections.txt |    5 +-
+ telepathy-glib/dbus-daemon.c               |  272 ++++++++++++++++++++++++++++
+ telepathy-glib/dbus-daemon.h               |   10 +
+ 3 files changed, 286 insertions(+), 1 deletions(-)
+
+commit f6d4e669ec944cb9da603f4ded8732f65ddd26a4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 15:58:24 +0100
+
+    TpDBusDaemon: reduce and improve debug output
+
+ telepathy-glib/dbus-daemon.c |   12 +++++-------
+ 1 files changed, 5 insertions(+), 7 deletions(-)
+
+commit eced62a10faadc3e0c4dbf41a040a852c023e156
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 13:36:49 +0100
+
+    Separate dbus.c into dbus.c and dbus-daemon.c
+    
+    No code changes, except renaming starter_bus_conn to
+    _tp_dbus_starter_bus_conn and making it visible within telepathy-glib
+    (both of the split modules need it, now).
+
+ telepathy-glib/Makefile.am     |    1 +
+ telepathy-glib/dbus-daemon.c   | 1098 ++++++++++++++++++++++++++++++++++++++++
+ telepathy-glib/dbus-internal.h |    2 +
+ telepathy-glib/dbus.c          | 1077 +---------------------------------------
+ 4 files changed, 1104 insertions(+), 1074 deletions(-)
+
+commit 16ae7db13a12c3da955748d1a56a945c19eb7147
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 13:28:49 +0100
+
+    Separate dbus.h into dbus.h and dbus-daemon.h
+    
+    The latter is not #includable directly.
+
+ telepathy-glib/Makefile.am   |    1 +
+ telepathy-glib/dbus-daemon.h |   82 ++++++++++++++++++++++++++++++++++++++++++
+ telepathy-glib/dbus.h        |   55 +++-------------------------
+ 3 files changed, 88 insertions(+), 50 deletions(-)
+
+commit 0c6411f83601ddf2ff34f042c08a700ff094a756
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 13:17:17 +0100
+
+    Add a test for fd.o#9812
+    
+    This was adapted from one I removed from telepathy-gabble.
+
+ tests/dbus/Makefile.am   |    3 +
+ tests/dbus/handle-repo.c |  111 ++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 114 insertions(+), 0 deletions(-)
+
+commit c669610296159614c98783e5f56c655c0a8c3ee0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 13:03:11 +0100
+
+    fd.o #9812: TpDynamicHandleRepo: use tp_dbus_daemon_watch_name_owner for reduced wakeups
+    
+    We can now bind to NameOwnerChanged selectively (much rejoicing).
+    
+    This patch also introduces a new feature, of a sort: if a client holds
+    handles then immediately crashes, the ref held on its behalf will be
+    discarded (because GetNameOwner will indicate that its name is no longer
+    owned).
+
+ telepathy-glib/handle-repo-dynamic.c |   37 ++++++++++++++++++++-------------
+ 1 files changed, 22 insertions(+), 15 deletions(-)
+
+commit 645df3a45148d8520f4994e455851ff0d7beee82
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 12:48:57 +0100
+
+    Add tp_dbus_daemon_get_unique_name (convenience API for dbus_bus_get_unique_name)
+
+ docs/reference/telepathy-glib-sections.txt |    1 +
+ telepathy-glib/dbus.c                      |   17 +++++++++++++++++
+ telepathy-glib/dbus.h                      |    2 ++
+ 3 files changed, 20 insertions(+), 0 deletions(-)
+
+commit 9bf3c6147d8d97590c7963524f88891d51d5fcd1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-17 12:13:53 +0100
+
+    Use raw libdbus for GetNameOwner
+
+ telepathy-glib/dbus.c |  153 +++++++++++++++++++++++++++++++++++++++++++++----
+ 1 files changed, 141 insertions(+), 12 deletions(-)
+
+commit 64bcb94d6cdae5d73593dd8fefff0783e4391197
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-16 18:15:37 +0100
+
+    TpDBusDaemon: track NameOwnerChanged by using raw libdbus
+    
+    This avoids one of the points at which we make a DBusGProxy for the bus daemon.
+
+ telepathy-glib/dbus.c |  180 +++++++++++++++++++++++++++++++++++++++++++++----
+ 1 files changed, 167 insertions(+), 13 deletions(-)
+
+commit feeb6aeaa3b94a7d633689d81ffc953e34099899
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-16 18:14:25 +0100
+
+    TpDBusDaemon: if destroyed with name ownership watches still outstanding, don't leak their structs etc.
+
+ telepathy-glib/dbus.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 78f37b8630897d69c304c1e3c9451f8888cd5ac6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-16 18:13:23 +0100
+
+    TpDBusDaemon: factor out _tp_dbus_daemon_stop_watching
+
+ telepathy-glib/dbus.c |   22 ++++++++++++++--------
+ 1 files changed, 14 insertions(+), 8 deletions(-)
+
+commit 524350c8c032fc86a573f53e39cf6bc27eb6fde1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-16 18:11:37 +0100
+
+    TpDBusDaemon: keep a separate ref to the libdbus DBusConnection
+
+ telepathy-glib/dbus.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+commit cc896e525017fd669aca2b4a8806b5a485c059b3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-08-16 16:32:06 +0100
+
+    Post-release version bump
+
+ NEWS         |    5 +++++
+ configure.ac |    2 +-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
 commit 4d52d41188af7d213e6153450e8541c5d65fc8af
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-08-16 15:23:00 +0100
@@ -96,6 +429,15 @@ Date:   2009-08-16 15:28:38 +0100
  telepathy-glib/connection.xml                      |    1 +
  26 files changed, 635 insertions(+), 340 deletions(-)
 
+commit 19307370b506140ff570befe86c260ff94a485cd
+Author: Andre Moreira Magalhaes (andrunko) <andrunko@andrunko.cbg.collabora.co.uk>
+Date:   2009-08-13 20:39:05 -0300
+
+    callable example: add Hold interface simulation support.
+
+ examples/cm/callable/media-channel.c |  137 ++++++++++++++++++++++++++++++++++
+ 1 files changed, 137 insertions(+), 0 deletions(-)
+
 commit 87b06bfc9661f5f8e972490a98a61d59b2f05617
 Merge: 6a70cd7 7bdf24b
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
@@ -118,6 +460,20 @@ Date:   2009-08-06 19:32:02 +0100
 
  telepathy-glib/dbus.c |    1 -
  1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit a27b0351babc0dab926c4e3d47f7fa47e94d7617
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2009-07-17 10:48:14 +0100
+
+    tp_base_connection_change_status: don't unref and set to 0 the self-handle when connection is disconnected (fd.o #17751)
+    
+    There is no reason to unref it at this stage and this make CM unable to
+    use the self-handle during the disconnection.
+    There is already code to unref it when the BaseConnection disposes so we
+    don't need any other change.
+
+ telepathy-glib/base-connection.c |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
 
 commit 6a70cd7597cdbb941a420c278c5334a29568ecc9
 Merge: 1fceee2 1dc2718
