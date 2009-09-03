@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="telepathy-glib-svc-debug">
+<refmeta>
+<refentrytitle role="top_of_page" id="telepathy-glib-svc-debug.top_of_page">Service-side Debug base interface</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>TELEPATHY-GLIB Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Service-side Debug base interface</refname>
+<refpurpose>GInterface for Telepathy Debug objects</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="telepathy-glib-svc-debug.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+<anchor id="TpSvcDebug"/>
+<synopsis>
+
+#include &lt;telepathy-glib/svc-debug.h&gt;
+
+                    <link linkend="TpSvcDebug-struct">TpSvcDebug</link>;
+                    <link linkend="TpSvcDebugClass">TpSvcDebugClass</link>;
+<link linkend="void">void</link>                (<link linkend="tp-svc-debug-get-messages-impl">*tp_svc_debug_get_messages_impl</link>)   (<link linkend="TpSvcDebug">TpSvcDebug</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);
+<link linkend="void">void</link>                <link linkend="tp-svc-debug-implement-get-messages">tp_svc_debug_implement_get_messages</link> (<link linkend="TpSvcDebugClass">TpSvcDebugClass</link> *klass,
+                                                         <link linkend="tp-svc-debug-get-messages-impl">tp_svc_debug_get_messages_impl</link> impl);
+<link linkend="void">void</link>                <link linkend="tp-svc-debug-return-from-get-messages">tp_svc_debug_return_from_get_messages</link>
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Messages);
+<link linkend="void">void</link>                <link linkend="tp-svc-debug-emit-new-debug-message">tp_svc_debug_emit_new_debug_message</link> (<link linkend="gpointer">gpointer</link> instance,
+                                                         <link linkend="gdouble">gdouble</link> arg_time,
+                                                         const <link linkend="gchar">gchar</link> *arg_domain,
+                                                         <link linkend="guint">guint</link> arg_level,
+                                                         const <link linkend="gchar">gchar</link> *arg_message);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="telepathy-glib-svc-debug.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GInterface">GInterface</link>
+   +----TpSvcDebug
+</synopsis>
+</refsect1>
+
+
+
+
+<refsect1 id="telepathy-glib-svc-debug.implementations" role="implementations">
+<title role="implementations.title">Known Implementations</title>
+<para>
+TpSvcDebug is implemented by
+ <link linkend="TpDebugSender">TpDebugSender</link>.</para>
+</refsect1>
+
+
+<refsect1 id="telepathy-glib-svc-debug.signals" role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+  &quot;<link linkend="TpSvcDebug-new-debug-message">new-debug-message</link>&quot;                              : Run Last / Has Details
+</synopsis>
+</refsect1>
+
+
+<refsect1 id="telepathy-glib-svc-debug.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+This interface (auto-generated from the Telepathy spec) makes it easier
+to export objects implementing the Telepathy Debug interface.
+</para>
+<para>
+<link linkend="TpDebugSender"><type>TpDebugSender</type></link> provides a reference implementation of the Debug object.</para>
+<para>
+</para>
+</refsect1>
+
+<refsect1 id="telepathy-glib-svc-debug.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="TpSvcDebug-struct" role="struct">
+<title>TpSvcDebug</title>
+<indexterm zone="TpSvcDebug-struct"><primary sortas="TpSvcDebug">TpSvcDebug</primary></indexterm><programlisting>typedef struct _TpSvcDebug TpSvcDebug;</programlisting>
+<para>
+Dummy typedef representing any implementation of this interface.</para>
+<para>
+</para></refsect2>
+<refsect2 id="TpSvcDebugClass" role="struct">
+<title>TpSvcDebugClass</title>
+<indexterm zone="TpSvcDebugClass"><primary sortas="TpSvcDebugClass">TpSvcDebugClass</primary></indexterm><programlisting>typedef struct _TpSvcDebugClass TpSvcDebugClass;</programlisting>
+<para>
+The class of TpSvcDebug.
+</para>
+<para>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <link linkend="G-IMPLEMENT-INTERFACE--CAPS"><function>G_IMPLEMENT_INTERFACE()</function></link> would
+typically look like this:
+</para>
+<para>
+<programlisting>
+static void
+implement_debug (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_debug_implement_##<link linkend="x">x</link> (\
+  klass, my_object_##<link linkend="x">x</link>)
+  IMPLEMENT (get_messages);
+#undef IMPLEMENT
+}
+</programlisting></para>
+<para>
+</para></refsect2>
+<refsect2 id="tp-svc-debug-get-messages-impl" role="function">
+<title>tp_svc_debug_get_messages_impl ()</title>
+<indexterm zone="tp-svc-debug-get-messages-impl"><primary sortas="tp_svc_debug_get_messages_impl">tp_svc_debug_get_messages_impl</primary></indexterm><programlisting><link linkend="void">void</link>                (*tp_svc_debug_get_messages_impl)   (<link linkend="TpSvcDebug">TpSvcDebug</link> *self,
+                                                         <link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context);</programlisting>
+<para>
+The signature of an implementation of the D-Bus method
+GetMessages on interface org.freedesktop.Telepathy.Debug.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&#160;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> Used to return values or throw an error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-debug-implement-get-messages" role="function">
+<title>tp_svc_debug_implement_get_messages ()</title>
+<indexterm zone="tp-svc-debug-implement-get-messages"><primary sortas="tp_svc_debug_implement_get_messages">tp_svc_debug_implement_get_messages</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_debug_implement_get_messages (<link linkend="TpSvcDebugClass">TpSvcDebugClass</link> *klass,
+                                                         <link linkend="tp-svc-debug-get-messages-impl">tp_svc_debug_get_messages_impl</link> impl);</programlisting>
+<para>
+Register an implementation for the GetMessages method in the vtable
+of an implementation of this interface. To be called from
+the interface init function.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>klass</parameter>&#160;:</term>
+<listitem><simpara> A class whose instances implement this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>impl</parameter>&#160;:</term>
+<listitem><simpara> A callback used to implement the GetMessages D-Bus method
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-debug-return-from-get-messages" role="function">
+<title>tp_svc_debug_return_from_get_messages ()</title>
+<indexterm zone="tp-svc-debug-return-from-get-messages"><primary sortas="tp_svc_debug_return_from_get_messages">tp_svc_debug_return_from_get_messages</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_debug_return_from_get_messages
+                                                        (<link linkend="DBusGMethodInvocation">DBusGMethodInvocation</link> *context,
+                                                         const <link linkend="GPtrArray">GPtrArray</link> *out_Messages);</programlisting>
+<para>
+Return successfully by calling <link linkend="dbus-g-method-return"><function>dbus_g_method_return()</function></link>.
+This inline function exists only to provide type-safety.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&#160;:</term>
+<listitem><simpara> The D-Bus method invocation context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out_Messages</parameter>&#160;:</term>
+<listitem><simpara> const GPtrArray * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-svc-debug-emit-new-debug-message" role="function">
+<title>tp_svc_debug_emit_new_debug_message ()</title>
+<indexterm zone="tp-svc-debug-emit-new-debug-message"><primary sortas="tp_svc_debug_emit_new_debug_message">tp_svc_debug_emit_new_debug_message</primary></indexterm><programlisting><link linkend="void">void</link>                tp_svc_debug_emit_new_debug_message (<link linkend="gpointer">gpointer</link> instance,
+                                                         <link linkend="gdouble">gdouble</link> arg_time,
+                                                         const <link linkend="gchar">gchar</link> *arg_domain,
+                                                         <link linkend="guint">guint</link> arg_level,
+                                                         const <link linkend="gchar">gchar</link> *arg_message);</programlisting>
+<para>
+Type-safe wrapper around g_signal_emit to emit the
+NewDebugMessage signal on interface org.freedesktop.Telepathy.Debug.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&#160;:</term>
+<listitem><simpara> The object implementing this interface
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_time</parameter>&#160;:</term>
+<listitem><simpara> gdouble  (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_domain</parameter>&#160;:</term>
+<listitem><simpara> const gchar * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_level</parameter>&#160;:</term>
+<listitem><simpara> guint  (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_message</parameter>&#160;:</term>
+<listitem><simpara> const gchar * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+<refsect1 id="telepathy-glib-svc-debug.signal-details" role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2 id="TpSvcDebug-new-debug-message" role="signal"><title>The <literal>&quot;new-debug-message&quot;</literal> signal</title>
+<indexterm zone="TpSvcDebug-new-debug-message"><primary sortas="TpSvcDebug::new-debug-message">TpSvcDebug::new-debug-message</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="TpSvcDebug">TpSvcDebug</link> *arg_time,
+                                                        <link linkend="gdouble">gdouble</link>     arg_domain,
+                                                        <link linkend="gchar">gchar</link>      *arg_level,
+                                                        <link linkend="guint">guint</link>       arg_message,
+                                                        <link linkend="gchar">gchar</link>      *arg4,
+                                                        <link linkend="gpointer">gpointer</link>    user_data)        : Run Last / Has Details</programlisting>
+<para>
+The NewDebugMessage D-Bus signal is emitted whenever this GObject signal is.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>arg_time</parameter>&#160;:</term>
+<listitem><simpara> gdouble  (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_domain</parameter>&#160;:</term>
+<listitem><simpara> const gchar * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_level</parameter>&#160;:</term>
+<listitem><simpara> guint  (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>arg_message</parameter>&#160;:</term>
+<listitem><simpara> const gchar * (FIXME, generate documentation)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&#160;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
+
+
+
+</refentry>
