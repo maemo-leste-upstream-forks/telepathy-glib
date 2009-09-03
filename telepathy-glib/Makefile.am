@@ -38,7 +38,8 @@ ABI_LISTS = \
     versions/0.7.31.abi \
     versions/0.7.32.abi \
     versions/0.7.34.abi \
-    versions/0.7.35.abi
+    versions/0.7.35.abi \
+    versions/0.7.36.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -49,6 +50,7 @@ EXTRA_DIST = \
     channel-dispatch-operation.xml \
     channel-request.xml \
     client.xml \
+    debug.xml \
     connection.xml \
     connection-manager.xml \
     dbus-daemon.xml \
@@ -145,6 +147,7 @@ our_headers = \
     dbus-properties-mixin.h \
     defs.h \
     debug.h \
+    debug-sender.h \
     debug-ansi.h \
     enums.h \
     errors.h \
@@ -174,6 +177,7 @@ our_headers = \
     svc-client.h \
     svc-connection.h \
     svc-connection-manager.h \
+    svc-debug.h \
     svc-generic.h \
     svc-media-interfaces.h \
     svc-properties-interface.h \
@@ -215,6 +219,7 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/tp-svc-client.c \
     _gen/tp-svc-connection.c \
     _gen/tp-svc-connection-manager.c \
+    _gen/tp-svc-debug.c \
     _gen/tp-svc-generic.c \
     _gen/tp-svc-media-session-handler.c \
     _gen/tp-svc-media-stream-handler.c
@@ -246,6 +251,7 @@ nodist_geninclude_HEADERS = \
     _gen/tp-svc-client.h \
     _gen/tp-svc-connection.h \
     _gen/tp-svc-connection-manager.h \
+    _gen/tp-svc-debug.h \
     _gen/tp-svc-generic.h \
     _gen/tp-svc-media-session-handler.h \
     _gen/tp-svc-media-stream-handler.h
@@ -295,6 +301,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-internal.h \
     dbus-properties-mixin.c \
     debug.c \
+    debug-sender.c \
     interfaces.c \
     debug-internal.h \
     errors.c \

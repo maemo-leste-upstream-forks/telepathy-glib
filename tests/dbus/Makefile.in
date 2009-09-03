@@ -59,10 +59,11 @@ noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
 	test-group-mixin$(EXEEXT) test-handle-repo$(EXEEXT) \
 	test-handle-set$(EXEEXT) \
 	test-invalidated-while-invoking-signals$(EXEEXT) \
-	test-message-mixin$(EXEEXT) test-params-cm$(EXEEXT) \
-	test-properties$(EXEEXT) test-self-handle$(EXEEXT) \
-	test-self-presence$(EXEEXT) test-text-mixin$(EXEEXT) \
-	test-text-respawn$(EXEEXT) test-unsupported-interface$(EXEEXT)
+	test-long-connection-name$(EXEEXT) test-message-mixin$(EXEEXT) \
+	test-params-cm$(EXEEXT) test-properties$(EXEEXT) \
+	test-self-handle$(EXEEXT) test-self-presence$(EXEEXT) \
+	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
+	test-unsupported-interface$(EXEEXT)
 subdir = tests/dbus
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
@@ -278,6 +279,11 @@ test_invalidated_while_invoking_signals_LDADD = $(LDADD)
 test_invalidated_while_invoking_signals_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la
+am_test_long_connection_name_OBJECTS = long-connection-name.$(OBJEXT)
+test_long_connection_name_OBJECTS =  \
+	$(am_test_long_connection_name_OBJECTS)
+test_long_connection_name_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 am_test_message_mixin_OBJECTS = message-mixin.$(OBJEXT)
 test_message_mixin_OBJECTS = $(am_test_message_mixin_OBJECTS)
 test_message_mixin_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -359,6 +365,7 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_group_mixin_SOURCES) $(test_handle_repo_SOURCES) \
 	$(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
+	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(nodist_test_properties_SOURCES) \
 	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
@@ -387,6 +394,7 @@ DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_group_mixin_SOURCES) $(test_handle_repo_SOURCES) \
 	$(test_handle_set_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
+	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(test_self_handle_SOURCES) \
 	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
@@ -602,6 +610,11 @@ test_handle_set_SOURCES = handle-set.c
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
 
+test_long_connection_name_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+
+test_long_connection_name_SOURCES = long-connection-name.c
 test_message_mixin_LDADD = \
     $(LDADD) \
     $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
@@ -800,6 +813,9 @@ test-handle-set$(EXEEXT): $(test_handle_set_OBJECTS) $(test_handle_set_DEPENDENC
 test-invalidated-while-invoking-signals$(EXEEXT): $(test_invalidated_while_invoking_signals_OBJECTS) $(test_invalidated_while_invoking_signals_DEPENDENCIES) 
 	@rm -f test-invalidated-while-invoking-signals$(EXEEXT)
 	$(LINK) $(test_invalidated_while_invoking_signals_LDFLAGS) $(test_invalidated_while_invoking_signals_OBJECTS) $(test_invalidated_while_invoking_signals_LDADD) $(LIBS)
+test-long-connection-name$(EXEEXT): $(test_long_connection_name_OBJECTS) $(test_long_connection_name_DEPENDENCIES) 
+	@rm -f test-long-connection-name$(EXEEXT)
+	$(LINK) $(test_long_connection_name_LDFLAGS) $(test_long_connection_name_OBJECTS) $(test_long_connection_name_LDADD) $(LIBS)
 test-message-mixin$(EXEEXT): $(test_message_mixin_OBJECTS) $(test_message_mixin_DEPENDENCIES) 
 	@rm -f test-message-mixin$(EXEEXT)
 	$(LINK) $(test_message_mixin_LDFLAGS) $(test_message_mixin_OBJECTS) $(test_message_mixin_LDADD) $(LIBS)
@@ -861,6 +877,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidated-while-invoking-signals.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/long-connection-name.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/params-cm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@

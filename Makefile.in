@@ -244,6 +244,7 @@ EXTRA_DIST = \
 CLEANFILES = FIXME.out
 BRANCH = $(shell sh tools/git-which-branch.sh misc | tr -d '\n' | tr -C "[:alnum:]" _)
 UPLOAD_BRANCH_TO = people.freedesktop.org:public_html/telepathy-glib
+CHANGELOG_RANGE = telepathy-glib-0.6.0..
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -726,8 +727,7 @@ lcov-check:
 dist-hook:
 	chmod u+w ${distdir}/ChangeLog
 	if test -d ${top_srcdir}/.git; then \
-		git log --stat > ${distdir}/ChangeLog || \
-		git log > ${distdir}/ChangeLog; \
+		git log --date=iso $(CHANGELOG_RANGE) > ${distdir}/ChangeLog; \
 	fi
 
 maintainer-upload-release: _maintainer-upload-release

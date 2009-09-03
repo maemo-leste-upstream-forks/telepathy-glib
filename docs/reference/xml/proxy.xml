@@ -225,7 +225,20 @@ Opaque structure representing a D-Bus signal connection.</para>
 <para>
 Disconnect the given signal connection. After this function returns, you
 must not assume that the signal connection remains valid, but you must not
-explicitly free it either.</para>
+explicitly free it either.
+</para>
+<para>
+It is not safe to call this function if <parameter>sc</parameter> has been disconnected already,
+which happens in each of these situations:
+</para>
+<para>
+<itemizedlist>
+<listitem>the <parameter>weak_object</parameter> used when <parameter>sc</parameter> was created has been
+ destroyed</listitem>
+<listitem>tp_proxy_signal_connection_disconnect has already been
+ used</listitem>
+<listitem>the proxy has been invalidated</listitem>
+</itemizedlist></para>
 <para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>sc</parameter>&#160;:</term>
