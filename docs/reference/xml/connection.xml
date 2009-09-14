@@ -332,7 +332,7 @@
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          <link linkend="guint">guint</link> in_Handle_Type,
-                                                         const <link linkend="gchar">gchar</link> **in_Names,
+                                                         const <link linkend="gchar">gchar</link> **in_Identifiers,
                                                          <link linkend="tp-cli-connection-callback-for-request-handles">tp_cli_connection_callback_for_request_handles</link> callback,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
@@ -341,7 +341,7 @@
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          <link linkend="guint">guint</link> in_Handle_Type,
-                                                         const <link linkend="gchar">gchar</link> **in_Names,
+                                                         const <link linkend="gchar">gchar</link> **in_Identifiers,
                                                          <link linkend="GArray">GArray</link> **out_Handles,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);
@@ -1986,7 +1986,7 @@ succeeds or fails.</para>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out_Identifiers</parameter>&#160;:</term>
-<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>: An array of handle names in the same order as the given numbers
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>: An array of identifiers corresponding to the given handles, in the same order.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&#160;:</term>
 <listitem><simpara> <link linkend="NULL--CAPS"><literal>NULL</literal></link> on success, or an error on failure
@@ -2089,7 +2089,7 @@ Return a string representation for a number of handles of a given         type.<
 <listitem><simpara> Used to pass an 'in' argument: An array of integer handles of this type
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out_Identifiers</parameter>&#160;:</term>
-<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE--CAPS"><literal>TRUE</literal></link> is returned: An array of handle names in the same order as the given numbers
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE--CAPS"><literal>TRUE</literal></link> is returned: An array of identifiers corresponding to the given handles, in the same order.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&#160;:</term>
 <listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE--CAPS"><literal>FALSE</literal></link> 
@@ -2521,7 +2521,7 @@ succeeds or fails.</para>
 <listitem><simpara> the proxy on which the call was made
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out_Handles</parameter>&#160;:</term>
-<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>: An array of integer handle numbers in the same order as the given strings
+<listitem><simpara> Used to return an 'out' argument if <parameter>error</parameter> is <link linkend="NULL--CAPS"><literal>NULL</literal></link>: An array of integer handle numbers in the same order as the given identifiers.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&#160;:</term>
 <listitem><simpara> <link linkend="NULL--CAPS"><literal>NULL</literal></link> on success, or an error on failure
@@ -2539,7 +2539,7 @@ succeeds or fails.</para>
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          <link linkend="guint">guint</link> in_Handle_Type,
-                                                         const <link linkend="gchar">gchar</link> **in_Names,
+                                                         const <link linkend="gchar">gchar</link> **in_Identifiers,
                                                          <link linkend="tp-cli-connection-callback-for-request-handles">tp_cli_connection_callback_for_request_handles</link> callback,
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GDestroyNotify">GDestroyNotify</link> destroy,
@@ -2548,7 +2548,7 @@ succeeds or fails.</para>
 Start a RequestHandles method call.
 </para>
 <para>
-Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the name refers to an entity that already has a handle         in this connection manager, this handle should be returned instead.         The handle number 0 must not be returned by the connection manager.</para>
+Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the identifier refers to an entity that already has a         handle in this connection manager, this handle should be returned         instead. The handle number 0 must not be returned by the connection         manager.</para>
 <para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>proxy</parameter>&#160;:</term>
@@ -2561,8 +2561,8 @@ Request several handles from the connection manager which represent a         nu
 <varlistentry><term><parameter>in_Handle_Type</parameter>&#160;:</term>
 <listitem><simpara> Used to pass an 'in' argument: The type of handle required
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>in_Names</parameter>&#160;:</term>
-<listitem><simpara> Used to pass an 'in' argument: An array of names of entities to request handles for
+<varlistentry><term><parameter>in_Identifiers</parameter>&#160;:</term>
+<listitem><simpara> Used to pass an 'in' argument: An array of identifiers of entities to request handles for
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>callback</parameter>&#160;:</term>
 <listitem><simpara> called when the method call succeeds or fails;
@@ -2596,7 +2596,7 @@ Request several handles from the connection manager which represent a         nu
                                                         (<link linkend="TpConnection">TpConnection</link> *proxy,
                                                          <link linkend="gint">gint</link> timeout_ms,
                                                          <link linkend="guint">guint</link> in_Handle_Type,
-                                                         const <link linkend="gchar">gchar</link> **in_Names,
+                                                         const <link linkend="gchar">gchar</link> **in_Identifiers,
                                                          <link linkend="GArray">GArray</link> **out_Handles,
                                                          <link linkend="GError">GError</link> **error,
                                                          <link linkend="GMainLoop">GMainLoop</link> **loop);</programlisting>
@@ -2608,7 +2608,7 @@ and generally ensure that everything is in a consistent
 state.
 </para>
 <para>
-Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the name refers to an entity that already has a handle         in this connection manager, this handle should be returned instead.         The handle number 0 must not be returned by the connection manager.</para>
+Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the identifier refers to an entity that already has a         handle in this connection manager, this handle should be returned         instead. The handle number 0 must not be returned by the connection         manager.</para>
 <para>
 </para><variablelist role="params">
 <varlistentry><term><parameter>proxy</parameter>&#160;:</term>
@@ -2620,11 +2620,11 @@ Request several handles from the connection manager which represent a         nu
 <varlistentry><term><parameter>in_Handle_Type</parameter>&#160;:</term>
 <listitem><simpara> Used to pass an 'in' argument: The type of handle required
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>in_Names</parameter>&#160;:</term>
-<listitem><simpara> Used to pass an 'in' argument: An array of names of entities to request handles for
+<varlistentry><term><parameter>in_Identifiers</parameter>&#160;:</term>
+<listitem><simpara> Used to pass an 'in' argument: An array of identifiers of entities to request handles for
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>out_Handles</parameter>&#160;:</term>
-<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE--CAPS"><literal>TRUE</literal></link> is returned: An array of integer handle numbers in the same order as the given strings
+<listitem><simpara> Used to return an 'out' argument if <link linkend="TRUE--CAPS"><literal>TRUE</literal></link> is returned: An array of integer handle numbers in the same order as the given identifiers.
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&#160;:</term>
 <listitem><simpara> If not <link linkend="NULL--CAPS"><literal>NULL</literal></link>, used to return errors if <link linkend="FALSE--CAPS"><literal>FALSE</literal></link> 

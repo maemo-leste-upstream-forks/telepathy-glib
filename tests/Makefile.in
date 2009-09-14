@@ -38,7 +38,8 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
 	test-heap$(EXEEXT) test-internal-debug$(EXEEXT) \
-	test-intset$(EXEEXT) test-util$(EXEEXT)
+	test-intset$(EXEEXT) test-util$(EXEEXT) \
+	test-debug-domain$(EXEEXT)
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk
 subdir = tests
@@ -67,6 +68,10 @@ test_availability_cmp_OBJECTS = $(am_test_availability_cmp_OBJECTS)
 test_availability_cmp_LDADD = $(LDADD)
 test_availability_cmp_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
+am_test_debug_domain_OBJECTS = debug-domain.$(OBJEXT)
+test_debug_domain_OBJECTS = $(am_test_debug_domain_OBJECTS)
+test_debug_domain_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
 am_test_heap_OBJECTS = heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
 test_heap_LDADD = $(LDADD)
@@ -98,11 +103,13 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
-	$(test_intset_SOURCES) $(test_util_SOURCES)
+	$(test_debug_domain_SOURCES) $(test_heap_SOURCES) \
+	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
+	$(test_util_SOURCES)
 DIST_SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
-	$(test_intset_SOURCES) $(test_util_SOURCES)
+	$(test_debug_domain_SOURCES) $(test_heap_SOURCES) \
+	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
+	$(test_util_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -310,11 +317,17 @@ test_intset_SOURCES = \
 test_availability_cmp_SOURCES = \
     availability-cmp.c
 
+test_debug_domain_SOURCES = \
+    debug-domain.c
+
+test_internal_debug_SOURCES = \
+    internal-debug.c
+
 
 # this needs to link against the static convenience library so that
 # _tp_debug is still visible
-test_internal_debug_SOURCES = \
-    internal-debug.c
+test_debug_domain_LDADD = \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
 
 test_internal_debug_LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
@@ -375,6 +388,9 @@ test-asv$(EXEEXT): $(test_asv_OBJECTS) $(test_asv_DEPENDENCIES)
 test-availability-cmp$(EXEEXT): $(test_availability_cmp_OBJECTS) $(test_availability_cmp_DEPENDENCIES) 
 	@rm -f test-availability-cmp$(EXEEXT)
 	$(LINK) $(test_availability_cmp_LDFLAGS) $(test_availability_cmp_OBJECTS) $(test_availability_cmp_LDADD) $(LIBS)
+test-debug-domain$(EXEEXT): $(test_debug_domain_OBJECTS) $(test_debug_domain_DEPENDENCIES) 
+	@rm -f test-debug-domain$(EXEEXT)
+	$(LINK) $(test_debug_domain_LDFLAGS) $(test_debug_domain_OBJECTS) $(test_debug_domain_LDADD) $(LIBS)
 test-heap$(EXEEXT): $(test_heap_OBJECTS) $(test_heap_DEPENDENCIES) 
 	@rm -f test-heap$(EXEEXT)
 	$(LINK) $(test_heap_LDFLAGS) $(test_heap_OBJECTS) $(test_heap_LDADD) $(LIBS)
@@ -396,6 +412,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/availability-cmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-domain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/internal-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Po@am__quote@
