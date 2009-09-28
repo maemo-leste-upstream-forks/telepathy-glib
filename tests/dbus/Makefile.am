@@ -1,5 +1,3 @@
-include $(top_srcdir)/tools/shave.mk
-
 noinst_PROGRAMS = \
     test-account \
     test-account-manager \
@@ -45,7 +43,8 @@ TESTS = $(noinst_PROGRAMS)
 
 LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-    $(top_builddir)/tests/lib/libtp-glib-tests.la
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(GLIB_LIBS)
 
 test_account_SOURCES = account.c
 
@@ -207,7 +206,7 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 	$(top_srcdir)/tools/glib-ginterface-gen.py \
 	Makefile.am
 	$(mkdir_p) _gen
-	$(QUIET_GEN)$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
 		$< Test_Svc_
@@ -215,4 +214,4 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 _gen/errors-check.h: $(top_srcdir)/spec/errors.xml \
 	$(top_srcdir)/tools/glib-errors-check-gen.py
 	$(mkdir_p) _gen
-	$(QUIET_GEN)$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@
