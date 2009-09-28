@@ -10,7 +10,7 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [8])
+m4_define([tp_glib_minor_version], [9])
 m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [30])
-m4_define([tp_glib_lt_revision], [1])
-m4_define([tp_glib_lt_age], [30])
+m4_define([tp_glib_lt_current], [31])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [31])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -44,6 +44,8 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.9 -Wno-portability])
 AM_CONFIG_HEADER(config.h)
+
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
 
 dnl check for tools
 AC_PROG_CC
@@ -148,7 +150,7 @@ dnl (srcdir != builddir)
 AM_CONDITIONAL([OUT_OF_TREE_BUILD], [test "z$ac_srcdir" != z.])
 
 dnl Check for Glib
-PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.16, gobject-2.0 >= 2.16])
+PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.16, gobject-2.0 >= 2.16, gio-2.0])
 
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
@@ -194,8 +196,6 @@ if test -z "$NM"; then
 fi
 AM_CONDITIONAL([HAVE_LD_VERSION_SCRIPT], [test $HAVE_LD_VERSION_SCRIPT = yes])
 
-SHAVE_INIT(.)
-
 AC_OUTPUT( Makefile \
 	   docs/Makefile \
 	   docs/reference/Makefile \
@@ -219,7 +219,5 @@ AC_OUTPUT( Makefile \
 	   tests/dbus/Makefile \
 	   tests/tools/Makefile \
 	   tools/Makefile \
-	   m4/Makefile \
-	   shave \
-	   shave-libtool
+	   m4/Makefile
 )
