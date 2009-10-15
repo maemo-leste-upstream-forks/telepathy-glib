@@ -715,6 +715,9 @@ tp_account_manager_class_init (TpAccountManagerClass *klass)
    *
    * Emitted when an account from @manager is enabled.
    *
+   * Note that the returned #TpAccount @account is not guaranteed to have any
+   * features pre-prepared, including %TP_ACCOUNT_FEATURE_CORE.
+   *
    * Since: 0.9.0
    */
   signals[ACCOUNT_ENABLED] = g_signal_new ("account-enabled",
@@ -1191,7 +1194,7 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
 
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (my_res, error);
+      g_simple_async_result_set_from_error (my_res, (GError *) error);
       g_simple_async_result_complete (my_res);
       g_object_unref (my_res);
 

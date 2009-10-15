@@ -1,3 +1,178 @@
+commit 8148757e36bd0e1f5c3d52e4baffb5c8968aff49
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 17:42:17 +0100
+
+    Prepare version 0.9.1
+    
+    Second attempt, after discovering during smoke-testing that all our CMs
+    still rely on the "password"/"*-password" special case rather than setting
+    the SECRET flag correctly. *sigh*
+
+commit aa75908bdee6796514f2d1096b5ab84e1e85ea39
+Merge: 6ce9cb5 984a124
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 17:39:26 +0100
+
+    Merge branch 'telepathy-glib-0.8'
+    
+    Conflicts:
+    	NEWS
+
+commit 984a124a9a11dec00d0c75a00689f01ccb7d8b54
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 17:31:52 +0100
+
+    More NEWS
+
+commit 90941d0dd744c5046b1ca409e63cbf18df3db3b0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 17:12:43 +0100
+
+    TpConnectionManager: extend the "(^|-)password" special-case to GetParameters(), and debug whenever it is used
+    
+    Current Telepathy connection managers seem to all say that "password" is
+    secret in their .manager file, but not in their source code. As a result,
+    if you delete all your .manager files, MC no longer retrieves your
+    passwords from gnome-keyring, and all your accounts get marked as
+    invalid :-(
+
+commit 6ce9cb5fe15c46b159df114b123cf1f558a5824f
+Merge: b6e5238 c24b6b4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 14:51:47 +0100
+
+    Merge branch 'telepathy-glib-0.8'
+    
+    Conflicts:
+    	NEWS
+
+commit c24b6b4cf0d33a76fc1dd7b9af9efc89e5fd4de0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 14:50:08 +0100
+
+    Update NEWS
+
+commit 88de0415a52bb871cb1cd6ed4f35249d0cd50fed
+Merge: ac6a047 822ddeb
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 14:43:40 +0100
+
+    Merge branch '08-cm-crash' into telepathy-glib-0.8
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 822ddeb3d9ade861824c29751b0e077d8144ac5f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-14 22:14:03 +0100
+
+    TpConnectionManager: defer ListProtocols() until we know the initial name
+    
+    The fact that a name owner change to "" ends introspection and emits
+    "exited" means we don't behave as documented in
+    tp_connection_manager_activate, which claims that "exited" before
+    "activated" means a failure to activate.
+    
+    This isn't necessarily true if someone calls
+    tp_connection_manager_activate() straight after constructing the TpCM,
+    *and* the CM is not currently running. In that case, the ListProtocols()
+    call is in parallel with GetNameOwner(); GetNameOwner() will win the
+    race, because dbus-daemon processes it synchronously and replies
+    immediately. When GetNameOwner() returns error, watch_name_owner tells us
+    there is no owner, the ListProtocols() call is cancelled, and "exited"
+    is emitted.
+    
+    However, that ListProtocols() call was in fact a perfectly good
+    service-activation, which would start the CM up!
+    
+    The solution is to defer ListProtocols() until the CM's initial name is
+    known, and avoid emitting "exited" on the basis of initial state.
+
+commit bc814c3bbb09381de496e41b629d7c1059f3d425
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-14 21:47:29 +0100
+
+    fd.o #23853: cancel an in-flight ListProtocols(), if any, when ending introspection
+    
+    This fixes the crash seen in that bug, by not calling the callback if
+    we have decided we don't want its results.
+    
+    As a side bonus, we don't need the boolean flag listing_protocols - we
+    can just use the pending call object itself.
+
+commit 4dd848106d93fc43c363a835a0346f576b2dab2f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-14 21:38:08 +0100
+
+    tp_connection_manager_got_parameters: correctly return on error, rather than carrying on with a NULL pointer dereference
+
+commit b6e5238667f3b25187399329d99a2ffe3d467cc1
+Merge: f58c94d ba02c65
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-12 18:47:15 +0100
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Alban Crequy <alban.crequy@collabora.co.uk>
+
+commit ba02c659b2402172db18e45075398342fb0f780b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-12 18:22:49 +0100
+
+    Update NEWS
+
+commit 254f90c330588151a2d8876420ffdb3d09f1acc4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-12 18:19:01 +0100
+
+    Depend on GLib 2.20 (Debian #550406)
+
+commit f58c94d2962e158a8d31bba34cdd7508ab0b5f35
+Merge: 267f53a ac6a047
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2009-10-06 15:17:39 +0100
+
+    Merge branch 'telepathy-glib-0.8'
+    
+    Conflicts:
+    	NEWS
+    	configure.ac
+
+commit ac6a047cd63a1b63a752e6b28fe9831e80b02d76
+Author: Pekka Pessi <Pekka.Pessi@nokia.com>
+Date:   2009-10-06 16:30:10 +0300
+
+    dbus-properties-mixin.c: fixed error message on write-only properties
+    
+    Signed-off-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 267f53af2a9b8849e2cc2f4a19f7edf70ee3d7be
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2009-09-30 16:44:31 +0100
+
+    TpAccountManager::account-enabled: note about the readiness of the account
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 5620910fe58d95d62754437eeabc7befa95675e6
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2009-09-29 13:39:22 +0100
+
+    account{,-manager}: cast const GError*s to GError* when passing to g_simple_async_result_set_from_error
+    
+    gio changed this argument from GError * (in 2.20) to const GError * in
+    (2.22)[0]. Instead of depending on >= 2.22, we can just cast to GError *
+    and it'll work in both versions.
+    
+    0. http://git.gnome.org/cgit/glib/commit/?id=cdd04f36cac838f92826cbf415868100a4007741
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit a1adb8d61e26413a875734c40e54fada56aea6b1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-09-28 17:21:27 +0100
+
+    Nano version
+
 commit f32dca970eba0ebf539fc7a5165020501e0df152
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-09-28 16:35:34 +0100
@@ -647,6 +822,12 @@ Date:   2009-09-22 13:13:32 +0100
     account*: misc fixes to gtk-doc comments
     
     Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 8de0e35ecd2634dfad5ee38e1e550336f3ae2b45
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-09-24 15:30:53 +0100
+
+    Nano version (stable branch)
 
 commit 87322a6f9a6d3bda2b405ecf10926490a530d4be
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
