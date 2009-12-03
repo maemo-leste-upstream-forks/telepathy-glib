@@ -1,3 +1,976 @@
+commit eb655688bf6b73a55318d7d3ef6c33b9e4322cb9
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 20:12:14 +0000
+
+    Prepare version 0.9.2
+
+commit ad184cda01b089c5034eef6ae32a4607ed6a6023
+Merge: 30fefb6 63afecb
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 20:03:39 +0000
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 63afecbb96d832e78fe9bb1466e839d30c87e6cc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 19:32:38 +0000
+
+    Relax glob in .gitignore to ignore distdir for current as well as old versions
+
+commit 0ceb670bce43f76ddd907e47aba4bb015cfe543c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 19:32:08 +0000
+
+    tests/dbus/Makefile.am: support out-of-tree builds, and distribute dbus-1/session.conf.in
+
+commit 144b662c2508f065b752653c11638352bba95737
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 19:31:45 +0000
+
+    tests/dbus/Makefile.am: silence mkdir commands
+
+commit 8b2fcda35dbe6ea2cd9f5eb7849af7dbfe176720
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 19:19:41 +0000
+
+    Distribute and install telepathy-glib.h
+
+commit 8ec511d1a0ebf804514659679ecf57f89d8526d7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 19:14:44 +0000
+
+    Distribute telepathy-glib/util-internal.h in the tarball
+
+commit 30fefb60d7cd84f5049d886566cc03b00b0bc94c
+Merge: 0ffec90 74ad8e1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 18:59:02 +0000
+
+    Merge branch 'valgrind'
+    
+    Reviewed-by: David Laban <david.laban@collabora.co.uk>
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 0ffec90276a11ecf7e28198bb38fc9b069ac6fc3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 16:01:16 +0000
+
+    Update NEWS
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit e5e0dbe7f761f8656b796dd6d40c230ab20c1cfa
+Merge: ad9cc76 8fb1971
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 16:00:06 +0000
+
+    Merge branch 'leaks'
+    
+    Reviewed-by: David Laban <david.laban@collabora.co.uk>
+
+commit 74ad8e124d0d23826a5528a5474e460ca43a6902
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 17:45:28 +0100
+
+    valgrind.mk: say what suppressions we used
+
+commit b415ac35ab5c3ff0c1c71d88f8de77cee4b6db20
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-03 14:50:58 +0000
+
+    tests: improve normal and valgrind environments
+    
+    Normally, run with G_SLICE=debug-blocks (so GLib finds our bugs).
+    
+    Under valgrind, use G_DEBUG=gc-friendly and G_SLICE=always-malloc.
+    
+    Also fix a typo that resulted in check-valgrind not actually valgrinding
+    the non-D-Bus tests (missing '\').
+
+commit 65e15e6091800ec2c37d08e486258d6875af4a34
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 16:59:43 +0100
+
+    valgrind.mk: don't show reachable objects
+    
+    In practice, I don't think we can suppress all the false positives this
+    gives us without also suppressing real leaks.
+
+commit 1cc3a9593bc103a85967ee882bbb385a0d590d58
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 16:41:18 +0100
+
+    telepathy-glib.supp: ignore GSlice initialization
+    
+    The previous suppression only worked for GLib in /usr, and wasn't very
+    specific.
+
+commit 2d11ca85e44f33f590b352559c3b8016d7673945
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 16:37:44 +0100
+
+    telepathy-glib.supp: more dbus-glib non-leaks
+
+commit 9ceb712b2c8aa88099f252a074aadc074847e970
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 16:37:32 +0100
+
+    telepathy-glib.supp: document more telepathy-glib non-leaks
+
+commit 2fa0d932088ca4d8812bbf3f46f787d51ff94730
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:39:23 +0100
+
+    telepathy-glib.supp: ignore dbus_g_connection_register_g_object's GSList
+    
+    It's only freed when the DBusConnection closes, which in our case usually
+    doesn't happen.
+
+commit fb23048a8b522419076d63fc05aa124bcec19483
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:38:09 +0100
+
+    tp_proxy_subclass_add_error_mapping: annotate an intentional one-per-process allocation per error enum
+
+commit 7dcbadc9dc15599f62b2cb7e2ee9f7940fd05782
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:15:01 +0100
+
+    Ignore more GTest admin
+
+commit 4479b6cce14fb1b145a27c0b23f295152397b504
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:14:48 +0100
+
+    Annotate an intentional one-per-process leak
+
+commit fdeb580398f78aa86315c32ed545c205bcf66353
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:14:30 +0100
+
+    telepathy-glib.supp: ignore g_intern_string, g_intern_static_string
+    
+    These are meant to leak (strings in the first case, and hash table entries
+    in both cases).
+
+commit 23581e0255453a91fcd152dc0fb44d1fee5d5f91
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:02:26 +0100
+
+    Make the "GTest admin" suppression more general
+
+commit 5b16ab679462f540d21fd94ba3280476b64bbfe1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:01:02 +0100
+
+    telepathy-glib.supp: remove redundant suppression for GTest calling g_get_charset
+
+commit db8a2a53a8ebc59b558b4d53d4b32c198ba83bc2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:00:44 +0100
+
+    telepathy-glib.supp: ignore all leaks in libc dlopen initialization (due to handle leak debug)
+
+commit 8f69846e0eacf758f35eb3d8d1f6034e243e6bb2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:00:16 +0100
+
+    telepathy-glib.supp: ignore all "leaks" in dbus_g_bus_get
+
+commit 7a62d1844e614a0d2c0c243f82403d2d11dc68c8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 14:56:49 +0100
+
+    telepathy-glib.supp: add some more generic suppressions
+
+commit 63ceaa9286a5b5ba1cf30b9954601140b6b7893d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 14:51:16 +0100
+
+    telepathy-glib.supp: use ... wildcard to make suppressions more generic
+    
+    Some of these were far too specific, and no longer matched newer GLib.
+
+commit 7c0af0be354edad11930d2d0e6de897ae7a57253
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 14:36:55 +0100
+
+    valgrind.mk: let programs finish with their "natural" exit code, even if valgrind didn't like them
+
+commit 94dae71c582130aa053c953311b604b6d8f04e28
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 14:36:32 +0100
+
+    tests/Makefile.am: don't valgrind Python, it's doomed to failure
+    
+    Python needs a large and specific set of suppressions to deal with odd
+    memory accesses, and none of our code is in that process anyway.
+
+commit 07b03e187fb711f6006c7dbe0341ed0e6890153c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 14:30:34 +0100
+
+    Add a top-level target to run valgrind, and make it log the output
+
+commit 8fb197128960d4ba3095d9d53bc9af7858d411fe
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 17:43:52 +0100
+
+    callable-example test: don't leak some of the test data
+
+commit 1d22bde3ee935189fcb322415d16ffd86d63214a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 14:24:50 +0100
+
+    Move telepathy-glib.supp to tools/; add and use valgrind.mk
+    
+    If we put all our valgrind stuff in one place, it's easier for other
+    projects to use it.
+
+commit 6742bdcafa54f453f65c3f98cf1bd2d185f75005
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 17:18:05 +0100
+
+    ExampleCallableMediaChannel: in media_request_streams, don't leak the stream info "structs" (GValueArrays)
+
+commit ff089ca591d46c197abc244a01a6ae38743fbbf4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 17:17:40 +0100
+
+    ExampleCallableMediaChannel: in add_member, don't leak a TpIntSet
+
+commit 2f54aa197e35a5f013e474daa6bd469d4479df01
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 17:17:19 +0100
+
+    ExampleCallableMediaChannel: don't leak the streams' hash table
+
+commit cbc7bc3673e1b6f4981f984ac4541090a21bb318
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 16:04:56 +0100
+
+    tests/dbus/call-cancellation: don't leak the proxy 'k'
+    
+    Also, explicitly clear all the pointers so valgrind can give us better
+    diagnostics about reachability.
+
+commit d5ba197c1394b1e2492bacda7c5752008931759e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:38:42 +0100
+
+    tests/dbus/unsupported-interface: don't leak bus_daemon
+    
+    This makes valgrind logs nicer.
+
+commit 372ab2c3e5adb4912936845d00e30a792500fd09
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-01 15:37:36 +0100
+
+    tp_account_manager_dup: don't leak one ref to the starter dbus-daemon
+
+commit ad9cc760eaa5a5353e937f3a2f957e0cc5ee8fb2
+Merge: 41ae93b a91b7cd
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-12-02 18:38:04 +0000
+
+    Merge branch 'tests' to fix fd.o #25384
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 41ae93bdad60077b12635be021efb82783e45402
+Merge: c87898d 53590ec
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-02 18:08:55 +0000
+
+    Merge branch 'telepathy-glib-0.8'
+
+commit 53590ec34948232f115eb20e6ea615f043730e7c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:37:47 +0000
+
+    tp_dbus_properties_mixin_make_properties_hash: add missing call to va_end
+    
+    Cherry-picked: from commit 8a041e000f0b13101fae17eb8b289d2cf4156607
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit c87898d1d83693804c3590a976e586553f2a6dc2
+Merge: c99c16a 9562626
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-02 18:06:53 +0000
+
+    Merge branch 'coverity'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit c99c16a783104aa502c6cc3ef329f5b6d9ad11e8
+Merge: 0d39564 d84ccb1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-02 18:06:32 +0000
+
+    Merge remote branch 'wjt/cope-with-utf8-spec'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit a91b7cdeb936f2f83878bdedf97d0ff9124918c1
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-26 17:12:26 +0000
+
+    Test fd.o #25384 by advertising a "valid account" which doen't exist.
+    
+    Fails if cherry-picked before the previous commit.
+
+commit 05ba3e18b644b7aac966ae1ff0a097a923150968
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-12-01 23:52:48 +0000
+
+    fd.o #25384 Remove any account which fails to prepare itself.
+    
+    Rather than the account manager just never becoming ready.
+
+commit d93652a49f76f7b248e8ceb25f7dd2c626fe31cc
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-24 17:31:16 +0000
+
+    Test that core is not ready when we have a new AccountManager
+
+commit 3dcd4b4a2ed8c71ae6213758937bd1c67ba2e30d
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-24 17:22:36 +0000
+
+    account-manager: Test prepare for an unknown feature.
+
+commit dc2141ffcbe75b676794578b50b476e7e7c89704
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-24 16:56:56 +0000
+
+    Don't let MC5 activate itself during AM tests.
+    
+    This sets up dbus to use a session.conf which doesn't include the
+    standard services.
+    This is the same trick that gabble's twisted tests use.
+    
+    I'm not really sure whether tests/dbus/dbus-1/session.conf.in is the
+    best place to put the new file. If anyone thinks there is a better
+    place for it, shout.
+
+commit 0d39564bdd5ec4fe83dd6e92203dbe9f063c70a8
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2009-11-28 19:36:31 +0000
+
+    glib-client-gen: mark deprecated D-Bus methods as deprecated
+    
+    Don't include the version string from the spec because it just makes
+    things confusing.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 95626262b11f72f07169e5a6ef30c65477a1d5de
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:47:30 +0000
+
+    call-cancellation test: remove an unused assignment
+
+commit a05cdb0fa6c7742379b40bd9d71daa94266aad96
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:47:18 +0000
+
+    tp_text_mixin_class_init: critical if the mixin class wasn't set up properly
+    
+    This avoids a coverity warning about the unused assignment, and matches
+    the intention.
+
+commit 5c8ad18883b2737498e4e010d0100e70a3ef7fc8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:44:13 +0000
+
+    disconnection test: remove unused assignment
+
+commit 5a130488ee8d9637486bfcacbada3f8f7c696d41
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:42:12 +0000
+
+    contactlist example: remove unused variable assignment
+
+commit cc3b89b6b329fd0d1b7fbe7f0b31d016cc4a4991
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:41:59 +0000
+
+    echo2 example CM: remove unused variable assignment and unused return
+
+commit c75b3a77bc5c195ffebae3eea82d484f334f17eb
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:41:40 +0000
+
+    channelspecific example CM: remove unused variable and unused return
+
+commit 8a041e000f0b13101fae17eb8b289d2cf4156607
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 20:37:47 +0000
+
+    tp_dbus_properties_mixin_make_properties_hash: add missing call to va_end
+
+commit e7ed936024c074275c99eea09a3219108b5f92f4
+Merge: 5105a2b 2c01f82
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-12-01 19:54:44 +0000
+
+    Merge branch 'prop-constants'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit d84ccb1752b9487f4d20a511752eec9437d332fa
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2009-12-01 17:19:56 +0000
+
+    Cope with UTF-8 in spec XML
+
+commit 5105a2b05b67c9282a4d37c81eb63c4198f2e62a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-26 16:43:03 +0000
+
+    tp_account_manager_is_prepared: fix a confusing typo
+    
+    TP_ACCOUNT_MANAGER_FEATURE_CORE, not TP_ACCOUNT_FEATURE_CORE.
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 120633e2d4fd779e85c56dd33ff5edfd71671ed5
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-25 16:37:42 +0000
+
+    Don't rely on enum types being unsigned
+    
+    Not all compilers use unsigned types for enums even if all the values are
+    postive, as such an enum with 3 items doesn't always fit in a 2 bit field.
+    This can cause interesting bugs.
+    
+    Force the type to be an unsigned int, this hopefully doesn't break
+    anything and fixes the bug without breaking ABI etc.
+    
+    Reviewed-By: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 63641083f05e59e3dbe0d83c347c3f977317d9cf
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-25 16:37:42 +0000
+
+    Don't rely on enum types being unsigned
+    
+    Not all compilers use unsigned types for enums even if all the values are
+    postive, as such an enum with 3 items doesn't always fit in a 2 bit field.
+    This can cause interesting bugs.
+    
+    Force the type to be an unsigned int, this hopefully doesn't break
+    anything and fixes the bug without breaking ABI etc.
+    
+    Reviewed-By: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 2c01f821d22f83210f96f24724c27a555a14207f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-25 11:37:43 +0000
+
+    Tests: use TP_PROP constants and tp_asv_new for channel properties
+
+commit aad960dd08d6dda24fad5c2a7d057053417f2099
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-25 11:36:26 +0000
+
+    TpChannel: use TP_PROP constants
+
+commit c5b12d7224d5071327a8546126568c0ea9c476aa
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-25 11:35:41 +0000
+
+    TpBaseConnection: use TP_PROP constants and tp_asv_new
+
+commit 3e3cb89153b078e63880b5858d79cda58ecf5603
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-25 11:34:19 +0000
+
+    Examples: use TP_PROP constants and tp_asv_new
+
+commit 9aea9925ffca341a6dcd83808fa89b721314b38e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-25 11:25:33 +0000
+
+    Generate and document constants for D-Bus property names
+
+commit 720a212aee81ad6612ec19fcede86a1ec791f046
+Merge: 314b455 f452acb
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2009-11-25 07:22:22 +1100
+
+    Merge branch 'unified-header'
+
+commit f452acbec68d94d045a3bffafa8f67de3308ecbf
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2009-11-24 11:40:43 +1100
+
+    Include some more headers in telepathy-glib.h based on suggestions from smcv
+    
+    See http://bugs.freedesktop.org/show_bug.cgi?id=25235#c1
+
+commit 314b455de68fa347a2018b2787f25d5994328da3
+Merge: 2faee57 b177b40
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-23 11:17:36 +0000
+
+    Merge branch 'fix-25181'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit b177b4088330474920d317f63d6cc67a0304873f
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-20 17:37:19 +0000
+
+    tp_connection_get_contacts_by_handle(): avoid DBus calls when possible.
+    
+    Fixes b.fd.o #25181.
+    
+    If we already have all TpContact objects, we don't need to HoldHandles()
+    or GetContactAttributes()
+
+commit 707e69673088c0ece7611d072e86e4c12593c75a
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2009-11-23 10:22:47 +1100
+
+    Port examples/ directory to include telepathy-glib.h instead
+    
+    Compile time increases from an average of 17.2s to 19.0s.
+
+commit 573c6689045d9e53499b20168d8a3f175061009b
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2009-11-23 10:22:17 +1100
+
+    Add a telepathy-glib.h which includes most of the common headers.
+
+commit 2faee57e66d888effd65b4335b5eadc24c4eb71b
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2009-11-23 09:33:45 +1100
+
+    telepathy-glib now depends on dbus-glib 0.82 for tests/dbus/account-manager.c
+
+commit 2d05f466586689ab982fa7812bde20b5305b2e62
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-19 15:42:06 +0000
+
+    update NEWS
+
+commit 6c0e9ddf8439d33c26bd8ee064c90fd037492bf5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-19 15:37:53 +0000
+
+    Don't commit to the next release being 0.10.0, we may want to do a 0.9.2 first
+    
+    (Also, this .abi file wrongly claims to be 0.9.0, and isn't in
+    Makefile.am.)
+
+commit 5d9652396fcdf205b8823b14a8d67663a80de2ff
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-16 14:14:04 +0000
+
+    fd.o#25122: explicitly link against needed libraries (Debian#556486)
+    
+    This fixes failure to link with binutils-gold.
+
+commit eeb4312bf94fa5058c23b11bc5ad626ae3426018
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-19 15:09:32 +0000
+
+    Fix the naming in the tp_value_array_build documentation
+
+commit 0595c50eafed9bf64f95b364836975578e9a4187
+Merge: 660fc66 f40c759
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-19 15:46:10 +0000
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+
+commit f40c759ceab61be8e6e90f4d0c35e64234ee9ac3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-19 15:42:06 +0000
+
+    update NEWS
+
+commit 46e053902aaf4d8da6999656b107fbd6593f9bf2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-19 15:37:53 +0000
+
+    Don't commit to the next release being 0.10.0, we may want to do a 0.9.2 first
+    
+    (Also, this .abi file wrongly claims to be 0.9.0, and isn't in
+    Makefile.am.)
+
+commit ba4d3ad286b4518e77626dd1dc5578d3debaa7b8
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-16 14:14:04 +0000
+
+    fd.o#25122: explicitly link against needed libraries (Debian#556486)
+    
+    This fixes failure to link with binutils-gold.
+
+commit 660fc665c23a99d5d3f3752136a387f9398fe655
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-19 15:09:32 +0000
+
+    Fix the naming in the tp_value_array_build documentation
+
+commit e5f3f93adf08ffba9d6962cd25f0de58fe9fc979
+Merge: ef0590c ffabc5a
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-19 14:43:40 +0000
+
+    Merge branch 'value-array'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit ffabc5ae87ea0a0cd9f4c4e1a5b1cadb7479cd0a
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-19 14:18:57 +0000
+
+    Add a test for tp_value_array_build
+
+commit d99d1d3cc517254ae834e75f324e84580866b03f
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2009-11-19 14:18:46 +0000
+
+    Add tp_value_array_build
+
+commit ef0590caa1f9019e379a80347cd84c6aff9402f3
+Merge: 062f57b 505fb23
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-19 11:58:56 +0000
+
+    Merge branch 'fix-25051'
+
+commit 505fb23085e5a0da11f927dc93874b5760824d5f
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 15:35:05 +0000
+
+    _tp_account_manager_account_ready_cb: fix b.fd.o #25051
+    
+    Use tp_g_signal_connect_object to connect signal handlers with a
+    weakref to manager.
+
+commit e2f8b604a65e2dd403be37acf61d26fd692e1c0d
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 17:49:13 +0000
+
+    Added tp_g_signal_connect_object() as public api.
+    
+    Basically like g_signal_connect_object() but less leaky.
+
+commit 062f57b73c04881c45e3bc38b176a60ac775b4a6
+Merge: 0b16340 4dd4323
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 13:13:30 +0000
+
+    Merge branch 'fix-24654'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 4dd43236b768324dfdbb3a24bfa16b67cd9bf3d7
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 13:09:58 +0000
+
+    One more leaking code-path.
+    
+    I'll get used to this eventually.
+
+commit 5594ed665bdd0d517a7e5123f5c1ed9848fa4417
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 13:01:43 +0000
+
+    s/g_array_unref/g_array_free/ + fix leak + infer array size
+    
+    Copy-paste of previous commit.
+
+commit e0342477ddd17823292fed06161e621be0cdb441
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 12:57:58 +0000
+
+    s/g_array_unref/g_array_free/ + fix leak + infer array size
+    
+    Thanks to Simon for pointing this out.
+
+commit 8dab7bfa8c5102901a421008d82c86e695b0ca3d
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-18 12:50:37 +0000
+
+    _tp_quark_array_copy: Fix doc.
+
+commit 5265b1b9b71d9b52cc47fba68c283d0c0b754d8c
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 19:28:40 +0000
+
+    TpAccountManager: Don't use G_N_ELEMENTS() + fix typo.
+    
+    Copy-paste of a previous commit.
+
+commit 3ec9551e95c7d64bf935fd68f659e1b3c1539127
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 19:10:53 +0000
+
+    TpAccountManager: Make internal functions deal with GArrays rather than GQuark *.
+    
+    Copy-paste of a previous commit.
+
+commit a57b0c2073f0805468dc34d85826bee6b88abdae
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 17:08:01 +0000
+
+    TpAccount: Don't use G_N_ELEMENTS() + fix typo.
+
+commit b7082c2e19f666ab6659e76b6bde44d2ebb1ccf8
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 16:34:39 +0000
+
+    TpAccount: Make internal functions deal with GArrays rather than GQuark *.
+
+commit d2feb23b836c2a9b5fa2650944e2afe6bfbb5937
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 16:31:38 +0000
+
+    _tp_quark_array_copy(): copy a 0-terminated GQuark array into a GArray.
+    
+    This is a helper function for Account, as will be seen in the next commit.
+
+commit dc502dc6b455cd0bebd380becc25b5b3aab8b095
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 12:03:56 +0000
+
+    tp_account_manager_prepare_async: copy @features argument
+    
+    copy-paste of previous commit.
+
+commit 99454f2a7626e28766c56b855631a6d1f777bb04
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-17 02:52:04 +0000
+
+    b.fd.o #24654: tp_account_prepare_async: copy @features argument
+    
+    Note that the functions _tp_account_features_(copy|sizeof|free)
+    are probably generally useful. Will probably end up copy-pasting
+    them into AccountManager too.
+    
+    features member of TpAccountFeatureCallback is no longer const as it needs to
+    be freed.
+
+commit 0b163405976e1ef81314b5249e97f673995ec435
+Merge: 067471e a02657a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-13 14:47:16 +0000
+
+    Merge branch '08-portability'
+    
+    Reviewed-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+
+commit 067471eb41c3e8210907327b228c28e3b5d806db
+Merge: 30f2ebb f0e171a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-11-13 14:47:12 +0000
+
+    Merge branch 'telepathy-glib-0.8'
+    
+    Conflicts:
+    	NEWS
+    	configure.ac
+
+commit 30f2ebbb8cf0c71be0e651c1dba83d12138d7996
+Merge: ff49917 4aeff51
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-13 12:02:42 +0000
+
+    Merge branch 'fix-24257-alsuren'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 4aeff510dc1dbe1aadca9e64654376b7e39ec4db
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-12 10:18:17 +0000
+
+    tests/dbus/account-manager.c: valgrind.
+    
+    Fixed all "definitely lost" leaks (apart from one in libselinux that
+    I can't do anything about).
+
+commit d1feb9240566425f7038e90e694e97a9e2fa0704
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-11 18:10:09 +0000
+
+    tests/dbus/account-manager.c: s/GList/GQueue/
+    
+    Use GQueue for script rather than GList.
+    Also pop current action before we execute it, so the last action isn't leaked.
+
+commit b6180039f6b63d12ccae6e35499ec08d2209b7d6
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-11 02:04:16 +0000
+
+    Re-usable test functions.
+    
+    I found that I was wanting to execute the same test functions one after
+    another. This can't be done asyncronously unless you pass a list of functions
+    around which can be called when events happen.
+    
+    This framework allows me to test tp_account_prepare by first creating an
+    account manager, and then using it to create an account.
+    
+    I also made some whitespace-only changes to conform to the style guide.
+
+commit e61f5857aad235344721e03961dcfac2f8fe7429
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-05 18:02:15 +0000
+
+    Wrote simple dbus-based tests for account manager.
+    
+    Note that these tests are very limited, as they stop the mainloop as soon as
+    the account manager is prepared.
+
+commit 21f0a43639b701395f6bab8675d696f0d720685f
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-10 17:28:17 +0000
+
+    Skeleton test for SimpleAccountManager. Does nothing.
+
+commit a034381a682b4c3ffe4b13b1f059f4f647b632f5
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-04 18:33:32 +0000
+
+    Simple account manager service for use in tests.
+    
+    This service does only the bare minimum. Current limitations are:
+    * Only provides a single property: just enough to get prepare to succeed.
+    * Tests are responsible for acquiring the well-known name, and registering the object
+    * Calling prepare on the result of ensure_account will fail, as accounts are not implemented.
+
+commit c68ac2ff895d606d2a2c3a4f21b949891cc6e3bf
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-10 01:04:58 +0000
+
+    ensure_account: fail if account_new returns NULL.
+    
+    Add assert closer to where the error occurs (tp_account_new returns NULL).
+    The error will get caught eventually by tp_account_prepare, but it's nice
+    to fail early.
+
+commit cb65f8ffe81d1ee4fef060fc2412cabc5ee7ff6e
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-11-05 19:23:25 +0000
+
+    fd.o#24257: tp_account_manager_prepare: fail if invalidated
+    
+    AccountManager now also contains an invalidated callback,
+    which makes all prepare callbacks fail.
+    See previous commits.
+
+commit e996c509a17eb3fce6c401541bb2959ec4ed400d
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-10-28 17:33:16 +0000
+
+    fd.o#24257: tp_account_prepare: fail if invalidated
+    
+    Added "invalidated" callback _tp_account_invalidated_cb
+    which causes all prepare results to complete with an error.
+    
+    Also: invalidate account if get properties fails.
+
+commit 3373600a3cb749855a20ec219fc78f0d9e28fe1a
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-10-29 00:55:43 +0000
+
+    Fail "immediately" if invalidated before prepare.
+
+commit 2d8c5b15c920f0ae4063508af0461f172e15c70b
+Author: David Laban <david.laban@collabora.co.uk>
+Date:   2009-10-27 14:45:18 +0000
+
+    Doc: tp_account_is_prepared: s/whether/if/
+
+commit ff49917b61ae9c4a2d7a23bb6cfc49cb0a2f30bb
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2009-10-23 18:40:55 +0100
+
+    account-manager: fix ::most-available-presence-changed's docs
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit a02657a298c65fb188cb668168ddc0f6bb3b2eb0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-13 13:56:28 +0100
+
+    debug.c: don't rely on STDOUT_FILENO, STDERR_FILENO
+    
+    Windows doesn't have these, and their numeric values seem more universal
+    than the actual macros (for instance, basically every shell script relies
+    on stdout and stderr being fd 1 and 2).
+
+commit 6a50e224562df0111dd73299a1a9d16dd73fb1fb
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-13 13:50:08 +0100
+
+    TpProxy: rename @interface to @iface in all function parameters
+    
+    Same rationale as previous commit.
+
+commit 0da2de832781c85811e729516f73268f26768839
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-13 13:48:52 +0100
+
+    tp_proxy_signal_connection_v0_new: rename @interface to @iface
+    
+    Same rationale as previous commit. In this case we also have to rename
+    a local variable from @iface to @iface_proxy.
+
+commit e38e9b98bebfb9646a0a55083414b070aac8b029
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-13 13:47:44 +0100
+
+    tp_proxy_pending_call_v0_new: rename @interface to @iface
+    
+    Same rationale as previous commit.
+
+commit 8b72c84d516b56ec9bcef3973e6020db84cf1545
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-13 13:47:01 +0100
+
+    TpDBusPropertiesMixin: rename @interface to @iface throughout
+    
+    This partially works around the fact that some system header on Windows
+    defines interface as a macro.
+
+commit dd8645d4c2263c40b74a4f98d0c23f6fba940e05
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-13 13:12:09 +0100
+
+    tp_debug_timestamped_log_handler: use g_time_val_to_iso8601
+    
+    localtime_r is not very portable (in particular, Windows doesn't have it).
+    
+    This is a behaviour change - local time to UTC, and a slightly different
+    format - so also update the docs.
+
+commit f0e171a8cc88b401ea43415e2a64ce9ab0a5a773
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 19:54:21 +0100
+
+    Nano-version
+
+commit b4a04cd32a728a5c5fc3dab918adb1b064dbdccc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 18:39:16 +0100
+
+    Prepare version 0.8.1
+
+commit 1dfe987b211f923cbda874756aaf1bae3ae68cf4
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2009-10-15 18:38:07 +0100
+
+    Nano-version
+
 commit 8148757e36bd0e1f5c3d52e4baffb5c8968aff49
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2009-10-15 17:42:17 +0100

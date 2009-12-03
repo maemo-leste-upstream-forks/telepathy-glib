@@ -11,6 +11,8 @@ libtp_glib_tests_la_SOURCES = \
     myassert.h \
     params-cm.h \
     params-cm.c \
+    simple-account-manager.c\
+    simple-account-manager.h\
     simple-conn.c \
     simple-conn.h \
     simple-manager.c \
@@ -33,3 +35,8 @@ AM_CFLAGS = \
     $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
     $(TP_GLIB_CFLAGS)
+
+libtp_glib_tests_la_LIBADD = \
+    $(DBUS_LIBS) \
+    $(GLIB_LIBS) \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
