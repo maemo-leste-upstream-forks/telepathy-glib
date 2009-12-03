@@ -28,6 +28,9 @@
  * GLib, but aren't.
  */
 
+#include <gobject/gvaluecollector.h>
+
+#include <telepathy-glib/util-internal.h>
 #include <telepathy-glib/util.h>
 
 #include <string.h>
@@ -807,4 +810,221 @@ tp_g_key_file_get_uint64 (GKeyFile *key_file,
 
   g_free (s);
   return v;
+}
+
+typedef struct {
+    GObject *instance;
+    GObject *observer;
+    GClosure *closure;
+    gulong handler_id;
+} WeakHandlerCtx;
+
+static WeakHandlerCtx *
+whc_new (GObject *instance,
+         GObject *observer)
+{
+  WeakHandlerCtx *ctx = g_slice_new0 (WeakHandlerCtx);
+
+  ctx->instance = instance;
+  ctx->observer = observer;
+
+  return ctx;
+}
+
+static void
+whc_free (WeakHandlerCtx *ctx)
+{
+  g_slice_free (WeakHandlerCtx, ctx);
+}
+
+static void observer_destroyed_cb (gpointer, GObject *);
+static void closure_invalidated_cb (gpointer, GClosure *);
+
+/*
+ * If signal handlers are removed before the object is destroyed, this
+ * callback will never get triggered.
+ */
+static void
+instance_destroyed_cb (gpointer ctx_,
+    GObject *where_the_instance_was)
+{
+  WeakHandlerCtx *ctx = ctx_;
+
+  /* No need to disconnect the signal here, the instance has gone away. */
+  g_object_weak_unref (ctx->observer, observer_destroyed_cb, ctx);
+  g_closure_remove_invalidate_notifier (ctx->closure, ctx,
+      closure_invalidated_cb);
+  whc_free (ctx);
+}
+
+/* Triggered when the observer is destroyed. */
+static void
+observer_destroyed_cb (gpointer ctx_,
+    GObject *where_the_observer_was)
+{
+  WeakHandlerCtx *ctx = ctx_;
+
+  g_closure_remove_invalidate_notifier (ctx->closure, ctx,
+      closure_invalidated_cb);
+  g_signal_handler_disconnect (ctx->instance, ctx->handler_id);
+  g_object_weak_unref (ctx->instance, instance_destroyed_cb, ctx);
+  whc_free (ctx);
+}
+
+/* Triggered when either object is destroyed or the handler is disconnected. */
+static void
+closure_invalidated_cb (gpointer ctx_,
+    GClosure *where_the_closure_was)
+{
+  WeakHandlerCtx *ctx = ctx_;
+
+  g_object_weak_unref (ctx->instance, instance_destroyed_cb, ctx);
+  g_object_weak_unref (ctx->observer, observer_destroyed_cb, ctx);
+  whc_free (ctx);
+}
+
+/**
+ * tp_g_signal_connect_object:
+ * @instance: the instance to connect to.
+ * @detailed_signal: a string of the form "signal-name::detail".
+ * @c_handler: the #GCallback to connect.
+ * @gobject: the object to pass as data to @c_handler.
+ * @connect_flags: a combination of #GConnnectFlags.
+ *
+ * Connects a #GCallback function to a signal for a particular object, as if
+ * with g_signal_connect(). Additionally, arranges for the signal handler to be
+ * disconnected if @observer is destroyed.
+ *
+ * This is similar to g_signal_connect_data(), but uses a closure which
+ * ensures that the @gobject stays alive during the call to @c_handler
+ * by temporarily adding a reference count to @gobject.
+ *
+ * This is similar to g_signal_connect_object(), but doesn't have the
+ * documented bug that everyone is too scared to fix. Also, it does not allow
+ * you to pass in NULL as @gobject
+ *
+ * This is intended to be a convenient way for objects to use themselves as
+ * user_data for callbacks without having to explicitly disconnect all the
+ * handlers in their finalizers.
+ *
+ * Returns: the handler id.
+ */
+gulong
+tp_g_signal_connect_object (gpointer instance,
+    const gchar *detailed_signal,
+    GCallback c_handler,
+    gpointer gobject,
+    GConnectFlags connect_flags)
+{
+  GObject *instance_obj = G_OBJECT (instance);
+  WeakHandlerCtx *ctx = whc_new (instance_obj, gobject);
+
+  g_return_val_if_fail (G_TYPE_CHECK_INSTANCE (instance), 0);
+  g_return_val_if_fail (detailed_signal != NULL, 0);
+  g_return_val_if_fail (c_handler != NULL, 0);
+  g_return_val_if_fail (G_IS_OBJECT (gobject), 0);
+
+  if (connect_flags & G_CONNECT_SWAPPED)
+    ctx->closure = g_cclosure_new_object_swap (c_handler, gobject);
+  else
+    ctx->closure = g_cclosure_new_object (c_handler, gobject);
+
+  ctx->handler_id = g_signal_connect_closure (instance, detailed_signal,
+      ctx->closure, 0);
+
+  g_object_weak_ref (instance_obj, instance_destroyed_cb, ctx);
+  g_object_weak_ref (gobject, observer_destroyed_cb, ctx);
+  g_closure_add_invalidate_notifier (ctx->closure, ctx,
+      closure_invalidated_cb);
+
+  return ctx->handler_id;
+}
+
+/*
+ * _tp_quark_array_copy:
+ * @quarks: A 0-terminated list of quarks to copy
+ *
+ * Copy a zero-terminated array into a GArray. The trailing
+ * 0 is not counted in the @len member of the returned
+ * array, but the @data member is guaranteed to be
+ * zero-terminated.
+ *
+ * Returns: A new GArray containing a copy of @quarks.
+ */
+GArray *
+_tp_quark_array_copy (const GQuark *quarks)
+{
+  GArray *array;
+  const GQuark *q;
+
+  array = g_array_new (TRUE, TRUE, sizeof (GQuark));
+
+  for (q = quarks; q != NULL && *q != 0; q++)
+    {
+      g_array_append_val (array, *q);
+    }
+
+  return array;
+}
+
+/**
+ * tp_value_array_build:
+ * @length: The number of elements that should be in the array
+ * @type: The type of the first argument.
+ * @...: The value of the first item in the struct followed by a list of type,
+ * value pairs terminated by G_TYPE_INVALID.
+ *
+ * Creates a new #GValueArray for use with structs, containing the values
+ * passed in as parameters. The values are copied or reffed as appropriate for
+ * their type.
+ *
+ * <example>
+ *   <title> using tp_value_array_build</title>
+ *    <programlisting>
+ * GValueArray *array = tp_value_array_build (2,
+ *    G_TYPE_STRING, host,
+ *    G_TYPE_UINT, port,
+ *    G_TYPE_INVALID);
+ *    </programlisting>
+ * </example>
+ *
+ * Returns: a newly created #GValueArray, free with g_value_array_free.
+ */
+GValueArray *
+tp_value_array_build (gsize length,
+  GType type,
+  ...)
+{
+  GValueArray *arr;
+  GType t;
+  va_list var_args;
+  char *error = NULL;
+
+  arr = g_value_array_new (length);
+
+  va_start (var_args, type);
+
+  for (t = type; t != G_TYPE_INVALID; t = va_arg (var_args, GType))
+    {
+      GValue *v = arr->values + arr->n_values;
+
+      g_value_array_append (arr, NULL);
+
+      g_value_init (v, t);
+
+      G_VALUE_COLLECT (v, var_args, 0, &error);
+
+      if (error != NULL)
+        {
+          g_critical ("%s", error);
+          g_free (error);
+
+          g_value_array_free (arr);
+          return NULL;
+        }
+    }
+
+  g_warn_if_fail (arr->n_values == length);
+
+  return arr;
 }

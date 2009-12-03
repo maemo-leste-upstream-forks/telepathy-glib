@@ -66,6 +66,14 @@
                                                          const <link linkend="gchar">gchar</link> *group_name,
                                                          const <link linkend="gchar">gchar</link> *key,
                                                          <link linkend="GError">GError</link> **error);
+<link linkend="gulong">gulong</link>              <link linkend="tp-g-signal-connect-object">tp_g_signal_connect_object</link>          (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *detailed_signal,
+                                                         <link linkend="GCallback">GCallback</link> c_handler,
+                                                         <link linkend="gpointer">gpointer</link> gobject,
+                                                         <link linkend="GConnectFlags">GConnectFlags</link> connect_flags);
+<link linkend="GValueArray">GValueArray</link> *       <link linkend="tp-value-array-build">tp_value_array_build</link>                (<link linkend="gsize">gsize</link> length,
+                                                         <link linkend="GType">GType</link> type,
+                                                         ...);
 </synopsis>
 </refsynopsisdiv>
 
@@ -639,6 +647,87 @@ or 0 if the key was not found or could not be parsed.
 
 </simpara></listitem></varlistentry>
 </variablelist><para role="since">Since 0.7.31</para></refsect2>
+<refsect2 id="tp-g-signal-connect-object" role="function">
+<title>tp_g_signal_connect_object ()</title>
+<indexterm zone="tp-g-signal-connect-object"><primary sortas="tp_g_signal_connect_object">tp_g_signal_connect_object</primary></indexterm><programlisting><link linkend="gulong">gulong</link>              tp_g_signal_connect_object          (<link linkend="gpointer">gpointer</link> instance,
+                                                         const <link linkend="gchar">gchar</link> *detailed_signal,
+                                                         <link linkend="GCallback">GCallback</link> c_handler,
+                                                         <link linkend="gpointer">gpointer</link> gobject,
+                                                         <link linkend="GConnectFlags">GConnectFlags</link> connect_flags);</programlisting>
+<para>
+Connects a <link linkend="GCallback"><type>GCallback</type></link> function to a signal for a particular object, as if
+with <link linkend="g-signal-connect"><function>g_signal_connect()</function></link>. Additionally, arranges for the signal handler to be
+disconnected if <parameter>observer</parameter> is destroyed.
+</para>
+<para>
+This is similar to <link linkend="g-signal-connect-data"><function>g_signal_connect_data()</function></link>, but uses a closure which
+ensures that the <parameter>gobject</parameter> stays alive during the call to <parameter>c_handler</parameter>
+by temporarily adding a reference count to <parameter>gobject</parameter>.
+</para>
+<para>
+This is similar to <link linkend="g-signal-connect-object"><function>g_signal_connect_object()</function></link>, but doesn't have the
+documented bug that everyone is too scared to fix. Also, it does not allow
+you to pass in NULL as <parameter>gobject</parameter>
+</para>
+<para>
+This is intended to be a convenient way for objects to use themselves as
+user_data for callbacks without having to explicitly disconnect all the
+handlers in their finalizers.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>instance</parameter>&#160;:</term>
+<listitem><simpara> the instance to connect to.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>detailed_signal</parameter>&#160;:</term>
+<listitem><simpara> a string of the form "signal-name::detail".
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>c_handler</parameter>&#160;:</term>
+<listitem><simpara> the <link linkend="GCallback"><type>GCallback</type></link> to connect.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>gobject</parameter>&#160;:</term>
+<listitem><simpara> the object to pass as data to <parameter>c_handler</parameter>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>connect_flags</parameter>&#160;:</term>
+<listitem><simpara> a combination of <link linkend="GConnnectFlags"><type>GConnnectFlags</type></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> the handler id.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="tp-value-array-build" role="function">
+<title>tp_value_array_build ()</title>
+<indexterm zone="tp-value-array-build"><primary sortas="tp_value_array_build">tp_value_array_build</primary></indexterm><programlisting><link linkend="GValueArray">GValueArray</link> *       tp_value_array_build                (<link linkend="gsize">gsize</link> length,
+                                                         <link linkend="GType">GType</link> type,
+                                                         ...);</programlisting>
+<para>
+Creates a new <link linkend="GValueArray"><type>GValueArray</type></link> for use with structs, containing the values
+passed in as parameters. The values are copied or reffed as appropriate for
+their type.
+</para>
+<para>
+<example>
+  <title> using tp_value_array_build</title>
+   <programlisting>
+GValueArray *array = tp_value_array_build (2,
+   G_TYPE_STRING, host,
+   G_TYPE_UINT, port,
+   G_TYPE_INVALID);
+   </programlisting>
+</example></para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>length</parameter>&#160;:</term>
+<listitem><simpara> The number of elements that should be in the array
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>type</parameter>&#160;:</term>
+<listitem><simpara> The type of the first argument.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>...</parameter>&#160;:</term>
+<listitem><simpara> The value of the first item in the struct followed by a list of type,
+value pairs terminated by G_TYPE_INVALID.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a newly created <link linkend="GValueArray"><type>GValueArray</type></link>, free with g_value_array_free.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
 
 </refsect1>
 

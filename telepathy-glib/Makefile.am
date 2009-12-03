@@ -40,7 +40,8 @@ ABI_LISTS = \
     versions/0.7.35.abi \
     versions/0.7.36.abi \
     versions/0.7.37.abi \
-    versions/0.9.0.abi
+    versions/0.9.0.abi \
+    versions/0.9.2.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -182,6 +183,7 @@ our_headers = \
     svc-generic.h \
     svc-media-interfaces.h \
     svc-properties-interface.h \
+    telepathy-glib.h \
     text-mixin.h \
     util.h
 
@@ -332,7 +334,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     run.c \
     signals-marshal.list \
     text-mixin.c \
-    util.c
+    util.c \
+    util-internal.h
 
 AM_CFLAGS = \
     -DG_LOG_DOMAIN=\"tp-glib\" \

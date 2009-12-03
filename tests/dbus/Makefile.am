@@ -44,6 +44,7 @@ TESTS = $(noinst_PROGRAMS)
 LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
     $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(DBUS_LIBS) \
     $(GLIB_LIBS)
 
 test_account_SOURCES = account.c
@@ -167,24 +168,26 @@ TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     XDG_DATA_HOME=@abs_builddir@ \
     XDG_DATA_DIRS=@abs_srcdir@ \
-    G_DEBUG=fatal_warnings,fatal_criticals \
-    sh $(top_srcdir)/tools/with-session-bus.sh --session --
+    G_SLICE=debug-blocks \
+    G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
+    sh $(top_srcdir)/tools/with-session-bus.sh \
+        --config-file=dbus-1/session.conf --
 
 check-valgrind:
 	$(MAKE) check-TESTS \
+		maybe_gc_friendly=,gc-friendly \
 		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 
+include $(top_srcdir)/tools/valgrind.mk
+
 VALGRIND_TESTS_ENVIRONMENT = \
-    G_SLICE=always-malloc \
     $(TESTS_ENVIRONMENT) \
+    env G_SLICE=always-malloc \
     $(top_builddir)/libtool --mode=execute \
-    valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
-        --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
-        --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
-        --gen-suppressions=all \
-        $(VALGRIND_FLAGS)
+    $(VALGRIND) $(VALGRIND_FLAGS)
 
 BUILT_SOURCES = \
+	dbus-1/session.conf \
 	_gen/errors-check.h \
 	_gen/svc.h \
 	_gen/svc.c
@@ -196,16 +199,21 @@ distclean-local:
 	rm -rf _gen
 
 EXTRA_DIST = \
+    dbus-1/session.conf.in \
     dbus-1/services/spurious.service \
     telepathy/managers/spurious.manager \
     telepathy/managers/test_manager_file.manager \
     telepathy/managers/test_manager_file_invalid.manager \
     with-properties.xml
 
+dbus-1/%.conf: $(srcdir)/dbus-1/%.conf.in
+	$(AM_V_at)$(mkdir_p) dbus-1
+	$(AM_V_GEN)sed -e "s|[@]abs_top_builddir[@]|@abs_top_builddir@|g" $< > $@
+
 _gen/svc.c _gen/svc.h: with-properties.xml \
 	$(top_srcdir)/tools/glib-ginterface-gen.py \
 	Makefile.am
-	$(mkdir_p) _gen
+	$(AM_V_at)$(mkdir_p) _gen
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
@@ -213,5 +221,5 @@ _gen/svc.c _gen/svc.h: with-properties.xml \
 
 _gen/errors-check.h: $(top_srcdir)/spec/errors.xml \
 	$(top_srcdir)/tools/glib-errors-check-gen.py
-	$(mkdir_p) _gen
+	$(AM_V_at)$(mkdir_p) _gen
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@

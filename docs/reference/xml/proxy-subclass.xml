@@ -22,9 +22,9 @@
 #include &lt;telepathy-glib/proxy-subclass.h&gt;
 
 <link linkend="DBusGProxy">DBusGProxy</link> *        <link linkend="tp-proxy-add-interface-by-id">tp_proxy_add_interface_by_id</link>        (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface);
+                                                         <link linkend="GQuark">GQuark</link> iface);
 <link linkend="DBusGProxy">DBusGProxy</link> *        <link linkend="tp-proxy-borrow-interface-by-id">tp_proxy_borrow_interface_by_id</link>     (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> iface,
                                                          <link linkend="GError">GError</link> **error);
 <link linkend="void">void</link>                <link linkend="tp-proxy-invalidate">tp_proxy_invalidate</link>                 (<link linkend="TpProxy">TpProxy</link> *self,
                                                          const <link linkend="GError">GError</link> *error);
@@ -50,7 +50,7 @@
                                                          <link linkend="gpointer">gpointer</link> user_data,
                                                          <link linkend="GObject">GObject</link> *weak_object);
 <link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * <link linkend="tp-proxy-pending-call-v0-new">tp_proxy_pending_call_v0_new</link>       (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> iface,
                                                          const <link linkend="gchar">gchar</link> *member,
                                                          <link linkend="DBusGProxy">DBusGProxy</link> *iface_proxy,
                                                          <link linkend="TpProxyInvokeFunc">TpProxyInvokeFunc</link> invoke_callback,
@@ -69,7 +69,7 @@
                                                          <link linkend="GValueArray">GValueArray</link> *args);
 <link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * <link linkend="tp-proxy-signal-connection-v0-new">tp_proxy_signal_connection_v0_new</link>
                                                         (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> iface,
                                                          const <link linkend="gchar">gchar</link> *member,
                                                          const <link linkend="GType">GType</link> *expected_types,
                                                          <link linkend="GCallback">GCallback</link> collect_args,
@@ -112,7 +112,7 @@ be auto-generated, by copying tools/glib-client-gen.py from telepathy-glib.</par
 <refsect2 id="tp-proxy-add-interface-by-id" role="function" condition="since:0.7.1">
 <title>tp_proxy_add_interface_by_id ()</title>
 <indexterm zone="tp-proxy-add-interface-by-id" role="0.7.1"><primary sortas="tp_proxy_add_interface_by_id">tp_proxy_add_interface_by_id</primary></indexterm><programlisting><link linkend="DBusGProxy">DBusGProxy</link> *        tp_proxy_add_interface_by_id        (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface);</programlisting>
+                                                         <link linkend="GQuark">GQuark</link> iface);</programlisting>
 <para>
 Declare that this proxy supports a given interface.
 </para>
@@ -129,10 +129,10 @@ added, then do nothing.</para>
 <varlistentry><term><parameter>self</parameter>&#160;:</term>
 <listitem><simpara> the TpProxy, which must not have become <link linkend="TpProxy-invalidated"><type>"invalidated"</type></link>.
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>interface</parameter>&#160;:</term>
+<varlistentry><term><parameter>iface</parameter>&#160;:</term>
 <listitem><simpara> quark representing the interface to be added
 </simpara></listitem></varlistentry>
-<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> either <link linkend="NULL--CAPS"><literal>NULL</literal></link> or a borrowed <link linkend="DBusGProxy"><type>DBusGProxy</type></link> corresponding to <parameter>interface</parameter>,
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> either <link linkend="NULL--CAPS"><literal>NULL</literal></link> or a borrowed <link linkend="DBusGProxy"><type>DBusGProxy</type></link> corresponding to <parameter>iface</parameter>,
 depending on implementation details. To reliably borrow the <link linkend="DBusGProxy"><type>DBusGProxy</type></link>, use
 <link linkend="tp-proxy-borrow-interface-by-id"><function>tp_proxy_borrow_interface_by_id()</function></link>. (This method should probably have
 returned void; sorry.)
@@ -142,7 +142,7 @@ returned void; sorry.)
 <refsect2 id="tp-proxy-borrow-interface-by-id" role="function" condition="since:0.7.1">
 <title>tp_proxy_borrow_interface_by_id ()</title>
 <indexterm zone="tp-proxy-borrow-interface-by-id" role="0.7.1"><primary sortas="tp_proxy_borrow_interface_by_id">tp_proxy_borrow_interface_by_id</primary></indexterm><programlisting><link linkend="DBusGProxy">DBusGProxy</link> *        tp_proxy_borrow_interface_by_id     (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> iface,
                                                          <link linkend="GError">GError</link> **error);</programlisting>
 <para>
 <!-- --></para>
@@ -151,13 +151,13 @@ returned void; sorry.)
 <varlistentry><term><parameter>self</parameter>&#160;:</term>
 <listitem><simpara> the TpProxy
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>interface</parameter>&#160;:</term>
+<varlistentry><term><parameter>iface</parameter>&#160;:</term>
 <listitem><simpara> quark representing the interface required
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>error</parameter>&#160;:</term>
-<listitem><simpara> used to raise an error in the <link linkend="TP-DBUS-ERRORS--CAPS"><type>TP_DBUS_ERRORS</type></link> domain if <parameter>interface</parameter>
+<listitem><simpara> used to raise an error in the <link linkend="TP-DBUS-ERRORS--CAPS"><type>TP_DBUS_ERRORS</type></link> domain if <parameter>iface</parameter>
         is invalid, <parameter>self</parameter> has been invalidated or <parameter>self</parameter> does not implement
-        <parameter>interface</parameter>
+        <parameter>iface</parameter>
 </simpara></listitem></varlistentry>
 <varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a borrowed reference to a <link linkend="DBusGProxy"><type>DBusGProxy</type></link>
 for which the bus name and object path are the same as for <parameter>self</parameter>, but the
@@ -376,7 +376,7 @@ for freeing <parameter>error</parameter> and <parameter>args</parameter>, if the
 <refsect2 id="tp-proxy-pending-call-v0-new" role="function" condition="since:0.7.1">
 <title>tp_proxy_pending_call_v0_new ()</title>
 <indexterm zone="tp-proxy-pending-call-v0-new" role="0.7.1"><primary sortas="tp_proxy_pending_call_v0_new">tp_proxy_pending_call_v0_new</primary></indexterm><programlisting><link linkend="TpProxyPendingCall">TpProxyPendingCall</link> * tp_proxy_pending_call_v0_new       (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> iface,
                                                          const <link linkend="gchar">gchar</link> *member,
                                                          <link linkend="DBusGProxy">DBusGProxy</link> *iface_proxy,
                                                          <link linkend="TpProxyInvokeFunc">TpProxyInvokeFunc</link> invoke_callback,
@@ -414,14 +414,14 @@ tools/glib-client-gen.py.</para>
 <varlistentry><term><parameter>self</parameter>&#160;:</term>
 <listitem><simpara> a proxy
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>interface</parameter>&#160;:</term>
+<varlistentry><term><parameter>iface</parameter>&#160;:</term>
 <listitem><simpara> a quark whose string value is the D-Bus interface
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>member</parameter>&#160;:</term>
 <listitem><simpara> the name of the method being called
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>iface_proxy</parameter>&#160;:</term>
-<listitem><simpara> the interface-specific <link linkend="DBusGProxy"><type>DBusGProxy</type></link> for <parameter>interface</parameter>
+<listitem><simpara> the interface-specific <link linkend="DBusGProxy"><type>DBusGProxy</type></link> for <parameter>iface</parameter>
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>invoke_callback</parameter>&#160;:</term>
 <listitem><simpara> an implementation of <link linkend="TpProxyInvokeFunc"><type>TpProxyInvokeFunc</type></link> which will
@@ -528,7 +528,7 @@ tools/glib-client-gen.py.</para>
 <title>tp_proxy_signal_connection_v0_new ()</title>
 <indexterm zone="tp-proxy-signal-connection-v0-new" role="0.7.1"><primary sortas="tp_proxy_signal_connection_v0_new">tp_proxy_signal_connection_v0_new</primary></indexterm><programlisting><link linkend="TpProxySignalConnection">TpProxySignalConnection</link> * tp_proxy_signal_connection_v0_new
                                                         (<link linkend="TpProxy">TpProxy</link> *self,
-                                                         <link linkend="GQuark">GQuark</link> interface,
+                                                         <link linkend="GQuark">GQuark</link> iface,
                                                          const <link linkend="gchar">gchar</link> *member,
                                                          const <link linkend="GType">GType</link> *expected_types,
                                                          <link linkend="GCallback">GCallback</link> collect_args,
@@ -551,7 +551,7 @@ tools/glib-client-gen.py.</para>
 <varlistentry><term><parameter>self</parameter>&#160;:</term>
 <listitem><simpara> a proxy
 </simpara></listitem></varlistentry>
-<varlistentry><term><parameter>interface</parameter>&#160;:</term>
+<varlistentry><term><parameter>iface</parameter>&#160;:</term>
 <listitem><simpara> a quark whose string value is the D-Bus interface
 </simpara></listitem></varlistentry>
 <varlistentry><term><parameter>member</parameter>&#160;:</term>

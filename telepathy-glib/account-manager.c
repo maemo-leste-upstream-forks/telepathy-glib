@@ -26,6 +26,7 @@
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/proxy-subclass.h>
+#include <telepathy-glib/util-internal.h>
 #include <telepathy-glib/util.h>
 
 #include "telepathy-glib/account-manager.h"
@@ -99,7 +100,7 @@ typedef struct {
 
 typedef struct {
   GSimpleAsyncResult *result;
-  const GQuark *features;
+  GArray *features;
 } TpAccountManagerFeatureCallback;
 
 #define MC5_BUS_NAME "org.freedesktop.Telepathy.MissionControl5"
@@ -151,7 +152,7 @@ tp_account_manager_get_feature_quark_core (void)
 static const GQuark *
 _tp_account_manager_get_known_features (void)
 {
-  static GQuark features[1] = { 0 };
+  static GQuark features[] = { 0, 0 };
 
   if (G_UNLIKELY (features[0] == 0))
     {
@@ -196,12 +197,12 @@ _tp_account_manager_feature_in_array (GQuark feature,
 
 static gboolean
 _tp_account_manager_check_features (TpAccountManager *self,
-    const GQuark *features)
+    const GArray *features)
 {
   const GQuark *f;
   TpAccountManagerFeature *feat;
 
-  for (f = features; f != NULL && *f != 0; f++)
+  for (f = (GQuark *) features->data; f != NULL && *f != 0; f++)
     {
       feat = _tp_account_manager_get_feature (self, *f);
 
@@ -266,10 +267,37 @@ _tp_account_manager_become_ready (TpAccountManager *self,
 
       g_simple_async_result_complete (cb->result);
       g_object_unref (cb->result);
+      g_array_free (cb->features, TRUE);
       g_slice_free (TpAccountManagerFeatureCallback, cb);
     }
 
   g_list_free (remove);
+}
+
+static void
+_tp_account_manager_invalidated_cb (TpAccountManager *self,
+    guint domain,
+    guint code,
+    gchar *message)
+{
+  TpAccountManagerPrivate *priv = self->priv;
+  GList *l;
+
+  /* Make all currently pending callbacks fail. */
+  for (l = priv->callbacks; l != NULL; l = l->next)
+    {
+      TpAccountManagerFeatureCallback *cb = l->data;
+
+      g_simple_async_result_set_error (cb->result,
+          domain, code, "%s", message);
+      g_simple_async_result_complete (cb->result);
+      g_object_unref (cb->result);
+      g_array_free (cb->features, TRUE);
+      g_slice_free (TpAccountManagerFeatureCallback, cb);
+    }
+
+  g_list_free (priv->callbacks);
+  priv->callbacks = NULL;
 }
 
 static void
@@ -288,6 +316,9 @@ tp_account_manager_init (TpAccountManager *self)
       g_free, (GDestroyNotify) g_object_unref);
 
   priv->create_results = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+  g_signal_connect (self, "invalidated",
+      G_CALLBACK (_tp_account_manager_invalidated_cb), NULL);
 }
 
 static void
@@ -536,6 +567,7 @@ _tp_account_manager_got_all_cb (TpProxy *proxy,
   if (error != NULL)
     {
       DEBUG ("Failed to get account manager properties: %s", error->message);
+      tp_proxy_invalidate (proxy, error);
       return;
     }
 
@@ -577,7 +609,7 @@ _tp_account_manager_constructed (GObject *object)
   known_features = _tp_account_manager_get_known_features ();
 
   /* Fill features list. */
-  for (i = 0; i < G_N_ELEMENTS (known_features); i++)
+  for (i = 0; known_features[i] != 0; i++)
     {
       TpAccountManagerFeature *feature;
       feature = g_slice_new0 (TpAccountManagerFeature);
@@ -750,7 +782,6 @@ tp_account_manager_class_init (TpAccountManagerClass *klass)
   /**
    * TpAccountManager::most-available-presence-changed:
    * @manager: a #TpAccountManager
-   * @account: a #TpAccount
    * @presence: new presence type
    * @status: new status
    * @message: new status message
@@ -871,6 +902,8 @@ tp_account_manager_dup (void)
   g_object_add_weak_pointer (starter_account_manager_proxy,
       &starter_account_manager_proxy);
 
+  g_object_unref (dbus);
+
   return starter_account_manager_proxy;
 }
 
@@ -959,7 +992,17 @@ _tp_account_manager_account_ready_cb (GObject *source_object,
   GSimpleAsyncResult *result;
 
   if (!tp_account_prepare_finish (account, res, NULL))
-    return;
+    {
+      g_object_ref (account);
+      g_hash_table_remove (priv->accounts,
+          tp_proxy_get_object_path (account));
+
+      g_signal_emit (manager, signals[ACCOUNT_REMOVED], 0, account);
+      g_object_unref (account);
+
+      _tp_account_manager_check_core_ready (manager);
+      return;
+    }
 
   /* see if there's any pending callbacks for this account */
   result = g_hash_table_lookup (priv->create_results, account);
@@ -974,14 +1017,17 @@ _tp_account_manager_account_ready_cb (GObject *source_object,
       g_object_unref (result);
     }
 
-  g_signal_connect (account, "notify::enabled",
-      G_CALLBACK (_tp_account_manager_account_enabled_cb), manager);
+  tp_g_signal_connect_object (account, "notify::enabled",
+      G_CALLBACK (_tp_account_manager_account_enabled_cb),
+      G_OBJECT (manager), 0);
 
-  g_signal_connect (account, "presence-changed",
-      G_CALLBACK (_tp_account_manager_account_presence_changed_cb), manager);
+  tp_g_signal_connect_object (account, "presence-changed",
+      G_CALLBACK (_tp_account_manager_account_presence_changed_cb),
+      G_OBJECT (manager), 0);
 
-  g_signal_connect (account, "invalidated",
-      G_CALLBACK (_tp_account_manager_account_invalidated_cb), manager);
+  tp_g_signal_connect_object (account, "invalidated",
+      G_CALLBACK (_tp_account_manager_account_invalidated_cb),
+      G_OBJECT (manager), 0);
 
   _tp_account_manager_check_core_ready (manager);
 }
@@ -1023,6 +1069,7 @@ tp_account_manager_ensure_account (TpAccountManager *manager,
     return account;
 
   account = tp_account_new (tp_proxy_get_dbus_daemon (manager), path, NULL);
+  g_return_val_if_fail (account != NULL, NULL);
   g_hash_table_insert (priv->accounts, g_strdup (path), account);
 
   tp_account_prepare_async (account, fs, _tp_account_manager_account_ready_cb,
@@ -1342,7 +1389,7 @@ tp_account_manager_is_prepared (TpAccountManager *manager,
  * operation.
  *
  * If @features is %NULL, then @callback will be called when the implied
- * %TP_ACCOUNT_FEATURE_CORE feature is ready.
+ * %TP_ACCOUNT_MANAGER_FEATURE_CORE feature is ready.
  *
  * If %NULL is given to @callback, then no callback will be called when the
  * operation is finished. Instead, it will simply set @features on @manager.
@@ -1359,6 +1406,8 @@ tp_account_manager_prepare_async (TpAccountManager *manager,
   TpAccountManagerPrivate *priv;
   GSimpleAsyncResult *result;
   const GQuark *f;
+  const GError *error;
+  GArray *feature_array;
 
   g_return_if_fail (TP_IS_ACCOUNT_MANAGER (manager));
 
@@ -1370,9 +1419,10 @@ tp_account_manager_prepare_async (TpAccountManager *manager,
   for (f = features; f != NULL && *f != 0; f++)
     {
       /* Only add features to requested which exist on this object and are not
-       * already in the list. */
+       * already in the list.
+       */
       if (_tp_account_manager_get_feature (manager, *f) != NULL
-          && _tp_account_manager_feature_in_array (*f, priv->requested_features))
+          && !_tp_account_manager_feature_in_array (*f, priv->requested_features))
         g_array_append_val (priv->requested_features, *f);
     }
 
@@ -1382,10 +1432,21 @@ tp_account_manager_prepare_async (TpAccountManager *manager,
   result = g_simple_async_result_new (G_OBJECT (manager),
       callback, user_data, tp_account_manager_prepare_finish);
 
-  if (_tp_account_manager_check_features (manager, features))
+  feature_array = _tp_quark_array_copy (features);
+
+  error = tp_proxy_get_invalidated (manager);
+  if (error != NULL)
+    {
+      g_simple_async_result_set_from_error (result, error);
+      g_simple_async_result_complete_in_idle (result);
+      g_object_unref (result);
+      g_array_free (feature_array, TRUE);
+    }
+  else if (_tp_account_manager_check_features (manager, feature_array))
     {
       g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
+      g_array_free (feature_array, TRUE);
     }
   else
     {
@@ -1393,7 +1454,7 @@ tp_account_manager_prepare_async (TpAccountManager *manager,
 
       cb = g_slice_new0 (TpAccountManagerFeatureCallback);
       cb->result = result;
-      cb->features = features;
+      cb->features = feature_array;
       priv->callbacks = g_list_prepend (priv->callbacks, cb);
     }
 }

@@ -371,7 +371,7 @@ main (int argc,
   k_stub = g_object_new (stub_object_get_type (), NULL);
   g_message ("Starting call on k");
   g_object_weak_ref (k_stub, k_stub_destroyed, &pc);
-  pc = tp_cli_dbus_daemon_call_list_names (k, -1, listed_names, PTR (TEST_K),
+  tp_cli_dbus_daemon_call_list_names (k, -1, listed_names, PTR (TEST_K),
       destroy_user_data, k_stub);
   MYASSERT (!tp_intset_is_member (freed_user_data, TEST_K), "");
   MYASSERT (!tp_intset_is_member (method_ok, TEST_K), "");
@@ -438,16 +438,25 @@ main (int argc,
 
   g_message ("Dereferencing remaining proxies");
   g_object_unref (a);
+  a = NULL;
   g_object_unref (b);
+  b = NULL;
   g_object_unref (c);
+  c = NULL;
   MYASSERT (d == NULL, "");
   g_object_unref (e);
+  e = NULL;
   g_object_unref (f);
+  f = NULL;
   MYASSERT (g == NULL, "");
   MYASSERT (h == NULL, "");
   MYASSERT (i == NULL, "");
   g_object_unref (j);
+  j = NULL;
+  g_object_unref (k);
+  k = NULL;
   g_object_unref (z);
+  z = NULL;
 
   /* we should already have checked each of these at least once, but just to
    * make sure we have a systematic test that all user data is freed... */

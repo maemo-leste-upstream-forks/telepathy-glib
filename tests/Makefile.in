@@ -39,7 +39,8 @@ noinst_PROGRAMS = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
 	test-intset$(EXEEXT) test-util$(EXEEXT) \
 	test-debug-domain$(EXEEXT)
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/tools/check-coding-style.mk
+	$(top_srcdir)/tools/check-coding-style.mk \
+	$(top_srcdir)/tools/valgrind.mk
 subdir = tests
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
@@ -327,18 +328,24 @@ TESTS = $(noinst_PROGRAMS) \
 TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     abs_top_srcdir=@abs_top_srcdir@ \
-    G_DEBUG=fatal_warnings,fatal_criticals \
+    G_SLICE=debug-blocks \
+    G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
     PYTHONPATH=@abs_top_srcdir@/tools
 
+VALGRIND = valgrind --tool=memcheck \
+    --verbose \
+    --leak-check=full \
+    --leak-resolution=high \
+    --suppressions=$(top_srcdir)/tools/telepathy-glib.supp \
+    --child-silent-after-fork=yes \
+    --num-callers=20 \
+    --gen-suppressions=all
+
 VALGRIND_TESTS_ENVIRONMENT = \
-    G_SLICE=always-malloc \
     $(TESTS_ENVIRONMENT) \
+    G_SLICE=always-malloc \
     $(top_builddir)/libtool --mode=execute \
-    valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
-        --suppressions=$(top_srcdir)/examples/tp-glib-examples.supp \
-        --child-silent-after-fork=yes --num-callers=20 --error-exitcode=42 \
-        --gen-suppressions=all \
-        $(VALGRIND_FLAGS)
+    $(VALGRIND) $(VALGRIND_FLAGS)
 
 EXTRA_DIST = README \
     all-errors-documented.py
@@ -388,7 +395,7 @@ all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/tools/check-coding-style.mk $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/tools/valgrind.mk $(top_srcdir)/tools/check-coding-style.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -899,8 +906,15 @@ uninstall-am:
 	tags tags-recursive uninstall uninstall-am
 
 
+# other potentially interesting options:
+# --show-reachable=yes   reachable objects (many!)
+# --read-var-info=yes    better diagnostics from DWARF3 info
+# --track-origins=yes    better diagnostics for uninit values (slow)
+
 check-valgrind:
 	$(MAKE) check-TESTS \
+		maybe_gc_friendly=,gc-friendly \
+		TESTS='$$(noinst_PROGRAMS)' \
 		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 	$(MAKE) -C dbus check-valgrind
 check-coding-style:

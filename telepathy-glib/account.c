@@ -30,6 +30,7 @@
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/proxy-subclass.h>
+#include <telepathy-glib/util-internal.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_ACCOUNTS
@@ -124,7 +125,7 @@ typedef struct {
 
 typedef struct {
   GSimpleAsyncResult *result;
-  const GQuark *features;
+  GArray *features;
 } TpAccountFeatureCallback;
 
 G_DEFINE_TYPE (TpAccount, tp_account, TP_TYPE_PROXY);
@@ -195,7 +196,7 @@ tp_account_get_feature_quark_core (void)
 static const GQuark *
 _tp_account_get_known_features (void)
 {
-  static GQuark features[1] = { 0 };
+  static GQuark features[] = { 0, 0 };
 
   if (G_UNLIKELY (features[0] == 0))
     {
@@ -249,12 +250,12 @@ _tp_account_feature_in_array (GQuark feature,
 
 static gboolean
 _tp_account_check_features (TpAccount *self,
-    const GQuark *features)
+    const GArray *features)
 {
   const GQuark *f;
   TpAccountFeature *feat;
 
-  for (f = features; f != NULL && *f != 0; f++)
+  for (f = (GQuark *) features->data; f != NULL && *f != 0; f++)
     {
       feat = _tp_account_get_feature (self, *f);
 
@@ -318,10 +319,37 @@ _tp_account_become_ready (TpAccount *self,
 
       g_simple_async_result_complete (cb->result);
       g_object_unref (cb->result);
+      g_array_free (cb->features, TRUE);
       g_slice_free (TpAccountFeatureCallback, cb);
     }
 
   g_list_free (remove);
+}
+
+static void
+_tp_account_invalidated_cb (TpAccount *self,
+    guint domain,
+    guint code,
+    gchar *message)
+{
+  TpAccountPrivate *priv = self->priv;
+  GList *l;
+
+  /* Make all currently pending callbacks fail. */
+  for (l = priv->callbacks; l != NULL; l = l->next)
+    {
+      TpAccountFeatureCallback *cb = l->data;
+
+      g_simple_async_result_set_error (cb->result,
+          domain, code, "%s", message);
+      g_simple_async_result_complete (cb->result);
+      g_object_unref (cb->result);
+      g_array_free (cb->features, TRUE);
+      g_slice_free (TpAccountFeatureCallback, cb);
+    }
+
+  g_list_free (priv->callbacks);
+  priv->callbacks = NULL;
 }
 
 static void
@@ -599,6 +627,7 @@ _tp_account_got_all_cb (TpProxy *proxy,
     {
       DEBUG ("Failed to get the initial set of account properties: %s",
           error->message);
+      tp_proxy_invalidate ((TpProxy *) self, error);
       return;
     }
 
@@ -631,7 +660,7 @@ _tp_account_constructed (GObject *object)
   known_features = _tp_account_get_known_features ();
 
   /* Fill features list */
-  for (i = 0; i < G_N_ELEMENTS (known_features); i++)
+  for (i = 0; known_features[i] != 0; i++)
     {
       TpAccountFeature *feature;
       feature = g_slice_new0 (TpAccountFeature);
@@ -653,6 +682,9 @@ _tp_account_constructed (GObject *object)
       &(priv->cm_name), &(priv->proto_name), NULL, NULL);
 
   priv->icon_name = g_strdup_printf ("im-%s", priv->proto_name);
+
+  g_signal_connect (self, "invalidated",
+      G_CALLBACK (_tp_account_invalidated_cb), NULL);
 
   tp_cli_account_connect_to_account_property_changed (self,
       _tp_account_properties_changed, NULL, NULL, object, NULL);
@@ -2479,7 +2511,7 @@ tp_account_get_avatar_finish (TpAccount *account,
  *
  * <!-- -->
  *
- * Returns: %TRUE whether @feature is ready on @account, otherwise %FALSE
+ * Returns: %TRUE if @feature is ready on @account, otherwise %FALSE
  *
  * Since: 0.9.0
  */
@@ -2531,7 +2563,9 @@ tp_account_prepare_async (TpAccount *account,
 {
   TpAccountPrivate *priv;
   GSimpleAsyncResult *result;
+  const GError *error;
   const GQuark *f;
+  GArray *feature_array;
 
   g_return_if_fail (TP_IS_ACCOUNT (account));
 
@@ -2545,7 +2579,7 @@ tp_account_prepare_async (TpAccount *account,
       /* Only add features to requested which exist on this object and are not
        * already in the list. */
       if (_tp_account_get_feature (account, *f) != NULL
-          && _tp_account_feature_in_array (*f, priv->requested_features))
+          && !_tp_account_feature_in_array (*f, priv->requested_features))
         g_array_append_val (priv->requested_features, *f);
     }
 
@@ -2555,10 +2589,22 @@ tp_account_prepare_async (TpAccount *account,
   result = g_simple_async_result_new (G_OBJECT (account),
       callback, user_data, tp_account_prepare_finish);
 
-  if (_tp_account_check_features (account, features))
+  feature_array = _tp_quark_array_copy (features);
+
+  error = tp_proxy_get_invalidated (account);
+
+  if (error != NULL)
+    {
+      g_simple_async_result_set_from_error (result, error);
+      g_simple_async_result_complete_in_idle (result);
+      g_object_unref (result);
+      g_array_free (feature_array, TRUE);
+    }
+  else if (_tp_account_check_features (account, feature_array))
     {
       g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
+      g_array_free (feature_array, TRUE);
     }
   else
     {
@@ -2566,7 +2612,7 @@ tp_account_prepare_async (TpAccount *account,
 
       cb = g_slice_new0 (TpAccountFeatureCallback);
       cb->result = result;
-      cb->features = features;
+      cb->features = feature_array;
       priv->callbacks = g_list_prepend (priv->callbacks, cb);
     }
 }

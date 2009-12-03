@@ -15,11 +15,7 @@
 
 #include <dbus/dbus-glib.h>
 
-#include <telepathy-glib/base-connection.h>
-#include <telepathy-glib/channel-manager.h>
-#include <telepathy-glib/dbus.h>
-#include <telepathy-glib/errors.h>
-#include <telepathy-glib/interfaces.h>
+#include <telepathy-glib/telepathy-glib.h>
 
 #include "chan.h"
 
@@ -262,14 +258,14 @@ new_channel (ExampleEchoImManager *self,
 }
 
 static const gchar * const fixed_properties[] = {
-    TP_IFACE_CHANNEL ".ChannelType",
-    TP_IFACE_CHANNEL ".TargetHandleType",
+    TP_PROP_CHANNEL_CHANNEL_TYPE,
+    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
     NULL
 };
 
 static const gchar * const allowed_properties[] = {
-    TP_IFACE_CHANNEL ".TargetHandle",
-    TP_IFACE_CHANNEL ".TargetID",
+    TP_PROP_CHANNEL_TARGET_HANDLE,
+    TP_PROP_CHANNEL_TARGET_ID,
     NULL
 };
 
@@ -278,14 +274,12 @@ example_echo_im_manager_foreach_channel_class (TpChannelManager *manager,
     TpChannelManagerChannelClassFunc func,
     gpointer user_data)
 {
-  GHashTable *table = g_hash_table_new_full (g_str_hash, g_str_equal,
-      NULL, (GDestroyNotify) tp_g_value_slice_free);
+  GHashTable *table = tp_asv_new (
+      TP_PROP_CHANNEL_CHANNEL_TYPE,
+          G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_TEXT,
+      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+      NULL);
 
-  g_hash_table_insert (table, TP_IFACE_CHANNEL ".ChannelType",
-      tp_g_value_slice_new_static_string (TP_IFACE_CHANNEL_TYPE_TEXT));
-
-  g_hash_table_insert (table, TP_IFACE_CHANNEL ".TargetHandleType",
-      tp_g_value_slice_new_uint (TP_HANDLE_TYPE_CONTACT));
 
   func (manager, table, allowed_properties, user_data);
 
@@ -303,20 +297,20 @@ example_echo_im_manager_request (ExampleEchoImManager *self,
   GError *error = NULL;
 
   if (tp_strdiff (tp_asv_get_string (request_properties,
-          TP_IFACE_CHANNEL ".ChannelType"),
+          TP_PROP_CHANNEL_CHANNEL_TYPE),
       TP_IFACE_CHANNEL_TYPE_TEXT))
     {
       return FALSE;
     }
 
   if (tp_asv_get_uint32 (request_properties,
-      TP_IFACE_CHANNEL ".TargetHandleType", NULL) != TP_HANDLE_TYPE_CONTACT)
+      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, NULL) != TP_HANDLE_TYPE_CONTACT)
     {
       return FALSE;
     }
 
   handle = tp_asv_get_uint32 (request_properties,
-      TP_IFACE_CHANNEL ".TargetHandle", NULL);
+      TP_PROP_CHANNEL_TARGET_HANDLE, NULL);
   g_assert (handle != 0);
 
   if (tp_channel_manager_asv_has_unknown_properties (request_properties,
