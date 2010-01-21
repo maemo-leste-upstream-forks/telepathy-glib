@@ -335,6 +335,27 @@ _tp_account_invalidated_cb (TpAccount *self,
   TpAccountPrivate *priv = self->priv;
   GList *l;
 
+  /* The connection will get disconnected as a result of account deletion,
+   * but by then we will no longer be telling the API user about changes -
+   * so claim the disconnection already happened (see fd.o#25149) */
+  if (priv->connection_status != TP_CONNECTION_STATUS_DISCONNECTED)
+    {
+      priv->connection_status = TP_CONNECTION_STATUS_DISCONNECTED;
+
+      if (domain == TP_DBUS_ERRORS && code == TP_DBUS_ERROR_OBJECT_REMOVED)
+        {
+          /* presumably the user asked for it to be deleted... */
+          priv->reason = TP_CONNECTION_STATUS_REASON_REQUESTED;
+        }
+      else
+        {
+          priv->reason = TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED;
+        }
+
+      g_object_notify ((GObject *) self, "connection-status");
+      g_object_notify ((GObject *) self, "connection-status-reason");
+    }
+
   /* Make all currently pending callbacks fail. */
   for (l = priv->callbacks; l != NULL; l = l->next)
     {
@@ -2595,7 +2616,7 @@ tp_account_prepare_async (TpAccount *account,
 
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (result, error);
+      g_simple_async_result_set_from_error (result, (GError *) error);
       g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
       g_array_free (feature_array, TRUE);

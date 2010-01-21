@@ -762,7 +762,7 @@ tp_account_manager_class_init (TpAccountManagerClass *klass)
       1, TP_TYPE_ACCOUNT);
 
   /**
-   * TpAccountManager::account-disabled.
+   * TpAccountManager::account-disabled:
    * @manager: a #TpAccountManager
    * @account: a #TpAccount
    *
@@ -1437,7 +1437,7 @@ tp_account_manager_prepare_async (TpAccountManager *manager,
   error = tp_proxy_get_invalidated (manager);
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (result, error);
+      g_simple_async_result_set_from_error (result, (GError *) error);
       g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
       g_array_free (feature_array, TRUE);
