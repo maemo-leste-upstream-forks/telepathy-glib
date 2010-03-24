@@ -387,7 +387,9 @@ from the path. This includes replacing underscores with hyphens in the
 protocol name, as defined in the Account specification.
 </p>
 <p>
-Any of the out parameters may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not needed.</p>
+Any of the out parameters may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not needed. If <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> is returned,
+the caller is responsible for freeing the strings stored in any non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+out parameters, using <a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a>.</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -1406,7 +1408,19 @@ properties.</p>
 <a name="tp-account-get-parameters"></a><h3>tp_account_get_parameters ()</h3>
 <pre class="programlisting">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *  tp_account_get_parameters           (<a class="link" href="telepathy-glib-account.html#TpAccount"><span class="returnvalue">TpAccount</span></a> *account);</pre>
 <p>
+Returns the parameters of the account, in a hash table where each string
+is the parameter name (account, password, require-encryption etc.), and
+each value is a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>. Using the tp_asv_get family of functions
+(<a class="link" href="telepathy-glib-asv.html#tp-asv-get-uint32" title="tp_asv_get_uint32 ()"><code class="function">tp_asv_get_uint32()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-string" title="tp_asv_get_string ()"><code class="function">tp_asv_get_string()</code></a> etc.) to access the parameters is
+recommended.
 </p>
+<p>
+The allowed parameters depend on the connection manager, and can be found
+via <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-protocol" title="tp_connection_manager_get_protocol ()"><code class="function">tp_connection_manager_get_protocol()</code></a> and
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-get-param" title="tp_connection_manager_protocol_get_param ()"><code class="function">tp_connection_manager_protocol_get_param()</code></a>. Well-known parameters are
+listed
+<a class="ulink" href="http://telepathy.freedesktop.org/spec/org.freedesktop.Telepathy.ConnectionManager.html#org.freedesktop.Telepathy.ConnectionManager.RequestConnection" target="_top">in
+the Telepathy D-Bus Interface Specification</a>.</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -1583,7 +1597,8 @@ Finishes an async get operation of <em class="parameter"><code>account</code></e
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of the account's avatar, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on failure
+<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guchar"><span class="type">guchar</span></a> containing the bytes of the account's avatar,
+ or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on failure
 
 </td>
 </tr>
@@ -2403,7 +2418,7 @@ The account's connection manager name.</p>
 <a name="TpAccount--connection-status"></a><h3>The <code class="literal">"connection-status"</code> property</h3>
 <pre class="programlisting">  "connection-status"        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
 <p>
-The account's connection status type.
+The account's connection status type (a <a class="link" href="telepathy-glib-enums.html#TpConnectionStatus" title="enum TpConnectionStatus"><code class="literal">TpConnectionStatus</code></a>).
 </p>
 <p>
 One can receive change notifications on this property by connecting
@@ -2423,7 +2438,7 @@ This is not guaranteed to have been retrieved until
 <a name="TpAccount--connection-status-reason"></a><h3>The <code class="literal">"connection-status-reason"</code> property</h3>
 <pre class="programlisting">  "connection-status-reason" <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
 <p>
-The account's connection status reason.
+The account's connection status reason (a <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason"><code class="literal">TpConnectionStatusReason</code></a>).
 </p>
 <p>
 One can receive change notifications on this property by connecting
@@ -2443,7 +2458,8 @@ This is not guaranteed to have been retrieved until
 <a name="TpAccount--current-presence-type"></a><h3>The <code class="literal">"current-presence-type"</code> property</h3>
 <pre class="programlisting">  "current-presence-type"    <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
 <p>
-The account connection's current presence type.
+The account connection's current presence type
+(a <a class="link" href="telepathy-glib-enums.html#TpConnectionPresenceType" title="enum TpConnectionPresenceType"><code class="literal">TpConnectionPresenceType</code></a>).
 </p>
 <p>
 One can receive change notifications on this property by connecting
@@ -2481,8 +2497,20 @@ This is not guaranteed to have been retrieved until
 <div class="refsect2" title='The "current-status-message" property'>
 <a name="TpAccount--current-status-message"></a><h3>The <code class="literal">"current-status-message"</code> property</h3>
 <pre class="programlisting">  "current-status-message"   <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read</pre>
-<p>The Status message string of the account.</p>
+<p>
+The current status message message of the account.
+</p>
+<p>
+One can receive change notifications on this property by connecting
+to the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject-notify"><span class="type">"notify"</span></a> signal and using this property as the signal
+detail.
+</p>
+<p>
+This is not guaranteed to have been retrieved until
+<a class="link" href="telepathy-glib-account.html#tp-account-prepare-async" title="tp_account_prepare_async ()"><code class="function">tp_account_prepare_async()</code></a> has finished; until then, the value is
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
 <p>Default value: NULL</p>
+<p class="since">Since 0.9.0</p>
 </div>
 <hr>
 <div class="refsect2" title='The "display-name" property'>
@@ -2593,7 +2621,7 @@ The account's protocol name.</p>
 <a name="TpAccount--requested-presence-type"></a><h3>The <code class="literal">"requested-presence-type"</code> property</h3>
 <pre class="programlisting">  "requested-presence-type"  <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
 <p>
-The account's requested presence type.
+The account's requested presence type (a <a class="link" href="telepathy-glib-enums.html#TpConnectionPresenceType" title="enum TpConnectionPresenceType"><span class="type">TpConnectionPresenceType</span></a>).
 </p>
 <p>
 One can receive change notifications on this property by connecting
