@@ -48,6 +48,8 @@
  *
  * (This is gnulib's verify macro, written by Paul Eggert, Bruno Haible and
  * Jim Meyering.)
+ *
+ * Since: 0.7.34
  */
 
 /**
@@ -66,6 +68,8 @@
  * and Jim Meyering.)
  *
  * Returns: 1
+ *
+ * Since: 0.7.34
  */
 
 /**
@@ -78,6 +82,8 @@
  *
  * This macro can be used anywhere that a statement would be allowed; it
  * is equivalent to ((void) tp_verify_true (R)).
+ *
+ * Since: 0.7.34
  */
 
 /**
@@ -889,7 +895,7 @@ closure_invalidated_cb (gpointer ctx_,
  * @detailed_signal: a string of the form "signal-name::detail".
  * @c_handler: the #GCallback to connect.
  * @gobject: the object to pass as data to @c_handler.
- * @connect_flags: a combination of #GConnnectFlags.
+ * @connect_flags: a combination of #GConnectFlags.
  *
  * Connects a #GCallback function to a signal for a particular object, as if
  * with g_signal_connect(). Additionally, arranges for the signal handler to be
@@ -907,7 +913,9 @@ closure_invalidated_cb (gpointer ctx_,
  * user_data for callbacks without having to explicitly disconnect all the
  * handlers in their finalizers.
  *
- * Returns: the handler id.
+ * Returns: the handler id
+ *
+ * Since: 0.9.2
  */
 gulong
 tp_g_signal_connect_object (gpointer instance,
@@ -989,6 +997,8 @@ _tp_quark_array_copy (const GQuark *quarks)
  * </example>
  *
  * Returns: a newly created #GValueArray, free with g_value_array_free.
+ *
+ * Since: 0.9.2
  */
 GValueArray *
 tp_value_array_build (gsize length,
