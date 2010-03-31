@@ -1502,6 +1502,9 @@ finally:
  *  %FALSE if the channel has become invalid.
  *
  * Since: 0.7.1
+ * Deprecated: 0.11.0: Use tp_connection_call_when_ready,
+ *  or restructure your program in such a way as to avoid re-entering the
+ *  main loop.
  */
 gboolean
 tp_channel_run_until_ready (TpChannel *self,

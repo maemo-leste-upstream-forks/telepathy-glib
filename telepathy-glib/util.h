@@ -39,6 +39,7 @@ GValue *tp_g_value_slice_new (GType type) G_GNUC_WARN_UNUSED_RESULT;
 GValue *tp_g_value_slice_new_boolean (gboolean b) G_GNUC_WARN_UNUSED_RESULT;
 GValue *tp_g_value_slice_new_int (gint n) G_GNUC_WARN_UNUSED_RESULT;
 GValue *tp_g_value_slice_new_int64 (gint64 n) G_GNUC_WARN_UNUSED_RESULT;
+GValue *tp_g_value_slice_new_byte (guchar n) G_GNUC_WARN_UNUSED_RESULT;
 GValue *tp_g_value_slice_new_uint (guint n) G_GNUC_WARN_UNUSED_RESULT;
 GValue *tp_g_value_slice_new_uint64 (guint64 n) G_GNUC_WARN_UNUSED_RESULT;
 GValue *tp_g_value_slice_new_double (double d) G_GNUC_WARN_UNUSED_RESULT;
@@ -86,6 +87,9 @@ gulong tp_g_signal_connect_object (gpointer instance,
 GValueArray *tp_value_array_build (gsize length,
   GType type,
   ...) G_GNUC_WARN_UNUSED_RESULT;
+void tp_value_array_unpack (GValueArray *array,
+    gsize len,
+    ...);
 
 G_END_DECLS
 

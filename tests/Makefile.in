@@ -35,9 +35,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
-	test-heap$(EXEEXT) test-internal-debug$(EXEEXT) \
-	test-intset$(EXEEXT) test-util$(EXEEXT) \
-	test-debug-domain$(EXEEXT)
+	test-gnio-util$(EXEEXT) test-heap$(EXEEXT) \
+	test-internal-debug$(EXEEXT) test-intset$(EXEEXT) \
+	test-util$(EXEEXT) test-debug-domain$(EXEEXT)
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
 	$(top_srcdir)/tools/valgrind.mk
@@ -78,6 +78,12 @@ am_test_debug_domain_OBJECTS = debug-domain.$(OBJEXT)
 test_debug_domain_OBJECTS = $(am_test_debug_domain_OBJECTS)
 test_debug_domain_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
+am_test_gnio_util_OBJECTS = gnio-util.$(OBJEXT)
+test_gnio_util_OBJECTS = $(am_test_gnio_util_OBJECTS)
+test_gnio_util_LDADD = $(LDADD)
+test_gnio_util_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1)
 am_test_heap_OBJECTS = heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
 test_heap_LDADD = $(LDADD)
@@ -127,13 +133,13 @@ AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
-	$(test_debug_domain_SOURCES) $(test_heap_SOURCES) \
-	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
-	$(test_util_SOURCES)
+	$(test_debug_domain_SOURCES) $(test_gnio_util_SOURCES) \
+	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+	$(test_intset_SOURCES) $(test_util_SOURCES)
 DIST_SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
-	$(test_debug_domain_SOURCES) $(test_heap_SOURCES) \
-	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
-	$(test_util_SOURCES)
+	$(test_debug_domain_SOURCES) $(test_gnio_util_SOURCES) \
+	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
+	$(test_intset_SOURCES) $(test_util_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -206,6 +212,8 @@ ENABLE_CODING_STYLE_CHECKS = @ENABLE_CODING_STYLE_CHECKS@
 ERROR_CFLAGS = @ERROR_CFLAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GIO_UNIX_CFLAGS = @GIO_UNIX_CFLAGS@
+GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
@@ -358,6 +366,9 @@ test_asv_SOURCES = \
 test_heap_SOURCES = \
     heap.c
 
+test_gnio_util_SOURCES = \
+    gnio-util.c
+
 test_util_SOURCES = \
     util.c
 
@@ -391,6 +402,7 @@ AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
+    -D_TP_IGNORE_DEPRECATIONS \
     $(TP_GLIB_CFLAGS)
 
 all: all-recursive
@@ -445,6 +457,9 @@ test-availability-cmp$(EXEEXT): $(test_availability_cmp_OBJECTS) $(test_availabi
 test-debug-domain$(EXEEXT): $(test_debug_domain_OBJECTS) $(test_debug_domain_DEPENDENCIES) 
 	@rm -f test-debug-domain$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_debug_domain_OBJECTS) $(test_debug_domain_LDADD) $(LIBS)
+test-gnio-util$(EXEEXT): $(test_gnio_util_OBJECTS) $(test_gnio_util_DEPENDENCIES) 
+	@rm -f test-gnio-util$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_gnio_util_OBJECTS) $(test_gnio_util_LDADD) $(LIBS)
 test-heap$(EXEEXT): $(test_heap_OBJECTS) $(test_heap_DEPENDENCIES) 
 	@rm -f test-heap$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_heap_OBJECTS) $(test_heap_LDADD) $(LIBS)
@@ -467,6 +482,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/availability-cmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-domain.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnio-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/internal-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Po@am__quote@

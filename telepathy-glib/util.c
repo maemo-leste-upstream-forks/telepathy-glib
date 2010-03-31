@@ -195,6 +195,27 @@ tp_g_value_slice_new_int64 (gint64 n)
 }
 
 /**
+ * tp_g_value_slice_new_byte:
+ * @n: an unsigned integer
+ *
+ * Slice-allocate and initialize a #GValue. This function is convenient to
+ * use when constructing hash tables from string to #GValue, for example.
+ *
+ * Returns: a #GValue of type %G_TYPE_UCHAR with value @n, to be freed with
+ * tp_g_value_slice_free() or g_slice_free()
+ *
+ * Since: 0.11.0
+ */
+GValue *
+tp_g_value_slice_new_byte (guchar n)
+{
+  GValue *v = tp_g_value_slice_new (G_TYPE_UCHAR);
+
+  g_value_set_uchar (v, n);
+  return v;
+}
+
+/**
  * tp_g_value_slice_new_uint:
  * @n: an unsigned integer
  *
@@ -1037,4 +1058,64 @@ tp_value_array_build (gsize length,
   g_warn_if_fail (arr->n_values == length);
 
   return arr;
+}
+
+/**
+ * tp_value_array_unpack:
+ * @array: the array to unpack
+ * @len: The number of elements that should be in the array
+ * @...: a list of correctly typed pointers to store the values in
+ *
+ * Unpacks a #GValueArray into separate variables.
+ *
+ * The contents of the values aren't copied into the variables, and so become
+ * invalid when @array is freed.
+ *
+ * <example>
+ *   <title>using tp_value_array_unpack</title>
+ *    <programlisting>
+ * gchar *host;
+ * guint port;
+ *
+ * tp_value_array_unpack (array, 2,
+ *    &host,
+ *    &port);
+ *    </programlisting>
+ * </example>
+ *
+ * Since: 0.11.0
+ */
+void
+tp_value_array_unpack (GValueArray *array,
+    gsize len,
+    ...)
+{
+  va_list var_args;
+  guint i;
+
+  va_start (var_args, len);
+
+  for (i = 0; i < len; i++)
+    {
+      GValue *value;
+      char *error = NULL;
+
+      if (G_UNLIKELY (i > array->n_values))
+        {
+          g_warning ("More parameters than entries in the struct!");
+          break;
+        }
+
+      value = g_value_array_get_nth (array, i);
+
+      G_VALUE_LCOPY (value, var_args, G_VALUE_NOCOPY_CONTENTS, &error);
+      if (error != NULL)
+        {
+          g_warning ("%s: %s", G_STRFUNC, error);
+          g_free (error);
+          break;
+        }
+    }
+
+  va_end (var_args);
 }

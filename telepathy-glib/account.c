@@ -114,8 +114,6 @@ struct _TpAccountPrivate {
   GList *features;
   GList *callbacks;
   GArray *requested_features;
-  GArray *actual_features;
-  GArray *missing_features;
 };
 
 typedef struct {
@@ -291,9 +289,6 @@ _tp_account_become_ready (TpAccount *self,
     return;
 
   f->ready = TRUE;
-
-  if (!_tp_account_feature_in_array (feature, priv->actual_features))
-    g_array_append_val (priv->actual_features, feature);
 
   /* First, find which callbacks are satisfied and add those items
    * from the remove list. */
@@ -696,8 +691,6 @@ _tp_account_constructed (GObject *object)
   priv->features = NULL;
   priv->callbacks = NULL;
   priv->requested_features = g_array_new (TRUE, FALSE, sizeof (GQuark));
-  priv->actual_features = g_array_new (TRUE, FALSE, sizeof (GQuark));
-  priv->missing_features = g_array_new (TRUE, FALSE, sizeof (GQuark));
 
   known_features = _tp_account_get_known_features ();
 
@@ -863,8 +856,6 @@ _tp_account_finalize (GObject *object)
   priv->callbacks = NULL;
 
   g_array_free (priv->requested_features, TRUE);
-  g_array_free (priv->actual_features, TRUE);
-  g_array_free (priv->missing_features, TRUE);
 
   /* free any data held directly by the object here */
   if (G_OBJECT_CLASS (tp_account_parent_class)->finalize != NULL)
@@ -1612,7 +1603,7 @@ _tp_account_property_set_cb (TpProxy *proxy,
   if (error != NULL)
     {
       DEBUG ("Failed to set property: %s", error->message);
-      g_simple_async_result_set_from_error (result, (GError *) error);
+      g_simple_async_result_set_from_error (result, error);
     }
 
   g_simple_async_result_complete (result);
@@ -1707,7 +1698,7 @@ _tp_account_reconnected_cb (TpAccount *proxy,
   GSimpleAsyncResult *result = user_data;
 
   if (error != NULL)
-    g_simple_async_result_set_from_error (result, (GError *) error);
+    g_simple_async_result_set_from_error (result, error);
 
   g_simple_async_result_complete (result);
   g_object_unref (result);
@@ -1865,7 +1856,7 @@ _tp_account_updated_cb (TpAccount *proxy,
   GSimpleAsyncResult *result = G_SIMPLE_ASYNC_RESULT (user_data);
 
   if (error != NULL)
-    g_simple_async_result_set_from_error (result, (GError *) error);
+    g_simple_async_result_set_from_error (result, error);
   else
     g_simple_async_result_set_op_res_gpointer (result, reconnect_required, NULL);
 
@@ -2108,7 +2099,7 @@ _tp_account_remove_cb (TpAccount *proxy,
   GSimpleAsyncResult *result = G_SIMPLE_ASYNC_RESULT (user_data);
 
   if (error != NULL)
-    g_simple_async_result_set_from_error (result, (GError *) error);
+    g_simple_async_result_set_from_error (result, error);
 
   g_simple_async_result_complete (result);
   g_object_unref (G_OBJECT (result));
@@ -2448,7 +2439,7 @@ tp_account_set_nickname_async (TpAccount *account,
   g_return_if_fail (nickname != NULL);
 
   result = g_simple_async_result_new (G_OBJECT (account),
-      callback, user_data, tp_account_request_presence_finish);
+      callback, user_data, tp_account_set_nickname_finish);
 
   if (nickname == NULL)
     {
@@ -2482,7 +2473,7 @@ _tp_account_got_avatar_cb (TpProxy *proxy,
   if (error != NULL)
     {
       DEBUG ("Failed to get avatar: %s", error->message);
-      g_simple_async_result_set_from_error (result, (GError *) error);
+      g_simple_async_result_set_from_error (result, error);
     }
   else
     {
@@ -2650,7 +2641,7 @@ tp_account_prepare_async (TpAccount *account,
 
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (result, (GError *) error);
+      g_simple_async_result_set_from_error (result, error);
       g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
       g_array_free (feature_array, TRUE);
@@ -2703,61 +2694,6 @@ tp_account_prepare_finish (TpAccount *account,
           G_OBJECT (account), tp_account_prepare_finish), FALSE);
 
   return TRUE;
-}
-
-/**
- * _tp_account_get_requested_features:
- * @account: a #TpAccount
- *
- * <!-- -->
- *
- * Returns: a 0-terminated list of features requested on @account
- *
- * Since: 0.9.0
- */
-const GQuark *
-_tp_account_get_requested_features (TpAccount *account)
-{
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
-
-  return (const GQuark *) account->priv->requested_features->data;
-}
-
-/**
- * _tp_account_get_actual_features:
- * @account: a #TpAccount
- *
- * <!-- -->
- *
- * Returns: a 0-terminated list of actual features on @account
- *
- * Since: 0.9.0
- */
-const GQuark *
-_tp_account_get_actual_features (TpAccount *account)
-{
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
-
-  return (const GQuark *) account->priv->actual_features->data;
-}
-
-/**
- * _tp_account_get_missing_features:
- * @account: a #TpAccount
- *
- * <!-- -->
- *
- * Returns: a 0-terminated list of missing features from @account
- *          that have been requested
- *
- * Since: 0.9.0
- */
-const GQuark *
-_tp_account_get_missing_features (TpAccount *account)
-{
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
-
-  return (const GQuark *) account->priv->missing_features->data;
 }
 
 static void

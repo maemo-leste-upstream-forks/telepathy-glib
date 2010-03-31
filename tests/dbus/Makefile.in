@@ -35,7 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
-	test-call-cancellation$(EXEEXT) test-callable-example$(EXEEXT) \
+	test-call-cancellation$(EXEEXT) test-call-example$(EXEEXT) \
+	test-callable-example$(EXEEXT) \
 	test-channel-dispatcher$(EXEEXT) \
 	test-channel-dispatch-operation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
@@ -104,12 +105,16 @@ test_call_cancellation_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-am_test_callable_example_OBJECTS = callable-example.$(OBJEXT)
-test_callable_example_OBJECTS = $(am_test_callable_example_OBJECTS)
+am_test_call_example_OBJECTS = call-example.$(OBJEXT)
+test_call_example_OBJECTS = $(am_test_call_example_OBJECTS)
 am__DEPENDENCIES_2 =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+test_call_example_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/examples/future/call-cm/libexample-cm-call.la
+am_test_callable_example_OBJECTS = callable-example.$(OBJEXT)
+test_callable_example_OBJECTS = $(am_test_callable_example_OBJECTS)
 test_callable_example_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	$(top_builddir)/examples/cm/callable/libexample-cm-callable.la
 am_test_channel_dispatch_operation_OBJECTS =  \
@@ -394,7 +399,7 @@ AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_call_cancellation_SOURCES) \
+	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
 	$(test_callable_example_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
@@ -424,7 +429,7 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_call_cancellation_SOURCES) \
+	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
 	$(test_callable_example_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
@@ -486,6 +491,8 @@ ENABLE_CODING_STYLE_CHECKS = @ENABLE_CODING_STYLE_CHECKS@
 ERROR_CFLAGS = @ERROR_CFLAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GIO_UNIX_CFLAGS = @GIO_UNIX_CFLAGS@
+GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
@@ -612,6 +619,11 @@ test_channel_dispatcher_SOURCES = channel-dispatcher.c
 test_channel_dispatch_operation_SOURCES = channel-dispatch-operation.c
 test_channel_introspect_SOURCES = channel-introspect.c
 test_channel_request_SOURCES = channel-request.c
+test_call_example_SOURCES = call-example.c
+test_call_example_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/future/call-cm/libexample-cm-call.la
+
 test_callable_example_SOURCES = callable-example.c
 test_callable_example_LDADD = \
     $(LDADD) \
@@ -690,6 +702,7 @@ AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
+    -D_TP_IGNORE_DEPRECATIONS \
     $(TP_GLIB_CFLAGS)
 
 TESTS_ENVIRONMENT = \
@@ -786,6 +799,9 @@ test-account-manager$(EXEEXT): $(test_account_manager_OBJECTS) $(test_account_ma
 test-call-cancellation$(EXEEXT): $(test_call_cancellation_OBJECTS) $(test_call_cancellation_DEPENDENCIES) 
 	@rm -f test-call-cancellation$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_call_cancellation_OBJECTS) $(test_call_cancellation_LDADD) $(LIBS)
+test-call-example$(EXEEXT): $(test_call_example_OBJECTS) $(test_call_example_DEPENDENCIES) 
+	@rm -f test-call-example$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_call_example_OBJECTS) $(test_call_example_LDADD) $(LIBS)
 test-callable-example$(EXEEXT): $(test_callable_example_OBJECTS) $(test_callable_example_DEPENDENCIES) 
 	@rm -f test-callable-example$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_callable_example_OBJECTS) $(test_callable_example_LDADD) $(LIBS)
@@ -904,6 +920,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call-cancellation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call-example.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callable-example.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatch-operation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Po@am__quote@
