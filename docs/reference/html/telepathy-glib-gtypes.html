@@ -75,6 +75,8 @@
 
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-AVATAR-TOKEN-MAP:CAPS" title="TP_HASH_TYPE_AVATAR_TOKEN_MAP">TP_HASH_TYPE_AVATAR_TOKEN_MAP</a>
 
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-CURRENCY-AMOUNT:CAPS" title="TP_STRUCT_TYPE_CURRENCY_AMOUNT">TP_STRUCT_TYPE_CURRENCY_AMOUNT</a>
+
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-CONTACT-CAPABILITIES-MAP:CAPS" title="TP_HASH_TYPE_CONTACT_CAPABILITIES_MAP">TP_HASH_TYPE_CONTACT_CAPABILITIES_MAP</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-CONTACT-CAPABILITIES-MAP-LIST:CAPS" title="TP_ARRAY_TYPE_CONTACT_CAPABILITIES_MAP_LIST">TP_ARRAY_TYPE_CONTACT_CAPABILITIES_MAP_LIST</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-HANDLER-CAPABILITIES:CAPS" title="TP_STRUCT_TYPE_HANDLER_CAPABILITIES">TP_STRUCT_TYPE_HANDLER_CAPABILITIES</a>
@@ -635,6 +637,55 @@ named <code class="literal">Token</code>):
 (Undocumented)</p>
 </div>
 <hr>
+<div class="refsect2" title="TP_STRUCT_TYPE_CURRENCY_AMOUNT">
+<a name="TP-STRUCT-TYPE-CURRENCY-AMOUNT:CAPS"></a><h3>TP_STRUCT_TYPE_CURRENCY_AMOUNT</h3>
+<pre class="programlisting">#define TP_STRUCT_TYPE_CURRENCY_AMOUNT (tp_type_dbus_struct_ius ())
+</pre>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;
+	
+        
+	&lt;p&gt;
+		An amount of money in a specified currency. For example,
+          3.21 British pounds would conventionally be represented by
+          (Amount = 321, Scale = 2, Currency = &amp;quot;GBP&amp;quot;), but could be
+          represented by (Amount = 3210, Scale = 3, Currency = &amp;quot;GBP&amp;quot;)
+          in a service that records balance in units of 0.001 pounds.
+	&lt;/p&gt;
+	
+</p>
+<p>
+        
+	&lt;p&gt;
+		As a special case, if Amount = 0, Scale = 2**32 - 1 (i.e.
+          the largest possible 32-bit unsigned integer) and Currency = &amp;quot;&amp;quot;,
+          this indicates an unknown amount.
+	&lt;/p&gt;
+	
+      
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Value-arrays.html#GValueArray"><span class="type">GValueArray</span></a>
+appropriate for representing a D-Bus struct
+with signature <code class="literal">(ius)</code>.
+</p>
+<p>
+Member 0 (D-Bus type <code class="literal">i</code>,
+named <code class="literal">Amount</code>):
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;The amount, expressed as a fixed-point number with decimal scale             defined by the Scale property; for instance, an Amount value of             1234 with Scale of 2 represents 12.34 in the currency unit given             by the Currency.&lt;/p&gt;
+</p>
+<p>
+Member 1 (D-Bus type <code class="literal">u</code>,
+named <code class="literal">Scale</code>):
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;The decimal scale for the fixed point value of the Amount             property, defining the number of rightmost decimal digits from             the integer value which form the fractional part of the resulting             currency value.&lt;/p&gt;            &lt;p&gt;As well as defining the interpretation of Amount, user interfaces             may use this value to determine the precision with which to display             the amount.&lt;/p&gt;
+</p>
+<p>
+Member 2 (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Currency</code>):
+The currency code represented by this amount, which SHOULD be an           international currency code such as &amp;quot;EUR&amp;quot;, &amp;quot;USD&amp;quot;, or &amp;quot;JPY&amp;quot; if           possible. An empty string can be used to indicate that the currency           is not known.</p>
+</div>
+<hr>
 <div class="refsect2" title="TP_HASH_TYPE_CONTACT_CAPABILITIES_MAP">
 <a name="TP-HASH-TYPE-CONTACT-CAPABILITIES-MAP:CAPS"></a><h3>TP_HASH_TYPE_CONTACT_CAPABILITIES_MAP</h3>
 <pre class="programlisting">#define TP_HASH_TYPE_CONTACT_CAPABILITIES_MAP (tp_type_dbus_hash_ua_28a_7bsv_7das_29 ())
@@ -659,7 +710,7 @@ A contact handle.
 Values (D-Bus type <code class="literal">a(a{sv}as)</code>,
 type <code class="literal">Requestable_Channel_Class[]</code>,
 named <code class="literal">Value</code>):
-The contact capabilities.</p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;          &lt;p&gt;The contact's capabilities. These should be represented           in the same way as in &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection.Interface.Requests"&gt;RequestableChannelClasses&lt;/tp:dbus-ref&gt;,           except that they may have more fixed properties or fewer allowed           properties, to represent contacts who do not have all the           capabilities of the connection.&lt;/p&gt;          &lt;p&gt;In particular, requestable channel classes for channels with           target handle type Contact MUST list &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Channel"&gt;TargetHandleType&lt;/tp:dbus-ref&gt; among their fixed properties when           they appear here, and clients MAY assume that this will be the           case.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This matches the initial implementations - service-side in             telepathy-gabble, and client-side in telepathy-qt4 - and means             that clients can use exactly the same code to interpret             RequestableChannelClasses and contact capabilities.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Channel classes with target handle type Handle_Type_Contact           indicate that a request that matches the channel class, and also           either has the contact's handle as &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Channel"&gt;TargetHandle&lt;/tp:dbus-ref&gt; or the contact's identifier as           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Channel"&gt;TargetID&lt;/tp:dbus-ref&gt;, can be expected to succeed. Connection           managers SHOULD NOT include the TargetHandle or TargetID as a           fixed property in contact capabilities.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This makes one channel class sufficient to describe requests via             TargetHandle or TargetID, and is necessary in order to allow             clients to interpret RequestableChannelClasses and contact             capabilities with the same code.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Channel classes with target handle type Handle_Type_Room or           Handle_Type_None indicate that if a channel matching the channel           class is created, then inviting the contact to that channel           can be expected to succeed.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;To support room-based XMPP protocols like             &lt;a href="http://telepathy.freedesktop.org/wiki/Muji"&gt;Muji&lt;/a&gt;             and MUC Tubes, it's necessary to be able to discover who can be             invited to a given room channel; most XMPP contacts won't             support being invited into a Muji conference call, at least             in the short to medium term.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;No interpretation is defined for channel classes with any other           target handle type, or for channel classes that do not fix a           target handle type, in this version of the Telepathy           specification.&lt;/p&gt;</p>
 </div>
 <hr>
 <div class="refsect2" title="TP_ARRAY_TYPE_CONTACT_CAPABILITIES_MAP_LIST">

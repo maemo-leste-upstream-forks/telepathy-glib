@@ -10,16 +10,25 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [10])
-m4_define([tp_glib_micro_version], [2])
+m4_define([tp_glib_minor_version], [11])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
-# If library source has changed since last release, increment revision.
-# Do not add new API or ABI, or make incompatible changes, on this branch
-# (which means that current and age should remain 32).
-m4_define([tp_glib_lt_current], [32])
-m4_define([tp_glib_lt_revision], [3])
-m4_define([tp_glib_lt_age], [32])
+# If library source has changed since last release, increment revision
+# If interfaces have been added, removed or changed since last release,
+#  increment current and set revision to 0
+# If interfaces have been added since last release, increment age
+# If interfaces have been removed since last release, set age to 0
+#
+# If interfaces have been added, release builds will fail unless you add a new
+# file like telepathy-glib/versions/0.7.3.abi to add them to the official ABI.
+# This also forces binaries built against devel versions to be rebuilt
+# (we don't guarantee that we won't add ABI then remove it again, if it was
+# never seen in a release).
+
+m4_define([tp_glib_lt_current], [33])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [33])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -29,7 +38,7 @@ m4_define([tp_glib_version],
               [tp_glib_base_version].[tp_glib_nano_version])])
 
 AC_INIT([Telepathy-GLib], [tp_glib_version],
-        [https://bugs.freedesktop.org/enter_bug.cgi?product=Telepathy&component=tp-glib&version=0.10])
+        [https://bugs.freedesktop.org/enter_bug.cgi?product=Telepathy&component=tp-glib])
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -142,7 +151,19 @@ AM_CONDITIONAL([OUT_OF_TREE_BUILD], [test "z$ac_srcdir" != z.])
 
 dnl Check for Glib
 PKG_CHECK_MODULES(GLIB,
-  [glib-2.0 >= 2.20, gobject-2.0 >= 2.20, gio-2.0 >= 2.20])
+  [glib-2.0 >= 2.22, gobject-2.0 >= 2.22, gio-2.0 >= 2.22])
+
+dnl Check for GIO-Unix
+PKG_CHECK_MODULES(GIO_UNIX, [gio-unix-2.0],
+  have_gio_unix=yes, have_gio_unix=no)
+
+if test "x$have_gio_unix" = "xyes"; then
+  AC_DEFINE(HAVE_GIO_UNIX, [], [Define if GIO-Unix is available])
+
+  GLIB_CFLAGS="$GLIB_CFLAGS $GIO_UNIX_CFLAGS"
+  GLIB_LIBS="$GLIB_LIBS $GIO_UNIX_LIBS"
+fi
+
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
 
@@ -201,6 +222,9 @@ AC_OUTPUT( Makefile \
 	   examples/cm/extended/Makefile \
 	   examples/cm/no-protocols/Makefile \
 	   examples/extensions/Makefile \
+	   examples/future/Makefile \
+	   examples/future/call-cm/Makefile \
+	   extensions/Makefile \
 	   spec/Makefile \
 	   telepathy-glib/Makefile \
 	   telepathy-glib/telepathy-glib.pc \

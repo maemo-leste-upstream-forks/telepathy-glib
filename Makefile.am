@@ -1,6 +1,14 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = m4 tools spec telepathy-glib examples tests docs
+SUBDIRS = \
+    m4 \
+    tools \
+    spec \
+    telepathy-glib \
+    extensions \
+    examples \
+    tests \
+    docs
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --disable-debug
 
@@ -20,7 +28,7 @@ check-valgrind:
 maintainer-upload-release: _maintainer-upload-release-local
 _maintainer-upload-release-local: _maintainer-upload-release-check
 	rsync -rvzPp --chmod=Dg+s,ug+rwX,o=rX docs/reference/html/ \
-	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib-0.10.x/
+	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib/
 
 BRANCH = $(shell sh tools/git-which-branch.sh misc | tr -d '\n' | tr -C "[:alnum:]" _)
 UPLOAD_BRANCH_TO = people.freedesktop.org:public_html/telepathy-glib
@@ -31,7 +39,7 @@ upload-branch-docs: all
 
 include tools/lcov.am
 
-CHANGELOG_RANGE = telepathy-glib-0.6.0..
+CHANGELOG_RANGE = telepathy-glib-0.8.0..
 CHECK_FOR_UNRELEASED = $(srcdir)/NEWS $(wildcard $(srcdir)/telepathy-glib/*.[ch])
 
 include tools/telepathy.am

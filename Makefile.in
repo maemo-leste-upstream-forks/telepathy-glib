@@ -144,6 +144,8 @@ ENABLE_CODING_STYLE_CHECKS = @ENABLE_CODING_STYLE_CHECKS@
 ERROR_CFLAGS = @ERROR_CFLAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GIO_UNIX_CFLAGS = @GIO_UNIX_CFLAGS@
+GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
@@ -257,7 +259,16 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = m4 tools spec telepathy-glib examples tests docs
+SUBDIRS = \
+    m4 \
+    tools \
+    spec \
+    telepathy-glib \
+    extensions \
+    examples \
+    tests \
+    docs
+
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --disable-debug
 EXTRA_DIST = \
     autogen.sh \
@@ -266,7 +277,7 @@ EXTRA_DIST = \
 CLEANFILES = FIXME.out
 BRANCH = $(shell sh tools/git-which-branch.sh misc | tr -d '\n' | tr -C "[:alnum:]" _)
 UPLOAD_BRANCH_TO = people.freedesktop.org:public_html/telepathy-glib
-CHANGELOG_RANGE = telepathy-glib-0.6.0..
+CHANGELOG_RANGE = telepathy-glib-0.8.0..
 CHECK_FOR_UNRELEASED = $(srcdir)/NEWS $(wildcard $(srcdir)/telepathy-glib/*.[ch])
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -780,7 +791,7 @@ check-valgrind:
 maintainer-upload-release: _maintainer-upload-release-local
 _maintainer-upload-release-local: _maintainer-upload-release-check
 	rsync -rvzPp --chmod=Dg+s,ug+rwX,o=rX docs/reference/html/ \
-	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib-0.10.x/
+	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib/
 
 upload-branch-docs: all
 	rsync -rtzvPp --chmod=a+rX docs/reference/html/ \
@@ -815,7 +826,8 @@ dist-hook:
 	fi
 
 distcheck-hook:
-	@case @VERSION@ in \
+	@test "z$(CHECK_FOR_UNRELEASED)" = z || \
+	case @VERSION@ in \
 		*.*.*.*) ;; \
 		*) \
 			if grep -r UNRELEASED $(CHECK_FOR_UNRELEASED); \

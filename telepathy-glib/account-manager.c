@@ -1241,7 +1241,7 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
 
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (my_res, (GError *) error);
+      g_simple_async_result_set_from_error (my_res, error);
       g_simple_async_result_complete (my_res);
       g_object_unref (my_res);
 
@@ -1436,7 +1436,7 @@ tp_account_manager_prepare_async (TpAccountManager *manager,
   error = tp_proxy_get_invalidated (manager);
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (result, (GError *) error);
+      g_simple_async_result_set_from_error (result, error);
       g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
       g_array_free (feature_array, TRUE);
@@ -1489,60 +1489,6 @@ tp_account_manager_prepare_finish (TpAccountManager *manager,
           G_OBJECT (manager),tp_account_manager_prepare_finish), FALSE);
 
   return TRUE;
-}
-
-/**
- * _tp_account_manager_get_requested_features:
- * @manager: a #TpAccountManager
- *
- * <!-- -->
- *
- * Returns: a 0-terminated list of requested features on @manager
- *
- * Since: 0.9.0
- */
-const GQuark *
-_tp_account_manager_get_requested_features (TpAccountManager *manager)
-{
-  g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
-
-  return (const GQuark *) manager->priv->requested_features->data;
-}
-
-/**
- * _tp_account_manager_get_actual_features:
- * @manager: a #TpAccountManager
- *
- * <!-- -->
- *
- * Returns: a 0-terminated list of actual features on @manager
- *
- * Since: 0.9.0
- */
-const GQuark *
-_tp_account_manager_get_actual_features (TpAccountManager *manager)
-{
-  g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
-
-  return (const GQuark *) manager->priv->actual_features->data;
-}
-
-/**
- * _tp_account_manager_get_missing_features:
- * @manager: a #TpAccountManager
- *
- * <!-- -->
- *
- * Returns: a 0-terminated list of missing features on @manager
- *
- * Since: 0.9.0
- */
-const GQuark *
-_tp_account_manager_get_missing_features (TpAccountManager *manager)
-{
-  g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
-
-  return (const GQuark *) manager->priv->missing_features->data;
 }
 
 /**

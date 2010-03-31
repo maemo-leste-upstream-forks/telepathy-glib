@@ -2,6 +2,7 @@ noinst_PROGRAMS = \
     test-account \
     test-account-manager \
     test-call-cancellation \
+    test-call-example \
     test-callable-example \
     test-channel-dispatcher \
     test-channel-dispatch-operation \
@@ -60,6 +61,11 @@ test_channel_dispatch_operation_SOURCES = channel-dispatch-operation.c
 test_channel_introspect_SOURCES = channel-introspect.c
 
 test_channel_request_SOURCES = channel-request.c
+
+test_call_example_SOURCES = call-example.c
+test_call_example_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/future/call-cm/libexample-cm-call.la
 
 test_callable_example_SOURCES = callable-example.c
 test_callable_example_LDADD = \
@@ -162,6 +168,7 @@ AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
+    -D_TP_IGNORE_DEPRECATIONS \
     $(TP_GLIB_CFLAGS)
 
 TESTS_ENVIRONMENT = \

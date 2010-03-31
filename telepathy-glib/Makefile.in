@@ -97,13 +97,13 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	connection-handles.lo connection-manager.lo contact.lo \
 	contacts-mixin.lo dbus.lo dbus-daemon.lo \
 	dbus-properties-mixin.lo debug.lo debug-sender.lo \
-	interfaces.lo errors.lo exportable-channel.lo group-mixin.lo \
-	gtypes.lo handle.lo handle-repo.lo handle-repo-dynamic.lo \
-	handle-repo-static.lo handle-set.lo heap.lo intset.lo \
-	channel-iface.lo channel-factory-iface.lo media-interfaces.lo \
-	message-mixin.lo presence-mixin.lo properties-mixin.lo \
-	proxy.lo proxy-methods.lo proxy-signals.lo run.lo \
-	text-mixin.lo util.lo
+	interfaces.lo errors.lo exportable-channel.lo gnio-util.lo \
+	group-mixin.lo gtypes.lo handle.lo handle-repo.lo \
+	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
+	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
+	media-interfaces.lo message-mixin.lo presence-mixin.lo \
+	properties-mixin.lo proxy.lo proxy-methods.lo proxy-signals.lo \
+	run.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	signals-marshal.lo tp-svc-account.lo tp-svc-account-manager.lo \
 	tp-svc-channel.lo tp-svc-channel-dispatcher.lo \
@@ -188,6 +188,8 @@ ENABLE_CODING_STYLE_CHECKS = @ENABLE_CODING_STYLE_CHECKS@
 ERROR_CFLAGS = @ERROR_CFLAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GIO_UNIX_CFLAGS = @GIO_UNIX_CFLAGS@
+GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
@@ -339,7 +341,8 @@ ABI_LISTS = \
     versions/0.7.36.abi \
     versions/0.7.37.abi \
     versions/0.9.0.abi \
-    versions/0.9.2.abi
+    versions/0.9.2.abi \
+    versions/0.11.0.abi
 
 EXTRA_DIST = \
     $(ABI_LISTS) \
@@ -417,6 +420,7 @@ our_headers = \
     enums.h \
     errors.h \
     exportable-channel.h \
+    gnio-util.h \
     group-mixin.h \
     gtypes.h \
     handle.h \
@@ -568,6 +572,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     debug-internal.h \
     errors.c \
     exportable-channel.c \
+    gnio-util.c \
     group-mixin.c \
     gtypes.c \
     handle.c \
@@ -727,6 +732,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-str.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exportable-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnio-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtypes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo-dynamic.Plo@am__quote@
@@ -1314,7 +1320,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 	subclass_assert= ; \
 	case $* in \
 		generic) \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		account-manager) \
 			subclass=--subclass=TpAccountManager; \
@@ -1327,7 +1333,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		channel) \
 			subclass=--subclass=TpChannel; \
 			subclass_assert=--subclass-assert=TP_IS_CHANNEL; \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		channel-dispatcher) \
 			subclass=--subclass=TpChannelDispatcher; \
@@ -1348,27 +1354,27 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		connection-manager) \
 			subclass=--subclass=TpConnectionManager; \
 			subclass_assert=--subclass-assert=TP_IS_CONNECTION_MANAGER \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		connection) \
 			subclass=--subclass=TpConnection; \
 			subclass_assert=--subclass-assert=TP_IS_CONNECTION; \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		media-session-handler) \
 			subclass=--subclass=TpMediaSessionHandler; \
 			subclass_assert=--subclass-assert=TP_IS_MEDIA_SESSION_HANDLER; \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		media-stream-handler) \
 			subclass=--subclass=TpMediaStreamHandler; \
 			subclass_assert=--subclass-assert=TP_IS_MEDIA_STREAM_HANDLER; \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		dbus-daemon) \
 			subclass=--subclass=TpDBusDaemon; \
 			subclass_assert=--subclass-assert=TP_IS_DBUS_DAEMON; \
-			maybe_reentrant=--generate-reentrant; \
+			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 	esac; \
 	$(PYTHON) $(tools_dir)/glib-client-gen.py \
@@ -1376,6 +1382,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		--group `echo $* | tr - _` \
 		--iface-quark-prefix=TP_IFACE_QUARK \
 		--tp-proxy-api=0.7.6 \
+		--deprecation-attribute=_TP_GNUC_DEPRECATED \
 		$$maybe_reentrant \
 		$< Tp_Cli _gen/tp-cli-$*
 
