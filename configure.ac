@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [11])
-m4_define([tp_glib_micro_version], [0])
+m4_define([tp_glib_micro_version], [1])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [33])
+m4_define([tp_glib_lt_current], [34])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [33])
+m4_define([tp_glib_lt_age], [34])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -107,18 +107,29 @@ AC_ARG_ENABLE(backtrace,
     enable_backtrace=$enableval, enable_backtrace=no )
 
 ifelse(tp_glib_nano_version, 0,
-    [ # tp-glib is version x.y.z - disable coding style checks by default
-AC_ARG_ENABLE(coding-style-checks,
-  AC_HELP_STRING([--enable-coding-style-checks],
-                 [check coding style using grep]),
+[ # tp-glib is version x.y.z - disable extra checks by default
+  AC_ARG_ENABLE(coding-style-checks,
+    AC_HELP_STRING([--enable-coding-style-checks],
+                   [check coding style using grep]),
     [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=no] )
-    ],
-    [ # tp-glib is version x.y.z.1 - enable coding style checks by default
-AC_ARG_ENABLE(coding-style-checks,
-  AC_HELP_STRING([--disable-coding-style-checks],
-                 [don't check coding style using grep]),
+  AC_ARG_ENABLE(doc-checks,
+    AC_HELP_STRING([--enable-doc-checks],
+                   [check for complete documentation coverage]),
+    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no] )
+],
+[ # tp-glib is version x.y.z.1 - enable extra checks by default
+  AC_ARG_ENABLE(coding-style-checks,
+    AC_HELP_STRING([--disable-coding-style-checks],
+                   [do not check coding style using grep]),
     [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=yes])
-    ])
+  AC_ARG_ENABLE(doc-checks,
+    AC_HELP_STRING([--disable-doc-checks],
+                   [do not check for complete documentation coverage]),
+    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=yes])
+])
+
+AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
+AC_SUBST([ENABLE_DOC_CHECKS])
 
 if test x$enable_debug = xyes; then
   AC_DEFINE(ENABLE_DEBUG, [], [Enable debug code])
@@ -142,8 +153,6 @@ AC_ARG_ENABLE([installed-examples],
     [enable_installed_examples="$enableval"],
     [enable_installed_examples=no])
 AM_CONDITIONAL([INSTALL_EXAMPLES], [test "$enable_installed_examples" = yes])
-
-AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
 
 dnl docs/Makefile.am needs to know whether it's an out of tree build
 dnl (srcdir != builddir)
