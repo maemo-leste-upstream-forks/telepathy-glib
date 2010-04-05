@@ -100,6 +100,7 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 ENABLE_CODING_STYLE_CHECKS = @ENABLE_CODING_STYLE_CHECKS@
+ENABLE_DOC_CHECKS = @ENABLE_DOC_CHECKS@
 ERROR_CFLAGS = @ERROR_CFLAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
@@ -696,19 +697,39 @@ dist-hook: dist-check-gtkdoc dist-hook-local
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 
 @ENABLE_GTK_DOC_TRUE@check-local:
-@ENABLE_GTK_DOC_TRUE@	@if grep '^0 symbols incomplete' \
+@ENABLE_GTK_DOC_TRUE@	@err=0; \
+@ENABLE_GTK_DOC_TRUE@	if grep '^0 symbols incomplete' \
 @ENABLE_GTK_DOC_TRUE@		$(srcdir)/telepathy-glib-undocumented.txt; then\
-@ENABLE_GTK_DOC_TRUE@		:; else \
-@ENABLE_GTK_DOC_TRUE@		cat $(srcdir)/telepathy-glib-undocumented.txt; exit 1; fi
-@ENABLE_GTK_DOC_TRUE@	@if grep '^0 not documented' \
+@ENABLE_GTK_DOC_TRUE@		:; \
+@ENABLE_GTK_DOC_TRUE@	else \
+@ENABLE_GTK_DOC_TRUE@		cat $(srcdir)/telepathy-glib-undocumented.txt; \
+@ENABLE_GTK_DOC_TRUE@		err=1; \
+@ENABLE_GTK_DOC_TRUE@	fi; \
+@ENABLE_GTK_DOC_TRUE@	if grep '^0 not documented' \
 @ENABLE_GTK_DOC_TRUE@		$(srcdir)/telepathy-glib-undocumented.txt; then\
-@ENABLE_GTK_DOC_TRUE@		:; else \
-@ENABLE_GTK_DOC_TRUE@		cat $(srcdir)/telepathy-glib-undocumented.txt; exit 1; fi
-@ENABLE_GTK_DOC_TRUE@	@if grep . $(srcdir)/telepathy-glib-unused.txt; then\
-@ENABLE_GTK_DOC_TRUE@		echo "^^^ Unused symbols" >&2; exit 1; fi
-@ENABLE_GTK_DOC_TRUE@	@if test -e $(srcdir)/telepathy-glib-undeclared.txt &&\
+@ENABLE_GTK_DOC_TRUE@		:; \
+@ENABLE_GTK_DOC_TRUE@	else \
+@ENABLE_GTK_DOC_TRUE@		cat $(srcdir)/telepathy-glib-undocumented.txt; \
+@ENABLE_GTK_DOC_TRUE@		err=1; \
+@ENABLE_GTK_DOC_TRUE@	fi; \
+@ENABLE_GTK_DOC_TRUE@	if grep . $(srcdir)/telepathy-glib-unused.txt; then\
+@ENABLE_GTK_DOC_TRUE@		echo "^^^ Unused symbols" >&2; \
+@ENABLE_GTK_DOC_TRUE@		err=1; \
+@ENABLE_GTK_DOC_TRUE@	fi; \
+@ENABLE_GTK_DOC_TRUE@	if test -e $(srcdir)/telepathy-glib-undeclared.txt &&\
 @ENABLE_GTK_DOC_TRUE@		grep . $(srcdir)/telepathy-glib-undeclared.txt; then\
-@ENABLE_GTK_DOC_TRUE@		echo "^^^ Undeclared symbols" >&2; exit 1; fi
+@ENABLE_GTK_DOC_TRUE@		echo "^^^ Undeclared symbols" >&2; \
+@ENABLE_GTK_DOC_TRUE@		err=1; \
+@ENABLE_GTK_DOC_TRUE@	fi; \
+@ENABLE_GTK_DOC_TRUE@	case @ENABLE_DOC_CHECKS@/$$err in \
+@ENABLE_GTK_DOC_TRUE@		(yes/1) \
+@ENABLE_GTK_DOC_TRUE@			echo "Documentation check failed" >&2; \
+@ENABLE_GTK_DOC_TRUE@			exit $$err; \
+@ENABLE_GTK_DOC_TRUE@			;; \
+@ENABLE_GTK_DOC_TRUE@		(*) \
+@ENABLE_GTK_DOC_TRUE@			exit 0; \
+@ENABLE_GTK_DOC_TRUE@			;; \
+@ENABLE_GTK_DOC_TRUE@	esac
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
