@@ -63,6 +63,7 @@
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *manager_filename</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
 const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-name" title="tp_connection_manager_get_name ()">tp_connection_manager_get_name</a>      (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>);
+#define             <a class="link" href="telepathy-glib-connection-manager.html#TP-CONNECTION-MANAGER-FEATURE-CORE:CAPS" title="TP_CONNECTION_MANAGER_FEATURE_CORE">TP_CONNECTION_MANAGER_FEATURE_CORE</a>
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerWhenReadyCb" title="TpConnectionManagerWhenReadyCb ()">*TpConnectionManagerWhenReadyCb</a>)   (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *cm</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
@@ -121,6 +122,12 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-init-known-interfaces" title="tp_connection_manager_init_known_interfaces ()">tp_connection_manager_init_known_interfaces</a>
                                                         (<em class="parameter"><code><span class="type">void</span></code></em>);
+<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="returnvalue">TpConnectionManagerParam</span></a> * <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-copy" title="tp_connection_manager_param_copy ()">tp_connection_manager_param_copy</a>
+                                                        (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *in</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-free" title="tp_connection_manager_param_free ()">tp_connection_manager_param_free</a>    (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *param</code></em>);
+<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="returnvalue">TpConnectionManagerProtocol</span></a> * <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-copy" title="tp_connection_manager_protocol_copy ()">tp_connection_manager_protocol_copy</a>
+                                                        (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *in</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-free" title="tp_connection_manager_protocol_free ()">tp_connection_manager_protocol_free</a> (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *proto</code></em>);
 
 
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection-manager.html#tp-cli-connection-manager-callback-for-get-parameters" title="tp_cli_connection_manager_callback_for_get_parameters ()">*tp_cli_connection_manager_callback_for_get_parameters</a>)
@@ -249,10 +256,11 @@ can be used to open connections.
 Signature of the callback supplied to <a class="link" href="telepathy-glib-connection-manager.html#tp-list-connection-managers" title="tp_list_connection_managers ()"><code class="function">tp_list_connection_managers()</code></a>.
 </p>
 <p>
-Since 0.7.26, <a class="link" href="telepathy-glib-connection-manager.html#tp-list-connection-managers" title="tp_list_connection_managers ()"><code class="function">tp_list_connection_managers()</code></a> will wait for each
-<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> to become ready, so all connection managers passed
-to <em class="parameter"><code>callback</code></em> will be ready (<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-is-ready" title="tp_connection_manager_is_ready ()"><code class="function">tp_connection_manager_is_ready()</code></a> will return
-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>) unless an error occurred while launching that connection manager.
+Since 0.11.3, <a class="link" href="telepathy-glib-connection-manager.html#tp-list-connection-managers" title="tp_list_connection_managers ()"><code class="function">tp_list_connection_managers()</code></a> will
+wait for <a class="link" href="telepathy-glib-connection-manager.html#TP-CONNECTION-MANAGER-FEATURE-CORE:CAPS" title="TP_CONNECTION_MANAGER_FEATURE_CORE"><code class="literal">TP_CONNECTION_MANAGER_FEATURE_CORE</code></a> to be prepared (so
+<code class="function">tp_connection_manager_is_prepared()</code> will return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>) on each
+connection manager passed to <em class="parameter"><code>callback</code></em>, unless an error occurred while
+launching that connection manager.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -376,8 +384,8 @@ references to it are discarded.
 </p>
 <p>
 Various fields and methods on this object do not work until
-<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-is-ready" title="tp_connection_manager_is_ready ()"><code class="function">tp_connection_manager_is_ready()</code></a> returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>. Use
-<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-call-when-ready" title="tp_connection_manager_call_when_ready ()"><code class="function">tp_connection_manager_call_when_ready()</code></a> to wait for this to happen.
+<a class="link" href="telepathy-glib-connection-manager.html#TP-CONNECTION-MANAGER-FEATURE-CORE:CAPS" title="TP_CONNECTION_MANAGER_FEATURE_CORE"><code class="literal">TP_CONNECTION_MANAGER_FEATURE_CORE</code></a> is prepared. Use
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> to wait for this to happen.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -401,14 +409,14 @@ Various fields and methods on this object do not work until
 </td>
 </tr>
 <tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpConnectionManager-struct.running"></a>running</code></em> :1;</span></p></td>
+<td><p><span class="term">unsigned <a href="/usr/share/gtk-doc/html/gnutls/gnutls-crypto.html#int"><span class="type">int</span></a> <em class="structfield"><code><a name="TpConnectionManager-struct.running"></a>running</code></em> :1;</span></p></td>
 <td>
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the CM is currently known to be running. Should be
  considered read-only
 </td>
 </tr>
 <tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpConnectionManager-struct.always-introspect"></a>always_introspect</code></em> :1;</span></p></td>
+<td><p><span class="term">unsigned <a href="/usr/share/gtk-doc/html/gnutls/gnutls-crypto.html#int"><span class="type">int</span></a> <em class="structfield"><code><a name="TpConnectionManager-struct.always-introspect"></a>always_introspect</code></em> :1;</span></p></td>
 <td>
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the CM will be introspected automatically.
  Should be considered read-only: use the
@@ -416,7 +424,7 @@ Various fields and methods on this object do not work until
 </td>
 </tr>
 <tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpConnectionManager-struct.info-source"></a>info_source</code></em> :2;</span></p></td>
+<td><p><span class="term">unsigned <a href="/usr/share/gtk-doc/html/gnutls/gnutls-crypto.html#int"><span class="type">int</span></a> <em class="structfield"><code><a name="TpConnectionManager-struct.info-source"></a>info_source</code></em> :2;</span></p></td>
 <td>The source of <em class="parameter"><code>protocols</code></em>, or <a class="link" href="telepathy-glib-connection-manager.html#TP-CM-INFO-SOURCE-NONE:CAPS"><code class="literal">TP_CM_INFO_SOURCE_NONE</code></a>
  if no info has been discovered yet
 </td>
@@ -520,6 +528,27 @@ if a longer lifetime is required.
 </tbody>
 </table></div>
 <p class="since">Since 0.7.26</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_CONNECTION_MANAGER_FEATURE_CORE">
+<a name="TP-CONNECTION-MANAGER-FEATURE-CORE:CAPS"></a><h3>TP_CONNECTION_MANAGER_FEATURE_CORE</h3>
+<pre class="programlisting">#define             TP_CONNECTION_MANAGER_FEATURE_CORE</pre>
+<p>
+Expands to a call to a function that returns a quark for the "core" feature
+on a <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a>.
+</p>
+<p>
+When this feature is prepared, [...]
+</p>
+<p>
+(These are the same guarantees offered by the older
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-call-when-ready" title="tp_connection_manager_call_when_ready ()"><code class="function">tp_connection_manager_call_when_ready()</code></a> mechanism.)
+</p>
+<p>
+One can ask for a feature to be prepared using the
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> function, and waiting for it to callback.
+</p>
+<p class="since">Since 0.11.3</p>
 </div>
 <hr>
 <div class="refsect2" title="TpConnectionManagerWhenReadyCb ()">
@@ -1360,6 +1389,94 @@ call this function before calling
 <p class="since">Since 0.7.32</p>
 </div>
 <hr>
+<div class="refsect2" title="tp_connection_manager_param_copy ()">
+<a name="tp-connection-manager-param-copy"></a><h3>tp_connection_manager_param_copy ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="returnvalue">TpConnectionManagerParam</span></a> * tp_connection_manager_param_copy
+                                                        (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *in</code></em>);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> to copy
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly (slice) allocated <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a>, free with
+ <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-free" title="tp_connection_manager_param_free ()"><code class="function">tp_connection_manager_param_free()</code></a>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_connection_manager_param_free ()">
+<a name="tp-connection-manager-param-free"></a><h3>tp_connection_manager_param_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_connection_manager_param_free    (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *param</code></em>);</pre>
+<p>
+Frees <em class="parameter"><code>param</code></em>, which was copied with <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-copy" title="tp_connection_manager_param_copy ()"><code class="function">tp_connection_manager_param_copy()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>param</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam" title="TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> to free
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_connection_manager_protocol_copy ()">
+<a name="tp-connection-manager-protocol-copy"></a><h3>tp_connection_manager_protocol_copy ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="returnvalue">TpConnectionManagerProtocol</span></a> * tp_connection_manager_protocol_copy
+                                                        (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *in</code></em>);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> to copy
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly (slice) allocated <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a>, free with
+ <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-free" title="tp_connection_manager_protocol_free ()"><code class="function">tp_connection_manager_protocol_free()</code></a>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_connection_manager_protocol_free ()">
+<a name="tp-connection-manager-protocol-free"></a><h3>tp_connection_manager_protocol_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_connection_manager_protocol_free (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *proto</code></em>);</pre>
+<p>
+Frees <em class="parameter"><code>proto</code></em>, which was copied with <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-copy" title="tp_connection_manager_protocol_copy ()"><code class="function">tp_connection_manager_protocol_copy()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>proto</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> to free
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
 <div class="refsect2" title="tp_cli_connection_manager_callback_for_get_parameters ()">
 <a name="tp-cli-connection-manager-callback-for-get-parameters"></a><h3>tp_cli_connection_manager_callback_for_get_parameters ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                (*tp_cli_connection_manager_callback_for_get_parameters)
@@ -1794,7 +1911,7 @@ succeeds or fails.
 Start a RequestConnection method call.
 </p>
 <p>
-&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request a           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Connection&lt;/tp:dbus-ref&gt;           object representing a given account on a given           protocol with the given parameters. The method returns the bus name           and the object path where the new Connection object can be found,           which should have the status of Connection_Status_Disconnected, to           allow signal handlers to be attached before connecting is started           with the           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection"&gt;Connect&lt;/tp:dbus-ref&gt;           method.&lt;/p&gt;          &lt;p&gt;The parameters which must and may be provided in the parameters         dictionary can be discovered with the         &lt;tp:member-ref&gt;GetParameters&lt;/tp:member-ref&gt; method. These         parameters, their types, and their default values may be cached         in files so that all available connection managers do not need to be         started to discover which protocols are available.&lt;/p&gt;          &lt;p&gt;To request values for these parameters from the user, a client must         have prior knowledge of the meaning of the parameter names, so the         following well-known names and types should be used where appropriate:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;account (s)&lt;/dt&gt;           &lt;dd&gt;The identifier for the user's account on the server&lt;/dd&gt;            &lt;dt&gt;server (s)&lt;/dt&gt;           &lt;dd&gt;A fully qualified domain name or numeric IPv4 or IPv6 address.             Using the fully-qualified domain name form is recommended whenever             possible. If this parameter is specified and the account for that             protocol also specifies a server, this parameter should override             that in the user id.&lt;/dd&gt;            &lt;dt&gt;port (q)&lt;/dt&gt;           &lt;dd&gt;A TCP or UDP port number. If this parameter is specified and the             account for that protocol also specifies a port, this parameter             should override that in the account.&lt;/dd&gt;            &lt;dt&gt;password (s)&lt;/dt&gt;           &lt;dd&gt;A password associated with the account.&lt;/dd&gt;            &lt;dt&gt;require-encryption (b)&lt;/dt&gt;           &lt;dd&gt;Require encryption for this connection. A connection should fail             to connect if require-encryption is set and an encrypted connection             is not possible.&lt;/dd&gt;            &lt;dt&gt;register (b)&lt;/dt&gt;           &lt;dd&gt;This account should be created on the server if it does not             already exist.&lt;/dd&gt;            &lt;dt&gt;ident (s)&lt;/dt&gt;           &lt;dd&gt;The local username to report to the server if necessary, such as             in IRC.&lt;/dd&gt;            &lt;dt&gt;fullname (s)&lt;/dt&gt;           &lt;dd&gt;The user's full name if the service requires this when             authenticating or registering.&lt;/dd&gt;            &lt;dt&gt;stun-server (s)&lt;/dt&gt;           &lt;dd&gt;The IP address or FQDN of a STUN server to use for NAT traversal,             without any &amp;quot;:port&amp;quot; suffix.&lt;/dd&gt;            &lt;dt&gt;stun-port (q)&lt;/dt&gt;           &lt;dd&gt;The UDP port number on the stun-server to use for STUN. Only             significant if the stun-server is also supplied.&lt;/dd&gt;            &lt;dt&gt;keepalive-interval (u)&lt;/dt&gt;           &lt;dd&gt;The time in seconds between pings sent to the server to ensure             that the connection is still alive, or &lt;tt&gt;0&lt;/tt&gt; to disable such             pings.&lt;/dd&gt;         &lt;/dl&gt;          &lt;p&gt;Every successful RequestConnection call will cause the emission of a         &lt;tp:member-ref&gt;NewConnection&lt;/tp:member-ref&gt; signal for the same newly         created connection. The         requester can use the returned object path and service name         independently of the emission of that signal. In that case this signal         emission is most useful for, e.g. other processes that are monitoring         the creation of new connections.&lt;/p&gt;
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request a           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Connection&lt;/tp:dbus-ref&gt;           object representing a given account on a given           protocol with the given parameters. The method returns the bus name           and the object path where the new Connection object can be found,           which should have the status of Connection_Status_Disconnected, to           allow signal handlers to be attached before connecting is started           with the           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection"&gt;Connect&lt;/tp:dbus-ref&gt;           method.&lt;/p&gt;          &lt;p&gt;The parameters which must and may be provided in the parameters         dictionary can be discovered with the         &lt;tp:member-ref&gt;GetParameters&lt;/tp:member-ref&gt; method. These         parameters, their types, and their default values may be cached         in files so that all available connection managers do not need to be         started to discover which protocols are available.&lt;/p&gt;          &lt;p&gt;To request values for these parameters from the user, a client must         have prior knowledge of the meaning of the parameter names, so the         following well-known names and types should be used where appropriate:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;account (s)&lt;/dt&gt;           &lt;dd&gt;The identifier for the user's account on the server&lt;/dd&gt;            &lt;dt&gt;server (s)&lt;/dt&gt;           &lt;dd&gt;A fully qualified domain name or numeric IPv4 or IPv6 address.             Using the fully-qualified domain name form is recommended whenever             possible. If this parameter is specified and the account for that             protocol also specifies a server, this parameter should override             that in the user id.&lt;/dd&gt;            &lt;dt&gt;port (q)&lt;/dt&gt;           &lt;dd&gt;A TCP or UDP port number. If this parameter is specified and the             account for that protocol also specifies a port, this parameter             should override that in the account.&lt;/dd&gt;            &lt;dt&gt;password (s)&lt;/dt&gt;           &lt;dd&gt;A password associated with the account.&lt;/dd&gt;            &lt;dt&gt;require-encryption (b)&lt;/dt&gt;           &lt;dd&gt;Require encryption for this connection. A connection should fail             to connect if require-encryption is set and an encrypted connection             is not possible.&lt;/dd&gt;            &lt;dt&gt;register (b)&lt;/dt&gt;           &lt;dd&gt;This account should be created on the server if it does not             already exist.&lt;/dd&gt;            &lt;dt&gt;ident (s)&lt;/dt&gt;           &lt;dd&gt;The local username to report to the server if necessary, such as             in IRC.&lt;/dd&gt;            &lt;dt&gt;fullname (s)&lt;/dt&gt;           &lt;dd&gt;The user's full name if the service requires this when             authenticating or registering.&lt;/dd&gt;            &lt;dt&gt;stun-server (s)&lt;/dt&gt;           &lt;dd&gt;The IP address or FQDN of a STUN server to use for NAT traversal,             without any &amp;quot;:port&amp;quot; suffix.&lt;/dd&gt;            &lt;dt&gt;stun-port (q)&lt;/dt&gt;           &lt;dd&gt;The UDP port number on the stun-server to use for STUN. Only             significant if the stun-server is also supplied.&lt;/dd&gt;            &lt;dt&gt;keepalive-interval (u)&lt;/dt&gt;           &lt;dd&gt;The time in seconds between pings sent to the server to ensure             that the connection is still alive, or &lt;tt&gt;0&lt;/tt&gt; to disable such             pings.&lt;/dd&gt;         &lt;/dl&gt;          &lt;p&gt;Connection manager authors SHOULD avoid introducing parameters           whose default values would not be serializable in a           &lt;code&gt;.manager&lt;/code&gt; file.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The same serialization format is used in Mission Control             to store accounts.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Every successful RequestConnection call will cause the emission of a         &lt;tp:member-ref&gt;NewConnection&lt;/tp:member-ref&gt; signal for the same newly         created connection. The         requester can use the returned object path and service name         independently of the emission of that signal. In that case this signal         emission is most useful for, e.g. other processes that are monitoring         the creation of new connections.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -1883,7 +2000,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request a           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Connection&lt;/tp:dbus-ref&gt;           object representing a given account on a given           protocol with the given parameters. The method returns the bus name           and the object path where the new Connection object can be found,           which should have the status of Connection_Status_Disconnected, to           allow signal handlers to be attached before connecting is started           with the           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection"&gt;Connect&lt;/tp:dbus-ref&gt;           method.&lt;/p&gt;          &lt;p&gt;The parameters which must and may be provided in the parameters         dictionary can be discovered with the         &lt;tp:member-ref&gt;GetParameters&lt;/tp:member-ref&gt; method. These         parameters, their types, and their default values may be cached         in files so that all available connection managers do not need to be         started to discover which protocols are available.&lt;/p&gt;          &lt;p&gt;To request values for these parameters from the user, a client must         have prior knowledge of the meaning of the parameter names, so the         following well-known names and types should be used where appropriate:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;account (s)&lt;/dt&gt;           &lt;dd&gt;The identifier for the user's account on the server&lt;/dd&gt;            &lt;dt&gt;server (s)&lt;/dt&gt;           &lt;dd&gt;A fully qualified domain name or numeric IPv4 or IPv6 address.             Using the fully-qualified domain name form is recommended whenever             possible. If this parameter is specified and the account for that             protocol also specifies a server, this parameter should override             that in the user id.&lt;/dd&gt;            &lt;dt&gt;port (q)&lt;/dt&gt;           &lt;dd&gt;A TCP or UDP port number. If this parameter is specified and the             account for that protocol also specifies a port, this parameter             should override that in the account.&lt;/dd&gt;            &lt;dt&gt;password (s)&lt;/dt&gt;           &lt;dd&gt;A password associated with the account.&lt;/dd&gt;            &lt;dt&gt;require-encryption (b)&lt;/dt&gt;           &lt;dd&gt;Require encryption for this connection. A connection should fail             to connect if require-encryption is set and an encrypted connection             is not possible.&lt;/dd&gt;            &lt;dt&gt;register (b)&lt;/dt&gt;           &lt;dd&gt;This account should be created on the server if it does not             already exist.&lt;/dd&gt;            &lt;dt&gt;ident (s)&lt;/dt&gt;           &lt;dd&gt;The local username to report to the server if necessary, such as             in IRC.&lt;/dd&gt;            &lt;dt&gt;fullname (s)&lt;/dt&gt;           &lt;dd&gt;The user's full name if the service requires this when             authenticating or registering.&lt;/dd&gt;            &lt;dt&gt;stun-server (s)&lt;/dt&gt;           &lt;dd&gt;The IP address or FQDN of a STUN server to use for NAT traversal,             without any &amp;quot;:port&amp;quot; suffix.&lt;/dd&gt;            &lt;dt&gt;stun-port (q)&lt;/dt&gt;           &lt;dd&gt;The UDP port number on the stun-server to use for STUN. Only             significant if the stun-server is also supplied.&lt;/dd&gt;            &lt;dt&gt;keepalive-interval (u)&lt;/dt&gt;           &lt;dd&gt;The time in seconds between pings sent to the server to ensure             that the connection is still alive, or &lt;tt&gt;0&lt;/tt&gt; to disable such             pings.&lt;/dd&gt;         &lt;/dl&gt;          &lt;p&gt;Every successful RequestConnection call will cause the emission of a         &lt;tp:member-ref&gt;NewConnection&lt;/tp:member-ref&gt; signal for the same newly         created connection. The         requester can use the returned object path and service name         independently of the emission of that signal. In that case this signal         emission is most useful for, e.g. other processes that are monitoring         the creation of new connections.&lt;/p&gt;
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request a           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Connection&lt;/tp:dbus-ref&gt;           object representing a given account on a given           protocol with the given parameters. The method returns the bus name           and the object path where the new Connection object can be found,           which should have the status of Connection_Status_Disconnected, to           allow signal handlers to be attached before connecting is started           with the           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection"&gt;Connect&lt;/tp:dbus-ref&gt;           method.&lt;/p&gt;          &lt;p&gt;The parameters which must and may be provided in the parameters         dictionary can be discovered with the         &lt;tp:member-ref&gt;GetParameters&lt;/tp:member-ref&gt; method. These         parameters, their types, and their default values may be cached         in files so that all available connection managers do not need to be         started to discover which protocols are available.&lt;/p&gt;          &lt;p&gt;To request values for these parameters from the user, a client must         have prior knowledge of the meaning of the parameter names, so the         following well-known names and types should be used where appropriate:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;account (s)&lt;/dt&gt;           &lt;dd&gt;The identifier for the user's account on the server&lt;/dd&gt;            &lt;dt&gt;server (s)&lt;/dt&gt;           &lt;dd&gt;A fully qualified domain name or numeric IPv4 or IPv6 address.             Using the fully-qualified domain name form is recommended whenever             possible. If this parameter is specified and the account for that             protocol also specifies a server, this parameter should override             that in the user id.&lt;/dd&gt;            &lt;dt&gt;port (q)&lt;/dt&gt;           &lt;dd&gt;A TCP or UDP port number. If this parameter is specified and the             account for that protocol also specifies a port, this parameter             should override that in the account.&lt;/dd&gt;            &lt;dt&gt;password (s)&lt;/dt&gt;           &lt;dd&gt;A password associated with the account.&lt;/dd&gt;            &lt;dt&gt;require-encryption (b)&lt;/dt&gt;           &lt;dd&gt;Require encryption for this connection. A connection should fail             to connect if require-encryption is set and an encrypted connection             is not possible.&lt;/dd&gt;            &lt;dt&gt;register (b)&lt;/dt&gt;           &lt;dd&gt;This account should be created on the server if it does not             already exist.&lt;/dd&gt;            &lt;dt&gt;ident (s)&lt;/dt&gt;           &lt;dd&gt;The local username to report to the server if necessary, such as             in IRC.&lt;/dd&gt;            &lt;dt&gt;fullname (s)&lt;/dt&gt;           &lt;dd&gt;The user's full name if the service requires this when             authenticating or registering.&lt;/dd&gt;            &lt;dt&gt;stun-server (s)&lt;/dt&gt;           &lt;dd&gt;The IP address or FQDN of a STUN server to use for NAT traversal,             without any &amp;quot;:port&amp;quot; suffix.&lt;/dd&gt;            &lt;dt&gt;stun-port (q)&lt;/dt&gt;           &lt;dd&gt;The UDP port number on the stun-server to use for STUN. Only             significant if the stun-server is also supplied.&lt;/dd&gt;            &lt;dt&gt;keepalive-interval (u)&lt;/dt&gt;           &lt;dd&gt;The time in seconds between pings sent to the server to ensure             that the connection is still alive, or &lt;tt&gt;0&lt;/tt&gt; to disable such             pings.&lt;/dd&gt;         &lt;/dl&gt;          &lt;p&gt;Connection manager authors SHOULD avoid introducing parameters           whose default values would not be serializable in a           &lt;code&gt;.manager&lt;/code&gt; file.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The same serialization format is used in Mission Control             to store accounts.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Every successful RequestConnection call will cause the emission of a         &lt;tp:member-ref&gt;NewConnection&lt;/tp:member-ref&gt; signal for the same newly         created connection. The         requester can use the returned object path and service name         independently of the emission of that signal. In that case this signal         emission is most useful for, e.g. other processes that are monitoring         the creation of new connections.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">

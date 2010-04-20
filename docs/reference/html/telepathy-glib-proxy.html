@@ -47,11 +47,22 @@
 #include &lt;telepathy-glib/proxy.h&gt;
 
                     <a class="link" href="telepathy-glib-proxy.html#TpProxy-struct" title="TpProxy">TpProxy</a>;
+                    <a class="link" href="telepathy-glib-proxy.html#TpProxyFeature" title="TpProxyFeature">TpProxyFeature</a>;
+const <a class="link" href="telepathy-glib-proxy.html#TpProxyFeature" title="TpProxyFeature"><span class="returnvalue">TpProxyFeature</span></a> * (<a class="link" href="telepathy-glib-proxy.html#TpProxyClassFeatureListFunc" title="TpProxyClassFeatureListFunc ()">*TpProxyClassFeatureListFunc</a>)   (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxyClass" title="TpProxyClass"><span class="type">TpProxyClass</span></a> *cls</code></em>);
                     <a class="link" href="telepathy-glib-proxy.html#TpProxyClass" title="TpProxyClass">TpProxyClass</a>;
 #define             <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface" title="tp_proxy_has_interface()">tp_proxy_has_interface</a>              (self,
                                                          iface)
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface-by-id" title="tp_proxy_has_interface_by_id ()">tp_proxy_has_interface_by_id</a>        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-proxy.html#tp-proxy-is-prepared" title="tp_proxy_is_prepared ()">tp_proxy_is_prepared</a>                (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> feature</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()">tp_proxy_prepare_async</a>              (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> *features</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-finish" title="tp_proxy_prepare_finish ()">tp_proxy_prepare_finish</a>             (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html"><span class="type">GAsyncResult</span></a> *result</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
                     <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall" title="TpProxyPendingCall">TpProxyPendingCall</a>;
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-proxy.html#tp-proxy-pending-call-cancel" title="tp_proxy_pending_call_cancel ()">tp_proxy_pending_call_cancel</a>        (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall" title="TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> *pc</code></em>);
                     <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection">TpProxySignalConnection</a>;
@@ -124,6 +135,43 @@ Structure representing a Telepathy client-side proxy.
 <p class="since">Since 0.7.1</p>
 </div>
 <hr>
+<div class="refsect2" title="TpProxyFeature">
+<a name="TpProxyFeature"></a><h3>TpProxyFeature</h3>
+<pre class="programlisting">typedef struct _TpProxyFeature TpProxyFeature;</pre>
+<p>
+Structure representing a feature. This is currently opaque to code outside
+telepathy-glib itself.
+</p>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="TpProxyClassFeatureListFunc ()">
+<a name="TpProxyClassFeatureListFunc"></a><h3>TpProxyClassFeatureListFunc ()</h3>
+<pre class="programlisting">const <a class="link" href="telepathy-glib-proxy.html#TpProxyFeature" title="TpProxyFeature"><span class="returnvalue">TpProxyFeature</span></a> * (*TpProxyClassFeatureListFunc)   (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxyClass" title="TpProxyClass"><span class="type">TpProxyClass</span></a> *cls</code></em>);</pre>
+<p>
+A function called to list the features supported by
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>. Currently, only code inside telepathy-glib can
+implement this.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>cls</code></em> :</span></p></td>
+<td>a subclass of <a class="link" href="telepathy-glib-proxy.html#TpProxyClass" title="TpProxyClass"><span class="type">TpProxyClass</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an array of feature descriptions
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
 <div class="refsect2" title="TpProxyClass">
 <a name="TpProxyClass"></a><h3>TpProxyClass</h3>
 <pre class="programlisting">typedef struct {
@@ -134,7 +182,8 @@ Structure representing a Telepathy client-side proxy.
     unsigned int must_have_unique_name:1;
     guint _reserved_flags:31;
 
-    GCallback _reserved[4];
+    TpProxyClassFeatureListFunc list_features;
+    GCallback _reserved[3];
     gpointer priv;
 } TpProxyClass;
 </pre>
@@ -156,7 +205,7 @@ The class of a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span cl
 </td>
 </tr>
 <tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpProxyClass.must-have-unique-name"></a>must_have_unique_name</code></em> :1;</span></p></td>
+<td><p><span class="term">unsigned <a href="/usr/share/gtk-doc/html/gnutls/gnutls-crypto.html#int"><span class="type">int</span></a> <em class="structfield"><code><a name="TpProxyClass.must-have-unique-name"></a>must_have_unique_name</code></em> :1;</span></p></td>
 <td>If set <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> by a subclass, the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
    constructor will fail if a well-known bus name is given
 </td>
@@ -167,7 +216,14 @@ The class of a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span cl
 </td>
 </tr>
 <tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#GCallback"><span class="type">GCallback</span></a> <em class="structfield"><code><a name="TpProxyClass.-reserved"></a>_reserved</code></em>[4];</span></p></td>
+<td><p><span class="term"><a class="link" href="telepathy-glib-proxy.html#TpProxyClassFeatureListFunc" title="TpProxyClassFeatureListFunc ()"><span class="type">TpProxyClassFeatureListFunc</span></a> <em class="structfield"><code><a name="TpProxyClass.list-features"></a>list_features</code></em>;</span></p></td>
+<td>Defined by subclasses to provide features for
+ <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> (currently only usable within telepathy-glib
+ itself)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#GCallback"><span class="type">GCallback</span></a> <em class="structfield"><code><a name="TpProxyClass.-reserved"></a>_reserved</code></em>[3];</span></p></td>
 <td>Reserved for future expansion
 </td>
 </tr>
@@ -235,6 +291,203 @@ proxy implements the given interface.
 </tbody>
 </table></div>
 <p class="since">Since 0.7.1</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_proxy_is_prepared ()">
+<a name="tp-proxy-is-prepared"></a><h3>tp_proxy_is_prepared ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_proxy_is_prepared                (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> feature</code></em>);</pre>
+<p>
+Return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>feature</code></em> has been prepared successfully, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> if
+<em class="parameter"><code>feature</code></em> has not been requested, has not been prepared yet, or is not
+available on this object at all.
+</p>
+<p>
+(For instance, if <em class="parameter"><code>feature</code></em> is <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CHAT-STATES:CAPS" title="TP_CHANNEL_FEATURE_CHAT_STATES"><code class="literal">TP_CHANNEL_FEATURE_CHAT_STATES</code></a> and <em class="parameter"><code>self</code></em>
+is a <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> in a protocol that doesn't actually implement chat states,
+or is not a <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> at all, then this method will return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.)
+</p>
+<p>
+To prepare features, call <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>an instance of a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>feature</code></em> :</span></p></td>
+<td>a feature that is supported by <em class="parameter"><code>self</code></em>'s class
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>feature</code></em> has been prepared successfully
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_proxy_prepare_async ()">
+<a name="tp-proxy-prepare-async"></a><h3>tp_proxy_prepare_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_proxy_prepare_async              (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> *features</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+<p>
+<a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> itself does not support any features, but subclasses like
+<a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> can support features, which can either be core functionality like
+<a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>, or extended functionality like
+<a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CHAT-STATES:CAPS" title="TP_CHANNEL_FEATURE_CHAT_STATES"><code class="literal">TP_CHANNEL_FEATURE_CHAT_STATES</code></a>.
+</p>
+<p>
+Proxy instances start with no features prepared. When features are
+requested via <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>, the proxy starts to do the
+necessary setup to use those features.
+</p>
+<p>
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> always waits for core functionality of the proxy's
+class to be prepared, even if it is not specifically requested: for
+instance, because <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a> is core functionality of a
+<a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>,
+</p>
+<p>
+</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3</pre></td>
+        <td class="listing_code"><pre class="programlisting">TpChannel <span class="symbol">*</span>channel <span class="symbol">= ...;</span>
+
+<span class="function"><a href="telepathy-glib-proxy.html#tp-proxy-prepare-async">tp_proxy_prepare_async</a></span> <span class="symbol">(</span>channel<span class="symbol">,</span> NULL<span class="symbol">,</span> NULL<span class="symbol">,</span> callback<span class="symbol">,</span> user_data<span class="symbol">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+</p>
+<p>
+is equivalent to
+</p>
+<p>
+</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4</pre></td>
+        <td class="listing_code"><pre class="programlisting">TpChannel <span class="symbol">*</span>channel <span class="symbol">= ...;</span>
+GQuark features<span class="symbol">[] = {</span> TP_CHANNEL_FEATURE_CORE<span class="symbol">,</span> <span class="number">0</span> <span class="symbol">};</span>
+
+<span class="function"><a href="telepathy-glib-proxy.html#tp-proxy-prepare-async">tp_proxy_prepare_async</a></span> <span class="symbol">(</span>channel<span class="symbol">,</span> features<span class="symbol">,</span> NULL<span class="symbol">,</span> callback<span class="symbol">,</span> user_data<span class="symbol">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+</p>
+<p>
+If a feature represents core functionality (like <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>),
+failure to prepare it will result in <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> finishing
+unsuccessfully: if failure to prepare the feature indicates that the proxy
+is no longer useful, it will also emit <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>.
+</p>
+<p>
+If a feature represents non-essential functionality
+(like <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CHAT-STATES:CAPS" title="TP_CHANNEL_FEATURE_CHAT_STATES"><code class="literal">TP_CHANNEL_FEATURE_CHAT_STATES</code></a>), or is not supported by the object
+at all, then failure to prepare it is not fatal:
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> will complete successfully, but
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-is-prepared" title="tp_proxy_is_prepared ()"><code class="function">tp_proxy_is_prepared()</code></a> will still return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> for the feature, and
+accessor methods for the feature will typically return a dummy value.
+</p>
+<p>
+Some <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> subclasses automatically start to prepare their core
+features when instantiated, and features will sometimes become prepared as
+a side-effect of other actions, but to ensure that a feature is present you
+must generally call <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> and wait for the result.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>an instance of a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>features</code></em> :</span></p></td>
+<td>an  array of desired features, ending with 0; <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is
+ equivalent to an  array containing only 0
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>if not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, called exactly once, when the features have all
+ been prepared or failed to prepare, or after the proxy is invalidated
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data for <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_proxy_prepare_finish ()">
+<a name="tp-proxy-prepare-finish"></a><h3>tp_proxy_prepare_finish ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_proxy_prepare_finish             (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html"><span class="type">GAsyncResult</span></a> *result</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>
+Check for error in a call to <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>. An error here
+generally indicates that either the asynchronous call was cancelled,
+or <em class="parameter"><code>self</code></em> has emitted <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>an instance of a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>result</code></em> :</span></p></td>
+<td>the result passed to the callback of <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> is returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> (setting <em class="parameter"><code>error</code></em>) if <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> failed
+ or was cancelled
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
 </div>
 <hr>
 <div class="refsect2" title="TpProxyPendingCall">

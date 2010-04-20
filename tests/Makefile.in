@@ -34,9 +34,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-asv$(EXEEXT) test-availability-cmp$(EXEEXT) \
-	test-gnio-util$(EXEEXT) test-heap$(EXEEXT) \
-	test-internal-debug$(EXEEXT) test-intset$(EXEEXT) \
+noinst_PROGRAMS = test-asv$(EXEEXT) test-capabilities$(EXEEXT) \
+	test-availability-cmp$(EXEEXT) test-gnio-util$(EXEEXT) \
+	test-heap$(EXEEXT) test-internal-debug$(EXEEXT) \
+	test-intset$(EXEEXT) test-signal-connect-object$(EXEEXT) \
 	test-util$(EXEEXT) test-debug-domain$(EXEEXT)
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
@@ -74,6 +75,11 @@ test_availability_cmp_LDADD = $(LDADD)
 test_availability_cmp_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1)
+am_test_capabilities_OBJECTS = capabilities.$(OBJEXT)
+test_capabilities_OBJECTS = $(am_test_capabilities_OBJECTS)
+test_capabilities_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+	$(am__DEPENDENCIES_1)
 am_test_debug_domain_OBJECTS = debug-domain.$(OBJEXT)
 test_debug_domain_OBJECTS = $(am_test_debug_domain_OBJECTS)
 test_debug_domain_DEPENDENCIES =  \
@@ -100,6 +106,16 @@ test_intset_LDADD = $(LDADD)
 test_intset_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1)
+am_test_signal_connect_object_OBJECTS =  \
+	signal-connect-object.$(OBJEXT)
+test_signal_connect_object_OBJECTS =  \
+	$(am_test_signal_connect_object_OBJECTS)
+am__DEPENDENCIES_2 =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1)
+test_signal_connect_object_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_2)
 am_test_util_OBJECTS = util.$(OBJEXT)
 test_util_OBJECTS = $(am_test_util_OBJECTS)
 test_util_LDADD = $(LDADD)
@@ -133,13 +149,15 @@ AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
-	$(test_debug_domain_SOURCES) $(test_gnio_util_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
-	$(test_intset_SOURCES) $(test_util_SOURCES)
+	$(test_capabilities_SOURCES) $(test_debug_domain_SOURCES) \
+	$(test_gnio_util_SOURCES) $(test_heap_SOURCES) \
+	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
+	$(test_signal_connect_object_SOURCES) $(test_util_SOURCES)
 DIST_SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
-	$(test_debug_domain_SOURCES) $(test_gnio_util_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
-	$(test_intset_SOURCES) $(test_util_SOURCES)
+	$(test_capabilities_SOURCES) $(test_debug_domain_SOURCES) \
+	$(test_gnio_util_SOURCES) $(test_heap_SOURCES) \
+	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
+	$(test_signal_connect_object_SOURCES) $(test_util_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -328,8 +346,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
-    . \
     lib \
+    . \
     dbus \
     tools
 
@@ -364,6 +382,15 @@ EXTRA_DIST = README \
 test_asv_SOURCES = \
     asv.c
 
+
+# this one uses internal ABI
+test_capabilities_SOURCES = \
+    capabilities.c
+
+test_capabilities_LDADD = \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS)
+
 test_heap_SOURCES = \
     heap.c
 
@@ -384,6 +411,13 @@ test_debug_domain_SOURCES = \
 
 test_internal_debug_SOURCES = \
     internal-debug.c
+
+test_signal_connect_object_SOURCES = \
+    signal-connect-object.c
+
+test_signal_connect_object_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(LDADD)
 
 
 # this needs to link against the static convenience library so that
@@ -455,6 +489,9 @@ test-asv$(EXEEXT): $(test_asv_OBJECTS) $(test_asv_DEPENDENCIES)
 test-availability-cmp$(EXEEXT): $(test_availability_cmp_OBJECTS) $(test_availability_cmp_DEPENDENCIES) 
 	@rm -f test-availability-cmp$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_availability_cmp_OBJECTS) $(test_availability_cmp_LDADD) $(LIBS)
+test-capabilities$(EXEEXT): $(test_capabilities_OBJECTS) $(test_capabilities_DEPENDENCIES) 
+	@rm -f test-capabilities$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_capabilities_OBJECTS) $(test_capabilities_LDADD) $(LIBS)
 test-debug-domain$(EXEEXT): $(test_debug_domain_OBJECTS) $(test_debug_domain_DEPENDENCIES) 
 	@rm -f test-debug-domain$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_debug_domain_OBJECTS) $(test_debug_domain_LDADD) $(LIBS)
@@ -470,6 +507,9 @@ test-internal-debug$(EXEEXT): $(test_internal_debug_OBJECTS) $(test_internal_deb
 test-intset$(EXEEXT): $(test_intset_OBJECTS) $(test_intset_DEPENDENCIES) 
 	@rm -f test-intset$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_intset_OBJECTS) $(test_intset_LDADD) $(LIBS)
+test-signal-connect-object$(EXEEXT): $(test_signal_connect_object_OBJECTS) $(test_signal_connect_object_DEPENDENCIES) 
+	@rm -f test-signal-connect-object$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_signal_connect_object_OBJECTS) $(test_signal_connect_object_LDADD) $(LIBS)
 test-util$(EXEEXT): $(test_util_OBJECTS) $(test_util_DEPENDENCIES) 
 	@rm -f test-util$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_util_OBJECTS) $(test_util_LDADD) $(LIBS)
@@ -482,11 +522,13 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/availability-cmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-domain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnio-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/internal-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signal-connect-object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
 
 .c.o:

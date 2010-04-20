@@ -28,15 +28,18 @@
 #include <telepathy-glib/defs.h>
 #include <telepathy-glib/enums.h>
 #include <telepathy-glib/errors.h>
+#include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/handle.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/proxy-subclass.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CONNECTION
+#include "telepathy-glib/capabilities-internal.h"
 #include "telepathy-glib/connection-internal.h"
 #include "telepathy-glib/dbus-internal.h"
 #include "telepathy-glib/debug-internal.h"
+#include "telepathy-glib/proxy-internal.h"
 
 #include "_gen/tp-cli-connection-body.h"
 
@@ -59,6 +62,111 @@
  *
  * Since: 0.7.1
  */
+
+/**
+ * TP_CONNECTION_FEATURE_CORE:
+ *
+ * Expands to a call to a function that returns a quark for the "core" feature
+ * on a #TpConnection.
+ *
+ * When this feature is prepared, the basic properties of the Connection have
+ * been retrieved and are available for use, and change-notification has been
+ * set up for those that can change.
+ *
+ * Specifically, this implies that:
+ *
+ * <itemizedlist>
+ *  <listitem>#TpConnection:status has a value other than
+ *    %TP_UNKNOWN_CONNECTION_STATUS, and #TpConnection:status-reason is
+ *    the reason for changing to that status</listitem>
+ *  <listitem>interfaces that are always available have been added to the
+ *    #TpProxy:interfaces (although the set of interfaces is not guaranteed
+ *    to be complete until #TpConnection:status becomes
+ *    %TP_CONNECTION_STATUS_CONNECTED))</listitem>
+ * </itemizedlist>
+ *
+ * <note>
+ *  <title>prepared does not imply connected</title>
+ *  <para>Unlike the older #TpConnection:connection-ready mechanism, this
+ *    feature does not imply that the connection has successfully connected.
+ *    It only implies that an initial status (disconnected, connecting or
+ *    connected) has been discovered. %TP_CONNECTION_FEATURE_CONNECTED
+ *    is the closest equivalent of #TpConnection:connection-ready.</para>
+ * </note>
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.11.3
+ */
+
+GQuark
+tp_connection_get_feature_quark_core (void)
+{
+  return g_quark_from_static_string ("tp-connection-feature-core");
+}
+
+/**
+ * TP_CONNECTION_FEATURE_CONNECTED:
+ *
+ * Expands to a call to a function that returns a #GQuark representing the
+ * "connected" feature.
+ *
+ * When this feature is prepared, it means that the connection has become
+ * connected to the appropriate real-time communications service, and all
+ * information requested via other features has been updated accordingly.
+ * In particular, the following aspects of %TP_CONNECTION_FEATURE_CORE
+ * will be up to date:
+ *
+ * <itemizedlist>
+ *  <listitem>#TpConnection:status is
+ *    %TP_CONNECTION_STATUS_CONNECTED</listitem>
+ *  <listitem>#TpConnection:self-handle is valid and non-zero</listitem>
+ *  <listitem>all interfaces have been added to the set of
+ *    #TpProxy:interfaces, and that set will not change again</listitem>
+ * </itemizedlist>
+ *
+ * <note>
+ *   <title>Someone still has to call Connect()</title>
+ *   <para>Requesting this feature via tp_proxy_prepare_async() means that
+ *     you want to wait for the connection to connect, but it doesn't actually
+ *     start the process of connecting: to do that, call
+ *     tp_cli_connection_call_connect() separately.</para>
+ * </note>
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.11.3
+ */
+
+GQuark
+tp_connection_get_feature_quark_connected (void)
+{
+  return g_quark_from_static_string ("tp-connection-feature-connected");
+}
+
+/**
+ * TP_CONNECTION_FEATURE_CAPABILITIES:
+ *
+ * Expands to a call to a function that returns a #GQuark representing the
+ * "capabilities" feature.
+ *
+ * When this feature is prepared, the Requests.RequestableChannelClasses
+ * property of the Connection has been retrieved.
+ * In particular, the %TpConnection:capabilities property has been set.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.11.3
+ */
+
+GQuark
+tp_connection_get_feature_quark_capabilities (void)
+{
+  return g_quark_from_static_string ("tp-connection-feature-capabilities");
+}
 
 /**
  * TP_ERRORS_DISCONNECTED:
@@ -122,6 +230,7 @@ enum
   PROP_STATUS_REASON,
   PROP_CONNECTION_READY,
   PROP_SELF_HANDLE,
+  PROP_CAPABILITIES,
   N_PROPS
 };
 
@@ -151,6 +260,9 @@ tp_connection_get_property (GObject *object,
     case PROP_SELF_HANDLE:
       g_value_set_uint (value, self->priv->self_handle);
       break;
+    case PROP_CAPABILITIES:
+      g_value_set_object (value, self->priv->capabilities);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -158,26 +270,131 @@ tp_connection_get_property (GObject *object,
 }
 
 static void
+tp_connection_get_rcc_cb (TpProxy *proxy,
+    const GValue *value,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  TpConnection *self = (TpConnection *) proxy;
+
+  self->priv->fetching_rcc = FALSE;
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to get RequestableChannelClasses property, using an "
+          "empty set: %s", error->message);
+
+      /* it's NULL-safe */
+      self->priv->capabilities = _tp_capabilities_new (NULL, FALSE);
+      goto finally;
+    }
+
+  g_assert (self->priv->capabilities == NULL);
+
+  if (!G_VALUE_HOLDS (value, TP_ARRAY_TYPE_REQUESTABLE_CHANNEL_CLASS_LIST))
+    {
+      DEBUG ("RequestableChannelClasses is not of type a(a{sv}as), using an "
+          "empty set: %s", G_VALUE_TYPE_NAME (value));
+
+      /* it's NULL-safe */
+      self->priv->capabilities = _tp_capabilities_new (NULL, FALSE);
+      goto finally;
+    }
+
+  DEBUG ("CAPABILITIES ready");
+
+  self->priv->capabilities = _tp_capabilities_new (g_value_get_boxed (value),
+      FALSE);
+
+finally:
+  _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_CAPABILITIES,
+      TRUE);
+
+  g_object_notify ((GObject *) self, "capabilities");
+}
+
+static void
+tp_connection_maybe_prepare_capabilities (TpProxy *proxy)
+{
+  TpConnection *self = (TpConnection *) proxy;
+
+  if (self->priv->capabilities != NULL)
+    return;   /* already done */
+
+  if (!_tp_proxy_is_preparing (proxy, TP_CONNECTION_FEATURE_CAPABILITIES))
+    return;   /* not interested right now */
+
+  if (!self->priv->ready)
+    return;   /* will try again when ready */
+
+  if (self->priv->fetching_rcc)
+    return;   /* Another Get operation is running */
+
+  if (!tp_proxy_has_interface_by_id (proxy,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_REQUESTS))
+    {
+      /* Connection doesn't support Requests; set an empty TpCapabilities
+       * object as all calls to CreateChannel/EnsureChannel will fail. */
+
+      self->priv->capabilities = _tp_capabilities_new (NULL, FALSE);
+      _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_CAPABILITIES,
+          TRUE);
+      return;
+    }
+
+  self->priv->fetching_rcc = TRUE;
+
+  tp_cli_dbus_properties_call_get (self, -1,
+      TP_IFACE_CONNECTION_INTERFACE_REQUESTS, "RequestableChannelClasses",
+      tp_connection_get_rcc_cb, NULL, NULL, NULL);
+}
+
+static void
 tp_connection_continue_introspection (TpConnection *self)
 {
-  g_assert (self->priv->introspect_needed != NULL);
-
-  if (self->priv->introspect_needed->len == 0)
+  if (tp_proxy_get_invalidated (self) != NULL)
     {
-      g_array_free (self->priv->introspect_needed, TRUE);
-      self->priv->introspect_needed = NULL;
+      DEBUG ("Already invalidated: not becoming ready");
+      return;
+    }
 
-      DEBUG ("%p: connection ready", self);
+  if (self->priv->introspect_needed == NULL)
+    {
+      if (!self->priv->introspecting_after_connected)
+        {
+          /* Introspection will restart when we become CONNECTED */
+          DEBUG ("CORE ready, but not CONNECTED");
+          _tp_proxy_set_feature_prepared ((TpProxy *) self,
+            TP_CONNECTION_FEATURE_CORE, TRUE);
+          return;
+        }
+
+      /* signal CONNECTED; we shouldn't have gone to status CONNECTED for any
+       * reason that isn't REQUESTED :-) */
+      DEBUG ("%p: CORE and CONNECTED ready", self);
+      self->priv->status = TP_CONNECTION_STATUS_CONNECTED;
+      self->priv->status_reason = TP_CONNECTION_STATUS_REASON_REQUESTED;
       self->priv->ready = TRUE;
+
+      _tp_proxy_set_feature_prepared ((TpProxy *) self,
+          TP_CONNECTION_FEATURE_CONNECTED, TRUE);
+      _tp_proxy_set_feature_prepared ((TpProxy *) self,
+          TP_CONNECTION_FEATURE_CORE, TRUE);
+
+      g_object_notify ((GObject *) self, "status");
+      g_object_notify ((GObject *) self, "status-reason");
       g_object_notify ((GObject *) self, "connection-ready");
+
+      tp_connection_maybe_prepare_capabilities ((TpProxy *) self);
     }
   else
     {
-      guint i = self->priv->introspect_needed->len - 1;
-      TpConnectionProc next = g_array_index (self->priv->introspect_needed,
-          TpConnectionProc, i);
+      TpConnectionProc next = self->priv->introspect_needed->data;
 
-      g_array_remove_index (self->priv->introspect_needed, i);
+      self->priv->introspect_needed = g_list_delete_link (
+          self->priv->introspect_needed,
+          self->priv->introspect_needed);
       next (self);
     }
 }
@@ -190,6 +407,9 @@ got_contact_attribute_interfaces (TpProxy *proxy,
                                   GObject *weak_object G_GNUC_UNUSED)
 {
   TpConnection *self = TP_CONNECTION (proxy);
+
+  g_assert (self->priv->introspection_call != NULL);
+  self->priv->introspection_call = NULL;
 
   if (error == NULL)
     {
@@ -222,7 +442,9 @@ got_contact_attribute_interfaces (TpProxy *proxy,
                 }
             }
 
-          g_assert (self->priv->contact_attribute_interfaces == NULL);
+          if (self->priv->contact_attribute_interfaces != NULL)
+            g_array_free (self->priv->contact_attribute_interfaces, TRUE);
+
           self->priv->contact_attribute_interfaces = arr;
         }
       else
@@ -244,9 +466,15 @@ got_contact_attribute_interfaces (TpProxy *proxy,
 static void
 introspect_contacts (TpConnection *self)
 {
-  g_assert (self->priv->introspect_needed != NULL);
+  /* "This cannot change during the lifetime of the Connection." -- tp-spec */
+  if (self->priv->contact_attribute_interfaces != NULL)
+    {
+      tp_connection_continue_introspection (self);
+      return;
+    }
 
-  tp_cli_dbus_properties_call_get (self, -1,
+  g_assert (self->priv->introspection_call == NULL);
+  self->priv->introspection_call = tp_cli_dbus_properties_call_get (self, -1,
        TP_IFACE_CONNECTION_INTERFACE_CONTACTS, "ContactAttributeInterfaces",
        got_contact_attribute_interfaces, NULL, NULL, NULL);
 }
@@ -269,6 +497,8 @@ got_self_handle (TpConnection *self,
                  gpointer user_data G_GNUC_UNUSED,
                  GObject *user_object G_GNUC_UNUSED)
 {
+  g_assert (self->priv->introspection_call != NULL);
+  self->priv->introspection_call = NULL;
 
   if (error != NULL)
     {
@@ -293,8 +523,14 @@ on_self_handle_changed (TpConnection *self,
 static void
 get_self_handle (TpConnection *self)
 {
-  g_assert (self->priv->introspect_needed != NULL);
+  if (!self->priv->introspecting_after_connected)
+    {
+      tp_connection_continue_introspection (self);
+      return;
+    }
 
+  /* this only happens when we introspect after CONNECTED, so there's no need
+   * to track whether this is the first time */
   tp_cli_connection_connect_to_self_handle_changed (self,
       on_self_handle_changed, NULL, NULL, NULL, NULL);
 
@@ -302,8 +538,9 @@ get_self_handle (TpConnection *self)
    * but until Connection has other interesting properties, there's no point in
    * trying to implement a fast path; GetSelfHandle is the only one guaranteed
    * to work, so we'll sometimes have to call it anyway */
-  tp_cli_connection_call_get_self_handle (self, -1,
-       got_self_handle, NULL, NULL, NULL);
+  g_assert (self->priv->introspection_call == NULL);
+  self->priv->introspection_call = tp_cli_connection_call_get_self_handle (
+      self, -1, got_self_handle, NULL, NULL, NULL);
 }
 
 static void
@@ -313,7 +550,8 @@ tp_connection_got_interfaces_cb (TpConnection *self,
                                  gpointer user_data,
                                  GObject *user_object)
 {
-  TpConnectionProc func;
+  g_assert (self->priv->introspection_call != NULL);
+  self->priv->introspection_call = NULL;
 
   if (error != NULL)
     {
@@ -332,11 +570,9 @@ tp_connection_got_interfaces_cb (TpConnection *self,
     }
 
   g_assert (self->priv->introspect_needed == NULL);
-  self->priv->introspect_needed = g_array_new (FALSE, FALSE,
-      sizeof (TpConnectionProc));
-
-  func = get_self_handle;
-  g_array_append_val (self->priv->introspect_needed, func);
+  tp_verify_statement (sizeof (TpConnectionProc) <= sizeof (gpointer));
+  self->priv->introspect_needed = g_list_append (self->priv->introspect_needed,
+    get_self_handle);
 
   if (interfaces != NULL)
     {
@@ -352,8 +588,8 @@ tp_connection_got_interfaces_cb (TpConnection *self,
 
               if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS)
                 {
-                  func = introspect_contacts;
-                  g_array_append_val (self->priv->introspect_needed, func);
+                  self->priv->introspect_needed = g_list_append (
+                      self->priv->introspect_needed, introspect_contacts);
                 }
             }
           else
@@ -376,17 +612,36 @@ tp_connection_status_changed (TpConnection *self,
 {
   DEBUG ("%p: %d -> %d because %d", self, self->priv->status, status, reason);
 
-  self->priv->status = status;
-  self->priv->status_reason = reason;
-  g_object_notify ((GObject *) self, "status");
-  g_object_notify ((GObject *) self, "status-reason");
-
-  if (status == TP_CONNECTION_STATUS_CONNECTED &&
-      !self->priv->called_get_interfaces)
+  if (status == TP_CONNECTION_STATUS_CONNECTED)
     {
-      tp_cli_connection_call_get_interfaces (self, -1,
-          tp_connection_got_interfaces_cb, NULL, NULL, NULL);
-      self->priv->called_get_interfaces = TRUE;
+      if (self->priv->introspection_call != NULL &&
+          !self->priv->introspecting_after_connected)
+        {
+          /* We thought we knew what was going on, but now the connection has
+           * gone to CONNECTED and all bets are off. Start again! */
+          DEBUG ("Cancelling pre-CONNECTED introspection and starting again");
+          tp_proxy_pending_call_cancel (self->priv->introspection_call);
+          self->priv->introspection_call = NULL;
+          g_list_free (self->priv->introspect_needed);
+          self->priv->introspect_needed = NULL;
+        }
+
+      self->priv->introspecting_after_connected = TRUE;
+
+      /* we defer the perceived change to CONNECTED until ready */
+      if (self->priv->introspection_call == NULL)
+        {
+          self->priv->introspection_call =
+            tp_cli_connection_call_get_interfaces (self, -1,
+                tp_connection_got_interfaces_cb, NULL, NULL, NULL);
+        }
+    }
+  else
+    {
+      self->priv->status = status;
+      self->priv->status_reason = reason;
+      g_object_notify ((GObject *) self, "status");
+      g_object_notify ((GObject *) self, "status-reason");
     }
 }
 
@@ -550,11 +805,23 @@ tp_connection_got_status_cb (TpConnection *self,
 {
   DEBUG ("%p", self);
 
+  g_assert (self->priv->introspection_call != NULL);
+  self->priv->introspection_call = NULL;
+
   if (error == NULL)
     {
       DEBUG ("%p: Initial status is %d", self, status);
       tp_connection_status_changed (self, status,
           TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED);
+
+      /* try introspecting before CONNECTED - it might work... */
+      if (status != TP_CONNECTION_STATUS_CONNECTED &&
+          self->priv->introspection_call == NULL)
+        {
+          self->priv->introspection_call =
+            tp_cli_connection_call_get_interfaces (self, -1,
+                tp_connection_got_interfaces_cb, NULL, NULL, NULL);
+        }
     }
   else
     {
@@ -567,6 +834,13 @@ tp_connection_got_status_cb (TpConnection *self,
 static void
 tp_connection_invalidated (TpConnection *self)
 {
+  if (self->priv->introspection_call != NULL)
+    {
+      DEBUG ("Cancelling introspection");
+      tp_proxy_pending_call_cancel (self->priv->introspection_call);
+      self->priv->introspection_call = NULL;
+    }
+
   _tp_connection_set_self_handle (self, 0);
   _tp_connection_clean_up_handle_refs (self);
 }
@@ -591,7 +865,8 @@ tp_connection_constructor (GType type,
 
   /* get my initial status */
   DEBUG ("Calling GetStatus");
-  tp_cli_connection_call_get_status (self, -1,
+  g_assert (self->priv->introspection_call == NULL);
+  self->priv->introspection_call = tp_cli_connection_call_get_status (self, -1,
       tp_connection_got_status_cb, NULL, NULL, NULL);
 
   _tp_connection_init_handle_refs (self);
@@ -614,6 +889,7 @@ tp_connection_init (TpConnection *self)
   self->priv->status = TP_UNKNOWN_CONNECTION_STATUS;
   self->priv->status_reason = TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED;
   self->priv->contacts = g_hash_table_new (g_direct_hash, g_direct_equal);
+  self->priv->introspection_call = NULL;
 }
 
 static void
@@ -626,7 +902,7 @@ tp_connection_finalize (GObject *object)
   /* not true unless we were finalized before we were ready */
   if (self->priv->introspect_needed != NULL)
     {
-      g_array_free (self->priv->introspect_needed, TRUE);
+      g_list_free (self->priv->introspect_needed);
       self->priv->introspect_needed = NULL;
     }
 
@@ -670,7 +946,43 @@ tp_connection_dispose (GObject *object)
       self->priv->contacts = NULL;
     }
 
+  if (self->priv->capabilities != NULL)
+    {
+      g_object_unref (self->priv->capabilities);
+      self->priv->capabilities = NULL;
+    }
+
   ((GObjectClass *) tp_connection_parent_class)->dispose (object);
+}
+
+enum {
+    FEAT_CORE,
+    FEAT_CONNECTED,
+    FEAT_CAPABILITIES,
+    N_FEAT
+};
+
+static const TpProxyFeature *
+tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
+{
+  static TpProxyFeature features[N_FEAT + 1] = { { 0 } };
+
+  if (G_LIKELY (features[0].name != 0))
+    return features;
+
+  features[FEAT_CORE].name = TP_CONNECTION_FEATURE_CORE;
+  features[FEAT_CORE].core = TRUE;
+
+  features[FEAT_CONNECTED].name = TP_CONNECTION_FEATURE_CONNECTED;
+
+  features[FEAT_CAPABILITIES].name = TP_CONNECTION_FEATURE_CAPABILITIES;
+  features[FEAT_CAPABILITIES].start_preparing =
+    tp_connection_maybe_prepare_capabilities;
+
+  /* assert that the terminator at the end is there */
+  g_assert (features[N_FEAT].name == 0);
+
+  return features;
 }
 
 static void
@@ -693,12 +1005,20 @@ tp_connection_class_init (TpConnectionClass *klass)
   /* If you change this, you must also change TpChannel to stop asserting
    * that its connection has a unique name */
   proxy_class->must_have_unique_name = TRUE;
+  proxy_class->list_features = tp_connection_list_features;
 
   /**
    * TpConnection:status:
    *
-   * This connection's status, or TP_UNKNOWN_CONNECTION_STATUS if we don't
+   * This connection's status, or %TP_UNKNOWN_CONNECTION_STATUS if we don't
    * know yet.
+   *
+   * To wait for a valid status (and other properties), call
+   * tp_proxy_prepare_async() with the feature %TP_CONNECTION_FEATURE_CORE.
+   *
+   * Since version 0.11.3, the change to status
+   * %TP_CONNECTION_STATUS_CONNECTED is delayed slightly, until introspection
+   * of the connection has finished.
    */
   param_spec = g_param_spec_uint ("status", "Status",
       "The status of this connection", 0, G_MAXUINT32,
@@ -713,6 +1033,10 @@ tp_connection_class_init (TpConnectionClass *klass)
    *
    * The %TP_HANDLE_TYPE_CONTACT handle of the local user on this connection,
    * or 0 if we don't know yet or if the connection has become invalid.
+   *
+   * To wait for a valid self-handle (and other properties), call
+   * tp_proxy_prepare_async() with the feature
+   * %TP_CONNECTION_FEATURE_CONNECTED.
    */
   param_spec = g_param_spec_uint ("self-handle", "Self handle",
       "The local user's Contact handle on this connection", 0, G_MAXUINT32,
@@ -723,6 +1047,9 @@ tp_connection_class_init (TpConnectionClass *klass)
 
   /**
    * TpConnection:status-reason:
+   *
+   * To wait for a valid status (and other properties), call
+   * tp_proxy_prepare_async() with the feature %TP_CONNECTION_FEATURE_CORE.
    *
    * The reason why #TpConnection:status changed to its current value,
    * or TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED if unknown.
@@ -745,12 +1072,32 @@ tp_connection_class_init (TpConnectionClass *klass)
    * By the time this property becomes %TRUE, any extra interfaces will
    * have been set up and the #TpProxy:interfaces property will have been
    * populated.
+   *
+   * This is similar to %TP_CONNECTION_FEATURE_CONNECTED, except that once
+   * it has changed to %TRUE, it remains %TRUE even if the connection has
+   * been invalidated.
    */
   param_spec = g_param_spec_boolean ("connection-ready", "Connection ready?",
       "Initially FALSE; changes to TRUE when introspection finishes", FALSE,
       G_PARAM_READABLE
       | G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class, PROP_CONNECTION_READY,
+      param_spec);
+
+ /**
+   * TpConnection:capabilities:
+   *
+   * The %TpCapabilities object representing the capabilities of this
+   * connection, or NULL if we don't know yet.
+   *
+   * To wait for valid capability information, call tp_proxy_prepare_async()
+   * with the feature %TP_CONNECTION_FEATURE_CAPABILITIES.
+   */
+  param_spec = g_param_spec_object ("capabilities", "Capabilities",
+      "A TpCapabilities object representing the capabilities of the connection",
+      TP_TYPE_CAPABILITIES,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CAPABILITIES,
       param_spec);
 }
 
@@ -839,9 +1186,8 @@ finally:
  * @self: a connection
  *
  * Return the %TP_HANDLE_TYPE_CONTACT handle of the local user on this
- * connection, or 0 if the connection is not ready (the
- * TpConnection:connection-ready property is false) or has become invalid
- * (the TpProxy::invalidated signal).
+ * connection, or 0 if the self-handle is not known yet or the connection
+ * has become invalid (the TpProxy::invalidated signal).
  *
  * The returned handle is not necessarily valid forever (the
  * notify::self-handle signal will be emitted if it changes, which can happen
@@ -1541,4 +1887,22 @@ tp_connection_is_ready (TpConnection *self)
   g_return_val_if_fail (TP_IS_CONNECTION (self), FALSE);
 
   return self->priv->ready;
+}
+
+/**
+ * tp_connection_get_capabilities:
+ * @self: a connection
+ *
+ * <!-- -->
+ *
+ * Returns: the same #TpCapabilities as the #TpConnection:capabilities
+ * property
+ * Since: 0.11.3
+ */
+TpCapabilities *
+tp_connection_get_capabilities (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), FALSE);
+
+  return self->priv->capabilities;
 }

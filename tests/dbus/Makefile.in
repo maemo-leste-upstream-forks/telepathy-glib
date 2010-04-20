@@ -47,9 +47,9 @@ noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
 	test-connection-inject-bug16307$(EXEEXT) \
 	test-connection-getinterfaces-failure$(EXEEXT) \
 	test-contacts$(EXEEXT) test-contacts-bug-19101$(EXEEXT) \
-	test-contacts-mixin$(EXEEXT) test-dbus$(EXEEXT) \
-	test-disconnection$(EXEEXT) test-error-enum$(EXEEXT) \
-	test-example-no-protocols$(EXEEXT) \
+	test-contacts-mixin$(EXEEXT) test-contacts-slow-path$(EXEEXT) \
+	test-dbus$(EXEEXT) test-disconnection$(EXEEXT) \
+	test-error-enum$(EXEEXT) test-example-no-protocols$(EXEEXT) \
 	test-finalized-in-invalidated-handler$(EXEEXT) \
 	test-get-interface-after-invalidate$(EXEEXT) \
 	test-group-mixin$(EXEEXT) test-handle-repo$(EXEEXT) \
@@ -237,6 +237,14 @@ test_contacts_mixin_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_contacts_slow_path_OBJECTS = contacts-slow-path.$(OBJEXT)
+test_contacts_slow_path_OBJECTS =  \
+	$(am_test_contacts_slow_path_OBJECTS)
+test_contacts_slow_path_LDADD = $(LDADD)
+test_contacts_slow_path_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_dbus_OBJECTS = dbus.$(OBJEXT)
 test_dbus_OBJECTS = $(am_test_dbus_OBJECTS)
 test_dbus_LDADD = $(LDADD)
@@ -413,7 +421,8 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
 	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
-	$(test_contacts_mixin_SOURCES) $(test_dbus_SOURCES) \
+	$(test_contacts_mixin_SOURCES) \
+	$(test_contacts_slow_path_SOURCES) $(test_dbus_SOURCES) \
 	$(test_disconnection_SOURCES) $(test_error_enum_SOURCES) \
 	$(nodist_test_error_enum_SOURCES) \
 	$(test_example_no_protocols_SOURCES) \
@@ -443,7 +452,8 @@ DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
 	$(test_contacts_SOURCES) $(test_contacts_bug_19101_SOURCES) \
-	$(test_contacts_mixin_SOURCES) $(test_dbus_SOURCES) \
+	$(test_contacts_mixin_SOURCES) \
+	$(test_contacts_slow_path_SOURCES) $(test_dbus_SOURCES) \
 	$(test_disconnection_SOURCES) $(test_error_enum_SOURCES) \
 	$(test_example_no_protocols_SOURCES) \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
@@ -648,6 +658,7 @@ test_connection_getinterfaces_failure_SOURCES = \
 test_contacts_SOURCES = contacts.c
 test_contacts_bug_19101_SOURCES = contacts-bug-19101.c
 test_contacts_mixin_SOURCES = contacts-mixin.c
+test_contacts_slow_path_SOURCES = contacts-slow-path.c
 test_dbus_SOURCES = dbus.c
 test_disconnection_SOURCES = disconnection.c
 test_error_enum_SOURCES = error-enum.c
@@ -854,6 +865,9 @@ test-contacts-bug-19101$(EXEEXT): $(test_contacts_bug_19101_OBJECTS) $(test_cont
 test-contacts-mixin$(EXEEXT): $(test_contacts_mixin_OBJECTS) $(test_contacts_mixin_DEPENDENCIES) 
 	@rm -f test-contacts-mixin$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_contacts_mixin_OBJECTS) $(test_contacts_mixin_LDADD) $(LIBS)
+test-contacts-slow-path$(EXEEXT): $(test_contacts_slow_path_OBJECTS) $(test_contacts_slow_path_DEPENDENCIES) 
+	@rm -f test-contacts-slow-path$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_contacts_slow_path_OBJECTS) $(test_contacts_slow_path_LDADD) $(LIBS)
 test-dbus$(EXEEXT): $(test_dbus_OBJECTS) $(test_dbus_DEPENDENCIES) 
 	@rm -f test-dbus$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_dbus_OBJECTS) $(test_dbus_LDADD) $(LIBS)
@@ -938,6 +952,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-bug-19101.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-slow-path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disconnection.Po@am__quote@
