@@ -99,6 +99,13 @@
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-util.html#tp-value-array-unpack" title="tp_value_array_unpack ()">tp_value_array_unpack</a>               (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Value-arrays.html#GValueArray"><span class="type">GValueArray</span></a> *array</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> len</code></em>,
                                                          <em class="parameter"><code>...</code></em>);
+                    <a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef">TpWeakRef</a>;
+<a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="returnvalue">TpWeakRef</span></a> *         <a class="link" href="telepathy-glib-util.html#tp-weak-ref-new" title="tp_weak_ref_new ()">tp_weak_ref_new</a>                     (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a>            <a class="link" href="telepathy-glib-util.html#tp-weak-ref-dup-object" title="tp_weak_ref_dup_object ()">tp_weak_ref_dup_object</a>              (<em class="parameter"><code><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="type">TpWeakRef</span></a> *self</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a>            <a class="link" href="telepathy-glib-util.html#tp-weak-ref-get-user-data" title="tp_weak_ref_get_user_data ()">tp_weak_ref_get_user_data</a>           (<em class="parameter"><code><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="type">TpWeakRef</span></a> *self</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-util.html#tp-weak-ref-destroy" title="tp_weak_ref_destroy ()">tp_weak_ref_destroy</a>                 (<em class="parameter"><code><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="type">TpWeakRef</span></a> *self</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -725,7 +732,7 @@ Return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macro
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>s</code></em> :</span></p></td>
-<td> a string. type utf8<a href="http://foldoc.org/transfer%20none"><span class="acronym">transfer none</span></a>. </td>
+<td> a string. type utf8<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>. </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
@@ -1061,6 +1068,9 @@ This is intended to be a convenient way for objects to use themselves as
 user_data for callbacks without having to explicitly disconnect all the
 handlers in their finalizers.
 </p>
+<p>
+Changed in 0.10.4 and 0.11.3: <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#G-CONNECT-AFTER:CAPS"><code class="literal">G_CONNECT_AFTER</code></a> is now respected.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -1086,7 +1096,8 @@ handlers in their finalizers.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>connect_flags</code></em> :</span></p></td>
-<td>a combination of <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#GConnectFlags"><span class="type">GConnectFlags</span></a>.
+<td>a combination of <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#GConnectFlags"><span class="type">GConnectFlags</span></a>. Only
+ <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#G-CONNECT-AFTER:CAPS"><code class="literal">G_CONNECT_AFTER</code></a> and <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#G-CONNECT-SWAPPED:CAPS"><code class="literal">G_CONNECT_SWAPPED</code></a> are supported by this function.
 </td>
 </tr>
 <tr>
@@ -1113,7 +1124,7 @@ their type.
 <p>
 </p>
 <div class="example">
-<a name="id3571951"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
+<a name="id1000859"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
 <div class="example-contents">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
@@ -1179,7 +1190,7 @@ invalid when <em class="parameter"><code>array</code></em> is freed.
 <p>
 </p>
 <div class="example">
-<a name="id3572136"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
+<a name="id1001038"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
 <div class="example-contents">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
@@ -1225,6 +1236,136 @@ guint port<span class="symbol">;</span>
 </tbody>
 </table></div>
 <p class="since">Since 0.11.0</p>
+</div>
+<hr>
+<div class="refsect2" title="TpWeakRef">
+<a name="TpWeakRef"></a><h3>TpWeakRef</h3>
+<pre class="programlisting">typedef struct _TpWeakRef TpWeakRef;</pre>
+<p>
+A simple wrapper for a weak reference to a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a>, suitable for use in
+asynchronous calls which should only affect the object if it hasn't already
+been freed.
+</p>
+<p>
+As well as wrapping a weak reference to an object, this structure can
+contain an extra pointer to arbitrary data. This is useful for asynchronous
+calls which act on an object and some second piece of data, which are quite
+common in practice.
+</p>
+<p>
+If more than one piece of auxiliary data is required, the <em class="parameter"><code>user_data</code></em>
+argument to the constructor can be a struct or a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Value-arrays.html#GValueArray"><span class="type">GValueArray</span></a>.
+</p>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_weak_ref_new ()">
+<a name="tp-weak-ref-new"></a><h3>tp_weak_ref_new ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="returnvalue">TpWeakRef</span></a> *         tp_weak_ref_new                     (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);</pre>
+<p>
+Return a new weak reference wrapper for <em class="parameter"><code>object</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> an object to which to take a weak reference. type Object</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>optional additional data to store alongside the weak ref
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>destructor for <em class="parameter"><code>user_data</code></em>, called when the weak ref
+ is freed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a new weak-reference wrapper
+
+Free-function: <a class="link" href="telepathy-glib-util.html#tp-weak-ref-destroy" title="tp_weak_ref_destroy ()"><code class="function">tp_weak_ref_destroy()</code></a>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_weak_ref_dup_object ()">
+<a name="tp-weak-ref-dup-object"></a><h3>tp_weak_ref_dup_object ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a>            tp_weak_ref_dup_object              (<em class="parameter"><code><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="type">TpWeakRef</span></a> *self</code></em>);</pre>
+<p>
+If the weakly referenced object still exists, return a new reference to
+it. Otherwise, return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a weak reference
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a new reference, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+. type Object<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>. </td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_weak_ref_get_user_data ()">
+<a name="tp-weak-ref-get-user-data"></a><h3>tp_weak_ref_get_user_data ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a>            tp_weak_ref_get_user_data           (<em class="parameter"><code><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="type">TpWeakRef</span></a> *self</code></em>);</pre>
+<p>
+Return the additional data that was passed to <a class="link" href="telepathy-glib-util.html#tp-weak-ref-new" title="tp_weak_ref_new ()"><code class="function">tp_weak_ref_new()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a weak reference
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the additional data supplied in <a class="link" href="telepathy-glib-util.html#tp-weak-ref-new" title="tp_weak_ref_new ()"><code class="function">tp_weak_ref_new()</code></a>, which may be
+ <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_weak_ref_destroy ()">
+<a name="tp-weak-ref-destroy"></a><h3>tp_weak_ref_destroy ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_weak_ref_destroy                 (<em class="parameter"><code><a class="link" href="telepathy-glib-util.html#TpWeakRef" title="TpWeakRef"><span class="type">TpWeakRef</span></a> *self</code></em>);</pre>
+<p>
+Free a weak reference wrapper. This drops the weak reference to the
+object (if it still exists), and frees the user data with the user-supplied
+destructor function if one was provided.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a weak reference
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since 0.11.3</p>
 </div>
 </div>
 </div>

@@ -20,6 +20,7 @@
 
 #include <telepathy-glib/contact.h>
 
+#include <telepathy-glib/capabilities-internal.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/interfaces.h>
@@ -87,6 +88,8 @@ struct _TpContact {
  * @TP_CONTACT_FEATURE_PRESENCE: #TpContact:presence-type,
  *  #TpContact:presence-status and #TpContact:presence-message
  * @TP_CONTACT_FEATURE_LOCATION: #TpContact:location (available since 0.11.1)
+ * @TP_CONTACT_FEATURE_CAPABILITIES: #TpContact:capabilities
+ *  (available since 0.11.3)
  * @NUM_TP_CONTACT_FEATURES: 1 higher than the highest TpContactFeature
  *  supported by this version of telepathy-glib
  *
@@ -111,6 +114,7 @@ enum {
     PROP_PRESENCE_STATUS,
     PROP_PRESENCE_MESSAGE,
     PROP_LOCATION,
+    PROP_CAPABILITIES,
     N_PROPS
 };
 
@@ -122,6 +126,7 @@ typedef enum {
     CONTACT_FEATURE_FLAG_AVATAR_TOKEN = 1 << TP_CONTACT_FEATURE_AVATAR_TOKEN,
     CONTACT_FEATURE_FLAG_PRESENCE = 1 << TP_CONTACT_FEATURE_PRESENCE,
     CONTACT_FEATURE_FLAG_LOCATION = 1 << TP_CONTACT_FEATURE_LOCATION,
+    CONTACT_FEATURE_FLAG_CAPABILITIES = 1 << TP_CONTACT_FEATURE_CAPABILITIES,
 } ContactFeatureFlags;
 
 struct _TpContactPrivate {
@@ -144,6 +149,9 @@ struct _TpContactPrivate {
 
     /* location */
     GHashTable *location;
+
+    /* capabilities */
+    TpCapabilities *capabilities;
 };
 
 
@@ -380,6 +388,26 @@ tp_contact_get_location (TpContact *self)
   return self->priv->location;
 }
 
+/**
+ * tp_contact_get_capabilities:
+ * @self: a contact
+ *
+ * <!-- -->
+ *
+ * Returns: the same #TpCapabilities (or %NULL) as the
+ * #TpContact:capabilities property
+ *
+ * Since: 0.11.3
+ */
+TpCapabilities *
+tp_contact_get_capabilities (TpContact *self)
+{
+  g_return_val_if_fail (self != NULL, NULL);
+
+  return self->priv->capabilities;
+}
+
+
 void
 _tp_contact_connection_invalidated (TpContact *contact)
 {
@@ -418,6 +446,12 @@ tp_contact_dispose (GObject *object)
     {
       g_hash_table_unref (self->priv->location);
       self->priv->location = NULL;
+    }
+
+  if (self->priv->capabilities != NULL)
+    {
+      g_object_unref (self->priv->capabilities);
+      self->priv->capabilities = NULL;
     }
 
   ((GObjectClass *) tp_contact_parent_class)->dispose (object);
@@ -486,6 +520,10 @@ tp_contact_get_property (GObject *object,
 
     case PROP_LOCATION:
       g_value_set_boxed (value, tp_contact_get_location (self));
+      break;
+
+    case PROP_CAPABILITIES:
+      g_value_set_object (value, tp_contact_get_capabilities (self));
       break;
 
     default:
@@ -678,6 +716,28 @@ tp_contact_class_init (TpContactClass *klass)
       TP_HASH_TYPE_STRING_VARIANT_MAP,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_LOCATION,
+      param_spec);
+
+  /**
+   * TpContact:capabilities:
+   *
+   * The capabilities supported by this contact. If the underlying Connection
+   * doesn't support the ContactCapabilities interface, this property will
+   * contain the capabilities supported by the connection.
+   * Use tp_capabilities_is_specific_to_contact() to check if the capabilities
+   * are specific to this #TpContact or not.
+   *
+   * This may be %NULL if this #TpContact object has not been set up to track
+   * %TP_CONTACT_FEATURE_CAPABILITIES.
+   *
+   * Since: 0.11.3
+   */
+  param_spec = g_param_spec_object ("capabilities",
+      "Capabilities",
+      "Capabilities of the contact, or NULL",
+      TP_TYPE_CAPABILITIES,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CAPABILITIES,
       param_spec);
 }
 
@@ -1487,6 +1547,33 @@ contact_maybe_set_location (TpContact *self,
 }
 
 static void
+contact_set_capabilities (TpContact *self,
+    TpCapabilities *capabilities)
+{
+  if (self->priv->capabilities != NULL)
+    g_object_unref (self->priv->capabilities);
+
+  self->priv->has_features |= CONTACT_FEATURE_FLAG_CAPABILITIES;
+  self->priv->capabilities = g_object_ref (capabilities);
+  g_object_notify ((GObject *) self, "capabilities");
+}
+
+static void
+contact_maybe_set_capabilities (TpContact *self,
+    GPtrArray *arr)
+{
+  TpCapabilities *capabilities;
+
+  if (self == NULL || arr == NULL)
+    return;
+
+  capabilities = _tp_capabilities_new (arr, TRUE);
+  contact_set_capabilities (self, capabilities);
+  g_object_unref (capabilities);
+}
+
+
+static void
 contacts_presences_changed (TpConnection *connection,
                             GHashTable *presences,
                             gpointer user_data G_GNUC_UNUSED,
@@ -1652,6 +1739,89 @@ contacts_get_locations (ContactsContext *c)
 }
 
 static void
+set_conn_capabilities_on_contacts (GPtrArray *contacts,
+    TpConnection *connection)
+{
+  guint i;
+
+  for (i = 0; i < contacts->len; i++)
+    {
+      TpContact *contact = g_ptr_array_index (contacts, i);
+
+      contact_set_capabilities (contact, tp_connection_get_capabilities (
+            connection));
+    }
+}
+
+static void
+connection_capabilities_prepare_cb (GObject *object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  GError *error = NULL;
+  ContactsContext *c = user_data;
+
+  if (!tp_proxy_prepare_finish (object, res, &error))
+    {
+      DEBUG ("Failed to prepare Connection capabilities feature: %s %u: %s",
+          g_quark_to_string (error->domain), error->code, error->message);
+    }
+  else if (!tp_proxy_is_prepared (object, TP_CONNECTION_FEATURE_CAPABILITIES))
+    {
+      DEBUG ("Connection capabilities feature has not been actually prepared");
+    }
+  else
+    {
+      set_conn_capabilities_on_contacts (c->contacts, c->connection);
+    }
+
+  contacts_context_continue (c);
+  contacts_context_unref (c);
+}
+
+static void
+contacts_get_conn_capabilities (ContactsContext *c)
+{
+  GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
+  g_assert (c->handles->len == c->contacts->len);
+
+  c->refcount++;
+  tp_proxy_prepare_async (c->connection, features,
+      connection_capabilities_prepare_cb, c);
+}
+
+static void
+contacts_capabilities_updated (TpConnection *connection,
+    GHashTable *capabilities,
+    gpointer user_data G_GNUC_UNUSED,
+    GObject *weak_object G_GNUC_UNUSED)
+{
+  GHashTableIter iter;
+  gpointer handle, value;
+
+  g_hash_table_iter_init (&iter, capabilities);
+  while (g_hash_table_iter_next (&iter, &handle, &value))
+    {
+      TpContact *contact = _tp_connection_lookup_contact (connection,
+              GPOINTER_TO_UINT (handle));
+
+      contact_maybe_set_capabilities (contact, value);
+    }
+}
+
+static void
+contacts_bind_to_capabilities_updated (TpConnection *connection)
+{
+  if (!connection->priv->tracking_contact_caps_changed)
+    {
+      connection->priv->tracking_contact_caps_changed = TRUE;
+
+      tp_cli_connection_interface_contact_capabilities_connect_to_contact_capabilities_changed
+        (connection, contacts_capabilities_updated, NULL, NULL, NULL, NULL);
+    }
+}
+
+static void
 contacts_avatar_updated (TpConnection *connection,
                          TpHandle handle,
                          const gchar *new_token,
@@ -1749,19 +1919,50 @@ contacts_get_avatar_tokens (ContactsContext *c)
   contacts_context_continue (c);
 }
 
+static gboolean
+contacts_context_supports_iface (ContactsContext *context,
+    GQuark iface)
+{
+  GArray *contact_attribute_interfaces =
+      context->connection->priv->contact_attribute_interfaces;
+  guint i;
+
+  if (!tp_proxy_has_interface_by_id (context->connection,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS))
+    return FALSE;
+
+  g_assert (contact_attribute_interfaces != NULL);
+
+  for (i = 0; i < contact_attribute_interfaces->len; i++)
+    {
+      GQuark q = g_array_index (contact_attribute_interfaces, GQuark, i);
+
+      if (q == iface)
+        return TRUE;
+    }
+
+  return FALSE;
+}
 
 static void
 contacts_context_queue_features (ContactsContext *context,
                                  ContactFeatureFlags feature_flags)
 {
+  /* Start slow path for requested features that are not in
+   * ContactAttributeInterfaces */
+
   if ((feature_flags & CONTACT_FEATURE_FLAG_ALIAS) != 0 &&
+      !contacts_context_supports_iface (context,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING) &&
       tp_proxy_has_interface_by_id (context->connection,
         TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING))
     {
       g_queue_push_tail (&context->todo, contacts_get_aliases);
     }
 
-  if ((feature_flags & CONTACT_FEATURE_FLAG_PRESENCE) != 0)
+  if ((feature_flags & CONTACT_FEATURE_FLAG_PRESENCE) != 0 &&
+      !contacts_context_supports_iface (context,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_SIMPLE_PRESENCE))
     {
       if (tp_proxy_has_interface_by_id (context->connection,
             TP_IFACE_QUARK_CONNECTION_INTERFACE_SIMPLE_PRESENCE))
@@ -1780,6 +1981,8 @@ contacts_context_queue_features (ContactsContext *context,
     }
 
   if ((feature_flags & CONTACT_FEATURE_FLAG_AVATAR_TOKEN) != 0 &&
+      !contacts_context_supports_iface (context,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_AVATARS) &&
       tp_proxy_has_interface_by_id (context->connection,
         TP_IFACE_QUARK_CONNECTION_INTERFACE_AVATARS))
     {
@@ -1787,10 +1990,30 @@ contacts_context_queue_features (ContactsContext *context,
     }
 
   if ((feature_flags & CONTACT_FEATURE_FLAG_LOCATION) != 0 &&
+      !contacts_context_supports_iface (context,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_LOCATION) &&
       tp_proxy_has_interface_by_id (context->connection,
         TP_IFACE_QUARK_CONNECTION_INTERFACE_LOCATION))
     {
       g_queue_push_tail (&context->todo, contacts_get_locations);
+    }
+
+  /* Don't implement slow path for ContactCapabilities as Contacts is now
+   * mandatory so any CM supporting ContactCapabilities will implement
+   * Contacts as well.
+   *
+   * But if ContactCapabilities is NOT supported, we fallback to connection
+   * capabilities.
+   * */
+
+  if ((feature_flags & CONTACT_FEATURE_FLAG_CAPABILITIES) != 0 &&
+      !tp_proxy_has_interface_by_id (context->connection,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_CAPABILITIES))
+    {
+      DEBUG ("Connection doesn't support ContactCapabilities; fallback to "
+          "connection capabilities");
+
+      g_queue_push_tail (&context->todo, contacts_get_conn_capabilities);
     }
 }
 
@@ -1936,11 +2159,16 @@ contacts_got_attributes (TpConnection *connection,
 
       /* Location */
       boxed = tp_asv_get_boxed (asv,
-          TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE "/location",
+          TP_IFACE_CONNECTION_INTERFACE_LOCATION "/location",
           TP_HASH_TYPE_LOCATION);
       contact_maybe_set_location (contact, boxed);
 
-      /* FIXME: TP_IFACE_CONNECTION_INTERFACE_CAPABILITIES "/caps" */
+      /* Capabilities */
+      boxed = tp_asv_get_boxed (asv,
+          TP_IFACE_CONNECTION_INTERFACE_CONTACT_CAPABILITIES "/capabilities",
+          TP_ARRAY_TYPE_REQUESTABLE_CHANNEL_CLASS_LIST);
+
+      contact_maybe_set_capabilities (contact, boxed);
     }
 
   contacts_context_continue (c);
@@ -2008,6 +2236,15 @@ contacts_get_attributes (ContactsContext *context)
               g_ptr_array_add (array,
                   TP_IFACE_CONNECTION_INTERFACE_LOCATION);
               contacts_bind_to_location_updated (context->connection);
+            }
+        }
+      else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_CAPABILITIES)
+        {
+          if ((context->wanted & CONTACT_FEATURE_FLAG_CAPABILITIES) != 0)
+            {
+              g_ptr_array_add (array,
+                  TP_IFACE_CONNECTION_INTERFACE_CONTACT_CAPABILITIES);
+              contacts_bind_to_capabilities_updated (context->connection);
             }
         }
     }

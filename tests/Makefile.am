@@ -1,16 +1,18 @@
 SUBDIRS = \
-    . \
     lib \
+    . \
     dbus \
     tools
 
 noinst_PROGRAMS = \
     test-asv \
+    test-capabilities \
     test-availability-cmp \
     test-gnio-util \
     test-heap \
     test-internal-debug \
     test-intset \
+    test-signal-connect-object \
     test-util \
     test-debug-domain
 
@@ -45,6 +47,13 @@ EXTRA_DIST = README \
 test_asv_SOURCES = \
     asv.c
 
+# this one uses internal ABI
+test_capabilities_SOURCES = \
+    capabilities.c
+test_capabilities_LDADD = \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS)
+
 test_heap_SOURCES = \
     heap.c
 
@@ -65,6 +74,12 @@ test_debug_domain_SOURCES = \
 
 test_internal_debug_SOURCES = \
     internal-debug.c
+
+test_signal_connect_object_SOURCES = \
+    signal-connect-object.c
+test_signal_connect_object_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(LDADD)
 
 # this needs to link against the static convenience library so that
 # _tp_debug is still visible

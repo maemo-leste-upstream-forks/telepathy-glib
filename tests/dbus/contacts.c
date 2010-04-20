@@ -293,6 +293,8 @@ test_no_features (ContactsConnection *service_conn,
             TP_CONTACT_FEATURE_PRESENCE), "");
       MYASSERT (!tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_LOCATION), "");
+      MYASSERT (!tp_contact_has_feature (contacts[i],
+            TP_CONTACT_FEATURE_CAPABILITIES), "");
     }
 
   for (i = 0; i < 3; i++)
@@ -369,6 +371,63 @@ upgrade_cb (TpConnection *connection,
   } G_STMT_END
 
 static void
+free_rcc_list (GPtrArray *rccs)
+{
+  g_boxed_free (TP_ARRAY_TYPE_REQUESTABLE_CHANNEL_CLASS_LIST, rccs);
+}
+
+static void
+add_text_chat_class (GPtrArray *classes,
+    TpHandleType handle_type)
+{
+  GHashTable *fixed;
+  const gchar * const allowed[] = { NULL };
+  GValueArray *arr;
+
+  fixed = tp_asv_new (
+      TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+          TP_IFACE_CHANNEL_TYPE_TEXT,
+      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
+          handle_type,
+      NULL);
+
+  arr = tp_value_array_build (2,
+      TP_HASH_TYPE_STRING_VARIANT_MAP, fixed,
+      G_TYPE_STRV, allowed,
+      G_TYPE_INVALID);
+
+  g_hash_table_unref (fixed);
+
+  g_ptr_array_add (classes, arr);
+}
+
+static GHashTable *
+create_contact_caps (TpHandle *handles)
+{
+  GHashTable *capabilities;
+  GPtrArray *caps1, *caps2, *caps3;
+
+  capabilities = g_hash_table_new_full (NULL, NULL, NULL,
+      (GDestroyNotify) free_rcc_list);
+
+  /* Support private text chats */
+  caps1 = g_ptr_array_sized_new (2);
+  add_text_chat_class (caps1, TP_HANDLE_TYPE_CONTACT);
+  g_hash_table_insert (capabilities, GUINT_TO_POINTER (handles[0]), caps1);
+
+  /* Support text chatrooms */
+  caps2 = g_ptr_array_sized_new (1);
+  add_text_chat_class (caps2, TP_HANDLE_TYPE_ROOM);
+  g_hash_table_insert (capabilities, GUINT_TO_POINTER (handles[1]), caps2);
+
+  /* Don't support anything */
+  caps3 = g_ptr_array_sized_new (0);
+  g_hash_table_insert (capabilities, GUINT_TO_POINTER (handles[2]), caps3);
+
+  return capabilities;
+}
+
+static void
 test_upgrade (ContactsConnection *service_conn,
               TpConnection *client_conn)
 {
@@ -390,12 +449,13 @@ test_upgrade (ContactsConnection *service_conn,
   GHashTable *location_3 = tp_asv_new (
       "country",  G_TYPE_STRING, "Belgium", NULL);
   GHashTable *locations[] = { location_1, location_2, location_3 };
+  GHashTable *capabilities;
   TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
       (TpBaseConnection *) service_conn, TP_HANDLE_TYPE_CONTACT);
   TpContact *contacts[3];
   TpContactFeature features[] = { TP_CONTACT_FEATURE_ALIAS,
       TP_CONTACT_FEATURE_AVATAR_TOKEN, TP_CONTACT_FEATURE_PRESENCE,
-      TP_CONTACT_FEATURE_LOCATION };
+      TP_CONTACT_FEATURE_LOCATION, TP_CONTACT_FEATURE_CAPABILITIES };
   guint i;
 
   g_message (G_STRFUNC);
@@ -408,6 +468,10 @@ test_upgrade (ContactsConnection *service_conn,
       statuses, messages);
   contacts_connection_change_avatar_tokens (service_conn, 3, handles, tokens);
   contacts_connection_change_locations (service_conn, 3, handles, locations);
+
+  capabilities = create_contact_caps (handles);
+  contacts_connection_change_capabilities (service_conn, capabilities);
+  g_hash_table_unref (capabilities);
 
   tp_connection_get_contacts_by_handle (client_conn,
       3, handles,
@@ -449,6 +513,8 @@ test_upgrade (ContactsConnection *service_conn,
             TP_CONTACT_FEATURE_PRESENCE), "");
       MYASSERT (!tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_LOCATION), "");
+      MYASSERT (!tp_contact_has_feature (contacts[i],
+            TP_CONTACT_FEATURE_CAPABILITIES), "");
     }
 
   /* clean up before doing the second request */
@@ -499,6 +565,10 @@ test_upgrade (ContactsConnection *service_conn,
             TP_CONTACT_FEATURE_LOCATION), "");
       ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
           locations[i]);
+
+      MYASSERT (tp_contact_has_feature (contacts[i],
+            TP_CONTACT_FEATURE_CAPABILITIES), "");
+      MYASSERT (tp_contact_get_capabilities (contacts[i]) != NULL, "");
     }
 
   MYASSERT_SAME_UINT (tp_contact_get_presence_type (contacts[0]),
@@ -537,6 +607,7 @@ typedef struct
   gboolean presence_status_changed;
   gboolean presence_msg_changed;
   gboolean location_changed;
+  gboolean capabilities_changed;
 } notify_ctx;
 
 static void
@@ -548,6 +619,7 @@ notify_ctx_init (notify_ctx *ctx)
   ctx->presence_status_changed = FALSE;
   ctx->presence_msg_changed = FALSE;
   ctx->location_changed = FALSE;
+  ctx->capabilities_changed = FALSE;
 }
 
 static gboolean
@@ -555,7 +627,8 @@ notify_ctx_is_fully_changed (notify_ctx *ctx)
 {
   return ctx->alias_changed && ctx->avatar_token_changed &&
     ctx->presence_type_changed && ctx->presence_status_changed &&
-    ctx->presence_msg_changed && ctx->location_changed;
+    ctx->presence_msg_changed && ctx->location_changed &&
+    ctx->capabilities_changed;
 }
 
 static gboolean
@@ -563,7 +636,8 @@ notify_ctx_is_changed (notify_ctx *ctx)
 {
   return ctx->alias_changed || ctx->avatar_token_changed ||
     ctx->presence_type_changed || ctx->presence_status_changed ||
-    ctx->presence_msg_changed || ctx->location_changed;
+    ctx->presence_msg_changed || ctx->location_changed ||
+    ctx->capabilities_changed;
 }
 
 static void
@@ -583,6 +657,30 @@ contact_notify_cb (TpContact *contact,
     ctx->presence_msg_changed = TRUE;
   else if (!tp_strdiff (param->name, "location"))
     ctx->location_changed = TRUE;
+  else if (!tp_strdiff (param->name, "capabilities"))
+    ctx->capabilities_changed = TRUE;
+}
+
+static GHashTable *
+create_new_contact_caps (TpHandle *handles)
+{
+  GHashTable *capabilities;
+  GPtrArray *caps1, *caps2;
+
+  capabilities = g_hash_table_new_full (NULL, NULL, NULL,
+      (GDestroyNotify) free_rcc_list);
+
+  /* Support private text chats and chatrooms */
+  caps1 = g_ptr_array_sized_new (2);
+  add_text_chat_class (caps1, TP_HANDLE_TYPE_CONTACT);
+  add_text_chat_class (caps1, TP_HANDLE_TYPE_ROOM);
+  g_hash_table_insert (capabilities, GUINT_TO_POINTER (handles[0]), caps1);
+
+  /* Don't support anything */
+  caps2 = g_ptr_array_sized_new (0);
+  g_hash_table_insert (capabilities, GUINT_TO_POINTER (handles[1]), caps2);
+
+  return capabilities;
 }
 
 static void
@@ -619,12 +717,17 @@ test_features (ContactsConnection *service_conn,
   GHashTable *location_5 = tp_asv_new (
       "country",  G_TYPE_STRING, "Irland", NULL);
   GHashTable *new_locations[] = { location_4, location_5 };
+  GHashTable *capabilities, *new_capabilities;
+  gboolean support_text_chats[] = { TRUE, FALSE, FALSE };
+  gboolean support_text_chatrooms[] = { FALSE, TRUE, FALSE };
+  gboolean new_support_text_chats[] = { TRUE, FALSE };
+  gboolean new_support_text_chatrooms[] = { TRUE, FALSE };
   TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
       (TpBaseConnection *) service_conn, TP_HANDLE_TYPE_CONTACT);
   TpContact *contacts[3];
   TpContactFeature features[] = { TP_CONTACT_FEATURE_ALIAS,
       TP_CONTACT_FEATURE_AVATAR_TOKEN, TP_CONTACT_FEATURE_PRESENCE,
-      TP_CONTACT_FEATURE_LOCATION };
+      TP_CONTACT_FEATURE_LOCATION, TP_CONTACT_FEATURE_CAPABILITIES };
   guint i;
   struct {
       TpConnection *connection;
@@ -636,6 +739,7 @@ test_features (ContactsConnection *service_conn,
       gchar *presence_status;
       gchar *presence_message;
       GHashTable *location;
+      TpCapabilities *capabilities;
   } from_gobject;
   notify_ctx notify_ctx_alice, notify_ctx_chris;
 
@@ -649,6 +753,11 @@ test_features (ContactsConnection *service_conn,
       statuses, messages);
   contacts_connection_change_avatar_tokens (service_conn, 3, handles, tokens);
   contacts_connection_change_locations (service_conn, 3, handles, locations);
+
+  /* contact capabilities */
+  capabilities = create_contact_caps (handles);
+  contacts_connection_change_capabilities (service_conn, capabilities);
+  g_hash_table_unref (capabilities);
 
   tp_connection_get_contacts_by_handle (client_conn,
       3, handles,
@@ -671,6 +780,8 @@ test_features (ContactsConnection *service_conn,
 
   for (i = 0; i < 3; i++)
     {
+      TpCapabilities *caps;
+
       MYASSERT_SAME_UINT (tp_contact_get_handle (contacts[i]), handles[i]);
       MYASSERT_SAME_STRING (tp_contact_get_identifier (contacts[i]), ids[i]);
 
@@ -692,6 +803,17 @@ test_features (ContactsConnection *service_conn,
             TP_CONTACT_FEATURE_LOCATION), "");
       ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
           locations[i]);
+
+      MYASSERT (tp_contact_has_feature (contacts[i],
+            TP_CONTACT_FEATURE_CAPABILITIES), "");
+
+      caps = tp_contact_get_capabilities (contacts[i]);
+      MYASSERT (caps != NULL, "");
+      MYASSERT (tp_capabilities_is_specific_to_contact (caps), "");
+      MYASSERT (tp_capabilities_supports_text_chats (caps) ==
+          support_text_chats[i], " contact %u", i);
+      MYASSERT (tp_capabilities_supports_text_chatrooms (caps) ==
+          support_text_chatrooms[i], " contact %u", i);
     }
 
   MYASSERT_SAME_UINT (tp_contact_get_presence_type (contacts[0]),
@@ -719,6 +841,7 @@ test_features (ContactsConnection *service_conn,
       "presence-status", &from_gobject.presence_status,
       "presence-message", &from_gobject.presence_message,
       "location", &from_gobject.location,
+      "capabilities", &from_gobject.capabilities,
       NULL);
   MYASSERT (from_gobject.connection == client_conn, "");
   MYASSERT_SAME_UINT (from_gobject.handle, handles[0]);
@@ -730,6 +853,12 @@ test_features (ContactsConnection *service_conn,
   MYASSERT_SAME_STRING (from_gobject.presence_status, "available");
   MYASSERT_SAME_STRING (from_gobject.presence_message, "");
   ASSERT_SAME_LOCATION (from_gobject.location, locations[0]);
+  MYASSERT (tp_capabilities_is_specific_to_contact (from_gobject.capabilities),
+      "");
+  MYASSERT (tp_capabilities_supports_text_chats (from_gobject.capabilities)
+      == support_text_chats[0], "");
+  MYASSERT (tp_capabilities_supports_text_chatrooms (from_gobject.capabilities)
+      == support_text_chatrooms[0], "");
   g_object_unref (from_gobject.connection);
   g_free (from_gobject.identifier);
   g_free (from_gobject.alias);
@@ -737,6 +866,7 @@ test_features (ContactsConnection *service_conn,
   g_free (from_gobject.presence_status);
   g_free (from_gobject.presence_message);
   g_hash_table_unref (from_gobject.location);
+  g_object_unref (from_gobject.capabilities);
 
   notify_ctx_init (&notify_ctx_alice);
   g_signal_connect (contacts[0], "notify",
@@ -754,6 +884,11 @@ test_features (ContactsConnection *service_conn,
       new_tokens);
   contacts_connection_change_locations (service_conn, 2, handles,
       new_locations);
+
+  new_capabilities = create_new_contact_caps (handles);
+  contacts_connection_change_capabilities (service_conn, new_capabilities);
+  g_hash_table_unref (new_capabilities);
+
   test_connection_run_until_dbus_queue_processed (client_conn);
 
   g_assert (notify_ctx_is_fully_changed (&notify_ctx_alice));
@@ -761,6 +896,8 @@ test_features (ContactsConnection *service_conn,
 
   for (i = 0; i < 2; i++)
     {
+      TpCapabilities *caps;
+
       MYASSERT_SAME_UINT (tp_contact_get_handle (contacts[i]), handles[i]);
       MYASSERT_SAME_STRING (tp_contact_get_identifier (contacts[i]), ids[i]);
 
@@ -783,6 +920,14 @@ test_features (ContactsConnection *service_conn,
             TP_CONTACT_FEATURE_LOCATION), "");
       ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
           new_locations[i]);
+
+      caps = tp_contact_get_capabilities (contacts[i]);
+      MYASSERT (caps != NULL, "");
+      MYASSERT (tp_capabilities_is_specific_to_contact (caps), "");
+      MYASSERT (tp_capabilities_supports_text_chats (caps) ==
+          new_support_text_chats[i], " contact %u", i);
+      MYASSERT (tp_capabilities_supports_text_chatrooms (caps) ==
+          new_support_text_chatrooms[i], " contact %u", i);
     }
 
   MYASSERT_SAME_UINT (tp_contact_get_presence_type (contacts[0]),
@@ -1015,64 +1160,153 @@ test_by_id (TpConnection *client_conn)
   result.bad_ids = NULL;
 }
 
+static void
+test_capabilities_without_contact_caps (ContactsConnection *service_conn,
+    TpConnection *client_conn)
+{
+  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
+  TpHandle handles[] = { 0, 0, 0 };
+  static const gchar * const ids[] = { "alice", "bob", "chris" };
+  TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
+      (TpBaseConnection *) service_conn, TP_HANDLE_TYPE_CONTACT);
+  TpContact *contacts[3];
+  guint i;
+  TpContactFeature features[] = { TP_CONTACT_FEATURE_CAPABILITIES };
+
+  g_message (G_STRFUNC);
+
+  for (i = 0; i < 3; i++)
+    handles[i] = tp_handle_ensure (service_repo, ids[i], NULL, NULL);
+
+  tp_connection_get_contacts_by_handle (client_conn,
+      3, handles,
+      sizeof (features) / sizeof (features[0]), features,
+      by_handle_cb,
+      &result, finish, NULL);
+
+  g_main_loop_run (result.loop);
+
+  MYASSERT (result.contacts->len == 3, ": %u", result.contacts->len);
+  MYASSERT (result.invalid->len == 0, ": %u", result.invalid->len);
+  test_assert_no_error (result.error);
+
+  MYASSERT (g_ptr_array_index (result.contacts, 0) != NULL, "");
+  MYASSERT (g_ptr_array_index (result.contacts, 1) != NULL, "");
+  MYASSERT (g_ptr_array_index (result.contacts, 2) != NULL, "");
+
+  for (i = 0; i < 3; i++)
+    contacts[i] = g_ptr_array_index (result.contacts, i);
+
+  for (i = 0; i < 3; i++)
+    {
+      TpCapabilities *caps;
+
+      MYASSERT_SAME_UINT (tp_contact_get_handle (contacts[i]), handles[i]);
+      MYASSERT_SAME_STRING (tp_contact_get_identifier (contacts[i]), ids[i]);
+
+      MYASSERT (tp_contact_has_feature (contacts[i],
+            TP_CONTACT_FEATURE_CAPABILITIES), "");
+
+      caps = tp_contact_get_capabilities (contacts[i]);
+      MYASSERT (caps != NULL, "");
+      MYASSERT (!tp_capabilities_is_specific_to_contact (caps), "");
+      MYASSERT (!tp_capabilities_supports_text_chats (caps), " contact %u", i);
+      MYASSERT (!tp_capabilities_supports_text_chatrooms (caps),
+          " contact %u", i);
+    }
+
+  g_main_loop_unref (result.loop);
+  g_array_free (result.invalid, TRUE);
+  g_ptr_array_free (result.contacts, TRUE);
+  g_assert (result.error == NULL);
+}
+
+static void
+test_prepare_contact_caps_without_request (ContactsConnection *service_conn,
+    TpConnection *client_conn)
+{
+  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
+  TpHandle handles[] = { 0, 0, 0 };
+  static const gchar * const ids[] = { "alice", "bob", "chris" };
+  TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
+      (TpBaseConnection *) service_conn, TP_HANDLE_TYPE_CONTACT);
+  TpContact *contacts[3];
+  guint i;
+  TpContactFeature features[] = { TP_CONTACT_FEATURE_CAPABILITIES };
+
+  g_message (G_STRFUNC);
+
+  for (i = 0; i < 3; i++)
+    handles[i] = tp_handle_ensure (service_repo, ids[i], NULL, NULL);
+
+  tp_connection_get_contacts_by_handle (client_conn,
+      3, handles,
+      sizeof (features) / sizeof (features[0]), features,
+      by_handle_cb,
+      &result, finish, NULL);
+
+  g_main_loop_run (result.loop);
+
+  MYASSERT (result.contacts->len == 3, ": %u", result.contacts->len);
+  MYASSERT (result.invalid->len == 0, ": %u", result.invalid->len);
+  test_assert_no_error (result.error);
+
+  MYASSERT (g_ptr_array_index (result.contacts, 0) != NULL, "");
+  MYASSERT (g_ptr_array_index (result.contacts, 1) != NULL, "");
+  MYASSERT (g_ptr_array_index (result.contacts, 2) != NULL, "");
+
+  for (i = 0; i < 3; i++)
+    contacts[i] = g_ptr_array_index (result.contacts, i);
+
+  for (i = 0; i < 3; i++)
+    {
+      TpCapabilities *caps;
+      GPtrArray *classes;
+
+      MYASSERT_SAME_UINT (tp_contact_get_handle (contacts[i]), handles[i]);
+      MYASSERT_SAME_STRING (tp_contact_get_identifier (contacts[i]), ids[i]);
+
+      MYASSERT (tp_contact_has_feature (contacts[i],
+            TP_CONTACT_FEATURE_CAPABILITIES), "");
+
+      caps = tp_contact_get_capabilities (contacts[i]);
+      MYASSERT (caps != NULL, "");
+      MYASSERT (!tp_capabilities_is_specific_to_contact (caps), "");
+      classes = tp_capabilities_get_channel_classes (caps);
+      MYASSERT_SAME_UINT (classes->len, 0);
+    }
+
+  g_main_loop_unref (result.loop);
+  g_array_free (result.invalid, TRUE);
+  g_ptr_array_free (result.contacts, TRUE);
+  g_assert (result.error == NULL);
+}
+
 int
 main (int argc,
       char **argv)
 {
-  TpDBusDaemon *dbus;
-  ContactsConnection *service_conn, *legacy_service_conn;
-  TpBaseConnection *service_conn_as_base, *legacy_service_conn_as_base;
-  gchar *name, *legacy_name;
-  gchar *conn_path, *legacy_conn_path;
+  TpBaseConnection *base_connection, *legacy_base_connection,
+                   *no_requests_base_connection;
+  ContactsConnection *service_conn;
   GError *error = NULL;
-  TpConnection *client_conn, *legacy_client_conn;
+  TpConnection *client_conn, *legacy_client_conn, *no_requests_client_conn;
 
   /* Setup */
 
   g_type_init ();
   tp_debug_set_flags ("all");
-  dbus = test_dbus_daemon_dup_or_die ();
 
-  service_conn = CONTACTS_CONNECTION (g_object_new (
-        CONTACTS_TYPE_CONNECTION,
-        "account", "me@example.com",
-        "protocol", "simple",
-        NULL));
-  service_conn_as_base = TP_BASE_CONNECTION (service_conn);
-  MYASSERT (service_conn != NULL, "");
-  MYASSERT (service_conn_as_base != NULL, "");
+  test_create_and_connect_conn (CONTACTS_TYPE_CONNECTION, "me@test.com",
+      &base_connection, &client_conn);
 
-  legacy_service_conn = CONTACTS_CONNECTION (g_object_new (
-        LEGACY_CONTACTS_TYPE_CONNECTION,
-        "account", "legacy@example.com",
-        "protocol", "simple",
-        NULL));
-  legacy_service_conn_as_base = TP_BASE_CONNECTION (legacy_service_conn);
-  MYASSERT (legacy_service_conn != NULL, "");
-  MYASSERT (legacy_service_conn_as_base != NULL, "");
+  service_conn = CONTACTS_CONNECTION (base_connection);
 
-  MYASSERT (tp_base_connection_register (service_conn_as_base, "simple",
-        &name, &conn_path, &error), "");
-  test_assert_no_error (error);
+  test_create_and_connect_conn (LEGACY_CONTACTS_TYPE_CONNECTION, "me2@test.com",
+      &legacy_base_connection, &legacy_client_conn);
 
-  MYASSERT (tp_base_connection_register (legacy_service_conn_as_base, "simple",
-        &legacy_name, &legacy_conn_path, &error), "");
-  test_assert_no_error (error);
-
-  client_conn = tp_connection_new (dbus, name, conn_path, &error);
-  MYASSERT (client_conn != NULL, "");
-  test_assert_no_error (error);
-  MYASSERT (tp_connection_run_until_ready (client_conn, TRUE, &error, NULL),
-      "");
-  test_assert_no_error (error);
-
-  legacy_client_conn = tp_connection_new (dbus, legacy_name, legacy_conn_path,
-      &error);
-  MYASSERT (legacy_client_conn != NULL, "");
-  test_assert_no_error (error);
-  MYASSERT (tp_connection_run_until_ready (legacy_client_conn, TRUE, &error,
-        NULL), "");
-  test_assert_no_error (error);
+  test_create_and_connect_conn (NO_REQUESTS_TYPE_CONNECTION, "me3@test.com",
+      &no_requests_base_connection, &no_requests_client_conn);
 
   /* Tests */
 
@@ -1082,11 +1316,17 @@ main (int argc,
   test_upgrade (service_conn, client_conn);
   test_by_id (client_conn);
 
-  test_by_handle (legacy_service_conn, legacy_client_conn);
-  test_no_features (legacy_service_conn, legacy_client_conn);
-  test_features (legacy_service_conn, legacy_client_conn);
-  test_upgrade (legacy_service_conn, legacy_client_conn);
-  test_by_id (legacy_client_conn);
+  /* test if TpContact fallbacks to connection's capabilities if
+   * ContactCapabilities is not implemented. */
+  test_capabilities_without_contact_caps (
+      CONTACTS_CONNECTION (legacy_base_connection), legacy_client_conn);
+
+  /* test if TP_CONTACT_FEATURE_CAPABILITIES is prepared but with
+   * an empty set of capabilities if the connection doesn't support
+   * ContactCapabilities and Requests. */
+  test_prepare_contact_caps_without_request (
+      CONTACTS_CONNECTION (no_requests_base_connection),
+      no_requests_client_conn);
 
   /* Teardown */
 
@@ -1094,23 +1334,19 @@ main (int argc,
       "");
   test_assert_no_error (error);
   g_object_unref (client_conn);
+  g_object_unref (service_conn);
 
-  MYASSERT (tp_cli_connection_run_disconnect (legacy_client_conn, -1, &error,
-        NULL), "");
+  MYASSERT (tp_cli_connection_run_disconnect (legacy_client_conn, -1, &error, NULL),
+      "");
   test_assert_no_error (error);
   g_object_unref (legacy_client_conn);
+  g_object_unref (legacy_base_connection);
 
-  service_conn_as_base = NULL;
-  g_object_unref (service_conn);
-  g_free (name);
-  g_free (conn_path);
-
-  legacy_service_conn_as_base = NULL;
-  g_object_unref (legacy_service_conn);
-  g_free (legacy_name);
-  g_free (legacy_conn_path);
-
-  g_object_unref (dbus);
+  MYASSERT (tp_cli_connection_run_disconnect (no_requests_client_conn, -1,
+        &error, NULL), "");
+  test_assert_no_error (error);
+  g_object_unref (no_requests_client_conn);
+  g_object_unref (no_requests_base_connection);
 
   return 0;
 }

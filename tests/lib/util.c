@@ -265,3 +265,44 @@ _test_assert_strv_equals (const char *file,
         }
     }
 }
+
+void
+test_create_and_connect_conn (GType conn_type,
+    const gchar *account,
+    TpBaseConnection **service_conn,
+    TpConnection **client_conn)
+{
+  TpDBusDaemon *dbus;
+  gchar *name;
+  gchar *conn_path;
+  GError *error = NULL;
+
+  g_assert (service_conn != NULL);
+  g_assert (client_conn != NULL);
+
+  dbus = test_dbus_daemon_dup_or_die ();
+
+  *service_conn = g_object_new (
+        conn_type,
+        "account", account,
+        "protocol", "simple",
+        NULL);
+  g_assert (*service_conn != NULL);
+
+  g_assert (tp_base_connection_register (*service_conn, "simple",
+        &name, &conn_path, &error));
+  test_assert_no_error (error);
+
+  *client_conn = tp_connection_new (dbus, name, conn_path,
+      &error);
+  g_assert (*client_conn != NULL);
+  test_assert_no_error (error);
+
+  tp_cli_connection_call_connect (*client_conn, -1, NULL, NULL, NULL, NULL);
+  test_connection_run_until_ready (*client_conn);
+
+  g_free (name);
+  g_free (conn_path);
+
+  g_object_unref (dbus);
+}

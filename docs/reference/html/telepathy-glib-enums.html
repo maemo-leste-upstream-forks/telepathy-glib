@@ -109,6 +109,8 @@ enum                <a class="link" href="telepathy-glib-enums.html#TpTubeChanne
 #define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-TUBE-CHANNEL-STATES:CAPS" title="NUM_TP_TUBE_CHANNEL_STATES">NUM_TP_TUBE_CHANNEL_STATES</a>
 enum                <a class="link" href="telepathy-glib-enums.html#TpDebugLevel" title="enum TpDebugLevel">TpDebugLevel</a>;
 #define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-DEBUG-LEVELS:CAPS" title="NUM_TP_DEBUG_LEVELS">NUM_TP_DEBUG_LEVELS</a>
+enum                <a class="link" href="telepathy-glib-enums.html#TpContactInfoFlags" title="enum TpContactInfoFlags">TpContactInfoFlags</a>;
+enum                <a class="link" href="telepathy-glib-enums.html#TpContactInfoFieldFlags" title="enum TpContactInfoFieldFlags">TpContactInfoFieldFlags</a>;
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -250,17 +252,17 @@ Bitfield/set of flags generated from the Telepathy specification.
 <tbody>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-CONNECTED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_CONNECTED</code></span></p></td>
-<td>             The connection is alive and all methods are available.         
+<td>           The connection is fully connected and all methods are available.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-CONNECTING:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_CONNECTING</code></span></p></td>
-<td>             The connection has not yet been established, or has been             severed and reconnection is being attempted. Some methods may fail             until the connection has been established.         
+<td>           Connect has been called but the           connection has not yet been established. Some methods may fail           until the connection has been established.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-DISCONNECTED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_DISCONNECTED</code></span></p></td>
-<td>             The connection has been severed and no method calls are             valid. The object may be removed from the bus at any time.         
+<td>           If this is retrieved from GetStatus or           Status, it indicates that connection           has not yet been attempted. If seen in a           StatusChanged signal, it indicates           that the connection has failed; the Connection object SHOULD be           removed from D-Bus immediately, and all subsequent method calls           SHOULD fail.         
 </td>
 </tr>
 </tbody>
@@ -2221,6 +2223,58 @@ Bitfield/set of flags generated from the Telepathy specification.
 <p>
 1 higher than the highest valid value of <a class="link" href="telepathy-glib-enums.html#TpDebugLevel" title="enum TpDebugLevel"><span class="type">TpDebugLevel</span></a>.
 </p>
+</div>
+<hr>
+<div class="refsect2" title="enum TpContactInfoFlags">
+<a name="TpContactInfoFlags"></a><h3>enum TpContactInfoFlags</h3>
+<pre class="programlisting">typedef enum {
+    TP_CONTACT_INFO_FLAG_CAN_SET = 1,
+    TP_CONTACT_INFO_FLAG_PUSH = 2,
+} TpContactInfoFlags;
+</pre>
+<p>
+         Flags defining the behaviour of contact information on this protocol.         Some protocols provide no information on contacts without an explicit         request; others always push information to the connection manager as         and when it changes.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-CONTACT-INFO-FLAG-CAN-SET:CAPS"></a><span class="term"><code class="literal">TP_CONTACT_INFO_FLAG_CAN_SET</code></span></p></td>
+<td>           Indicates that SetContactInfo is           supported on this connection.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CONTACT-INFO-FLAG-PUSH:CAPS"></a><span class="term"><code class="literal">TP_CONTACT_INFO_FLAG_PUSH</code></span></p></td>
+<td>           Indicates that the protocol pushes all contacts' information to the           connection manager without prompting. If set,           ContactInfoChanged will be emitted           whenever contacts' information changes.         
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="enum TpContactInfoFieldFlags">
+<a name="TpContactInfoFieldFlags"></a><h3>enum TpContactInfoFieldFlags</h3>
+<pre class="programlisting">typedef enum {
+    TP_CONTACT_INFO_FIELD_FLAG_PARAMETERS_EXACT = 1,
+} TpContactInfoFieldFlags;
+</pre>
+<p>
+         Flags describing the behaviour of a vCard field.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><a name="TP-CONTACT-INFO-FIELD-FLAG-PARAMETERS-EXACT:CAPS"></a><span class="term"><code class="literal">TP_CONTACT_INFO_FIELD_FLAG_PARAMETERS_EXACT</code></span></p></td>
+<td>           If present, exactly the parameters indicated must be set on this             field; in the case of an empty list of parameters, this implies that             parameters may not be used.            If absent, and the list of allowed parameters is non-empty,             any (possibly empty) subset of that list may be             used.            If absent, and the list of allowed parameters is empty,             any parameters may be used.         
+</td>
+</tr></tbody>
+</table></div>
 </div>
 </div>
 </div>

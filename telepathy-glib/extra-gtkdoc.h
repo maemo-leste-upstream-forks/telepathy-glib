@@ -650,4 +650,23 @@
  *
  * This section documents the auto-generated C wrappers for the
  * Balance interface, used with #TpConnection objects.
+ *
+ * Since: 0.11.0
+ */
+
+/**
+ * SECTION:connection-contact-info
+ * @title: Connection ContactInfo interface
+ * @short_description: client-side wrappers for the ContactInfo interface
+ * @see_also: #TpConnection
+ *
+ * An interface for requesting information about a contact on a given
+ * connection. The information is represented as a list of fields forming a
+ * structured representation of a vCard (as defined by RFC 2426), using field
+ * names and semantics defined therein.
+ *
+ * This section documents the auto-generated C wrappers for the
+ * ContactInfo interface, used with #TpConnection objects.
+ *
+ * Since: 0.11.3
  */

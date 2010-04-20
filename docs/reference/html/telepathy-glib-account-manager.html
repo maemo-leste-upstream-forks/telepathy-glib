@@ -440,7 +440,7 @@ account <span class="symbol">=</span> <span class="function"><a href="telepathy-
 <p>
 The list of valid accounts returned is not guaranteed to have been retrieved
 until <a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAGER-FEATURE-CORE:CAPS" title="TP_ACCOUNT_MANAGER_FEATURE_CORE"><code class="literal">TP_ACCOUNT_MANAGER_FEATURE_CORE</code></a> is prepared
-(<a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-async" title="tp_account_manager_prepare_async ()"><code class="function">tp_account_manager_prepare_async()</code></a> has returned). Until this feature has
+(<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has returned). Until this feature has
 been prepared, an empty list (<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>) will be returned.
 </p>
 <div class="variablelist"><table border="0">
@@ -481,7 +481,7 @@ If no accounts are enabled or valid the output will be
 </p>
 <p>
 The return value of this function is not guaranteed to have been retrieved
-until <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-async" title="tp_account_manager_prepare_async ()"><code class="function">tp_account_manager_prepare_async()</code></a> has finished; until then, the
+until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has finished; until then, the
 value will be the same as if no accounts are enabled or valid.
 </p>
 <div class="variablelist"><table border="0">
@@ -531,7 +531,8 @@ You can find the most available presence across all accounts by calling
 </p>
 <p>
 Setting a requested presence on all accounts will have no effect
-until <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-async" title="tp_account_manager_prepare_async ()"><code class="function">tp_account_manager_prepare_async()</code></a> has finished.
+until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
+(or the older <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-async" title="tp_account_manager_prepare_async ()"><code class="function">tp_account_manager_prepare_async()</code></a>) has finished.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -592,7 +593,7 @@ are available for use, and change-notification has been set up.
 </p>
 <p>
 One can ask for a feature to be prepared using the
-<a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-async" title="tp_account_manager_prepare_async ()"><code class="function">tp_account_manager_prepare_async()</code></a> function, and waiting for it to callback.
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> function, and waiting for it to callback.
 </p>
 <p class="since">Since 0.9.0</p>
 </div>
@@ -619,7 +620,7 @@ One can ask for a feature to be prepared using the
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>feature</code></em> is ready on <em class="parameter"><code>manager</code></em>, otherwise <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
+<td> the same thing as <a class="link" href="telepathy-glib-proxy.html#tp-proxy-is-prepared" title="tp_proxy_is_prepared ()"><code class="function">tp_proxy_is_prepared()</code></a>
 
 </td>
 </tr>
@@ -635,19 +636,20 @@ One can ask for a feature to be prepared using the
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
 <p>
-Requests an asynchronous preparation of <em class="parameter"><code>manager</code></em> with the features specified
+Requests an asynchronous preparation of <em class="parameter"><code>manager</code></em> with
+<a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAGER-FEATURE-CORE:CAPS" title="TP_ACCOUNT_MANAGER_FEATURE_CORE"><code class="literal">TP_ACCOUNT_MANAGER_FEATURE_CORE</code></a>, plus any features specified
 by <em class="parameter"><code>features</code></em>. When the operation is finished, <em class="parameter"><code>callback</code></em> will be called. You
 can then call <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-finish" title="tp_account_manager_prepare_finish ()"><code class="function">tp_account_manager_prepare_finish()</code></a> to get the result of the
 operation.
 </p>
 <p>
-If <em class="parameter"><code>features</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, then <em class="parameter"><code>callback</code></em> will be called when the implied
-<a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAGER-FEATURE-CORE:CAPS" title="TP_ACCOUNT_MANAGER_FEATURE_CORE"><code class="literal">TP_ACCOUNT_MANAGER_FEATURE_CORE</code></a> feature is ready.
-</p>
-<p>
 If <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is given to <em class="parameter"><code>callback</code></em>, then no callback will be called when the
 operation is finished. Instead, it will simply set <em class="parameter"><code>features</code></em> on <em class="parameter"><code>manager</code></em>.
 Note that if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, then <em class="parameter"><code>user_data</code></em> must also be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+</p>
+<p>
+In version 0.11.3 or later, this is equivalent to calling
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> with the same arguments.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
