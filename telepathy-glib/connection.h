@@ -49,6 +49,44 @@ struct _TpConnection {
     TpConnectionPrivate *priv;
 };
 
+typedef struct _TpAvatarRequirements TpAvatarRequirements;
+struct _TpAvatarRequirements
+{
+  gchar **supported_mime_types;
+  guint minimum_width;
+  guint minimum_height;
+  guint recommended_width;
+  guint recommended_height;
+  guint maximum_width;
+  guint maximum_height;
+  guint maximum_bytes;
+
+  /*<private>*/
+  gpointer _1;
+  gpointer _2;
+  gpointer _3;
+  gpointer _4;
+};
+
+#define TP_TYPE_AVATAR_REQUIREMENTS (tp_avatar_requirements_get_type ())
+GType tp_avatar_requirements_get_type (void);
+
+TpAvatarRequirements * tp_avatar_requirements_new (
+    GStrv supported_mime_types,
+    guint minimum_width,
+    guint minimum_height,
+    guint recommended_width,
+    guint recommended_height,
+    guint maximum_width,
+    guint maximum_height,
+    guint maximum_bytes);
+
+TpAvatarRequirements * tp_avatar_requirements_copy (
+    TpAvatarRequirements *self);
+
+void tp_avatar_requirements_destroy (TpAvatarRequirements *self);
+
+
 GType tp_connection_get_type (void);
 
 #define TP_ERRORS_DISCONNECTED (tp_errors_disconnected_quark ())
@@ -83,6 +121,9 @@ TpHandle tp_connection_get_self_handle (TpConnection *self);
 
 TpCapabilities * tp_connection_get_capabilities (TpConnection *self);
 
+TpAvatarRequirements * tp_connection_get_avatar_requirements (
+    TpConnection *self);
+
 gboolean tp_connection_is_ready (TpConnection *self);
 
 #ifndef TP_DISABLE_DEPRECATED
@@ -115,6 +156,9 @@ gint tp_connection_presence_type_cmp_availability (TpConnectionPresenceType p1,
 gboolean tp_connection_parse_object_path (TpConnection *self, gchar **protocol,
     gchar **cm_name);
 
+const gchar *tp_connection_get_detailed_error (TpConnection *self,
+    const GHashTable **details);
+
 #define TP_CONNECTION_FEATURE_CORE \
   (tp_connection_get_feature_quark_core ())
 GQuark tp_connection_get_feature_quark_core (void) G_GNUC_CONST;
@@ -126,6 +170,10 @@ GQuark tp_connection_get_feature_quark_connected (void) G_GNUC_CONST;
 #define TP_CONNECTION_FEATURE_CAPABILITIES \
   (tp_connection_get_feature_quark_capabilities ())
 GQuark tp_connection_get_feature_quark_capabilities (void) G_GNUC_CONST;
+
+#define TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS \
+  (tp_connection_get_feature_quark_avatar_requirements ())
+GQuark tp_connection_get_feature_quark_avatar_requirements (void) G_GNUC_CONST;
 
 /* connection-handles.c */
 

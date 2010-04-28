@@ -15,6 +15,12 @@
 
 @SET_MAKE@
 
+# To be included by Makefile.am.
+
+# To be included by Makefile.am.
+
+# To be included by Makefile.am.
+
 
 
 VPATH = @srcdir@
@@ -37,6 +43,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/abi.am $(srcdir)/codegen.am \
+	$(srcdir)/introspection.am \
 	$(srcdir)/telepathy-glib-uninstalled.pc.in \
 	$(srcdir)/telepathy-glib.pc.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
@@ -47,13 +55,17 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 @HAVE_LD_VERSION_SCRIPT_TRUE@    $(VERSION_SCRIPT_ARG)=_gen/version-script.txt
 
 @HAVE_LD_VERSION_SCRIPT_FALSE@am__append_4 = -export-symbols-regex '^tp'
+@HAVE_INTROSPECTION_TRUE@am__append_5 = \
+@HAVE_INTROSPECTION_TRUE@    $(gir_DATA) \
+@HAVE_INTROSPECTION_TRUE@    $(typelibs_DATA)
+
 subdir = telepathy-glib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/linker.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/introspection.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/linker.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/tp-compiler-flag.m4 \
 	$(top_srcdir)/m4/tp-compiler-warnings.m4 \
 	$(top_srcdir)/configure.ac
@@ -84,7 +96,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(girdir)" \
+	"$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(typelibsdir)" \
 	"$(DESTDIR)$(genincludedir)" "$(DESTDIR)$(tpgincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
@@ -155,7 +168,7 @@ SOURCES = $(libtelepathy_glib_internal_la_SOURCES) \
 	$(nodist_libtelepathy_glib_internal_la_SOURCES) \
 	$(nodist_libtelepathy_glib_la_SOURCES)
 DIST_SOURCES = $(libtelepathy_glib_internal_la_SOURCES)
-DATA = $(pkgconfig_DATA)
+DATA = $(gir_DATA) $(pkgconfig_DATA) $(typelibs_DATA)
 HEADERS = $(nodist_geninclude_HEADERS) $(tpginclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -206,6 +219,11 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
+INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
+INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
+INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -308,93 +326,20 @@ tpgincludedir = $(includedir)/telepathy-1.0/telepathy-glib
 genincludedir = $(tpgincludedir)/_gen
 pkgconfigdir = ${libdir}/pkgconfig
 pkgconfig_DATA = telepathy-glib.pc
-ABI_LISTS = \
-    versions/0.7.0.abi \
-    versions/0.7.1.abi \
-    versions/0.7.2.abi \
-    versions/0.7.3.abi \
-    versions/0.7.5.abi \
-    versions/0.7.6.abi \
-    versions/0.7.7.abi \
-    versions/0.7.8.abi \
-    versions/0.7.9.abi \
-    versions/0.7.10.abi \
-    versions/0.7.12.abi \
-    versions/0.7.13.abi \
-    versions/0.7.14.abi \
-    versions/0.7.15.abi \
-    versions/0.7.16.abi \
-    versions/0.7.17.abi \
-    versions/0.7.18.abi \
-    versions/0.7.19.abi \
-    versions/0.7.20.abi \
-    versions/0.7.21.abi \
-    versions/0.7.23.abi \
-    versions/0.7.24.abi \
-    versions/0.7.26.abi \
-    versions/0.7.27.abi \
-    versions/0.7.28.abi \
-    versions/0.7.29.abi \
-    versions/0.7.30.abi \
-    versions/0.7.31.abi \
-    versions/0.7.32.abi \
-    versions/0.7.34.abi \
-    versions/0.7.35.abi \
-    versions/0.7.36.abi \
-    versions/0.7.37.abi \
-    versions/0.9.0.abi \
-    versions/0.9.2.abi \
-    versions/0.11.0.abi \
-    versions/0.11.1.abi \
-    versions/0.11.3.abi
-
 EXTRA_DIST = \
     $(ABI_LISTS) \
-    account.xml \
-    account-manager.xml \
-    channel.xml \
-    channel-dispatcher.xml \
-    channel-dispatch-operation.xml \
-    channel-request.xml \
-    client.xml \
-    debug.xml \
-    connection.xml \
-    connection-manager.xml \
-    dbus-daemon.xml \
-    dbus-introspectable.xml \
-    dbus-peer.xml \
-    dbus-properties.xml \
-    extra-gtkdoc.h \
-    generic.xml \
-    media-session-handler.xml \
-    media-stream-handler.xml \
-    stable-interfaces.xml
+    $(codegen_extra_dist) \
+    $(introspection_extra_dist) \
+    extra-gtkdoc.h
 
-lib_LTLIBRARIES = libtelepathy-glib.la
-noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 
-# libtelepathy-glib is just a shared version of libtelepathy-glib-internal.
+# libtelepathy-glib is just a shared version of libtelepathy-glib-internal,
+# produced by abi.am.
+#
 # The static version is necessary because one of the tests wants to use
 # internal symbols (_tp_debug) which are made invisible by GNU ld.
-
-# The quoting here is unnecessary but harmless, and has the useful side-effect
-# that vim quickfix mode (:make) doesn't interpret the libtool --mode=link
-# command as an error message in a bizarrely named file
-libtelepathy_glib_la_LDFLAGS = -version-info \
-	"$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)" $(am__append_3) \
-	$(am__append_4)
-libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
-nodist_libtelepathy_glib_la_SOURCES = $(am__append_1)
-libtelepathy_glib_la_DEPENDENCIES = libtelepathy-glib-internal.la \
-	Makefile.am $(am__append_2)
-# allow new ABI, and silently put it in a dummy version (which can be used to
-# check whether binaries have been linked against unguaranteed ABI)
-@HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_FALSE@MAKE_VERSION_SCRIPT_FLAGS = \
-@HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_FALSE@    --unreleased-version=TELEPATHY_GLIB_@VERSION@_UNRELEASED
-
-
-# don't allow undocumented ABI
-@HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_TRUE@MAKE_VERSION_SCRIPT_FLAGS = 
+lib_LTLIBRARIES = libtelepathy-glib.la
+noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 
 # headers that are subject to coding-style checks
 our_headers = \
@@ -463,84 +408,8 @@ tpginclude_HEADERS = \
     $(our_headers) \
     verify.h
 
-nodist_libtelepathy_glib_internal_la_SOURCES = \
-    _gen/error-str.c \
-    _gen/signals-marshal.c \
-    _gen/signals-marshal.h \
-    _gen/signals-marshal.list \
-    _gen/tp-signals-marshal.list \
-    _gen/interfaces-body.h \
-    _gen/gtypes-body.h \
-    _gen/register-dbus-glib-marshallers-body.h \
-    _gen/tp-cli-account-body.h \
-    _gen/tp-cli-account-manager-body.h \
-    _gen/tp-cli-channel-body.h \
-    _gen/tp-cli-channel-dispatcher-body.h \
-    _gen/tp-cli-channel-dispatch-operation-body.h \
-    _gen/tp-cli-channel-request-body.h \
-    _gen/tp-cli-client-body.h \
-    _gen/tp-cli-connection-body.h \
-    _gen/tp-cli-connection-manager-body.h \
-    _gen/tp-cli-dbus-daemon-body.h \
-    _gen/tp-cli-generic-body.h \
-    _gen/tp-cli-media-session-handler-body.h \
-    _gen/tp-cli-media-stream-handler-body.h \
-    _gen/tp-svc-account.c \
-    _gen/tp-svc-account-manager.c \
-    _gen/tp-svc-channel.c \
-    _gen/tp-svc-channel-dispatcher.c \
-    _gen/tp-svc-channel-dispatch-operation.c \
-    _gen/tp-svc-channel-request.c \
-    _gen/tp-svc-client.c \
-    _gen/tp-svc-connection.c \
-    _gen/tp-svc-connection-manager.c \
-    _gen/tp-svc-debug.c \
-    _gen/tp-svc-generic.c \
-    _gen/tp-svc-media-session-handler.c \
-    _gen/tp-svc-media-stream-handler.c
-
-nodist_geninclude_HEADERS = \
-    _gen/error-str.h \
-    _gen/telepathy-enums.h \
-    _gen/telepathy-interfaces.h \
-    _gen/gtypes.h \
-    _gen/tp-cli-account.h \
-    _gen/tp-cli-account-manager.h \
-    _gen/tp-cli-channel.h \
-    _gen/tp-cli-channel-dispatcher.h \
-    _gen/tp-cli-channel-dispatch-operation.h \
-    _gen/tp-cli-channel-request.h \
-    _gen/tp-cli-client.h \
-    _gen/tp-cli-connection.h \
-    _gen/tp-cli-connection-manager.h \
-    _gen/tp-cli-dbus-daemon.h \
-    _gen/tp-cli-generic.h \
-    _gen/tp-cli-media-session-handler.h \
-    _gen/tp-cli-media-stream-handler.h \
-    _gen/tp-svc-account.h \
-    _gen/tp-svc-account-manager.h \
-    _gen/tp-svc-channel.h \
-    _gen/tp-svc-channel-dispatcher.h \
-    _gen/tp-svc-channel-dispatch-operation.h \
-    _gen/tp-svc-channel-request.h \
-    _gen/tp-svc-client.h \
-    _gen/tp-svc-connection.h \
-    _gen/tp-svc-connection-manager.h \
-    _gen/tp-svc-debug.h \
-    _gen/tp-svc-generic.h \
-    _gen/tp-svc-media-session-handler.h \
-    _gen/tp-svc-media-stream-handler.h
-
-BUILT_SOURCES = \
-    $(nodist_libtelepathy_glib_internal_la_SOURCES) \
-    $(nodist_geninclude_HEADERS) \
-    _gen/stable-spec.xml \
-    _gen/spec-stamp \
-    _gen/stable-stamp
-
-CLEANFILES = \
-    $(BUILT_SOURCES)
-
+BUILT_SOURCES = $(codegen_sources)
+CLEANFILES = $(BUILT_SOURCES) $(am__append_5)
 check_c_sources = \
     $(our_headers) \
     $(libtelepathy_glib_internal_la_SOURCES)
@@ -619,16 +488,196 @@ ALL_LIBS = \
     @DBUS_LIBS@ \
     @GLIB_LIBS@
 
+ABI_LISTS = \
+    versions/0.7.0.abi \
+    versions/0.7.1.abi \
+    versions/0.7.2.abi \
+    versions/0.7.3.abi \
+    versions/0.7.5.abi \
+    versions/0.7.6.abi \
+    versions/0.7.7.abi \
+    versions/0.7.8.abi \
+    versions/0.7.9.abi \
+    versions/0.7.10.abi \
+    versions/0.7.12.abi \
+    versions/0.7.13.abi \
+    versions/0.7.14.abi \
+    versions/0.7.15.abi \
+    versions/0.7.16.abi \
+    versions/0.7.17.abi \
+    versions/0.7.18.abi \
+    versions/0.7.19.abi \
+    versions/0.7.20.abi \
+    versions/0.7.21.abi \
+    versions/0.7.23.abi \
+    versions/0.7.24.abi \
+    versions/0.7.26.abi \
+    versions/0.7.27.abi \
+    versions/0.7.28.abi \
+    versions/0.7.29.abi \
+    versions/0.7.30.abi \
+    versions/0.7.31.abi \
+    versions/0.7.32.abi \
+    versions/0.7.34.abi \
+    versions/0.7.35.abi \
+    versions/0.7.36.abi \
+    versions/0.7.37.abi \
+    versions/0.9.0.abi \
+    versions/0.9.2.abi \
+    versions/0.11.0.abi \
+    versions/0.11.1.abi \
+    versions/0.11.3.abi \
+    versions/0.11.4.abi
+
+
+# The quoting here is unnecessary but harmless, and has the useful side-effect
+# that vim quickfix mode (:make) doesn't interpret the libtool --mode=link
+# command as an error message in a bizarrely named file
+libtelepathy_glib_la_LDFLAGS = -version-info \
+	"$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)" $(am__append_3) \
+	$(am__append_4)
+libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
+nodist_libtelepathy_glib_la_SOURCES = $(am__append_1)
+libtelepathy_glib_la_DEPENDENCIES = libtelepathy-glib-internal.la \
+	abi.am $(am__append_2)
+# allow new ABI, and silently put it in a dummy version (which can be used to
+# check whether binaries have been linked against unguaranteed ABI)
+@HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_FALSE@MAKE_VERSION_SCRIPT_FLAGS = \
+@HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_FALSE@    --unreleased-version=TELEPATHY_GLIB_@VERSION@_UNRELEASED
+
+
+# don't allow undocumented ABI
+@HAVE_LD_VERSION_SCRIPT_TRUE@@OFFICIAL_RELEASE_TRUE@MAKE_VERSION_SCRIPT_FLAGS = 
+codegen_extra_dist = \
+    account.xml \
+    account-manager.xml \
+    channel.xml \
+    channel-dispatcher.xml \
+    channel-dispatch-operation.xml \
+    channel-request.xml \
+    client.xml \
+    debug.xml \
+    connection.xml \
+    connection-manager.xml \
+    dbus-daemon.xml \
+    dbus-introspectable.xml \
+    dbus-peer.xml \
+    dbus-properties.xml \
+    generic.xml \
+    media-session-handler.xml \
+    media-stream-handler.xml \
+    stable-interfaces.xml
+
+codegen_sources = \
+    $(nodist_libtelepathy_glib_internal_la_SOURCES) \
+    $(nodist_geninclude_HEADERS) \
+    _gen/stable-spec.xml \
+    _gen/spec-stamp \
+    _gen/stable-stamp
+
+nodist_geninclude_HEADERS = \
+    _gen/error-str.h \
+    _gen/telepathy-enums.h \
+    _gen/telepathy-interfaces.h \
+    _gen/gtypes.h \
+    _gen/tp-cli-account.h \
+    _gen/tp-cli-account-manager.h \
+    _gen/tp-cli-channel.h \
+    _gen/tp-cli-channel-dispatcher.h \
+    _gen/tp-cli-channel-dispatch-operation.h \
+    _gen/tp-cli-channel-request.h \
+    _gen/tp-cli-client.h \
+    _gen/tp-cli-connection.h \
+    _gen/tp-cli-connection-manager.h \
+    _gen/tp-cli-dbus-daemon.h \
+    _gen/tp-cli-generic.h \
+    _gen/tp-cli-media-session-handler.h \
+    _gen/tp-cli-media-stream-handler.h \
+    _gen/tp-svc-account.h \
+    _gen/tp-svc-account-manager.h \
+    _gen/tp-svc-channel.h \
+    _gen/tp-svc-channel-dispatcher.h \
+    _gen/tp-svc-channel-dispatch-operation.h \
+    _gen/tp-svc-channel-request.h \
+    _gen/tp-svc-client.h \
+    _gen/tp-svc-connection.h \
+    _gen/tp-svc-connection-manager.h \
+    _gen/tp-svc-debug.h \
+    _gen/tp-svc-generic.h \
+    _gen/tp-svc-media-session-handler.h \
+    _gen/tp-svc-media-stream-handler.h
+
+nodist_libtelepathy_glib_internal_la_SOURCES = \
+    _gen/error-str.c \
+    _gen/signals-marshal.c \
+    _gen/signals-marshal.h \
+    _gen/signals-marshal.list \
+    _gen/tp-signals-marshal.list \
+    _gen/interfaces-body.h \
+    _gen/gtypes-body.h \
+    _gen/register-dbus-glib-marshallers-body.h \
+    _gen/tp-cli-account-body.h \
+    _gen/tp-cli-account-manager-body.h \
+    _gen/tp-cli-channel-body.h \
+    _gen/tp-cli-channel-dispatcher-body.h \
+    _gen/tp-cli-channel-dispatch-operation-body.h \
+    _gen/tp-cli-channel-request-body.h \
+    _gen/tp-cli-client-body.h \
+    _gen/tp-cli-connection-body.h \
+    _gen/tp-cli-connection-manager-body.h \
+    _gen/tp-cli-dbus-daemon-body.h \
+    _gen/tp-cli-generic-body.h \
+    _gen/tp-cli-media-session-handler-body.h \
+    _gen/tp-cli-media-stream-handler-body.h \
+    _gen/tp-svc-account.c \
+    _gen/tp-svc-account-manager.c \
+    _gen/tp-svc-channel.c \
+    _gen/tp-svc-channel-dispatcher.c \
+    _gen/tp-svc-channel-dispatch-operation.c \
+    _gen/tp-svc-channel-request.c \
+    _gen/tp-svc-client.c \
+    _gen/tp-svc-connection.c \
+    _gen/tp-svc-connection-manager.c \
+    _gen/tp-svc-debug.c \
+    _gen/tp-svc-generic.c \
+    _gen/tp-svc-media-session-handler.c \
+    _gen/tp-svc-media-stream-handler.c
+
 
 # Generated stuff
 DROP_NAMESPACE = sed -e 's@xmlns:tp="http://telepathy\.freedesktop\.org/wiki/DbusSpec.extensions-v0"@@g'
 tools_dir = $(top_srcdir)/tools
+introspection_extra_dist = kludge-616375.xsl
+@HAVE_INTROSPECTION_TRUE@INTROSPECTION_FILES = \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-manager.c $(srcdir)/account-manager.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection.c $(srcdir)/connection.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-handles.c \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-manager.c $(srcdir)/connection-manager.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel.c $(srcdir)/channel.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle.c $(srcdir)/handle.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-daemon.c $(srcdir)/dbus-daemon.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/interfaces.c $(srcdir)/interfaces.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/intset.c $(srcdir)/intset.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus.c $(srcdir)/dbus.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/capabilities.c $(srcdir)/capabilities.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact.c $(srcdir)/contact.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/defs.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/debug.c $(srcdir)/debug.h \
+@HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h \
+@HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h
+
+@HAVE_INTROSPECTION_TRUE@girdir = $(datadir)/gir-1.0
+@HAVE_INTROSPECTION_TRUE@gir_DATA = TelepathyGLib-0.12.gir
+@HAVE_INTROSPECTION_TRUE@typelibsdir = $(libdir)/girepository-1.0/
+@HAVE_INTROSPECTION_TRUE@typelibs_DATA = $(gir_DATA:.gir=.typelib)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/tools/flymake.mk $(top_srcdir)/tools/check-coding-style.mk $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/tools/flymake.mk $(top_srcdir)/tools/check-coding-style.mk $(srcdir)/abi.am $(srcdir)/codegen.am $(srcdir)/introspection.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -925,6 +974,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-girDATA: $(gir_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(girdir)" || $(MKDIR_P) "$(DESTDIR)$(girdir)"
+	@list='$(gir_DATA)'; test -n "$(girdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(girdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(girdir)" || exit $$?; \
+	done
+
+uninstall-girDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(gir_DATA)'; test -n "$(girdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(girdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(girdir)" && rm -f $$files
 install-pkgconfigDATA: $(pkgconfig_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkgconfigdir)" || $(MKDIR_P) "$(DESTDIR)$(pkgconfigdir)"
@@ -945,6 +1014,26 @@ uninstall-pkgconfigDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(pkgconfigdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(pkgconfigdir)" && rm -f $$files
+install-typelibsDATA: $(typelibs_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(typelibsdir)" || $(MKDIR_P) "$(DESTDIR)$(typelibsdir)"
+	@list='$(typelibs_DATA)'; test -n "$(typelibsdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(typelibsdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(typelibsdir)" || exit $$?; \
+	done
+
+uninstall-typelibsDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(typelibs_DATA)'; test -n "$(typelibsdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(typelibsdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(typelibsdir)" && rm -f $$files
 install-nodist_genincludeHEADERS: $(nodist_geninclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(genincludedir)" || $(MKDIR_P) "$(DESTDIR)$(genincludedir)"
@@ -1074,7 +1163,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(genincludedir)" "$(DESTDIR)$(tpgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(girdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(typelibsdir)" "$(DESTDIR)$(genincludedir)" "$(DESTDIR)$(tpgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -1128,8 +1217,9 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nodist_genincludeHEADERS \
-	install-pkgconfigDATA install-tpgincludeHEADERS
+install-data-am: install-girDATA install-nodist_genincludeHEADERS \
+	install-pkgconfigDATA install-tpgincludeHEADERS \
+	install-typelibsDATA
 
 install-dvi: install-dvi-am
 
@@ -1175,9 +1265,9 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES \
+uninstall-am: uninstall-girDATA uninstall-libLTLIBRARIES \
 	uninstall-nodist_genincludeHEADERS uninstall-pkgconfigDATA \
-	uninstall-tpgincludeHEADERS
+	uninstall-tpgincludeHEADERS uninstall-typelibsDATA
 
 .MAKE: all check check-am install install-am install-strip
 
@@ -1187,45 +1277,24 @@ uninstall-am: uninstall-libLTLIBRARIES \
 	distclean-generic distclean-libtool distclean-local \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
+	install-dvi-am install-exec install-exec-am install-girDATA \
+	install-html install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man \
 	install-nodist_genincludeHEADERS install-pdf install-pdf-am \
 	install-pkgconfigDATA install-ps install-ps-am install-strip \
-	install-tpgincludeHEADERS installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-libLTLIBRARIES \
-	uninstall-nodist_genincludeHEADERS uninstall-pkgconfigDATA \
-	uninstall-tpgincludeHEADERS
+	install-tpgincludeHEADERS install-typelibsDATA installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-girDATA \
+	uninstall-libLTLIBRARIES uninstall-nodist_genincludeHEADERS \
+	uninstall-pkgconfigDATA uninstall-tpgincludeHEADERS \
+	uninstall-typelibsDATA
 
 check-syntax:
 	$(CC) $(AM_CPPFLAGS) $(AM_CFLAGS) -fsyntax-only $(CHK_SOURCES)
 
 .PHONY: check-syntax
-
-@HAVE_LD_VERSION_SCRIPT_TRUE@_gen/version-script.txt: $(ABI_LISTS) _gen/abi.txt Makefile.am \
-@HAVE_LD_VERSION_SCRIPT_TRUE@	$(top_srcdir)/tools/make-version-script.py
-@HAVE_LD_VERSION_SCRIPT_TRUE@	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
-@HAVE_LD_VERSION_SCRIPT_TRUE@		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
-@HAVE_LD_VERSION_SCRIPT_TRUE@		 $(ABI_LISTS:%=$(srcdir)/%) > $@
-@HAVE_LD_VERSION_SCRIPT_TRUE@	$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
-@HAVE_LD_VERSION_SCRIPT_TRUE@		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
-@HAVE_LD_VERSION_SCRIPT_TRUE@		 --dpkg "libtelepathy-glib.so.0 libtelepathy-glib0 #MINVER#" \
-@HAVE_LD_VERSION_SCRIPT_TRUE@		 --dpkg-build-depends-package "libtelepathy-glib-dev" \
-@HAVE_LD_VERSION_SCRIPT_TRUE@		 $(ABI_LISTS:%=$(srcdir)/%) > _gen/libtelepathy-glib0.symbols
-@HAVE_LD_VERSION_SCRIPT_TRUE@	sed -n -e "s/^[	 ]*\\(tp_.*\\);/\\1/p" < $@ > _gen/versioned-abi.tmp
-@HAVE_LD_VERSION_SCRIPT_TRUE@	sort -u < _gen/versioned-abi.tmp > _gen/versioned-abi.txt
-@HAVE_LD_VERSION_SCRIPT_TRUE@	: # the versioned API should always match the ^tp API
-@HAVE_LD_VERSION_SCRIPT_TRUE@	diff -c _gen/versioned-abi.txt _gen/abi.txt
-
-@HAVE_LD_VERSION_SCRIPT_TRUE@_gen/abi.txt: libtelepathy-glib-internal.la Makefile.am
-@HAVE_LD_VERSION_SCRIPT_TRUE@	$(NM) .libs/libtelepathy-glib-internal.a > _gen/abi.nm
-@HAVE_LD_VERSION_SCRIPT_TRUE@	grep " [DT] " < _gen/abi.nm > _gen/abi.funcs
-@HAVE_LD_VERSION_SCRIPT_TRUE@	cut -d" " -f3 < _gen/abi.funcs > _gen/abi.funcnames
-@HAVE_LD_VERSION_SCRIPT_TRUE@	grep "^tp" < _gen/abi.funcnames > _gen/abi.tpfuncnames
-@HAVE_LD_VERSION_SCRIPT_TRUE@	$(AM_V_GEN)sort -u < _gen/abi.tpfuncnames > $@
 
 distclean-local:
 	rm -rf _gen
@@ -1248,6 +1317,30 @@ check-coding-style:
 	fi
 
 check-local: check-coding-style
+
+@HAVE_LD_VERSION_SCRIPT_TRUE@_gen/version-script.txt: $(ABI_LISTS) _gen/abi.txt abi.am \
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(top_srcdir)/tools/make-version-script.py
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 $(ABI_LISTS:%=$(srcdir)/%) > $@
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(PYTHON) $(top_srcdir)/tools/make-version-script.py \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --symbols=_gen/abi.txt $(MAKE_VERSION_SCRIPT_FLAGS) \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --dpkg "libtelepathy-glib.so.0 libtelepathy-glib0 #MINVER#" \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 --dpkg-build-depends-package "libtelepathy-glib-dev" \
+@HAVE_LD_VERSION_SCRIPT_TRUE@		 $(ABI_LISTS:%=$(srcdir)/%) > _gen/libtelepathy-glib0.symbols
+@HAVE_LD_VERSION_SCRIPT_TRUE@	sed -n -e "s/^[	 ]*\\(tp_.*\\);/\\1/p" < $@ > _gen/versioned-abi.tmp
+@HAVE_LD_VERSION_SCRIPT_TRUE@	sort -u < _gen/versioned-abi.tmp > _gen/versioned-abi.txt
+@HAVE_LD_VERSION_SCRIPT_TRUE@	: # the versioned API should always match the ^tp API
+@HAVE_LD_VERSION_SCRIPT_TRUE@	diff -c _gen/versioned-abi.txt _gen/abi.txt
+
+@HAVE_LD_VERSION_SCRIPT_TRUE@_gen/abi.txt: libtelepathy-glib-internal.la abi.am
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(NM) .libs/libtelepathy-glib-internal.a > _gen/abi.nm
+@HAVE_LD_VERSION_SCRIPT_TRUE@	grep " [DT] " < _gen/abi.nm > _gen/abi.funcs
+@HAVE_LD_VERSION_SCRIPT_TRUE@	cut -d" " -f3 < _gen/abi.funcs > _gen/abi.funcnames
+@HAVE_LD_VERSION_SCRIPT_TRUE@	grep "^tp" < _gen/abi.funcnames > _gen/abi.tpfuncnames
+@HAVE_LD_VERSION_SCRIPT_TRUE@	$(AM_V_GEN)sort -u < _gen/abi.tpfuncnames > $@
+
+# vim:set ft=automake:
 
 # Bootstrapping
 
@@ -1292,10 +1385,10 @@ _gen/tp-signals-marshal.list: $(tools_dir)/glib-signals-marshal-gen.py \
 _gen/signals-marshal.list: signals-marshal.list _gen/tp-signals-marshal.list
 	$(AM_V_GEN)sort -u $^ > $@
 
-_gen/signals-marshal.h: _gen/signals-marshal.list Makefile.am
+_gen/signals-marshal.h: _gen/signals-marshal.list codegen.am
 	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_tp_marshal $< > $@
 
-_gen/signals-marshal.c: _gen/signals-marshal.list Makefile.am
+_gen/signals-marshal.c: _gen/signals-marshal.list codegen.am
 	$(AM_V_GEN){ echo '#include "_gen/signals-marshal.h"' && \
 	$(GLIB_GENMARSHAL) --body --prefix=_tp_marshal $< ; } > $@
 
@@ -1311,7 +1404,7 @@ _gen/tp-spec-%.xml: %.xml _gen/spec-stamp $(tools_dir)/xincludator.py
 
 _gen/tp-svc-%.c _gen/tp-svc-%.h: _gen/tp-spec-%.xml \
 	$(tools_dir)/glib-ginterface-gen.py \
-	Makefile.am
+	codegen.am
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/glib-ginterface-gen.py \
 		--filename=_gen/tp-svc-$* \
 		--signal-marshal-prefix=_tp \
@@ -1322,7 +1415,7 @@ _gen/tp-svc-%.c _gen/tp-svc-%.h: _gen/tp-spec-%.xml \
 
 _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 	$(tools_dir)/glib-client-gen.py \
-	Makefile.am
+	codegen.am
 	$(AM_V_GEN)set -e; \
 	subclass= ; \
 	subclass_assert= ; \
@@ -1393,6 +1486,43 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		--deprecation-attribute=_TP_GNUC_DEPRECATED \
 		$$maybe_reentrant \
 		$< Tp_Cli _gen/tp-cli-$*
+
+# vim:set ft=automake:
+
+@HAVE_INTROSPECTION_TRUE@_gen/proxy-introspectable.h: proxy.h introspection.am
+@HAVE_INTROSPECTION_TRUE@	@$(mkdir_p) _gen
+@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)sed -e 's/gpointer self/TpProxy *self/' < $< > $@
+
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib-0.12.gir: $(INTROSPECTION_SCANNER) \
+@HAVE_INTROSPECTION_TRUE@		libtelepathy-glib.la \
+@HAVE_INTROSPECTION_TRUE@		$(srcdir)/kludge-616375.xsl \
+@HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
+@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
+@HAVE_INTROSPECTION_TRUE@		--namespace TelepathyGLib \
+@HAVE_INTROSPECTION_TRUE@		--nsversion=$(VERSION) \
+@HAVE_INTROSPECTION_TRUE@		--strip-prefix=tp \
+@HAVE_INTROSPECTION_TRUE@		-I$(top_builddir) \
+@HAVE_INTROSPECTION_TRUE@		-I$(top_srcdir) \
+@HAVE_INTROSPECTION_TRUE@		--include=GLib-2.0 \
+@HAVE_INTROSPECTION_TRUE@		--include=Gio-2.0 \
+@HAVE_INTROSPECTION_TRUE@		--libtool="$(top_builddir)/libtool" \
+@HAVE_INTROSPECTION_TRUE@		--library=libtelepathy-glib.la \
+@HAVE_INTROSPECTION_TRUE@		--pkg gio-2.0 \
+@HAVE_INTROSPECTION_TRUE@		--pkg dbus-glib-1 \
+@HAVE_INTROSPECTION_TRUE@		--output _gen/$@.tmp \
+@HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
+@HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge-616375.xsl _gen/$@.tmp > $@
+@HAVE_INTROSPECTION_TRUE@	@rm -f _gen/proxy-introspectable.h
+@HAVE_INTROSPECTION_TRUE@	@rm -f _gen/$@.tmp
+
+@HAVE_INTROSPECTION_TRUE@%.typelib: %.gir $(INTROSPECTION_COMPILER)
+@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute \
+@HAVE_INTROSPECTION_TRUE@	    $(INTROSPECTION_COMPILER) \
+@HAVE_INTROSPECTION_TRUE@	        --includedir=$(srcdir) \
+@HAVE_INTROSPECTION_TRUE@	        --includedir=. \
+@HAVE_INTROSPECTION_TRUE@	        $(INTROSPECTION_COMPILER_OPTS) $< -o $(@F)
+
+# vim:set ft=automake:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

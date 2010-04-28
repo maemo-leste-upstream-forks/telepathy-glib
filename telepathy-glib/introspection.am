@@ -1,0 +1,72 @@
+# To be included by Makefile.am.
+
+introspection_extra_dist = kludge-616375.xsl
+
+if HAVE_INTROSPECTION
+
+INTROSPECTION_FILES = \
+	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
+	$(srcdir)/account.c $(srcdir)/account.h \
+	$(srcdir)/account-manager.c $(srcdir)/account-manager.h \
+	$(srcdir)/connection.c $(srcdir)/connection.h \
+	$(srcdir)/connection-handles.c \
+	$(srcdir)/connection-manager.c $(srcdir)/connection-manager.h \
+	$(srcdir)/channel.c $(srcdir)/channel.h \
+	$(srcdir)/handle.c $(srcdir)/handle.h \
+	$(srcdir)/dbus-daemon.c $(srcdir)/dbus-daemon.h \
+	$(srcdir)/interfaces.c $(srcdir)/interfaces.h \
+	$(srcdir)/intset.c $(srcdir)/intset.h \
+	$(srcdir)/dbus.c $(srcdir)/dbus.h \
+	$(srcdir)/capabilities.c $(srcdir)/capabilities.h \
+	$(srcdir)/contact.c $(srcdir)/contact.h \
+	$(srcdir)/defs.h \
+	$(srcdir)/debug.c $(srcdir)/debug.h \
+	_gen/telepathy-enums.h \
+	_gen/telepathy-interfaces.h
+
+_gen/proxy-introspectable.h: proxy.h introspection.am
+	@$(mkdir_p) _gen
+	$(AM_V_GEN)sed -e 's/gpointer self/TpProxy *self/' < $< > $@
+
+TelepathyGLib-0.12.gir: $(INTROSPECTION_SCANNER) \
+		libtelepathy-glib.la \
+		$(srcdir)/kludge-616375.xsl \
+		$(INTROSPECTION_FILES)
+	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
+		--namespace TelepathyGLib \
+		--nsversion=$(VERSION) \
+		--strip-prefix=tp \
+		-I$(top_builddir) \
+		-I$(top_srcdir) \
+		--include=GLib-2.0 \
+		--include=Gio-2.0 \
+		--libtool="$(top_builddir)/libtool" \
+		--library=libtelepathy-glib.la \
+		--pkg gio-2.0 \
+		--pkg dbus-glib-1 \
+		--output _gen/$@.tmp \
+		$(INTROSPECTION_FILES)
+	@xsltproc $(srcdir)/kludge-616375.xsl _gen/$@.tmp > $@
+	@rm -f _gen/proxy-introspectable.h
+	@rm -f _gen/$@.tmp
+
+girdir = $(datadir)/gir-1.0
+gir_DATA = TelepathyGLib-0.12.gir
+
+%.typelib: %.gir $(INTROSPECTION_COMPILER)
+	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute \
+	    $(INTROSPECTION_COMPILER) \
+	        --includedir=$(srcdir) \
+	        --includedir=. \
+	        $(INTROSPECTION_COMPILER_OPTS) $< -o $(@F)
+
+typelibsdir = $(libdir)/girepository-1.0/
+typelibs_DATA = $(gir_DATA:.gir=.typelib)
+
+CLEANFILES += \
+    $(gir_DATA) \
+    $(typelibs_DATA)
+
+endif
+
+# vim:set ft=automake:
