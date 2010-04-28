@@ -23,6 +23,8 @@
 
 #include <string.h>
 
+#include <dbus/dbus-protocol.h>
+
 #include <telepathy-glib/connection-manager.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/defs.h>
@@ -169,6 +171,28 @@ tp_connection_get_feature_quark_capabilities (void)
 }
 
 /**
+ * TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS:
+ *
+ * Expands to a call to a function that returns a #GQuark representing the
+ * "avatar-requirements" feature.
+ *
+ * When this feature is prepared, the avatar requirements of the Connection has
+ * been retrieved. Use tp_connection_get_avatar_requirements() to get them once
+ * prepared.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.11.4
+ */
+
+GQuark
+tp_connection_get_feature_quark_avatar_requirements (void)
+{
+  return g_quark_from_static_string ("tp-connection-feature-avatar-requirements");
+}
+
+/**
  * TP_ERRORS_DISCONNECTED:
  *
  * #GError domain representing a Telepathy connection becoming disconnected.
@@ -176,6 +200,9 @@ tp_connection_get_feature_quark_capabilities (void)
  * #TpConnectionStatusReason.
  *
  * This macro expands to a function call returning a #GQuark.
+ *
+ * Since 0.7.24, this error domain is only used if a connection manager emits
+ * a #TpConnectionStatusReason not known to telepathy-glib.
  *
  * Since: 0.7.1
  */
@@ -351,6 +378,81 @@ tp_connection_maybe_prepare_capabilities (TpProxy *proxy)
 }
 
 static void
+tp_connection_get_avatar_requirements_cb (TpProxy *proxy,
+    GHashTable *properties,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  TpConnection *self = (TpConnection *) proxy;
+  GStrv supported_mime_types;
+  GStrv empty_strv = { NULL };
+
+  self->priv->fetching_avatar_requirements = FALSE;
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to get avatar requirements properties: %s", error->message);
+      goto finally;
+    }
+
+  g_assert (self->priv->avatar_requirements == NULL);
+
+  DEBUG ("AVATAR REQUIREMENTS ready");
+
+  supported_mime_types = (GStrv) tp_asv_get_strv (properties,
+      "SupportedAvatarMIMETypes");
+  if (supported_mime_types == NULL)
+    supported_mime_types = empty_strv;
+
+  self->priv->avatar_requirements = tp_avatar_requirements_new (
+      supported_mime_types,
+      tp_asv_get_uint32 (properties, "MinimumAvatarWidth", NULL),
+      tp_asv_get_uint32 (properties, "MinimumAvatarHeight", NULL),
+      tp_asv_get_uint32 (properties, "RecommendedAvatarWidth", NULL),
+      tp_asv_get_uint32 (properties, "RecommendedAvatarHeight", NULL),
+      tp_asv_get_uint32 (properties, "MaximumAvatarWidth", NULL),
+      tp_asv_get_uint32 (properties, "MaximumAvatarHeight", NULL),
+      tp_asv_get_uint32 (properties, "MaximumAvatarBytes", NULL));
+
+finally:
+  _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS,
+      self->priv->avatar_requirements != NULL);
+}
+
+static void
+tp_connection_maybe_prepare_avatar_requirements (TpProxy *proxy)
+{
+  TpConnection *self = (TpConnection *) proxy;
+
+  if (self->priv->avatar_requirements != NULL)
+    return;   /* already done */
+
+  if (!_tp_proxy_is_preparing (proxy, TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS))
+    return;   /* not interested right now */
+
+  if (!self->priv->ready)
+    return;   /* will try again when ready */
+
+  if (self->priv->fetching_avatar_requirements)
+    return;   /* Another Get operation is running */
+
+  if (!tp_proxy_has_interface_by_id (proxy,
+        TP_IFACE_QUARK_CONNECTION_INTERFACE_AVATARS))
+    {
+      _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS,
+          FALSE);
+      return;
+    }
+
+  self->priv->fetching_avatar_requirements = TRUE;
+
+  tp_cli_dbus_properties_call_get_all (self, -1,
+      TP_IFACE_CONNECTION_INTERFACE_AVATARS,
+      tp_connection_get_avatar_requirements_cb, NULL, NULL, NULL);
+}
+
+static void
 tp_connection_continue_introspection (TpConnection *self)
 {
   if (tp_proxy_get_invalidated (self) != NULL)
@@ -387,6 +489,7 @@ tp_connection_continue_introspection (TpConnection *self)
       g_object_notify ((GObject *) self, "connection-ready");
 
       tp_connection_maybe_prepare_capabilities ((TpProxy *) self);
+      tp_connection_maybe_prepare_avatar_requirements ((TpProxy *) self);
     }
   else
     {
@@ -407,58 +510,54 @@ got_contact_attribute_interfaces (TpProxy *proxy,
                                   GObject *weak_object G_GNUC_UNUSED)
 {
   TpConnection *self = TP_CONNECTION (proxy);
+  GArray *arr;
 
   g_assert (self->priv->introspection_call != NULL);
   self->priv->introspection_call = NULL;
 
-  if (error == NULL)
+  if (error == NULL && G_VALUE_HOLDS (value, G_TYPE_STRV))
     {
-      if (G_VALUE_HOLDS (value, G_TYPE_STRV))
+      gchar **interfaces = g_value_get_boxed (value);
+      gchar **iter;
+
+      arr = g_array_sized_new (FALSE, FALSE, sizeof (GQuark),
+          interfaces == NULL ? 0 : g_strv_length (interfaces));
+
+      if (interfaces != NULL)
         {
-          GArray *arr;
-          gchar **interfaces = g_value_get_boxed (value);
-          gchar **iter;
-
-          arr = g_array_sized_new (FALSE, FALSE, sizeof (GQuark),
-              interfaces == NULL ? 0 : g_strv_length (interfaces));
-
-          if (interfaces != NULL)
+          for (iter = interfaces; *iter != NULL; iter++)
             {
-              for (iter = interfaces; *iter != NULL; iter++)
+              if (tp_dbus_check_valid_interface_name (*iter, NULL))
                 {
-                  if (tp_dbus_check_valid_interface_name (*iter, NULL))
-                    {
-                      GQuark q = g_quark_from_string (*iter);
+                  GQuark q = g_quark_from_string (*iter);
 
-                      DEBUG ("%p: ContactAttributeInterfaces has %s", self,
-                          *iter);
-                      g_array_append_val (arr, q);
-                    }
-                  else
-                    {
-                      DEBUG ("%p: ignoring invalid interface: %s", self,
-                          *iter);
-                    }
+                  DEBUG ("%p: ContactAttributeInterfaces has %s", self,
+                      *iter);
+                  g_array_append_val (arr, q);
+                }
+              else
+                {
+                  DEBUG ("%p: ignoring invalid interface: %s", self,
+                      *iter);
                 }
             }
-
-          if (self->priv->contact_attribute_interfaces != NULL)
-            g_array_free (self->priv->contact_attribute_interfaces, TRUE);
-
-          self->priv->contact_attribute_interfaces = arr;
-        }
-      else
-        {
-          DEBUG ("%p: ContactAttributeInterfaces had wrong type %s, "
-              "ignoring", self, G_VALUE_TYPE_NAME (value));
         }
     }
   else
     {
-      DEBUG ("%p: Get(Contacts, ContactAttributeInterfaces) failed with "
-          "%s %d: %s", self, g_quark_to_string (error->domain), error->code,
-          error->message);
+      if (error == NULL)
+        DEBUG ("%p: ContactAttributeInterfaces had wrong type %s, "
+            "ignoring", self, G_VALUE_TYPE_NAME (value));
+      else
+        DEBUG ("%p: Get(Contacts, ContactAttributeInterfaces) failed with "
+            "%s %d: %s", self, g_quark_to_string (error->domain), error->code,
+            error->message);
+
+      arr = g_array_sized_new (FALSE, FALSE, sizeof (GQuark), 0);
     }
+
+  g_assert (self->priv->contact_attribute_interfaces == NULL);
+  self->priv->contact_attribute_interfaces = arr;
 
   tp_connection_continue_introspection (self);
 }
@@ -652,15 +751,14 @@ tp_connection_connection_error_cb (TpConnection *self,
                                    gpointer user_data,
                                    GObject *weak_object)
 {
-  if (self->priv->connection_error != NULL)
-    {
-      g_error_free (self->priv->connection_error);
-      self->priv->connection_error = NULL;
-    }
+  g_free (self->priv->connection_error);
+  self->priv->connection_error = g_strdup (error_name);
 
-  tp_proxy_dbus_error_to_gerror (self, error_name,
-        tp_asv_get_string (details, "debug-message"),
-        &(self->priv->connection_error));
+  if (self->priv->connection_error_details != NULL)
+    g_hash_table_unref (self->priv->connection_error_details);
+
+  self->priv->connection_error_details = g_boxed_copy (
+      TP_HASH_TYPE_STRING_VARIANT_MAP, details);
 }
 
 static void
@@ -783,16 +881,39 @@ tp_connection_status_changed_cb (TpConnection *self,
 
   if (status == TP_CONNECTION_STATUS_DISCONNECTED)
     {
+      GError *error = NULL;
+
       if (self->priv->connection_error == NULL)
         {
-          tp_connection_status_reason_to_gerror (reason, prev_status,
-              &(self->priv->connection_error));
+          g_assert (self->priv->connection_error_details == NULL);
+
+          tp_connection_status_reason_to_gerror (reason, prev_status, &error);
+        }
+      else
+        {
+          g_assert (self->priv->connection_error_details != NULL);
+          tp_proxy_dbus_error_to_gerror (self, self->priv->connection_error,
+              tp_asv_get_string (self->priv->connection_error_details,
+                "debug-message"), &error);
+
+          /* ... but if we don't know anything about that D-Bus error
+           * name, we can still be more helpful by deriving an error code from
+           * TpConnectionStatusReason */
+          if (g_error_matches (error, TP_DBUS_ERRORS,
+                TP_DBUS_ERROR_UNKNOWN_REMOTE_ERROR))
+            {
+              GError *from_csr = NULL;
+
+              tp_connection_status_reason_to_gerror (reason, prev_status,
+                  &from_csr);
+              error->domain = from_csr->domain;
+              error->code = from_csr->code;
+              g_error_free (from_csr);
+            }
         }
 
-      tp_proxy_invalidate ((TpProxy *) self, self->priv->connection_error);
-
-      g_error_free (self->priv->connection_error);
-      self->priv->connection_error = NULL;
+      tp_proxy_invalidate ((TpProxy *) self, error);
+      g_error_free (error);
     }
 }
 
@@ -912,10 +1033,13 @@ tp_connection_finalize (GObject *object)
       self->priv->contact_attribute_interfaces = NULL;
     }
 
-  if (self->priv->connection_error != NULL)
+  g_free (self->priv->connection_error);
+  self->priv->connection_error = NULL;
+
+  if (self->priv->connection_error_details != NULL)
     {
-      g_error_free (self->priv->connection_error);
-      self->priv->connection_error = NULL;
+      g_hash_table_unref (self->priv->connection_error_details);
+      self->priv->connection_error_details = NULL;
     }
 
   ((GObjectClass *) tp_connection_parent_class)->finalize (object);
@@ -952,6 +1076,12 @@ tp_connection_dispose (GObject *object)
       self->priv->capabilities = NULL;
     }
 
+  if (self->priv->avatar_requirements != NULL)
+    {
+      tp_avatar_requirements_destroy (self->priv->avatar_requirements);
+      self->priv->avatar_requirements = NULL;
+    }
+
   ((GObjectClass *) tp_connection_parent_class)->dispose (object);
 }
 
@@ -959,6 +1089,7 @@ enum {
     FEAT_CORE,
     FEAT_CONNECTED,
     FEAT_CAPABILITIES,
+    FEAT_AVATAR_REQUIREMENTS,
     N_FEAT
 };
 
@@ -978,6 +1109,10 @@ tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   features[FEAT_CAPABILITIES].name = TP_CONNECTION_FEATURE_CAPABILITIES;
   features[FEAT_CAPABILITIES].start_preparing =
     tp_connection_maybe_prepare_capabilities;
+
+  features[FEAT_AVATAR_REQUIREMENTS].name = TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS;
+  features[FEAT_AVATAR_REQUIREMENTS].start_preparing =
+    tp_connection_maybe_prepare_avatar_requirements;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);
@@ -1104,13 +1239,13 @@ tp_connection_class_init (TpConnectionClass *klass)
 /**
  * tp_connection_new:
  * @dbus: a D-Bus daemon; may not be %NULL
- * @bus_name: the well-known or unique name of the connection process;
- *  if well-known, this function will make a blocking call to the bus daemon
- *  to resolve the unique name. May be %NULL if @object_path is not, in which
- *  case a well-known name will be derived from @object_path.
- * @object_path: the object path of the connection process. May be %NULL
- *  if @bus_name is a well-known name, in which case the object path will
- *  be derived from @bus_name.
+ * @bus_name: (allow-none): the well-known or unique name of the connection
+ *  process; if well-known, this function will make a blocking call to the bus
+ *  daemon to resolve the unique name. May be %NULL if @object_path is not, in
+ *  which case a well-known name will be derived from @object_path.
+ * @object_path: (allow-none): the object path of the connection process.
+ *  May be %NULL if @bus_name is a well-known name, in which case the object
+ *  path will be derived from @bus_name.
  * @error: used to indicate the error if %NULL is returned
  *
  * <!-- -->
@@ -1209,7 +1344,7 @@ tp_connection_get_self_handle (TpConnection *self)
 /**
  * tp_connection_get_status:
  * @self: a connection
- * @reason: a TpConnectionStatusReason, or %NULL
+ * @reason: (out): a TpConnectionStatusReason, or %NULL
  *
  * If @reason is not %NULL it is set to the reason why "status" changed to its
  * current value, or %TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED if unknown.
@@ -1232,7 +1367,7 @@ tp_connection_get_status (TpConnection *self,
 }
 
 /**
- * tp_connection_run_until_ready:
+ * tp_connection_run_until_ready: (skip)
  * @self: a connection
  * @connect: if %TRUE, call Connect() if it appears to be necessary;
  *  if %FALSE, rely on Connect() to be called by another client
@@ -1687,7 +1822,7 @@ cwr_ready (TpConnection *self,
  */
 
 /**
- * tp_connection_call_when_ready:
+ * tp_connection_call_when_ready: (skip)
  * @self: a connection
  * @callback: called when the connection becomes ready or invalidated,
  *  whichever happens first
@@ -1803,9 +1938,10 @@ tp_connection_presence_type_cmp_availability (TpConnectionPresenceType p1,
 /**
  * tp_connection_parse_object_path:
  * @self: a connection
- * @protocol: If not NULL, used to return the protocol of the connection
- * @cm_name: If not NULL, used to return the connection manager name of the
- * connection
+ * @protocol: (out) (transfer full): If not NULL, used to return the protocol
+ *  of the connection
+ * @cm_name: (out) (transfer full): If not NULL, used to return the connection
+ *  manager name of the connection
  *
  * If the object path of @connection is in the correct form, set
  * @protocol and @cm_name, return TRUE. Otherwise leave them unchanged and
@@ -1873,7 +2009,7 @@ _tp_connection_add_contact (TpConnection *self,
 
 
 /**
- * tp_connection_is_ready:
+ * tp_connection_is_ready: (skip)
  * @self: a connection
  *
  * Returns the same thing as the #TpConnection:connection-ready property.
@@ -1905,4 +2041,234 @@ tp_connection_get_capabilities (TpConnection *self)
   g_return_val_if_fail (TP_IS_CONNECTION (self), FALSE);
 
   return self->priv->capabilities;
+}
+
+/**
+ * tp_connection_get_avatar_requirements:
+ * @self: a connection
+ *
+ * To wait for valid avatar requirements, call tp_proxy_prepare_async()
+ * with the feature %TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS.
+ *
+ * This property cannot change after @self goes to the Connected state.
+ *
+ * Returns: (transfer none): a #TpAvatarRequirements struct, or %NULL if the
+ *  feature is not yet prepared or the connection doesn't have the necessary
+ *  properties.
+ * Since: 0.11.4
+ */
+TpAvatarRequirements *
+tp_connection_get_avatar_requirements (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+  return self->priv->avatar_requirements;
+}
+
+/**
+ * TpAvatarRequirements:
+ * @supported_mime_types: An array of supported MIME types (e.g. "image/jpeg")
+ *  Clients MAY assume that the first type in this array is preferred
+ * @minimum_width: The minimum width in pixels of an avatar, which MAY be 0
+ * @minimum_height: The minimum height in pixels of an avatar, which MAY be 0
+ * @recommended_width: The recommended width in pixels of an avatar, or 0 if
+ *  there is no preferred width.
+ * @recommended_height: The recommended height in pixels of an avatar, or 0 if
+ *  there is no preferred height
+ * @maximum_width: The maximum width in pixels of an avatar on this protocol,
+ *  or 0 if there is no limit.
+ * @maximum_height: The maximum height in pixels of an avatar, or 0 if there is
+ *  no limit.
+ * @maximum_bytes: he maximum size in bytes of an avatar, or 0 if there is no
+ *  limit.
+ *
+ * The requirements for setting an avatar on a particular protocol.
+ *
+ * Since: 0.11.4
+ */
+
+/**
+ * TP_TYPE_AVATAR_REQUIREMENTS:
+ *
+ * The boxed type of a #TpAvatarRequirements.
+ *
+ * Since: 0.11.4
+ */
+GType
+tp_avatar_requirements_get_type (void)
+{
+  static GType type = 0;
+
+  if (G_UNLIKELY (type == 0))
+    {
+      type = g_boxed_type_register_static (g_intern_static_string ("TpAvatarRequirements"),
+          (GBoxedCopyFunc) tp_avatar_requirements_copy,
+          (GBoxedFreeFunc) tp_avatar_requirements_destroy);
+    }
+
+  return type;
+}
+
+/**
+ * tp_avatar_requirements_new:
+ * @supported_mime_types: An array of supported MIME types (e.g. "image/jpeg")
+ *  Clients MAY assume that the first type in this array is preferred
+ * @minimum_width: The minimum width in pixels of an avatar, which MAY be 0
+ * @minimum_height: The minimum height in pixels of an avatar, which MAY be 0
+ * @recommended_width: The recommended width in pixels of an avatar, or 0 if
+ *  there is no preferred width.
+ * @recommended_height: The recommended height in pixels of an avatar, or 0 if
+ *  there is no preferred height
+ * @maximum_width: The maximum width in pixels of an avatar on this protocol,
+ *  or 0 if there is no limit.
+ * @maximum_height: The maximum height in pixels of an avatar, or 0 if there is
+ *  no limit.
+ * @maximum_bytes: he maximum size in bytes of an avatar, or 0 if there is no
+ *  limit.
+ *
+ * <!--Returns: says it all-->
+ *
+ * Returns: a newly allocated #TpAvatarRequirements, free it with
+ * tp_avatar_requirements_destroy()
+ * Since: 0.11.4
+ */
+TpAvatarRequirements *
+tp_avatar_requirements_new (GStrv supported_mime_types,
+                            guint minimum_width,
+                            guint minimum_height,
+                            guint recommended_width,
+                            guint recommended_height,
+                            guint maximum_width,
+                            guint maximum_height,
+                            guint maximum_bytes)
+{
+  TpAvatarRequirements *self;
+
+  self = g_slice_new (TpAvatarRequirements);
+  self->supported_mime_types = g_strdupv (supported_mime_types);
+  self->minimum_width = minimum_width;
+  self->minimum_height = minimum_height;
+  self->recommended_width = recommended_width;
+  self->recommended_height = recommended_height;
+  self->maximum_width = maximum_width;
+  self->maximum_height = maximum_height;
+  self->maximum_bytes = maximum_bytes;
+
+  return self;
+}
+
+/**
+ * tp_avatar_requirements_copy:
+ * @self: a #TpAvatarRequirements
+ *
+ * <!--Returns: says it all-->
+ *
+ * Returns: a newly allocated #TpAvatarRequirements, free it with
+ * tp_avatar_requirements_destroy()
+ * Since: 0.11.4
+ */
+TpAvatarRequirements *
+tp_avatar_requirements_copy (TpAvatarRequirements *self)
+{
+  g_return_val_if_fail (self != NULL, NULL);
+
+  return tp_avatar_requirements_new (self->supported_mime_types,
+      self->minimum_width,
+      self->minimum_height,
+      self->recommended_width,
+      self->recommended_height,
+      self->maximum_width,
+      self->maximum_height,
+      self->maximum_bytes);
+}
+
+/**
+ * tp_avatar_requirements_destroy:
+ * @self: a #TpAvatarRequirements
+ *
+ * Free all memory used by the #TpAvatarRequirements.
+ *
+ * Since: 0.11.4
+ */
+void
+tp_avatar_requirements_destroy (TpAvatarRequirements *self)
+{
+  g_return_if_fail (self != NULL);
+
+  g_strfreev (self->supported_mime_types);
+  g_slice_free (TpAvatarRequirements, self);
+}
+
+/**
+ * tp_connection_get_detailed_error:
+ * @self: a connection
+ * @details: (out) (allow-none) (element-type utf8 GObject.Value) (transfer none):
+ *  optionally used to return a map from string to #GValue, which must not be
+ *  modified or destroyed by the caller
+ *
+ * If the connection has disconnected, return the D-Bus error name with which
+ * it disconnected (in particular, this is %TP_ERROR_STR_CANCELLED if it was
+ * disconnected by a user request).
+ *
+ * Otherwise, return %NULL, without altering @details.
+ *
+ * Returns: (transfer none) (allow-none): a D-Bus error name, or %NULL.
+ *
+ * Since: 0.11.4
+ */
+const gchar *
+tp_connection_get_detailed_error (TpConnection *self,
+    const GHashTable **details)
+{
+  TpProxy *proxy = (TpProxy *) self;
+
+  if (proxy->invalidated == NULL)
+    return NULL;
+
+  if (self->priv->connection_error != NULL)
+    {
+      g_assert (self->priv->connection_error_details != NULL);
+
+      if (details != NULL)
+        *details = self->priv->connection_error_details;
+
+      return self->priv->connection_error;
+    }
+  else
+    {
+      /* no detailed error, but we *have* been invalidated - guess one based
+       * on the invalidation reason, and don't give any details */
+
+      if (details != NULL)
+        *details = tp_asv_new (NULL, NULL);
+
+      if (proxy->invalidated->domain == TP_ERRORS)
+        {
+          return tp_error_get_dbus_name (proxy->invalidated->code);
+        }
+      else if (proxy->invalidated->domain == TP_DBUS_ERRORS)
+        {
+          switch (proxy->invalidated->code)
+            {
+            case TP_DBUS_ERROR_NAME_OWNER_LOST:
+              /* the CM probably crashed */
+              return DBUS_ERROR_NO_REPLY;
+              break;
+
+            case TP_DBUS_ERROR_OBJECT_REMOVED:
+            case TP_DBUS_ERROR_UNKNOWN_REMOTE_ERROR:
+            case TP_DBUS_ERROR_INCONSISTENT:
+            /* ... and all other cases up to and including
+             * TP_DBUS_ERROR_INCONSISTENT don't make sense in this context, so
+             * just use the generic one for them too */
+            default:
+              return TP_ERROR_STR_DISCONNECTED;
+            }
+        }
+      else
+        {
+          /* no idea what that means */
+          return TP_ERROR_STR_DISCONNECTED;
+        }
+    }
 }

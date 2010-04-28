@@ -59,7 +59,7 @@ setup (Test *test,
   tp_debug_set_flags ("all");
   test->dbus = test_dbus_daemon_dup_or_die ();
 
-  test->service_conn = SIMPLE_CONNECTION (g_object_new (
+  test->service_conn = SIMPLE_CONNECTION (test_object_new_static_class (
         SIMPLE_TYPE_CONNECTION,
         "account", "me@example.com",
         "protocol", "simple-protocol",
@@ -256,7 +256,8 @@ test_fail_to_prepare (Test *test,
     gconstpointer nil G_GNUC_UNUSED)
 {
   GError *error = NULL;
-  GQuark features[] = { TP_CONNECTION_FEATURE_CONNECTED };
+  GQuark features[] = { TP_CONNECTION_FEATURE_CONNECTED, 0 };
+  const GHashTable *asv;
 
   test->conn = tp_connection_new (test->dbus, test->conn_name, test->conn_path,
       &error);
@@ -305,6 +306,12 @@ test_fail_to_prepare (Test *test,
   g_assert (!tp_proxy_is_prepared (test->conn, TP_CONNECTION_FEATURE_CORE));
   g_assert (!tp_proxy_is_prepared (test->conn,
         TP_CONNECTION_FEATURE_CONNECTED));
+
+  g_assert_cmpstr (tp_connection_get_detailed_error (test->conn, NULL), ==,
+      TP_ERROR_STR_PERMISSION_DENIED);
+  g_assert_cmpstr (tp_connection_get_detailed_error (test->conn, &asv), ==,
+      TP_ERROR_STR_PERMISSION_DENIED);
+  g_assert (asv != NULL);
 }
 
 static void

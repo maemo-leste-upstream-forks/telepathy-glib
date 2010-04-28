@@ -37,7 +37,9 @@ struct _TpConnectionPrivate {
     TpHandle self_handle;
     TpConnectionStatus status;
     TpConnectionStatusReason status_reason;
-    GError *connection_error /* initialized statically */;
+    gchar *connection_error;
+    /* a TP_HASH_TYPE_STRING_VARIANT_MAP */
+    GHashTable *connection_error_details;
 
     /* GArray of GQuark */
     GArray *contact_attribute_interfaces;
@@ -47,8 +49,11 @@ struct _TpConnectionPrivate {
 
     TpCapabilities *capabilities;
 
+    TpAvatarRequirements *avatar_requirements;
+
     TpProxyPendingCall *introspection_call;
     unsigned fetching_rcc:1;
+    unsigned fetching_avatar_requirements:1;
 
     unsigned ready:1;
     unsigned tracking_aliases_changed:1;

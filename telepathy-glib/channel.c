@@ -254,7 +254,7 @@ tp_channel_get_channel_type_id (TpChannel *self)
 /**
  * tp_channel_get_handle:
  * @self: a channel
- * @handle_type: if not %NULL, used to return the type of this handle
+ * @handle_type: (out): if not %NULL, used to return the type of this handle
  *
  * Get the handle representing the contact, chatroom, etc. with which this
  * channel communicates for its whole lifetime, or 0 if there is no such
@@ -290,11 +290,15 @@ tp_channel_get_handle (TpChannel *self,
  * tp_channel_get_identifier:
  * @self: a channel
  *
- * This channel's associated identifier, or NULL if no identifier or unknown.
+ * This channel's associated identifier, or the empty string if no identifier
+ * or unknown.
  *
- * The identifier is the result of inspecting #TpChannel:handle.
  * This is the same as the #TpChannel:identifier property, and isn't guaranteed
- * to be non-%NULL until the %TP_CHANNEL_FEATURE_CORE property is ready.
+ * to be set until the %TP_CHANNEL_FEATURE_CORE property is ready.
+ *
+ * Changed in 0.11.4: as with #TpChannel:identifier, this could
+ * previously either be %NULL or the empty string if there was no suitable
+ * value. It is now non-%NULL in all cases.
  *
  * Returns: the identifier
  * Since: 0.7.21
@@ -304,11 +308,14 @@ tp_channel_get_identifier (TpChannel *self)
 {
   g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
 
+  if (self->priv->identifier == NULL)
+    return "";
+
   return self->priv->identifier;
 }
 
 /**
- * tp_channel_is_ready:
+ * tp_channel_is_ready: (skip)
  * @self: a channel
  *
  * Returns the same thing as the #TpChannel:channel-ready property.
@@ -345,7 +352,7 @@ tp_channel_is_ready (TpChannel *self)
  * Returns the connection for this channel. The returned pointer is only valid
  * while this channel is valid - reference it with g_object_ref() if needed.
  *
- * Returns: the value of #TpChannel:connection
+ * Returns: (transfer none): the value of #TpChannel:connection
  * Since: 0.7.12
  */
 TpConnection *
@@ -376,7 +383,8 @@ tp_channel_borrow_connection (TpChannel *self)
  * progressively more complete values until the %TP_CHANNEL_FEATURE_CORE
  * feature is prepared.
  *
- * Returns: a #GHashTable where the keys are strings,
+ * Returns: (transfer none) (element-type utf8 GObject.Value): a #GHashTable
+ *  where the keys are strings,
  *  D-Bus interface name + "." + property name, and the values are #GValue
  *  instances
  */
@@ -416,7 +424,7 @@ tp_channel_get_property (GObject *object,
       g_value_set_uint (value, self->priv->handle);
       break;
     case PROP_IDENTIFIER:
-      g_value_set_string (value, self->priv->identifier);
+      g_value_set_string (value, tp_channel_get_identifier (self));
       break;
     case PROP_CHANNEL_PROPERTIES:
       g_value_set_boxed (value, self->priv->channel_properties);
@@ -598,6 +606,10 @@ tp_channel_set_property (GObject *object,
           if (asv != NULL)
             {
               guint u;
+
+              /* no need to emit GObject::notify for any of these since this
+               * can only happen at construct time, before anyone has
+               * connected to it */
 
               tp_g_hash_table_update (self->priv->channel_properties,
                   asv, (GBoxedCopyFunc) g_strdup,
@@ -942,24 +954,30 @@ tp_channel_got_identifier_cb (TpConnection *connection,
 {
   TpChannel *self = user_data;
 
-  if (error == NULL)
-    {
-      DEBUG ("%p: Introspected identifier %s", self, *identifier);
-      self->priv->identifier = g_strdup (*identifier);
-
-      g_hash_table_insert (self->priv->channel_properties,
-          g_strdup (TP_PROP_CHANNEL_TARGET_ID),
-          tp_g_value_slice_new_string (*identifier));
-
-      g_object_notify ((GObject *) self, "identifier");
-
-      _tp_channel_continue_introspection (self);
-    }
-  else
+  if (error != NULL)
     {
       _tp_channel_abort_introspection (self, "InspectHandles failed", error);
+      goto finally;
     }
 
+  if (identifier == NULL || identifier[0] == NULL || identifier[1] != NULL)
+    {
+      GError e = { TP_DBUS_ERRORS, TP_DBUS_ERROR_INCONSISTENT,
+          "CM is broken: InspectHandles(CONTACT, [TargetHandle]) returned "
+          "non-1 length" };
+
+      _tp_channel_abort_introspection (self, "InspectHandles inconsistent",
+          &e);
+      goto finally;
+    }
+
+  DEBUG ("%p: Introspected identifier %s", self, identifier[0]);
+  _tp_channel_maybe_set_identifier (self, identifier[0]);
+  g_object_notify ((GObject *) self, "identifier");
+
+  _tp_channel_continue_introspection (self);
+
+finally:
   g_object_unref (self);
 }
 
@@ -967,8 +985,15 @@ tp_channel_got_identifier_cb (TpConnection *connection,
 static void
 _tp_channel_get_identifier (TpChannel *self)
 {
-  if (self->priv->identifier == NULL && self->priv->handle != 0 &&
-      self->priv->handle_type != TP_HANDLE_TYPE_NONE)
+  if (self->priv->identifier == NULL &&
+      (self->priv->handle == 0 ||
+       self->priv->handle_type == TP_HANDLE_TYPE_NONE))
+    {
+      /* no need to emit GObject::notify here since the initial value was "" */
+      _tp_channel_maybe_set_identifier (self, "");
+    }
+
+  if (self->priv->identifier == NULL)
     {
       GArray handles = {(gchar *) &self->priv->handle, 1};
 
@@ -1431,17 +1456,24 @@ tp_channel_class_init (TpChannelClass *klass)
   /**
    * TpChannel:identifier:
    *
-   * This channel's associated identifier, or NULL if no identifier or unknown.
+   * This channel's associated identifier, or the empty string if it has
+   * handle type %TP_HANDLE_TYPE_NONE.
    *
-   * The identifier is the result of inspecting #TpChannel:handle.
+   * For channels where #TpChannel:handle is non-zero, this is the result of
+   * inspecting #TpChannel:handle.
    *
    * This is not guaranteed to be set until tp_proxy_prepare_async() has
-   * finished preparing %TP_CHANNEL_FEATURE_CORE.
+   * finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may be
+   * the empty string.
+   *
+   * Changed in 0.11.4: this property is never %NULL. Previously,
+   * it was %NULL before an identifier was known, or when a channel
+   * with no TargetID D-Bus property had TargetHandleType %TP_HANDLE_TYPE_NONE.
    */
   param_spec = g_param_spec_string ("identifier",
       "The identifier",
       "The identifier of the channel",
-      NULL,
+      "",
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_IDENTIFIER,
       param_spec);
@@ -1565,7 +1597,7 @@ tp_channel_class_init (TpChannelClass *klass)
       G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_UINT);
 
   /**
-   * TpChannel::group-members-changed:
+   * TpChannel::group-members-changed: (skip)
    * @self: a channel
    * @message: an optional textual message
    * @added: a #GArray of #guint containing the full members added
@@ -1595,14 +1627,16 @@ tp_channel_class_init (TpChannelClass *klass)
   /**
    * TpChannel::group-members-changed-detailed:
    * @self: a channel
-   * @added: a #GArray of #guint containing the full members added
-   * @removed: a #GArray of #guint containing the members (full,
-   *  local-pending or remote-pending) removed
-   * @local_pending: a #GArray of #guint containing the local-pending
+   * @added: (type GLib.Array): a #GArray of #guint containing the full
    *  members added
-   * @remote_pending: a #GArray of #guint containing the remote-pending
-   *  members added
-   * @details: a #GHashTable mapping (gchar *) to #GValue containing details
+   * @removed: (type GLib.Array):  a #GArray of #guint containing the members
+   *  (full, local-pending or remote-pending) removed
+   * @local_pending: (type GLib.Array):  a #GArray of #guint containing the
+   *  local-pending members added
+   * @remote_pending: (type GLib.Array):  a #GArray of #guint containing the
+   *  remote-pending members added
+   * @details: (type GLib.HashTable): (element-type utf8 GObject.Value):
+   *  a #GHashTable mapping (gchar *) to #GValue containing details
    *  about the change, as described in the specification of the
    *  MembersChangedDetailed signal.
    *
@@ -1647,7 +1681,8 @@ tp_channel_class_init (TpChannelClass *klass)
  * tp_channel_new_from_properties:
  * @conn: a connection; may not be %NULL
  * @object_path: the object path of the channel; may not be %NULL
- * @immutable_properties: the immutable properties of the channel,
+ * @immutable_properties: (transfer none) (element-type utf8 GObject.Value):
+ *  the immutable properties of the channel,
  *  as signalled by the NewChannel D-Bus signal or returned by the
  *  CreateChannel and EnsureChannel D-Bus methods: a mapping from
  *  strings (D-Bus interface name + "." + property name) to #GValue instances
@@ -1771,7 +1806,7 @@ finally:
 }
 
 /**
- * tp_channel_run_until_ready:
+ * tp_channel_run_until_ready: (skip)
  * @self: a channel
  * @error: if not %NULL and %FALSE is returned, used to raise an error
  * @loop: if not %NULL, a #GMainLoop is placed here while it is being run
@@ -1907,7 +1942,7 @@ cwr_ready (TpChannel *self,
  */
 
 /**
- * tp_channel_call_when_ready:
+ * tp_channel_call_when_ready: (skip)
  * @self: a channel
  * @callback: called when the channel becomes ready or invalidated, whichever
  *  happens first

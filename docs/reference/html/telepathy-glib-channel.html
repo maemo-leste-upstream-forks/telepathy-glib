@@ -381,11 +381,11 @@ subclassing.)
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>immutable_properties</code></em> :</span></p></td>
-<td>the immutable properties of the channel,
+<td>
+ the immutable properties of the channel,
  as signalled by the NewChannel D-Bus signal or returned by the
  CreateChannel and EnsureChannel D-Bus methods: a mapping from
- strings (D-Bus interface name + "." + property name) to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> instances
-</td>
+ strings (D-Bus interface name + "." + property name) to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> instances. <acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>. <acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 GObject.Value. </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
@@ -633,8 +633,7 @@ while this channel is valid - reference it with <a href="http://library.gnome.or
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> the value of <a class="link" href="telepathy-glib-channel.html#TpChannel--connection" title='The "connection" property'><span class="type">"connection"</span></a>
-</td>
+<td> the value of <a class="link" href="telepathy-glib-channel.html#TpChannel--connection" title='The "connection" property'><span class="type">"connection"</span></a>. <acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>. </td>
 </tr>
 </tbody>
 </table></div>
@@ -673,10 +672,10 @@ feature is prepared.
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> where the keys are strings,
+<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
+ where the keys are strings,
  D-Bus interface name + "." + property name, and the values are <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>
- instances
-</td>
+ instances. <acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>. <acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 GObject.Value. </td>
 </tr>
 </tbody>
 </table></div>
@@ -774,8 +773,7 @@ channel will always communicate. This is the same as the
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>handle_type</code></em> :</span></p></td>
-<td>if not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return the type of this handle
-</td>
+<td> if not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return the type of this handle. <acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>. </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
@@ -791,12 +789,17 @@ channel will always communicate. This is the same as the
 <a name="tp-channel-get-identifier"></a><h3>tp_channel_get_identifier ()</h3>
 <pre class="programlisting">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       tp_channel_get_identifier           (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *self</code></em>);</pre>
 <p>
-This channel's associated identifier, or NULL if no identifier or unknown.
+This channel's associated identifier, or the empty string if no identifier
+or unknown.
 </p>
 <p>
-The identifier is the result of inspecting <span class="type">"handle"</span>.
 This is the same as the <a class="link" href="telepathy-glib-channel.html#TpChannel--identifier" title='The "identifier" property'><span class="type">"identifier"</span></a> property, and isn't guaranteed
-to be non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> until the <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a> property is ready.
+to be set until the <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a> property is ready.
+</p>
+<p>
+Changed in 0.11.UNRELEASED: as with <a class="link" href="telepathy-glib-channel.html#TpChannel--identifier" title='The "identifier" property'><span class="type">"identifier"</span></a>, this could
+previously either be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> or the empty string if there was no suitable
+value. It is now non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in all cases.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -2283,16 +2286,24 @@ Change notification is via notify::group-self-handle.
 <a name="TpChannel--identifier"></a><h3>The <code class="literal">"identifier"</code> property</h3>
 <pre class="programlisting">  "identifier"               <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read</pre>
 <p>
-This channel's associated identifier, or NULL if no identifier or unknown.
+This channel's associated identifier, or the empty string if it has
+handle type <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-NONE:CAPS"><code class="literal">TP_HANDLE_TYPE_NONE</code></a>.
 </p>
 <p>
-The identifier is the result of inspecting <span class="type">"handle"</span>.
+For channels where <span class="type">"handle"</span> is non-zero, this is the result of
+inspecting <span class="type">"handle"</span>.
 </p>
 <p>
 This is not guaranteed to be set until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has
-finished preparing <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>.
+finished preparing <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>; until then, it may be
+the empty string.
 </p>
-<p>Default value: NULL</p>
+<p>
+Changed in 0.11.UNRELEASED: this property is never <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Previously,
+it was <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> before an identifier was known, or when a channel
+with no TargetID D-Bus property had TargetHandleType <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-NONE:CAPS"><code class="literal">TP_HANDLE_TYPE_NONE</code></a>.
+</p>
+<p>Default value: ""</p>
 </div>
 </div>
 <div class="refsect1" title="Signal Details">
@@ -2466,33 +2477,30 @@ applications can connect to this signal and ignore the other.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>added</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the full members added
-</td>
+<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the full
+ members added. type GLib.Array</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>removed</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the members (full,
- local-pending or remote-pending) removed
-</td>
+<td>  a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the members
+ (full, local-pending or remote-pending) removed. type GLib.Array</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>local_pending</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the local-pending
- members added
-</td>
+<td>  a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the
+ local-pending members added. type GLib.Array</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>remote_pending</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the remote-pending
- members added
-</td>
+<td>  a <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> containing the
+ remote-pending members added. type GLib.Array</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> mapping (gchar *) to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> containing details
+<td>
+ a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> mapping (gchar *) to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> containing details
  about the change, as described in the specification of the
- MembersChangedDetailed signal.
-</td>
+ MembersChangedDetailed signal.. type GLib.HashTable): (element-type utf8 GObject.Value</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>

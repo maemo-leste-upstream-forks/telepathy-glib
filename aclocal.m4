@@ -1370,6 +1370,7 @@ AC_SUBST([am__untar])
 
 m4_include([m4/compiler.m4])
 m4_include([m4/gtk-doc.m4])
+m4_include([m4/introspection.m4])
 m4_include([m4/libtool.m4])
 m4_include([m4/linker.m4])
 m4_include([m4/ltoptions.m4])
