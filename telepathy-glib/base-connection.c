@@ -1631,7 +1631,7 @@ tp_base_connection_register (TpBaseConnection *self,
     }
   else
     {
-      g_warning ("Protocol name %s is not valid - should match "
+      WARNING ("Protocol name %s is not valid - should match "
           "[A-Za-z][A-Za-z0-9-]+", priv->protocol);
       safe_proto = tp_escape_as_identifier (priv->protocol);
     }
@@ -1656,7 +1656,7 @@ tp_base_connection_register (TpBaseConnection *self,
            */
           if (prefix_length >= dbus_max_name_length - 10)
             {
-              g_warning (
+              WARNING (
                   "Couldn't fit CM name + protocol name + unique name into "
                   "255 characters.");
               g_free (unique_name);
@@ -2796,8 +2796,8 @@ tp_base_connection_change_status (TpBaseConnection *self,
 
   if (self->status == status)
     {
-      g_warning ("%s: attempted to re-emit the current status %u, reason %u",
-          G_STRFUNC, status, reason);
+      WARNING ("attempted to re-emit the current status %u, reason %u",
+          status, reason);
       return;
     }
 
@@ -2825,8 +2825,7 @@ tp_base_connection_change_status (TpBaseConnection *self,
       g_return_if_fail (prev_status == TP_INTERNAL_CONNECTION_STATUS_NEW);
       break;
     default:
-      g_warning ("%s: invalid connection status %d", G_STRFUNC, status);
-      g_assert_not_reached ();
+      CRITICAL ("invalid connection status %d", status);
       return;
     }
 
@@ -3415,7 +3414,7 @@ tp_base_connection_fill_contact_attributes (GObject *obj,
       g_assert (tmp != NULL);
 
       tp_contacts_mixin_set_contact_attribute (attributes_hash,
-          handle, TP_IFACE_CONNECTION"/contact-id",
+          handle, TP_TOKEN_CONNECTION_CONTACT_ID,
           tp_g_value_slice_new_string (tmp));
     }
 }

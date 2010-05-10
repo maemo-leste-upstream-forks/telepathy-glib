@@ -8,6 +8,7 @@ noinst_PROGRAMS = \
     test-asv \
     test-capabilities \
     test-availability-cmp \
+    test-enums \
     test-gnio-util \
     test-heap \
     test-internal-debug \
@@ -71,6 +72,9 @@ test_intset_SOURCES = \
 test_availability_cmp_SOURCES = \
     availability-cmp.c
 
+test_enums_SOURCES = \
+    enums.c
+
 test_debug_domain_SOURCES = \
     debug-domain.c
 
@@ -84,7 +88,7 @@ test_signal_connect_object_LDADD = \
     $(LDADD)
 
 # this needs to link against the static convenience library so that
-# _tp_debug is still visible
+# _tp_log is still visible
 test_debug_domain_LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
 test_internal_debug_LDADD = \
@@ -96,6 +100,7 @@ check-local: check-coding-style
 
 LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+    $(DBUS_LIBS) \
     $(GLIB_LIBS)
 
 AM_CFLAGS = \

@@ -79,7 +79,11 @@
  * Expands to a call to a function that returns a quark for the "core" feature
  * on a #TpConnectionManager.
  *
- * When this feature is prepared, [...]
+ * After this feature is prepared, basic information about the connection
+ * manager's protocols (tp_connection_manager_get_protocol() and
+ * tp_connection_manager_dup_protocol_names()), and their available parameters,
+ * will have been retrieved, either by activating the connection manager over
+ * D-Bus or by reading the .manager file in which that information is cached.
  *
  * (These are the same guarantees offered by the older
  * tp_connection_manager_call_when_ready() mechanism.)
@@ -105,7 +109,18 @@ tp_connection_manager_get_feature_quark_core (void)
  * Describes possible sources of information on connection managers'
  * supported protocols.
  *
+ * Since 0.11.5, there is a corresponding #GEnumClass type,
+ * %TP_TYPE_CM_INFO_SOURCE.
+ *
  * Since: 0.7.1
+ */
+
+/**
+ * TP_TYPE_CM_INFO_SOURCE:
+ *
+ * The #GEnumClass type of a #TpCMInfoSource.
+ *
+ * Since: 0.11.5
  */
 
 /**
@@ -164,6 +179,11 @@ enum
  * Various fields and methods on this object do not work until
  * %TP_CONNECTION_MANAGER_FEATURE_CORE is prepared. Use
  * tp_proxy_prepare_async() to wait for this to happen.
+ *
+ * Note that the @protocols may be freed and reallocated (based on new
+ * information) whenever the main loop is entered. Since 0.11.3, each protocol
+ * struct can be copied with tp_connection_manager_protocol_copy() if a
+ * private copy is needed.
  *
  * Since: 0.7.1
  */
@@ -1698,6 +1718,9 @@ tp_connection_manager_class_init (TpConnectionManagerClass *klass)
    *
    * Since 0.7.26, the #GObject::notify signal is emitted for this
    * property.
+   *
+   * (Note that this is of type %G_TYPE_UINT, not %TP_TYPE_CM_INFO_SOURCE,
+   * for historical reasons.)
    */
   param_spec = g_param_spec_uint ("info-source", "CM info source",
       "Where we got the current information on supported protocols",
@@ -2048,12 +2071,12 @@ tp_list_connection_managers_got_names (TpDBusDaemon *bus_daemon,
 /**
  * tp_list_connection_managers:
  * @bus_daemon: proxy for the D-Bus daemon
- * @callback: (scope async): callback to be called when listing the CMs
+ * @callback: callback to be called when listing the CMs
  *  succeeds or fails; not called if the @weak_object goes away
  * @user_data: user-supplied data for the callback
  * @destroy: callback to destroy the user-supplied data, called after
  *   @callback, but also if the @weak_object goes away
- * @weak_object: (allow-none) (transfer none): if not %NULL, will be weakly
+ * @weak_object: (allow-none): if not %NULL, will be weakly
  *  referenced; the callback will not be called, and the call will be
  *  cancelled, if the object has vanished
  *
@@ -2294,7 +2317,7 @@ tp_connection_manager_get_info_source (TpConnectionManager *self)
  * The result is copied and must be freed by the caller, but it is not
  * necessarily still true after the main loop is re-entered.
  *
- * Returns: (type GLib.Strv) (transfer full): a #GStrv of protocol names
+ * Returns: (type GObject.Strv) (transfer full): a #GStrv of protocol names
  * Since: 0.7.26
  */
 gchar **
@@ -2340,6 +2363,8 @@ tp_connection_manager_dup_protocol_names (TpConnectionManager *self)
  * tp_connection_manager_call_when_ready() to wait for this.
  *
  * The result is not necessarily valid after the main loop is re-entered.
+ * Since 0.11.3, it can be copied with tp_connection_manager_protocol_copy()
+ * if a permanently-valid copy is needed.
  *
  * Returns: (transfer none): a structure representing the protocol
  * Since: 0.7.26
@@ -2468,7 +2493,7 @@ tp_connection_manager_protocol_can_register (
  *
  * The result is copied and must be freed by the caller with g_strfreev().
  *
- * Returns: (type GLib.Strv) (transfer full): a #GStrv of protocol names
+ * Returns: (type GObject.Strv) (transfer full): a #GStrv of protocol names
  * Since: 0.7.26
  */
 gchar **

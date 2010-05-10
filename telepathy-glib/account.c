@@ -570,7 +570,7 @@ _tp_account_constructed (GObject *object)
 
   if (sc == NULL)
     {
-      g_critical ("Couldn't connect to Removed: %s", error->message);
+      CRITICAL ("Couldn't connect to Removed: %s", error->message);
       g_error_free (error);
     }
 
@@ -1748,7 +1748,7 @@ tp_account_update_parameters_async (TpAccount *account,
  * tp_account_update_parameters_finish:
  * @account: a #TpAccount
  * @result: a #GAsyncResult
- * @reconnect_required: (out) (type GLib.Strv) (transfer full): a #GStrv to
+ * @reconnect_required: (out) (type GObject.Strv) (transfer full): a #GStrv to
  *  fill with properties that need a reconnect to take effect
  * @error: a #GError to fill
  *

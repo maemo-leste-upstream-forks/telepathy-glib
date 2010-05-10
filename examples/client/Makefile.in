@@ -59,9 +59,20 @@ am__EXEEXT_1 = telepathy-example-inspect-channel$(EXEEXT) \
 	telepathy-example-inspect-cm$(EXEEXT) \
 	telepathy-example-list-connections$(EXEEXT) \
 	telepathy-example-list-managers$(EXEEXT) \
-	telepathy-example-extended-client$(EXEEXT)
+	telepathy-example-extended-client$(EXEEXT) \
+	telepathy-example-media-observer$(EXEEXT) \
+	telepathy-example-approver$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+am_telepathy_example_approver_OBJECTS = approver.$(OBJEXT)
+telepathy_example_approver_OBJECTS =  \
+	$(am_telepathy_example_approver_OBJECTS)
+telepathy_example_approver_LDADD = $(LDADD)
+telepathy_example_approver_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 am_telepathy_example_extended_client_OBJECTS =  \
 	extended-client.$(OBJEXT)
 telepathy_example_extended_client_OBJECTS =  \
@@ -71,9 +82,6 @@ am__DEPENDENCIES_1 =  \
 telepathy_example_extended_client_DEPENDENCIES =  \
 	$(top_builddir)/examples/extensions/libexample-extensions.la \
 	$(am__DEPENDENCIES_1)
-AM_V_lt = $(am__v_lt_$(V))
-am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
-am__v_lt_0 = --silent
 am_telepathy_example_inspect_channel_OBJECTS =  \
 	inspect-channel.$(OBJEXT)
 telepathy_example_inspect_channel_OBJECTS =  \
@@ -114,6 +122,13 @@ telepathy_example_list_managers_OBJECTS =  \
 telepathy_example_list_managers_LDADD = $(LDADD)
 telepathy_example_list_managers_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
+am_telepathy_example_media_observer_OBJECTS =  \
+	media-observer.$(OBJEXT)
+telepathy_example_media_observer_OBJECTS =  \
+	$(am_telepathy_example_media_observer_OBJECTS)
+telepathy_example_media_observer_LDADD = $(LDADD)
+telepathy_example_media_observer_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -140,20 +155,24 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(telepathy_example_extended_client_SOURCES) \
+SOURCES = $(telepathy_example_approver_SOURCES) \
+	$(telepathy_example_extended_client_SOURCES) \
 	$(telepathy_example_inspect_channel_SOURCES) \
 	$(telepathy_example_inspect_cm_SOURCES) \
 	$(telepathy_example_inspect_connection_SOURCES) \
 	$(telepathy_example_inspect_contact_SOURCES) \
 	$(telepathy_example_list_connections_SOURCES) \
-	$(telepathy_example_list_managers_SOURCES)
-DIST_SOURCES = $(telepathy_example_extended_client_SOURCES) \
+	$(telepathy_example_list_managers_SOURCES) \
+	$(telepathy_example_media_observer_SOURCES)
+DIST_SOURCES = $(telepathy_example_approver_SOURCES) \
+	$(telepathy_example_extended_client_SOURCES) \
 	$(telepathy_example_inspect_channel_SOURCES) \
 	$(telepathy_example_inspect_cm_SOURCES) \
 	$(telepathy_example_inspect_connection_SOURCES) \
 	$(telepathy_example_inspect_contact_SOURCES) \
 	$(telepathy_example_list_connections_SOURCES) \
-	$(telepathy_example_list_managers_SOURCES)
+	$(telepathy_example_list_managers_SOURCES) \
+	$(telepathy_example_media_observer_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -192,6 +211,7 @@ GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
@@ -311,7 +331,8 @@ EXAMPLES = telepathy-example-inspect-channel \
 	telepathy-example-inspect-contact telepathy-example-inspect-cm \
 	telepathy-example-list-connections \
 	telepathy-example-list-managers \
-	telepathy-example-extended-client
+	telepathy-example-extended-client \
+	telepathy-example-media-observer telepathy-example-approver
 telepathy_example_inspect_channel_SOURCES = inspect-channel.c
 telepathy_example_inspect_connection_SOURCES = inspect-connection.c
 telepathy_example_inspect_contact_SOURCES = inspect-contact.c
@@ -323,6 +344,8 @@ telepathy_example_extended_client_LDADD = \
     $(top_builddir)/examples/extensions/libexample-extensions.la \
     $(LDADD)
 
+telepathy_example_media_observer_SOURCES = media-observer.c
+telepathy_example_approver_SOURCES = approver.c
 
 # In an external project you'd use $(TP_GLIB_LIBS) (obtained from
 # pkg-config via autoconf) instead of the .la path
@@ -423,6 +446,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+telepathy-example-approver$(EXEEXT): $(telepathy_example_approver_OBJECTS) $(telepathy_example_approver_DEPENDENCIES) 
+	@rm -f telepathy-example-approver$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(telepathy_example_approver_OBJECTS) $(telepathy_example_approver_LDADD) $(LIBS)
 telepathy-example-extended-client$(EXEEXT): $(telepathy_example_extended_client_OBJECTS) $(telepathy_example_extended_client_DEPENDENCIES) 
 	@rm -f telepathy-example-extended-client$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(telepathy_example_extended_client_OBJECTS) $(telepathy_example_extended_client_LDADD) $(LIBS)
@@ -444,6 +470,9 @@ telepathy-example-list-connections$(EXEEXT): $(telepathy_example_list_connection
 telepathy-example-list-managers$(EXEEXT): $(telepathy_example_list_managers_OBJECTS) $(telepathy_example_list_managers_DEPENDENCIES) 
 	@rm -f telepathy-example-list-managers$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(telepathy_example_list_managers_OBJECTS) $(telepathy_example_list_managers_LDADD) $(LIBS)
+telepathy-example-media-observer$(EXEEXT): $(telepathy_example_media_observer_OBJECTS) $(telepathy_example_media_observer_DEPENDENCIES) 
+	@rm -f telepathy-example-media-observer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(telepathy_example_media_observer_OBJECTS) $(telepathy_example_media_observer_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -451,6 +480,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/approver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended-client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inspect-channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inspect-cm.Po@am__quote@
@@ -458,6 +488,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inspect-contact.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list-connections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list-managers.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/media-observer.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

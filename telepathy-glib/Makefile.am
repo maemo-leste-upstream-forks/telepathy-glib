@@ -16,7 +16,7 @@ EXTRA_DIST = \
 # produced by abi.am.
 #
 # The static version is necessary because one of the tests wants to use
-# internal symbols (_tp_debug) which are made invisible by GNU ld.
+# internal symbols (_tp_log) which are made invisible by GNU ld.
 
 lib_LTLIBRARIES = libtelepathy-glib.la
 noinst_LTLIBRARIES = libtelepathy-glib-internal.la
@@ -25,6 +25,8 @@ noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 our_headers = \
     account.h \
     account-manager.h \
+    add-dispatch-operation-context.h \
+    base-client.h \
     base-connection.h \
     base-connection-manager.h \
     channel.h \
@@ -62,11 +64,14 @@ our_headers = \
     intset.h \
     media-interfaces.h \
     message-mixin.h \
+    observe-channels-context.h \
     presence-mixin.h \
     properties-mixin.h \
     proxy.h \
     proxy-subclass.h \
     run.h \
+    simple-approver.h \
+    simple-observer.h \
     svc-account.h \
     svc-account-manager.h \
     svc-channel-dispatcher.h \
@@ -109,6 +114,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     account-internal.h \
     account-manager.c \
     account-manager-internal.h \
+    add-dispatch-operation-context-internal.h \
+    add-dispatch-operation-context.c \
+    base-client.c \
     base-connection.c \
     base-connection-manager.c \
     capabilities.c \
@@ -118,6 +126,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-internal.h \
     channel-dispatcher.c \
     channel-dispatch-operation.c \
+    channel-dispatch-operation-internal.h \
     channel-manager.c \
     channel-request.c \
     client.c \
@@ -152,6 +161,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-factory-iface.c \
     media-interfaces.c \
     message-mixin.c \
+    observe-channels-context-internal.h \
+    observe-channels-context.c \
     presence-mixin.c \
     properties-mixin.c \
     proxy.c \
@@ -160,6 +171,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     proxy-signals.c \
     run.c \
     signals-marshal.list \
+    simple-approver.c \
+    simple-observer.c \
     text-mixin.c \
     util.c \
     util-internal.h

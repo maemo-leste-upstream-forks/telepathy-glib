@@ -109,6 +109,7 @@ GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
@@ -250,7 +251,8 @@ SCANGOBJ_OPTIONS =
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
 SCAN_OPTIONS = --deprecated-guards=TP_DISABLE_DEPRECATED \
-	--ignore-decorators=_TP_GNUC_DEPRECATED $(am__append_1)
+	--ignore-decorators=_TP_GNUC_DEPRECATED --rebuild-types \
+	$(am__append_1)
 
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--sgml-mode --output-format=xml
@@ -273,11 +275,15 @@ CFILE_GLOB = $(top_srcdir)/telepathy-glib/*.c $(top_builddir)/telepathy-glib/_ge
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 IGNORE_HFILES = \
+    add-dispatch-operation-context-internal.h \
+    channel-dispatch-operation-internal.h \
     channel-internal.h \
     connection-internal.h \
     debug-internal.h \
     handle-repo-internal.h \
-    proxy-internal.h
+    observe-channels-context-internal.h \
+    proxy-internal.h \
+    proxy-introspectable.h
 
 
 # Images to copy into HTML directory.
@@ -726,6 +732,17 @@ dist-hook: dist-check-gtkdoc dist-hook-local
 @ENABLE_GTK_DOC_TRUE@		echo "^^^ Undeclared symbols" >&2; \
 @ENABLE_GTK_DOC_TRUE@		err=1; \
 @ENABLE_GTK_DOC_TRUE@	fi; \
+@ENABLE_GTK_DOC_TRUE@	sed -n -e 's,<FILE>\(.*\)</FILE>,\1,p' $(srcdir)/telepathy-glib-sections.txt |\
+@ENABLE_GTK_DOC_TRUE@	while read file; do \
+@ENABLE_GTK_DOC_TRUE@		if grep -F "xml/$$file.xml" $(srcdir)/telepathy-glib-docs.sgml \
+@ENABLE_GTK_DOC_TRUE@			>/dev/null;\
+@ENABLE_GTK_DOC_TRUE@		then \
+@ENABLE_GTK_DOC_TRUE@		:; \
+@ENABLE_GTK_DOC_TRUE@		else \
+@ENABLE_GTK_DOC_TRUE@			echo "$$file missing from telepathy-glib-docs.sgml"; \
+@ENABLE_GTK_DOC_TRUE@			err=1; \
+@ENABLE_GTK_DOC_TRUE@		fi; \
+@ENABLE_GTK_DOC_TRUE@	done; \
 @ENABLE_GTK_DOC_TRUE@	case @ENABLE_DOC_CHECKS@/$$err in \
 @ENABLE_GTK_DOC_TRUE@		(yes/1) \
 @ENABLE_GTK_DOC_TRUE@			echo "Documentation check failed" >&2; \
