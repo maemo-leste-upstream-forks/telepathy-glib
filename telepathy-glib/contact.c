@@ -98,7 +98,18 @@ struct _TpContact {
  * the #TpContact code will only initialize state for those features, to
  * avoid unwanted D-Bus round-trips and signal connections.
  *
+ * Since 0.11.5, there is a corresponding #GEnumClass type,
+ * %TP_TYPE_CONTACT_FEATURE.
+ *
  * Since: 0.7.18
+ */
+
+/**
+ * TP_TYPE_CONTACT_FEATURE:
+ *
+ * The #GEnumClass type of a #TpContactFeature.
+ *
+ * Since: 0.11.5
  */
 
 G_DEFINE_TYPE (TpContact, tp_contact, G_TYPE_OBJECT);
@@ -959,15 +970,16 @@ contacts_context_fail (ContactsContext *c,
  * @connection: The connection
  * @n_contacts: The number of TpContact objects successfully created
  *  (one per valid handle), or 0 on unrecoverable errors
- * @contacts: An array of @n_contacts TpContact objects (this callback is
- *  not given a reference to any of these objects, and must call g_object_ref()
- *  on any that it will keep), or %NULL on unrecoverable errors
+ * @contacts: (array length=n_contacts): An array of @n_contacts TpContact
+ *  objects (this callback is not given a reference to any of these objects,
+ *  and must call g_object_ref() on any that it will keep), or %NULL on
+ *  unrecoverable errors
  * @n_failed: The number of invalid handles that were passed to
  *  tp_connection_get_contacts_by_handle() (or on unrecoverable errors,
  *  the total number of handles that were given)
- * @failed: An array of @n_failed handles that were passed to
- *  tp_connection_get_contacts_by_handle() but turned out to be invalid
- *  (or on unrecoverable errors, all the handles that were given)
+ * @failed: (array length=n_failed): An array of @n_failed handles that were
+ *  passed to tp_connection_get_contacts_by_handle() but turned out to be
+ *  invalid (or on unrecoverable errors, all the handles that were given)
  * @error: %NULL on success, or an unrecoverable error that caused everything
  *  to fail
  * @user_data: the @user_data that was passed to
@@ -1267,7 +1279,7 @@ contacts_inspected (TpConnection *connection,
           tp_proxy_get_bus_name (connection), c->handles->len,
           g_strv_length ((GStrv) ids));
 
-      g_warning ("%s", e->message);
+      WARNING ("%s", e->message);
       contacts_context_fail (c, e);
       g_error_free (e);
       return;
@@ -1295,7 +1307,7 @@ contacts_inspected (TpConnection *connection,
                   tp_proxy_get_bus_name (connection), contact->priv->handle,
                   contact->priv->identifier, ids[i]);
 
-              g_warning ("%s", e->message);
+              WARNING ("%s", e->message);
               contacts_context_fail (c, e);
               g_error_free (e);
               return;
@@ -1351,7 +1363,7 @@ contacts_requested_aliases (TpConnection *connection,
 
       if (G_UNLIKELY (g_strv_length ((GStrv) aliases) != c->contacts->len))
         {
-          g_warning ("Connection manager %s is broken: we requested %u "
+          WARNING ("Connection manager %s is broken: we requested %u "
               "handles' aliases but got %u strings back",
               tp_proxy_get_bus_name (connection), c->contacts->len,
               g_strv_length ((GStrv) aliases));
@@ -1413,7 +1425,7 @@ contacts_got_aliases (TpConnection *connection,
             }
           else
             {
-              g_warning ("No alias returned for %u, will use ID instead",
+              WARNING ("No alias returned for %u, will use ID instead",
                   contact->priv->handle);
             }
 
@@ -2106,7 +2118,7 @@ contacts_got_attributes (TpConnection *connection,
 
       /* set up the contact with its attributes */
 
-      s = tp_asv_get_string (asv, TP_IFACE_CONNECTION "/contact-id");
+      s = tp_asv_get_string (asv, TP_TOKEN_CONNECTION_CONTACT_ID);
 
       if (s == NULL)
         {
@@ -2138,7 +2150,7 @@ contacts_got_attributes (TpConnection *connection,
         }
 
       s = tp_asv_get_string (asv,
-          TP_IFACE_CONNECTION_INTERFACE_ALIASING "/alias");
+          TP_TOKEN_CONNECTION_INTERFACE_ALIASING_ALIAS);
 
       if (s != NULL)
         {
@@ -2148,27 +2160,26 @@ contacts_got_attributes (TpConnection *connection,
           g_object_notify ((GObject *) contact, "alias");
         }
 
-      s = tp_asv_get_string (asv,
-          TP_IFACE_CONNECTION_INTERFACE_AVATARS "/token");
+      s = tp_asv_get_string (asv, TP_TOKEN_CONNECTION_INTERFACE_AVATARS_TOKEN);
 
       if (s != NULL)
         contacts_avatar_updated (connection, contact->priv->handle, s,
             NULL, NULL);
 
       boxed = tp_asv_get_boxed (asv,
-          TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE "/presence",
+          TP_TOKEN_CONNECTION_INTERFACE_SIMPLE_PRESENCE_PRESENCE,
           TP_STRUCT_TYPE_SIMPLE_PRESENCE);
       contact_maybe_set_simple_presence (contact, boxed);
 
       /* Location */
       boxed = tp_asv_get_boxed (asv,
-          TP_IFACE_CONNECTION_INTERFACE_LOCATION "/location",
+          TP_TOKEN_CONNECTION_INTERFACE_LOCATION_LOCATION,
           TP_HASH_TYPE_LOCATION);
       contact_maybe_set_location (contact, boxed);
 
       /* Capabilities */
       boxed = tp_asv_get_boxed (asv,
-          TP_IFACE_CONNECTION_INTERFACE_CONTACT_CAPABILITIES "/capabilities",
+          TP_TOKEN_CONNECTION_INTERFACE_CONTACT_CAPABILITIES_CAPABILITIES,
           TP_ARRAY_TYPE_REQUESTABLE_CHANNEL_CLASS_LIST);
 
       contact_maybe_set_capabilities (contact, boxed);
@@ -2300,17 +2311,19 @@ lookup_all_contacts (ContactsContext *context)
  * @self: A connection, which must be ready (#TpConnection:connection-ready
  *  must be %TRUE)
  * @n_handles: The number of handles in @handles (must be at least 1)
- * @handles: An array of handles of type %TP_HANDLE_TYPE_CONTACT representing
- *  the desired contacts
+ * @handles: (array length=n_handles) (element-type uint): An array of handles
+ *  of type %TP_HANDLE_TYPE_CONTACT representing the desired contacts
  * @n_features: The number of features in @features (may be 0)
- * @features: An array of features that must be ready for use (if supported)
- *  before the callback is called (may be %NULL if @n_features is 0)
+ * @features: (array length=n_features) (allow-none) (element-type uint): An array of features that
+ *  must be ready for use (if supported) before the callback is called (may
+ *  be %NULL if @n_features is 0)
  * @callback: A user callback to call when the contacts are ready
  * @user_data: Data to pass to the callback
  * @destroy: Called to destroy @user_data either after @callback has been
  *  called, or if the operation is cancelled
- * @weak_object: An object to pass to the callback, which will be weakly
- *  referenced; if this object is destroyed, the operation will be cancelled
+ * @weak_object: (allow-none): An object to pass to the callback, which will be
+ *  weakly referenced; if this object is destroyed, the operation will be
+ *  cancelled
  *
  * Create a number of #TpContact objects and make asynchronous method calls
  * to hold their handles and ensure that all the features specified in
@@ -2419,7 +2432,7 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
  * @n_features: The number of features in @features (must be at least 1)
  * @features: (array length=n_features): An array of features that must be
  *  ready for use (if supported) before the callback is called
- * @callback: (scope async): A user callback to call when the contacts are ready
+ * @callback: A user callback to call when the contacts are ready
  * @user_data: Data to pass to the callback
  * @destroy: Called to destroy @user_data either after @callback has been
  *  called, or if the operation is cancelled
@@ -2635,13 +2648,13 @@ contacts_requested_handles (TpConnection *connection,
  * @features: (array length=n_features) (allow-none): An array of features
  *  that must be ready for use (if supported)
  *  before the callback is called (may be %NULL if @n_features is 0)
- * @callback: (scope async): A user callback to call when the contacts are ready
+ * @callback: A user callback to call when the contacts are ready
  * @user_data: Data to pass to the callback
  * @destroy: Called to destroy @user_data either after @callback has been
  *  called, or if the operation is cancelled
- * @weak_object: (allow-none) (transfer none): An object to pass to the
- *  callback, which will be weakly
- *  referenced; if this object is destroyed, the operation will be cancelled
+ * @weak_object: (allow-none): An object to pass to the callback, which will
+ *  be weakly referenced; if this object is destroyed, the operation will be
+ *  cancelled
  *
  * Create a number of #TpContact objects and make asynchronous method calls
  * to obtain their handles and ensure that all the features specified in

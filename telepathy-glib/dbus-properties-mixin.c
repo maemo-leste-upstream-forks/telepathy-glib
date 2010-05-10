@@ -26,6 +26,9 @@
 #include <telepathy-glib/svc-generic.h>
 #include <telepathy-glib/util.h>
 
+#define DEBUG_FLAG TP_DEBUG_PROPERTIES
+#include "telepathy-glib/debug-internal.h"
+
 /**
  * SECTION:dbus-properties-mixin
  * @title: TpDBusPropertiesMixin
@@ -64,7 +67,18 @@
  *
  * Bitfield representing allowed access to a property.
  *
+ * Since 0.11.5, there is a corresponding #GFlagsClass type,
+ * %TP_TYPE_DBUS_PROPERTIES_MIXIN_FLAGS.
+ *
  * Since: 0.7.3
+ */
+
+/**
+ * TP_TYPE_DBUS_PROPERTIES_MIXIN_FLAGS:
+ *
+ * The #GFlagsClass type of #TpDBusPropertiesMixinFlags.
+ *
+ * Since: 0.11.5
  */
 
 /**
@@ -348,7 +362,7 @@ link_interface (GType type,
 
   if (iface_info == NULL)
     {
-      g_critical ("%s tried to implement undefined interface %s",
+      CRITICAL ("%s tried to implement undefined interface %s",
           g_type_name (type), iface_impl->name);
       return FALSE;
     }
@@ -379,7 +393,7 @@ link_interface (GType type,
 
       if (prop_impl->mixin_priv == NULL)
         {
-          g_critical ("%s tried to implement nonexistent property %s"
+          CRITICAL ("%s tried to implement nonexistent property %s"
               " on interface %s", g_type_name (type), prop_impl->name,
               iface_impl->name);
           return FALSE;
@@ -476,7 +490,7 @@ tp_dbus_properties_mixin_implement_interface (GObjectClass *cls,
 
           if (G_UNLIKELY (other_info->dbus_interface == iface))
             {
-              g_critical ("type %s tried to implement interface %s with %s "
+              CRITICAL ("type %s tried to implement interface %s with %s "
                   "twice", g_type_name (type), g_quark_to_string (iface),
                   G_STRFUNC);
               goto out;
@@ -497,7 +511,7 @@ tp_dbus_properties_mixin_implement_interface (GObjectClass *cls,
 
               if (G_UNLIKELY (other_info->dbus_interface == iface))
                 {
-                  g_critical ("type %s tried to implement interface %s with %s "
+                  CRITICAL ("type %s tried to implement interface %s with %s "
                       "and also in static data", g_type_name (type),
                       g_quark_to_string (iface), G_STRFUNC);
                   goto out;
@@ -597,7 +611,7 @@ tp_dbus_properties_mixin_class_init (GObjectClass *cls,
 
           if (G_UNLIKELY (iface_quark == other_info->dbus_interface))
             {
-              g_critical ("type %s tried to implement interface %s in static "
+              CRITICAL ("type %s tried to implement interface %s in static "
                   "data twice", g_type_name (type), iface_impl->name);
               goto out;
             }

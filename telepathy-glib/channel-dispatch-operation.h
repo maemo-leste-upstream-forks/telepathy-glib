@@ -22,6 +22,8 @@
 #ifndef TP_CHANNEL_DISPATCH_OPERATION_H
 #define TP_CHANNEL_DISPATCH_OPERATION_H
 
+#include <telepathy-glib/account.h>
+#include <telepathy-glib/connection.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/defs.h>
 #include <telepathy-glib/proxy.h>
@@ -74,6 +76,47 @@ TpChannelDispatchOperation *tp_channel_dispatch_operation_new (
   G_GNUC_WARN_UNUSED_RESULT;
 
 void tp_channel_dispatch_operation_init_known_interfaces (void);
+
+#define TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE \
+  tp_channel_dispatch_operation_get_feature_quark_core ()
+
+GQuark tp_channel_dispatch_operation_get_feature_quark_core (void) G_GNUC_CONST;
+
+TpConnection * tp_channel_dispatch_operation_borrow_connection (
+    TpChannelDispatchOperation *self);
+
+TpAccount * tp_channel_dispatch_operation_borrow_account (
+    TpChannelDispatchOperation *self);
+
+GPtrArray * tp_channel_dispatch_operation_borrow_channels (
+    TpChannelDispatchOperation *self);
+
+GStrv tp_channel_dispatch_operation_borrow_possible_handlers (
+    TpChannelDispatchOperation *self);
+
+GHashTable * tp_channel_dispatch_operation_borrow_immutable_properties (
+    TpChannelDispatchOperation *self);
+
+void tp_channel_dispatch_operation_handle_with_async (
+    TpChannelDispatchOperation *self,
+    const gchar *handler,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean tp_channel_dispatch_operation_handle_with_finish (
+    TpChannelDispatchOperation *self,
+    GAsyncResult *result,
+    GError **error);
+
+void tp_channel_dispatch_operation_claim_async (
+    TpChannelDispatchOperation *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean tp_channel_dispatch_operation_claim_finish (
+    TpChannelDispatchOperation *self,
+    GAsyncResult *result,
+    GError **error);
 
 G_END_DECLS
 

@@ -1,3 +1,1742 @@
+commit 2fd57acfab0dd14888baefed5e79c97fce153a74
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-10 17:03:56 +0100
+
+    Prepare release 0.11.5
+
+commit 8eb1c1345b48d9719fecb92e35f86c260a74c820
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-10 12:17:55 +0100
+
+    fd.o #28043: explicitly link tests/* against dbus-glib
+    
+    This fixes compilation with LDFLAGS=-Wl,--no-add-needed, with GNU gold
+    (where this is the default), and hopefully with recent Fedora (where this
+    appears to be the default for ld too).
+    
+    When the last round of Debian "fails to build with GNU gold" reports came
+    in, nothing in tests/ used libdbus or dbus-glib. However, the test for
+    gnio-utils needs the dbus-glib specialized type system, even though it
+    doesn't actually connect to D-Bus, so it needs to be linked accordingly.
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 366e300fb469496f060301df594502498fb8c75e
+Merge: 00f0133 c5658c2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-10 16:28:42 +0100
+
+    Merge branch 'cdo'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit c5658c22e4271848fd895fd8bc6cbf6765664d63
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-10 16:26:21 +0100
+
+    TpChannelDispatchOperation: don't crash if channels is not given in g_object_new
+    
+    channels is meant to be optional, but we'd crash with a NULL pointer
+    dereference if it's omitted (in which case GObject sets it to NULL).
+    
+    "Updating" a channels array that was NULL also crashed with a NULL pointer
+    dereference.
+
+commit 79bff23750a5fbddd0adb6e08396dd9f36d2ad84
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-10 16:22:15 +0100
+
+    TpChannelDispatchOperation: assert that we're not leaking properties
+
+commit 92991d03cd048b40e597e0b8b87712093ddf1844
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-10 16:10:22 +0100
+
+    TpChannelDispatchOperation: defer interpretation of immutables until constructed
+    
+    Without this change, the CDO's behaviour would depend on the order of
+    g_object_new arguments:
+    
+    * if cdo-properties came before account: make a new TpAccount, which is
+      then leaked (overwritten with an existing TpAccount, but not freed)
+      when the account property is set
+    
+    * if account came before cdo-properties: behave correctly (use the
+      existing TpAccount)
+    
+    The corresponding order-dependent bug could happen for connection too.
+    By delaying the maybe_set functions until constructed(), we force the
+    latter (correct) ordering in all cases.
+
+commit 00f0133f43d96008230378c3245034fee82c287c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-10 14:04:17 +0200
+
+    no need to pass dbus-connection when constructing CDO
+
+commit 85ef11d6ad84bf5c26df16616365930b6ec83778
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-10 11:39:04 +0200
+
+    test-approver: check CDO reuses existing proxies
+
+commit 3769f59525c07f39314587d9a2aecf53ec3c0a01
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-10 11:38:30 +0200
+
+    _tp_base_client_add_dispatch_operation: use _tp_channel_dispatch_operation_new_with_objects to create the CDO
+
+commit 4c3b73e98fbf88d24f3fd42a998511b055c89001
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-10 11:36:27 +0200
+
+    add _tp_channel_dispatch_operation_new_with_objects
+    
+    This can be used by tp-glib to create a new CDO using existing proxies rather
+    than creating new ones.
+
+commit db9240a129ae9af2cf56ec9aa9c7622be22f60d9
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-10 11:31:33 +0200
+
+    CDO: update list of channels when we fetch them from D-Bus
+
+commit 0226292f8c90b6c0ca5b7995feea0bd10d84e064
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-10 11:30:08 +0200
+
+    CDO: make account, connection and channels properties construct-only
+
+commit eb98e533f3d455d273fe2ef21cd515b9a89e23c9
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-06 14:47:11 +0200
+
+    add example approver
+
+commit 1f9679e1323ab857362e6e87822cdf95ea500341
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-06 12:21:46 +0200
+
+    test simple-approver
+
+commit 037a5723f9d927601f967b43708047ee230b1717
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 12:10:49 +0200
+
+    add simple-approver (fdo #27875)
+
+commit b4b633c1bccb75f68cb867a0bb7a8388d3b3feb8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 15:24:28 +0200
+
+    use WARNING if D-Bus method hasn't been implemented when expected
+
+commit bc9e42038b8bbdbd3aec1ab43a24e7da609f355d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 14:29:48 +0200
+
+    rephrase doc of some API
+
+commit 367c3ff65f8960da30564a6428c8fdab5a2b83b1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 14:24:17 +0200
+
+    remove useless '\'
+
+commit 84ef2289986dc66a44d7a3805abdffd38f604c70
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 14:23:16 +0200
+
+    add-dispatch-operation-context: fix copyright headers
+
+commit 324a03753345761f79fd3aa56665a2e22f23170b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:35:16 +0200
+
+    No need to special case when a CDO disappear while preparing it
+    
+    The spec guarantees that ChanneLost/Finished aren't fired until
+    AddDispatchOperation returns.
+
+commit cff5d2d1282f2f74c5300557873e38f30c50bdf5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:32:42 +0200
+
+    refer to tp_channel_dispatch_operation_{handle_with,claim}_async in TpBaseClientClassAddDispatchOperationImpl's doc
+
+commit a01d41699c667e5caedb1f97ea0992f33348a832
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 17:15:34 +0200
+
+    test-base-client: test invalidating the CDO while preparing the context
+
+commit 3e2db10fc246a1866284483d22b51ba0280af31d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 16:47:42 +0200
+
+    test-base-client: test invalidating one channel while calling AddDispatchOperation
+
+commit 2a4e0ad89d566a5cdd8e7bea131b2c31468ed39a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 16:25:36 +0200
+
+    pass 2 channels to AddDispatchOperation
+
+commit b18197b9545109924ca891e5b40055bb1d085bd8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 14:53:19 +0200
+
+    document tp_base_client_{add,take}_approver_filter
+
+commit 4f0d87c604cbb31d04a19b36dfbd1a789b836402
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 14:52:57 +0200
+
+    test-base-client: implement AddDispatchOperation()
+
+commit 926789f750d10ca7c2eeea8301b296101feaea2f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 14:52:00 +0200
+
+    base-client: add API to implement AddDispatchOperation()
+
+commit 22aecb02672ebdb5aec5be4aadca2ec0b306eaf4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 14:45:17 +0200
+
+    add add-dispatch-operation-context
+
+commit c52b6aba6fae5831671339951d756be9d0fd20f8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 12:33:32 +0200
+
+    test-approver: instantiate a fake CDO service and pass proper properties to AddDispatchOperation()
+
+commit b2dde6a82dcee6d5fd5b39002c50ccf3be4a317a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 12:31:05 +0200
+
+    add simple_channel_dispatch_operation_set_account_path
+
+commit 7eb820e60fe0e2dcf38c897384238cff2a7e82c6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 12:06:28 +0200
+
+    test-base-client: uncomment Approver test
+
+commit 4c552b15ac4a890d1d2ed2720ea3f43d4ca5fbb1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 12:06:17 +0200
+
+    base-client: uncomment Approver code
+
+commit 5b2cdebdbbd9d1af9b2a4083323262be4204f8dc
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 12:03:14 +0200
+
+    test-base-client: remove Handler bits
+
+commit 40ba28806841278d1e71d9e02a281ddd67f54951
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 12:01:56 +0200
+
+    base-client: remove Handler bits
+    
+    We are going to implement Approver for now.
+
+commit c3b605595ce4a47af0965180561443cceb766af6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:48:01 +0200
+
+    Revert "test-base-client: remove Approver and Handler tests for now"
+    
+    This reverts commit 7b8d450bed2eb391505a0b5bd7c1bac7cae23789.
+
+commit 3ca6e012e70fed8cd1ffb3664ec838079e46c250
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:47:53 +0200
+
+    Revert "base-client: remove Approver and Handler code for now"
+    
+    This reverts commit 790531670baad55d83c003c5db06a1bde69273f0.
+
+commit 45b42af7da85bbb9acbe09c97134e853db9747e3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 14:11:34 +0200
+
+    skip tp_channel_dispatch_operation_borrow_* methods
+
+commit 492d8a3d47d2a60deb3c3e656af915c59099b30a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 14:04:59 +0200
+
+    rename channel-dispatch-operation-properties property to cdo-properties
+
+commit d728bf6331c369d08726061c45a68b8f631a9425
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 13:57:10 +0200
+
+    fix #TpProxy::invalidated references in doc
+
+commit fcd7e0d0ca380da63abe4c015906a622cb561961
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:14:30 +0200
+
+    use g_assert_cmpstr
+
+commit 73c6c25e674649714bcda17b91f1a4974e12a51f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:10:13 +0200
+
+    document the error code used when invalidating the CDO as a result of tp_channel_dispatch_operation_handle_with_async
+
+commit 6bbd1bf543473f69cf7b933d5312f22f29a53496
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:07:48 +0200
+
+    don't skip the channel-lost sig
+
+commit c4146b24d3738de8d9896f1f724ad400396d88ad
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:07:08 +0200
+
+    set preparing_core when starting to prepare
+
+commit 8814084a755c495bf0682a2c91ab0db10a4efc84
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 11:04:32 +0200
+
+    get_dispatch_operation_prop_cb: invalidate the CDO is a property is missing
+
+commit 357f52a4d7d76291670ee77e54f5fe15948b0883
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 10:40:59 +0200
+
+    fix identation
+
+commit 703bc1942cc8ac82ec35a533a5bb0d7b1fb83ea8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-07 10:38:25 +0200
+
+    remove setter for connection, account and possible-handlers properties
+    
+    There are read-only.
+
+commit 22149785271489439fbb4336f8822fe303116ef1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 11:00:04 +0200
+
+    test removing the 2 channels while preparing the CDO
+
+commit cc805799413ba30de579d14898a3b67271971149
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 10:55:35 +0200
+
+    test_channel_lost: test removing the second channel
+
+commit 36edb35ca7b50a49e45ba68da423780e983ad1cd
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 17:10:22 +0200
+
+    simple-channel-dispatch-operation: fire Finished signal when removing the last channel
+
+commit 65c37be1c7e69aadd0d58cec1ebea6206b2ca566
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 10:39:23 +0200
+
+    test removing a channel while preparing the CDO
+
+commit 8180f2a6380cee3676a9c555113b859755d69eb6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 16:46:25 +0200
+
+    channel-dispatch-operation: don't crash if ChannLost is fired before we fetch channels
+
+commit 7ace4dc92eb96c0ba1c2f018d79d6c48d1aed393
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 10:35:18 +0200
+
+    test_channel_lost: actually remove the channel from the bus
+
+commit b473773146d8ef2b1d5cad02c197126973c843aa
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 10:32:48 +0200
+
+    test-channel-dispatch-operation: pass 2 channels to the CDO
+
+commit 51e602a270b00425164a9a2e661a860e07462c29
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:36:02 +0200
+
+    test tp_channel_dispatch_operation_claim_async
+
+commit 92c6da567fad79456c6a59a85123c808d34c1762
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:35:46 +0200
+
+    add tp_channel_dispatch_operation_claim_{async,finish}
+
+commit 349631bf9cf3ec1a9f0bb76bfe012552c146b1c7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:17:37 +0200
+
+    test tp_channel_dispatch_operation_handle_with_async
+
+commit 95118745bbc376323c18f9afe9c0363b417073f3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:17:01 +0200
+
+    add tp_channel_dispatch_operation_handle_with_{async,finish}
+
+commit 46647279c39411342628cea211d994150fcc336f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 11:01:14 +0200
+
+    simple-channel-dispatch-operation: implement HandleWith() and Claim()
+
+commit ddf90f909d7dcdef8c9a949d60ee792f00fcb573
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-30 15:37:14 +0200
+
+    test 'channel-lost' signal
+
+commit e26d8082a47c110b927113e2a8efe8d95da9ef99
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-30 15:36:05 +0200
+
+    TpChannelDispatchOperation: implement "channel-lost" signal
+
+commit b8084728a25a0caf64edba929b2d83536f6fd93d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-30 14:21:38 +0200
+
+    request TP_CHANNEL_DISPATCHER_BUS_NAME in setup_services
+
+commit dfd8281f9cbda89709eb4014324a17d68293a3d6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-30 13:58:10 +0200
+
+    test fetching properties from D-Bus
+
+commit 38a2e07c7a024287955d4f7afb01c1acb3063499
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-30 13:51:56 +0200
+
+    implement TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE
+
+commit 72ce1653aa2dbac890d4ef308eb1489753dbcc6b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 15:28:24 +0200
+
+    test properties before being fetched from D-Bus
+
+commit 10405e3e567d1adb7b8a04180b1f6abb6b0cca27
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 12:48:05 +0200
+
+    test channel-dispatch-operation GObject properties when passed from tp_channel_dispatch_operation_new
+
+commit c59a602a0ec08760de0a3271e5c2000b52f7eb32
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 15:58:56 +0200
+
+    add accessors for properties
+
+commit c3a4ec003596ca553e7b5f83e214a22afe27414b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 12:47:26 +0200
+
+    channel-dispatch-operation: add GObject properties
+
+commit ba68fb2dca4776b24bfc558302aec3cec28992ad
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 11:46:56 +0200
+
+    test-channel-dispatch-operation: use SimpleChannelDispatchOperation instead of our own stub object
+
+commit 658b1d9ff3943218160049ed900153d4835683ca
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 11:46:05 +0200
+
+    add simple-channel-dispatch-operation for tests
+
+commit 3fa592507ffd8db0730fa1cbc8870985cce49e45
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 10:05:12 +0200
+
+    add TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE
+
+commit df4a7e3a180d6d035d5448d4f9d244dced6379d3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-06 10:39:13 +0200
+
+    no need to ref the account and connection to unref it right after
+
+commit 23e6bb351a3aaa4aecaf6f99c0e510448922f693
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-05 17:06:18 +0200
+
+    base-client: use _tp_dbus_daemon_is_the_shared_one
+
+commit 70fb1639522213b9f2b62c98f840b6c0f895dba2
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-05 17:06:04 +0200
+
+    add _tp_dbus_daemon_is_the_shared_one as internal API
+
+commit 9a6db8f51aec46b62226a8db2375147d4c2fc577
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-05 15:53:35 +0200
+
+    use tp_account_ensure_connection to create the TpConnection
+
+commit 2a7ac8156f882ac266498206b6ed1466ead77fa1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-05 15:48:53 +0200
+
+    test-base-client: test that TpBaseClient recycle the existing TpAccount object
+
+commit 5fbb52e40a5f8f9f7d324c083eee7dadbd935fca
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-05 15:47:51 +0200
+
+    base-client: use tp_account_manager_ensure_account to create the TpAccount
+    
+    This will recycle an existing TpAccount if possible (fdo #27982).
+
+commit 7b9ee99dba330f7ae1f6e4fdcde85ff49d141a7f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-05 15:37:03 +0200
+
+    instantiate a TpAccountManager
+
+commit 12c77955be313d4f285b488313f2291075ee1505
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 15:26:45 +0200
+
+    Don't fail preparing the context if the connection or account is not prepared
+
+commit de8447ea9cf1fd36f9a8781522a2ef3524366d9a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 12:49:06 +0200
+
+    Pass invalidated channels to ObserveChannels implementation (fdo #27956)
+
+commit 12761eb92a5aa7a20910bb5b412ce915f85bff7c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 15:21:20 +0200
+
+    use a counter to check if context is ready
+
+commit 018602d067ee3482c9e1154c1c3a390721da3bab
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-05 10:45:55 +0100
+
+    TpConnectionManager: say what TP_CONNECTION_MANAGER_FEATURE_CORE implies
+    
+    Reviewed-by: Danielle Madeley <danielle.madeley@collabora.co.uk>
+
+commit acd91b9ee2ec5f829d7e8cb0374d30e853d15271
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:06:36 +0100
+
+    Write about fd.o #23369 in NEWS
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit e31c4230489c79d73762f422f385d50bd8e08100
+Merge: 0cec215 5c830fc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 17:59:05 +0100
+
+    Merge branch 'even-better-errors'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 0cec215a515bd6bc049c482bf1f153a909da3adc
+Merge: 1a8b201 e8c737d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 17:58:09 +0100
+
+    Merge branch 'enums'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit e8c737d028fdbf3652a943807e190bc6170bf02f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 17:08:55 +0100
+
+    Run glib-mkenums in a way that works with out-of-tree builds
+
+commit c32bb738ea4e52418e1f1dbac2bb8682c5a86ce6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 17:02:21 +0100
+
+    Distribute genums.[ch].template
+
+commit c77760c35d8616e706b713b476e73f860d19a99a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:45:53 +0100
+
+    Include generated GEnum/GFlags types in documentation
+
+commit 0e5c51bada28e61fd0e6bc70c4ca834be179268a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:28:37 +0100
+
+    connection-manager.h: include _gen/genums.h, for TP_TYPE_CM_INFO_SOURCE
+
+commit f54a685e0736e95492f3d5b176825b17d3957caf
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:28:18 +0100
+
+    contact.h: include _gen/genums.h, for TP_TYPE_CONTACT_FEATURE
+
+commit c8a39d853a3cedc4cd39a45e9245dbc37107bbf6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:28:02 +0100
+
+    dbus-properties-mixin.h: include _gen/genums.h, for TP_TYPE_DBUS_PROPERTIES_MIXIN_FLAGS
+
+commit f3cdcc37d1a71db2850476b2c62aca29466911c6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:27:45 +0100
+
+    dbus.h: include _gen/genums.h, for TP_TYPE_DBUS_ERROR
+
+commit 6dd17fc10c3da7c0e9258e4ecb10e3549b1adf48
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:27:22 +0100
+
+    proxy.h: include _gen/genums.h, for TP_TYPE_DBUS_ERROR
+
+commit 253213bcbde04f1c4359fd72ab63454b7f3b2016
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:20:07 +0100
+
+    TpConnectionManager::info-source: flag as inappropriate type (for ABI)
+
+commit 72326836c0bbb20062ce52bdc7abd9c9095c767b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:19:34 +0100
+
+    Don't generate an enum type for TpChannelFactoryRequestStatus
+    
+    The entire channel factory interface should probably be deprecated, but
+    that's a job for a separate branch; for now, just don't add more API.
+
+commit 8bca61a75abd945f4d3f79ce4ab0ee9ea0576694
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:18:42 +0100
+
+    Generate a flags type, not an enum type, for TpDBusNameType
+    
+    Also unwrap the longer lines (breaking the 80-character barrier, sadly)
+    so glib-mkenums will understand.
+
+commit 0d2b59857814f34c20d6455c5472fcc2e5453382
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 16:17:49 +0100
+
+    Generate a flags type, not an enum type, for TpDBusPropertiesMixinFlags
+
+commit 1a8b201ed14c71b99b0169f837103738792ccc60
+Merge: 516507d 6ee70b2
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-05-04 20:53:12 +1000
+
+    Merge branch 'enums'
+
+commit 516507d09c392dcd9e981a6ff0193e42389af152
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 11:49:17 +0100
+
+    Clean up all generated files
+
+commit 6ee70b2a582c8b219b816b78fff31f112bf3ea8d
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-05-04 20:43:30 +1000
+
+    Add nick trigraph to entries in the TpError enum, so that valid error names can be generated
+
+commit 78387c155326e58613dac07e5c2d8949e27c8f1f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 11:42:57 +0100
+
+    Correct glib-errors-check-gen test
+    
+    TP_ERROR_PREFIX is documented to not include the trailing dot (because
+    that's what dbus-glib wants).
+
+commit 8519cce9b70db2d789410746c7f6eb5af6e66c56
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 11:31:51 +0100
+
+    Distribute expected-gtypes-gtk-doc.h to fix distcheck
+
+commit c97ca0cb8054e5ca0b2673b5631fffae2c400d7f
+Merge: 9ff1b35 059bac6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 11:17:49 +0100
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Danielle Madeley <danielle.madeley@collabora.co.uk>
+
+commit 9ff1b357b1dbecb7d5087a3eb9f3b8b52f107611
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 12:14:17 +0200
+
+    fix TpSimpleObserver:callback: documentation
+
+commit 059bac67c267f8fb6f22a21e3911af8002089bf7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-04 11:13:56 +0100
+
+    glib-errors-check-gen.py: check that TP_ERROR_STR_foo are right, too
+
+commit 006b6f0dff6b3a97bdc3d0f9088240c658a00e4c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 09:49:14 +0200
+
+    move DBusGMethodInvocation to priv
+    
+    Once the context object we shouldn't access it directly but use
+    accept/delay/fail methods instead.
+
+commit 38698680fae2c54e6092884ebdacd80657b6aabe
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-04 09:46:31 +0200
+
+    fix an error leak
+
+commit d3a4812224e51436aafc0ba9be01763a8fe68615
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-05-04 11:42:06 +1000
+
+    Add a regression test to check the values for NUM_TP_{CONTACT_FEATURES,DBUS_ERRORS} are up to date.
+
+commit 19d2e7a4277c109ee6dbd69ee1e51a4d24f679f1
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-05-04 11:40:43 +1000
+
+    Generate GEnums for hand-written enums
+
+commit 9b42d0b5c83fe4a2da2f5bec7d32beaeee9647ee
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-03 16:52:15 +0100
+
+    Remove spurious comments about fd.o #5688
+    
+    We no longer leak the object we claim to be leaking, and haven't since
+    version 0.11.3.
+
+commit b2e2c0c39d3ee277e2646d27b02357980189be99
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 17:20:46 +0200
+
+    Use tp_observe_channels_context_fail if preparing the context fail
+    
+    This avoid to dispose the context in the None state and so raise a warning.
+
+commit 7dcb08240d8ae0b2a408cffa063b6e07d3233708
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-05-03 15:16:38 +0200
+
+    move TpBaseClientClassPrivate to the right section
+
+commit b2c46b4b3769ab0041d2808e876f69b0ac23bfc9
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-05-03 20:55:17 +1000
+
+    Work around GObject Introspection bug #615923
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=615923
+    
+    GObject-Introspection fails to parse this enum with NUM_TP_CONTACT_FEATURES in
+    it, make this a #define instead.
+
+commit 14451a0b239fb8e9c56ac28a80c1ab214118a0ae
+Merge: 0993e4f 04e68cf
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-03 11:13:13 +0100
+
+    Merge branch 'error-macros'
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 0993e4fe7f114f5ba04db595f570205893095d02
+Merge: 275c1a8 93c4e78
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-05-03 10:56:33 +0100
+
+    Merge branch 'split-codegen-doc'
+    
+    Reviwed-by: Travis Reitter <travis.reitter@collabora.co.uk>
+
+commit 275c1a8c88ac21803c924651f28f0650d1bc1edc
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-05-03 17:13:07 +1000
+
+    Add/correct gobject-introspection annotation for TpConnection and TpConnectionManager
+
+commit 04e68cf5d201a5bd89aec25c8dd85aac02901a60
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:25:29 +0100
+
+    Correct documentation regarding --disable-debug
+
+commit 8b96c00668529c498cb6946fdd18f6481e9ceff1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:19:07 +0100
+
+    Use macros WARNING(), etc., consistently (within the library)
+
+commit 88e91939bf941e4566708f3137404f5048ca04d2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:16:01 +0100
+
+    Put various files into debug domains
+
+commit eafb834d52d0cb68c2c58b4335ef46c30d4284c1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:12:19 +0100
+
+    Introduce a "misc" debug domain for util, dbus etc.
+
+commit ee4e5d90c6f9806b2c311336e38ee6976540d504
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 15:48:28 +0100
+
+    tp_base_connection_change_status: turn a warning + assert into a CRITICAL + return
+    
+    g_warning is at level WARNING, but g_assert_not_reached is fatal. What
+    we really want here is a critical warning (the same as for
+    g_return_if_fail), which is usually but not always fatal.
+
+commit 5e8a82673e483da4701517a8ead9cc266e34e7ea
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:10:44 +0100
+
+    TpConnection: if RequestHandles returns the wrong length, raise error
+    
+    Previously, we mistakenly passed error (which is NULL on this code path)
+    to client code; this should have been e, the new GError we just allocated.
+    
+    Also, don't leak that GError.
+
+commit 24422b4c6cbee6f0f491f26f177e350225657162
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:15:41 +0100
+
+    Make ERROR() expand to something the compiler knows can't return
+
+commit 4f47b4fba4d43fc2f323cc90c8a0f9b8a24ea512
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 16:14:32 +0100
+
+    debug: always log messages of level > DEBUG, even with --disable-debug
+    
+    We clearly don't want a configure option that can turn off CRITICAL()!
+
+commit 89cf0b331fb6cb457c653854dcb22a8cd2d86bb7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 15:00:11 +0100
+
+    NEWS so far for 0.11.5
+
+commit 7f97178f2dfe1a9e5fb4450fa72fd9b9a7a3a00e
+Merge: 8fc5e25 eadb24e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 14:47:34 +0100
+
+    Merge branch 'cm-trivia'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 8fc5e25f8a5aae6b79c644b8c173f5da9d1b8f6c
+Merge: 11c464d 7095980
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 14:39:27 +0100
+
+    Merge branch 'tokens'
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 7095980f46e63be610c37e8b862a64134452fb48
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:57:08 +0100
+
+    Use generated token-name strings, except in tests
+
+commit 4a76d135db0fab4b2ef9f37e120a91184cb68a96
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:53:18 +0100
+
+    TpContact: use the generated #defines for token names
+    
+    If we'd done this already, it would have caught the error fixed by the
+    previous commit.
+
+commit f2a1ea5e9e59861b038a708b421e36564afe42a5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:49:19 +0100
+
+    fd.o #26211: glib-interfaces-gen.py: generate tokens correctly, with '/'
+
+commit 93c4e78ac4dbb31b2106da2835c47eeb3896d0a3
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:29:14 +0100
+
+    fd.o #27878: c-constants-gen: output gtk-doc separately
+    
+    gtk-doc will happily document all .h files, so we don't need the
+    doc-comments to be in the same files as the declarations or
+    implementations.
+    
+    This required changing the calling convention of c-constants-gen to output
+    to files, rather than to stdout.
+
+commit 5fc1dc323d5d1b499bb760e2bceb2beb3806a64f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:17:00 +0100
+
+    fd.o #27878: glib-errors-str-gen: output gtk-doc separately
+    
+    gtk-doc will happily document all .h files, so we don't need the
+    doc-comments to be in the same files as the declarations or
+    implementations.
+    
+    Also, ensure output is in UTF-8.
+
+commit f00c785be583e50b9635d8a18b55400594049cfc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:16:35 +0100
+
+    fd.o #27878: glib-ginterface-gen: output gtk-doc separately
+    
+    gtk-doc will happily document all .h files, so we don't need the
+    doc-comments to be in the same files as the declarations or
+    implementations.
+    
+    Also, ensure that output is in UTF-8.
+
+commit e424efaad99d3b73da131374c0fe22f453a557a1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:08:03 +0100
+
+    fd.o #27878: glib-client-gen: output gtk-doc separately
+    
+    gtk-doc will happily document all .h files, so we don't need the
+    doc-comments to be in the same files as the declarations or
+    implementations.
+
+commit 4e6e58cc9037265c360e120125ecaf0c14ad90da
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 12:07:50 +0100
+
+    fd.o #27878: glib-gtypes-generator: output gtk-doc separately
+    
+    gtk-doc will happily document all .h files, so we don't need the
+    doc-comments to be in the same files as the declarations or
+    implementations.
+
+commit eca7345d0942234af56449e6d38fa488beddcf21
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-30 11:57:35 +0100
+
+    fd.o #27878: glib-interfaces-gen: output gtk-doc separately
+    
+    gtk-doc will happily document all .h files, so we don't need the
+    doc-comments to be in the same files as the declarations or
+    implementations.
+
+commit 11c464d3c4bc893762daad7042d7b7bff5fe651b
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-04-30 17:23:15 +1000
+
+    Annotated dispatch_operation as (allow-none)
+
+commit d1ce6568c3531ef726976c76d30cef32f0eb5aa3
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-04-30 17:23:02 +1000
+
+    Add TpChannelRequest to introspected classes
+
+commit 8a5a43a71f3931139fbc0a867f852bb43284b323
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-04-30 17:16:13 +1000
+
+    Fix up namespace for types and element-types
+    
+    Namespace is TelepathyGLib, not Tp
+
+commit 9e2da8068f1b11af461afbeee8ca6b051167fc28
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2010-04-30 14:27:10 +1000
+
+    Add TpBaseClient and TpSimpleObserver to introspection.am
+
+commit 456d7d6b8ecb56c1f646748f3c16ed97aab9d013
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2010-04-29 15:38:27 +0100
+
+    debug-internal: add more debug levels
+    
+    Fixes fd.o#27899
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit eadb24eb0d9d2299a1ea45f5b2155d32b87be8bb
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 16:36:54 +0100
+
+    fd.o #24689: document protocol structs' validity
+
+commit 33823e022238472b924cdf122a493ce658622794
+Merge: 56ab6b2 2017abc
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 16:26:03 +0200
+
+    Merge branch 'simple-observer'
+
+commit 56ab6b206699e4d89d4daedf32fcc0a7e43559b7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 15:02:04 +0200
+
+    fix doc of channels in TpBaseClientClassObserveChannelsImpl
+
+commit 2017abcde8b5872e6468bf290587fc21e317ba7d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 14:57:44 +0200
+
+    add destroy property to TpSimpleObserver
+
+commit 3c3c2fab044806977ed8149897a430d3c4a8e970
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 14:42:07 +0200
+
+    tp_simple_observer_new: properly annotate the return type
+
+commit e830354ac68c1ba719826c79bd0f6aa14b981589
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 14:37:19 +0200
+
+    rename observe-channels-impl property to 'callback'
+
+commit 8436b1a4cce1493830cca3e497e6d9de07a89f30
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 14:35:49 +0200
+
+    improve code snippet showing how to use TpSimpleObserver
+
+commit 1eb6a5e08e238390cf9e41b3c234a79377775b91
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 14:33:42 +0200
+
+    fix doc of TpSimpleObserverObserveChannelsImpl
+
+commit f7c88380b21f83cb30010064b4ec5dc40cf3bf8a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:32:17 +0200
+
+    add reference to examples/client/media-observer.c in doc
+
+commit 6f93a63e213c16ecfba3a0bd1b60a839d3c3e5c7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:08:36 +0200
+
+    add examples/client/media-observer.c (fdo #24214)
+
+commit 037007c767008ac15de2bc2cbc00df2ce2aaf7c6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:33:24 +0200
+
+    base-client: add reference to TpSimpleObserver in doc
+
+commit ac802166a57a80f378ae1041eb70b24f9b17a0b6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:26:03 +0200
+
+    add simple-observer.h to telepathy-glib.h
+
+commit 54f7698f953e704114adb5d9053c1ca9e27fa9d8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 16:34:06 +0200
+
+    test TpSimpleObserver
+
+commit 6fb45dde70d8fbea105c8bee821a2ee90dee678a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 16:33:30 +0200
+
+    add simple-observer (fdo #27871)
+
+commit 1227f955657d881170d77712f82c2b0ebbbcd113
+Merge: 6c61741 535be57
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 14:09:54 +0200
+
+    Merge branch 'base-client-25236'
+    
+    Conflicts:
+    	docs/reference/Makefile.am
+    	docs/reference/telepathy-glib.types
+
+commit 535be579e2f3d9b164a52af359ac31512fadc666
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 13:59:48 +0200
+
+    define TpBaseClient as an abstract type
+
+commit 60bd89ee683fb7e0c1e00494e265012f0667cfec
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 13:57:46 +0200
+
+    skip TpObserveChannelsContext:dbus-context: property from introspection
+
+commit e6b012969e9f56035001f0f60c427c6fc3fe651c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 13:46:21 +0200
+
+    tp_base_client_constructed: don't leak tp_escape_as_identifier result
+
+commit 6c617414b9c935708e312b9bfe79a6431891313a
+Merge: e8c0400 1493ce5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:43:54 +0100
+
+    Merge branch 'trivia'
+    
+    Reviewed-by: Danielle Madeley <danielle.madeley@collabora.co.uk>
+
+commit 1493ce504c362855088e2794efc2ddf13892964a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:40:34 +0100
+
+    Annotate string vectors as GObject.Strv, not GLib.Strv
+    
+    The name "GStrv" is an invention of the GType system, and it's named
+    accordingly in GObject-Introspection.
+
+commit 931749d2e6cda27a93fbe927ef721911f92af5dd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:34:05 +0100
+
+    docs: fail check if not all the <FILE>s are actually XIncluded
+    
+    This catches the error fixed in the previous commit.
+
+commit 38ddb9cc1baba096dfbbb3ea3d5470b5008a82c5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:33:28 +0100
+
+    docs: add some missing bindings to the HTML
+
+commit d6c7acad335553c6d411ff4623da2ce657d0f070
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:33:13 +0100
+
+    docs: don't scan proxy-introspectable.h
+    
+    Note that the bare filename is right, and _gen/proxy-introspectable.h
+    wouldn't work here. Thtkdoc...
+
+commit 2295ecc7e165cd9cbb64675522fcac830eedae35
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:31:16 +0100
+
+    introspection.am: don't always delete and rebuild proxy-introspectable.h
+    
+    This caused TelepathyGLib-0.12.gir and TelepathyGLib-0.12.typelib to be
+    rebuilt every time.
+
+commit 336f6fb1833a46c23fa467242d37e0e8ea8625fd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-29 11:13:05 +0100
+
+    docs: build the .types file automatically, and delete it from git
+
+commit cdd04c9e1df567cc3228be004757e420567cc8c5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 09:10:11 +0200
+
+    remove \n in DEBUG message
+
+commit c884b30533a5c030eb24e84cdb88417a40bf06c4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-29 09:09:36 +0200
+
+    improve TpBaseClientClassObserveChannelsImpl doc
+
+commit 449f44cc84c538f60e73931e71d417616dbacac2
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:52:49 +0200
+
+    fix copyright headers
+
+commit 30e319388d7f250d6150b8021eb8509064eabb3c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:50:37 +0200
+
+    g_strfreev is NULL-safe, no need to check
+
+commit 107e6f0395be14fc1c5464b390116d8248062955
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:49:38 +0200
+
+    use g_clear_error
+
+commit d22545488cafdef8d1053d0088b891d8debe48bb
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:48:15 +0200
+
+    no need to pass dbus-connection when creating a client object
+
+commit e6a94a34ecd073ac24dfdc5e245015961c9cd701
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:46:35 +0200
+
+    no need to check if dbus is not NULL, test_dbus_daemon_dup_or_die does it for us
+
+commit 03f625a79541b06a115a41c9836aa926a8c8053d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:44:40 +0200
+
+    skip tp_base_client_take_observer_filter from introspection
+
+commit 0bf98ff49c371b5c52723a7d79339aaefef7c7b4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:11:11 +0200
+
+    add base-client.h to telepathy-glib.h
+
+commit d92c1a235e1b00ee331ffc32e914395a7e9f0839
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:02:27 +0200
+
+    simple-client: check the objects we received from base-client
+
+commit c1eef8f0dbf513688e25f861e4f96dce1d860b9d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 15:01:13 +0200
+
+    ptr_array_to_list: fix for loop to properly iterate over the array
+
+commit 4db53ff9533c49c9b29bc4f09d250813e678d8f0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 13:03:11 +0200
+
+    TpBaseClientClassObserveChannelsImpl: rename self pointer to 'client' to fit documentation
+
+commit b0c6a477dd450590ff40436e5983ad59174febb3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 13:00:10 +0200
+
+    add observe-channels-context-internal.h to the list of ignored headers for doc
+
+commit 7b8d450bed2eb391505a0b5bd7c1bac7cae23789
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 12:50:06 +0200
+
+    test-base-client: remove Approver and Handler tests for now
+
+commit 790531670baad55d83c003c5db06a1bde69273f0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 12:48:09 +0200
+
+    base-client: remove Approver and Handler code for now
+    
+    We'll implement them post-merge.
+
+commit 3503b82c51c949c4e6938b47942f9f69c3c02f9a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 12:35:51 +0200
+
+    simple-client: always unref observe_ctx
+
+commit 3556497c26fdc4417115ccbe517a3e692c795ca4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 12:18:18 +0200
+
+    use test_object_new_static_class
+
+commit 45df5e36979280351d6c7f5a6b04ce2d245579f5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 12:01:37 +0200
+
+    test-base-client: use tp_base_client_get_{bus_name,object_path}
+
+commit ed0770a15c3c1e88705b3416444aa54e0d702108
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 12:01:18 +0200
+
+    add tp_base_client_get_bus_name and tp_base_client_get_object_path
+
+commit 46deb177c07b519066cfda71e6ab86003ed40e8e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 11:24:11 +0200
+
+    observe-channels-context: improve documentation
+
+commit c71f643a8edd591dfa53b02b39d82aa3d1dd6ff4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 11:11:21 +0200
+
+    raise NotImplemented error when disposing a context in the 'none' or 'delayed' state
+
+commit 8d94ea2670a26de020477b04dfa6efa59486b896
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:56:41 +0200
+
+    assert that observe_channels_impl has been defined when calling a tp_base_client_*_observer_* method
+
+commit d1d5cab035489b89cc17592bff88c5e434cd53d7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:55:24 +0200
+
+    cache TpBaseClientClassPrivate pointer in TpBaseClientClass
+
+commit 255273b75e42460b7401dd08f55672f6733d1337
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:54:23 +0200
+
+    comment out Handler and Approver D-Bus properties
+
+commit 76676bfa61dc196299bcc821bc42b09312664bea
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:53:28 +0200
+
+    tp_base_client_set_property: assert that priv->{dbus,name} are not set
+
+commit 2ce0547a8fe4be8cad62afb7376c18afa0c40bb3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:52:07 +0200
+
+    tp_base_client_register: don't raise a warning if tp_dbus_daemon_request_name failed
+    
+    Also split code building the object path of the client.
+
+commit 1eec62e973bdf93274e93a0a5c0cc3f3ee893105
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:51:44 +0200
+
+    base-client: improve documentation
+
+commit 90f40fe8f25a976a103348afaf90c594cf66d1a8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 10:31:27 +0200
+
+    add blank lines between cases
+
+commit 44572b678a0e549dcb5392b813fa3b0632d00fb7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-28 09:46:53 +0200
+
+    rename tp_observe_channels_context_get_recovering to tp_observe_channels_context_is_recovering
+
+commit ace3c8a692929a0e0c099d5a1212456e1d8ade69
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 16:47:08 +0200
+
+    allow tp_base_client_register to fail
+
+commit b1695de0a78b956509955cd18044f9853c265ce1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 14:02:10 +0200
+
+    annotate base-client
+
+commit c2728db0216dd05be7f786da3ae6a8d235e0f659
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 15:29:29 +0200
+
+    document TpObserveChannelsContext
+
+commit 7d5d64fa49c10d150335c8d50d102df0d22c99a0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 14:58:13 +0200
+
+    document TpBaseClient
+
+commit 73ac083ac57798a5636e28154173462e1b496fdb
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 12:28:11 +0200
+
+    move TpObserveChannelsContextState to observe-channels-context-internal.h
+
+commit f8f642a2086ed857b179df0938a7c12d8c8f8856
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 11:41:10 +0200
+
+    base-client: assert that mandatory properties have been set
+
+commit 9d7296886c8e5674dc38919fa2bab6c35f418ff9
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 11:05:02 +0200
+
+    sort #include
+
+commit b1c173768cc1065d2a86135e66a1a2d52ae59c7d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 11:00:20 +0200
+
+    use g_ptr_array_sized_new/g_ptr_array_set_free_func rather than g_ptr_array_new_with_free_func
+
+commit 79443cb953f732b747ad1ecdbb29f96afcd97f47
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:54:45 +0200
+
+    fix comment describing dispatch_operation
+    
+    Also describe requests array.
+
+commit c85930f040d2d96e9a60affa12fed905d9ed6d28
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:51:37 +0200
+
+    rename klass to cls
+
+commit ea3b527805cbfe774171a192d600cdc1af044095
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:34:50 +0200
+
+    raise a D-Bus error if subclass didn't accept/delay/fail the context
+
+commit 782926b85c8ff0a6724e4c51f0d14ad57bbfa959
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:18:08 +0200
+
+    improve debug msg if ObserveChannels isn't implemented
+
+commit 9b9e61319e161c6974f188369a47869fa401ace4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:15:07 +0200
+
+    remove useless ';' when calling g_type_add_class_private
+
+commit 698ef126132da987f20de11bc837ea48e7516a70
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:11:25 +0200
+
+    check state of the context when accepting/failing/delaying
+    
+    Also set dbus_context to NULL once we return as it's freed by dbus-glib.
+
+commit d8ab95e6673f29019f9192a45565533a3b365b6e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:06:53 +0200
+
+    'dbus-context' has to be write-only
+
+commit 586e910f3086a2bc5942f1e5af2bb8116b1fe7eb
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:02:40 +0200
+
+    Use syntactically object paths
+
+commit 145b90508703c62ca8cf3074d3952bc711875e21
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-27 10:00:49 +0200
+
+    rename test_basis to test_basics
+
+commit 8d166a1673cea674b88ce282b0f81461ebdace28
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 15:34:42 +0200
+
+    Make tp_observe_channels_context_prepare_{async,finish} internals
+    
+    They are not meant to be used outside of base-client.
+
+commit 9304910b7de00d4b6e24ccf140e12f5c71657721
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 13:41:07 +0200
+
+    Disable Approver and Handler support for now
+
+commit 350e7a5ed313db9c684ef7cdf26bf0c87ee707dc
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 12:26:35 +0200
+
+    rename TpBaseClientContextState to TpObserveChannelsContextState
+
+commit e3b651768e671f5910815fb23e1807f2e8e3d690
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 12:18:49 +0200
+
+    rename base-client-context* to observe-channels-context*
+    
+    Each context will have its own file and object.
+
+commit 227dc04a35aa42c78bbd00464fce72c3cfd9724a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 11:52:53 +0200
+
+    prepare the channels before considering the context as ready
+
+commit 44132805d836f81ff120b03027d0e9b288b38467
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 11:40:43 +0200
+
+    re-test ObserveChannels failing
+
+commit f4e7ad5b4254258ae919e9a517f9ab1773bb4449
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-26 11:40:06 +0200
+
+    simple-client: raise an error if observer info contains a 'FAIL' property
+    
+    This give us a chance to test tp_observe_channels_context_fail.
+
+commit 5d07852041a56c3dfc8aa0d487011fbfdeaf50d0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 16:39:47 +0200
+
+    simplify teardown()
+    
+    That's not a dispose function so there is no point to check if objects that we
+    allocated in setup() are NULL or not.
+
+commit a34277411a5403d727b815b7906d40846350c5e0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 16:36:54 +0200
+
+    test-base-client: re-enable test of ObserveChannels
+
+commit 99b3c9293cb5fbecd9513f8b90ea27cb7b45c07d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 16:35:44 +0200
+
+    raise error if there is no channel to observe
+
+commit 7f8406360c03831f5e1587dd6993bf64dc925945
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 15:42:56 +0200
+
+    prepare the connection before considering the context as ready
+
+commit 411b29b269f4f46b20aaa82899d88d09ce99aed1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 13:37:28 +0200
+
+    prepare the account before considering the context as ready
+
+commit a0130f2b233e32cfb4cf9b92c8f768838e64b8e4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 09:32:51 +0200
+
+    Wait that TpObserveChannelsContext is prepared before calling the implementation callback
+
+commit bb8a47b4f347d024f1650990ea7083e0e8c3c50b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-23 09:31:59 +0200
+
+    add tp_observe_channels_context_prepare_{async,finish}
+
+commit bb0526c7b64c4ebe284f10039f609a2fa152ff93
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 17:32:26 +0200
+
+    pass all the objects from ObserverChannels to TpObserveChannelsContext
+    
+    Also move _TpObserveChannelsContext to base-client-context-internal.h so
+    base-client would be able to use the when calling the actual implementation.
+
+commit 0fd4bf6786bc86c6640936dd2e387bb9b57951ed
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 15:56:48 +0200
+
+    change TpBaseClientClassObserveChannelsImpl to a more high level API
+
+commit a444afeec8d2b9a11998b9089e292bcda3def17a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 15:47:04 +0200
+
+    disable test of ObserveChannels for now
+
+commit 334c65f69661848391094b8eb96601a90ca4cbc5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:30:51 +0200
+
+    bump glib dep to 2.24
+    
+    We need it for g_type_add_class_private.
+
+commit b99bbb45545b1e6b972f0999027238f582d667ff
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:27:52 +0200
+
+    add padding to _TpBaseClientClass
+
+commit a3a98f0d1a5316aee1255d6dc0a60419cbc0d8c4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:25:13 +0200
+
+    use tp_dbus_daemon_register_object to register the client
+
+commit 7bb08ed601f2100b48c9e886db37ad2dd4b091f4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:15:09 +0200
+
+    add tp_observe_channels_context_delay
+
+commit 157a86b9802f231a1993568d604410b5599c2765
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:11:23 +0200
+
+    prefix tp_observe_channels_context_new with a '_'
+    
+    That's an internal function.
+
+commit bc87ad320c6e4a4ed76793640172040967e5235d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:08:54 +0200
+
+    check that ObserveChannels implementation changed the state of the ctx
+
+commit 3549eae6cbfa280388e8e45f8ecae78c46f47248
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:08:24 +0200
+
+    TpObserveChannelsContext: add state
+
+commit acc0a46a7bccb2f0297454d4bd594320a02e1eb2
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 12:45:17 +0200
+
+    test-base-client: free test->error
+
+commit 320280b898a5079dc36afdc0833c529aedbcfaba
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 12:43:48 +0200
+
+    properly free filters and caps
+
+commit 0a79b59c2abc6b84f74b2575b1efeb6521eebf29
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 11:27:51 +0200
+
+    test if ObserverChannels is properly called
+
+commit 3fb85f960c974ee953cdd92e75457927166ce860
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 11:26:33 +0200
+
+    simple-client: implement ObserveChannels
+    
+    Also expose the ObserveChannels context to we can test it.
+
+commit 597bcbf8f00317df0c15e531a336e40853437101
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 11:20:57 +0200
+
+    add API to allow subclass of TpBaseClient to implement ObserveChannels
+
+commit 46574df44da3b044e241ce1a531956ea216e446e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 11:17:14 +0200
+
+    add base-client-context implementing TpObserveChannelsContext
+
+commit 3eb03a95e1d8db847fc85afa4e1fdb5d956c9649
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 16:02:07 +0200
+
+    remove tp_base_client_new
+    
+    TpBaseClient is meant to be subclassed so this helper doesn't really makes
+    sense.
+
+commit 9f5af285a36b3c41c26330b1f37f13e45bb63db5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 15:55:15 +0200
+
+    instantiate a SimpleClient in tests
+
+commit e2a53230ba9b7563aa10858d94faac0afab089b5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 15:54:35 +0200
+
+    add simple-client, a simple subclass of TpBaseClient for tests
+
+commit 73b453cb89778ce6160e7d2eb149e4ff4c53b2d9
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 15:47:01 +0200
+
+    move _TpBaseClient(Class) to header so we can subclass
+
+commit 3523ddcb06c0d376ece5ce6bc0b7148cb67399ff
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 15:25:05 +0200
+
+    test: make calls to methods
+    
+    Most of the methods are not implemented yet.
+
+commit 97d11cc2d127b713cca4157fc7c24a7ccea364ce
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 14:29:58 +0200
+
+    test Client.Interface.Requests properties
+
+commit 1e4e56d6ab2cd83e5ee376ea8130cc902f942ae9
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 14:14:20 +0200
+
+    test Handler properties
+
+commit b24c28a7e9a6a541aab023beaf5207258df1efd4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 14:01:25 +0200
+
+    test Approver properties
+
+commit 5fdd04080214249bec5f395261fdb0b48bbc3aca
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 13:44:11 +0200
+
+    test Observer properties
+
+commit c0240a9f2d02125c49d1f6e29b12a3a48ab77456
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 11:21:40 +0200
+
+    test tp_base_client_register
+
+commit 315db5d558f99b2c58b715f2acbd7fbdeeaa40a7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 11:20:48 +0200
+
+    implement tp_base_client_register
+
+commit 86419f97ea1e10339da89dd881ae9d999319d6a3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-21 11:33:55 +0200
+
+    add 'client' debug domain
+
+commit 75287d1eb28ac78781e1def1361e5f08103fe1ad
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-20 16:45:45 +0200
+
+    add tests/dbus/base-client.c
+
+commit a6d14ec4edbd017480e4a21f0f919e221fc92035
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-04-22 14:12:29 +0200
+
+    Add TpBaseClient (fdo #25236)
+    
+    This could be used on its own, or to implement TpSimpleHandler, or
+    to implement a more elaborate Client.
+
+commit e8c0400634faea5afe75397dd20b96555c2d2a63
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-28 19:42:16 +0100
+
+    Nano version / add missing GLib 2.24 dependency to previous NEWS
+
 commit c7fb2968063379f0d1cdffb09e843bc233fa9f7c
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2010-04-28 18:15:54 +0100
@@ -256,6 +1995,33 @@ Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
 Date:   2010-04-15 11:57:45 +1000
 
     Annotate TpAccount and TpAccountManager
+
+commit 5c830fcc97a3564ee7a57372053358ae31e64257
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-27 15:44:53 +0100
+
+    TpChannel: map most TP_ERRORS_REMOVED_FROM_GROUP errors into TP_ERRORS
+    
+    This reduces the number of errors that typical code will see, at the cost
+    of changing TpChannel's observed behaviour.
+
+commit fa2a9a03e55ac833ed05779009de40c528981914
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-26 16:06:04 +0100
+
+    cli-group test: assert that any known error names in "error" are used
+
+commit ae180225dee13397bc81b4ad09d14cbb38a323d6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-26 16:34:04 +0100
+
+    fd.o #23369: TpChannel: if the CM gives us a recognized error name, use it for invalidation
+    
+    More specifically: if "error" is present in MembersChangedDetailed, *and* it
+    can be mapped to a GError domain and code, use that domain and code as
+    the invalidation reason. If it's absent or would be mapped to
+    TP_DBUS_ERROR_REMOTE_ERROR, continue to use TP_ERRORS_REMOVED_FROM_GROUP
+    as the invalidation reason.
 
 commit e9f2f749a19c1e1de3eb0492e612b6cb17ce742a
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>

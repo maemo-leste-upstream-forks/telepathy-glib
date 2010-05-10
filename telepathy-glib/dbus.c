@@ -64,6 +64,9 @@
 #include <telepathy-glib/errors.h>
 #include <telepathy-glib/util.h>
 
+#define DEBUG_FLAG TP_DEBUG_MISC
+#include "debug-internal.h"
+
 /**
  * tp_asv_size: (skip)
  * @asv: a GHashTable
@@ -130,7 +133,7 @@ tp_get_bus (void)
 
   if (bus == NULL)
     {
-      g_warning ("Failed to connect to starter bus: %s", error->message);
+      WARNING ("Failed to connect to starter bus: %s", error->message);
       exit (1);
     }
 
@@ -159,7 +162,7 @@ tp_get_bus_proxy (void)
 
       if (bus == NULL)
         {
-          g_warning ("Failed to connect to starter bus: %s", error->message);
+          WARNING ("Failed to connect to starter bus: %s", error->message);
           exit (1);
         }
 
@@ -169,7 +172,7 @@ tp_get_bus_proxy (void)
                                             "org.freedesktop.DBus");
 
       if (bus_proxy == NULL)
-        g_error ("Failed to get proxy object for bus.");
+        ERROR ("Failed to get proxy object for bus.");
     }
 
   return bus_proxy;
@@ -193,7 +196,18 @@ tp_get_bus_proxy (void)
  * types. %TP_DBUS_NAME_TYPE_NOT_BUS_DAEMON and %TP_DBUS_NAME_TYPE_ANY are
  * the bitwise-or of other appropriate types, for convenience.
  *
+ * Since 0.11.5, there is a corresponding #GFlagsClass type,
+ * %TP_TYPE_DBUS_NAME_TYPE.
+ *
  * Since: 0.7.1
+ */
+
+/**
+ * TP_TYPE_DBUS_NAME_TYPE:
+ *
+ * The #GFlagsClass type of a #TpDBusNameType or a set of name types.
+ *
+ * Since: 0.11.5
  */
 
 /**
@@ -756,7 +770,7 @@ tp_asv_new (const gchar *first_key, ...)
 
     if (error != NULL)
     {
-      g_critical ("key %s: %s", key, error);
+      CRITICAL ("key %s: %s", key, error);
       g_free (error);
       error = NULL;
       tp_g_value_slice_free (value);

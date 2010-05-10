@@ -27,6 +27,8 @@
 #include <telepathy-glib/connection.h>
 #include <telepathy-glib/handle.h>
 
+#include <telepathy-glib/_gen/genums.h>
+
 G_BEGIN_DECLS
 
 typedef struct _TpContact TpContact;
@@ -57,7 +59,7 @@ typedef enum {
     TP_CONTACT_FEATURE_PRESENCE,
     TP_CONTACT_FEATURE_LOCATION,
     TP_CONTACT_FEATURE_CAPABILITIES,
-    NUM_TP_CONTACT_FEATURES
+#define NUM_TP_CONTACT_FEATURES (TP_CONTACT_FEATURE_CAPABILITIES + 1)
 } TpContactFeature;
 
 /* Basic functionality, always available */

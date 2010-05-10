@@ -1,6 +1,7 @@
 noinst_PROGRAMS = \
     test-account \
     test-account-manager \
+    test-base-client \
     test-call-cancellation \
     test-call-example \
     test-callable-example \
@@ -37,6 +38,8 @@ noinst_PROGRAMS = \
     test-properties \
     test-self-handle \
     test-self-presence \
+    test-simple-approver \
+    test-simple-observer \
     test-text-mixin \
     test-text-respawn \
     test-unsupported-interface
@@ -52,6 +55,8 @@ LDADD = \
 test_account_SOURCES = account.c
 
 test_account_manager_SOURCES = account-manager.c
+
+test_base_client_SOURCES = base-client.c
 
 test_call_cancellation_SOURCES = call-cancellation.c
 
@@ -162,6 +167,10 @@ test_unsupported_interface_SOURCES = unsupported-interface.c
 
 test_params_cm_SOURCES = \
     params-cm.c
+
+test_simple_observer_SOURCES = simple-observer.c
+
+test_simple_approver_SOURCES = simple-approver.c
 
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk

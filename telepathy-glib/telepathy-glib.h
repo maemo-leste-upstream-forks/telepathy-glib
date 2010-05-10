@@ -32,6 +32,7 @@
 #include <telepathy-glib/intset.h>
 #include <telepathy-glib/heap.h>
 
+#include <telepathy-glib/base-client.h>
 #include <telepathy-glib/proxy.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/channel.h>
@@ -45,6 +46,7 @@
 #include <telepathy-glib/handle.h>
 #include <telepathy-glib/contact.h>
 #include <telepathy-glib/debug.h>
+#include <telepathy-glib/simple-observer.h>
 
 #include <telepathy-glib/svc-generic.h>
 #include <telepathy-glib/svc-client.h>

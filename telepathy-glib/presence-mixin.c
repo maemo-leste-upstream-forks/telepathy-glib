@@ -246,7 +246,7 @@ tp_presence_mixin_class_init (GObjectClass *obj_cls,
             case TP_CONNECTION_PRESENCE_TYPE_OFFLINE:
             case TP_CONNECTION_PRESENCE_TYPE_UNKNOWN:
             case TP_CONNECTION_PRESENCE_TYPE_ERROR:
-              g_warning ("Status \"%s\" of type %u should not be available "
+              WARNING ("Status \"%s\" of type %u should not be available "
                   "to set on yourself", statuses[i].name,
                   statuses[i].presence_type);
               break;
@@ -1386,7 +1386,7 @@ simple_presence_fill_contact_attributes_foreach (gpointer key,
 
   tp_contacts_mixin_set_contact_attribute (data->presence_hash,
     handle,
-    TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE"/presence",
+    TP_TOKEN_CONNECTION_INTERFACE_SIMPLE_PRESENCE_PRESENCE,
     tp_g_value_slice_new_take_boxed (G_TYPE_VALUE_ARRAY, presence));
 }
 

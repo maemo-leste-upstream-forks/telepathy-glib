@@ -26,6 +26,7 @@
 #include <gio/gio.h>
 
 #include <telepathy-glib/defs.h>
+#include <telepathy-glib/_gen/genums.h>
 
 G_BEGIN_DECLS
 
@@ -51,7 +52,7 @@ typedef enum {
     TP_DBUS_ERROR_OBJECT_REMOVED = 8,
     TP_DBUS_ERROR_CANCELLED = 9,
     TP_DBUS_ERROR_INCONSISTENT = 10,
-    NUM_TP_DBUS_ERRORS
+#define NUM_TP_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
 } TpDBusError;
 
 struct _TpProxy {
