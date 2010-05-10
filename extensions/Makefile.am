@@ -72,6 +72,9 @@ BUILT_SOURCES = \
 
 CLEANFILES = $(BUILT_SOURCES)
 
+clean-local:
+	rm -rf _gen
+
 XSLTPROCFLAGS = --nonet --novalid
 
 # Generated files which can be generated for all categories simultaneously
@@ -105,7 +108,7 @@ _gen/enums.h: _gen/all.xml \
 	$(tools_dir)/c-constants-gen.py
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/c-constants-gen.py \
 		Future \
-		$< > $@
+		$< _gen/enums
 
 _gen/interfaces-body.h _gen/interfaces.h: _gen/all.xml \
 	$(tools_dir)/glib-interfaces-gen.py

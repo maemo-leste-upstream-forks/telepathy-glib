@@ -35,8 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
-	test-call-cancellation$(EXEEXT) test-call-example$(EXEEXT) \
-	test-callable-example$(EXEEXT) \
+	test-base-client$(EXEEXT) test-call-cancellation$(EXEEXT) \
+	test-call-example$(EXEEXT) test-callable-example$(EXEEXT) \
 	test-channel-dispatcher$(EXEEXT) \
 	test-channel-dispatch-operation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
@@ -58,6 +58,7 @@ noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
 	test-long-connection-name$(EXEEXT) test-message-mixin$(EXEEXT) \
 	test-params-cm$(EXEEXT) test-properties$(EXEEXT) \
 	test-self-handle$(EXEEXT) test-self-presence$(EXEEXT) \
+	test-simple-approver$(EXEEXT) test-simple-observer$(EXEEXT) \
 	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
 	test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -95,6 +96,13 @@ am_test_account_manager_OBJECTS = account-manager.$(OBJEXT)
 test_account_manager_OBJECTS = $(am_test_account_manager_OBJECTS)
 test_account_manager_LDADD = $(LDADD)
 test_account_manager_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_base_client_OBJECTS = base-client.$(OBJEXT)
+test_base_client_OBJECTS = $(am_test_base_client_OBJECTS)
+test_base_client_LDADD = $(LDADD)
+test_base_client_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -363,6 +371,20 @@ test_self_presence_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_simple_approver_OBJECTS = simple-approver.$(OBJEXT)
+test_simple_approver_OBJECTS = $(am_test_simple_approver_OBJECTS)
+test_simple_approver_LDADD = $(LDADD)
+test_simple_approver_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_simple_observer_OBJECTS = simple-observer.$(OBJEXT)
+test_simple_observer_OBJECTS = $(am_test_simple_observer_OBJECTS)
+test_simple_observer_LDADD = $(LDADD)
+test_simple_observer_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_text_mixin_OBJECTS = text-mixin.$(OBJEXT)
 test_text_mixin_OBJECTS = $(am_test_text_mixin_OBJECTS)
 test_text_mixin_DEPENDENCIES = $(am__DEPENDENCIES_2) \
@@ -407,8 +429,8 @@ AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
-	$(test_callable_example_SOURCES) \
+	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
+	$(test_call_example_SOURCES) $(test_callable_example_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
@@ -435,11 +457,13 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(nodist_test_properties_SOURCES) \
 	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
-	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
+	$(test_simple_approver_SOURCES) \
+	$(test_simple_observer_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
-	$(test_callable_example_SOURCES) \
+	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
+	$(test_call_example_SOURCES) $(test_callable_example_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
@@ -464,7 +488,8 @@ DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(test_self_handle_SOURCES) \
-	$(test_self_presence_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
+	$(test_simple_observer_SOURCES) $(test_text_mixin_SOURCES) \
 	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
@@ -507,6 +532,7 @@ GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_LIBS = @GLIB_LIBS@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
@@ -630,6 +656,7 @@ LDADD = \
 
 test_account_SOURCES = account.c
 test_account_manager_SOURCES = account-manager.c
+test_base_client_SOURCES = base-client.c
 test_call_cancellation_SOURCES = call-cancellation.c
 test_channel_dispatcher_SOURCES = channel-dispatcher.c
 test_channel_dispatch_operation_SOURCES = channel-dispatch-operation.c
@@ -714,6 +741,8 @@ test_unsupported_interface_SOURCES = unsupported-interface.c
 test_params_cm_SOURCES = \
     params-cm.c
 
+test_simple_observer_SOURCES = simple-observer.c
+test_simple_approver_SOURCES = simple-approver.c
 check_c_sources = *.c
 AM_CFLAGS = \
     $(ERROR_CFLAGS) \
@@ -813,6 +842,9 @@ test-account$(EXEEXT): $(test_account_OBJECTS) $(test_account_DEPENDENCIES)
 test-account-manager$(EXEEXT): $(test_account_manager_OBJECTS) $(test_account_manager_DEPENDENCIES) 
 	@rm -f test-account-manager$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_account_manager_OBJECTS) $(test_account_manager_LDADD) $(LIBS)
+test-base-client$(EXEEXT): $(test_base_client_OBJECTS) $(test_base_client_DEPENDENCIES) 
+	@rm -f test-base-client$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_base_client_OBJECTS) $(test_base_client_LDADD) $(LIBS)
 test-call-cancellation$(EXEEXT): $(test_call_cancellation_OBJECTS) $(test_call_cancellation_DEPENDENCIES) 
 	@rm -f test-call-cancellation$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_call_cancellation_OBJECTS) $(test_call_cancellation_LDADD) $(LIBS)
@@ -921,6 +953,12 @@ test-self-handle$(EXEEXT): $(test_self_handle_OBJECTS) $(test_self_handle_DEPEND
 test-self-presence$(EXEEXT): $(test_self_presence_OBJECTS) $(test_self_presence_DEPENDENCIES) 
 	@rm -f test-self-presence$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_self_presence_OBJECTS) $(test_self_presence_LDADD) $(LIBS)
+test-simple-approver$(EXEEXT): $(test_simple_approver_OBJECTS) $(test_simple_approver_DEPENDENCIES) 
+	@rm -f test-simple-approver$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_simple_approver_OBJECTS) $(test_simple_approver_LDADD) $(LIBS)
+test-simple-observer$(EXEEXT): $(test_simple_observer_OBJECTS) $(test_simple_observer_DEPENDENCIES) 
+	@rm -f test-simple-observer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_simple_observer_OBJECTS) $(test_simple_observer_LDADD) $(LIBS)
 test-text-mixin$(EXEEXT): $(test_text_mixin_OBJECTS) $(test_text_mixin_DEPENDENCIES) 
 	@rm -f test-text-mixin$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_text_mixin_OBJECTS) $(test_text_mixin_LDADD) $(LIBS)
@@ -939,6 +977,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call-cancellation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call-example.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callable-example.Po@am__quote@
@@ -975,6 +1014,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-presence.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-respawn.Po@am__quote@
