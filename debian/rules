@@ -17,16 +17,21 @@ DEB_DH_STRIP_ARGS := --dbg-package=libtelepathy-glib0-dbg
 DEB_MAKE_CHECK_TARGET := check
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-Werror \
-	--disable-introspection \
+	--enable-introspection \
 	--enable-gtk-doc \
 	--with-html-dir=\$${prefix}/share/doc/libtelepathy-glib-doc
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
+
+$(patsubst %,binary-predeb/%,$(DEB_ALL_PACKAGES)) ::
+	dh_girepository -p$(cdbs_curpkg)
 
 # we symlink many of the doc directories together
 DEB_INSTALL_DOCS_libtelepathy-glib0-dbg := --no-act
 DEB_INSTALL_CHANGELOGS_libtelepathy-glib0-dbg := --no-act
 DEB_INSTALL_DOCS_libtelepathy-glib-dev := --no-act
 DEB_INSTALL_CHANGELOGS_libtelepathy-glib-dev := --no-act
+DEB_INSTALL_DOCS_gir1.0-telepathyglib-0.12 := --no-act
+DEB_INSTALL_CHANGELOGS_gir1.0-telepathyglib-0.12 := --no-act
 
 include $(CURDIR)/debian/update-patches.mk
