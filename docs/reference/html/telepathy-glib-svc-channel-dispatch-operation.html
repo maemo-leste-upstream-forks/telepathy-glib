@@ -8,7 +8,7 @@
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-channel-dispatcher.html" title="Service-side Channel Dispatcher interface">
 <link rel="next" href="telepathy-glib-svc-channel-request.html" title="Service-side Channel Request interface">
-<meta name="generator" content="GTK-Doc V1.14 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.15 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -63,6 +63,16 @@
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-implement-handle-with" title="tp_svc_channel_dispatch_operation_implement_handle_with ()">tp_svc_channel_dispatch_operation_implement_handle_with</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#TpSvcChannelDispatchOperationClass" title="TpSvcChannelDispatchOperationClass"><span class="type">TpSvcChannelDispatchOperationClass</span></a> *klass</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-handle-with-impl" title="tp_svc_channel_dispatch_operation_handle_with_impl ()"><span class="type">tp_svc_channel_dispatch_operation_handle_with_impl</span></a> impl</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-handle-with-time-impl" title="tp_svc_channel_dispatch_operation_handle_with_time_impl ()">*tp_svc_channel_dispatch_operation_handle_with_time_impl</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#TpSvcChannelDispatchOperation"><span class="type">TpSvcChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *in_Handler</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> in_UserActionTime</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-implement-handle-with-time" title="tp_svc_channel_dispatch_operation_implement_handle_with_time ()">tp_svc_channel_dispatch_operation_implement_handle_with_time</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#TpSvcChannelDispatchOperationClass" title="TpSvcChannelDispatchOperationClass"><span class="type">TpSvcChannelDispatchOperationClass</span></a> *klass</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-handle-with-time-impl" title="tp_svc_channel_dispatch_operation_handle_with_time_impl ()"><span class="type">tp_svc_channel_dispatch_operation_handle_with_time_impl</span></a> impl</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-return-from-handle-with-time" title="tp_svc_channel_dispatch_operation_return_from_handle_with_time ()">tp_svc_channel_dispatch_operation_return_from_handle_with_time</a>
+                                                        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-emit-channel-lost" title="tp_svc_channel_dispatch_operation_emit_channel_lost ()">tp_svc_channel_dispatch_operation_emit_channel_lost</a>
                                                         (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> instance</code></em>,
                                                          <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Channel</code></em>,
@@ -132,6 +142,7 @@ implement_channel_dispatch_operation (gpointer klass,
   klass, my_object_##x)
   IMPLEMENT (handle_with);
   IMPLEMENT (claim);
+  IMPLEMENT (handle_with_time);
 #undef IMPLEMENT
 }
 </pre>
@@ -287,6 +298,89 @@ the interface init function.
 </table></div>
 </div>
 <hr>
+<div class="refsect2" title="tp_svc_channel_dispatch_operation_handle_with_time_impl ()">
+<a name="tp-svc-channel-dispatch-operation-handle-with-time-impl"></a><h3>tp_svc_channel_dispatch_operation_handle_with_time_impl ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*tp_svc_channel_dispatch_operation_handle_with_time_impl)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#TpSvcChannelDispatchOperation"><span class="type">TpSvcChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *in_Handler</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> in_UserActionTime</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);</pre>
+<p>
+The signature of an implementation of the D-Bus method
+HandleWithTime on interface org.freedesktop.Telepathy.ChannelDispatchOperation.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_Handler</code></em> :</span></p></td>
+<td>const gchar * (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_UserActionTime</code></em> :</span></p></td>
+<td>gint64  (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td>Used to return values or throw an error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_svc_channel_dispatch_operation_implement_handle_with_time ()">
+<a name="tp-svc-channel-dispatch-operation-implement-handle-with-time"></a><h3>tp_svc_channel_dispatch_operation_implement_handle_with_time ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_svc_channel_dispatch_operation_implement_handle_with_time
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#TpSvcChannelDispatchOperationClass" title="TpSvcChannelDispatchOperationClass"><span class="type">TpSvcChannelDispatchOperationClass</span></a> *klass</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-dispatch-operation.html#tp-svc-channel-dispatch-operation-handle-with-time-impl" title="tp_svc_channel_dispatch_operation_handle_with_time_impl ()"><span class="type">tp_svc_channel_dispatch_operation_handle_with_time_impl</span></a> impl</code></em>);</pre>
+<p>
+Register an implementation for the HandleWithTime method in the vtable
+of an implementation of this interface. To be called from
+the interface init function.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>klass</code></em> :</span></p></td>
+<td>A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>impl</code></em> :</span></p></td>
+<td>A callback used to implement the HandleWithTime D-Bus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_svc_channel_dispatch_operation_return_from_handle_with_time ()">
+<a name="tp-svc-channel-dispatch-operation-return-from-handle-with-time"></a><h3>tp_svc_channel_dispatch_operation_return_from_handle_with_time ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_svc_channel_dispatch_operation_return_from_handle_with_time
+                                                        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);</pre>
+<p>
+Return successfully by calling <a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#dbus-g-method-return"><code class="function">dbus_g_method_return()</code></a>.
+This inline function exists only to provide type-safety.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td>The D-Bus method invocation context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title="tp_svc_channel_dispatch_operation_emit_channel_lost ()">
 <a name="tp-svc-channel-dispatch-operation-emit-channel-lost"></a><h3>tp_svc_channel_dispatch_operation_emit_channel_lost ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                tp_svc_channel_dispatch_operation_emit_channel_lost
@@ -400,6 +494,6 @@ The Finished D-Bus signal is emitted whenever this GObject signal is.
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.14</div>
+          Generated by GTK-Doc V1.15</div>
 </body>
 </html>

@@ -9,11 +9,15 @@
  *
  * Copyright (C) 2008 Collabora Ltd. <http://www.collabora.co.uk/>
  * Copyright (C) 2008 Nokia Corporation
+ * Copyright (C) 2007 Will Thompson
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
  * notice and this notice are preserved.
  */
+#include <stdio.h>
+#include <string.h>
+#include <glib/gstdio.h>
 
 #include <telepathy-glib/connection.h>
 #include <telepathy-glib/contact.h>
@@ -67,11 +71,21 @@ by_handle_cb (TpConnection *connection,
       for (i = 0; i < n_contacts; i++)
         {
           TpContact *contact = contacts[i];
+          GFile *avatar_file;
+          gchar *avatar_uri = NULL;
+
+          avatar_file = tp_contact_get_avatar_file (contact);
+          if (avatar_file != NULL)
+            avatar_uri = g_file_get_uri (avatar_file);
 
           DEBUG ("contact #%u: %p", i, contact);
           DEBUG ("contact #%u alias: %s", i, tp_contact_get_alias (contact));
           DEBUG ("contact #%u avatar token: %s", i,
               tp_contact_get_avatar_token (contact));
+          DEBUG ("contact #%u avatar MIME type: %s", i,
+              tp_contact_get_avatar_mime_type (contact));
+          DEBUG ("contact #%u avatar file: %s", i,
+              avatar_uri);
           DEBUG ("contact #%u presence type: %u", i,
               tp_contact_get_presence_type (contact));
           DEBUG ("contact #%u presence status: %s", i,
@@ -79,6 +93,8 @@ by_handle_cb (TpConnection *connection,
           DEBUG ("contact #%u presence message: %s", i,
               tp_contact_get_presence_message (contact));
           g_ptr_array_add (result->contacts, g_object_ref (contact));
+
+          g_free (avatar_uri);
         }
     }
   else
@@ -95,6 +111,231 @@ finish (gpointer r)
   Result *result = r;
 
   g_main_loop_quit (result->loop);
+}
+
+static void
+prepare_avatar_requirements_cb (GObject *object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  TpConnection *connection = TP_CONNECTION (object);
+  Result *result = user_data;
+
+  if (tp_proxy_prepare_finish (connection, res, &result->error))
+    {
+      TpAvatarRequirements *req;
+
+      req = tp_connection_get_avatar_requirements (connection);
+      g_assert (req != NULL);
+      g_assert (req->supported_mime_types != NULL);
+      g_assert_cmpstr (req->supported_mime_types[0], ==, "image/png");
+      g_assert (req->supported_mime_types[1] == NULL);
+      g_assert_cmpuint (req->minimum_width, ==, 1);
+      g_assert_cmpuint (req->minimum_height, ==, 2);
+      g_assert_cmpuint (req->recommended_width, ==, 3);
+      g_assert_cmpuint (req->recommended_height, ==, 4);
+      g_assert_cmpuint (req->maximum_width, ==, 5);
+      g_assert_cmpuint (req->maximum_height, ==, 6);
+      g_assert_cmpuint (req->maximum_bytes, ==, 7);
+    }
+
+  finish (result);
+}
+
+static void
+test_avatar_requirements (TpConnection *client_conn)
+{
+  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
+  GQuark features[] = { TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS, 0 };
+
+  g_message (G_STRFUNC);
+
+  tp_proxy_prepare_async (TP_PROXY (client_conn), features,
+      prepare_avatar_requirements_cb, &result);
+  g_main_loop_run (result.loop);
+
+  g_assert_no_error (result.error);
+  g_main_loop_unref (result.loop);
+}
+
+static GFile *
+create_contact_with_fake_avatar (ContactsConnection *service_conn,
+    TpConnection *client_conn,
+    const gchar *id)
+{
+  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
+  TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
+      (TpBaseConnection *) service_conn, TP_HANDLE_TYPE_CONTACT);
+  TpContactFeature features[] = { TP_CONTACT_FEATURE_AVATAR_DATA };
+  const gchar avatar_data[] = "fake-avatar-data";
+  const gchar avatar_token[] = "fake-avatar-token";
+  const gchar avatar_mime_type[] = "fake-avatar-mime-type";
+  TpContact *contact;
+  TpHandle handle;
+  GArray *array;
+  GFile *avatar_file;
+  gchar *content = NULL;
+
+  handle = tp_handle_ensure (service_repo, id, NULL, NULL);
+  array = g_array_new (FALSE, FALSE, sizeof (gchar));
+  g_array_append_vals (array, avatar_data, strlen (avatar_data) + 1);
+
+  contacts_connection_change_avatar_data (service_conn, handle, array,
+      avatar_mime_type, avatar_token);
+
+  tp_connection_get_contacts_by_handle (client_conn,
+      1, &handle,
+      G_N_ELEMENTS (features), features,
+      by_handle_cb,
+      &result, finish, NULL);
+  g_main_loop_run (result.loop);
+  g_assert_no_error (result.error);
+
+  contact = g_ptr_array_index (result.contacts, 0);
+  if (tp_contact_get_avatar_file (contact) == NULL)
+    {
+      g_signal_connect_swapped (contact, "notify::avatar-file",
+          G_CALLBACK (finish), &result);
+      g_main_loop_run (result.loop);
+    }
+
+  g_assert_cmpstr (tp_contact_get_avatar_mime_type (contact), ==,
+      avatar_mime_type);
+  g_assert_cmpstr (tp_contact_get_avatar_token (contact), ==, avatar_token);
+
+  avatar_file = tp_contact_get_avatar_file (contact);
+  g_assert (avatar_file != NULL);
+  g_file_load_contents (avatar_file, NULL, &content, NULL, NULL, &result.error);
+  g_assert_no_error (result.error);
+  g_assert_cmpstr (content, ==, avatar_data);
+  g_free (content);
+
+  /* Keep avatar_file alive after contact destruction */
+  g_object_ref (avatar_file);
+
+  g_object_unref (contact);
+  g_array_free (result.invalid, TRUE);
+  g_ptr_array_free (result.contacts, TRUE);
+  g_main_loop_unref (result.loop);
+
+  tp_handle_unref (service_repo, handle);
+  g_array_unref (array);
+
+  return avatar_file;
+}
+
+static void
+avatar_retrieved_cb (TpConnection *connection,
+    guint handle,
+    const gchar *token,
+    const GArray *avatar,
+    const gchar *mime_type,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  gboolean *called = user_data;
+
+  *called = TRUE;
+}
+
+/* From telepathy-haze, with permission */
+static gboolean
+haze_remove_directory (const gchar *path)
+{
+  const gchar *child_path;
+  GDir *dir = g_dir_open (path, 0, NULL);
+  gboolean ret = TRUE;
+
+  if (!dir)
+    return FALSE;
+
+  while (ret && (child_path = g_dir_read_name (dir)))
+    {
+      gchar *child_full_path = g_build_filename (path, child_path, NULL);
+
+      if (g_file_test (child_full_path, G_FILE_TEST_IS_DIR))
+        {
+          if (!haze_remove_directory (child_full_path))
+            ret = FALSE;
+        }
+      else
+        {
+          DEBUG ("deleting %s", child_full_path);
+
+          if (g_unlink (child_full_path))
+            ret = FALSE;
+        }
+
+      g_free (child_full_path);
+    }
+
+  g_dir_close (dir);
+
+  if (ret)
+    {
+      DEBUG ("deleting %s", path);
+      ret = !g_rmdir (path);
+    }
+
+  return ret;
+}
+
+#define RAND_STR_LEN 6
+
+static void
+test_avatar_data (ContactsConnection *service_conn,
+    TpConnection *client_conn)
+{
+  static const gchar letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  gchar rand_str[RAND_STR_LEN + 1];
+  gchar *dir;
+  guint i;
+  gboolean avatar_retrieved_called;
+  GError *error = NULL;
+  GFile *file1, *file2;
+  TpProxySignalConnection *signal_id;
+
+  g_message (G_STRFUNC);
+
+  /* Make sure g_get_user_cache_dir() returns a tmp directory, to not mess up
+   * user's cache dir.
+   * FIXME: Replace this with g_mkdtemp once it gets added to GLib.
+   * See GNOME bug #118563 */
+  for (i = 0; i < RAND_STR_LEN; i++)
+    rand_str[i] = letters[g_random_int_range (0, strlen (letters))];
+  rand_str[RAND_STR_LEN] = '\0';
+  dir = g_build_filename (g_get_tmp_dir (), rand_str, NULL);
+  g_assert (g_mkdir (dir, 0700) == 0);
+  g_setenv ("XDG_CACHE_HOME", dir, TRUE);
+  g_assert_cmpstr (g_get_user_cache_dir (), ==, dir);
+
+  /* Check if AvatarRetrieved gets called */
+  signal_id = tp_cli_connection_interface_avatars_connect_to_avatar_retrieved (
+      client_conn, avatar_retrieved_cb, &avatar_retrieved_called, NULL, NULL,
+      &error);
+  g_assert_no_error (error);
+
+  /* First time we create a contact, avatar should not be in cache, so
+   * AvatarRetrived should be called */
+  avatar_retrieved_called = FALSE;
+  file1 = create_contact_with_fake_avatar (service_conn, client_conn,
+      "fake-id1");
+  g_assert (avatar_retrieved_called);
+
+  /* Second time we create a contact, avatar should be in cache now, so
+   * AvatarRetrived should NOT be called */
+  avatar_retrieved_called = FALSE;
+  file2 = create_contact_with_fake_avatar (service_conn, client_conn,
+      "fake-id2");
+  g_assert (!avatar_retrieved_called);
+
+  g_assert (g_file_equal (file1, file2));
+  g_assert (haze_remove_directory (dir));
+
+  tp_proxy_signal_connection_disconnect (signal_id);
+  g_object_unref (file1);
+  g_object_unref (file2);
+  g_free (dir);
 }
 
 static void
@@ -1315,6 +1556,8 @@ main (int argc,
   test_features (service_conn, client_conn);
   test_upgrade (service_conn, client_conn);
   test_by_id (client_conn);
+  test_avatar_requirements (client_conn);
+  test_avatar_data (service_conn, client_conn);
 
   /* test if TpContact fallbacks to connection's capabilities if
    * ContactCapabilities is not implemented. */

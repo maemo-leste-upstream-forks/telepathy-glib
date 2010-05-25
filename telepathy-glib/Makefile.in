@@ -112,14 +112,14 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	contacts-mixin.lo dbus.lo dbus-daemon.lo \
 	dbus-properties-mixin.lo debug.lo debug-sender.lo \
 	interfaces.lo errors.lo exportable-channel.lo gnio-util.lo \
-	group-mixin.lo gtypes.lo handle.lo handle-repo.lo \
-	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
-	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
-	media-interfaces.lo message-mixin.lo \
+	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
+	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
+	handle-set.lo heap.lo intset.lo channel-iface.lo \
+	channel-factory-iface.lo media-interfaces.lo message-mixin.lo \
 	observe-channels-context.lo presence-mixin.lo \
 	properties-mixin.lo proxy.lo proxy-methods.lo proxy-signals.lo \
-	run.lo simple-approver.lo simple-observer.lo text-mixin.lo \
-	util.lo
+	run.lo simple-approver.lo simple-handler.lo simple-observer.lo \
+	text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	signals-marshal.lo genums.lo tp-svc-account.lo \
 	tp-svc-account-manager.lo tp-svc-channel.lo \
@@ -256,6 +256,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PYTHON = @PYTHON@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
@@ -380,6 +382,7 @@ our_headers = \
     group-mixin.h \
     gtypes.h \
     handle.h \
+    handle-channels-context.h \
     handle-repo.h \
     handle-repo-static.h \
     handle-repo-dynamic.h \
@@ -395,6 +398,7 @@ our_headers = \
     proxy-subclass.h \
     run.h \
     simple-approver.h \
+    simple-handler.h \
     simple-observer.h \
     svc-account.h \
     svc-account-manager.h \
@@ -465,6 +469,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     group-mixin.c \
     gtypes.c \
     handle.c \
+    handle-channels-context-internal.h \
+    handle-channels-context.c \
     handle-repo.c \
     handle-repo-dynamic.c \
     handle-repo-internal.h \
@@ -487,6 +493,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     run.c \
     signals-marshal.list \
     simple-approver.c \
+    simple-handler.c \
     simple-observer.c \
     text-mixin.c \
     util.c \
@@ -545,7 +552,8 @@ ABI_LISTS = \
     versions/0.11.1.abi \
     versions/0.11.3.abi \
     versions/0.11.4.abi \
-    versions/0.11.5.abi
+    versions/0.11.5.abi \
+    versions/0.11.6.abi
 
 
 # The quoting here is unnecessary but harmless, and has the useful side-effect
@@ -679,6 +687,7 @@ introspection_extra_dist = kludge-616375.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-manager.c $(srcdir)/connection-manager.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel.c $(srcdir)/channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle.c $(srcdir)/handle.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-channels-context.c $(srcdir)/handle-channels-context.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-daemon.c $(srcdir)/dbus-daemon.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/interfaces.c $(srcdir)/interfaces.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/intset.c $(srcdir)/intset.h \
@@ -689,6 +698,7 @@ introspection_extra_dist = kludge-616375.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/debug.c $(srcdir)/debug.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-client.c $(srcdir)/base-client.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-approver.c $(srcdir)/simple-approver.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-handler.c $(srcdir)/simple-handler.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-observer.c $(srcdir)/simple-observer.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-properties-mixin.c $(srcdir)/dbus-properties-mixin.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-dispatch-operation.c $(srcdir)/channel-dispatch-operation.h \
@@ -825,6 +835,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnio-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtypes.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-channels-context.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo-dynamic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo-static.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle-repo.Plo@am__quote@
@@ -844,6 +855,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/run.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-account-manager.Plo@am__quote@
@@ -1552,7 +1564,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 @HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
 @HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 @HAVE_INTROSPECTION_TRUE@		--namespace TelepathyGLib \
-@HAVE_INTROSPECTION_TRUE@		--nsversion=$(VERSION) \
+@HAVE_INTROSPECTION_TRUE@		--nsversion=0.12 \
 @HAVE_INTROSPECTION_TRUE@		--strip-prefix=tp \
 @HAVE_INTROSPECTION_TRUE@		-I$(top_builddir) \
 @HAVE_INTROSPECTION_TRUE@		-I$(top_srcdir) \

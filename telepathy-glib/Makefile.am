@@ -56,6 +56,7 @@ our_headers = \
     group-mixin.h \
     gtypes.h \
     handle.h \
+    handle-channels-context.h \
     handle-repo.h \
     handle-repo-static.h \
     handle-repo-dynamic.h \
@@ -71,6 +72,7 @@ our_headers = \
     proxy-subclass.h \
     run.h \
     simple-approver.h \
+    simple-handler.h \
     simple-observer.h \
     svc-account.h \
     svc-account-manager.h \
@@ -150,6 +152,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     group-mixin.c \
     gtypes.c \
     handle.c \
+    handle-channels-context-internal.h \
+    handle-channels-context.c \
     handle-repo.c \
     handle-repo-dynamic.c \
     handle-repo-internal.h \
@@ -172,6 +176,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     run.c \
     signals-marshal.list \
     simple-approver.c \
+    simple-handler.c \
     simple-observer.c \
     text-mixin.c \
     util.c \

@@ -18,6 +18,7 @@ noinst_PROGRAMS = \
     test-connection-handles \
     test-connection-inject-bug16307 \
     test-connection-getinterfaces-failure \
+    test-contact-lists \
     test-contacts \
     test-contacts-bug-19101 \
     test-contacts-mixin \
@@ -39,6 +40,7 @@ noinst_PROGRAMS = \
     test-self-handle \
     test-self-presence \
     test-simple-approver \
+    test-simple-handler \
     test-simple-observer \
     test-text-mixin \
     test-text-respawn \
@@ -88,6 +90,11 @@ test_cm_LDADD = \
     $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
 
 test_connection_SOURCES = connection.c
+
+test_contact_lists_SOURCES = contact-lists.c
+test_contact_lists_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/contactlist/libexample-cm-contactlist.la
 
 test_connection_bug_18845_SOURCES = connection-bug-18845.c
 
@@ -171,6 +178,8 @@ test_params_cm_SOURCES = \
 test_simple_observer_SOURCES = simple-observer.c
 
 test_simple_approver_SOURCES = simple-approver.c
+
+test_simple_handler_SOURCES = simple-handler.c
 
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk

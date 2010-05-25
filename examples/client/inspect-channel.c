@@ -60,15 +60,16 @@ channel_ready_cb (TpChannel *channel,
         TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP))
     {
       const TpIntSet *members = tp_channel_group_get_members (channel);
-      TpIntSetIter group_iter;
+      TpIntSetFastIter group_iter;
+      TpHandle member;
 
       printf ("Group members:\n");
 
-      tp_intset_iter_init (&group_iter, members);
+      tp_intset_fast_iter_init (&group_iter, members);
 
-      while (tp_intset_iter_next (&group_iter))
+      while (tp_intset_fast_iter_next (&group_iter, &member))
         {
-          printf ("\tcontact #%u\n", group_iter.element);
+          printf ("\tcontact #%u\n", member);
         }
     }
 
@@ -120,7 +121,7 @@ main (int argc,
 {
   InspectChannelData data = { 1, NULL, NULL };
   const gchar *conn_name;
-  TpDBusDaemon *daemon = NULL;
+  TpDBusDaemon *dbus = NULL;
   TpConnection *connection = NULL;
   GError *error = NULL;
 
@@ -140,9 +141,9 @@ main (int argc,
   conn_name = argv[1];
   data.object_path = argv[2];
 
-  daemon = tp_dbus_daemon_dup (&error);
+  dbus = tp_dbus_daemon_dup (&error);
 
-  if (daemon == NULL)
+  if (dbus == NULL)
     {
       g_warning ("%s", error->message);
       g_error_free (error);
@@ -151,9 +152,9 @@ main (int argc,
     }
 
   if (conn_name[0] == '/')
-    connection = tp_connection_new (daemon, NULL, conn_name, &error);
+    connection = tp_connection_new (dbus, NULL, conn_name, &error);
   else
-    connection = tp_connection_new (daemon, conn_name, NULL, &error);
+    connection = tp_connection_new (dbus, conn_name, NULL, &error);
 
   if (connection == NULL)
     {
@@ -174,8 +175,8 @@ main (int argc,
   g_main_loop_run (data.main_loop);
 
 out:
-  if (daemon != NULL)
-    g_object_unref (daemon);
+  if (dbus != NULL)
+    g_object_unref (dbus);
 
   if (data.main_loop != NULL)
     g_main_loop_unref (data.main_loop);
