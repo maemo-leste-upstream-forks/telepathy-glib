@@ -1630,14 +1630,14 @@ tp_channel_class_init (TpChannelClass *klass)
   /**
    * TpChannel::group-members-changed-detailed:
    * @self: a channel
-   * @added: (type GLib.Array): a #GArray of #guint containing the full
-   *  members added
-   * @removed: (type GLib.Array):  a #GArray of #guint containing the members
-   *  (full, local-pending or remote-pending) removed
-   * @local_pending: (type GLib.Array):  a #GArray of #guint containing the
-   *  local-pending members added
-   * @remote_pending: (type GLib.Array):  a #GArray of #guint containing the
-   *  remote-pending members added
+   * @added: (type GLib.Array) (element-type uint): a #GArray of #guint
+   *  containing the full members added
+   * @removed: (type GLib.Array) (element-type uint):  a #GArray of #guint
+   *  containing the members (full, local-pending or remote-pending) removed
+   * @local_pending: (type GLib.Array) (element-type uint):  a #GArray of
+   *  #guint containing the local-pending members added
+   * @remote_pending: (type GLib.Array) (element-type uint):  a #GArray of
+   *  #guint containing the remote-pending members added
    * @details: (type GLib.HashTable): (element-type utf8 GObject.Value):
    *  a #GHashTable mapping (gchar *) to #GValue containing details
    *  about the change, as described in the specification of the
@@ -1759,7 +1759,6 @@ tp_channel_new (TpConnection *conn,
 {
   TpChannel *ret = NULL;
   TpProxy *conn_proxy = (TpProxy *) conn;
-  gchar *dup = NULL;
 
   g_return_val_if_fail (TP_IS_CONNECTION (conn), NULL);
   g_return_val_if_fail (object_path != NULL, NULL);
@@ -1803,7 +1802,6 @@ tp_channel_new (TpConnection *conn,
         NULL));
 
 finally:
-  g_free (dup);
 
   return ret;
 }

@@ -30,6 +30,7 @@ struct _ContactsConnectionClass {
 
     TpPresenceMixinClass presence_mixin;
     TpContactsMixinClass contacts_mixin;
+    TpDBusPropertiesMixinClass properties_class;
 };
 
 struct _ContactsConnection {
@@ -80,6 +81,12 @@ void contacts_connection_change_presences (ContactsConnection *self, guint n,
 
 void contacts_connection_change_avatar_tokens (ContactsConnection *self,
     guint n, const TpHandle *handles, const gchar * const *tokens);
+
+void contacts_connection_change_avatar_data (ContactsConnection *self,
+    TpHandle handle,
+    GArray *data,
+    const gchar *mime_type,
+    const gchar *token);
 
 void contacts_connection_change_locations (ContactsConnection *self,
     guint n,

@@ -50,6 +50,7 @@ void tp_intset_foreach (const TpIntSet *set, TpIntFunc func,
 GArray *tp_intset_to_array (const TpIntSet *set) G_GNUC_WARN_UNUSED_RESULT;
 TpIntSet *tp_intset_from_array (const GArray *array) G_GNUC_WARN_UNUSED_RESULT;
 
+gboolean tp_intset_is_empty (const TpIntSet *set) G_GNUC_WARN_UNUSED_RESULT;
 guint tp_intset_size (const TpIntSet *set) G_GNUC_WARN_UNUSED_RESULT;
 
 gboolean tp_intset_is_equal (const TpIntSet *left, const TpIntSet *right)
@@ -96,6 +97,17 @@ tp_intset_iter_reset_inline (TpIntSetIter *iter)
 }
 
 gboolean tp_intset_iter_next (TpIntSetIter *iter);
+
+typedef struct {
+    /*<private>*/
+    gpointer _dummy[16];
+} TpIntSetFastIter;
+
+void tp_intset_fast_iter_init (TpIntSetFastIter *iter,
+    const TpIntSet *set);
+
+gboolean tp_intset_fast_iter_next (TpIntSetFastIter *iter,
+    guint *output);
 
 G_END_DECLS
 
