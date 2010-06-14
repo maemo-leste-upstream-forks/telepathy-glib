@@ -33,6 +33,7 @@ GQuark tp_errors_quark (void);
 #define TP_ERROR_PREFIX "org.freedesktop.Telepathy.Error"
 
 #define TP_ERRORS (tp_errors_quark ())
+#define TP_ERROR TP_ERRORS
 
 void tp_g_set_error_invalid_handle_type (guint type, GError **error);
 void tp_g_set_error_unsupported_handle_type (guint type, GError **error);
@@ -76,6 +77,7 @@ typedef enum {
     TP_ERROR_REGISTRATION_EXISTS, /*< nick=RegistrationExists >*/
     TP_ERROR_SERVICE_BUSY, /*< nick=ServiceBusy >*/
     TP_ERROR_RESOURCE_UNAVAILABLE, /*< nick=ResourceUnavailable >*/
+    TP_ERROR_WOULD_BREAK_ANONYMITY, /*< nick=WouldBreakAnonymity >*/
 } TpError;
 
 const gchar *tp_error_get_dbus_name (TpError error);

@@ -53,9 +53,13 @@ struct _TpConnectionPrivate {
     GArray *avatar_request_queue;
     guint avatar_request_idle_id;
 
+    TpContactInfoFlags contact_info_flags;
+    GList *contact_info_supported_fields;
+
     TpProxyPendingCall *introspection_call;
     unsigned fetching_rcc:1;
     unsigned fetching_avatar_requirements:1;
+    unsigned contact_info_fetched:1;
 
     unsigned ready:1;
     unsigned tracking_aliases_changed:1;
@@ -65,8 +69,14 @@ struct _TpConnectionPrivate {
     unsigned tracking_presence_update:1;
     unsigned tracking_location_changed:1;
     unsigned tracking_contact_caps_changed:1;
+    unsigned tracking_contact_info_changed:1;
     unsigned introspecting_after_connected:1;
 };
+
+void _tp_connection_status_reason_to_gerror (TpConnectionStatusReason reason,
+    TpConnectionStatus prev_status,
+    const gchar **ret_str,
+    GError **error);
 
 void _tp_connection_init_handle_refs (TpConnection *self);
 void _tp_connection_clean_up_handle_refs (TpConnection *self);
@@ -80,6 +90,13 @@ TpContact *_tp_connection_lookup_contact (TpConnection *self, TpHandle handle);
 /* Actually implemented in contact.c, but having a contact-internal header
  * just for this would be overkill */
 void _tp_contact_connection_invalidated (TpContact *contact);
+
+/* connection-contact-info.c */
+void _tp_connection_maybe_prepare_contact_info (TpProxy *proxy);
+TpContactInfoFieldSpec *_tp_contact_info_field_spec_new (const gchar *name,
+    GStrv parameters, TpContactInfoFieldFlags flags, guint max);
+
+
 
 G_END_DECLS
 

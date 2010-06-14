@@ -25,7 +25,10 @@ TESTS_ENVIRONMENT = \
     abs_top_srcdir=@abs_top_srcdir@ \
     G_SLICE=debug-blocks \
     G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
-    PYTHONPATH=@abs_top_srcdir@/tools
+    PYTHONPATH=@abs_top_srcdir@/tools \
+    $(EXTRA_TESTS_ENVIRONMENT)
+
+EXTRA_TESTS_ENVIRONMENT =
 
 include $(top_srcdir)/tools/valgrind.mk
 
@@ -109,3 +112,16 @@ AM_CFLAGS = \
     $(GLIB_CFLAGS) \
     -D_TP_IGNORE_DEPRECATIONS \
     $(TP_GLIB_CFLAGS)
+
+AM_CXXFLAGS = \
+    $(DBUS_CFLAGS) \
+    $(GLIB_CFLAGS) \
+    -D_TP_IGNORE_DEPRECATIONS \
+    $(TP_GLIB_CFLAGS)
+
+if HAVE_CXX
+noinst_PROGRAMS += \
+    test-util-cxx
+
+test_util_cxx_SOURCES = util-cxx.cpp
+endif

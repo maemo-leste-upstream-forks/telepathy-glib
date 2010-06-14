@@ -166,6 +166,12 @@
  *     Raised when a local process rejects a request because it does not have
  *     enough of a resource, such as memory.
  *     Since 0.7.34
+ * @TP_ERROR_WOULD_BREAK_ANONYMITY: org.freedesktop.Telepathy.Error.WouldBreakAnonymity:
+ *     Raised when a request cannot be satisfied without violating an
+ *     earlier request for anonymity, and the earlier request specified
+ *     that raising an error is preferable to disclosing the user's
+ *     identity
+ *     Since 0.11.7
  *
  * Enumerated type representing the Telepathy D-Bus errors.
  */
@@ -229,8 +235,6 @@ tp_errors_quark (void)
     {
       GQuark domain = g_quark_from_static_string ("tp_errors");
 
-      tp_verify_statement (sizeof (GQuark) <= sizeof (gsize));
-
       g_type_init ();
       dbus_g_error_domain_register (domain, TP_ERROR_PREFIX,
           TP_TYPE_ERROR);
@@ -239,3 +243,6 @@ tp_errors_quark (void)
 
   return (GQuark) quark;
 }
+
+/* tp_errors_quark assumes this */
+G_STATIC_ASSERT (sizeof (GQuark) <= sizeof (gsize));
