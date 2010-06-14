@@ -112,6 +112,9 @@ enum                <a class="link" href="telepathy-glib-enums.html#TpDebugLevel
 enum                <a class="link" href="telepathy-glib-enums.html#TpContactInfoFlags" title="enum TpContactInfoFlags">TpContactInfoFlags</a>;
 enum                <a class="link" href="telepathy-glib-enums.html#TpContactInfoFieldFlags" title="enum TpContactInfoFieldFlags">TpContactInfoFieldFlags</a>;
 enum                <a class="link" href="telepathy-glib-enums.html#TpLocationFeatures" title="enum TpLocationFeatures">TpLocationFeatures</a>;
+enum                <a class="link" href="telepathy-glib-enums.html#TpServicePointType" title="enum TpServicePointType">TpServicePointType</a>;
+#define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-SERVICE-POINT-TYPES:CAPS" title="NUM_TP_SERVICE_POINT_TYPES">NUM_TP_SERVICE_POINT_TYPES</a>
+enum                <a class="link" href="telepathy-glib-enums.html#TpAnonymityModeFlags" title="enum TpAnonymityModeFlags">TpAnonymityModeFlags</a>;
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -2297,6 +2300,87 @@ Bitfield/set of flags generated from the Telepathy specification.
 <td>           Indicates that setting your own location with           SetLocation is supported on this           connection.         
 </td>
 </tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="enum TpServicePointType">
+<a name="TpServicePointType"></a><h3>enum TpServicePointType</h3>
+<pre class="programlisting">typedef enum {
+    TP_SERVICE_POINT_TYPE_NONE = 0,
+    TP_SERVICE_POINT_TYPE_EMERGENCY = 1,
+    TP_SERVICE_POINT_TYPE_COUNSELING = 2,
+} TpServicePointType;
+</pre>
+<p>
+         The various types of service points a channel might connect to.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-SERVICE-POINT-TYPE-NONE:CAPS"></a><span class="term"><code class="literal">TP_SERVICE_POINT_TYPE_NONE</code></span></p></td>
+<td>           The channel is not communicating with a service point, or it is not           known whether it is communicating with a service point (e.g. an           ordinary call).         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-SERVICE-POINT-TYPE-EMERGENCY:CAPS"></a><span class="term"><code class="literal">TP_SERVICE_POINT_TYPE_EMERGENCY</code></span></p></td>
+<td>           The service point is a generic emergency point.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-SERVICE-POINT-TYPE-COUNSELING:CAPS"></a><span class="term"><code class="literal">TP_SERVICE_POINT_TYPE_COUNSELING</code></span></p></td>
+<td>           The service point is some kind of counseling service (ie, mental health           or child-services counseling).         
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="NUM_TP_SERVICE_POINT_TYPES">
+<a name="NUM-TP-SERVICE-POINT-TYPES:CAPS"></a><h3>NUM_TP_SERVICE_POINT_TYPES</h3>
+<pre class="programlisting">#define NUM_TP_SERVICE_POINT_TYPES (2+1)
+</pre>
+<p>
+1 higher than the highest valid value of <a class="link" href="telepathy-glib-enums.html#TpServicePointType" title="enum TpServicePointType"><span class="type">TpServicePointType</span></a>.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="enum TpAnonymityModeFlags">
+<a name="TpAnonymityModeFlags"></a><h3>enum TpAnonymityModeFlags</h3>
+<pre class="programlisting">typedef enum {
+    TP_ANONYMITY_MODE_CLIENT_INFO = 1,
+    TP_ANONYMITY_MODE_SHOW_CLIENT_INFO = 2,
+    TP_ANONYMITY_MODE_NETWORK_INFO = 4,
+} TpAnonymityModeFlags;
+</pre>
+<p>
+         Flags for the various types of anonymity modes.  These modes are solely to         inform the CM of the desired anonymous settings.  It is up to the         CM to determine whether the anonymity modes should be handled within         the CM itself, or whether the network that a CM might be talking to         should be enforcing anonymity.          CMs MAY support only a subset of these modes, and specific         connections MAY support none at all.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-ANONYMITY-MODE-CLIENT-INFO:CAPS"></a><span class="term"><code class="literal">TP_ANONYMITY_MODE_CLIENT_INFO</code></span></p></td>
+<td>           Obscure any information that provides user identification,           user-agent identification or personal details. Examples of this           information might be GSM CallerID, SIP from address, various           informational email headers, etc.            The CM should scrub/replace any of this information before           passing messages or data onto the network. Note that a CM which           has the option of obscuring the information at the CM or privacy           service level would choose both (anonymity services are opaque           to clients of this interface).            Clients SHOULD NOT set both Client_Info and Show_Client_Info modes.           If they are set, the CM MUST respect Client_Info and ignore           Show_Client_Info.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ANONYMITY-MODE-SHOW-CLIENT-INFO:CAPS"></a><span class="term"><code class="literal">TP_ANONYMITY_MODE_SHOW_CLIENT_INFO</code></span></p></td>
+<td>           Explicitly request showing of client information. In connection           context, this can be used to override service default. In channel           context, this overrides connection anonymity modes.                         In GSM, it's possible to have CLIR enabled by default, and               explicitly suppress CLIR for a single phone call.                       Clients SHOULD NOT set both Client_Info and Show_Client_Info modes.           If they are set, the CM MUST respect Client_Info and ignore           Show_Client_Info. The CM MAY set both Client_Info and Show_Client_Info           in SupportedAnonymityModes to indicate           its support for explicitly hiding and publicising client information.                    
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-ANONYMITY-MODE-NETWORK-INFO:CAPS"></a><span class="term"><code class="literal">TP_ANONYMITY_MODE_NETWORK_INFO</code></span></p></td>
+<td>           Obscure any originating IP address information, contact URIs,           and anonymize all traffic involved with sending/receiving any           media streams or call content.           Examples of this include the "headers" portions of           RFC 3323 as           well as the History-Info (described in           RFC 4244)           for a SIP CM.            This SHOULD have the effect of hiding address information from           the remote contact (ie, the contact cannot know what IP address           the session is originated from). Obviously the network still needs           to be able to route information between contacts, so this provides           no guarantees of what can be seen by intermediaries.         
+</td>
+</tr>
+</tbody>
 </table></div>
 </div>
 </div>

@@ -385,8 +385,6 @@ tp_connection_get_avatar_requirements_cb (TpProxy *proxy,
     GObject *weak_object)
 {
   TpConnection *self = (TpConnection *) proxy;
-  GStrv supported_mime_types;
-  GStrv empty_strv = { NULL };
 
   self->priv->fetching_avatar_requirements = FALSE;
 
@@ -400,13 +398,8 @@ tp_connection_get_avatar_requirements_cb (TpProxy *proxy,
 
   DEBUG ("AVATAR REQUIREMENTS ready");
 
-  supported_mime_types = (GStrv) tp_asv_get_strv (properties,
-      "SupportedAvatarMIMETypes");
-  if (supported_mime_types == NULL)
-    supported_mime_types = empty_strv;
-
   self->priv->avatar_requirements = tp_avatar_requirements_new (
-      supported_mime_types,
+      (GStrv) tp_asv_get_strv (properties, "SupportedAvatarMIMETypes"),
       tp_asv_get_uint32 (properties, "MinimumAvatarWidth", NULL),
       tp_asv_get_uint32 (properties, "MinimumAvatarHeight", NULL),
       tp_asv_get_uint32 (properties, "RecommendedAvatarWidth", NULL),
@@ -490,6 +483,7 @@ tp_connection_continue_introspection (TpConnection *self)
 
       tp_connection_maybe_prepare_capabilities ((TpProxy *) self);
       tp_connection_maybe_prepare_avatar_requirements ((TpProxy *) self);
+      _tp_connection_maybe_prepare_contact_info ((TpProxy *) self);
     }
   else
     {
@@ -642,6 +636,9 @@ get_self_handle (TpConnection *self)
       self, -1, got_self_handle, NULL, NULL, NULL);
 }
 
+/* Appending callbacks to self->priv->introspect_needed relies on this */
+G_STATIC_ASSERT (sizeof (TpConnectionProc) <= sizeof (gpointer));
+
 static void
 tp_connection_got_interfaces_cb (TpConnection *self,
                                  const gchar **interfaces,
@@ -669,7 +666,6 @@ tp_connection_got_interfaces_cb (TpConnection *self,
     }
 
   g_assert (self->priv->introspect_needed == NULL);
-  tp_verify_statement (sizeof (TpConnectionProc) <= sizeof (gpointer));
   self->priv->introspect_needed = g_list_append (self->priv->introspect_needed,
     get_self_handle);
 
@@ -761,10 +757,11 @@ tp_connection_connection_error_cb (TpConnection *self,
       TP_HASH_TYPE_STRING_VARIANT_MAP, details);
 }
 
-static void
-tp_connection_status_reason_to_gerror (TpConnectionStatusReason reason,
-                                       TpConnectionStatus prev_status,
-                                       GError **error)
+void
+_tp_connection_status_reason_to_gerror (TpConnectionStatusReason reason,
+    TpConnectionStatus prev_status,
+    const gchar **ret_str,
+    GError **error)
 {
   TpError code;
   const gchar *message;
@@ -852,10 +849,17 @@ tp_connection_status_reason_to_gerror (TpConnectionStatusReason reason,
     default:
       g_set_error (error, TP_ERRORS_DISCONNECTED, reason,
           "Unknown disconnection reason");
+
+      if (ret_str != NULL)
+        *ret_str = TP_ERROR_STR_DISCONNECTED;
+
       return;
     }
 
   g_set_error (error, TP_ERRORS, code, "%s", message);
+
+  if (ret_str != NULL)
+    *ret_str = tp_error_get_dbus_name (code);
 }
 
 static void
@@ -885,9 +889,8 @@ tp_connection_status_changed_cb (TpConnection *self,
 
       if (self->priv->connection_error == NULL)
         {
-          g_assert (self->priv->connection_error_details == NULL);
-
-          tp_connection_status_reason_to_gerror (reason, prev_status, &error);
+          _tp_connection_status_reason_to_gerror (reason, prev_status,
+              NULL, &error);
         }
       else
         {
@@ -904,8 +907,8 @@ tp_connection_status_changed_cb (TpConnection *self,
             {
               GError *from_csr = NULL;
 
-              tp_connection_status_reason_to_gerror (reason, prev_status,
-                  &from_csr);
+              _tp_connection_status_reason_to_gerror (reason, prev_status,
+                  NULL, &from_csr);
               error->domain = from_csr->domain;
               error->code = from_csr->code;
               g_error_free (from_csr);
@@ -1054,9 +1057,11 @@ tp_connection_finalize (GObject *object)
       self->priv->avatar_request_idle_id = 0;
     }
 
+  tp_contact_info_spec_list_free (self->priv->contact_info_supported_fields);
+  self->priv->contact_info_supported_fields = NULL;
+
   ((GObjectClass *) tp_connection_parent_class)->finalize (object);
 }
-
 
 static void
 contact_notify_invalidated (gpointer k G_GNUC_UNUSED,
@@ -1078,21 +1083,12 @@ tp_connection_dispose (GObject *object)
     {
       g_hash_table_foreach (self->priv->contacts, contact_notify_invalidated,
           NULL);
-      g_hash_table_destroy (self->priv->contacts);
-      self->priv->contacts = NULL;
+      tp_clear_pointer (&self->priv->contacts, g_hash_table_destroy);
     }
 
-  if (self->priv->capabilities != NULL)
-    {
-      g_object_unref (self->priv->capabilities);
-      self->priv->capabilities = NULL;
-    }
-
-  if (self->priv->avatar_requirements != NULL)
-    {
-      tp_avatar_requirements_destroy (self->priv->avatar_requirements);
-      self->priv->avatar_requirements = NULL;
-    }
+  tp_clear_object (&self->priv->capabilities);
+  tp_clear_pointer (&self->priv->avatar_requirements,
+      tp_avatar_requirements_destroy);
 
   ((GObjectClass *) tp_connection_parent_class)->dispose (object);
 }
@@ -1102,6 +1098,7 @@ enum {
     FEAT_CONNECTED,
     FEAT_CAPABILITIES,
     FEAT_AVATAR_REQUIREMENTS,
+    FEAT_CONTACT_INFO,
     N_FEAT
 };
 
@@ -1125,6 +1122,10 @@ tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   features[FEAT_AVATAR_REQUIREMENTS].name = TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS;
   features[FEAT_AVATAR_REQUIREMENTS].start_preparing =
     tp_connection_maybe_prepare_avatar_requirements;
+
+  features[FEAT_CONTACT_INFO].name = TP_CONNECTION_FEATURE_CONTACT_INFO;
+  features[FEAT_CONTACT_INFO].start_preparing =
+    _tp_connection_maybe_prepare_contact_info;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);
@@ -2156,9 +2157,11 @@ tp_avatar_requirements_new (GStrv supported_mime_types,
                             guint maximum_bytes)
 {
   TpAvatarRequirements *self;
+  gchar *empty[] = { NULL };
 
   self = g_slice_new (TpAvatarRequirements);
-  self->supported_mime_types = g_strdupv (supported_mime_types);
+  self->supported_mime_types =
+      g_strdupv (supported_mime_types ? supported_mime_types : empty);
   self->minimum_width = minimum_width;
   self->minimum_height = minimum_height;
   self->recommended_width = recommended_width;
@@ -2171,7 +2174,7 @@ tp_avatar_requirements_new (GStrv supported_mime_types,
 }
 
 /**
- * tp_avatar_requirements_copy:
+ * tp_avatar_requirements_copy: (skip)
  * @self: a #TpAvatarRequirements
  *
  * <!--Returns: says it all-->
@@ -2181,7 +2184,7 @@ tp_avatar_requirements_new (GStrv supported_mime_types,
  * Since: 0.11.4
  */
 TpAvatarRequirements *
-tp_avatar_requirements_copy (TpAvatarRequirements *self)
+tp_avatar_requirements_copy (const TpAvatarRequirements *self)
 {
   g_return_val_if_fail (self != NULL, NULL);
 
@@ -2196,7 +2199,7 @@ tp_avatar_requirements_copy (TpAvatarRequirements *self)
 }
 
 /**
- * tp_avatar_requirements_destroy:
+ * tp_avatar_requirements_destroy: (skip)
  * @self: a #TpAvatarRequirements
  *
  * Free all memory used by the #TpAvatarRequirements.
@@ -2253,7 +2256,16 @@ tp_connection_get_detailed_error (TpConnection *self,
        * on the invalidation reason, and don't give any details */
 
       if (details != NULL)
-        *details = tp_asv_new (NULL, NULL);
+        {
+          if (self->priv->connection_error_details == NULL)
+            self->priv->connection_error_details = g_hash_table_new (
+                g_str_hash, g_str_equal);
+
+          g_assert (g_hash_table_size (self->priv->connection_error_details)
+              == 0);
+
+          *details = self->priv->connection_error_details;
+        }
 
       if (proxy->invalidated->domain == TP_ERRORS)
         {
