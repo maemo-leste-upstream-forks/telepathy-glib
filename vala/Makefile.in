@@ -14,6 +14,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -33,8 +34,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = spec
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+subdir = vala
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/telepathy-vala-uninstalled.pc.in \
+	$(srcdir)/telepathy-vala.pc.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/introspection.m4 \
@@ -48,7 +51,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = telepathy-vala.pc telepathy-vala-uninstalled.pc
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
@@ -58,6 +61,29 @@ am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
 am__v_at_0 = @
 SOURCES =
 DIST_SOURCES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__installdirs = "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(vapidir)"
+DATA = $(pkgconfig_DATA) $(vapi_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -222,90 +248,31 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = \
-    Account_Interface_Avatar.xml \
-    Account_Manager.xml \
-    Account.xml \
-    all.xml \
-    Call_Content.xml \
-    Call_Content_Interface_Media.xml \
-    Call_Content_Interface_Mute.xml \
-    Call_Content_Codec_Offer.xml \
-    Call_Stream.xml \
-    Call_Stream_Interface_Media.xml \
-    Call_Stream_Endpoint.xml \
-    Channel_Dispatch_Operation.xml \
-    Channel_Dispatcher.xml \
-    Channel_Dispatcher_Interface_Operation_List.xml \
-    Channel_Future.xml \
-    Channel_Handler.xml \
-    Channel_Interface_Anonymity.xml \
-    Channel_Interface_Call_State.xml \
-    Channel_Interface_Chat_State.xml \
-    Channel_Interface_Conference.xml \
-    Channel_Interface_Destroyable.xml \
-    Channel_Interface_DTMF.xml \
-    Channel_Interface_Group.xml \
-    Channel_Interface_Hold.xml \
-    Channel_Interface_HTML.xml \
-    Channel_Interface_Media_Signalling.xml \
-    Channel_Interface_Mergeable_Conference.xml \
-    Channel_Interface_Messages.xml \
-    Channel_Interface_Password.xml \
-    Channel_Interface_Service_Point.xml \
-    Channel_Interface_Splittable.xml \
-    Channel_Interface_Transfer.xml \
-    Channel_Interface_Tube.xml \
-    Channel_Request.xml \
-    Channel_Type_Call.xml \
-    Channel_Type_Contact_List.xml \
-    Channel_Type_Contact_Search.xml \
-    Channel_Type_DBus_Tube.xml \
-    Channel_Type_File_Transfer.xml \
-    Channel_Type_Room_List.xml \
-    Channel_Type_Stream_Tube.xml \
-    Channel_Type_Streamed_Media.xml \
-    Channel_Type_Text.xml \
-    Channel_Type_Tubes.xml \
-    Channel.xml \
-    Client.xml \
-    Client_Approver.xml \
-    Client_Handler.xml \
-    Client_Handler_Future.xml \
-    Client_Interface_Requests.xml \
-    Client_Observer.xml \
-    Connection_Future.xml \
-    Connection_Interface_Aliasing.xml \
-    Connection_Interface_Anonymity.xml \
-    Connection_Interface_Avatars.xml \
-    Connection_Interface_Balance.xml \
-    Connection_Interface_Capabilities.xml \
-    Connection_Interface_Cellular.xml \
-    Connection_Interface_Contact_Capabilities.xml \
-    Connection_Interface_Contact_Groups.xml \
-    Connection_Interface_Contact_Info.xml \
-    Connection_Interface_Contact_List.xml \
-    Connection_Interface_Contacts.xml \
-    Connection_Interface_Forwarding.xml \
-    Connection_Interface_Location.xml \
-    Connection_Interface_Mail_Notification.xml \
-    Connection_Interface_Presence.xml \
-    Connection_Interface_Privacy.xml \
-    Connection_Interface_Renaming.xml \
-    Connection_Interface_Requests.xml \
-    Connection_Interface_Service_Point.xml \
-    Connection_Interface_Simple_Presence.xml \
-    Connection_Manager.xml \
-    Connection.xml \
-    Debug.xml \
-    errors.xml \
-    generic-types.xml \
-    Media_Session_Handler.xml \
-    Media_Stream_Handler.xml \
-    Properties_Interface.xml \
-    template.xml
+XSLTPROCFLAGS = --nonet --novalid
+vapidir = $(datarootdir)/telepathy/vapi
+vapi_DATA = telepathy-glib.vapi
+BUILT_SOURCES = \
+	telepathy-glib.vapi \
+	$(NULL)
 
-all: all-am
+pkgconfigdir = ${libdir}/pkgconfig
+pkgconfig_DATA = telepathy-vala.pc
+CLEANFILES = \
+	$(BUILT_SOURCES) \
+	$(NULL)
+
+
+# set up the verbosity rules to avoid some build noise
+# XXX: once automake >= 1.11 is common, remove these, push VALASOURCES files
+# into SOURCES and add AM_PROG_VALAC to configure.ac
+VAPIGEN_V = $(VAPIGEN_V_$(V))
+VAPIGEN_V_ = $(VAPIGEN_V_$(AM_DEFAULT_VERBOSITY))
+VAPIGEN_V_0 = @echo "  VAPIG " $^;
+VGI_V = $(VGI_V_$(V))
+VGI_V_ = $(VGI_V_$(AM_DEFAULT_VERBOSITY))
+VGI_V_0 = @echo "  VGI   " $^;
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -317,9 +284,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu spec/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu vala/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu spec/Makefile
+	  $(AUTOMAKE) --gnu vala/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -338,12 +305,56 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+telepathy-vala.pc: $(top_builddir)/config.status $(srcdir)/telepathy-vala.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+telepathy-vala-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/telepathy-vala-uninstalled.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-pkgconfigDATA: $(pkgconfig_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgconfigdir)" || $(MKDIR_P) "$(DESTDIR)$(pkgconfigdir)"
+	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pkgconfigdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pkgconfigdir)" || exit $$?; \
+	done
+
+uninstall-pkgconfigDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(pkgconfigdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(pkgconfigdir)" && rm -f $$files
+install-vapiDATA: $(vapi_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(vapidir)" || $(MKDIR_P) "$(DESTDIR)$(vapidir)"
+	@list='$(vapi_DATA)'; test -n "$(vapidir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(vapidir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(vapidir)" || exit $$?; \
+	done
+
+uninstall-vapiDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(vapi_DATA)'; test -n "$(vapidir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(vapidir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(vapidir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -382,10 +393,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
-all-am: Makefile
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
+all-am: Makefile $(DATA)
 installdirs:
-install: install-am
+	for dir in "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(vapidir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -402,6 +418,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -410,6 +427,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libtool mostlyclean-am
@@ -430,7 +448,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-pkgconfigDATA install-vapiDATA
 
 install-dvi: install-dvi-am
 
@@ -474,9 +492,9 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-pkgconfigDATA uninstall-vapiDATA
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
@@ -484,11 +502,20 @@ uninstall-am:
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
+	install-pdf-am install-pkgconfigDATA install-ps install-ps-am \
+	install-strip install-vapiDATA installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am uninstall uninstall-am uninstall-pkgconfigDATA \
+	uninstall-vapiDATA
 
+
+telepathy-glib.vapi: $(top_srcdir)/telepathy-glib/TelepathyGLib-0.12.gir
+	$(VAPIGEN_V)$(VAPIGEN) \
+		--library telepathy-glib \
+		--pkg gio-2.0 \
+		$< \
+		$(NULL)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
