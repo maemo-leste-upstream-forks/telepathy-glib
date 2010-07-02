@@ -115,6 +115,7 @@ enum                <a class="link" href="telepathy-glib-enums.html#TpLocationFe
 enum                <a class="link" href="telepathy-glib-enums.html#TpServicePointType" title="enum TpServicePointType">TpServicePointType</a>;
 #define             <a class="link" href="telepathy-glib-enums.html#NUM-TP-SERVICE-POINT-TYPES:CAPS" title="NUM_TP_SERVICE_POINT_TYPES">NUM_TP_SERVICE_POINT_TYPES</a>
 enum                <a class="link" href="telepathy-glib-enums.html#TpAnonymityModeFlags" title="enum TpAnonymityModeFlags">TpAnonymityModeFlags</a>;
+enum                <a class="link" href="telepathy-glib-enums.html#TpStorageRestrictionFlags" title="enum TpStorageRestrictionFlags">TpStorageRestrictionFlags</a>;
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -945,7 +946,7 @@ Bitfield/set of flags generated from the Telepathy specification.
 </tr>
 <tr>
 <td><p><a name="TP-CHANNEL-TEXT-MESSAGE-TYPE-DELIVERY-REPORT:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_TEXT_MESSAGE_TYPE_DELIVERY_REPORT</code></span></p></td>
-<td>           This message type MUST NOT appear unless the channel supports the           DeliveryReporting interface. The message MUST be as defined by           the DeliveryReporting interface.         
+<td>           A delivery report. This message type MUST NOT appear unless the           channel supports the Messages           interface; see Message_Part for the format that           delivery reports must take.         
 </td>
 </tr>
 </tbody>
@@ -1309,7 +1310,7 @@ Bitfield/set of flags generated from the Telepathy specification.
 } TpDeliveryStatus;
 </pre>
 <p>
-         The status of a message as indicated by a delivery report.          If this enum is extended in future specifications, this should           only be to add new, non-overlapping conditions (i.e. all failures           should still be signalled as either Temporarily_Failed           or Permanently_Failed). If additional detail is required (e.g.           distinguishing between the various types of permanent failure) this           will be done using additional keys in the Message_Part.       
+         The status of a message as indicated by a delivery report.          If this enum is extended in future specifications, this should           only be to add new, non-overlapping conditions (i.e. all failures           should still be signalled as either Temporarily_Failed           or Permanently_Failed). If additional detail is required (e.g.           distinguishing between the various types of permanent failure) this           will be done using additional           Delivery_Report_Header_Keys.       
 </p>
 <p>
 Bitfield/set of flags generated from the Telepathy specification.
@@ -2378,6 +2379,48 @@ Bitfield/set of flags generated from the Telepathy specification.
 <tr>
 <td><p><a name="TP-ANONYMITY-MODE-NETWORK-INFO:CAPS"></a><span class="term"><code class="literal">TP_ANONYMITY_MODE_NETWORK_INFO</code></span></p></td>
 <td>           Obscure any originating IP address information, contact URIs,           and anonymize all traffic involved with sending/receiving any           media streams or call content.           Examples of this include the "headers" portions of           RFC 3323 as           well as the History-Info (described in           RFC 4244)           for a SIP CM.            This SHOULD have the effect of hiding address information from           the remote contact (ie, the contact cannot know what IP address           the session is originated from). Obviously the network still needs           to be able to route information between contacts, so this provides           no guarantees of what can be seen by intermediaries.         
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="enum TpStorageRestrictionFlags">
+<a name="TpStorageRestrictionFlags"></a><h3>enum TpStorageRestrictionFlags</h3>
+<pre class="programlisting">typedef enum {
+    TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS = 1,
+    TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED = 2,
+    TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PRESENCE = 4,
+    TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_SERVICE = 8,
+} TpStorageRestrictionFlags;
+</pre>
+<p>
+         Flags indicating restrictions imposed on an Account by its storage         method.       
+</p>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-STORAGE-RESTRICTION-FLAG-CANNOT-SET-PARAMETERS:CAPS"></a><span class="term"><code class="literal">TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS</code></span></p></td>
+<td>           The account's Parameters property can't be changed by calling           UpdateParameters.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-STORAGE-RESTRICTION-FLAG-CANNOT-SET-ENABLED:CAPS"></a><span class="term"><code class="literal">TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED</code></span></p></td>
+<td>           The account can't be enabled/disabled by setting the Enabled property.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-STORAGE-RESTRICTION-FLAG-CANNOT-SET-PRESENCE:CAPS"></a><span class="term"><code class="literal">TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PRESENCE</code></span></p></td>
+<td>           The account's presence can't be changed by setting the RequestedPresence and AutomaticPresence properties.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-STORAGE-RESTRICTION-FLAG-CANNOT-SET-SERVICE:CAPS"></a><span class="term"><code class="literal">TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_SERVICE</code></span></p></td>
+<td>           The account's Service           property cannot be changed.         
 </td>
 </tr>
 </tbody>
