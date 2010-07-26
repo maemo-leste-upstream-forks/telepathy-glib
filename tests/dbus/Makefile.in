@@ -58,10 +58,11 @@ noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
 	test-invalidated-while-invoking-signals$(EXEEXT) \
 	test-long-connection-name$(EXEEXT) test-message-mixin$(EXEEXT) \
 	test-params-cm$(EXEEXT) test-properties$(EXEEXT) \
-	test-self-handle$(EXEEXT) test-self-presence$(EXEEXT) \
-	test-simple-approver$(EXEEXT) test-simple-handler$(EXEEXT) \
-	test-simple-observer$(EXEEXT) test-text-mixin$(EXEEXT) \
-	test-text-respawn$(EXEEXT) test-unsupported-interface$(EXEEXT)
+	test-protocol-objects$(EXEEXT) test-self-handle$(EXEEXT) \
+	test-self-presence$(EXEEXT) test-simple-approver$(EXEEXT) \
+	test-simple-handler$(EXEEXT) test-simple-observer$(EXEEXT) \
+	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
+	test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
 	$(top_srcdir)/tools/valgrind.mk
@@ -362,6 +363,11 @@ test_properties_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_protocol_objects_OBJECTS = protocol-objects.$(OBJEXT)
+test_protocol_objects_OBJECTS = $(am_test_protocol_objects_OBJECTS)
+test_protocol_objects_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la \
+	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 am_test_self_handle_OBJECTS = self-handle.$(OBJEXT)
 test_self_handle_OBJECTS = $(am_test_self_handle_OBJECTS)
 test_self_handle_LDADD = $(LDADD)
@@ -469,10 +475,10 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(nodist_test_properties_SOURCES) \
-	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
-	$(test_simple_approver_SOURCES) $(test_simple_handler_SOURCES) \
-	$(test_simple_observer_SOURCES) $(test_text_mixin_SOURCES) \
-	$(test_text_respawn_SOURCES) \
+	$(test_protocol_objects_SOURCES) $(test_self_handle_SOURCES) \
+	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
+	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
+	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
@@ -501,10 +507,11 @@ DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_invalidated_while_invoking_signals_SOURCES) \
 	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
-	$(test_properties_SOURCES) $(test_self_handle_SOURCES) \
-	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
-	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
-	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
+	$(test_properties_SOURCES) $(test_protocol_objects_SOURCES) \
+	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
+	$(test_simple_approver_SOURCES) $(test_simple_handler_SOURCES) \
+	$(test_simple_observer_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -757,6 +764,12 @@ nodist_test_properties_SOURCES = \
     _gen/svc.h \
     _gen/svc.c
 
+test_protocol_objects_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la \
+    $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
+
+test_protocol_objects_SOURCES = protocol-objects.c
 test_self_handle_SOURCES = self-handle.c
 test_self_presence_SOURCES = self-presence.c
 test_text_mixin_LDADD = \
@@ -985,6 +998,9 @@ test-params-cm$(EXEEXT): $(test_params_cm_OBJECTS) $(test_params_cm_DEPENDENCIES
 test-properties$(EXEEXT): $(test_properties_OBJECTS) $(test_properties_DEPENDENCIES) 
 	@rm -f test-properties$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_properties_OBJECTS) $(test_properties_LDADD) $(LIBS)
+test-protocol-objects$(EXEEXT): $(test_protocol_objects_OBJECTS) $(test_protocol_objects_DEPENDENCIES) 
+	@rm -f test-protocol-objects$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_protocol_objects_OBJECTS) $(test_protocol_objects_LDADD) $(LIBS)
 test-self-handle$(EXEEXT): $(test_self_handle_OBJECTS) $(test_self_handle_DEPENDENCIES) 
 	@rm -f test-self-handle$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_self_handle_OBJECTS) $(test_self_handle_LDADD) $(LIBS)
@@ -1054,6 +1070,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/params-cm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol-objects.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-presence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Po@am__quote@
