@@ -34,4 +34,11 @@ DEB_INSTALL_DOCS_libtelepathy-glib0-dbg := --link-doc=libtelepathy-glib0
 DEB_INSTALL_DOCS_libtelepathy-glib-dev := --link-doc=libtelepathy-glib0
 DEB_INSTALL_DOCS_gir1.0-telepathyglib-0.12 := --link-doc=libtelepathy-glib0
 
+debian/stamp-buildinfo: insist-on-symlinks
+insist-on-symlinks:
+	for p in libtelepathy-glib0-dbg libtelepathy-glib-dev gir1.0-telepathyglib-0.12; do \
+		install -d debian/$$p/usr/share/doc || exit $$?; \
+		ln -s libtelepathy-glib0 debian/$$p/usr/share/doc/$$p || exit $$?; \
+	done
+
 include $(CURDIR)/debian/update-patches.mk
