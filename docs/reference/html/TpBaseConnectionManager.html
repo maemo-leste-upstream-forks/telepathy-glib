@@ -7,7 +7,7 @@
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="telepathy-glib-run.html" title="Connection manager life cycle">
-<link rel="next" href="TpBaseConnection.html" title="TpBaseConnection">
+<link rel="next" href="telepathy-glib-base-protocol.html" title="TpBaseProtocol">
 <meta name="generator" content="GTK-Doc V1.15 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
@@ -18,7 +18,7 @@
 <td><a accesskey="u" href="ch-service-base.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
 <th width="100%" align="center">telepathy-glib Reference Manual</th>
-<td><a accesskey="n" href="TpBaseConnection.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+<td><a accesskey="n" href="telepathy-glib-base-protocol.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
 <tr><td colspan="5" class="shortcuts">
 <a href="#TpBaseConnectionManager.synopsis" class="shortcut">Top</a>
@@ -76,6 +76,9 @@
 <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="returnvalue">TpDBusDaemon</span></a> *      <a class="link" href="TpBaseConnectionManager.html#tp-base-connection-manager-get-dbus-daemon" title="tp_base_connection_manager_get_dbus_daemon ()">tp_base_connection_manager_get_dbus_daemon</a>
                                                         (<em class="parameter"><code><a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager"><span class="type">TpBaseConnectionManager</span></a> *self</code></em>);
 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="TpBaseConnectionManager.html#tp-base-connection-manager-register" title="tp_base_connection_manager_register ()">tp_base_connection_manager_register</a> (<em class="parameter"><code><a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager"><span class="type">TpBaseConnectionManager</span></a> *self</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="TpBaseConnectionManager.html#tp-base-connection-manager-add-protocol" title="tp_base_connection_manager_add_protocol ()">tp_base_connection_manager_add_protocol</a>
+                                                        (<em class="parameter"><code><a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager"><span class="type">TpBaseConnectionManager</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *protocol</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Object Hierarchy">
@@ -89,12 +92,14 @@
 <a name="TpBaseConnectionManager.implemented-interfaces"></a><h2>Implemented Interfaces</h2>
 <p>
 TpBaseConnectionManager implements
- <a class="link" href="telepathy-glib-svc-connection-manager.html#TpSvcConnectionManager">TpSvcConnectionManager</a>.</p>
+ <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties">TpSvcDBusProperties</a> and  <a class="link" href="telepathy-glib-svc-connection-manager.html#TpSvcConnectionManager">TpSvcConnectionManager</a>.</p>
 </div>
 <div class="refsect1" title="Properties">
 <a name="TpBaseConnectionManager.properties"></a><h2>Properties</h2>
 <pre class="synopsis">
   "<a class="link" href="TpBaseConnectionManager.html#TpBaseConnectionManager--dbus-daemon" title='The "dbus-daemon" property'>dbus-daemon</a>"              <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a>*         : Read / Write / Construct Only
+  "<a class="link" href="TpBaseConnectionManager.html#TpBaseConnectionManager--interfaces" title='The "interfaces" property'>interfaces</a>"               <a href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>*                : Read
+  "<a class="link" href="TpBaseConnectionManager.html#TpBaseConnectionManager--protocols" title='The "protocols" property'>protocols</a>"                <span class="type">GHashTable_gchararray+GHashTable_gchararray+GValue__*</span>  : Read
 </pre>
 </div>
 <div class="refsect1" title="Signals">
@@ -459,19 +464,26 @@ fields in the instance structure.
     const char *cm_dbus_name;
     const TpCMProtocolSpec *protocol_params;
     TpBaseConnectionManagerNewConnFunc new_connection;
+
+    const gchar * const *interfaces;
 } TpBaseConnectionManagerClass;
 </pre>
 <p>
 The class structure for <a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager"><span class="type">TpBaseConnectionManager</span></a>.
 </p>
 <p>
-In addition to the fields documented here, there are four gpointer fields
+In addition to the fields documented here, there are some gpointer fields
 which must currently be <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (a meaning may be defined for these in a
-future version of telepathy-glib), and a pointer to opaque private data.
+future version of telepathy-glib).
 </p>
 <p>
 Changed in 0.7.1: it is a fatal error for <em class="parameter"><code>cm_dbus_name</code></em> not to conform to
 the specification.
+</p>
+<p>
+Changed in 0.11.UNRELEASED: protocol_params and new_connection may both be
+<a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. If so, this connection manager is assumed to use Protocol objects
+instead.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -493,14 +505,20 @@ the specification.
 <td><p><span class="term">const <a class="link" href="TpBaseConnectionManager.html#TpCMProtocolSpec" title="TpCMProtocolSpec"><span class="type">TpCMProtocolSpec</span></a> *<em class="structfield"><code><a name="TpBaseConnectionManagerClass.protocol-params"></a>protocol_params</code></em>;</span></p></td>
 <td>An array of <a class="link" href="TpBaseConnectionManager.html#TpCMProtocolSpec" title="TpCMProtocolSpec"><span class="type">TpCMProtocolSpec</span></a> structures representing
  the protocols this connection manager supports, terminated by a structure
- whose name member is <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+ whose name member is <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>; or <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if this CM uses Protocol objects.
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><a class="link" href="TpBaseConnectionManager.html#TpBaseConnectionManagerNewConnFunc" title="TpBaseConnectionManagerNewConnFunc ()"><span class="type">TpBaseConnectionManagerNewConnFunc</span></a> <em class="structfield"><code><a name="TpBaseConnectionManagerClass.new-connection"></a>new_connection</code></em>;</span></p></td>
 <td>A <a class="link" href="TpBaseConnectionManager.html#TpBaseConnectionManagerNewConnFunc" title="TpBaseConnectionManagerNewConnFunc ()"><span class="type">TpBaseConnectionManagerNewConnFunc</span></a> used to construct
- new connections. Must be filled in by subclasses in their class_init
- function.
+ new connections, or <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if this CM uses Protocol objects.
+</td>
+</tr>
+<tr>
+<td><p><span class="term">const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> * const  *<em class="structfield"><code><a name="TpBaseConnectionManagerClass.interfaces"></a>interfaces</code></em>;</span></p></td>
+<td>A <a href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> of extra D-Bus interfaces implemented
+ by instances of this class, which may be filled in by subclasses. The
+ default is to list no additional interfaces. Since: 0.11.UNRELEASED
 </td>
 </tr>
 </tbody>
@@ -617,6 +635,33 @@ bus name.
 </tbody>
 </table></div>
 </div>
+<hr>
+<div class="refsect2" title="tp_base_connection_manager_add_protocol ()">
+<a name="tp-base-connection-manager-add-protocol"></a><h3>tp_base_connection_manager_add_protocol ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_base_connection_manager_add_protocol
+                                                        (<em class="parameter"><code><a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager"><span class="type">TpBaseConnectionManager</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *protocol</code></em>);</pre>
+<p>
+Add a protocol object to the set of supported protocols.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection manager object which has not yet registered on D-Bus
+ (i.e. <a class="link" href="TpBaseConnectionManager.html#tp-base-connection-manager-register" title="tp_base_connection_manager_register ()"><code class="function">tp_base_connection_manager_register()</code></a> must not have been called)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>protocol</code></em> :</span></p></td>
+<td>a protocol object, which must not have the same protocol name as
+ any that has already been added
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <div class="refsect1" title="Property Details">
 <a name="TpBaseConnectionManager.property-details"></a><h2>Property Details</h2>
@@ -635,6 +680,25 @@ warning will be logged with <a href="/usr/share/gtk-doc/html/glib/glib-Message-L
 <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <p class="since">Since 0.11.3</p>
+</div>
+<hr>
+<div class="refsect2" title='The "interfaces" property'>
+<a name="TpBaseConnectionManager--interfaces"></a><h3>The <code class="literal">"interfaces"</code> property</h3>
+<pre class="programlisting">  "interfaces"               <a href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>*                : Read</pre>
+<p>
+The set of D-Bus interfaces available on this ConnectionManager, other
+than ConnectionManager itself.
+</p>
+<p class="since">Since 0.11.UNRELEASED</p>
+</div>
+<hr>
+<div class="refsect2" title='The "protocols" property'>
+<a name="TpBaseConnectionManager--protocols"></a><h3>The <code class="literal">"protocols"</code> property</h3>
+<pre class="programlisting">  "protocols"                <span class="type">GHashTable_gchararray+GHashTable_gchararray+GValue__*</span>  : Read</pre>
+<p>
+The Protocol objects available on this ConnectionManager.
+</p>
+<p class="since">Since 0.11.UNRELEASED</p>
 </div>
 </div>
 <div class="refsect1" title="Signal Details">

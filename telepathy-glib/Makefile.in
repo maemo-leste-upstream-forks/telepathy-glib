@@ -105,22 +105,22 @@ libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	account-manager.lo add-dispatch-operation-context.lo \
 	base-client.lo base-connection.lo base-connection-manager.lo \
-	capabilities.lo channel.lo channel-group.lo \
+	base-protocol.lo capabilities.lo channel.lo channel-group.lo \
 	channel-dispatcher.lo channel-dispatch-operation.lo \
 	channel-manager.lo channel-request.lo client.lo connection.lo \
-	connection-contact-info.lo connection-handles.lo \
-	connection-manager.lo contact.lo contacts-mixin.lo dbus.lo \
-	dbus-daemon.lo dbus-properties-mixin.lo debug.lo \
-	debug-sender.lo interfaces.lo errors.lo exportable-channel.lo \
-	gnio-util.lo group-mixin.lo gtypes.lo handle.lo \
-	handle-channels-context.lo handle-repo.lo \
-	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
-	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
-	media-interfaces.lo message-mixin.lo \
+	connection-avatars.lo connection-contact-info.lo \
+	connection-handles.lo connection-manager.lo contact.lo \
+	contacts-mixin.lo dbus.lo dbus-daemon.lo \
+	dbus-properties-mixin.lo debug.lo debug-sender.lo \
+	interfaces.lo errors.lo exportable-channel.lo gnio-util.lo \
+	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
+	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
+	handle-set.lo heap.lo intset.lo channel-iface.lo \
+	channel-factory-iface.lo media-interfaces.lo message-mixin.lo \
 	observe-channels-context.lo presence-mixin.lo \
-	properties-mixin.lo proxy.lo proxy-methods.lo proxy-signals.lo \
-	run.lo simple-approver.lo simple-handler.lo simple-observer.lo \
-	text-mixin.lo util.lo
+	properties-mixin.lo protocol.lo proxy.lo proxy-methods.lo \
+	proxy-signals.lo run.lo simple-approver.lo simple-handler.lo \
+	simple-observer.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	signals-marshal.lo genums.lo tp-svc-account.lo \
 	tp-svc-account-manager.lo tp-svc-channel.lo \
@@ -128,7 +128,8 @@ nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	tp-svc-channel-dispatch-operation.lo tp-svc-channel-request.lo \
 	tp-svc-client.lo tp-svc-connection.lo \
 	tp-svc-connection-manager.lo tp-svc-debug.lo tp-svc-generic.lo \
-	tp-svc-media-session-handler.lo tp-svc-media-stream-handler.lo
+	tp-svc-media-session-handler.lo tp-svc-media-stream-handler.lo \
+	tp-svc-protocol.lo
 libtelepathy_glib_internal_la_OBJECTS =  \
 	$(am_libtelepathy_glib_internal_la_OBJECTS) \
 	$(nodist_libtelepathy_glib_internal_la_OBJECTS)
@@ -367,6 +368,7 @@ our_headers = \
     base-client.h \
     base-connection.h \
     base-connection-manager.h \
+    base-protocol.h \
     channel.h \
     channel-iface.h \
     channel-dispatcher.h \
@@ -406,6 +408,7 @@ our_headers = \
     observe-channels-context.h \
     presence-mixin.h \
     properties-mixin.h \
+    protocol.h \
     proxy.h \
     proxy-subclass.h \
     run.h \
@@ -425,6 +428,7 @@ our_headers = \
     svc-generic.h \
     svc-media-interfaces.h \
     svc-properties-interface.h \
+    svc-protocol.h \
     telepathy-glib.h \
     text-mixin.h \
     util.h
@@ -450,6 +454,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     base-client.c \
     base-connection.c \
     base-connection-manager.c \
+    base-protocol-internal.h \
+    base-protocol.c \
     capabilities.c \
     capabilities-internal.h \
     channel.c \
@@ -462,6 +468,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-request.c \
     client.c \
     connection.c \
+    connection-avatars.c \
     connection-contact-info.c \
     connection-internal.h \
     connection-handles.c \
@@ -499,6 +506,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     observe-channels-context.c \
     presence-mixin.c \
     properties-mixin.c \
+    protocol.c \
+    protocol-internal.h \
     proxy.c \
     proxy-internal.h \
     proxy-methods.c \
@@ -568,7 +577,8 @@ ABI_LISTS = \
     versions/0.11.5.abi \
     versions/0.11.6.abi \
     versions/0.11.7.abi \
-    versions/0.11.9.abi
+    versions/0.11.9.abi \
+    versions/0.11.11.abi
 
 
 # The quoting here is unnecessary but harmless, and has the useful side-effect
@@ -609,6 +619,7 @@ codegen_extra_dist = \
     genums.h.template \
     media-session-handler.xml \
     media-stream-handler.xml \
+    protocol.xml \
     stable-interfaces.xml
 
 codegen_sources = \
@@ -637,6 +648,7 @@ nodist_geninclude_HEADERS = \
     _gen/tp-cli-generic.h \
     _gen/tp-cli-media-session-handler.h \
     _gen/tp-cli-media-stream-handler.h \
+    _gen/tp-cli-protocol.h \
     _gen/tp-svc-account.h \
     _gen/tp-svc-account-manager.h \
     _gen/tp-svc-channel.h \
@@ -649,7 +661,8 @@ nodist_geninclude_HEADERS = \
     _gen/tp-svc-debug.h \
     _gen/tp-svc-generic.h \
     _gen/tp-svc-media-session-handler.h \
-    _gen/tp-svc-media-stream-handler.h
+    _gen/tp-svc-media-stream-handler.h \
+    _gen/tp-svc-protocol.h
 
 nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/error-str.c \
@@ -674,6 +687,7 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/tp-cli-generic-body.h \
     _gen/tp-cli-media-session-handler-body.h \
     _gen/tp-cli-media-stream-handler-body.h \
+    _gen/tp-cli-protocol-body.h \
     _gen/tp-svc-account.c \
     _gen/tp-svc-account-manager.c \
     _gen/tp-svc-channel.c \
@@ -686,7 +700,8 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/tp-svc-debug.c \
     _gen/tp-svc-generic.c \
     _gen/tp-svc-media-session-handler.c \
-    _gen/tp-svc-media-stream-handler.c
+    _gen/tp-svc-media-stream-handler.c \
+    _gen/tp-svc-protocol.c
 
 
 # Generated stuff
@@ -699,6 +714,7 @@ introspection_extra_dist = kludge-616375.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-manager.c $(srcdir)/account-manager.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection.c $(srcdir)/connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-handles.c \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-manager.c $(srcdir)/connection-manager.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel.c $(srcdir)/channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle.c $(srcdir)/handle.h \
@@ -720,6 +736,9 @@ introspection_extra_dist = kludge-616375.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-request.c $(srcdir)/channel-request.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/observe-channels-context.c $(srcdir)/observe-channels-context.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/add-dispatch-operation-context.c $(srcdir)/add-dispatch-operation-context.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-connection.c $(srcdir)/base-connection.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-repo.c $(srcdir)/handle-repo.h $(srcdir)/handle-set.c \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h
 
@@ -823,6 +842,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-protocol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatch-operation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Plo@am__quote@
@@ -833,6 +853,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-request.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-avatars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
@@ -865,6 +886,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observe-channels-context.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/presence-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties-mixin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy-methods.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy.Plo@am__quote@
@@ -887,6 +909,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-generic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-session-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-stream-handler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-protocol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 
 .c.o:
@@ -1040,6 +1063,14 @@ tp-svc-media-stream-handler.lo: _gen/tp-svc-media-stream-handler.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-media-stream-handler.c' object='tp-svc-media-stream-handler.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-media-stream-handler.lo `test -f '_gen/tp-svc-media-stream-handler.c' || echo '$(srcdir)/'`_gen/tp-svc-media-stream-handler.c
+
+tp-svc-protocol.lo: _gen/tp-svc-protocol.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-protocol.lo -MD -MP -MF $(DEPDIR)/tp-svc-protocol.Tpo -c -o tp-svc-protocol.lo `test -f '_gen/tp-svc-protocol.c' || echo '$(srcdir)/'`_gen/tp-svc-protocol.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tp-svc-protocol.Tpo $(DEPDIR)/tp-svc-protocol.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-protocol.c' object='tp-svc-protocol.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-protocol.lo `test -f '_gen/tp-svc-protocol.c' || echo '$(srcdir)/'`_gen/tp-svc-protocol.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

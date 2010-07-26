@@ -7,7 +7,7 @@
 <link rel="home" href="index.html" title="telepathy-glib Reference Manual">
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="ch-client.html" title="Client-side proxies">
-<link rel="next" href="telepathy-glib-connection.html" title="TpConnection">
+<link rel="next" href="telepathy-glib-protocol.html" title="TpProtocol">
 <meta name="generator" content="GTK-Doc V1.15 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
@@ -18,7 +18,7 @@
 <td><a accesskey="u" href="ch-client.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
 <th width="100%" align="center">telepathy-glib Reference Manual</th>
-<td><a accesskey="n" href="telepathy-glib-connection.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+<td><a accesskey="n" href="telepathy-glib-protocol.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
 <tr><td colspan="5" class="shortcuts">
 <a href="#telepathy-glib-connection-manager.synopsis" class="shortcut">Top</a>
@@ -86,6 +86,9 @@ enum                <a class="link" href="telepathy-glib-connection-manager.html
 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-has-protocol" title="tp_connection_manager_has_protocol ()">tp_connection_manager_has_protocol</a>  (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *protocol</code></em>);
 const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol"><span class="returnvalue">TpConnectionManagerProtocol</span></a> * <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-protocol" title="tp_connection_manager_get_protocol ()">tp_connection_manager_get_protocol</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *protocol</code></em>);
+<a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="returnvalue">TpProtocol</span></a> *        <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-protocol-object" title="tp_connection_manager_get_protocol_object ()">tp_connection_manager_get_protocol_object</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *protocol</code></em>);
                     <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol" title="TpConnectionManagerProtocol">TpConnectionManagerProtocol</a>;
@@ -553,6 +556,11 @@ will have been retrieved, either by activating the connection manager over
 D-Bus or by reading the .manager file in which that information is cached.
 </p>
 <p>
+Since 0.11.UNRELEASED, this feature also finds any extra interfaces that
+this connection manager has, and adds them to <a class="link" href="telepathy-glib-proxy.html#TpProxy--interfaces" title='The "interfaces" property'><span class="type">"interfaces"</span></a> (where
+they can be queried with <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface" title="tp_proxy_has_interface ()"><code class="function">tp_proxy_has_interface()</code></a>).
+</p>
+<p>
 (These are the same guarantees offered by the older
 <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-call-when-ready" title="tp_connection_manager_call_when_ready ()"><code class="function">tp_connection_manager_call_when_ready()</code></a> mechanism.)
 </p>
@@ -918,6 +926,10 @@ Returns a structure representing a protocol, or <a href="/usr/share/gtk-doc/html
 manager does not support the specified protocol.
 </p>
 <p>
+Since 0.11.UNRELEASED, you can get a <a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> version with more
+functionality by calling <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-protocol-object" title="tp_connection_manager_get_protocol_object ()"><code class="function">tp_connection_manager_get_protocol_object()</code></a>.
+</p>
+<p>
 If this function is called before the connection manager information has
 been obtained, the result is always <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use
 <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-call-when-ready" title="tp_connection_manager_call_when_ready ()"><code class="function">tp_connection_manager_call_when_ready()</code></a> to wait for this.
@@ -949,6 +961,47 @@ if a permanently-valid copy is needed.
 </tbody>
 </table></div>
 <p class="since">Since 0.7.26</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_connection_manager_get_protocol_object ()">
+<a name="tp-connection-manager-get-protocol-object"></a><h3>tp_connection_manager_get_protocol_object ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="returnvalue">TpProtocol</span></a> *        tp_connection_manager_get_protocol_object
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *protocol</code></em>);</pre>
+<p>
+Returns an object representing a protocol, or <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if this connection
+manager does not support the specified protocol.
+</p>
+<p>
+If this function is called before the connection manager information has
+been obtained, the result is always <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
+to wait for this.
+</p>
+<p>
+The result should be referenced with <a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#g-object-ref"><code class="function">g_object_ref()</code></a> if it will be kept.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection manager
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>protocol</code></em> :</span></p></td>
+<td>the name of a protocol as defined in the Telepathy D-Bus API,
+           e.g. "jabber" or "msn"
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an object representing the protocol, or <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.UNRELEASED</p>
 </div>
 <hr>
 <div class="refsect2" title="TpConnectionManagerProtocol">

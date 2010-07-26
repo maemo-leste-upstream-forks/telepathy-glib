@@ -161,6 +161,11 @@
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-SERVICE-POINT-INFO-LIST:CAPS" title="TP_ARRAY_TYPE_SERVICE_POINT_INFO_LIST">TP_ARRAY_TYPE_SERVICE_POINT_INFO_LIST</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-SERVICE-POINT-INFO:CAPS" title="TP_STRUCT_TYPE_SERVICE_POINT_INFO">TP_STRUCT_TYPE_SERVICE_POINT_INFO</a>
 
+enum                <a class="link" href="telepathy-glib-gtypes.html#TpChannelContactSearchState" title="enum TpChannelContactSearchState">TpChannelContactSearchState</a>;
+#define             <a class="link" href="telepathy-glib-gtypes.html#NUM-TP-CHANNEL-CONTACT-SEARCH-STATES:CAPS" title="NUM_TP_CHANNEL_CONTACT_SEARCH_STATES">NUM_TP_CHANNEL_CONTACT_SEARCH_STATES</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-CONTACT-SEARCH-MAP:CAPS" title="TP_HASH_TYPE_CONTACT_SEARCH_MAP">TP_HASH_TYPE_CONTACT_SEARCH_MAP</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-CONTACT-SEARCH-RESULT-MAP:CAPS" title="TP_HASH_TYPE_CONTACT_SEARCH_RESULT_MAP">TP_HASH_TYPE_CONTACT_SEARCH_RESULT_MAP</a>
+
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-AVATAR:CAPS" title="TP_STRUCT_TYPE_AVATAR">TP_STRUCT_TYPE_AVATAR</a>
 
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-DISPATCH-OPERATION-DETAILS:CAPS" title="TP_STRUCT_TYPE_DISPATCH_OPERATION_DETAILS">TP_STRUCT_TYPE_DISPATCH_OPERATION_DETAILS</a>
@@ -535,7 +540,7 @@ of <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-PARAM-SPEC:CA
 <pre class="programlisting">#define TP_HASH_TYPE_PROTOCOL_PROPERTIES_MAP (tp_type_dbus_hash_sa_7bsv_7d ())
 </pre>
 <p>
-&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;A map from protocol identifiers supported by a connection           manager to the immutable properties of the corresponding           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Protocol.DRAFT&lt;/tp:dbus-ref&gt; objects.&lt;/p&gt;
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;A map from protocol identifiers supported by a connection           manager to the immutable properties of the corresponding           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Protocol&lt;/tp:dbus-ref&gt; objects.&lt;/p&gt;
 </p>
 <p>
 This macro expands to a call to a function
@@ -2780,6 +2785,114 @@ The service point.
 Member 1 (D-Bus type <code class="literal">as</code>,
 named <code class="literal">Service_IDs</code>):
 A list of IDs that are mapped to this service. This is provided as           a convenience for the UIs, but the preferred method for           requesting channel to a service is by setting the &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Channel.Interface.ServicePoint"&gt;InitialServicePoint&lt;/tp:dbus-ref&gt;             property in a channel request.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="enum TpChannelContactSearchState">
+<a name="TpChannelContactSearchState"></a><h3>enum TpChannelContactSearchState</h3>
+<pre class="programlisting">typedef enum {
+    TP_CHANNEL_CONTACT_SEARCH_STATE_NOT_STARTED = 0,
+    TP_CHANNEL_CONTACT_SEARCH_STATE_IN_PROGRESS = 1,
+    TP_CHANNEL_CONTACT_SEARCH_STATE_MORE_AVAILABLE = 2,
+    TP_CHANNEL_CONTACT_SEARCH_STATE_COMPLETED = 3,
+    TP_CHANNEL_CONTACT_SEARCH_STATE_FAILED = 4,
+} TpChannelContactSearchState;
+</pre>
+<p>
+Bitfield/set of flags generated from the Telepathy specification.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TP-CHANNEL-CONTACT-SEARCH-STATE-NOT-STARTED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CONTACT_SEARCH_STATE_NOT_STARTED</code></span></p></td>
+<td>The search has not started
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-CONTACT-SEARCH-STATE-IN-PROGRESS:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CONTACT_SEARCH_STATE_IN_PROGRESS</code></span></p></td>
+<td>The search is in progress
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-CONTACT-SEARCH-STATE-MORE-AVAILABLE:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CONTACT_SEARCH_STATE_MORE_AVAILABLE</code></span></p></td>
+<td>The search has paused, but more results can be retrieved           by calling More.
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-CONTACT-SEARCH-STATE-COMPLETED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CONTACT_SEARCH_STATE_COMPLETED</code></span></p></td>
+<td>The search has been completed
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-CONTACT-SEARCH-STATE-FAILED:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CONTACT_SEARCH_STATE_FAILED</code></span></p></td>
+<td>The search has failed
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="NUM_TP_CHANNEL_CONTACT_SEARCH_STATES">
+<a name="NUM-TP-CHANNEL-CONTACT-SEARCH-STATES:CAPS"></a><h3>NUM_TP_CHANNEL_CONTACT_SEARCH_STATES</h3>
+<pre class="programlisting">#define NUM_TP_CHANNEL_CONTACT_SEARCH_STATES (4+1)
+</pre>
+<p>
+1 higher than the highest valid value of <a class="link" href="telepathy-glib-gtypes.html#TpChannelContactSearchState" title="enum TpChannelContactSearchState"><span class="type">TpChannelContactSearchState</span></a>.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_HASH_TYPE_CONTACT_SEARCH_MAP">
+<a name="TP-HASH-TYPE-CONTACT-SEARCH-MAP:CAPS"></a><h3>TP_HASH_TYPE_CONTACT_SEARCH_MAP</h3>
+<pre class="programlisting">#define TP_HASH_TYPE_CONTACT_SEARCH_MAP (tp_type_dbus_hash_ss ())
+</pre>
+<p>
+A map from search keys to search terms.
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="/usr/share/gtk-doc/html/gobject/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
+appropriate for representing a D-Bus
+dictionary of signature
+<code class="literal">a{ss}</code>.
+</p>
+<p>
+Keys (D-Bus type <code class="literal">s</code>,
+type <code class="literal">Contact_Search_Key</code>,
+named <code class="literal">Key</code>):
+The search key to match against
+</p>
+<p>
+Values (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Term</code>):
+The term or terms to be searched for in the search key; depending on           the protocol and the server implementation, this may be matched by           exact or approximate equality, substring matching, word matching           or any other matching algorithm
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_HASH_TYPE_CONTACT_SEARCH_RESULT_MAP">
+<a name="TP-HASH-TYPE-CONTACT-SEARCH-RESULT-MAP:CAPS"></a><h3>TP_HASH_TYPE_CONTACT_SEARCH_RESULT_MAP</h3>
+<pre class="programlisting">#define TP_HASH_TYPE_CONTACT_SEARCH_RESULT_MAP (tp_type_dbus_hash_sa_28sasas_29 ())
+</pre>
+<p>
+A map from contact identifier to search result, emitted in         the &lt;tp:member-ref&gt;SearchResultReceived&lt;/tp:member-ref&gt;         signal.
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="/usr/share/gtk-doc/html/gobject/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
+appropriate for representing a D-Bus
+dictionary of signature
+<code class="literal">a{sa(sasas)}</code>.
+</p>
+<p>
+Keys (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Contact_Identifier</code>):
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           The identifier of a contact matching the search terms.            &lt;tp:rationale&gt;             This is an identifier rather than a handle in case we make handles             immortal; see &lt;a href="https://bugs.freedesktop.org/show_bug.cgi?id=23155"&gt;fd.o<span class="type">23155</span>&lt;/a&gt;             and &lt;a href="https://bugs.freedesktop.org/show_bug.cgi?id=13347<span class="type">c5</span>"&gt;fd.o<span class="type">13347</span>             comment 5&lt;/a&gt;.           &lt;/tp:rationale&gt;
+</p>
+<p>
+Values (D-Bus type <code class="literal">a(sasas)</code>,
+type <code class="literal">Contact_Info_Field[]</code>,
+named <code class="literal">Info</code>):
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;An array of fields representing information about this             contact, in the same format used in the &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection.Interface"&gt;ContactInfo&lt;/tp:dbus-ref&gt;             interface. It is possible that a separate call to &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection.Interface.ContactInfo"&gt;RequestContactInfo&lt;/tp:dbus-ref&gt;             would return more information than this signal provides.&lt;/p&gt;
 </p>
 </div>
 <hr>

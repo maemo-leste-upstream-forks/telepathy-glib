@@ -90,6 +90,12 @@ enum                <a class="link" href="telepathy-glib-dbus-properties-mixin.h
                                                          <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *property_name</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> *value</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-fill-properties-hash" title="tp_dbus_properties_mixin_fill_properties_hash ()">tp_dbus_properties_mixin_fill_properties_hash</a>
+                                                        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *object</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *table</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *first_interface</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *first_property</code></em>,
+                                                         <em class="parameter"><code>...</code></em>);
 <a href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-make-properties-hash" title="tp_dbus_properties_mixin_make_properties_hash ()">tp_dbus_properties_mixin_make_properties_hash</a>
                                                         (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *object</code></em>,
                                                          <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *first_interface</code></em>,
@@ -810,6 +816,62 @@ is filled in instead.
 </tbody>
 </table></div>
 <p class="since">Since 0.7.13</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_dbus_properties_mixin_fill_properties_hash ()">
+<a name="tp-dbus-properties-mixin-fill-properties-hash"></a><h3>tp_dbus_properties_mixin_fill_properties_hash ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_dbus_properties_mixin_fill_properties_hash
+                                                        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *object</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *table</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *first_interface</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *first_property</code></em>,
+                                                         <em class="parameter"><code>...</code></em>);</pre>
+<p>
+Retrieves the values of several D-Bus properties from an object, and adds
+them to a hash mapping the fully-qualified name of the property to its
+value. This is equivalent to calling <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-get" title="tp_dbus_properties_mixin_get ()"><code class="function">tp_dbus_properties_mixin_get()</code></a> for
+each property and adding it to the table yourself, with the proviso that
+this function will <a href="/usr/share/gtk-doc/html/glib/glib-Testing.html#g-assert"><code class="function">g_assert()</code></a> if retrieving a property fails (for instance,
+because it does not exist).
+</p>
+<p>
+Note that in particular, <em class="parameter"><code>table</code></em> does not have the same memory-allocation
+model as the hash tables required by <a class="link" href="telepathy-glib-asv.html#tp-asv-set-string" title="tp_asv_set_string ()"><code class="function">tp_asv_set_string()</code></a> and similar
+functions.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td>an object which uses the D-Bus properties mixin
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>table</code></em> :</span></p></td>
+<td> a hash table where the keys are
+ strings copied with <a href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strdup"><code class="function">g_strdup()</code></a> and the values are slice-allocated
+ <a href="/usr/share/gtk-doc/html/gobject/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>s. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 GObject.Value]</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>first_interface</code></em> :</span></p></td>
+<td>the interface of the first property to be retrieved
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>first_property</code></em> :</span></p></td>
+<td>the name of the first property to be retrieved
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>...</code></em> :</span></p></td>
+<td>more (interface name, property name) pairs, terminated by <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.UNRELEASED</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_dbus_properties_mixin_make_properties_hash ()">
