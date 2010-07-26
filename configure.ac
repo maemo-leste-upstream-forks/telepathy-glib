@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [11])
-m4_define([tp_glib_micro_version], [10])
+m4_define([tp_glib_micro_version], [11])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [39])
-m4_define([tp_glib_lt_revision], [2])
-m4_define([tp_glib_lt_age], [39])
+m4_define([tp_glib_lt_current], [40])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [40])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -204,7 +204,15 @@ if test x$enable_vala_bindings = xyes; then
   AC_SUBST(VALAC)
   AC_SUBST(VALAFLAGS)
 
+  AC_MSG_CHECKING([for vapigen])
   VAPIGEN=`$PKG_CONFIG --variable=vapigen vala-1.0`
+
+  if test "x$VAPIGEN" = "x"; then
+    AC_MSG_ERROR([not found. Was vala compiled with --enable-vapigen?])
+  else
+    AC_MSG_RESULT([$VAPIGEN])
+  fi
+
   AC_SUBST(VAPIGEN)
 fi
 

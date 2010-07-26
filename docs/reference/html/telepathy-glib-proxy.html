@@ -50,8 +50,8 @@
                     <a class="link" href="telepathy-glib-proxy.html#TpProxyFeature" title="TpProxyFeature">TpProxyFeature</a>;
 const <a class="link" href="telepathy-glib-proxy.html#TpProxyFeature" title="TpProxyFeature"><span class="returnvalue">TpProxyFeature</span></a> * (<a class="link" href="telepathy-glib-proxy.html#TpProxyClassFeatureListFunc" title="TpProxyClassFeatureListFunc ()">*TpProxyClassFeatureListFunc</a>)   (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxyClass" title="TpProxyClass"><span class="type">TpProxyClass</span></a> *cls</code></em>);
                     <a class="link" href="telepathy-glib-proxy.html#TpProxyClass" title="TpProxyClass">TpProxyClass</a>;
-#define             <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface" title="tp_proxy_has_interface()">tp_proxy_has_interface</a>              (self,
-                                                         iface)
+<a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface" title="tp_proxy_has_interface ()">tp_proxy_has_interface</a>              (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *iface</code></em>);
 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface-by-id" title="tp_proxy_has_interface_by_id ()">tp_proxy_has_interface_by_id</a>        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>);
 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-proxy.html#tp-proxy-is-prepared" title="tp_proxy_is_prepared ()">tp_proxy_is_prepared</a>                (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
@@ -99,6 +99,7 @@ enum                <a class="link" href="telepathy-glib-proxy.html#TpDBusError"
          +----<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>
          +----<a class="link" href="telepathy-glib-media-interfaces.html#TpMediaSessionHandler">TpMediaSessionHandler</a>
          +----<a class="link" href="telepathy-glib-media-interfaces.html#TpMediaStreamHandler">TpMediaStreamHandler</a>
+         +----<a class="link" href="telepathy-glib-protocol.html#TpProtocol">TpProtocol</a>
 </pre>
 </div>
 <div class="refsect1" title="Properties">
@@ -211,12 +212,22 @@ The class of a <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span cl
 <p class="since">Since 0.7.1</p>
 </div>
 <hr>
-<div class="refsect2" title="tp_proxy_has_interface()">
-<a name="tp-proxy-has-interface"></a><h3>tp_proxy_has_interface()</h3>
-<pre class="programlisting">#define             tp_proxy_has_interface(self, iface)</pre>
+<div class="refsect2" title="tp_proxy_has_interface ()">
+<a name="tp-proxy-has-interface"></a><h3>tp_proxy_has_interface ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_proxy_has_interface              (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
+                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *iface</code></em>);</pre>
 <p>
-A macro wrapping <a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface-by-id" title="tp_proxy_has_interface_by_id ()"><code class="function">tp_proxy_has_interface_by_id()</code></a>. Returns <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if this
-proxy implements the given interface.
+Return whether this proxy is known to have a particular interface. In
+versions older than 0.11.UNRELEASED, this was a macro wrapper around
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface-by-id" title="tp_proxy_has_interface_by_id ()"><code class="function">tp_proxy_has_interface_by_id()</code></a>.
+</p>
+<p>
+For objects that discover their interfaces at runtime, this method will
+indicate that interfaces are missing until they are known to be present.
+In subclasses that define features for use with <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>,
+successfully preparing the "core" feature for that subclass (such as
+<a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a> or <a class="link" href="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CORE:CAPS" title="TP_CONNECTION_FEATURE_CORE"><code class="literal">TP_CONNECTION_FEATURE_CORE</code></a>) implies that the
+interfaces are known.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -228,7 +239,12 @@ proxy implements the given interface.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>iface</code></em> :</span></p></td>
-<td>the interface required, as a string
+<td>the D-Bus interface required, as a string
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if this proxy implements the given interface.
 </td>
 </tr>
 </tbody>
@@ -241,7 +257,9 @@ proxy implements the given interface.
 <pre class="programlisting"><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_proxy_has_interface_by_id        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> self</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>);</pre>
 <p>
-
+Return whether this proxy is known to have a particular interface, by its
+quark ID. This is equivalent to using <a href="/usr/share/gtk-doc/html/glib/glib-Quarks.html#g-quark-to-string"><code class="function">g_quark_to_string()</code></a> followed by
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-has-interface" title="tp_proxy_has_interface ()"><code class="function">tp_proxy_has_interface()</code></a>, but more efficient.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -253,7 +271,7 @@ proxy implements the given interface.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>iface</code></em> :</span></p></td>
-<td>quark representing the interface required
+<td>quark representing the D-Bus interface required
 </td>
 </tr>
 <tr>
