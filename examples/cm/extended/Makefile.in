@@ -38,7 +38,8 @@ host_triplet = @host@
 @INSTALL_EXAMPLES_TRUE@libexec_PROGRAMS = $(am__EXEEXT_1)
 @INSTALL_EXAMPLES_FALSE@noinst_PROGRAMS = $(am__EXEEXT_1)
 subdir = examples/cm/extended
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(am__dist_manager_DATA_DIST) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/introspection.m4 \
@@ -59,7 +60,7 @@ am__installdirs = "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(managerdir)" \
 	"$(DESTDIR)$(servicedir)"
 PROGRAMS = $(libexec_PROGRAMS) $(noinst_PROGRAMS)
 am_telepathy_example_cm_extended_OBJECTS = conn.$(OBJEXT) \
-	connection-manager.$(OBJEXT) main.$(OBJEXT)
+	connection-manager.$(OBJEXT) protocol.$(OBJEXT) main.$(OBJEXT)
 telepathy_example_cm_extended_OBJECTS =  \
 	$(am_telepathy_example_cm_extended_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -98,6 +99,7 @@ am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(telepathy_example_cm_extended_SOURCES)
 DIST_SOURCES = $(telepathy_example_cm_extended_SOURCES)
+am__dist_manager_DATA_DIST = example_extended.manager
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -119,7 +121,7 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-DATA = $(manager_DATA) $(service_DATA)
+DATA = $(dist_manager_DATA) $(service_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -292,6 +294,8 @@ telepathy_example_cm_extended_SOURCES = \
     conn.h \
     connection-manager.c \
     connection-manager.h \
+    protocol.c \
+    protocol.h \
     main.c
 
 
@@ -309,15 +313,11 @@ AM_CFLAGS = \
     $(GLIB_CFLAGS) \
     $(TP_GLIB_CFLAGS)
 
-EXTRA_DIST = manager-file.py
 @INSTALL_EXAMPLES_TRUE@servicedir = ${datadir}/dbus-1/services
 @INSTALL_EXAMPLES_TRUE@service_DATA = _gen/org.freedesktop.Telepathy.ConnectionManager.example_extended.service
 @INSTALL_EXAMPLES_TRUE@managerdir = ${datadir}/telepathy/managers
-@INSTALL_EXAMPLES_TRUE@manager_DATA = _gen/example_extended.manager
-BUILT_SOURCES = _gen/param-spec-struct.h
-CLEANFILES = $(BUILT_SOURCES)
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+@INSTALL_EXAMPLES_TRUE@dist_manager_DATA = example_extended.manager
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -416,6 +416,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -446,10 +447,10 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-managerDATA: $(manager_DATA)
+install-dist_managerDATA: $(dist_manager_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(managerdir)" || $(MKDIR_P) "$(DESTDIR)$(managerdir)"
-	@list='$(manager_DATA)'; test -n "$(managerdir)" || list=; \
+	@list='$(dist_manager_DATA)'; test -n "$(managerdir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
@@ -459,9 +460,9 @@ install-managerDATA: $(manager_DATA)
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(managerdir)" || exit $$?; \
 	done
 
-uninstall-managerDATA:
+uninstall-dist_managerDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(manager_DATA)'; test -n "$(managerdir)" || list=; \
+	@list='$(dist_manager_DATA)'; test -n "$(managerdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(managerdir)' && rm -f" $$files ")"; \
@@ -570,15 +571,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(managerdir)" "$(DESTDIR)$(servicedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -595,7 +594,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -604,7 +602,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libexecPROGRAMS clean-libtool \
@@ -628,7 +625,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-managerDATA install-serviceDATA
+install-data-am: install-dist_managerDATA install-serviceDATA
 
 install-dvi: install-dvi-am
 
@@ -674,37 +671,32 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libexecPROGRAMS uninstall-managerDATA \
+uninstall-am: uninstall-dist_managerDATA uninstall-libexecPROGRAMS \
 	uninstall-serviceDATA
 
-.MAKE: all check install install-am install-strip
+.MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libexecPROGRAMS clean-libtool clean-local \
 	clean-noinstPROGRAMS ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-libexecPROGRAMS \
-	install-man install-managerDATA install-pdf install-pdf-am \
+	install-data install-data-am install-dist_managerDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-libexecPROGRAMS install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-serviceDATA install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libexecPROGRAMS \
-	uninstall-managerDATA uninstall-serviceDATA
+	tags uninstall uninstall-am uninstall-dist_managerDATA \
+	uninstall-libexecPROGRAMS uninstall-serviceDATA
 
 @INSTALL_EXAMPLES_TRUE@$(service_DATA): %: Makefile
 @INSTALL_EXAMPLES_TRUE@	$(mkdir_p) _gen
 @INSTALL_EXAMPLES_TRUE@	{ echo "[D-BUS Service]" && \
 @INSTALL_EXAMPLES_TRUE@	echo "Name=org.freedesktop.Telepathy.ConnectionManager.example_extended" && \
 @INSTALL_EXAMPLES_TRUE@	echo "Exec=${libexecdir}/telepathy-example-cm-extended"; } > $@
-
-_gen/example_extended.manager _gen/param-spec-struct.h: \
-		manager-file.py $(top_srcdir)/tools/manager-file.py
-	$(mkdir_p) _gen
-	$(PYTHON) $(top_srcdir)/tools/manager-file.py $(srcdir)/manager-file.py _gen
 
 clean-local:
 	rm -rf _gen

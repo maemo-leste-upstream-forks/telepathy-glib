@@ -300,6 +300,9 @@ Bitfield/set of flags generated from the Telepathy specification.
     TP_CONNECTION_STATUS_REASON_CERT_FINGERPRINT_MISMATCH = 11,
     TP_CONNECTION_STATUS_REASON_CERT_SELF_SIGNED = 12,
     TP_CONNECTION_STATUS_REASON_CERT_OTHER_ERROR = 13,
+    TP_CONNECTION_STATUS_REASON_CERT_REVOKED = 14,
+    TP_CONNECTION_STATUS_REASON_CERT_INSECURE = 15,
+    TP_CONNECTION_STATUS_REASON_CERT_LIMIT_EXCEEDED = 16,
 } TpConnectionStatusReason;
 </pre>
 <p>
@@ -373,12 +376,27 @@ Bitfield/set of flags generated from the Telepathy specification.
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-SELF-SIGNED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_SELF_SIGNED</code></span></p></td>
-<td>           The server's SSL certificate is self-signed.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.HostnameMismatch.                    
+<td>           The server's SSL certificate is self-signed.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.SelfSigned.                    
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-OTHER-ERROR:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_OTHER_ERROR</code></span></p></td>
 <td>           There was some other error validating the server's SSL             certificate.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Invalid.                    
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-REVOKED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_REVOKED</code></span></p></td>
+<td>           The server's SSL certificate has been revoked.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Revoked.                    
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-INSECURE:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_INSECURE</code></span></p></td>
+<td>           The server's SSL certificate uses an insecure algorithm, 	  or is cryptographically weak.            When disconnected for this reason, the equivalent D-Bus error is             org.freedesktop.Telepathy.Error.Cert.Insecure.                    
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CONNECTION-STATUS-REASON-CERT-LIMIT-EXCEEDED:CAPS"></a><span class="term"><code class="literal">TP_CONNECTION_STATUS_REASON_CERT_LIMIT_EXCEEDED</code></span></p></td>
+<td> 	  The length in bytes of the server certificate, or the depth of the 	  sever certificate chain exceed the limits imposed by the crypto 	  library.  	  When disconnected for this reason, the equivalent D-Bus error is 	    org.freedesktop.Telepathy.Error.Cert.LimitExceeded 	   	
 </td>
 </tr>
 </tbody>
@@ -387,7 +405,7 @@ Bitfield/set of flags generated from the Telepathy specification.
 <hr>
 <div class="refsect2" title="NUM_TP_CONNECTION_STATUS_REASONS">
 <a name="NUM-TP-CONNECTION-STATUS-REASONS:CAPS"></a><h3>NUM_TP_CONNECTION_STATUS_REASONS</h3>
-<pre class="programlisting">#define NUM_TP_CONNECTION_STATUS_REASONS (13+1)
+<pre class="programlisting">#define NUM_TP_CONNECTION_STATUS_REASONS (16+1)
 </pre>
 <p>
 1 higher than the highest valid value of <a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason"><span class="type">TpConnectionStatusReason</span></a>.
@@ -1808,6 +1826,7 @@ Bitfield/set of flags generated from the Telepathy specification.
     TP_CHANNEL_CALL_STATE_HELD = 4,
     TP_CHANNEL_CALL_STATE_FORWARDED = 8,
     TP_CHANNEL_CALL_STATE_IN_PROGRESS = 16,
+    TP_CHANNEL_CALL_STATE_CONFERENCE_HOST = 32,
 } TpChannelCallStateFlags;
 </pre>
 <p>
@@ -1842,6 +1861,11 @@ Bitfield/set of flags generated from the Telepathy specification.
 <tr>
 <td><p><a name="TP-CHANNEL-CALL-STATE-IN-PROGRESS:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CALL_STATE_IN_PROGRESS</code></span></p></td>
 <td>           Progress has been made in placing the outgoing call, but the           destination contact may not have been made aware of the call yet           (so the Ringing state is not appropriate). This corresponds to SIP's           status code 183 Session Progress, and could be used when the           outgoing call has reached a gateway, for instance.         
+</td>
+</tr>
+<tr>
+<td><p><a name="TP-CHANNEL-CALL-STATE-CONFERENCE-HOST:CAPS"></a><span class="term"><code class="literal">TP_CHANNEL_CALL_STATE_CONFERENCE_HOST</code></span></p></td>
+<td>           This contact has merged this call into a conference. Note that GSM           provides a notification when the remote party merges a call into a           conference, but not when it is split out again; thus, this flag can           only indicate that the call has been part of a conference at some           point. If a GSM connection manager receives a notification that a           call has been merged into a conference a second time, it SHOULD           represent this by clearing and immediately re-setting this flag on           the remote contact.         
 </td>
 </tr>
 </tbody>
