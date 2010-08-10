@@ -34,9 +34,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
-	test-base-client$(EXEEXT) test-call-cancellation$(EXEEXT) \
-	test-call-example$(EXEEXT) test-callable-example$(EXEEXT) \
+noinst_PROGRAMS = test-account$(EXEEXT) \
+	test-account-channel-request$(EXEEXT) \
+	test-account-manager$(EXEEXT) test-base-client$(EXEEXT) \
+	test-call-cancellation$(EXEEXT) test-call-example$(EXEEXT) \
+	test-callable-example$(EXEEXT) \
 	test-channel-dispatcher$(EXEEXT) \
 	test-channel-dispatch-operation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
@@ -94,6 +96,15 @@ test_account_DEPENDENCIES =  \
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
+am_test_account_channel_request_OBJECTS =  \
+	account-channel-request.$(OBJEXT)
+test_account_channel_request_OBJECTS =  \
+	$(am_test_account_channel_request_OBJECTS)
+test_account_channel_request_LDADD = $(LDADD)
+test_account_channel_request_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_account_manager_OBJECTS = account-manager.$(OBJEXT)
 test_account_manager_OBJECTS = $(am_test_account_manager_OBJECTS)
 test_account_manager_LDADD = $(LDADD)
@@ -175,8 +186,11 @@ test_client_DEPENDENCIES =  \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_cm_OBJECTS = cm.$(OBJEXT)
 test_cm_OBJECTS = $(am_test_cm_OBJECTS)
-test_cm_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_cm_LDADD = $(LDADD)
+test_cm_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_connection_OBJECTS = connection.$(OBJEXT)
 test_connection_OBJECTS = $(am_test_connection_OBJECTS)
 test_connection_LDADD = $(LDADD)
@@ -341,8 +355,11 @@ test_invalidated_while_invoking_signals_DEPENDENCIES =  \
 am_test_long_connection_name_OBJECTS = long-connection-name.$(OBJEXT)
 test_long_connection_name_OBJECTS =  \
 	$(am_test_long_connection_name_OBJECTS)
-test_long_connection_name_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_long_connection_name_LDADD = $(LDADD)
+test_long_connection_name_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_message_mixin_OBJECTS = message-mixin.$(OBJEXT)
 test_message_mixin_OBJECTS = $(am_test_message_mixin_OBJECTS)
 test_message_mixin_DEPENDENCIES = $(am__DEPENDENCIES_2) \
@@ -366,7 +383,6 @@ test_properties_DEPENDENCIES =  \
 am_test_protocol_objects_OBJECTS = protocol-objects.$(OBJEXT)
 test_protocol_objects_OBJECTS = $(am_test_protocol_objects_OBJECTS)
 test_protocol_objects_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la \
 	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 am_test_self_handle_OBJECTS = self-handle.$(OBJEXT)
 test_self_handle_OBJECTS = $(am_test_self_handle_OBJECTS)
@@ -405,12 +421,18 @@ test_simple_observer_DEPENDENCIES =  \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_text_mixin_OBJECTS = text-mixin.$(OBJEXT)
 test_text_mixin_OBJECTS = $(am_test_text_mixin_OBJECTS)
-test_text_mixin_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_text_mixin_LDADD = $(LDADD)
+test_text_mixin_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_text_respawn_OBJECTS = text-respawn.$(OBJEXT)
 test_text_respawn_OBJECTS = $(am_test_text_respawn_OBJECTS)
-test_text_respawn_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_text_respawn_LDADD = $(LDADD)
+test_text_respawn_DEPENDENCIES =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_unsupported_interface_OBJECTS =  \
 	unsupported-interface.$(OBJEXT)
 test_unsupported_interface_OBJECTS =  \
@@ -446,9 +468,11 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
-	$(test_call_example_SOURCES) $(test_callable_example_SOURCES) \
+SOURCES = $(test_account_SOURCES) \
+	$(test_account_channel_request_SOURCES) \
+	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
+	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
+	$(test_callable_example_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
@@ -480,9 +504,11 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
 	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
-DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
-	$(test_call_example_SOURCES) $(test_callable_example_SOURCES) \
+DIST_SOURCES = $(test_account_SOURCES) \
+	$(test_account_channel_request_SOURCES) \
+	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
+	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
+	$(test_callable_example_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
@@ -689,6 +715,7 @@ LDADD = \
     $(GLIB_LIBS)
 
 test_account_SOURCES = account.c
+test_account_channel_request_SOURCES = account-channel-request.c
 test_account_manager_SOURCES = account-manager.c
 test_base_client_SOURCES = base-client.c
 test_call_cancellation_SOURCES = call-cancellation.c
@@ -709,10 +736,6 @@ test_callable_example_LDADD = \
 test_client_SOURCES = client.c
 test_cli_group_SOURCES = cli-group.c
 test_cm_SOURCES = cm.c
-test_cm_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_connection_SOURCES = connection.c
 test_contact_lists_SOURCES = contact-lists.c
 test_contact_lists_LDADD = \
@@ -747,10 +770,6 @@ test_handle_set_SOURCES = handle-set.c
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
 
-test_long_connection_name_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_long_connection_name_SOURCES = long-connection-name.c
 test_message_mixin_LDADD = \
     $(LDADD) \
@@ -766,21 +785,12 @@ nodist_test_properties_SOURCES = \
 
 test_protocol_objects_LDADD = \
     $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la \
     $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 
 test_protocol_objects_SOURCES = protocol-objects.c
 test_self_handle_SOURCES = self-handle.c
 test_self_presence_SOURCES = self-presence.c
-test_text_mixin_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_text_mixin_SOURCES = text-mixin.c
-test_text_respawn_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_text_respawn_SOURCES = text-respawn.c
 test_unsupported_interface_SOURCES = unsupported-interface.c
 test_params_cm_SOURCES = \
@@ -887,6 +897,9 @@ clean-noinstPROGRAMS:
 test-account$(EXEEXT): $(test_account_OBJECTS) $(test_account_DEPENDENCIES) 
 	@rm -f test-account$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_account_OBJECTS) $(test_account_LDADD) $(LIBS)
+test-account-channel-request$(EXEEXT): $(test_account_channel_request_OBJECTS) $(test_account_channel_request_DEPENDENCIES) 
+	@rm -f test-account-channel-request$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_account_channel_request_OBJECTS) $(test_account_channel_request_LDADD) $(LIBS)
 test-account-manager$(EXEEXT): $(test_account_manager_OBJECTS) $(test_account_manager_DEPENDENCIES) 
 	@rm -f test-account-manager$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_account_manager_OBJECTS) $(test_account_manager_LDADD) $(LIBS)
@@ -1032,6 +1045,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-channel-request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Po@am__quote@
