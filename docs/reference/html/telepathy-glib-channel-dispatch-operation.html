@@ -144,7 +144,7 @@ struct              <a class="link" href="telepathy-glib-channel-dispatch-operat
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-handle-with-time-async" title="tp_channel_dispatch_operation_handle_with_time_async ()">tp_channel_dispatch_operation_handle_with_time_async</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *handler</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_timestamp</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-handle-with-time-finish" title="tp_channel_dispatch_operation_handle_with_time_finish ()">tp_channel_dispatch_operation_handle_with_time_finish</a>
@@ -1158,7 +1158,7 @@ Finishes an async call to <code class="function">HandleWith()</code>.
 <pre class="programlisting"><span class="returnvalue">void</span>                tp_channel_dispatch_operation_handle_with_time_async
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *handler</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_timestamp</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
 <p>
@@ -1168,11 +1168,13 @@ This timestamp will be passed to the Handler when HandleChannels is called.
 </p>
 <p>
 If an X server timestamp for the user action causing this method call is
-available, <em class="parameter"><code>user_action_timestamp</code></em> should be this timestamp (for instance, the
+available, <em class="parameter"><code>user_action_time</code></em> should be this timestamp (for instance, the
 result of <a href="http://library.gnome.org/devel/gdk/unstable/gdk-Events.html#gdk-event-get-time"><code class="function">gdk_event_get_time()</code></a> if it is not <a href="http://library.gnome.org/devel/gdk/unstable/gdk-Events.html#GDK-CURRENT-TIME:CAPS"><code class="literal">GDK_CURRENT_TIME</code></a>). Otherwise, it
-may be 0 to behave as if there was no user action or it happened a long time
-ago, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Limits-of-Basic-Types.html#G-MAXINT64:CAPS"><code class="literal">G_MAXINT64</code></a> to have the Handler behave as though the user action had
-just happened (resembling, but not numerically equal to, <a href="http://library.gnome.org/devel/gdk/unstable/gdk-Events.html#GDK-CURRENT-TIME:CAPS"><code class="literal">GDK_CURRENT_TIME</code></a>).
+may be <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a> to behave as if there was no
+user action or it happened a long time ago, or
+<a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a> to have the Handler behave as though the
+user action had just happened (resembling, but not numerically equal to,
+<a href="http://library.gnome.org/devel/gdk/unstable/gdk-Events.html#GDK-CURRENT-TIME:CAPS"><code class="literal">GDK_CURRENT_TIME</code></a>).
 </p>
 <p>
 This method has been introduced in telepathy-mission-control 5.5.0.
@@ -1193,8 +1195,10 @@ channel, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-
 </td>
 </tr>
 <tr>
-<td><p><span class="term"><em class="parameter"><code>user_action_timestamp</code></em> :</span></p></td>
-<td>the time at which user action occurred
+<td><p><span class="term"><em class="parameter"><code>user_action_time</code></em> :</span></p></td>
+<td>the time at which user action occurred, or one of the
+ special values <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a> or
+ <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a>
 </td>
 </tr>
 <tr>

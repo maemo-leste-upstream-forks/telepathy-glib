@@ -90,16 +90,10 @@ struct              <a class="link" href="telepathy-glib-TpPresenceMixin.html#Tp
 <a name="telepathy-glib-TpPresenceMixin.description"></a><h2>Description</h2>
 <p>
 This mixin can be added to a <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> subclass to implement the
-presence interface in a general way. It does not support protocols where it
-is possible to set multiple statuses on yourself at once, however. Hence all
-presence statuses will have the exclusive flag set.
-</p>
-<p>
-There are plans to deprecate the notion of last activity time in the D-Bus
-presence interface, so <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceStatus" title="TpPresenceStatus"><span class="type">TpPresenceStatus</span></a> doesn't include it at all.
-Consequently, the last activity time field in presence data presented over
-D-Bus will always be zero and the SetLastActivityTime method doesn't actually
-do anything.
+SimplePresence and/or Presence interfaces. Implementing both interfaces
+(as described below) is recommended. In particular, you must implement the
+old-style Presence interface if compatibility with telepathy-glib
+versions older than 0.11.UNRELEASED is required.
 </p>
 <p>
 To use the presence mixin, include a <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceMixinClass" title="TpPresenceMixinClass"><span class="type">TpPresenceMixinClass</span></a> somewhere in your
@@ -109,22 +103,57 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
 <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-finalize" title="tp_presence_mixin_finalize ()"><code class="function">tp_presence_mixin_finalize()</code></a> from your dispose or finalize function.
 </p>
 <p>
-To use the presence mixin as the implementation of
-<a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence"><span class="type">TpSvcConnectionInterfacePresence</span></a>, in the function you pass to
-G_IMPLEMENT_INTERFACE, you should call tp_presence_mixin_iface_init.
-TpPresenceMixin implements all of the D-Bus methods in the Presence
-interface.
+</p>
+<div class="section" title="Implementing SimplePresence">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id1030883"></a>Implementing SimplePresence</h2></div></div></div>
+<p>
+  Since 0.7.13 this mixin supports the entire SimplePresence interface.
+  You can implement <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceSimplePresence"><span class="type">TpSvcConnectionInterfaceSimplePresence</span></a> as follows:
+  </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem"><p>use the <a class="link" href="telepathy-glib-TpContactsMixin.html#TpContactsMixin" title="TpContactsMixin"><span class="type">TpContactsMixin</span></a> and <span class="type">TpDBusPropertiesMixin</span></p></li>
+<li class="listitem"><p>pass <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-simple-presence-iface-init" title="tp_presence_mixin_simple_presence_iface_init ()"><code class="function">tp_presence_mixin_simple_presence_iface_init()</code></a> as an
+        argument to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a>
+      </p></li>
+<li class="listitem"><p>
+        call tp_presence_mixin_simple_presence_init_dbus_properties in the
+        <span class="type">GTypeClass.class_init</span> function
+      </p></li>
+<li class="listitem"><p>
+        call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-simple-presence-register-with-contacts-mixin" title="tp_presence_mixin_simple_presence_register_with_contacts_mixin ()"><code class="function">tp_presence_mixin_simple_presence_register_with_contacts_mixin()</code></a>
+        in the <span class="type">GObjectClass.constructed</span> function
+      </p></li>
+</ul></div>
+<p>
+</p>
+</div>
+<p> 
+</p>
+<div class="section" title="Implementing old-style Presence">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id1030994"></a>Implementing old-style Presence</h2></div></div></div>
+<p>
+  This mixin also supports a large subset of the deprecated Presence
+  interface. It does not support protocols where it is possible to set
+  multiple statuses on yourself at once (all presence statuses will have the
+  exclusive flag set), or last-activity-time information.
 </p>
 <p>
-Since 0.7.13 you can also implement
-<a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceSimplePresence"><span class="type">TpSvcConnectionInterfaceSimplePresence</span></a> by using this mixin, in this case
-you should pass tp_presence_mixin_iface_init as an argument to
-G_IMPLEMENT_INTERFACE. Note that this can cause the status_available
-callback to be called while disconnected. Also to fully implement this
-interface some dbus properties need to be supported. To do that using this
-mixin the instance needs to use the dbus properties mixin and call
-tp_presence_mixin_simple_presence_init_dbus_properties in the class init
-function
+  To use the presence mixin as the implementation of
+  <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence"><span class="type">TpSvcConnectionInterfacePresence</span></a>, use <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-iface-init" title="tp_presence_mixin_iface_init ()"><code class="function">tp_presence_mixin_iface_init()</code></a> as
+  the function you pass to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a>.
+  The presence mixin implements all of the D-Bus methods in the Presence
+  interface.
+</p>
+<p>
+  In telepathy-glib versions older than 0.11.UNRELEASED, every connection
+  that used the <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceMixin" title="TpPresenceMixin"><span class="type">TpPresenceMixin</span></a> was required to implement
+  <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfacePresence"><span class="type">TpSvcConnectionInterfacePresence</span></a>; failing to do so would lead to an
+  assertion failure. Since 0.11.UNRELEASED, this is no longer required.
+</p>
+</div>
+<p> 
 </p>
 </div>
 <div class="refsect1" title="Details">
@@ -534,7 +563,8 @@ structure
 <td><p><span class="term"><em class="parameter"><code>status_available</code></em> :</span></p></td>
 <td>A callback to be used to determine if a given presence
  status is available to be set on the connection. If NULL, all statuses are
- always considered available.
+ always considered available. If SimplePresence is implemented, this
+ callback may be called before the connection is connected.
 </td>
 </tr>
 <tr>
