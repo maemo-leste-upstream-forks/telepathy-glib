@@ -217,8 +217,6 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 VALAC = @VALAC@
 VALAFLAGS = @VALAFLAGS@
-VALA_CFLAGS = @VALA_CFLAGS@
-VALA_LIBS = @VALA_LIBS@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
 VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
@@ -492,6 +490,7 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+@HAVE_AUTOMAKE_FOR_DIST_TRUE@dist-hook:
 
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
@@ -810,6 +809,14 @@ _maintainer-upload-release-local: _maintainer-upload-release-check
 upload-branch-docs: all
 	rsync -rtzvPp --chmod=a+rX docs/reference/html/ \
 		$(UPLOAD_BRANCH_TO)-$(BRANCH)/
+
+# automake is new enough to make dist
+@HAVE_AUTOMAKE_FOR_DIST_FALSE@dist-hook: dist-hook-check-am
+@HAVE_AUTOMAKE_FOR_DIST_FALSE@dist-hook-check-am:
+@HAVE_AUTOMAKE_FOR_DIST_FALSE@	@echo "*** Your automake is too old to compile Vala.">&2
+@HAVE_AUTOMAKE_FOR_DIST_FALSE@	@echo "*** You can build telepathy-glib with this automake, but you">&2
+@HAVE_AUTOMAKE_FOR_DIST_FALSE@	@echo "*** should not use it to make tarball releases.">&2
+@HAVE_AUTOMAKE_FOR_DIST_FALSE@	@exit 1
 lcov-reset:
 	lcov --directory @top_srcdir@ --zerocounters
 

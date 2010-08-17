@@ -36,9 +36,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = vala
 DIST_COMMON = $(dist_vapi_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in \
-	$(srcdir)/telepathy-vala-uninstalled.pc.in \
-	$(srcdir)/telepathy-vala.pc.in
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/introspection.m4 \
@@ -52,7 +50,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = telepathy-vala.pc telepathy-vala-uninstalled.pc
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
@@ -83,9 +81,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(vapidir)" "$(DESTDIR)$(pkgconfigdir)" \
-	"$(DESTDIR)$(vapidir)"
-DATA = $(dist_vapi_DATA) $(pkgconfig_DATA) $(vapi_DATA)
+am__installdirs = "$(DESTDIR)$(vapidir)" "$(DESTDIR)$(vapidir)"
+DATA = $(dist_vapi_DATA) $(vapi_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -187,8 +184,6 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 VALAC = @VALAC@
 VALAFLAGS = @VALAFLAGS@
-VALA_CFLAGS = @VALA_CFLAGS@
-VALA_LIBS = @VALA_LIBS@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
 VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
@@ -264,7 +259,6 @@ BUILT_SOURCES = \
 	$(NULL)
 
 pkgconfigdir = ${libdir}/pkgconfig
-pkgconfig_DATA = telepathy-vala.pc
 CLEANFILES = \
 	$(BUILT_SOURCES) \
 	$(NULL)
@@ -308,10 +302,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-telepathy-vala.pc: $(top_builddir)/config.status $(srcdir)/telepathy-vala.pc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-telepathy-vala-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/telepathy-vala-uninstalled.pc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -338,26 +328,6 @@ uninstall-dist_vapiDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(vapidir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(vapidir)" && rm -f $$files
-install-pkgconfigDATA: $(pkgconfig_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pkgconfigdir)" || $(MKDIR_P) "$(DESTDIR)$(pkgconfigdir)"
-	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pkgconfigdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pkgconfigdir)" || exit $$?; \
-	done
-
-uninstall-pkgconfigDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(pkgconfigdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(pkgconfigdir)" && rm -f $$files
 install-vapiDATA: $(vapi_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(vapidir)" || $(MKDIR_P) "$(DESTDIR)$(vapidir)"
@@ -420,7 +390,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(vapidir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(vapidir)"; do \
+	for dir in "$(DESTDIR)$(vapidir)" "$(DESTDIR)$(vapidir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -471,8 +441,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_vapiDATA install-pkgconfigDATA \
-	install-vapiDATA
+install-data-am: install-dist_vapiDATA install-vapiDATA
 
 install-dvi: install-dvi-am
 
@@ -516,8 +485,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_vapiDATA uninstall-pkgconfigDATA \
-	uninstall-vapiDATA
+uninstall-am: uninstall-dist_vapiDATA uninstall-vapiDATA
 
 .MAKE: all check install install-am install-strip
 
@@ -527,16 +495,15 @@ uninstall-am: uninstall-dist_vapiDATA uninstall-pkgconfigDATA \
 	install-data install-data-am install-dist_vapiDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-pkgconfigDATA install-ps \
-	install-ps-am install-strip install-vapiDATA installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_vapiDATA uninstall-pkgconfigDATA \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip install-vapiDATA installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am uninstall uninstall-am uninstall-dist_vapiDATA \
 	uninstall-vapiDATA
 
 
-telepathy-glib.vapi: $(top_srcdir)/telepathy-glib/TelepathyGLib-0.12.gir
+telepathy-glib.vapi: $(top_builddir)/telepathy-glib/TelepathyGLib-0.12.gir
 	$(VAPIGEN_V)$(VAPIGEN) \
 		--library telepathy-glib \
 		--pkg gio-2.0 \

@@ -147,7 +147,7 @@ to the foreground, if applicable.
 <p>
 Data structure representing a <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> object.
 </p>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_new ()">
@@ -170,13 +170,15 @@ Convenience function to create a new <a class="link" href="telepathy-glib-accoun
 <tr>
 <td><p><span class="term"><em class="parameter"><code>request</code></em> :</span></p></td>
 <td> the requested
-properties of the channel. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 GObject.Value]</span>
+ properties of the channel (see <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest--request" title='The "request" property'><span class="type">"request"</span></a>). <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 GObject.Value]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_action_time</code></em> :</span></p></td>
-<td>the user action time to pass to the channel dispatcher
-when requesting the channel
+<td>the time of the user action that caused this request,
+ or one of the special values <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a> or
+ <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a> (see
+ <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest--user-action-time" title='The "user-action-time" property'><span class="type">"user-action-time"</span></a>)
 </td>
 </tr>
 <tr>
@@ -187,7 +189,7 @@ when requesting the channel
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_get_request ()">
@@ -212,7 +214,7 @@ Return the <a class="link" href="telepathy-glib-account-channel-request.html#TpA
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_get_user_action_time ()">
@@ -238,7 +240,7 @@ Return the <a class="link" href="telepathy-glib-account-channel-request.html#TpA
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_get_account ()">
@@ -263,7 +265,7 @@ Return the <a class="link" href="telepathy-glib-account-channel-request.html#TpA
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_create_and_handle_channel_async ()">
@@ -280,6 +282,11 @@ that you are going to handle yourself.
 When the operation is finished, <em class="parameter"><code>callback</code></em> will be called. You can then call
 <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-and-handle-channel-finish" title="tp_account_channel_request_create_and_handle_channel_finish ()"><code class="function">tp_account_channel_request_create_and_handle_channel_finish()</code></a> to get the
 result of the operation.
+</p>
+<p>
+(Behind the scenes, this works by creating a temporary <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a>, then
+acting like <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-channel-async" title="tp_account_channel_request_create_channel_async ()"><code class="function">tp_account_channel_request_create_channel_async()</code></a> with the
+temporary <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> as the <em class="parameter"><code>preferred_handler</code></em>.)
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -306,7 +313,7 @@ result of the operation.
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_create_and_handle_channel_finish ()">
@@ -352,7 +359,7 @@ channel was successfully created and you are handling it, otherwise <a href="htt
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_ensure_and_handle_channel_async ()">
@@ -374,8 +381,15 @@ result of the operation.
 If the channel already exists and is already being handled, or if a
 newly created channel is sent to a different handler, this operation
 will fail with the error <a class="link" href="telepathy-glib-errors.html#TP-ERROR-NOT-YOURS:CAPS"><code class="literal">TP_ERROR_NOT_YOURS</code></a>. The other handler
-will be notified that the channel was requested again, and can
-move its window to the foreground, if applicable.
+will be notified that the channel was requested again (for instance
+with <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest-re-handled" title='The "re-handled" signal'><span class="type">"re-handled"</span></a>,
+<a class="link" href="telepathy-glib-base-client.html#TpBaseClientClassHandleChannelsImpl" title="TpBaseClientClassHandleChannelsImpl ()"><span class="type">TpBaseClientClassHandleChannelsImpl</span></a> or <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--callback" title='The "callback" property'><span class="type">"callback"</span></a>),
+and can move its window to the foreground, if applicable.
+</p>
+<p>
+(Behind the scenes, this works by creating a temporary <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a>, then
+acting like <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-ensure-channel-async" title="tp_account_channel_request_ensure_channel_async ()"><code class="function">tp_account_channel_request_ensure_channel_async()</code></a> with the
+temporary <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> as the <em class="parameter"><code>preferred_handler</code></em>.)
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -402,7 +416,7 @@ move its window to the foreground, if applicable.
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_ensure_and_handle_channel_finish ()">
@@ -453,7 +467,7 @@ channel was successfully created and you are handling it, otherwise <a href="htt
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_create_channel_async ()">
@@ -505,7 +519,7 @@ or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.ht
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_create_channel_finish ()">
@@ -545,7 +559,7 @@ otherwise <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Ma
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_ensure_channel_async ()">
@@ -560,6 +574,16 @@ otherwise <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Ma
 Asynchronously calls EnsureChannel on the ChannelDispatcher to create a
 channel with the properties defined in <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest--request" title='The "request" property'><span class="type">"request"</span></a>
 and let the ChannelDispatcher dispatch it to an handler.
+</p>
+<p>
+If a suitable channel already existed, its handler will be notified that
+the channel was requested again (for instance with
+<a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest-re-handled" title='The "re-handled" signal'><span class="type">"re-handled"</span></a>, <a class="link" href="telepathy-glib-base-client.html#TpBaseClientClassHandleChannelsImpl" title="TpBaseClientClassHandleChannelsImpl ()"><span class="type">TpBaseClientClassHandleChannelsImpl</span></a>
+or <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--callback" title='The "callback" property'><span class="type">"callback"</span></a>), and can move its window to the foreground,
+if applicable. Otherwise, a new channel will be created and dispatched to
+a handler.
+</p>
+<p>
 <em class="parameter"><code>callback</code></em> will be called when an existing channel's handler has been
 notified, a new channel has been created and dispatched, or the request
 has failed.
@@ -598,7 +622,7 @@ or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.ht
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_account_channel_request_ensure_channel_finish ()">
@@ -638,7 +662,7 @@ otherwise <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Ma
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 </div>
 <div class="refsect1" title="Property Details">
@@ -653,31 +677,57 @@ Read-only except during construction.
 <p>
 This property can't be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title='The "request" property'>
 <a name="TpAccountChannelRequest--request"></a><h3>The <code class="literal">"request"</code> property</h3>
 <pre class="programlisting">  "request"                  <span class="type">GHashTable_gchararray+GValue_*</span>  : Read / Write / Construct Only</pre>
 <p>
-The <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> used to request the channel.
-Read-only except during construction.
+The desired D-Bus properties for the channel, represented as a
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> where the keys are strings and the values are <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>.
 </p>
 <p>
 This property can't be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 <hr>
 <div class="refsect2" title='The "user-action-time" property'>
 <a name="TpAccountChannelRequest--user-action-time"></a><h3>The <code class="literal">"user-action-time"</code> property</h3>
 <pre class="programlisting">  "user-action-time"         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a>                : Read / Write / Construct Only</pre>
 <p>
-The user action time that will be passed to mission-control when
+The user action time that will be passed to the channel dispatcher when
 requesting the channel.
 </p>
+<p>
+This may be the time at which user action occurred, or one of the special
+values <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a> or
+<a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a>.
+</p>
+<p>
+If <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a>, the action doesn't involve any
+user action. Clients should avoid stealing focus when presenting the
+channel.
+</p>
+<p>
+If <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a>, clients SHOULD behave as though the
+user action happened at the current time, e.g. a client may
+request that its window gains focus.
+</p>
+<p>
+On X11-based systems, Gdk 2.x, Clutter 1.0 etc.,
+<a class="link" href="telepathy-glib-util.html#tp-user-action-time-from-x11" title="tp_user_action_time_from_x11 ()"><code class="function">tp_user_action_time_from_x11()</code></a> can be used to convert an X11 timestamp to
+a Telepathy user action time.
+</p>
+<p>
+If the channel request succeeds, this user action time will be passed on
+to the channel's handler. If the handler is a GUI, it may use
+<a class="link" href="telepathy-glib-util.html#tp-user-action-time-should-present" title="tp_user_action_time_should_present ()"><code class="function">tp_user_action_time_should_present()</code></a> to decide whether to bring its
+window to the foreground.
+</p>
 <p>Default value: 0</p>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 </div>
 <div class="refsect1" title="Signal Details">
@@ -690,7 +740,18 @@ requesting the channel.
                                                         <a class="link" href="telepathy-glib-handle-channels-context.html#TpHandleChannelsContext"><span class="type">TpHandleChannelsContext</span></a> *context,
                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>                 user_data)             : Run Last / Has Details</pre>
 <p>
-Emitted when channel which has been created using <em class="parameter"><code>self</code></em> has be re-handled.
+Emitted when the channel created using <em class="parameter"><code>self</code></em> has been "re-handled".
+</p>
+<p>
+This means that a Telepathy client has made another request for a
+matching channel using an "ensure" API like
+<a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-ensure-channel-async" title="tp_account_channel_request_ensure_channel_async ()"><code class="function">tp_account_channel_request_ensure_channel_async()</code></a>, while the channel
+still exists. Instead of creating a new channel, the channel dispatcher
+notifies the existing handler of <em class="parameter"><code>channel</code></em>, resulting in this signal.
+</p>
+<p>
+Most GUI handlers should respond to this signal by checking
+<em class="parameter"><code>user_action_time</code></em>, and if appropriate, moving to the foreground.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -707,8 +768,10 @@ Emitted when channel which has been created using <em class="parameter"><code>se
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_action_time</code></em> :</span></p></td>
-<td>the time at which user action occurred, or 0 if this
-channel is to be handled for some reason not involving user action.
+<td>the time at which user action occurred, or one of the
+ special values <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a> or
+ <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a>; see
+ <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest--user-action-time" title='The "user-action-time" property'><span class="type">"user-action-time"</span></a>
 </td>
 </tr>
 <tr>
@@ -723,7 +786,7 @@ the <code class="function">HandleChannels()</code> call.
 </tr>
 </tbody>
 </table></div>
-<p class="since">Since 0.11.UNRELEASED</p>
+<p class="since">Since 0.11.12</p>
 </div>
 </div>
 </div>
