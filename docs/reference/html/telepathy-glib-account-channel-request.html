@@ -327,6 +327,10 @@ temporary <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><s
 Finishes an async channel creation started using
 <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-and-handle-channel-async" title="tp_account_channel_request_create_and_handle_channel_async ()"><code class="function">tp_account_channel_request_create_and_handle_channel_async()</code></a>.
 </p>
+<p>
+See <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-ensure-and-handle-channel-finish" title="tp_account_channel_request_ensure_and_handle_channel_finish ()"><code class="function">tp_account_channel_request_ensure_and_handle_channel_finish()</code></a>
+for details of how <em class="parameter"><code>context</code></em> can be used.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -343,7 +347,7 @@ Finishes an async channel creation started using
 <tr>
 <td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
 <td> pointer used to return a
-on the context of the <code class="function">HandleChannels()</code> call, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+ reference to the context of the <code class="function">HandleChannels()</code> call, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 <tr>
@@ -435,6 +439,13 @@ If the channel already exists and is already being handled, or if a
 newly created channel is sent to a different handler, this operation
 will fail with the error <a class="link" href="telepathy-glib-errors.html#TP-ERROR-NOT-YOURS:CAPS"><code class="literal">TP_ERROR_NOT_YOURS</code></a>.
 </p>
+<p>
+<em class="parameter"><code>context</code></em> can be used to obtain extensible information about the channel
+via <a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-get-handler-info" title="tp_handle_channels_context_get_handler_info ()"><code class="function">tp_handle_channels_context_get_handler_info()</code></a>, and any similar methods
+that are added in future. It is not valid for the caller of this method
+to call <a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-accept" title="tp_handle_channels_context_accept ()"><code class="function">tp_handle_channels_context_accept()</code></a>,
+<a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-delay" title="tp_handle_channels_context_delay ()"><code class="function">tp_handle_channels_context_delay()</code></a> or <a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-fail" title="tp_handle_channels_context_fail ()"><code class="function">tp_handle_channels_context_fail()</code></a>.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -451,7 +462,7 @@ will fail with the error <a class="link" href="telepathy-glib-errors.html#TP-ERR
 <tr>
 <td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
 <td> pointer used to return a
-on the context of the <code class="function">HandleChannels()</code> call, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+ reference to the context of the <code class="function">HandleChannels()</code> call, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 <tr>
@@ -752,6 +763,13 @@ notifies the existing handler of <em class="parameter"><code>channel</code></em>
 <p>
 Most GUI handlers should respond to this signal by checking
 <em class="parameter"><code>user_action_time</code></em>, and if appropriate, moving to the foreground.
+</p>
+<p>
+<em class="parameter"><code>context</code></em> can be used to obtain extensible information about the channel
+via <a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-get-handler-info" title="tp_handle_channels_context_get_handler_info ()"><code class="function">tp_handle_channels_context_get_handler_info()</code></a>, and any similar methods
+that are added in future. It is not valid for the receiver of this signal
+to call <a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-accept" title="tp_handle_channels_context_accept ()"><code class="function">tp_handle_channels_context_accept()</code></a>,
+<a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-delay" title="tp_handle_channels_context_delay ()"><code class="function">tp_handle_channels_context_delay()</code></a> or <a class="link" href="telepathy-glib-handle-channels-context.html#tp-handle-channels-context-fail" title="tp_handle_channels_context_fail ()"><code class="function">tp_handle_channels_context_fail()</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
