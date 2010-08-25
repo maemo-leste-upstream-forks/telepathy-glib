@@ -63,7 +63,7 @@
 <a name="TpChannelIface.implementations"></a><h2>Known Implementations</h2>
 <p>
 TpChannelIface is implemented by
- <a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a>.</p>
+ <a class="link" href="TpBaseChannel.html" title="TpBaseChannel">TpBaseChannel</a> and  <a class="link" href="telepathy-glib-channel.html#TpChannel">TpChannel</a>.</p>
 </div>
 <div class="refsect1" title="Properties">
 <a name="TpChannelIface.properties"></a><h2>Properties</h2>
@@ -141,14 +141,20 @@ The class of the <a class="link" href="TpChannelIface.html" title="TpChannelIfac
 <pre class="programlisting">  "channel-type"             <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read / Write / Construct Only</pre>
 <p>
 The D-Bus interface representing the type of this channel. Read-only
-except during construction (and in connection managers, attempts to
-set it during construction will usually be ignored or treated as an
-error).
+except during construction.
 </p>
 <p>
-This is really only read-write for the benefit of <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> -
-GLib considers CONSTRUCT_ONLY|READWRITE to be incompatible with
-READONLY, because CONSTRUCT_ONLY is a restriction (arguably a GLib bug)
+In <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> this property is read-only except during construction;
+if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> during construction (the default), we ask the remote D-Bus
+object what its channel type is, and reading this property will yield
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> until a reply is received. This is not guaranteed to have happened
+until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has finished preparing
+<a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>.
+</p>
+<p>
+In connection manager implementations, attempts to set this property
+during construction will usually be ignored or treated as an
+error.
 </p>
 <p>Default value: NULL</p>
 </div>
@@ -157,10 +163,20 @@ READONLY, because CONSTRUCT_ONLY is a restriction (arguably a GLib bug)
 <a name="TpChannelIface--handle"></a><h3>The <code class="literal">"handle"</code> property</h3>
 <pre class="programlisting">  "handle"                   <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read / Write / Construct Only</pre>
 <p>
-This channel's associated
-handle, or 0 if there is no associated handle. Read-only except during
-construction (and depending on the channel type, attempts to set it
-during construction might also be ignored).
+This channel's associated handle, or 0 if no handle or unknown.
+Read-only except during construction.
+</p>
+<p>
+In <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>, if this is 0
+during construction, and handle-type is not TP_HANDLE_TYPE_NONE (== 0),
+we ask the remote D-Bus object what its handle type is; reading this
+property will yield 0 until we get the reply, or if <code class="function">GetHandle()</code>
+fails. This is not guaranteed to be set until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
+has finished preparing <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>.
+</p>
+<p>
+In connection manager implementations, attempts to set this during
+construction might be ignored, depending on the channel type.
 </p>
 <p>Default value: 0</p>
 </div>
@@ -169,10 +185,20 @@ during construction might also be ignored).
 <a name="TpChannelIface--handle-type"></a><h3>The <code class="literal">"handle-type"</code> property</h3>
 <pre class="programlisting">  "handle-type"              <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read / Write / Construct Only</pre>
 <p>
-The type (<a class="link" href="telepathy-glib-enums.html#TpHandleType" title="enum TpHandleType"><span class="type">TpHandleType</span></a>) of this channel's associated
-handle, or 0 if there is no associated handle. Read-only except during
-construction (and depending on the channel type, attempts to set it
-during construction might also be ignored).
+The <a class="link" href="telepathy-glib-enums.html#TpHandleType" title="enum TpHandleType"><span class="type">TpHandleType</span></a> of this channel's associated handle, or
+<a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-NONE:CAPS"><code class="literal">TP_HANDLE_TYPE_NONE</code></a> (which is numerically 0) if no handle.
+</p>
+<p>
+In <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>, if this is TP_UNKNOWN_HANDLE_TYPE
+during construction, we ask the remote D-Bus object what its
+handle type is; reading this property will yield TP_UNKNOWN_HANDLE_TYPE
+until we get the reply. This is not guaranteed to be have happened
+until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has finished preparing
+<a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a>.
+</p>
+<p>
+In connection manager implementations, attempts to set this during
+construction might also be ignored.
 </p>
 <p>Default value: 0</p>
 </div>
