@@ -1,20 +1,20 @@
 #!/usr/bin/make -f
 
-DEB_DH_MAKESHLIBS_ARGS_libtelepathy-glib0 := -V"libtelepathy-glib0 (>= 0.11.15)"
+%:
+	dh $@
 
-include /usr/share/cdbs/1/rules/utils.mk
-include /usr/share/cdbs/1/class/autotools.mk
-include /usr/share/cdbs/1/rules/debhelper.mk
+override_dh_strip:
+	dh_strip --dbg-package=libtelepathy-glib0-dbg
 
-# We don't want the .la files, but complain if anything else is missing
-binary-post-install/libtelepathy-glib-dev::
+override_dh_makeshlibs:
+	dh_makeshlibs -V"libtelepathy-glib0 (>= 0.11.15)"
+
+override_dh_auto_install:
+	dh_auto_install
 	rm -f debian/tmp/usr/lib/*.la
-common-binary-post-install-arch:: list-missing
 
-DEB_DH_STRIP_ARGS := --dbg-package=libtelepathy-glib0-dbg
-
-DEB_MAKE_CHECK_TARGET := check
-DEB_CONFIGURE_EXTRA_FLAGS := \
+override_dh_auto_configure:
+	dh_auto_configure -- \
 	--disable-Werror \
 	--enable-introspection \
 	--enable-vala-bindings \
@@ -23,20 +23,11 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 
-$(patsubst %,binary-predeb/%,$(DEB_ALL_PACKAGES)) ::
-	dh_girepository -p$(cdbs_curpkg)
+override_dh_shlibdeps:
+	dh_shlibdeps
+	dh_girepository
 
-# we symlink many of the doc directories together
-DEB_INSTALL_DOCS_ALL :=
-DEB_INSTALL_DOCS_libtelepathy-glib0 := README NEWS AUTHORS
-DEB_INSTALL_DOCS_libtelepathy-glib-doc := README NEWS AUTHORS
-DEB_INSTALL_DOCS_libtelepathy-glib0-dbg := --link-doc=libtelepathy-glib0
-DEB_INSTALL_DOCS_libtelepathy-glib-dev := --link-doc=libtelepathy-glib0
-DEB_INSTALL_DOCS_gir1.0-telepathyglib-0.12 := --link-doc=libtelepathy-glib0
-
-debian/stamp-buildinfo: insist-on-symlinks
-insist-on-symlinks:
-	for p in libtelepathy-glib0-dbg libtelepathy-glib-dev gir1.0-telepathyglib-0.12; do \
-		install -d debian/$$p/usr/share/doc || exit $$?; \
-		ln -s libtelepathy-glib0 debian/$$p/usr/share/doc/$$p || exit $$?; \
-	done
+# the doc package doesn't depend on the shared library, so can't symlink
+override_dh_installdocs:
+	dh_installdocs -a --link-doc=libtelepathy-glib0
+	dh_installdocs -i
