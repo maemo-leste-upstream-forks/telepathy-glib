@@ -10,21 +10,6 @@ When packaging new upstream releases, you can update the version
 that's actually used to build the package by copying it from
 telepathy-glib/_gen/ into the debian/ directory.
 
-Patches
-=======
-
-This package occasionally uses cdbs simple-patch-system to store
-modifications to the upstream source, although in most uploads no patches
-are needed.
-
-To get the fully patched source: make -f debian/rules patch
-
-To revert to what's in git: make -f debian/rules unpatch
-
-To add a patch: obtain a diff and put it in debian/patches, or see below
-
-To remove an existing patch: delete it from debian/patches
-
 Packaging using git
 ===================
 
@@ -53,19 +38,5 @@ upstream tarballs use:
     git checkout debian
     git-import-orig ~/telepathy-glib-0.7.x.tar.gz
 
-The branch 'debian-patches' is 'upstream' plus any patches needed for Debian.
-It should be rebased on 'upstream' after each upstream release:
-
-    git checkout debian-patches
-    git rebase upstream
-
-The preferred way of adding patches is to cherry pick from an upstream
-repository:
-
-    git remote add collabora \
-        git+ssh://git.collabora.co.uk/git/telepathy-glib.git
-    git fetch
-    git checkout debian-patches
-    git cherry-pick xxxxxxxxxxxxxx
-    git checkout debian
-    fakeroot debian/rules update-patches
+Patches can be added in the usual 3.0 (quilt) ways, for instance by using
+gbp-pq(1) from the git-buildpackage package.
