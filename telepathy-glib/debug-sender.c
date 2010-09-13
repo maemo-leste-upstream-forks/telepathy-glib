@@ -100,6 +100,7 @@ enum
   NUM_PROPERTIES
 };
 
+/* must be thread-safe */
 static TpDebugLevel
 log_level_flags_to_debug_level (GLogLevelFlags level)
 {
@@ -120,6 +121,7 @@ log_level_flags_to_debug_level (GLogLevelFlags level)
     return TP_DEBUG_LEVEL_DEBUG;
 }
 
+/* must be thread-safe */
 static DebugMessage *
 debug_message_new (GTimeVal *timestamp,
     const gchar *domain,
@@ -350,6 +352,26 @@ tp_debug_sender_dup (void)
   return g_object_new (TP_TYPE_DEBUG_SENDER, NULL);
 }
 
+static void
+_tp_debug_sender_take (TpDebugSender *self,
+    DebugMessage *new_msg)
+{
+  if (g_queue_get_length (self->priv->messages) >= DEBUG_MESSAGE_LIMIT)
+    {
+      DebugMessage *old_head =
+        (DebugMessage *) g_queue_pop_head (self->priv->messages);
+
+      debug_message_free (old_head);
+    }
+
+  g_queue_push_tail (self->priv->messages, new_msg);
+
+  if (self->priv->enabled)
+    {
+      tp_svc_debug_emit_new_debug_message (self, new_msg->timestamp,
+          new_msg->domain, new_msg->level, new_msg->string);
+    }
+}
 
 /**
  * tp_debug_sender_add_message:
@@ -372,24 +394,19 @@ tp_debug_sender_add_message (TpDebugSender *self,
     GLogLevelFlags level,
     const gchar *string)
 {
-  DebugMessage *new_msg;
+  _tp_debug_sender_take (self,
+      debug_message_new (timestamp, domain, level, string));
+}
 
-  if (g_queue_get_length (self->priv->messages) >= DEBUG_MESSAGE_LIMIT)
-    {
-      DebugMessage *old_head =
-        (DebugMessage *) g_queue_pop_head (self->priv->messages);
+static gboolean
+tp_debug_sender_idle (gpointer data)
+{
+  if (debug_sender == NULL)
+    debug_message_free (data);
+  else
+    _tp_debug_sender_take (debug_sender, data);
 
-      debug_message_free (old_head);
-    }
-
-  new_msg = debug_message_new (timestamp, domain, level, string);
-  g_queue_push_tail (self->priv->messages, new_msg);
-
-  if (self->priv->enabled)
-    {
-      tp_svc_debug_emit_new_debug_message (self, new_msg->timestamp,
-          domain, new_msg->level, string);
-    }
+  return FALSE;
 }
 
 /**
@@ -439,6 +456,8 @@ tp_debug_sender_add_message (TpDebugSender *self,
  * It can easily be re-implemented in services, and does not need to be
  * used.
  *
+ * Since version 0.11.15, this function can be called from any thread.
+ *
  * Since: 0.7.36
  */
 void
@@ -449,15 +468,13 @@ tp_debug_sender_log_handler (const gchar *log_domain,
 {
   g_log_default_handler (log_domain, log_level, message, NULL);
 
-  if (debug_sender == NULL)
-    return;
-
   if (exclude == NULL || tp_strdiff (log_domain, exclude))
     {
       GTimeVal now;
       g_get_current_time (&now);
 
-      tp_debug_sender_add_message (debug_sender, &now, log_domain, log_level,
-          message);
+      g_idle_add_full (G_PRIORITY_HIGH, tp_debug_sender_idle,
+          debug_message_new (&now, log_domain, log_level, message),
+          NULL);
     }
 }
