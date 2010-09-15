@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [11])
-m4_define([tp_glib_micro_version], [15])
+m4_define([tp_glib_micro_version], [16])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [44])
+m4_define([tp_glib_lt_current], [45])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [44])
+m4_define([tp_glib_lt_age], [45])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -38,7 +38,7 @@ m4_define([tp_glib_version],
               [tp_glib_base_version].[tp_glib_nano_version])])
 
 AC_INIT([Telepathy-GLib], [tp_glib_version],
-        [https://bugs.freedesktop.org/enter_bug.cgi?product=Telepathy&component=tp-glib])
+        [https://bugs.freedesktop.org/enter_bug.cgi?product=Telepathy&component=tp-glib&version=0.12])
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -107,7 +107,8 @@ TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$official_release" = xno],
    format-security \
    init-self],
   [missing-field-initializers \
-   unused-parameter])
+   unused-parameter \
+   deprecated-declarations])
 AC_SUBST([ERROR_CFLAGS])
 
 AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])

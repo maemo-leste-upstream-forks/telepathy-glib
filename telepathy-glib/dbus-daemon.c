@@ -592,7 +592,7 @@ _tp_dbus_daemon_stop_watching (TpDBusDaemon *self,
 }
 
 /**
- * tp_dbus_daemon_cancel_name_owner_watch:
+ * tp_dbus_daemon_cancel_name_owner_watch: (skip)
  * @self: the D-Bus daemon
  * @name: the name that was being watched
  * @callback: the callback that was called

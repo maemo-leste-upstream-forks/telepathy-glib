@@ -130,7 +130,7 @@ nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	tp-svc-client.lo tp-svc-connection.lo \
 	tp-svc-connection-manager.lo tp-svc-debug.lo tp-svc-generic.lo \
 	tp-svc-media-session-handler.lo tp-svc-media-stream-handler.lo \
-	tp-svc-protocol.lo
+	tp-svc-protocol.lo tp-svc-tls-cert.lo
 libtelepathy_glib_internal_la_OBJECTS =  \
 	$(am_libtelepathy_glib_internal_la_OBJECTS) \
 	$(nodist_libtelepathy_glib_internal_la_OBJECTS)
@@ -430,6 +430,7 @@ our_headers = \
     svc-media-interfaces.h \
     svc-properties-interface.h \
     svc-protocol.h \
+    svc-tls.h \
     telepathy-glib.h \
     text-mixin.h \
     util.h
@@ -586,7 +587,8 @@ ABI_LISTS = \
     versions/0.11.12.abi \
     versions/0.11.13.abi \
     versions/0.11.14.abi \
-    versions/0.11.15.abi
+    versions/0.11.15.abi \
+    versions/0.11.16.abi
 
 
 # The quoting here is unnecessary but harmless, and has the useful side-effect
@@ -628,7 +630,8 @@ codegen_extra_dist = \
     media-session-handler.xml \
     media-stream-handler.xml \
     protocol.xml \
-    stable-interfaces.xml
+    stable-interfaces.xml \
+    tls-cert.xml
 
 codegen_sources = \
     $(nodist_libtelepathy_glib_internal_la_SOURCES) \
@@ -670,7 +673,8 @@ nodist_geninclude_HEADERS = \
     _gen/tp-svc-generic.h \
     _gen/tp-svc-media-session-handler.h \
     _gen/tp-svc-media-stream-handler.h \
-    _gen/tp-svc-protocol.h
+    _gen/tp-svc-protocol.h \
+    _gen/tp-svc-tls-cert.h
 
 nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/error-str.c \
@@ -709,13 +713,14 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/tp-svc-generic.c \
     _gen/tp-svc-media-session-handler.c \
     _gen/tp-svc-media-stream-handler.c \
-    _gen/tp-svc-protocol.c
+    _gen/tp-svc-protocol.c \
+    _gen/tp-svc-tls-cert.c
 
 
 # Generated stuff
 DROP_NAMESPACE = sed -e 's@xmlns:tp="http://telepathy\.freedesktop\.org/wiki/DbusSpec.extensions-v0"@@g'
 tools_dir = $(top_srcdir)/tools
-introspection_extra_dist = kludge-616375.xsl
+introspection_extra_dist = kludge.xsl
 @HAVE_INTROSPECTION_TRUE@INTROSPECTION_FILES = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
@@ -929,6 +934,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-session-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-stream-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-protocol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-tls-cert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 
 .c.o:
@@ -1090,6 +1096,14 @@ tp-svc-protocol.lo: _gen/tp-svc-protocol.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-protocol.c' object='tp-svc-protocol.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-protocol.lo `test -f '_gen/tp-svc-protocol.c' || echo '$(srcdir)/'`_gen/tp-svc-protocol.c
+
+tp-svc-tls-cert.lo: _gen/tp-svc-tls-cert.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-tls-cert.lo -MD -MP -MF $(DEPDIR)/tp-svc-tls-cert.Tpo -c -o tp-svc-tls-cert.lo `test -f '_gen/tp-svc-tls-cert.c' || echo '$(srcdir)/'`_gen/tp-svc-tls-cert.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tp-svc-tls-cert.Tpo $(DEPDIR)/tp-svc-tls-cert.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-tls-cert.c' object='tp-svc-tls-cert.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-tls-cert.lo `test -f '_gen/tp-svc-tls-cert.c' || echo '$(srcdir)/'`_gen/tp-svc-tls-cert.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1626,7 +1640,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib-0.12.gir: $(INTROSPECTION_SCANNER) \
 @HAVE_INTROSPECTION_TRUE@		libtelepathy-glib.la \
-@HAVE_INTROSPECTION_TRUE@		$(srcdir)/kludge-616375.xsl \
+@HAVE_INTROSPECTION_TRUE@		$(srcdir)/kludge.xsl \
 @HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
 @HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 @HAVE_INTROSPECTION_TRUE@		--namespace TelepathyGLib \
@@ -1643,7 +1657,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 @HAVE_INTROSPECTION_TRUE@		$(gi_warn_all_arg) \
 @HAVE_INTROSPECTION_TRUE@		--output _gen/$@.tmp \
 @HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
-@HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge-616375.xsl _gen/$@.tmp > $@
+@HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge.xsl _gen/$@.tmp > $@
 @HAVE_INTROSPECTION_TRUE@	@rm -f _gen/$@.tmp
 
 @HAVE_INTROSPECTION_TRUE@%.typelib: %.gir $(INTROSPECTION_COMPILER)
