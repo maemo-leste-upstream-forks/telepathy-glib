@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [11])
-m4_define([tp_glib_micro_version], [16])
+m4_define([tp_glib_minor_version], [12])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -137,14 +137,16 @@ ifelse(tp_glib_nano_version, 0,
     [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no] )
 ],
 [ # tp-glib is version x.y.z.1 - enable extra checks by default
+  # (but only partially, because this is a stable branch and gtk-doc's
+  # definition of "complete" sometimes changes)
   AC_ARG_ENABLE(coding-style-checks,
     AC_HELP_STRING([--disable-coding-style-checks],
                    [do not check coding style using grep]),
     [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=yes])
   AC_ARG_ENABLE(doc-checks,
-    AC_HELP_STRING([--disable-doc-checks],
-                   [do not check for complete documentation coverage]),
-    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=yes])
+    AC_HELP_STRING([--enable-doc-checks],
+                   [check for complete documentation coverage]),
+    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no])
 ])
 
 AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
@@ -218,7 +220,11 @@ if test x$enable_vala_bindings = xyes; then
     AC_MSG_ERROR([GObject-Introspection must be enabled for Vala bindings])
   fi
 
-  m4_ifdef([AM_PROG_VALAC], [AM_PROG_VALAC(0.9.3)],
+  PKG_CHECK_EXISTS([gobject-introspection-1.0 >= 0.9.6],
+    [],
+    [AC_MSG_ERROR([gobject-introspection 0.9.6 required for Vala bindings])])
+
+  m4_ifdef([AM_PROG_VALAC], [AM_PROG_VALAC(0.10.0)],
            [AC_MSG_ERROR([Automake >= 1.11 required for Vala bindings])])
   have_vala=yes
 
