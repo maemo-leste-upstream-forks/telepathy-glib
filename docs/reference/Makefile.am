@@ -84,6 +84,13 @@ HTML_IMAGES=
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
 content_files=tp-svc.xml
 
+html-build.stamp: $(srcdir)/version.xml
+pdf-build.stamp: $(srcdir)/version.xml
+
+$(srcdir)/version.xml: Makefile
+	@-chmod u+w $(srcdir) $(srcdir)/version.xml
+	echo @PACKAGE_VERSION@ > $(srcdir)/version.xml
+
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
 # e.g. expand_content_files=running.sgml
