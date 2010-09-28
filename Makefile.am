@@ -38,7 +38,7 @@ check-valgrind:
 maintainer-upload-release: _maintainer-upload-release-local
 _maintainer-upload-release-local: _maintainer-upload-release-check
 	rsync -rvzPp --chmod=Dg+s,ug+rwX,o=rX $(srcdir)/docs/reference/html/ \
-	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib-0.12.x/
+	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib/
 
 BRANCH = $(shell sh tools/git-which-branch.sh misc | tr -d '\n' | tr -C "[:alnum:]" _)
 UPLOAD_BRANCH_TO = people.freedesktop.org:public_html/telepathy-glib
@@ -46,17 +46,6 @@ UPLOAD_BRANCH_TO = people.freedesktop.org:public_html/telepathy-glib
 upload-branch-docs: all
 	rsync -rtzvPp --chmod=a+rX docs/reference/html/ \
 		$(UPLOAD_BRANCH_TO)-$(BRANCH)/
-
-if HAVE_AUTOMAKE_FOR_DIST
-# automake is new enough to make dist
-else
-dist-hook: dist-hook-check-am
-dist-hook-check-am:
-	@echo "*** Your automake is too old to compile Vala.">&2
-	@echo "*** You can build telepathy-glib with this automake, but you">&2
-	@echo "*** should not use it to make tarball releases.">&2
-	@exit 1
-endif
 
 include tools/lcov.am
 

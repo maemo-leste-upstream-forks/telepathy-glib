@@ -115,6 +115,15 @@
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-list-attributes" title="tp_connection_get_contact_list_attributes ()">tp_connection_get_contact_list_attributes</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> timeout_ms</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> * const *interfaces</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> hold</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-callback-for-get-contact-attributes" title="tp_cli_connection_interface_contacts_callback_for_get_contact_attributes ()"><span class="type">tp_cli_connection_interface_contacts_callback_for_get_contact_attributes</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()">tp_connection_hold_handles</a>          (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> timeout_ms</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpHandleType" title="enum TpHandleType"><span class="type">TpHandleType</span></a> handle_type</code></em>,
@@ -1390,6 +1399,86 @@ that appears as a key in the callback's <em class="parameter"><code>attributes</
 <tr>
 <td><p><span class="term"><em class="parameter"><code>hold</code></em> :</span></p></td>
 <td>if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the callback will hold one reference to each valid handle
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> called on success or
+ failure (unless <em class="parameter"><code>weak_object</code></em> has become unreferenced). <span class="annotation">[type GObject.Callback]</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>arbitrary user-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>called to destroy <em class="parameter"><code>user_data</code></em> after calling <em class="parameter"><code>callback</code></em>, or when
+ <em class="parameter"><code>weak_object</code></em> becomes unreferenced (whichever occurs sooner)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>if not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, an object to be weakly referenced: if it is
+ destroyed, <em class="parameter"><code>callback</code></em> will not be called
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_connection_get_contact_list_attributes ()">
+<a name="tp-connection-get-contact-list-attributes"></a><h3>tp_connection_get_contact_list_attributes ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_connection_get_contact_list_attributes
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> timeout_ms</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> * const *interfaces</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> hold</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-callback-for-get-contact-attributes" title="tp_cli_connection_interface_contacts_callback_for_get_contact_attributes ()"><span class="type">tp_cli_connection_interface_contacts_callback_for_get_contact_attributes</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
+<p>
+Return (via a callback) the contacts on the contact list and any number of
+their attributes, and if <em class="parameter"><code>hold</code></em> is TRUE, hold a reference to them.
+</p>
+<p>
+This is a thin wrapper around the RequestContactList D-Bus method,
+and should be used in preference to lower-level functions; it is similar
+to <a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()"><code class="function">tp_connection_get_contact_attributes()</code></a>.
+</p>
+<p>
+The <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> API provides a higher-level abstraction which should
+usually be used instead.
+</p>
+<p>
+If <em class="parameter"><code>hold</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the <em class="parameter"><code>callback</code></em> is given one reference to each handle
+that appears as a key in the callback's <em class="parameter"><code>attributes</code></em> parameter.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em> :</span></p></td>
+<td>the timeout in milliseconds (using a large timeout is
+ recommended)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interfaces</code></em> :</span></p></td>
+<td>a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> of interfaces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>hold</code></em> :</span></p></td>
+<td>if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the callback will hold one reference to each handle it
+ receives
 </td>
 </tr>
 <tr>
