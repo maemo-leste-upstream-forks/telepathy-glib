@@ -111,13 +111,14 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	channel-manager.lo channel-request.lo client.lo connection.lo \
 	connection-avatars.lo connection-contact-info.lo \
 	connection-handles.lo connection-manager.lo contact.lo \
-	contacts-mixin.lo dbus.lo dbus-daemon.lo \
-	dbus-properties-mixin.lo debug.lo debug-sender.lo \
-	interfaces.lo errors.lo exportable-channel.lo gnio-util.lo \
-	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
-	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
-	handle-set.lo heap.lo intset.lo channel-iface.lo \
-	channel-factory-iface.lo media-interfaces.lo message-mixin.lo \
+	contact-list-channel.lo base-contact-list.lo contacts-mixin.lo \
+	dbus.lo dbus-daemon.lo dbus-properties-mixin.lo debug.lo \
+	debug-sender.lo interfaces.lo errors.lo exportable-channel.lo \
+	gnio-util.lo group-mixin.lo gtypes.lo handle.lo \
+	handle-channels-context.lo handle-repo.lo \
+	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
+	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
+	media-interfaces.lo message-mixin.lo \
 	observe-channels-context.lo presence-mixin.lo \
 	properties-mixin.lo protocol.lo proxy.lo proxy-methods.lo \
 	proxy-signals.lo run.lo simple-approver.lo simple-handler.lo \
@@ -382,6 +383,7 @@ our_headers = \
     connection-manager.h \
     capabilities.h \
     contact.h \
+    base-contact-list.h \
     contacts-mixin.h \
     dbus.h \
     dbus-daemon.h \
@@ -458,6 +460,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     base-client.c \
     base-client-internal.h \
     base-connection.c \
+    base-connection-internal.h \
     base-connection-manager.c \
     base-protocol-internal.h \
     base-protocol.c \
@@ -479,6 +482,10 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection-handles.c \
     connection-manager.c \
     contact.c \
+    contact-list-channel-internal.h \
+    contact-list-channel.c \
+    base-contact-list.c \
+    base-contact-list-internal.h \
     contacts-mixin.c \
     dbus.c \
     dbus-daemon.c \
@@ -588,7 +595,8 @@ ABI_LISTS = \
     versions/0.11.13.abi \
     versions/0.11.14.abi \
     versions/0.11.15.abi \
-    versions/0.11.16.abi
+    versions/0.11.16.abi \
+    versions/0.13.0.abi
 
 
 # The quoting here is unnecessary but harmless, and has the useful side-effect
@@ -760,10 +768,6 @@ introspection_extra_dist = kludge.xsl
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h \
 @HAVE_INTROSPECTION_TRUE@	$(NULL)
 
-@G_IR_SCANNER_NEW_ARGS_FALSE@@HAVE_INTROSPECTION_TRUE@gi_identifier_prefix_arg = --strip-prefix
-@G_IR_SCANNER_NEW_ARGS_TRUE@@HAVE_INTROSPECTION_TRUE@gi_identifier_prefix_arg = --identifier-prefix
-@G_IR_SCANNER_NEW_ARGS_FALSE@@HAVE_INTROSPECTION_TRUE@gi_warn_all_arg = 
-@G_IR_SCANNER_NEW_ARGS_TRUE@@HAVE_INTROSPECTION_TRUE@gi_warn_all_arg = --warn-all
 @HAVE_INTROSPECTION_TRUE@girdir = $(datadir)/gir-1.0
 @HAVE_INTROSPECTION_TRUE@gir_DATA = TelepathyGLib-0.12.gir
 @HAVE_INTROSPECTION_TRUE@typelibsdir = $(libdir)/girepository-1.0/
@@ -866,6 +870,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-contact-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-protocol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatch-operation.Plo@am__quote@
@@ -882,6 +887,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-list-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-daemon.Plo@am__quote@
@@ -1645,7 +1651,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 @HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 @HAVE_INTROSPECTION_TRUE@		--namespace TelepathyGLib \
 @HAVE_INTROSPECTION_TRUE@		--nsversion=0.12 \
-@HAVE_INTROSPECTION_TRUE@		$(gi_identifier_prefix_arg)=Tp \
+@HAVE_INTROSPECTION_TRUE@		--identifier-prefix=Tp \
 @HAVE_INTROSPECTION_TRUE@		-I$(top_builddir) \
 @HAVE_INTROSPECTION_TRUE@		-I$(top_srcdir) \
 @HAVE_INTROSPECTION_TRUE@		--include=GLib-2.0 \
@@ -1654,7 +1660,7 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 @HAVE_INTROSPECTION_TRUE@		--library=libtelepathy-glib.la \
 @HAVE_INTROSPECTION_TRUE@		--pkg gio-2.0 \
 @HAVE_INTROSPECTION_TRUE@		--pkg dbus-glib-1 \
-@HAVE_INTROSPECTION_TRUE@		$(gi_warn_all_arg) \
+@HAVE_INTROSPECTION_TRUE@		--warn-all \
 @HAVE_INTROSPECTION_TRUE@		--output _gen/$@.tmp \
 @HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
 @HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge.xsl _gen/$@.tmp > $@

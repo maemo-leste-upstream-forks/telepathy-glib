@@ -1,7 +1,7 @@
 /*
  * contacts-mixin.c - Source for TpContactsMixin
- * Copyright (C) 2008 Collabora Ltd.
- * Copyright (C) 2008 Nokia Corporation
+ * Copyright © 2008-2010 Collabora Ltd.
+ * Copyright © 2008 Nokia Corporation
  *   @author Sjoerd Simons <sjoerd.simons@collabora.co.uk>
  *
  * This library is free software; you can redistribute it and/or
@@ -262,21 +262,47 @@ tp_contacts_mixin_finalize (GObject *obj)
   g_slice_free (TpContactsMixinPrivate, mixin->priv);
 }
 
-static void
-tp_contacts_mixin_get_contact_attributes (
-  TpSvcConnectionInterfaceContacts *iface, const GArray *handles,
-  const char **interfaces, gboolean hold, DBusGMethodInvocation *context)
+/**
+ * tp_contacts_mixin_get_contact_attributes: (skip)
+ * @obj: A connection instance that uses this mixin. The connection must be connected.
+ * @handles: List of handles to retrieve contacts for. Any invalid handles will be
+ * dropped from the returned mapping.
+ * @interfaces: A list of interfaces to retrieve attributes from.
+ * @assumed_interfaces: A list of additional interfaces to retrieve attributes
+ *  from. This can be used for interfaces documented as automatically included,
+ *  like %TP_IFACE_CONNECTION for GetContactAttributes,
+ *  or %TP_IFACE_CONNECTION and %TP_IFACE_CONNECTION_CONTACT_LIST for
+ *  GetContactListAttributes.
+ * @sender: The DBus client's unique name. If this is not NULL, the requested handles
+ * will be held on behalf of this client.
+ *
+ * Get contact attributes for the given contacts. Provide attributes for all requested
+ * interfaces. If contact attributes are not immediately known, the behaviour is defined
+ * by the interface; the attribute should either be omitted from the result or replaced
+ * with a default value.
+ *
+ * Returns: A dictionary mapping the contact handles to contact attributes.
+ *
+ */
+GHashTable *
+tp_contacts_mixin_get_contact_attributes (GObject *obj,
+    const GArray *handles,
+    const gchar **interfaces,
+    const gchar **assumed_interfaces,
+    const gchar *sender)
 {
-  TpContactsMixin *self = TP_CONTACTS_MIXIN (iface);
   GHashTable *result;
   guint i;
-  TpBaseConnection *conn = TP_BASE_CONNECTION (iface);
+  TpBaseConnection *conn = TP_BASE_CONNECTION (obj);
+  TpContactsMixin *self = TP_CONTACTS_MIXIN (obj);
   TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (conn,
         TP_HANDLE_TYPE_CONTACT);
   GArray *valid_handles;
   TpContactsMixinFillContactAttributesFunc func;
 
-  TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (conn, context);
+  g_return_val_if_fail (TP_IS_BASE_CONNECTION (obj), NULL);
+  g_return_val_if_fail (TP_CONTACTS_MIXIN_OFFSET (obj) != 0, NULL);
+  g_return_val_if_fail (conn->status == TP_CONNECTION_STATUS_CONNECTED, NULL);
 
   /* Setup handle array and hash with valid handles, optionally holding them */
   valid_handles = g_array_sized_new (TRUE, TRUE, sizeof (TpHandle),
@@ -297,24 +323,25 @@ tp_contacts_mixin_get_contact_attributes (
         }
     }
 
-  if (hold)
-    {
-      gchar *sender = dbus_g_method_get_sender (context);
-
-      tp_handles_client_hold (contact_repo, sender, valid_handles, NULL);
-      g_free (sender);
-    }
+  if (sender != NULL)
+    tp_handles_client_hold (contact_repo, sender, valid_handles, NULL);
 
   /* ensure the handles don't disappear while calling out to various functions
    */
   tp_handles_ref (contact_repo, valid_handles);
 
-  func = g_hash_table_lookup (self->priv->interfaces, TP_IFACE_CONNECTION);
+  for (i = 0; assumed_interfaces != NULL && assumed_interfaces[i] != NULL; i++)
+    {
+      func = g_hash_table_lookup (self->priv->interfaces, assumed_interfaces[i]);
 
-  if (func != NULL)
-    func (G_OBJECT (iface), valid_handles, result);
+      if (func == NULL)
+        DEBUG ("non-inspectable assumed interface %s given; ignoring",
+            assumed_interfaces[i]);
+      else
+        func (obj, valid_handles, result);
+    }
 
-  for (i = 0; interfaces[i] != NULL; i++)
+  for (i = 0; interfaces != NULL && interfaces[i] != NULL; i++)
     {
 
       func = g_hash_table_lookup (self->priv->interfaces, interfaces[i]);
@@ -322,16 +349,44 @@ tp_contacts_mixin_get_contact_attributes (
       if (func == NULL)
         DEBUG ("non-inspectable interface %s given; ignoring", interfaces[i]);
       else
-        func (G_OBJECT(iface), valid_handles, result);
+        func (obj, valid_handles, result);
     }
-
-  tp_svc_connection_interface_contacts_return_from_get_contact_attributes (
-    context, result);
-
-  g_hash_table_destroy (result);
 
   tp_handles_unref (contact_repo, valid_handles);
   g_array_free (valid_handles, TRUE);
+
+  return result;
+}
+
+static void
+tp_contacts_mixin_get_contact_attributes_impl (
+  TpSvcConnectionInterfaceContacts *iface,
+  const GArray *handles,
+  const char **interfaces,
+  gboolean hold,
+  DBusGMethodInvocation *context)
+{
+  TpBaseConnection *conn = TP_BASE_CONNECTION (iface);
+  GHashTable *result;
+  gchar *sender = NULL;
+  const gchar *assumed_interfaces[] = {
+    TP_IFACE_CONNECTION,
+    NULL
+  };
+
+  TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (conn, context);
+
+  if (hold)
+    sender = dbus_g_method_get_sender (context);
+
+  result = tp_contacts_mixin_get_contact_attributes (G_OBJECT (conn),
+      handles, interfaces, assumed_interfaces, sender);
+
+  tp_svc_connection_interface_contacts_return_from_get_contact_attributes (
+      context, result);
+
+  g_free (sender);
+  g_hash_table_destroy (result);
 }
 
 /**
@@ -354,7 +409,7 @@ tp_contacts_mixin_iface_init (gpointer g_iface, gpointer iface_data)
     (TpSvcConnectionInterfaceContactsClass *) g_iface;
 
 #define IMPLEMENT(x) tp_svc_connection_interface_contacts_implement_##x ( \
-    klass, tp_contacts_mixin_##x)
+    klass, tp_contacts_mixin_##x##_impl)
   IMPLEMENT(get_contact_attributes);
 #undef IMPLEMENT
 }
