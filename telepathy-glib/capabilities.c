@@ -104,7 +104,7 @@ tp_capabilities_get_channel_classes (TpCapabilities *self)
 gboolean
 tp_capabilities_is_specific_to_contact (TpCapabilities *self)
 {
-  g_return_val_if_fail (self != NULL, FALSE);
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
 
   return self->priv->contact_specific;
 }
@@ -275,6 +275,8 @@ supports_simple_channel (TpCapabilities *self,
 {
   guint i;
 
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
+
   for (i = 0; i < self->priv->classes->len; i++)
     {
       GValueArray *arr = g_ptr_array_index (self->priv->classes, i);
@@ -365,6 +367,7 @@ tp_capabilities_supports_tubes_common (TpCapabilities *self,
 {
   guint i;
 
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
   g_return_val_if_fail (expected_handle_type == TP_HANDLE_TYPE_CONTACT ||
       expected_handle_type == TP_HANDLE_TYPE_ROOM, FALSE);
 
