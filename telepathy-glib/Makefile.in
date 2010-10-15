@@ -104,12 +104,14 @@ am__DEPENDENCIES_1 =
 libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	account-channel-request.lo account-manager.lo \
-	add-dispatch-operation-context.lo base-channel.lo \
-	base-client.lo base-connection.lo base-connection-manager.lo \
-	base-protocol.lo capabilities.lo channel.lo channel-group.lo \
-	channel-dispatcher.lo channel-dispatch-operation.lo \
-	channel-manager.lo channel-request.lo client.lo connection.lo \
-	connection-avatars.lo connection-contact-info.lo \
+	automatic-proxy-factory.lo add-dispatch-operation-context.lo \
+	base-channel.lo base-client.lo base-connection.lo \
+	base-connection-manager.lo base-protocol.lo \
+	basic-proxy-factory.lo capabilities.lo channel.lo \
+	channel-group.lo channel-dispatcher.lo \
+	channel-dispatch-operation.lo channel-manager.lo \
+	channel-request.lo client.lo client-channel-factory.lo \
+	connection.lo connection-avatars.lo connection-contact-info.lo \
 	connection-handles.lo connection-manager.lo contact.lo \
 	contact-list-channel.lo base-contact-list.lo contacts-mixin.lo \
 	dbus.lo dbus-daemon.lo dbus-properties-mixin.lo debug.lo \
@@ -122,7 +124,8 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	observe-channels-context.lo presence-mixin.lo \
 	properties-mixin.lo protocol.lo proxy.lo proxy-methods.lo \
 	proxy-signals.lo run.lo simple-approver.lo simple-handler.lo \
-	simple-observer.lo text-mixin.lo util.lo
+	simple-observer.lo stream-tube-channel.lo \
+	stream-tube-connection.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	signals-marshal.lo genums.lo tp-svc-account.lo \
 	tp-svc-account-manager.lo tp-svc-channel.lo \
@@ -365,12 +368,14 @@ our_headers = \
     account.h \
     account-channel-request.h \
     account-manager.h \
+    automatic-proxy-factory.h \
     add-dispatch-operation-context.h \
     base-client.h \
     base-channel.h \
     base-connection.h \
     base-connection-manager.h \
     base-protocol.h \
+    basic-proxy-factory.h \
     channel.h \
     channel-iface.h \
     channel-dispatcher.h \
@@ -379,6 +384,7 @@ our_headers = \
     channel-manager.h \
     channel-request.h \
     client.h \
+    client-channel-factory.h \
     connection.h \
     connection-manager.h \
     capabilities.h \
@@ -418,6 +424,8 @@ our_headers = \
     simple-approver.h \
     simple-handler.h \
     simple-observer.h \
+    stream-tube-channel.h \
+    stream-tube-connection.h \
     svc-account.h \
     svc-account-manager.h \
     svc-channel-dispatcher.h \
@@ -454,6 +462,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     account-internal.h \
     account-manager.c \
     account-manager-internal.h \
+    automatic-proxy-factory.c \
     add-dispatch-operation-context-internal.h \
     add-dispatch-operation-context.c \
     base-channel.c \
@@ -464,6 +473,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     base-connection-manager.c \
     base-protocol-internal.h \
     base-protocol.c \
+    basic-proxy-factory.c \
     capabilities.c \
     capabilities-internal.h \
     channel.c \
@@ -475,6 +485,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-manager.c \
     channel-request.c \
     client.c \
+    client-channel-factory.c \
     connection.c \
     connection-avatars.c \
     connection-contact-info.c \
@@ -529,6 +540,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     simple-approver.c \
     simple-handler.c \
     simple-observer.c \
+    stream-tube-channel.c \
+    stream-tube-connection-internal.h \
+    stream-tube-connection.c \
     text-mixin.c \
     util.c \
     util-internal.h
@@ -598,6 +612,7 @@ ABI_LISTS = \
     versions/0.11.16.abi \
     versions/0.13.0.abi \
     versions/0.13.1.abi \
+    versions/0.13.2.abi \
     $(NULL)
 
 
@@ -736,6 +751,8 @@ introspection_extra_dist = kludge.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-channel-request.c $(srcdir)/account-channel-request.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-manager.c $(srcdir)/account-manager.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/automatic-proxy-factory.c $(srcdir)/automatic-proxy-factory.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/basic-proxy-factory.c $(srcdir)/basic-proxy-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection.c $(srcdir)/connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-handles.c $(srcdir)/connection-contact-info.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
@@ -766,6 +783,8 @@ introspection_extra_dist = kludge.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-connection.c $(srcdir)/base-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-repo.c $(srcdir)/handle-repo.h $(srcdir)/handle-set.c \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-channel.c $(srcdir)/stream-tube-channel.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-connection.c $(srcdir)/stream-tube-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/errors.c $(srcdir)/errors.h \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h \
 @HAVE_INTROSPECTION_TRUE@	$(NULL)
@@ -868,12 +887,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/add-dispatch-operation-context.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/automatic-proxy-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-contact-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-protocol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic-proxy-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatch-operation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Plo@am__quote@
@@ -883,6 +904,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-request.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-channel-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-avatars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-info.Plo@am__quote@
@@ -927,6 +949,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream-tube-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream-tube-connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-account-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-account.Plo@am__quote@
@@ -1340,7 +1364,7 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
@@ -1416,7 +1440,7 @@ uninstall-am: uninstall-girDATA uninstall-libLTLIBRARIES \
 .MAKE: all check check-am install install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am check-local clean \
-	clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-local \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
@@ -1442,6 +1466,9 @@ check-syntax:
 
 distclean-local:
 	rm -rf _gen
+
+clean-local:
+	rm -rf tmp-introspect*
 check-coding-style:
 	@fail=0; \
 	if test -n "$(check_misc_sources)"; then \
