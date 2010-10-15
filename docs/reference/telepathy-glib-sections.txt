@@ -1259,6 +1259,8 @@ tp_svc_media_stream_handler_unhold_failure_impl
 tp_svc_media_stream_handler_codecs_updated_impl
 tp_svc_media_stream_handler_implement_codecs_updated
 tp_svc_media_stream_handler_return_from_codecs_updated
+tp_svc_media_stream_handler_emit_start_named_telephony_event
+tp_svc_media_stream_handler_emit_start_sound_telephony_event
 <SUBSECTION Standard>
 TP_SVC_MEDIA_STREAM_HANDLER
 TP_IS_SVC_MEDIA_STREAM_HANDLER
@@ -1347,6 +1349,8 @@ tp_user_action_time_should_present
 <INCLUDE>telepathy-glib/gnio-util.h</INCLUDE>
 tp_g_socket_address_from_variant
 tp_address_variant_from_g_socket_address
+tp_unix_connection_receive_credentials_with_byte
+tp_unix_connection_send_credentials_with_byte
 </SECTION>
 
 <SECTION>
@@ -2109,6 +2113,7 @@ TP_ERROR_STR_CERT_REVOKED
 TP_ERROR_STR_CERT_INSECURE
 TP_ERROR_STR_CERT_LIMIT_EXCEEDED
 TP_ERROR_STR_NOT_YET
+TP_ERROR_STR_REJECTED
 <SUBSECTION Standard>
 tp_error_get_type
 tp_errors_quark
@@ -3747,6 +3752,10 @@ tp_cli_media_stream_handler_signal_callback_set_stream_held
 tp_cli_media_stream_handler_call_codecs_updated
 tp_cli_media_stream_handler_callback_for_codecs_updated
 tp_cli_media_stream_handler_run_codecs_updated
+tp_cli_media_stream_handler_signal_callback_start_named_telephony_event
+tp_cli_media_stream_handler_connect_to_start_named_telephony_event
+tp_cli_media_stream_handler_signal_callback_start_sound_telephony_event
+tp_cli_media_stream_handler_connect_to_start_sound_telephony_event
 </SECTION>
 
 <SECTION>
@@ -3931,13 +3940,20 @@ tp_account_get_avatar_async
 tp_account_get_avatar_finish
 tp_account_set_avatar_async
 tp_account_set_avatar_finish
+tp_account_get_storage_provider
+tp_account_get_storage_identifier
+tp_account_get_storage_restrictions
+tp_account_get_storage_specific_information_async
+tp_account_get_storage_specific_information_finish
 <SUBSECTION>
 TP_ACCOUNT_FEATURE_CORE
+TP_ACCOUNT_FEATURE_STORAGE
 tp_account_is_prepared
 tp_account_prepare_async
 tp_account_prepare_finish
 <SUBSECTION Private>
 tp_account_get_feature_quark_core
+tp_account_get_feature_quark_storage
 <SUBSECTION>
 tp_cli_account_callback_for_reconnect
 tp_cli_account_call_reconnect
@@ -4356,6 +4372,8 @@ tp_base_client_get_dbus_daemon
 tp_base_client_get_name
 tp_base_client_get_uniquify_name
 tp_base_client_get_account_manager
+tp_base_client_set_channel_factory
+tp_base_client_get_channel_factory
 <SUBSECTION Standard>
 tp_base_client_get_type
 TP_BASE_CLIENT
@@ -4645,6 +4663,7 @@ tp_account_channel_request_create_channel_async
 tp_account_channel_request_create_channel_finish
 tp_account_channel_request_ensure_channel_async
 tp_account_channel_request_ensure_channel_finish
+tp_account_channel_request_set_channel_factory
 <SUBSECTION Standard>
 tp_account_channel_request_get_type
 TP_ACCOUNT_CHANNEL_REQUEST
@@ -4802,4 +4821,99 @@ tp_contact_group_list_get_type
 TP_IS_MUTABLE_CONTACT_GROUP_LIST
 TP_MUTABLE_CONTACT_GROUP_LIST_GET_INTERFACE
 tp_mutable_contact_group_list_get_type
+</SECTION>
+
+<SECTION>
+<FILE>stream-tube-channel</FILE>
+<TITLE>stream-tube-channel</TITLE>
+<INCLUDE>telepathy-glib/stream-tube-channel.h</INCLUDE>
+<SUBSECTION>
+TpStreamTubeChannel
+TpStreamTubeChannelClass
+tp_stream_tube_channel_accept_async
+tp_stream_tube_channel_accept_finish
+tp_stream_tube_channel_get_parameters
+tp_stream_tube_channel_get_service
+tp_stream_tube_channel_new
+tp_stream_tube_channel_offer_async
+tp_stream_tube_channel_offer_finish
+<SUBSECTION Standard>
+TP_IS_STREAM_TUBE_CHANNEL
+TP_IS_STREAM_TUBE_CHANNEL_CLASS
+TP_STREAM_TUBE_CHANNEL
+TP_STREAM_TUBE_CHANNEL_CLASS
+TP_STREAM_TUBE_CHANNEL_GET_CLASS
+TP_TYPE_STREAM_TUBE_CHANNEL
+tp_stream_tube_channel_get_type
+TpStreamTubeChannelPrivate
+</SECTION>
+
+<SECTION>
+<FILE>stream-tube-connection</FILE>
+<TITLE>stream-tube-connection</TITLE>
+<INCLUDE>telepathy-glib/stream-tube-connection.h</INCLUDE>
+<SUBSECTION>
+TpStreamTubeConnection
+TpStreamTubeConnectionClass
+tp_stream_tube_connection_get_channel
+tp_stream_tube_connection_get_contact
+tp_stream_tube_connection_get_socket_connection
+<SUBSECTION Standard>
+TP_IS_STREAM_TUBE_CONNECTION
+TP_IS_STREAM_TUBE_CONNECTION_CLASS
+TP_STREAM_TUBE_CONNECTION
+TP_STREAM_TUBE_CONNECTION_CLASS
+TP_STREAM_TUBE_CONNECTION_GET_CLASS
+TP_TYPE_STREAM_TUBE_CONNECTION
+tp_stream_tube_connection_get_type
+TpStreamTubeConnectionPrivate
+
+<SECTION>
+<FILE>client-channel-factory</FILE>
+<TITLE>client-channel-factory</TITLE>
+<INCLUDE>telepathy-glib/client-channel-factory.h</INCLUDE>
+TpClientChannelFactoryInterface
+tp_client_channel_factory_create_channel
+<SUBSECTION Standard>
+TP_CLIENT_CHANNEL_FACTORY
+TP_CLIENT_CHANNEL_FACTORY_GET_IFACE
+TP_IS_CLIENT_CHANNEL_FACTORY
+TP_TYPE_CLIENT_CHANNEL_FACTORY
+tp_client_channel_factory_get_type
+</SECTION>
+
+<SECTION>
+<FILE>basic-proxy-factory</FILE>
+<TITLE>basic-proxy-factory</TITLE>
+<INCLUDE>telepathy-glib/basic-proxy-factory.h</INCLUDE>
+TpBasicProxyFactory
+TpBasicProxyFactoryClass
+tp_basic_proxy_factory_new
+tp_basic_proxy_factory_dup
+<SUBSECTION Standard>
+TP_BASIC_PROXY_FACTORY
+TP_BASIC_PROXY_FACTORY_GET_CLASS
+TP_IS_BASIC_PROXY_FACTORY
+TP_TYPE_BASIC_PROXY_FACTORY
+TP_BASIC_PROXY_FACTORY_CLASS
+TP_IS_BASIC_PROXY_FACTORY_CLASS
+tp_basic_proxy_factory_get_type
+</SECTION>
+
+<SECTION>
+<FILE>automatic-proxy-factory</FILE>
+<TITLE>automatic-proxy-factory</TITLE>
+<INCLUDE>telepathy-glib/automatic-proxy-factory.h</INCLUDE>
+TpAutomaticProxyFactory
+TpAutomaticProxyFactoryClass
+tp_automatic_proxy_factory_new
+tp_automatic_proxy_factory_dup
+<SUBSECTION Standard>
+TP_AUTOMATIC_PROXY_FACTORY
+TP_AUTOMATIC_PROXY_FACTORY_CLASS
+TP_AUTOMATIC_PROXY_FACTORY_GET_CLASS
+TP_IS_AUTOMATIC_PROXY_FACTORY
+TP_IS_AUTOMATIC_PROXY_FACTORY_CLASS
+TP_TYPE_AUTOMATIC_PROXY_FACTORY
+tp_automatic_proxy_factory_get_type
 </SECTION>
