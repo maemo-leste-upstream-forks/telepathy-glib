@@ -301,6 +301,18 @@
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> arg_Cancelled</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="returnvalue">TpProxySignalConnection</span></a> * <a class="link" href="telepathy-glib-channel-media.html#tp-cli-channel-interface-dtmf-connect-to-tones-deferred" title="tp_cli_channel_interface_dtmf_connect_to_tones_deferred ()">tp_cli_channel_interface_dtmf_connect_to_tones_deferred</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-channel-media.html#tp-cli-channel-interface-dtmf-signal-callback-tones-deferred" title="tp_cli_channel_interface_dtmf_signal_callback_tones_deferred ()"><span class="type">tp_cli_channel_interface_dtmf_signal_callback_tones_deferred</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-channel-media.html#tp-cli-channel-interface-dtmf-signal-callback-tones-deferred" title="tp_cli_channel_interface_dtmf_signal_callback_tones_deferred ()">*tp_cli_channel_interface_dtmf_signal_callback_tones_deferred</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Tones</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
 
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-channel-media.html#tp-cli-channel-interface-hold-callback-for-get-hold-state" title="tp_cli_channel_interface_hold_callback_for_get_hold_state ()">*tp_cli_channel_interface_hold_callback_for_get_hold_state</a>)
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
@@ -2405,7 +2417,7 @@ succeeds or fails.
 Start a MultipleTones method call.
 </p>
 <p>
-&lt;p&gt;Send multiple DTMF events to all eligible streams in the channel.         Each character in the Tones string must be a valid DTMF event         (as defined by         &lt;a href="http://www.rfc-editor.org/rfc/rfc4733.txt"&gt;RFC4733&lt;/a&gt;).         Each tone will be played for a pre-defined number of milliseconds,         followed by a pause before the next tone is played.  The         duration/pause is defined by the protocol or connection manager.&lt;/p&gt;         &lt;tp:rationale&gt;           In cases where the client knows in advance the tone sequence it wants           to send, it's easier to use this method than manually start and stop           each tone in the sequence.         &lt;/tp:rationale&gt;          &lt;p&gt;Tone overlaping or queueing is not supported, so this method can only           be called if no DTMF tones are already being played.&lt;/p&gt;
+&lt;p&gt;Send multiple DTMF events to all eligible streams in the channel.         Each tone will be played for an implementation-defined number of         milliseconds (typically 250ms), followed by a gap before the next tone         is played (typically 100ms). The         duration and gap are defined by the protocol or connection manager.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;In cases where the client knows in advance the tone sequence it             wants to send, it's easier to use this method than manually start             and stop each tone in the sequence.&lt;/p&gt;            &lt;p&gt;The tone and gap lengths may need to vary for interoperability,             according to the protocol and other implementations' ability to             recognise tones. At the time of writing, GStreamer uses a             minimum of 250ms tones and 100ms gaps when playing in-band DTMF             in the normal audio stream, or 70ms tones and 50ms gaps when             encoding DTMF as &lt;code&gt;audio/telephone-event&lt;/code&gt;.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Tone overlaping or queueing is not supported, so this method can only           be called if no DTMF tones are already being played.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -2423,7 +2435,7 @@ Start a MultipleTones method call.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>in_Tones</code></em> :</span></p></td>
-<td>Used to pass an 'in' argument: A string representation of one or more DTMF           events.
+<td>Used to pass an 'in' argument: &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;A string representation of one or more DTMF             events. Implementations of this method MUST support all of the             following characters in this string:&lt;/p&gt;            &lt;ul&gt;             &lt;li&gt;the digits 0-9, letters A-D and a-d, and symbols '*' and '#'               correspond to the members of &lt;tp:type&gt;DTMF_Event&lt;/tp:type&gt;&lt;/li&gt;              &lt;li&gt;any of 'p', 'P', 'x', 'X' or ',' (comma) results in an               implementation-defined pause, typically for 3 seconds&lt;/li&gt;              &lt;li&gt;'w' or 'W' waits for the user to continue, by stopping               interpretation of the string, and if there is more to be played,               emitting the &lt;tp:member-ref&gt;TonesDeferred&lt;/tp:member-ref&gt; signal               with the rest of the string as its argument: see that signal               for details&lt;/li&gt;           &lt;/ul&gt;
 </td>
 </tr>
 <tr>
@@ -2697,6 +2709,110 @@ Represents the signature of a callback for the signal StoppedTones.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>arg_Cancelled</code></em> :</span></p></td>
 <td>True if the DTMF tones were actively cancelled via           &lt;tp:member-ref&gt;StopTone&lt;/tp:member-ref&gt;.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_cli_channel_interface_dtmf_connect_to_tones_deferred ()">
+<a name="tp-cli-channel-interface-dtmf-connect-to-tones-deferred"></a><h3>tp_cli_channel_interface_dtmf_connect_to_tones_deferred ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="returnvalue">TpProxySignalConnection</span></a> * tp_cli_channel_interface_dtmf_connect_to_tones_deferred
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-channel-media.html#tp-cli-channel-interface-dtmf-signal-callback-tones-deferred" title="tp_cli_channel_interface_dtmf_signal_callback_tones_deferred ()"><span class="type">tp_cli_channel_interface_dtmf_signal_callback_tones_deferred</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>
+Connect a handler to the signal TonesDeferred.
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Emitted when 'w' or 'W', indicating &amp;quot;wait for the user to continue&amp;quot;,           is encountered while playing a DTMF string queued by           &lt;tp:member-ref&gt;MultipleTones&lt;/tp:member-ref&gt; or           &lt;tp:member-ref&gt;InitialTones&lt;/tp:member-ref&gt;. Any queued DTMF events           after the 'w', which have not yet been played, are placed in the           &lt;tp:member-ref&gt;DeferredTones&lt;/tp:member-ref&gt; property and copied           into this signal's argument.&lt;/p&gt;          &lt;p&gt;When the channel handler is ready to continue, it MAY pass the           value of &lt;tp:member-ref&gt;DeferredTones&lt;/tp:member-ref&gt; to           &lt;tp:member-ref&gt;MultipleTones&lt;/tp:member-ref&gt;, to resume sending.           Alternatively, it MAY ignore the deferred tones, or even play           different tones instead. Any deferred tones are discarded the next           time a tone is played.&lt;/p&gt;          &lt;p&gt;This signal SHOULD NOT be emitted if there is nothing left to play,           i.e. if the 'w' was the last character in the DTMF string.&lt;/p&gt;
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>A <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to raise an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_cli_channel_interface_dtmf_signal_callback_tones_deferred ()">
+<a name="tp-cli-channel-interface-dtmf-signal-callback-tones-deferred"></a><h3>tp_cli_channel_interface_dtmf_signal_callback_tones_deferred ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*tp_cli_channel_interface_dtmf_signal_callback_tones_deferred)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Tones</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
+<p>
+Represents the signature of a callback for the signal TonesDeferred.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>The proxy on which <a class="link" href="telepathy-glib-channel-media.html#tp-cli-channel-interface-dtmf-connect-to-tones-deferred" title="tp_cli_channel_interface_dtmf_connect_to_tones_deferred ()"><code class="function">tp_cli_channel_interface_dtmf_connect_to_tones_deferred()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Tones</code></em> :</span></p></td>
+<td>The new non-empty value of           &lt;tp:member-ref&gt;DeferredTones&lt;/tp:member-ref&gt;.
 </td>
 </tr>
 <tr>

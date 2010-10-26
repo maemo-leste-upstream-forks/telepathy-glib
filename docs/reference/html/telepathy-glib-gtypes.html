@@ -124,6 +124,14 @@
 
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-CONTACT-CLIENT-TYPES:CAPS" title="TP_HASH_TYPE_CONTACT_CLIENT_TYPES">TP_HASH_TYPE_CONTACT_CLIENT_TYPES</a>
 
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-MAIL:CAPS" title="TP_HASH_TYPE_MAIL">TP_HASH_TYPE_MAIL</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-MAIL-LIST:CAPS" title="TP_ARRAY_TYPE_MAIL_LIST">TP_ARRAY_TYPE_MAIL_LIST</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-MAIL-ADDRESS:CAPS" title="TP_STRUCT_TYPE_MAIL_ADDRESS">TP_STRUCT_TYPE_MAIL_ADDRESS</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-MAIL-ADDRESS-LIST:CAPS" title="TP_ARRAY_TYPE_MAIL_ADDRESS_LIST">TP_ARRAY_TYPE_MAIL_ADDRESS_LIST</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-MAIL-URL:CAPS" title="TP_STRUCT_TYPE_MAIL_URL">TP_STRUCT_TYPE_MAIL_URL</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-HTTP-POST-DATA:CAPS" title="TP_STRUCT_TYPE_HTTP_POST_DATA">TP_STRUCT_TYPE_HTTP_POST_DATA</a>
+#define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-HTTP-POST-DATA-LIST:CAPS" title="TP_ARRAY_TYPE_HTTP_POST_DATA_LIST">TP_ARRAY_TYPE_HTTP_POST_DATA_LIST</a>
+
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-LOCAL-PENDING-INFO:CAPS" title="TP_STRUCT_TYPE_LOCAL_PENDING_INFO">TP_STRUCT_TYPE_LOCAL_PENDING_INFO</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-ARRAY-TYPE-LOCAL-PENDING-INFO-LIST:CAPS" title="TP_ARRAY_TYPE_LOCAL_PENDING_INFO_LIST">TP_ARRAY_TYPE_LOCAL_PENDING_INFO_LIST</a>
 #define             <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-HANDLE-OWNER-MAP:CAPS" title="TP_HASH_TYPE_HANDLE_OWNER_MAP">TP_HASH_TYPE_HANDLE_OWNER_MAP</a>
@@ -2036,6 +2044,265 @@ Values (D-Bus type <code class="literal">as</code>,
 type <code class="literal">Contact_Client_Type[]</code>,
 named <code class="literal">Client_Types</code>):
 The contact's client types as documented earlier in this interface.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_HASH_TYPE_MAIL">
+<a name="TP-HASH-TYPE-MAIL:CAPS"></a><h3>TP_HASH_TYPE_MAIL</h3>
+<pre class="programlisting">#define TP_HASH_TYPE_MAIL (tp_type_dbus_hash_sv ())
+</pre>
+<p>
+An extensible map representing a mail, or (on protocols where         &lt;tt&gt;Thread_Based&lt;/tt&gt; appears in         &lt;tp:member-ref&gt;MailNotificationFlags&lt;/tp:member-ref&gt;) a thread of         mails. All keys are optional where not otherwise stated; however, at         least one of &amp;quot;senders&amp;quot; and &amp;quot;subject&amp;quot; must be included.
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
+appropriate for representing a D-Bus
+dictionary of signature
+<code class="literal">a{sv}</code>.
+</p>
+<p>
+Keys (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Key</code>):
+&lt;p&gt;A key providing information about the mail or thread. Well-known             keys are as follows:&lt;/p&gt;          &lt;dl&gt;           &lt;dt&gt;id — s&lt;/dt&gt;           &lt;dd&gt;             &lt;p&gt;A unique ID for this e-mail. CMs with               &lt;tt&gt;Supports_Unread_Mails&lt;/tt&gt; set in               &lt;tp:member-ref&gt;MailNotificationFlags&lt;/tp:member-ref&gt; MUST provide               this key in each &lt;tp:type&gt;Mail&lt;/tp:type&gt;.&lt;/p&gt;              &lt;p&gt;If provided, the ID SHOULD be unique to a Mail at least until               that mail is removed with the               &lt;tp:member-ref&gt;UnreadMailsChanged&lt;/tp:member-ref&gt; signal               (in protocols with &lt;tt&gt;Supports_Unread_Emails&lt;/tt&gt;), or               unique for the duration of a session (otherwise).&lt;/p&gt;              &lt;tp:rationale&gt;               &lt;p&gt;In protocols with Supports_Unread_Mails, this key is used to                 indicate which mail was removed. In protocols without that                 feature, it's impossible to tell when a mail has been removed                 (and hence how long the identifier will remain valid for use                 with &lt;tp:member-ref&gt;RequestMailURL&lt;/tp:member-ref&gt;).&lt;/p&gt;             &lt;/tp:rationale&gt;           &lt;/dd&gt;            &lt;dt&gt;url-data — any type&lt;/dt&gt;           &lt;dd&gt;An opaque identifier (typically a string or list of strings)             provided to the Connection when calling             &lt;tp:member-ref&gt;RequestMailURL&lt;/tp:member-ref&gt;,             containing information used by the Connection to build the URL.           &lt;/dd&gt;            &lt;dt&gt;senders — a(ss) (&lt;tp:type&gt;Mail_Address&lt;/tp:type&gt;)&lt;/dt&gt;           &lt;dd&gt;             An array of sender display name and e-mail address pairs. Note that             only e-mails represented as a thread can have multiple senders.           &lt;/dd&gt;            &lt;dt&gt;to-addresses — a(ss) (&lt;tp:type&gt;Mail_Address&lt;/tp:type&gt;)&lt;/dt&gt;           &lt;dd&gt;             An array of display name and e-mail address pairs representing             the recipients.           &lt;/dd&gt;            &lt;dt&gt;cc-addresses — a(ss) (&lt;tp:type&gt;Mail_Address&lt;/tp:type&gt;)&lt;/dt&gt;           &lt;dd&gt;             An array of display name and e-mail address pairs representing             the carbon-copy recipients.           &lt;/dd&gt;            &lt;dt&gt;sent-timestamp — x (&lt;tp:type&gt;Unix_Timestamp64&lt;/tp:type&gt;)&lt;/dt&gt;           &lt;dd&gt;A UNIX timestamp indicating when the message was sent, or for             a thread, when the most recent message was sent.           &lt;/dd&gt;            &lt;dt&gt;received-timestamp — x (&lt;tp:type&gt;Unix_Timestamp64&lt;/tp:type&gt;)&lt;/dt&gt;           &lt;dd&gt;A UNIX timestamp indicating when the message was received, or for             a thread, when the most recent message was received.           &lt;/dd&gt;            &lt;dt&gt;has-attachments — b&lt;/dt&gt;           &lt;dd&gt;If true, this mail has attachments.&lt;/dd&gt;            &lt;dt&gt;subject — s&lt;/dt&gt;           &lt;dd&gt;             The subject of the message. This MUST be encoded in UTF-8.           &lt;/dd&gt;            &lt;dt&gt;content-type — s&lt;/dt&gt;           &lt;dd&gt;             &lt;p&gt;The MIME type of the message content. Two types are currently               supported: &amp;quot;text/plain&amp;quot; for plain text, and &amp;quot;text/html&amp;quot; for a               HTML document. If omitted, &amp;quot;text/plain&amp;quot; MUST be assumed.               Regardless of MIME type, the content MUST be valid UTF-8 (which               may require that the Connection transcodes it from a legacy               encoding).&lt;/p&gt;              &lt;tp:rationale&gt;               &lt;p&gt;All strings on D-Bus must be UTF-8.&lt;/p&gt;             &lt;/tp:rationale&gt;           &lt;/dd&gt;            &lt;dt&gt;truncated — b&lt;/dt&gt;           &lt;dd&gt;             If true, the content is only a partial message; if false or             omitted, the content is the entire message.           &lt;/dd&gt;            &lt;dt&gt;content — s&lt;/dt&gt;           &lt;dd&gt;             The body of the message, possibly truncated, encoded as appropriate             for &amp;quot;content-type&amp;quot;.           &lt;/dd&gt;            &lt;dt&gt;folder — s&lt;/dt&gt;           &lt;dd&gt;             The name of the folder containing this e-mails.             If omitted, the inbox SHOULD be assumed.           &lt;/dd&gt;         &lt;/dl&gt;
+</p>
+<p>
+Values (D-Bus type <code class="literal">v</code>,
+named <code class="literal">Value</code>):
+The value, of whatever type is appropriate for the           key.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ARRAY_TYPE_MAIL_LIST">
+<a name="TP-ARRAY-TYPE-MAIL-LIST:CAPS"></a><h3>TP_ARRAY_TYPE_MAIL_LIST</h3>
+<pre class="programlisting">#define TP_ARRAY_TYPE_MAIL_LIST (tp_type_dbus_array_of_a_7bsv_7d ())
+</pre>
+<p>
+Expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a>
+of <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-MAIL:CAPS" title="TP_HASH_TYPE_MAIL"><span class="type">TP_HASH_TYPE_MAIL</span></a>.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_STRUCT_TYPE_MAIL_ADDRESS">
+<a name="TP-STRUCT-TYPE-MAIL-ADDRESS:CAPS"></a><h3>TP_STRUCT_TYPE_MAIL_ADDRESS</h3>
+<pre class="programlisting">#define TP_STRUCT_TYPE_MAIL_ADDRESS (tp_type_dbus_struct_ss ())
+</pre>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;
+	
+        
+	&lt;p&gt;
+		A pair (name, address) representing an e-mail address,
+        such as (&amp;quot;Nicolas Dufresne&amp;quot;, &amp;quot;nicolas.dufresne<em class="parameter"><code>collabora.co.uk</code></em>&amp;quot;). At
+        least one of name and address MUST be provided. A missing element will
+        be represented by the empty string.
+	&lt;/p&gt;
+	
+        
+	&lt;tp:rationale&gt;
+		
+	  
+		&lt;p&gt;
+			The CM should provide as much information as possible, but not all
+            protocols provide both the displayed name and the address. (If a
+            protocol doesn't provide either, it should omit the appropriate
+            field from the 
+			&lt;tp:type&gt;
+				Mail
+			&lt;/tp:type&gt;
+			 entirely.)
+		&lt;/p&gt;
+		
+        
+	&lt;/tp:rationale&gt;
+	
+      
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Value-arrays.html#GValueArray"><span class="type">GValueArray</span></a>
+appropriate for representing a D-Bus struct
+with signature <code class="literal">(ss)</code>.
+</p>
+<p>
+Member 0 (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Name</code>):
+The displayed name corresponding to the e-mail           address
+</p>
+<p>
+Member 1 (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Address</code>):
+The actual e-mail address
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ARRAY_TYPE_MAIL_ADDRESS_LIST">
+<a name="TP-ARRAY-TYPE-MAIL-ADDRESS-LIST:CAPS"></a><h3>TP_ARRAY_TYPE_MAIL_ADDRESS_LIST</h3>
+<pre class="programlisting">#define TP_ARRAY_TYPE_MAIL_ADDRESS_LIST (tp_type_dbus_array_ss ())
+</pre>
+<p>
+Expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a>
+of <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-MAIL-ADDRESS:CAPS" title="TP_STRUCT_TYPE_MAIL_ADDRESS"><span class="type">TP_STRUCT_TYPE_MAIL_ADDRESS</span></a>.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_STRUCT_TYPE_MAIL_URL">
+<a name="TP-STRUCT-TYPE-MAIL-URL:CAPS"></a><h3>TP_STRUCT_TYPE_MAIL_URL</h3>
+<pre class="programlisting">#define TP_STRUCT_TYPE_MAIL_URL (tp_type_dbus_struct_sua_28ss_29 ())
+</pre>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;
+	
+        
+	&lt;p&gt;
+		A structure containing the required information to open a web-based
+          e-mail UI, without needing re-authentication (if possible).
+	&lt;/p&gt;
+	
+</p>
+<p>
+        
+	&lt;p&gt;
+		Because the URL and POST data frequently contain short-lived
+          credential tokens, a new URL should be requested (by calling one of
+          the methods that returns a Mail_URL) for each visit to the web-based
+          UI, and the URL should be visited soon after it is returned.
+	&lt;/p&gt;
+	
+      
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Value-arrays.html#GValueArray"><span class="type">GValueArray</span></a>
+appropriate for representing a D-Bus struct
+with signature <code class="literal">(sua(ss))</code>.
+</p>
+<p>
+Member 0 (D-Bus type <code class="literal">s</code>,
+named <code class="literal">URL</code>):
+The URL to which to send a request.
+</p>
+<p>
+Member 1 (D-Bus type <code class="literal">u</code>,
+type <code class="literal">HTTP_Method</code>,
+named <code class="literal">Method</code>):
+The HTTP method of the request.
+</p>
+<p>
+Member 2 (D-Bus type <code class="literal">a(ss)</code>,
+type <code class="literal">HTTP_Post_Data[]</code>,
+named <code class="literal">Post_Data</code>):
+An array of name-value pairs containing the POST data to use when           opening the URL. This MUST be an empty array if the Method is not           POST.
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_STRUCT_TYPE_HTTP_POST_DATA">
+<a name="TP-STRUCT-TYPE-HTTP-POST-DATA:CAPS"></a><h3>TP_STRUCT_TYPE_HTTP_POST_DATA</h3>
+<pre class="programlisting">#define TP_STRUCT_TYPE_HTTP_POST_DATA (tp_type_dbus_struct_ss ())
+</pre>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;
+	
+        
+	&lt;p&gt;
+		A pair (key, value) representing POST data compatible with the
+        application/x-www-form-urlencoded MIME type. The strings MUST be
+        valid UTF-8 strings, and the characters used in the key MUST obey
+        the requirements of the
+        
+		&lt;a href="http://www.w3.org/TR/html401/types.html<span class="type">type-cdata</span>"&gt;
+			
+          HTML CDATA type
+		&lt;/a&gt;
+		. The value MUST NOT be
+        encoded with HTML entities.
+	&lt;/p&gt;
+	
+</p>
+<p>
+        
+	&lt;p&gt;
+		For example, if the POST data should contain a key &amp;quot;less-than&amp;quot; with value
+        &amp;quot;&amp;lt;&amp;quot;, and a key &amp;quot;percent&amp;quot; with value &amp;quot;%&amp;quot;, this should be represented as
+        two HTTP_Post_Data structures, (&amp;quot;less-than&amp;quot;, &amp;quot;&amp;lt;&amp;quot;) and (&amp;quot;percent&amp;quot;, &amp;quot;%&amp;quot;),
+        resulting in a POST request whose request body is &amp;quot;less-than=&amp;amp;lt;&amp;amp;percent=<code class="literal">25</code>&amp;quot;.
+        If a client passes this to a browser by writing it into an HTML form, it
+        could do so by representing it as:
+	&lt;/p&gt;
+	
+</p>
+<p>
+        
+	&lt;pre&gt;
+		
+        &amp;lt;input type=&amp;quot;hidden&amp;quot; name=&amp;quot;less-than&amp;quot;&amp;gt;&amp;amp;lt;&amp;lt;/input&amp;gt;
+        &amp;lt;input type=&amp;quot;hidden&amp;quot; name=&amp;quot;percent&amp;quot;&amp;gt;%&amp;lt;/input&amp;gt;
+        
+	&lt;/pre&gt;
+	
+</p>
+<p>
+        
+	&lt;tp:rationale&gt;
+		
+          
+		&lt;p&gt;
+			This data can be used to generate a HTML file that will
+            automatically load the URL with appropriate POST data, in which case
+            the client MUST convert any characters that are special within HTML
+            into HTML entities. Alternatively, it can be used in an API that will
+            instruct the browser how to load the URL (like the Netscape Plug-in
+            API), in which case the client MUST escape
+            
+			&lt;a href="http://www.ietf.org/rfc/rfc1738.txt"&gt;
+				characters that are
+              reserved in URLs
+			&lt;/a&gt;
+			, if appropriate for that API.
+		&lt;/p&gt;
+		
+</p>
+<p>
+          
+		&lt;p&gt;
+			An array of pairs is used instead of a map from keys to values,
+            because it's valid to repeat keys in both HTML and
+            x-www-form-urlencoded data.
+		&lt;/p&gt;
+		
+        
+	&lt;/tp:rationale&gt;
+	
+      
+</p>
+<p>
+This macro expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Value-arrays.html#GValueArray"><span class="type">GValueArray</span></a>
+appropriate for representing a D-Bus struct
+with signature <code class="literal">(ss)</code>.
+</p>
+<p>
+Member 0 (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Key</code>):
+The key, corresponding to a HTML control           name
+</p>
+<p>
+Member 1 (D-Bus type <code class="literal">s</code>,
+named <code class="literal">Value</code>):
+The value
+</p>
+</div>
+<hr>
+<div class="refsect2" title="TP_ARRAY_TYPE_HTTP_POST_DATA_LIST">
+<a name="TP-ARRAY-TYPE-HTTP-POST-DATA-LIST:CAPS"></a><h3>TP_ARRAY_TYPE_HTTP_POST_DATA_LIST</h3>
+<pre class="programlisting">#define TP_ARRAY_TYPE_HTTP_POST_DATA_LIST (tp_type_dbus_array_ss ())
+</pre>
+<p>
+Expands to a call to a function
+that returns the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> of a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a>
+of <a class="link" href="telepathy-glib-gtypes.html#TP-STRUCT-TYPE-HTTP-POST-DATA:CAPS" title="TP_STRUCT_TYPE_HTTP_POST_DATA"><span class="type">TP_STRUCT_TYPE_HTTP_POST_DATA</span></a>.
 </p>
 </div>
 <hr>
