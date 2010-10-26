@@ -35,8 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = test-asv$(EXEEXT) test-capabilities$(EXEEXT) \
-	test-availability-cmp$(EXEEXT) test-enums$(EXEEXT) \
-	test-gnio-util$(EXEEXT) test-heap$(EXEEXT) \
+	test-availability-cmp$(EXEEXT) test-dtmf-player$(EXEEXT) \
+	test-enums$(EXEEXT) test-gnio-util$(EXEEXT) test-heap$(EXEEXT) \
 	test-internal-debug$(EXEEXT) test-intset$(EXEEXT) \
 	test-signal-connect-object$(EXEEXT) test-util$(EXEEXT) \
 	test-debug-domain$(EXEEXT) $(am__EXEEXT_1)
@@ -90,6 +90,14 @@ am_test_debug_domain_OBJECTS = debug-domain.$(OBJEXT)
 test_debug_domain_OBJECTS = $(am_test_debug_domain_OBJECTS)
 test_debug_domain_DEPENDENCIES =  \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la
+am_test_dtmf_player_OBJECTS = dtmf-player.$(OBJEXT)
+test_dtmf_player_OBJECTS = $(am_test_dtmf_player_OBJECTS)
+am__DEPENDENCIES_2 =  \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+test_dtmf_player_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(am__DEPENDENCIES_2)
 am_test_enums_OBJECTS = enums.$(OBJEXT)
 test_enums_OBJECTS = $(am_test_enums_OBJECTS)
 test_enums_LDADD = $(LDADD)
@@ -122,9 +130,6 @@ am_test_signal_connect_object_OBJECTS =  \
 	signal-connect-object.$(OBJEXT)
 test_signal_connect_object_OBJECTS =  \
 	$(am_test_signal_connect_object_OBJECTS)
-am__DEPENDENCIES_2 =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 test_signal_connect_object_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_2)
@@ -185,16 +190,18 @@ am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
 	$(test_capabilities_SOURCES) $(test_debug_domain_SOURCES) \
-	$(test_enums_SOURCES) $(test_gnio_util_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
-	$(test_intset_SOURCES) $(test_signal_connect_object_SOURCES) \
-	$(test_util_SOURCES) $(test_util_cxx_SOURCES)
+	$(test_dtmf_player_SOURCES) $(test_enums_SOURCES) \
+	$(test_gnio_util_SOURCES) $(test_heap_SOURCES) \
+	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
+	$(test_signal_connect_object_SOURCES) $(test_util_SOURCES) \
+	$(test_util_cxx_SOURCES)
 DIST_SOURCES = $(test_asv_SOURCES) $(test_availability_cmp_SOURCES) \
 	$(test_capabilities_SOURCES) $(test_debug_domain_SOURCES) \
-	$(test_enums_SOURCES) $(test_gnio_util_SOURCES) \
-	$(test_heap_SOURCES) $(test_internal_debug_SOURCES) \
-	$(test_intset_SOURCES) $(test_signal_connect_object_SOURCES) \
-	$(test_util_SOURCES) $(am__test_util_cxx_SOURCES_DIST)
+	$(test_dtmf_player_SOURCES) $(test_enums_SOURCES) \
+	$(test_gnio_util_SOURCES) $(test_heap_SOURCES) \
+	$(test_internal_debug_SOURCES) $(test_intset_SOURCES) \
+	$(test_signal_connect_object_SOURCES) $(test_util_SOURCES) \
+	$(am__test_util_cxx_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -414,6 +421,7 @@ TESTS_ENVIRONMENT = \
     G_SLICE=debug-blocks \
     G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
     PYTHONPATH=@abs_top_srcdir@/tools \
+    $(top_srcdir)/tools/test-wrapper.sh \
     $(EXTRA_TESTS_ENVIRONMENT)
 
 EXTRA_TESTS_ENVIRONMENT = 
@@ -428,7 +436,7 @@ VALGRIND = valgrind --tool=memcheck \
 
 VALGRIND_TESTS_ENVIRONMENT = \
     $(TESTS_ENVIRONMENT) \
-    G_SLICE=always-malloc \
+    env G_SLICE=always-malloc CHECK_VERBOSE=1 \
     $(top_builddir)/libtool --mode=execute \
     $(VALGRIND) --suppressions=$(top_srcdir)/tests/tests.supp $(VALGRIND_FLAGS)
 
@@ -448,6 +456,11 @@ test_capabilities_LDADD = \
     $(top_builddir)/tests/lib/libtp-glib-tests.la \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
     $(GLIB_LIBS)
+
+test_dtmf_player_SOURCES = dtmf-player.c
+test_dtmf_player_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(LDADD)
 
 test_heap_SOURCES = \
     heap.c
@@ -492,22 +505,19 @@ test_internal_debug_LDADD = \
 check_c_sources = *.c
 LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+    $(GLIB_LIBS) \
     $(DBUS_LIBS) \
-    $(GLIB_LIBS)
+    $(NULL)
 
-AM_CFLAGS = \
-    $(ERROR_CFLAGS) \
-    $(DBUS_CFLAGS) \
-    $(GLIB_CFLAGS) \
+AM_CPPFLAGS = \
+    -I${top_srcdir} -I${top_builddir} \
     -D_TP_IGNORE_DEPRECATIONS \
-    $(TP_GLIB_CFLAGS)
-
-AM_CXXFLAGS = \
-    $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
-    -D_TP_IGNORE_DEPRECATIONS \
-    $(TP_GLIB_CFLAGS)
+    $(DBUS_CFLAGS) \
+    $(NULL)
 
+AM_CFLAGS = $(ERROR_CFLAGS)
+AM_CXXFLAGS = $(ERROR_CXXFLAGS)
 @HAVE_CXX_TRUE@test_util_cxx_SOURCES = util-cxx.cpp
 all: all-recursive
 
@@ -564,6 +574,9 @@ test-capabilities$(EXEEXT): $(test_capabilities_OBJECTS) $(test_capabilities_DEP
 test-debug-domain$(EXEEXT): $(test_debug_domain_OBJECTS) $(test_debug_domain_DEPENDENCIES) 
 	@rm -f test-debug-domain$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_debug_domain_OBJECTS) $(test_debug_domain_LDADD) $(LIBS)
+test-dtmf-player$(EXEEXT): $(test_dtmf_player_OBJECTS) $(test_dtmf_player_DEPENDENCIES) 
+	@rm -f test-dtmf-player$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_dtmf_player_OBJECTS) $(test_dtmf_player_LDADD) $(LIBS)
 test-enums$(EXEEXT): $(test_enums_OBJECTS) $(test_enums_DEPENDENCIES) 
 	@rm -f test-enums$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_enums_OBJECTS) $(test_enums_LDADD) $(LIBS)
@@ -599,6 +612,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/availability-cmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-domain.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtmf-player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enums.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnio-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@

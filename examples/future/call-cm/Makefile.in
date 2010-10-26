@@ -60,10 +60,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libexample_cm_call_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) \
+am__DEPENDENCIES_2 =  \
+	$(top_builddir)/extensions/libfuture-extensions.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-	$(top_builddir)/extensions/libfuture-extensions.la
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+libexample_cm_call_la_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_libexample_cm_call_la_OBJECTS = cm.lo conn.lo call-channel.lo \
 	call-manager.lo call-content.lo call-stream.lo protocol.lo
 libexample_cm_call_la_OBJECTS = $(am_libexample_cm_call_la_OBJECTS)
@@ -313,31 +314,38 @@ libexample_cm_call_la_SOURCES = \
     protocol.c \
     protocol.h
 
-
-# In an external project you'd use $(TP_GLIB_LIBS) (obtained from
-# pkg-config via autoconf) instead of the .la path
-libexample_cm_call_la_LIBADD = \
-    $(GLIB_LIBS) \
-    $(DBUS_LIBS) \
-    $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-    $(top_builddir)/extensions/libfuture-extensions.la
-
+libexample_cm_call_la_LIBADD = $(LDADD)
 telepathy_example_cm_call_SOURCES = \
     main.c
 
 telepathy_example_cm_call_LDADD = \
     $(noinst_LTLIBRARIES)
 
-AM_CFLAGS = \
-    $(ERROR_CFLAGS) \
-    $(DBUS_CFLAGS) \
-    $(GLIB_CFLAGS) \
-    $(TP_GLIB_CFLAGS)
-
 servicedir = ${datadir}/dbus-1/services
 @INSTALL_EXAMPLES_TRUE@service_DATA = _gen/org.freedesktop.Telepathy.ConnectionManager.example_call.service
 @INSTALL_EXAMPLES_TRUE@managerdir = ${datadir}/telepathy/managers
 @INSTALL_EXAMPLES_TRUE@dist_manager_DATA = example_call.manager
+
+# In an external project you'd use $(TP_GLIB_LIBS) (obtained from
+# pkg-config via autoconf) instead of the .la path, and put it last; we use
+# a different format here because we're part of the telepathy-glib source tree.
+LDADD = \
+    $(top_builddir)/extensions/libfuture-extensions.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+    $(GLIB_LIBS) \
+    $(DBUS_LIBS) \
+    $(NULL)
+
+
+# Similarly, in an external project you'd put $(TP_GLIB_CFLAGS) at the end of
+# AM_CPPFLAGS.
+AM_CPPFLAGS = \
+    -I${top_srcdir} -I${top_builddir} \
+    $(GLIB_CFLAGS) \
+    $(DBUS_CFLAGS) \
+    $(NULL)
+
+AM_CFLAGS = $(ERROR_CFLAGS)
 all: all-am
 
 .SUFFIXES:

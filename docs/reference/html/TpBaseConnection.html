@@ -95,6 +95,14 @@
                                                          context)
 <span class="returnvalue">void</span>                <a class="link" href="TpBaseConnection.html#tp-base-connection-register-with-contacts-mixin" title="tp_base_connection_register_with_contacts_mixin ()">tp_base_connection_register_with_contacts_mixin</a>
                                                         (<em class="parameter"><code><a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *self</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="TpBaseConnection.html#tp-base-connection-add-possible-client-interest" title="tp_base_connection_add_possible_client_interest ()">tp_base_connection_add_possible_client_interest</a>
+                                                        (<em class="parameter"><code><a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> token</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="TpBaseConnection.html#tp-base-connection-add-client-interest" title="tp_base_connection_add_client_interest ()">tp_base_connection_add_client_interest</a>
+                                                        (<em class="parameter"><code><a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *unique_name</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *token</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> only_if_uninterested</code></em>);
 
                     <a class="link" href="TpBaseConnection.html#TpChannelManagerIter" title="TpChannelManagerIter">TpChannelManagerIter</a>;
 <span class="returnvalue">void</span>                <a class="link" href="TpBaseConnection.html#tp-base-connection-channel-manager-iter-init" title="tp_base_connection_channel_manager_iter_init ()">tp_base_connection_channel_manager_iter_init</a>
@@ -131,6 +139,8 @@ TpBaseConnection implements
 <div class="refsect1" title="Signals">
 <a name="TpBaseConnection.signals"></a><h2>Signals</h2>
 <pre class="synopsis">
+  "<a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-interested" title='The "clients-interested" signal'>clients-interested</a>"                             : Run Last / Has Details
+  "<a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-uninterested" title='The "clients-uninterested" signal'>clients-uninterested</a>"                           : Run Last / Has Details
   "<a class="link" href="TpBaseConnection.html#TpBaseConnection-shutdown-finished" title='The "shutdown-finished" signal'>shutdown-finished</a>"                              : Run Last / Has Details
 </pre>
 </div>
@@ -261,11 +271,6 @@ future version of telepathy-glib), and a pointer to opaque private data.
 <p>
 The class of a <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>. Many members are virtual methods etc.
 to be filled in in the subclass' class_init function.
-</p>
-<p>
-In addition to the fields documented here, there are three gpointer fields
-which must currently be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (a meaning may be defined for these in a
-future version of telepathy-glib), and a pointer to opaque private data.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -962,6 +967,84 @@ mixin
 </table></div>
 </div>
 <hr>
+<div class="refsect2" title="tp_base_connection_add_possible_client_interest ()">
+<a name="tp-base-connection-add-possible-client-interest"></a><h3>tp_base_connection_add_possible_client_interest ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_base_connection_add_possible_client_interest
+                                                        (<em class="parameter"><code><a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> token</code></em>);</pre>
+<p>
+Add <em class="parameter"><code>token</code></em> to the set of tokens for which this connection will emit
+<a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-interested" title='The "clients-interested" signal'><span class="type">"clients-interested"</span></a> and
+<a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-uninterested" title='The "clients-uninterested" signal'><span class="type">"clients-uninterested"</span></a>.
+</p>
+<p>
+This method must be called from the <span class="type">GObjectClass.constructed</span> or
+<span class="type">GObjectClass.constructor</span> callback (otherwise, it will run too late to be
+useful).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>token</code></em> :</span></p></td>
+<td>a quark corresponding to a D-Bus interface, or a token
+ representing part of a D-Bus interface, for which this connection wishes
+ to be notified when clients register an interest
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_base_connection_add_client_interest ()">
+<a name="tp-base-connection-add-client-interest"></a><h3>tp_base_connection_add_client_interest ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_base_connection_add_client_interest
+                                                        (<em class="parameter"><code><a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *unique_name</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *token</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> only_if_uninterested</code></em>);</pre>
+<p>
+Add a "client interest" for <em class="parameter"><code>token</code></em> on behalf of the given client.
+</p>
+<p>
+This emits <a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-interested" title='The "clients-interested" signal'><span class="type">"clients-interested"</span></a> if this was the first
+time a client expressed an interest in this token.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>unique_name</code></em> :</span></p></td>
+<td>the unique bus name of a D-Bus client
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>token</code></em> :</span></p></td>
+<td>a D-Bus interface or a token representing part of an interface,
+ added with <a class="link" href="TpBaseConnection.html#tp-base-connection-add-possible-client-interest" title="tp_base_connection_add_possible_client_interest ()"><code class="function">tp_base_connection_add_possible_client_interest()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>only_if_uninterested</code></em> :</span></p></td>
+<td>only add to the interest count if the client is not
+ already interested (appropriate for APIs that implicitly subscribe on first
+ use if this has not been done already, like Location)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title="TpChannelManagerIter">
 <a name="TpChannelManagerIter"></a><h3>TpChannelManagerIter</h3>
 <pre class="programlisting">typedef struct {
@@ -1135,6 +1218,73 @@ Must be set nonzero by the subclass before moving to state CONNECTED.
 </div>
 <div class="refsect1" title="Signal Details">
 <a name="TpBaseConnection.signal-details"></a><h2>Signal Details</h2>
+<div class="refsect2" title='The "clients-interested" signal'>
+<a name="TpBaseConnection-clients-interested"></a><h3>The <code class="literal">"clients-interested"</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *token,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>            *arg1,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>          user_data)      : Run Last / Has Details</pre>
+<p>
+Emitted when a client becomes interested in any token that was added with
+<a class="link" href="TpBaseConnection.html#tp-base-connection-add-possible-client-interest" title="tp_base_connection_add_possible_client_interest ()"><code class="function">tp_base_connection_add_possible_client_interest()</code></a>.
+</p>
+<p>
+The "signal detail" is a GQuark representing <em class="parameter"><code>token</code></em>. Modules implementing
+an interface (Location, say) should typically connect to a detailed signal
+like
+"clients-interested::org.freedesktop.Telepathy.Connection.Interface.Location"
+rather than receiving all emissions of this signal.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>token</code></em> :</span></p></td>
+<td>the interface or part of an interface in which clients are newly
+ interested
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title='The "clients-uninterested" signal'>
+<a name="TpBaseConnection-clients-uninterested"></a><h3>The <code class="literal">"clients-uninterested"</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *token,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>            *arg1,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>          user_data)      : Run Last / Has Details</pre>
+<p>
+Emitted when no more clients are interested in an interface added with
+<a class="link" href="TpBaseConnection.html#tp-base-connection-add-possible-client-interest" title="tp_base_connection_add_possible_client_interest ()"><code class="function">tp_base_connection_add_possible_client_interest()</code></a>, for which
+<a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-interested" title='The "clients-interested" signal'><span class="type">"clients-interested"</span></a> was previously emitted.
+</p>
+<p>
+As with <a class="link" href="TpBaseConnection.html#TpBaseConnection-clients-interested" title='The "clients-interested" signal'><span class="type">"clients-interested"</span></a>, the "signal detail" is a
+GQuark representing <em class="parameter"><code>token</code></em>. Modules implementing an interface (Location,
+say) should typically connect to a detailed signal like
+"clients-uninterested::org.freedesktop.Telepathy.Connection.Interface.Location"
+rather than receiving all emissions of this signal.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>token</code></em> :</span></p></td>
+<td>the interface or part of an interface in which clients are no
+ longer interested
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title='The "shutdown-finished" signal'>
 <a name="TpBaseConnection-shutdown-finished"></a><h3>The <code class="literal">"shutdown-finished"</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> *arg0,

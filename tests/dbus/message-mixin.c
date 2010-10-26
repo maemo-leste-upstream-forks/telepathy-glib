@@ -207,6 +207,7 @@ main (int argc,
   gboolean ok;
   GHashTable *parameters;
 
+  tp_tests_abort_after (10);
   g_type_init ();
   tp_debug_set_flags ("all");
   dbus = tp_tests_dbus_daemon_dup_or_die ();
@@ -336,7 +337,8 @@ main (int argc,
       MYASSERT (messages->len == 0, "%u", messages->len);
 
       g_assert_cmpuint (tp_asv_get_uint32 (properties,
-            "DeliveryReportingSupport", NULL), ==, 0);
+            "DeliveryReportingSupport", NULL), ==,
+          TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES);
 
       g_hash_table_destroy (properties);
     }
@@ -973,7 +975,8 @@ main (int argc,
       g_free (contents);
 
       g_assert_cmpuint (tp_asv_get_uint32 (properties,
-            "DeliveryReportingSupport", NULL), ==, 0);
+            "DeliveryReportingSupport", NULL), ==,
+          TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES);
 
       MYASSERT ((value = tp_asv_lookup (properties, "PendingMessages"))
           != NULL, "");
