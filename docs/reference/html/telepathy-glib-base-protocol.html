@@ -51,6 +51,8 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="telepathy-glib-base-protocol.html#tp-base-protocol-get-immutable-properties" title="tp_base_protocol_get_immutable_properties ()">tp_base_protocol_get_immutable_properties</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>);
 const <a class="link" href="TpBaseConnectionManager.html#TpCMParamSpec" title="TpCMParamSpec"><span class="returnvalue">TpCMParamSpec</span></a> * <a class="link" href="telepathy-glib-base-protocol.html#tp-base-protocol-get-parameters" title="tp_base_protocol_get_parameters ()">tp_base_protocol_get_parameters</a>   (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>);
+const <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceStatusSpec" title="TpPresenceStatusSpec"><span class="returnvalue">TpPresenceStatusSpec</span></a> * <a class="link" href="telepathy-glib-base-protocol.html#tp-base-protocol-get-statuses" title="tp_base_protocol_get_statuses ()">tp_base_protocol_get_statuses</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>);
 <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="returnvalue">TpBaseConnection</span></a> *  <a class="link" href="telepathy-glib-base-protocol.html#tp-base-protocol-new-connection" title="tp_base_protocol_new_connection ()">tp_base_protocol_new_connection</a>     (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *asv</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
@@ -90,7 +92,7 @@ const <a class="link" href="TpBaseConnectionManager.html#TpCMParamSpec" title="T
 <a name="telepathy-glib-base-protocol.implemented-interfaces"></a><h2>Implemented Interfaces</h2>
 <p>
 TpBaseProtocol implements
- <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties">TpSvcDBusProperties</a> and  <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocol">TpSvcProtocol</a>.</p>
+ <a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties">TpSvcDBusProperties</a>,  <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocol">TpSvcProtocol</a> and  <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocolInterfacePresence">TpSvcProtocolInterfacePresence</a>.</p>
 </div>
 <div class="refsect1" title="Properties">
 <a name="telepathy-glib-base-protocol.properties"></a><h2>Properties</h2>
@@ -208,6 +210,40 @@ be a global static array).
 <p class="since">Since 0.11.11</p>
 </div>
 <hr>
+<div class="refsect2" title="tp_base_protocol_get_statuses ()">
+<a name="tp-base-protocol-get-statuses"></a><h3>tp_base_protocol_get_statuses ()</h3>
+<pre class="programlisting">const <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceStatusSpec" title="TpPresenceStatusSpec"><span class="returnvalue">TpPresenceStatusSpec</span></a> * tp_base_protocol_get_statuses
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>);</pre>
+<p>
+Get the statuses supported by this object. Subclasses implement this via
+the <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocolClass.get-statuses"><span class="type">TpBaseProtocolClass.get_statuses</span></a> virtual method.
+</p>
+<p>
+If the object does not implement the Protocol.Interface.Presences
+interface, it need not implement this virtual method.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a Protocol object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> an array of <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceStatusSpec" title="TpPresenceStatusSpec"><span class="type">TpPresenceStatusSpec</span></a> structs describing the
+ standard statuses supported by this protocol, with a final element
+ whose name element is guaranteed to be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. The array must remain
+ valid at least as long as <em class="parameter"><code>self</code></em> does.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.5</p>
+</div>
+<hr>
 <div class="refsect2" title="tp_base_protocol_new_connection ()">
 <a name="tp-base-protocol-new-connection"></a><h3>tp_base_protocol_new_connection ()</h3>
 <pre class="programlisting"><a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="returnvalue">TpBaseConnection</span></a> *  tp_base_protocol_new_connection     (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>,
@@ -287,6 +323,8 @@ specified by <a class="link" href="TpBaseConnectionManager.html#TpCMParamSpec.gt
       gchar **icon_name,
       gchar **english_name,
       gchar **vcard_field);
+
+  const TpPresenceStatusSpec * (*get_statuses) (TpBaseProtocol *self);
 } TpBaseProtocolClass;
 </pre>
 <p>
@@ -354,6 +392,12 @@ The class of a <a class="link" href="telepathy-glib-base-protocol.html#TpBasePro
 <td>a callback used to implement the Protocol D-Bus
  properties that represent details of the connections provided by this
  protocol
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="structfield"><code><a name="TpBaseProtocolClass.get-statuses"></a>get_statuses</code></em> ()</span></p></td>
+<td>a callback used to implement the Protocol.Interface.Presence
+interface's Statuses property. Since 0.13.5
 </td>
 </tr>
 </tbody>
@@ -526,6 +570,10 @@ the parameters in <em class="parameter"><code>asv</code></em> conform to the spe
 <p>
 Signature of a virtual method to get the D-Bus interfaces implemented by
 <em class="parameter"><code>self</code></em>, in addition to the Protocol interface.
+</p>
+<p>
+If you implement <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocolClass.get-statuses"><span class="type">TpBaseProtocolClass.get_statuses</span></a>, you should include
+<a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-PROTOCOL-INTERFACE-PRESENCE:CAPS" title="TP_IFACE_PROTOCOL_INTERFACE_PRESENCE"><code class="literal">TP_IFACE_PROTOCOL_INTERFACE_PRESENCE</code></a> in the returned array.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
