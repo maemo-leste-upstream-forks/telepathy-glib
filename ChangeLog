@@ -1,8 +1,134 @@
+commit cdbf0f3b18b275a658c03f6446b71999ab34ab38
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-05 13:58:40 +0000
+
+    Prepare version 0.13.5
+
+commit 96f35c9e98d8e3004ee022c039f1ace2135b735c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-05 13:34:29 +0000
+
+    Improve TpBaseProtocol documentation slightly
+
+commit 50af945a7f7547d2dd01e4b53b8381b8966f4b0b
+Merge: 3158bb2 2cde97d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-05 13:31:22 +0000
+
+    Merge branch 'proto-presence'
+    
+    Reviewed-by: Vivek Dasmohapatra <vivek@collabora.co.uk>
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 3158bb257910576940177b505b73cb514bb83380
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-05 11:19:40 +0000
+
+    NEWS so far
+
+commit 484d46d08909cbb277c66d6116b0a531cad041c7
+Merge: 40397d2 2444ca1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-05 11:13:28 +0000
+
+    Merge branch 'disappear'
+    
+    Reviewed-by: Vivek Dasmohapatra <vivek@collabora.co.uk>
+
+commit 40397d220bbf378264dc2f0b402301551c7d4ea1
+Merge: fb89793 02c7b0b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-04 19:06:41 +0000
+
+    Merge branch 'tests'
+    
+    Reviewed-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+
+commit 02c7b0b62dd354ef3f3f608bb15ac3ca409e2fe6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-04 18:15:38 +0000
+
+    fd.o #31377: don't use tp_tests_proxy_run_until_dbus_queue_processed with multiple D-Bus connections
+    
+    tp_tests_proxy_run_until_dbus_queue_processed tells us that our message
+    has got through dbus-glib, to the dbus-daemon and back. However, in the
+    presence of another parallel D-Bus connection, that doesn't guarantee
+    that dbus-daemon has polled the other connection's socket; in
+    particular, it might not have noticed its disconnection and sent us
+    NameOwnerChanged.
+    
+    Now that we have an arbitrary timeout on every test, it's more reasonable to
+    just spin the main loop until the expected event happens; if it doesn't,
+    we'll just be killed by the timeout, with a useful stack trace.
+
+commit fb897932628045eb7bd99ccc223ae5a7535228fc
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2010-11-04 18:34:44 +0000
+
+    glib-ginterface-gen: be sure to give the object in signal args
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 96f5d84afb3ff1ab63fb7c57227e320ef91a1f3e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-04 17:58:27 +0000
+
+    contact-lists test: extend timeout from 10 to 60 seconds
+    
+    This test is fairly thorough and produces quite a lot of output. It
+    failed on Debian's armel buildd, probably because it took more than 10
+    seconds on that slower CPU.
+
+commit 13dace228062de9bbcd22eceda0a6072ffb27e6f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-04 17:47:59 +0000
+
+    connection-interests test: assert on failure rather than crashing
+
+commit 04664ce73f846df397e386cb2a22e902af31b99d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-03 19:06:52 +0000
+
+    Nano version, add missing release name
+
 commit 573336f2cf38444b6afd3d429de94d674b77d1b2
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2010-11-03 18:09:36 +0000
 
     Prepare version 0.13.4
+
+commit 2444ca1eb8a9037599f6977f8bad97139b8fdbd2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-03 17:59:15 +0000
+
+    fd.o #10613: tp_base_connection_unregister: release object path before bus name
+    
+    We're effectively using the bus name as a mutex to protect the object
+    path, because dbus-glib doesn't have failable object path acquisition.
+    
+    Now that we (can) explicitly remove the object from the bus, we can do
+    that properly, fixing a longstanding bug.
+
+commit 7931c481607e64ee22b4fe155a353f03e5e345ec
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-03 17:14:29 +0000
+
+    tp_base_connection_change_status: hold a ref across callbacks
+
+commit a542d3dc0940a0a6a66325ae5e9ac2fa2a723c79
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-03 16:36:02 +0000
+
+    tp_base_connection_change_status: unregister object after starting async shutdown
+
+commit 4078acb4a2376fd3704d974cd6cfc30cfa4afd1f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-11-03 16:13:28 +0000
+
+    tp_base_connection_remove_from_bus: factor out from tp_base_connection_dispose
+    
+    Also call tp_dbus_daemon_unregister_object explicitly, rather than letting
+    dbus-glib's weak-ref hook do the equivalent a moment later.
 
 commit 5c6c514bc0cc08d831d97bfcbad611c59c5ef89c
 Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
@@ -180,6 +306,23 @@ Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2010-10-26 16:43:42 +0100
 
     Prepare version 0.12.2
+
+commit 2cde97db8804773e0da61774a4b4ee11ea0656dc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-10-26 16:16:42 +0100
+
+    Document tp_base_protocol_get_statuses
+
+commit ac1e468dbf4ca625bad3b23702de34be6c04afeb
+Merge: d726d73 7c81e9c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-10-26 15:51:49 +0100
+
+    Merge branch 'master' into proto-presence
+    
+    Conflicts:
+    	spec/Protocol_Interface_Presence.xml
+    	telepathy-glib/base-protocol.c
 
 commit 7c81e9c6c3cf08bccad085929911ecd393cea65f
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
@@ -1012,6 +1155,12 @@ Date:   2010-10-06 12:01:34 +0100
     This isn't allowed by C99, but gcc accepts it as an extension and doesn't
     seem to offer a way to warn about it.
 
+commit d726d7313b4443345da301d5e4bf8da210a55146
+Author: Vivek Dasmohapatra <vivek@collabora.co.uk>
+Date:   2010-10-05 16:29:55 +0100
+
+    Be pickier about which status args set the Protocol.I.Presences message flag
+
 commit c602da0320ba70ea44c01655de3737b80c0822ef
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2010-10-05 16:54:13 +0200
@@ -1071,6 +1220,18 @@ Date:   2010-10-05 11:41:24 +0200
     
     It doesn't allow us to bind the client socket before connecting which will be
     needed to get the port when using the access control 'Port'.
+
+commit 02b0aa755c9508a33dc595178ee212b45c47cf93
+Author: Vivek Dasmohapatra <vivek@collabora.co.uk>
+Date:   2010-10-05 14:38:44 +0100
+
+    Implement Protocol.Interface.Presences (Status prop) helpers in TpBaseProtocol
+
+commit 3f4b1a6fe1f18efcbb62a74da553285656e945bc
+Author: Vivek Dasmohapatra <vivek@collabora.co.uk>
+Date:   2010-10-05 13:53:28 +0100
+
+    Undraft protocol interface presence and take it off the no-fly list
 
 commit 0f2ab6850d1b8e9a0808003ee480db2acd2f876b
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
