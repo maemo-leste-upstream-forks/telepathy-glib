@@ -255,7 +255,7 @@ struct _TpBaseClientPrivate
 
   TpAccountManager *account_mgr;
   TpAccount *only_for_account;
-  TpClientChannelFactoryInterface *channel_factory;
+  TpClientChannelFactory *channel_factory;
 
   /* array of GQuark or NULL */
   GArray *account_features;
@@ -2646,7 +2646,7 @@ tp_base_client_add_connection_features (TpBaseClient *self,
  */
 void
 tp_base_client_set_channel_factory (TpBaseClient *self,
-    TpClientChannelFactoryInterface *factory)
+    TpClientChannelFactory *factory)
 {
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
@@ -2654,7 +2654,7 @@ tp_base_client_set_channel_factory (TpBaseClient *self,
 
   tp_clear_object (&self->priv->channel_factory);
 
-  self->priv->channel_factory = g_object_ref (self->priv->channel_factory);
+  self->priv->channel_factory = g_object_ref (factory);
   g_object_notify (G_OBJECT (self), "channel-factory");
 }
 
@@ -2667,7 +2667,7 @@ tp_base_client_set_channel_factory (TpBaseClient *self,
  * Returns: the value of #TpBaseClient:channel-factory
  * Since: 0.13.2
  */
-TpClientChannelFactoryInterface *
+TpClientChannelFactory *
 tp_base_client_get_channel_factory (TpBaseClient *self)
 {
   g_return_val_if_fail (TP_IS_BASE_CLIENT (self), NULL);
