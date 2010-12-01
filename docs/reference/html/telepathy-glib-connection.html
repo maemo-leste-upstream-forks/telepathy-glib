@@ -81,6 +81,7 @@
 <a class="link" href="telepathy-glib-enums.html#TpConnectionStatus" title="enum TpConnectionStatus"><span class="returnvalue">TpConnectionStatus</span></a>  <a class="link" href="telepathy-glib-connection.html#tp-connection-get-status" title="tp_connection_get_status ()">tp_connection_get_status</a>            (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason"><span class="type">TpConnectionStatusReason</span></a> *reason</code></em>);
 <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="returnvalue">TpHandle</span></a>            <a class="link" href="telepathy-glib-connection.html#tp-connection-get-self-handle" title="tp_connection_get_self_handle ()">tp_connection_get_self_handle</a>       (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-connection.html#tp-connection-has-immortal-handles" title="tp_connection_has_immortal_handles ()">tp_connection_has_immortal_handles</a>  (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection.html#TpConnectionRequestHandlesCb" title="TpConnectionRequestHandlesCb ()">*TpConnectionRequestHandlesCb</a>)     (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpHandleType" title="enum TpHandleType"><span class="type">TpHandleType</span></a> handle_type</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> n_handles</code></em>,
@@ -1140,6 +1141,35 @@ like their presence status, over time.
 <p class="since">Since 0.7.26</p>
 </div>
 <hr>
+<div class="refsect2" title="tp_connection_has_immortal_handles ()">
+<a name="tp-connection-has-immortal-handles"></a><h3>tp_connection_has_immortal_handles ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_connection_has_immortal_handles  (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);</pre>
+<p>
+Return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if this connection is known to not destroy handles
+(<a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="type">TpHandle</span></a>) until it disconnects.
+</p>
+<p>
+On such connections, if you know that a handle maps to a particular
+identifier now, then you can rely on that handle mapping to that
+identifier for the whole lifetime of the connection.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if handles last as long as the connection itself
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title="TpConnectionRequestHandlesCb ()">
 <a name="TpConnectionRequestHandlesCb"></a><h3>TpConnectionRequestHandlesCb ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                (*TpConnectionRequestHandlesCb)     (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
@@ -1155,10 +1185,13 @@ Signature of the callback called when <a class="link" href="telepathy-glib-conne
 succeeds or fails.
 </p>
 <p>
-On success, the caller has one reference to each handle in <em class="parameter"><code>handles</code></em>, which
-may be released later with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>. If not
-released, the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
-(signalled by TpProxy::invalidated).
+On success, the caller has a reference to each handle in <em class="parameter"><code>handles</code></em>.
+</p>
+<p>
+Since telepathy-glib version 0.13.UNRELEASED,
+the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
+(signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, they could be
+released with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>.
 </p>
 <p>
 For convenience, the handle type and IDs requested by the caller are
@@ -1304,10 +1337,13 @@ Signature of the callback called when <a class="link" href="telepathy-glib-conne
 or fails.
 </p>
 <p>
-On success, the caller has one reference to each handle in <em class="parameter"><code>handles</code></em>, which
-may be released later with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>. If not
-released, the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
-(signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>).
+On success, the caller has a reference to each handle in <em class="parameter"><code>handles</code></em>.
+</p>
+<p>
+Since telepathy-glib version 0.13.UNRELEASED,
+the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
+(signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, they could be
+released with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>.
 </p>
 <p>
 For convenience, the handle type and handles requested by the caller are
@@ -1376,8 +1412,14 @@ include them in <em class="parameter"><code>user_data</code></em>.
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
 <p>
-Return (via a callback) any number of attributes of the given handles, and
-if they are valid and <em class="parameter"><code>hold</code></em> is TRUE, hold a reference to them.
+Return (via a callback) any number of attributes of the given handles.
+</p>
+<p>
+Since telepathy-glib version 0.13.UNRELEASED,
+the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
+(signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, if <em class="parameter"><code>hold</code></em>
+was <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the callback would hold a reference to them which could be
+released with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>.
 </p>
 <p>
 This is a thin wrapper around the GetContactAttributes D-Bus method, and
@@ -1472,7 +1514,14 @@ that appears as a key in the callback's <em class="parameter"><code>attributes</
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
 <p>
 Return (via a callback) the contacts on the contact list and any number of
-their attributes, and if <em class="parameter"><code>hold</code></em> is TRUE, hold a reference to them.
+their attributes.
+</p>
+<p>
+Since telepathy-glib version 0.13.UNRELEASED,
+the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
+(signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, if <em class="parameter"><code>hold</code></em>
+was <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the callback would hold a reference to them which could be
+released with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>.
 </p>
 <p>
 This is a thin wrapper around the RequestContactList D-Bus method,
@@ -1484,7 +1533,7 @@ The <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="ty
 usually be used instead.
 </p>
 <p>
-If <em class="parameter"><code>hold</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the <em class="parameter"><code>callback</code></em> is given one reference to each handle
+If <em class="parameter"><code>hold</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the <em class="parameter"><code>callback</code></em> is given a reference to each handle
 that appears as a key in the callback's <em class="parameter"><code>attributes</code></em> parameter.
 </p>
 <div class="variablelist"><table border="0">
@@ -1627,24 +1676,8 @@ functions.
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> n_handles</code></em>,
                                                          <em class="parameter"><code>const <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="type">TpHandle</span></a> *handles</code></em>);</pre>
 <p>
-Release the reference to the handles in <em class="parameter"><code>handles</code></em> that was obtained by
-calling <a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()"><code class="function">tp_connection_hold_handles()</code></a> or <a class="link" href="telepathy-glib-connection.html#tp-connection-request-handles" title="tp_connection_request_handles ()"><code class="function">tp_connection_request_handles()</code></a>.
-</p>
-<p>
-This function might release any references held by calling
-<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-request-handles" title="tp_cli_connection_call_request_handles ()"><code class="function">tp_cli_connection_call_request_handles()</code></a>,
-<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-request-handles" title="tp_cli_connection_run_request_handles ()"><code class="function">tp_cli_connection_run_request_handles()</code></a>,
-<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-hold-handles" title="tp_cli_connection_call_hold_handles ()"><code class="function">tp_cli_connection_call_hold_handles()</code></a>,
-<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-run-hold-handles" title="tp_cli_connection_run_hold_handles ()"><code class="function">tp_cli_connection_run_hold_handles()</code></a>,
-<a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-call-get-contact-attributes" title="tp_cli_connection_interface_contacts_call_get_contact_attributes ()"><code class="function">tp_cli_connection_interface_contacts_call_get_contact_attributes()</code></a> or
-<a class="link" href="telepathy-glib-connection-contacts.html#tp-cli-connection-interface-contacts-run-get-contact-attributes" title="tp_cli_connection_interface_contacts_run_get_contact_attributes ()"><code class="function">tp_cli_connection_interface_contacts_run_get_contact_attributes()</code></a> directly.
-Those functions should be avoided in favour of using <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>,
-<a class="link" href="telepathy-glib-connection.html#tp-connection-hold-handles" title="tp_connection_hold_handles ()"><code class="function">tp_connection_hold_handles()</code></a>, <a class="link" href="telepathy-glib-connection.html#tp-connection-request-handles" title="tp_connection_request_handles ()"><code class="function">tp_connection_request_handles()</code></a> and
-<a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-attributes" title="tp_connection_get_contact_attributes ()"><code class="function">tp_connection_get_contact_attributes()</code></a>, which along with this function
-perform client-side reference counting of handles.
-</p>
-<p>
-If <em class="parameter"><code>self</code></em> has already become invalid, this function does nothing.
+Do nothing. In versions of telepathy-glib prior to 0.13.UNRELEASED,
+this released a reference to the handles in <em class="parameter"><code>handles</code></em>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -3749,7 +3782,7 @@ succeeds or fails.
 Start a HoldHandles method call.
 </p>
 <p>
-&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Notify the connection manger that your client is holding a copy         of handles which may not be in use in any existing channel or         list, and were not obtained by using the         &lt;tp:member-ref&gt;RequestHandles&lt;/tp:member-ref&gt; method. For         example, a handle observed in an emitted signal, or displayed         somewhere in the UI that is not associated with a channel. The         connection manager must not deallocate a handle where any clients         have used this method to indicate it is in use until the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method is called, or the clients disappear from the bus.&lt;/p&gt;          &lt;p&gt;Note that HoldHandles is idempotent - calling it multiple times           is equivalent to calling it once. If a handle is &amp;quot;referenced&amp;quot; by           several components which share a D-Bus unique name, the client           should perform reference counting internally, and only call           ReleaseHandles when none of the cooperating components need the           handle any longer.&lt;/p&gt;
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;If &lt;tp:member-ref&gt;HasImmortalHandles&lt;/tp:member-ref&gt; is true,           which SHOULD always be the case in this version of telepathy-spec,           this method does nothing and returns successfully, unless           the given handle type or any of the given handles is invalid.&lt;/p&gt;          &lt;p&gt;In older connection managers, this method         notifies the connection manger that your client is holding a copy         of handles which may not be in use in any existing channel or         list, and were not obtained by using the         &lt;tp:member-ref&gt;RequestHandles&lt;/tp:member-ref&gt; method. For         example, a handle observed in an emitted signal, or displayed         somewhere in the UI that is not associated with a channel. The         connection manager must not deallocate a handle where any clients         have used this method to indicate it is in use until the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method is called, or the clients disappear from the bus.&lt;/p&gt;          &lt;p&gt;Note that HoldHandles is idempotent - calling it multiple times           is equivalent to calling it once. If a handle is &amp;quot;referenced&amp;quot; by           several components which share a D-Bus unique name, the client           should perform reference counting internally, and only call           ReleaseHandles when none of the cooperating components need the           handle any longer.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -3835,7 +3868,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Notify the connection manger that your client is holding a copy         of handles which may not be in use in any existing channel or         list, and were not obtained by using the         &lt;tp:member-ref&gt;RequestHandles&lt;/tp:member-ref&gt; method. For         example, a handle observed in an emitted signal, or displayed         somewhere in the UI that is not associated with a channel. The         connection manager must not deallocate a handle where any clients         have used this method to indicate it is in use until the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method is called, or the clients disappear from the bus.&lt;/p&gt;          &lt;p&gt;Note that HoldHandles is idempotent - calling it multiple times           is equivalent to calling it once. If a handle is &amp;quot;referenced&amp;quot; by           several components which share a D-Bus unique name, the client           should perform reference counting internally, and only call           ReleaseHandles when none of the cooperating components need the           handle any longer.&lt;/p&gt;
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;If &lt;tp:member-ref&gt;HasImmortalHandles&lt;/tp:member-ref&gt; is true,           which SHOULD always be the case in this version of telepathy-spec,           this method does nothing and returns successfully, unless           the given handle type or any of the given handles is invalid.&lt;/p&gt;          &lt;p&gt;In older connection managers, this method         notifies the connection manger that your client is holding a copy         of handles which may not be in use in any existing channel or         list, and were not obtained by using the         &lt;tp:member-ref&gt;RequestHandles&lt;/tp:member-ref&gt; method. For         example, a handle observed in an emitted signal, or displayed         somewhere in the UI that is not associated with a channel. The         connection manager must not deallocate a handle where any clients         have used this method to indicate it is in use until the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method is called, or the clients disappear from the bus.&lt;/p&gt;          &lt;p&gt;Note that HoldHandles is idempotent - calling it multiple times           is equivalent to calling it once. If a handle is &amp;quot;referenced&amp;quot; by           several components which share a D-Bus unique name, the client           should perform reference counting internally, and only call           ReleaseHandles when none of the cooperating components need the           handle any longer.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -4327,7 +4360,7 @@ succeeds or fails.
 Start a ReleaseHandles method call.
 </p>
 <p>
-Explicitly notify the connection manager that your client is no         longer holding any references to the given handles, and that they         may be deallocated if they are not held by any other clients or         referenced by any existing channels. See HoldHandles for notes.
+&lt;p&gt;If &lt;tp:member-ref&gt;HasImmortalHandles&lt;/tp:member-ref&gt; is true,           which SHOULD always be the case in this version of telepathy-spec,           this method does nothing and returns successfully, unless           the given handle type or any of the given handles is invalid.&lt;/p&gt;          &lt;p&gt;In older connection managers, this method         explicitly notifies the connection manager that your client is no         longer holding any references to the given handles, and that they         may be deallocated if they are not held by any other clients or         referenced by any existing channels. See         &lt;tp:member-ref&gt;HoldHandles&lt;/tp:member-ref&gt; for notes.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -4414,7 +4447,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Explicitly notify the connection manager that your client is no         longer holding any references to the given handles, and that they         may be deallocated if they are not held by any other clients or         referenced by any existing channels. See HoldHandles for notes.
+&lt;p&gt;If &lt;tp:member-ref&gt;HasImmortalHandles&lt;/tp:member-ref&gt; is true,           which SHOULD always be the case in this version of telepathy-spec,           this method does nothing and returns successfully, unless           the given handle type or any of the given handles is invalid.&lt;/p&gt;          &lt;p&gt;In older connection managers, this method         explicitly notifies the connection manager that your client is no         longer holding any references to the given handles, and that they         may be deallocated if they are not held by any other clients or         referenced by any existing channels. See         &lt;tp:member-ref&gt;HoldHandles&lt;/tp:member-ref&gt; for notes.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -4759,7 +4792,7 @@ succeeds or fails.
 Start a RequestHandles method call.
 </p>
 <p>
-Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the identifier refers to an entity that already has a         handle in this connection manager, this handle should be returned         instead. The handle number 0 must not be returned by the connection         manager.
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request several handles from the connection manager which represent a           number of contacts, rooms or server-stored lists on the service.&lt;/p&gt;          &lt;p&gt;If &lt;tp:member-ref&gt;HasImmortalHandles&lt;/tp:member-ref&gt; is true,           which SHOULD always be the case in this version of telepathy-spec,           the handles remain valid until the connection disconnects.&lt;/p&gt;          &lt;p&gt;The implementation of this method in older connection managers         must record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the identifier refers to an entity that already has a         handle in this connection manager, this handle should be returned         instead. The handle number 0 must not be returned by the connection         manager.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -4847,7 +4880,7 @@ and generally ensure that everything is in a consistent
 state.
 </p>
 <p>
-Request several handles from the connection manager which represent a         number of contacts, rooms or server-stored lists on the service. The         connection manager should record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the identifier refers to an entity that already has a         handle in this connection manager, this handle should be returned         instead. The handle number 0 must not be returned by the connection         manager.
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request several handles from the connection manager which represent a           number of contacts, rooms or server-stored lists on the service.&lt;/p&gt;          &lt;p&gt;If &lt;tp:member-ref&gt;HasImmortalHandles&lt;/tp:member-ref&gt; is true,           which SHOULD always be the case in this version of telepathy-spec,           the handles remain valid until the connection disconnects.&lt;/p&gt;          &lt;p&gt;The implementation of this method in older connection managers         must record that these handles are in use by the         client who invokes this method, and must not deallocate the handles         until the client disconnects from the bus or calls the         &lt;tp:member-ref&gt;ReleaseHandles&lt;/tp:member-ref&gt;         method. Where the identifier refers to an entity that already has a         handle in this connection manager, this handle should be returned         instead. The handle number 0 must not be returned by the connection         manager.&lt;/p&gt;
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">

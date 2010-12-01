@@ -99,7 +99,8 @@ finish (gpointer r)
 }
 
 /*
- * Assert that RequestHandles + unref releases the handles.
+ * Assert that RequestHandles + unref doesn't crash. (It doesn't
+ * do anything any more, however.)
  */
 static void
 test_request_and_release (TpTestsSimpleConnection *service_conn,
@@ -148,20 +149,11 @@ test_request_and_release (TpTestsSimpleConnection *service_conn,
           "%s != %s", tp_handle_inspect (service_repo, handle), ids[i]);
     }
 
-  /* release the handles */
+  /* release the handles (but don't assert that it isn't a no-op) */
 
   tp_connection_unref_handles (client_conn, TP_HANDLE_TYPE_CONTACT,
       result.handles->len, (const TpHandle *) result.handles->data);
   tp_tests_proxy_run_until_dbus_queue_processed (client_conn);
-
-  /* check that the handles have been released */
-
-  for (i = 0; i < 3; i++)
-    {
-      TpHandle handle = g_array_index (result.handles, TpHandle, i);
-
-      MYASSERT (!tp_handle_is_valid (service_repo, handle, NULL), "");
-    }
 
   /* clean up */
 
@@ -271,20 +263,11 @@ test_request_hold_release (TpTestsSimpleConnection *service_conn,
           "%s != %s", tp_handle_inspect (service_repo, handle), ids[i]);
     }
 
-  /* release the handles by unreffing them again */
+  /* release the handles (but don't assert that it isn't a no-op) */
 
   tp_connection_unref_handles (client_conn, TP_HANDLE_TYPE_CONTACT,
       result.handles->len, (const TpHandle *) result.handles->data);
   tp_tests_proxy_run_until_dbus_queue_processed (client_conn);
-
-  /* check that the handles have been released */
-
-  for (i = 0; i < 3; i++)
-    {
-      TpHandle handle = g_array_index (result.handles, TpHandle, i);
-
-      MYASSERT (!tp_handle_is_valid (service_repo, handle, NULL), "");
-    }
 
   /* clean up */
 
@@ -328,10 +311,15 @@ main (int argc,
 
   client_conn = tp_connection_new (dbus, name, conn_path, &error);
   MYASSERT (client_conn != NULL, "");
+  /* It does in fact have immortal handles, but we can't know that yet */
+  g_assert (!tp_connection_has_immortal_handles (client_conn));
   g_assert_no_error (error);
   MYASSERT (tp_connection_run_until_ready (client_conn, TRUE, &error, NULL),
       "");
   g_assert_no_error (error);
+
+  /* now we know */
+  g_assert (tp_connection_has_immortal_handles (client_conn));
 
   /* Tests */
 

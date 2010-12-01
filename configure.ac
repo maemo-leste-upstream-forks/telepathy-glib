@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [13])
-m4_define([tp_glib_micro_version], [7])
+m4_define([tp_glib_micro_version], [8])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [52])
+m4_define([tp_glib_lt_current], [53])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [52])
+m4_define([tp_glib_lt_age], [53])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -137,16 +137,10 @@ if test x$enable_debug = xyes; then
   AC_DEFINE(ENABLE_DEBUG, [], [Enable debug code])
 fi
 
-if test x$enable_handle_leak_debug = xyes; then
-  AC_DEFINE(ENABLE_HANDLE_LEAK_DEBUG, [], [Enable handle leak debug code])
-  HANDLE_LEAK_DEBUG_CFLAGS="-rdynamic"
-fi
-
 if test x$enable_backtrace = xyes; then
   AC_DEFINE(ENABLE_BACKTRACE, [], [Enable backtrace output on crashes])
 fi
 
-AC_SUBST(HANDLE_LEAK_DEBUG_CFLAGS)
 AC_SUBST(COVERAGE_CFLAGS)
 
 AC_ARG_ENABLE([installed-examples],
