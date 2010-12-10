@@ -67,17 +67,21 @@ IGNORE_HFILES=\
     base-connection-internal.h \
     base-contact-list-internal.h \
     channel-dispatch-operation-internal.h \
+    client-message-internal.h \
     base-protocol-internal.h \
     channel-internal.h \
+    cm-message-internal.h \
     connection-internal.h \
     contact-list-channel-internal.h \
     debug-internal.h \
     handle-channels-context-internal.h \
     handle-repo-internal.h \
+    message-internal.h \
     observe-channels-context-internal.h \
     protocol-internal.h \
     proxy-internal.h \
     proxy-introspectable.h \
+    signalled-message-internal.h \
     simple-password-channel-internal.h \
     util-internal.h
 

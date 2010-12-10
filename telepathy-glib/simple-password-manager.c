@@ -211,8 +211,9 @@ tp_simple_password_manager_close_all (TpSimplePasswordManager *self)
 
   DEBUG ("closing %p", priv->channel);
   tp_base_channel_close (TP_BASE_CHANNEL (priv->channel));
-  g_object_unref (priv->channel);
-  priv->channel = NULL;
+
+  /* priv->channel gets unreffed and set to NULL in the closed
+   * callback below. */
 }
 
 static void
@@ -300,6 +301,8 @@ tp_simple_password_manager_channel_closed_cb (GObject *chan,
 {
   tp_channel_manager_emit_channel_closed_for_object (manager,
       TP_EXPORTABLE_CHANNEL (chan));
+
+  tp_clear_object (&manager->priv->channel);
 }
 
 static void

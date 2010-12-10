@@ -44,7 +44,8 @@ noinst_PROGRAMS = test-account$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
 	test-cli-group$(EXEEXT) test-client$(EXEEXT) \
 	test-client-channel-factory$(EXEEXT) test-cm$(EXEEXT) \
-	test-connection$(EXEEXT) test-connection-bug-18845$(EXEEXT) \
+	test-cm-message$(EXEEXT) test-connection$(EXEEXT) \
+	test-connection-bug-18845$(EXEEXT) \
 	test-connection-error$(EXEEXT) \
 	test-connection-handles$(EXEEXT) \
 	test-connection-inject-bug16307$(EXEEXT) \
@@ -200,6 +201,12 @@ test_cm_LDADD = $(LDADD)
 test_cm_DEPENDENCIES = $(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_cm_message_OBJECTS = cm-message.$(OBJEXT)
+test_cm_message_OBJECTS = $(am_test_cm_message_OBJECTS)
+test_cm_message_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+	$(am__DEPENDENCIES_1)
 am_test_connection_OBJECTS = connection.$(OBJEXT)
 test_connection_OBJECTS = $(am_test_connection_OBJECTS)
 test_connection_LDADD = $(LDADD)
@@ -502,7 +509,8 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
 	$(test_channel_request_SOURCES) $(test_cli_group_SOURCES) \
 	$(test_client_SOURCES) $(test_client_channel_factory_SOURCES) \
-	$(test_cm_SOURCES) $(test_connection_SOURCES) \
+	$(test_cm_SOURCES) $(test_cm_message_SOURCES) \
+	$(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
@@ -540,7 +548,8 @@ DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
 	$(test_channel_request_SOURCES) $(test_cli_group_SOURCES) \
 	$(test_client_SOURCES) $(test_client_channel_factory_SOURCES) \
-	$(test_cm_SOURCES) $(test_connection_SOURCES) \
+	$(test_cm_SOURCES) $(test_cm_message_SOURCES) \
+	$(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
@@ -827,6 +836,16 @@ test_simple_approver_SOURCES = simple-approver.c
 test_simple_handler_SOURCES = simple-handler.c
 test_stream_tube_SOURCES = stream-tube.c
 test_client_channel_factory_SOURCES = client-channel-factory.c
+
+# this one uses internal ABI
+test_cm_message_SOURCES = \
+    cm-message.c
+
+test_cm_message_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS)
+
 check_c_sources = *.c
 AM_CPPFLAGS = \
     -I${top_srcdir} -I${top_builddir} \
@@ -969,6 +988,9 @@ test-client-channel-factory$(EXEEXT): $(test_client_channel_factory_OBJECTS) $(t
 test-cm$(EXEEXT): $(test_cm_OBJECTS) $(test_cm_DEPENDENCIES) 
 	@rm -f test-cm$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_cm_OBJECTS) $(test_cm_LDADD) $(LIBS)
+test-cm-message$(EXEEXT): $(test_cm_message_OBJECTS) $(test_cm_message_DEPENDENCIES) 
+	@rm -f test-cm-message$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_cm_message_OBJECTS) $(test_cm_message_LDADD) $(LIBS)
 test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENCIES) 
 	@rm -f test-connection$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_connection_OBJECTS) $(test_connection_LDADD) $(LIBS)
@@ -1098,6 +1120,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli-group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-channel-factory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm-message.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-bug-18845.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-error.Po@am__quote@

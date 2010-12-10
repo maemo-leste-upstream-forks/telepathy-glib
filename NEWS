@@ -1,3 +1,57 @@
+telepathy-glib 0.13.9 (2010-12-10)
+==================================
+
+The "please mind the gap between the table and the table" release.
+
+This release includes all the bugfixes from version 0.12.6.
+
+Deprecations:
+
+• tp_message_new (replace with tp_cm_message_new)
+• tp_message_ref_handle (no longer needed)
+• tp_message_set_handle (use tp_cm_message_set_sender for the only supported
+  handle in a message)
+• tp_message_take_message (replace with tp_cm_message_take_message)
+
+Enhancements:
+
+• tp_account_get_path_suffix: new function to get the varying suffix of an
+  account's object path (wjt)
+
+• TpAccountManager: document which TpAccount objects are prepared (wjt)
+
+• tp_connection_dup_contact_if_possible: new function to make
+  TpContact objects synchronously in some situations (smcv)
+
+• convert TpMessage into a GObject, with subclasses for use in CMs
+  (TpCMMessage) and clients (TpClientMessage, TpSignalledMessage) (cassidy)
+
+• add TpConnection:self-contact, a TpContact for the self-handle (smcv)
+
+Fixes:
+
+• In TpSimplePasswordManager, clear the pointer to the channel when it's closed
+  (jonny)
+
+• fd.o #32116: don't leak LegacyProtocol object references when a
+  TpBaseConnectionManager is registered (smcv)
+
+• Fix an unlikely crash in which a TpBaseConnection outlives its
+  TpBaseConnectionManager (smcv)
+
+• Documentation improvements (cassidy)
+
+• fd.o #32191: when tp_connection_get_contacts_by_handle would return
+  contacts that already exist, make sure they have the desired features (smcv)
+
+• Fix memory leaks in TpAccount and TpDynamicHandleRepo introduced in 0.13.8
+  (cassidy)
+
+• fd.o #32222: fix a leak of TpChannel objects in TpBaseClient, document that
+  Handlers are responsible for closing their channels, warn if channels are
+  still handled when a Handler is disposed, and close channels in some
+  regression tests (Zdra)
+
 telepathy-glib 0.13.8 (2010-12-01)
 ==================================
 

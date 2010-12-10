@@ -63,7 +63,7 @@ GType tp_simple_approver_get_type (void);
                               TpSimpleApproverClass))
 
 typedef void (*TpSimpleApproverAddDispatchOperationImpl) (
-    TpSimpleApprover *self,
+    TpSimpleApprover *approver,
     TpAccount *account,
     TpConnection *connection,
     GList *channels,
@@ -73,7 +73,7 @@ typedef void (*TpSimpleApproverAddDispatchOperationImpl) (
 
 TpBaseClient * tp_simple_approver_new (TpDBusDaemon *dbus,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
     TpSimpleApproverAddDispatchOperationImpl callback,
     gpointer user_data,
     GDestroyNotify destroy);
@@ -81,7 +81,7 @@ TpBaseClient * tp_simple_approver_new (TpDBusDaemon *dbus,
 TpBaseClient *tp_simple_approver_new_with_am (
     TpAccountManager *account_manager,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
     TpSimpleApproverAddDispatchOperationImpl callback,
     gpointer user_data,
     GDestroyNotify destroy);

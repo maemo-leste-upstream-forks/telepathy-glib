@@ -58,6 +58,10 @@ enum                <a class="link" href="telepathy-glib-contact.html#TpContactF
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
+<a class="link" href="telepathy-glib-contact.html#TpContact"><span class="returnvalue">TpContact</span></a> *         <a class="link" href="telepathy-glib-contact.html#tp-connection-dup-contact-if-possible" title="tp_connection_dup_contact_if_possible ()">tp_connection_dup_contact_if_possible</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="type">TpHandle</span></a> handle</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *identifier</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-contact.html#tp-connection-get-contacts-by-handle" title="tp_connection_get_contacts_by_handle ()">tp_connection_get_contacts_by_handle</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> n_handles</code></em>,
@@ -392,6 +396,63 @@ that were not valid.
 </tbody>
 </table></div>
 <p class="since">Since 0.7.18</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_connection_dup_contact_if_possible ()">
+<a name="tp-connection-dup-contact-if-possible"></a><h3>tp_connection_dup_contact_if_possible ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="returnvalue">TpContact</span></a> *         tp_connection_dup_contact_if_possible
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="type">TpHandle</span></a> handle</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *identifier</code></em>);</pre>
+<p>
+Try to return an existing contact object or create a new contact object
+immediately.
+</p>
+<p>
+If <a class="link" href="telepathy-glib-connection.html#tp-connection-has-immortal-handles" title="tp_connection_has_immortal_handles ()"><code class="function">tp_connection_has_immortal_handles()</code></a> would return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> and
+<em class="parameter"><code>identifier</code></em> is non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, this function always succeeds.
+</p>
+<p>
+On connections without immortal handles, it is not possible to guarantee
+that <em class="parameter"><code>handle</code></em> remains valid without making asynchronous D-Bus calls, so
+it might be necessary to delay processing of messages or other events
+until a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> can be constructed asynchronously, for instance by using
+<a class="link" href="telepathy-glib-contact.html#tp-connection-get-contacts-by-id" title="tp_connection_get_contacts_by_id ()"><code class="function">tp_connection_get_contacts_by_id()</code></a>.
+</p>
+<p>
+Similarly, if <em class="parameter"><code>identifier</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, it might not be possible to find the
+identifier for <em class="parameter"><code>handle</code></em> without making asynchronous D-Bus calls, so
+it might be necessary to delay processing of messages or other events
+until a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> can be constructed asynchronously, for instance by using
+<a class="link" href="telepathy-glib-contact.html#tp-connection-get-contacts-by-handle" title="tp_connection_get_contacts_by_handle ()"><code class="function">tp_connection_get_contacts_by_handle()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>connection</code></em> :</span></p></td>
+<td>a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>handle</code></em> :</span></p></td>
+<td>a handle of type <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-CONTACT:CAPS"><code class="literal">TP_HANDLE_TYPE_CONTACT</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>identifier</code></em> :</span></p></td>
+<td> the normalized identifier (XMPP JID, etc.)
+ corresponding to <em class="parameter"><code>handle</code></em>, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not known. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a contact or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.9</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_connection_get_contacts_by_handle ()">

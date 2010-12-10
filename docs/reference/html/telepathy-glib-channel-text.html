@@ -348,6 +348,19 @@
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> arg_Removed</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
+
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="returnvalue">TpProxySignalConnection</span></a> * <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-sms-connect-to-sms-channel-changed" title="tp_cli_channel_interface_sms_connect_to_sms_channel_changed ()">tp_cli_channel_interface_sms_connect_to_sms_channel_changed</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-sms-signal-callback-sms-channel-changed" title="tp_cli_channel_interface_sms_signal_callback_sms_channel_changed ()"><span class="type">tp_cli_channel_interface_sms_signal_callback_sms_channel_changed</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-sms-signal-callback-sms-channel-changed" title="tp_cli_channel_interface_sms_signal_callback_sms_channel_changed ()">*tp_cli_channel_interface_sms_signal_callback_sms_channel_changed</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> arg_SMSChannel</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -1888,7 +1901,7 @@ Start a SendMessage method call.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>in_Message</code></em> :</span></p></td>
-<td>Used to pass an 'in' argument: The message content, including any attachments or alternatives
+<td>Used to pass an 'in' argument: The message content, including any attachments or alternatives.           This MUST NOT include the following headers, or any others that           do not make sense for a client to specify:           &lt;code&gt;message-sender&lt;/code&gt;, &lt;code&gt;message-sender-id&lt;/code&gt;,           &lt;code&gt;message-sent&lt;/code&gt;, &lt;code&gt;message-received&lt;/code&gt;,           &lt;code&gt;pending-message-id&lt;/code&gt;.
 </td>
 </tr>
 <tr>
@@ -1975,7 +1988,7 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>in_Message</code></em> :</span></p></td>
-<td>Used to pass an 'in' argument: The message content, including any attachments or alternatives
+<td>Used to pass an 'in' argument: The message content, including any attachments or alternatives.           This MUST NOT include the following headers, or any others that           do not make sense for a client to specify:           &lt;code&gt;message-sender&lt;/code&gt;, &lt;code&gt;message-sender-id&lt;/code&gt;,           &lt;code&gt;message-sent&lt;/code&gt;, &lt;code&gt;message-received&lt;/code&gt;,           &lt;code&gt;pending-message-id&lt;/code&gt;.
 </td>
 </tr>
 <tr>
@@ -2139,7 +2152,7 @@ Represents the signature of a callback for the signal MessageSent.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>arg_Content</code></em> :</span></p></td>
-<td>&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;The message content (see &lt;tp:type&gt;Message_Part&lt;/tp:type&gt; for full             details). If the message that was passed to             &lt;tp:member-ref&gt;SendMessage&lt;/tp:member-ref&gt; has a formatted text             part that the connection manager recognises, but no             &lt;tt&gt;text/plain&lt;/tt&gt; alternative, the CM MUST use the formatted text             part to generate a &lt;tt&gt;text/plain&lt;/tt&gt; alternative which is also             included in this signal argument.&lt;/p&gt;            &lt;p&gt;If the connection manager can predict that the message will be             altered during transmission, this argument SHOULD reflect what             other contacts will receive, rather than being a copy of the             argument to SendMessage (if the message is truncated,             formatting or alternatives are dropped, etc., then the edited             version SHOULD appear in this signal).&lt;/p&gt;
+<td>&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           &lt;p&gt;The message content (see &lt;tp:type&gt;Message_Part&lt;/tp:type&gt; for full             details). If the message that was passed to             &lt;tp:member-ref&gt;SendMessage&lt;/tp:member-ref&gt; has a formatted text             part that the connection manager recognises, but no             &lt;tt&gt;text/plain&lt;/tt&gt; alternative, the CM MUST use the formatted text             part to generate a &lt;tt&gt;text/plain&lt;/tt&gt; alternative which is also             included in this signal argument.&lt;/p&gt;            &lt;p&gt;The connection manager SHOULD include the             &lt;code&gt;message-sender&lt;/code&gt;, &lt;code&gt;message-sender-id&lt;/code&gt; and             &lt;code&gt;message-sent&lt;/code&gt; headers in the representation of the             message that is signalled here. If the channel has             channel-specific handles, the &lt;code&gt;message-sender&lt;/code&gt; and             &lt;code&gt;message-sender-id&lt;/code&gt; SHOULD reflect the sender that             other contacts will see.&lt;/p&gt;            &lt;p&gt;If the connection manager can predict that the message will be             altered during transmission, this argument SHOULD reflect what             other contacts will receive, rather than being a copy of the             argument to SendMessage (if the message is truncated,             formatting or alternatives are dropped, etc., then the edited             version SHOULD appear in this signal).&lt;/p&gt;
 </td>
 </tr>
 <tr>
@@ -3086,6 +3099,110 @@ Represents the signature of a callback for the signal PasswordFlagsChanged.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>arg_Removed</code></em> :</span></p></td>
 <td>A bitwise OR of the flags which have been cleared
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>User-supplied data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>User-supplied weakly referenced object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_cli_channel_interface_sms_connect_to_sms_channel_changed ()">
+<a name="tp-cli-channel-interface-sms-connect-to-sms-channel-changed"></a><h3>tp_cli_channel_interface_sms_connect_to_sms_channel_changed ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="returnvalue">TpProxySignalConnection</span></a> * tp_cli_channel_interface_sms_connect_to_sms_channel_changed
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-sms-signal-callback-sms-channel-changed" title="tp_cli_channel_interface_sms_signal_callback_sms_channel_changed ()"><span class="type">tp_cli_channel_interface_sms_signal_callback_sms_channel_changed</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>
+Connect a handler to the signal SMSChannelChanged.
+</p>
+<p>
+This signal indicates a change in the         &lt;tp:member-ref&gt;SMSChannel&lt;/tp:member-ref&gt; property.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>A <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> or subclass
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>Callback to be called when the signal is
+  received
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>User-supplied data for the callback
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>Destructor for the user-supplied data, which
+  will be called when this signal is disconnected, or
+  before this function returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>A <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be weakly referenced; 
+  if it is destroyed, this callback will automatically be
+  disconnected
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to raise an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is
+  returned
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+or has become invalid.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_cli_channel_interface_sms_signal_callback_sms_channel_changed ()">
+<a name="tp-cli-channel-interface-sms-signal-callback-sms-channel-changed"></a><h3>tp_cli_channel_interface_sms_signal_callback_sms_channel_changed ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*tp_cli_channel_interface_sms_signal_callback_sms_channel_changed)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> arg_SMSChannel</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
+<p>
+Represents the signature of a callback for the signal SMSChannelChanged.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>The proxy on which <a class="link" href="telepathy-glib-channel-text.html#tp-cli-channel-interface-sms-connect-to-sms-channel-changed" title="tp_cli_channel_interface_sms_connect_to_sms_channel_changed ()"><code class="function">tp_cli_channel_interface_sms_connect_to_sms_channel_changed()</code></a>
+ was called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_SMSChannel</code></em> :</span></p></td>
+<td>The new value for &lt;tp:member-ref&gt;SMSChannel&lt;/tp:member-ref&gt;.
 </td>
 </tr>
 <tr>

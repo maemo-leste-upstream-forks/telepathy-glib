@@ -63,7 +63,7 @@ GType tp_simple_observer_get_type (void);
                               TpSimpleObserverClass))
 
 typedef void (*TpSimpleObserverObserveChannelsImpl) (
-    TpSimpleObserver *self,
+    TpSimpleObserver *observer,
     TpAccount *account,
     TpConnection *connection,
     GList *channels,
@@ -75,7 +75,7 @@ typedef void (*TpSimpleObserverObserveChannelsImpl) (
 TpBaseClient * tp_simple_observer_new (TpDBusDaemon *dbus,
     gboolean recover,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
     TpSimpleObserverObserveChannelsImpl callback,
     gpointer user_data,
     GDestroyNotify destroy);
@@ -84,7 +84,7 @@ TpBaseClient *tp_simple_observer_new_with_am (
     TpAccountManager *account_manager,
     gboolean recover,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
     TpSimpleObserverObserveChannelsImpl callback,
     gpointer user_data,
     GDestroyNotify destroy);
