@@ -80,6 +80,7 @@
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-connection.html#tp-connection-is-ready" title="tp_connection_is_ready ()">tp_connection_is_ready</a>              (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
 <a class="link" href="telepathy-glib-enums.html#TpConnectionStatus" title="enum TpConnectionStatus"><span class="returnvalue">TpConnectionStatus</span></a>  <a class="link" href="telepathy-glib-connection.html#tp-connection-get-status" title="tp_connection_get_status ()">tp_connection_get_status</a>            (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason"><span class="type">TpConnectionStatusReason</span></a> *reason</code></em>);
+<a class="link" href="telepathy-glib-contact.html#TpContact"><span class="returnvalue">TpContact</span></a> *         <a class="link" href="telepathy-glib-connection.html#tp-connection-get-self-contact" title="tp_connection_get_self_contact ()">tp_connection_get_self_contact</a>      (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
 <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="returnvalue">TpHandle</span></a>            <a class="link" href="telepathy-glib-connection.html#tp-connection-get-self-handle" title="tp_connection_get_self_handle ()">tp_connection_get_self_handle</a>       (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-connection.html#tp-connection-has-immortal-handles" title="tp_connection_has_immortal_handles ()">tp_connection_has_immortal_handles</a>  (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection.html#TpConnectionRequestHandlesCb" title="TpConnectionRequestHandlesCb ()">*TpConnectionRequestHandlesCb</a>)     (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
@@ -534,6 +535,7 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
 <pre class="synopsis">
   "<a class="link" href="telepathy-glib-connection.html#TpConnection--capabilities" title='The "capabilities" property'>capabilities</a>"             <a class="link" href="telepathy-glib-capabilities.html#TpCapabilities"><span class="type">TpCapabilities</span></a>*       : Read
   "<a class="link" href="telepathy-glib-connection.html#TpConnection--connection-ready" title='The "connection-ready" property'>connection-ready</a>"         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Read
+  "<a class="link" href="telepathy-glib-connection.html#TpConnection--self-contact" title='The "self-contact" property'>self-contact</a>"             <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>*            : Read
   "<a class="link" href="telepathy-glib-connection.html#TpConnection--self-handle" title='The "self-handle" property'>self-handle</a>"              <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
   "<a class="link" href="telepathy-glib-connection.html#TpConnection--status" title='The "status" property'>status</a>"                   <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
   "<a class="link" href="telepathy-glib-connection.html#TpConnection--status-reason" title='The "status-reason" property'>status-reason</a>"            <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
@@ -834,6 +836,9 @@ will be up to date:
 </li>
 <li class="listitem">
 <a class="link" href="telepathy-glib-connection.html#TpConnection--self-handle" title='The "self-handle" property'><span class="type">"self-handle"</span></a> is valid and non-zero</li>
+<li class="listitem">
+<a class="link" href="telepathy-glib-connection.html#TpConnection--self-contact" title='The "self-contact" property'><span class="type">"self-contact"</span></a> is non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</li>
 <li class="listitem">all interfaces have been added to the set of
    <a class="link" href="telepathy-glib-proxy.html#TpProxy--interfaces" title='The "interfaces" property'><span class="type">"interfaces"</span></a>, and that set will not change again</li>
 </ul></div>
@@ -1107,6 +1112,35 @@ don't know yet.
 <p class="since">Since 0.7.14</p>
 </div>
 <hr>
+<div class="refsect2" title="tp_connection_get_self_contact ()">
+<a name="tp-connection-get-self-contact"></a><h3>tp_connection_get_self_contact ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="returnvalue">TpContact</span></a> *         tp_connection_get_self_contact      (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);</pre>
+<p>
+Return a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> representing the local user on this connection.
+</p>
+<p>
+The returned object is not necessarily valid after the main loop is
+re-entered; ref it with <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-ref"><code class="function">g_object_ref()</code></a> if you want to keep it.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of the TpConnection:self-contact
+ property, which may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.9</p>
+</div>
+<hr>
 <div class="refsect2" title="tp_connection_get_self_handle ()">
 <a name="tp-connection-get-self-handle"></a><h3>tp_connection_get_self_handle ()</h3>
 <pre class="programlisting"><a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="returnvalue">TpHandle</span></a>            tp_connection_get_self_handle       (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);</pre>
@@ -1188,7 +1222,7 @@ succeeds or fails.
 On success, the caller has a reference to each handle in <em class="parameter"><code>handles</code></em>.
 </p>
 <p>
-Since telepathy-glib version 0.13.UNRELEASED,
+Since telepathy-glib version 0.13.8,
 the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
 (signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, they could be
 released with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>.
@@ -1340,7 +1374,7 @@ or fails.
 On success, the caller has a reference to each handle in <em class="parameter"><code>handles</code></em>.
 </p>
 <p>
-Since telepathy-glib version 0.13.UNRELEASED,
+Since telepathy-glib version 0.13.8,
 the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
 (signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, they could be
 released with <a class="link" href="telepathy-glib-connection.html#tp-connection-unref-handles" title="tp_connection_unref_handles ()"><code class="function">tp_connection_unref_handles()</code></a>.
@@ -1415,7 +1449,7 @@ include them in <em class="parameter"><code>user_data</code></em>.
 Return (via a callback) any number of attributes of the given handles.
 </p>
 <p>
-Since telepathy-glib version 0.13.UNRELEASED,
+Since telepathy-glib version 0.13.8,
 the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
 (signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, if <em class="parameter"><code>hold</code></em>
 was <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the callback would hold a reference to them which could be
@@ -1517,7 +1551,7 @@ Return (via a callback) the contacts on the contact list and any number of
 their attributes.
 </p>
 <p>
-Since telepathy-glib version 0.13.UNRELEASED,
+Since telepathy-glib version 0.13.8,
 the handles will remain valid until <em class="parameter"><code>connection</code></em> becomes invalid
 (signalled by <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a>). In earlier versions, if <em class="parameter"><code>hold</code></em>
 was <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the callback would hold a reference to them which could be
@@ -1676,7 +1710,7 @@ functions.
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> n_handles</code></em>,
                                                          <em class="parameter"><code>const <a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="type">TpHandle</span></a> *handles</code></em>);</pre>
 <p>
-Do nothing. In versions of telepathy-glib prior to 0.13.UNRELEASED,
+Do nothing. In versions of telepathy-glib prior to 0.13.8,
 this released a reference to the handles in <em class="parameter"><code>handles</code></em>.
 </p>
 <div class="variablelist"><table border="0">
@@ -5649,12 +5683,37 @@ been invalidated.
 <p>Default value: FALSE</p>
 </div>
 <hr>
+<div class="refsect2" title='The "self-contact" property'>
+<a name="TpConnection--self-contact"></a><h3>The <code class="literal">"self-contact"</code> property</h3>
+<pre class="programlisting">  "self-contact"             <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>*            : Read</pre>
+<p>
+A <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> representing the local user on this connection,
+or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not yet available.
+</p>
+<p>
+If the local user's unique identifier changes (for instance by using
+/nick on IRC), this property will change to a different <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> object
+representing the new identifier, and <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject-notify"><span class="type">"notify"</span></a> will be emitted.
+</p>
+<p>
+To wait for a non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> self-contact (and other properties), call
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> with the feature
+<a class="link" href="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONNECTED:CAPS" title="TP_CONNECTION_FEATURE_CONNECTED"><code class="literal">TP_CONNECTION_FEATURE_CONNECTED</code></a>.
+</p>
+<p class="since">Since 0.13.9</p>
+</div>
+<hr>
 <div class="refsect2" title='The "self-handle" property'>
 <a name="TpConnection--self-handle"></a><h3>The <code class="literal">"self-handle"</code> property</h3>
 <pre class="programlisting">  "self-handle"              <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
 <p>
 The <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-CONTACT:CAPS"><code class="literal">TP_HANDLE_TYPE_CONTACT</code></a> handle of the local user on this connection,
 or 0 if we don't know yet or if the connection has become invalid.
+</p>
+<p>
+This may change if the local user's unique identifier changes (for
+instance by using /nick on IRC), in which case <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject-notify"><span class="type">"notify"</span></a> will be
+emitted.
 </p>
 <p>
 To wait for a valid self-handle (and other properties), call

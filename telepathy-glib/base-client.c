@@ -895,7 +895,7 @@ tp_base_client_init (TpBaseClient *self)
   g_ptr_array_add (self->priv->handler_caps, NULL);
 
   self->priv->my_chans = g_hash_table_new_full (g_str_hash, g_str_equal,
-      NULL, NULL);
+      NULL, g_object_unref);
 }
 
 static void
@@ -915,6 +915,10 @@ tp_base_client_dispose (GObject *object)
   g_list_foreach (self->priv->pending_requests, (GFunc) g_object_unref, NULL);
   g_list_free (self->priv->pending_requests);
   self->priv->pending_requests = NULL;
+
+  if (self->priv->my_chans != NULL &&
+      g_hash_table_size (self->priv->my_chans) > 0)
+    WARNING ("TpBaseClient is still handling channels at dispose");
 
   tp_clear_pointer (&self->priv->my_chans, g_hash_table_unref);
 

@@ -32,7 +32,7 @@
 
 G_BEGIN_DECLS
 
-typedef struct _TpContact TpContact;
+/* TpContact is forward-declared in connection.h */
 typedef struct _TpContactClass TpContactClass;
 typedef struct _TpContactPrivate TpContactPrivate;
 
@@ -142,6 +142,9 @@ void tp_connection_get_contacts_by_id (TpConnection *self,
     guint n_features, const TpContactFeature *features,
     TpConnectionContactsByIdCb callback,
     gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
+
+TpContact *tp_connection_dup_contact_if_possible (TpConnection *connection,
+    TpHandle handle, const gchar *identifier);
 
 G_END_DECLS
 

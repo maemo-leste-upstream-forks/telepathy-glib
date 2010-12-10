@@ -43,6 +43,8 @@ our_headers = \
     channel-request.h \
     client.h \
     client-channel-factory.h \
+    client-message.h \
+    cm-message.h \
     connection.h \
     connection-manager.h \
     capabilities.h \
@@ -72,6 +74,7 @@ our_headers = \
     interfaces.h \
     intset.h \
     media-interfaces.h \
+    message.h \
     message-mixin.h \
     observe-channels-context.h \
     presence-mixin.h \
@@ -80,6 +83,7 @@ our_headers = \
     proxy.h \
     proxy-subclass.h \
     run.h \
+    signalled-message.h \
     simple-approver.h \
     simple-handler.h \
     simple-observer.h \
@@ -158,6 +162,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-request.c \
     client.c \
     client-channel-factory.c \
+    client-message.c \
+    client-message-internal.h \
     connection.c \
     connection-avatars.c \
     connection-contact-info.c \
@@ -169,6 +175,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     contact-list-channel.c \
     base-contact-list.c \
     base-contact-list-internal.h \
+    cm-message.c \
+    cm-message-internal.h \
     contacts-mixin.c \
     dbus.c \
     dbus-daemon.c \
@@ -197,6 +205,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-iface.c \
     channel-factory-iface.c \
     media-interfaces.c \
+    message.c \
+    message-internal.h \
     message-mixin.c \
     observe-channels-context-internal.h \
     observe-channels-context.c \
@@ -210,6 +220,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     proxy-signals.c \
     run.c \
     signals-marshal.list \
+    signalled-message.c \
+    signalled-message-internal.h \
     simple-approver.c \
     simple-handler.c \
     simple-observer.c \
