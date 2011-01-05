@@ -57,9 +57,16 @@
 #include <telepathy-glib/simple-observer.h>
 #include <telepathy-glib/stream-tube-channel.h>
 #include <telepathy-glib/stream-tube-connection.h>
+#include <telepathy-glib/text-channel.h>
 
 #include <telepathy-glib/svc-generic.h>
 #include <telepathy-glib/svc-client.h>
+
+#include <telepathy-glib/base-channel.h>
+#include <telepathy-glib/base-connection.h>
+#include <telepathy-glib/base-connection-manager.h>
+#include <telepathy-glib/base-contact-list.h>
+#include <telepathy-glib/base-protocol.h>
 
 #undef  __TP_IN_GLIB_H__
 #endif /* __TP_GLIB_H__ */

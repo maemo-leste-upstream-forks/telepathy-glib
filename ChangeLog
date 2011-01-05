@@ -1,3 +1,921 @@
+commit 3797bff4fe9bad91c2ce0311923e688880ece506
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-20 19:42:11 +0000
+
+    Prepare version 0.13.10
+
+commit 4f46941b5de10a50bfba0a76f3f7d7ef790ad7c6
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-20 19:46:44 +0000
+
+    Remove MinimumPresence from EXTRA_DIST
+
+commit 0e8c632e445c63ec749234b5b36c4c534eed6eec
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-20 19:32:09 +0000
+
+    BaseContactList: test for ContactsChangedWithID
+
+commit a4061c482951f1d7f0b90293007f45ff21589224
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-20 19:31:21 +0000
+
+    BaseContactList: emit ContactsChangedWithID
+
+commit a59d9e3fcbe6fb8bca8962721c7c40cdda3c5154
+Merge: 0da65da 42a0caa
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-20 18:43:01 +0000
+
+    Merge remote branch 'smcv/better-contact-list' into spec-0.21.8
+
+commit 0da65dac9be817a4c74d89477d593b8467a0bd9f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-20 18:27:24 +0000
+
+    Update to spec 0.21.8
+    
+    The only change to stable API is the addition of a ContactsChangedWithID
+    signal to Connection.Interface.ContactList.
+
+commit 62c090ce74b2818a3ac83b9bb9617cb32c91ae44
+Merge: 03f9bc7 cc2c2d8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-20 15:44:52 +0100
+
+    Merge branch 'gir-iface-32465'
+
+commit 03f9bc7e8a4c4dedda2d5cb5e3894c98f9b79bdd
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2010-12-18 15:18:40 +0000
+
+    Test calling HandleChannels with the same channel multiple times
+
+commit adf5742012cb62e8ff95c74bf50f67c6645ed3ca
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2010-12-18 15:14:58 +0000
+
+    Use g_hash_table_replace instead of _insert
+    
+    For the channels hash in TpBaseClient the key is owned by the value in the
+    hash. The replacement behaviour of g_hash_table_insert always keeps the
+    existing key, which is not be valid anymore if the old value freed. Use
+    g_hash_table_replace instead to get the expected behaviour.
+
+commit e333114732f77e3cf6bd2faedf78c7fb71bda543
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2010-12-18 14:58:35 +0000
+
+    Better debug info and don't remove already removed channels
+    
+    TpProxy has the bad habit of emitting signals from dispose (Booo!).
+    TpBaseClient in various cases will be the last holder of a reference and tries
+    to remove the channel from its hash-table on invalidated..
+    
+    So in case the proxy gets unreferenced because it is removed from the hash
+    table (because HandleChannels is called again with the same path), the
+    proxy is disposed, it signals invalidated (Boo!) and during the removal it gets
+    removed again and thus unreferenced again...
+
+commit cc2c2d8cea5476cabff9f61cd555778af760ebcd
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 15:02:22 +0100
+
+    Ask to introspect _gen/telepathy-interfaces.h directly
+    
+    The gir scanner doesn't scan it if it's included from telepathy-interfaces.h
+
+commit bc129171d0ca02c3132e675d97914a04db5bc64c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:46:27 +0100
+
+    c-constants-gen.py: add magic gir rune when generating flags enum
+
+commit fbf1c3bdc2ab91cfd8a39b334115ca4b8f460b8e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:46:05 +0100
+
+    fix annotation of tp_protocol_get_authentication_types
+
+commit 5df616e8c3bf586eb1bfddc839463a42be26cecd
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:45:27 +0100
+
+    fix annotation of tp_client_channel_factory_create_channel
+
+commit 86b80a0a351ba3d9a79a14a256c22b1191f7f4cc
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:45:04 +0100
+
+    introspect client-channel-factory
+
+commit 1af111368d8aa6cdb593f01c61639d2754d68520
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:44:48 +0100
+
+    account: fix arg name in doc
+
+commit acfa9e84c635b986917dcf8aaa937f877fa579ed
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:44:17 +0100
+
+    fix return type of tp_account_get_avatar_finish
+
+commit 0d0fe4089f0d7f341ac31f8866bcfb93ea8f8dc5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 13:04:38 +0100
+
+    tp_text_channel_ack_messages_async: annotate messages
+
+commit 3d448d17ef2e3920e51e407f2f8ca02e01dd8e93
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 12:05:12 +0100
+
+    annotate the return type of tp_text_channel_get_pending_messages()
+
+commit e8cae5243e2ec02b813c4269293ff76b3a5ef89f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-17 12:04:42 +0100
+
+    add all TpMessage classes to introspection.am
+
+commit 42a0caaac49ebab5aff47ab1ffae00e905ef470e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-17 10:56:32 +0000
+
+    Use tp_intset_union_update to simplify TpBaseContactList
+
+commit 173c5201aad8ca3fe733a992d74fdcff6101f09a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-07 16:31:40 +0000
+
+    TpIntset: factor out tp_intset_union_update, tp_intset_difference_update
+
+commit bf9e9716394c406f754c8a952682ce6eb278ee71
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-17 10:54:30 +0000
+
+    Generate the information needed by ContactsChangedWithID
+
+commit d377afea4a28cfb2103b206111b10720a0afc833
+Merge: b936c72 78f683f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 19:07:15 +0000
+
+    Merge branch 'telepathy-glib-0.12'
+    
+    Conflicts:
+    	NEWS
+    	tests/dbus/dbus.c
+
+commit 78f683f9817d627b3f2404ad125961274fb5b8ff
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 19:02:10 +0000
+
+    NEWS
+
+commit 6fd6364e9d0e6cb6dfd9cfa8897905561b39875b
+Merge: 8ae5881 13638f7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 18:57:55 +0000
+
+    Merge branch '012-noc-fixes' into telepathy-glib-0.12
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=32391
+
+commit 13638f7d1bd48d4e2fde4bab6fa77563d2604ed6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 18:54:29 +0000
+
+    fix a typo in the test, and make even more assertions
+
+commit 95cd35028fec0239cfe05ece3f571d055ff6e501
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 18:42:08 +0000
+
+    tests/dbus/dbus: cancel_watch_during_dispatch: assert that user_data is freed
+
+commit 53d392c2d3d0b18228a33fecb002bdeb11ee61ed
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 18:41:42 +0000
+
+    Fix iteration over arrays of name-owner watches
+    
+    Also document why we're iterating backwards.
+    
+    In tp_dbus_daemon_maybe_free_name_owner_watch, the flawed
+    reverse-iteration was a bug: we'd skip over the element before a removed
+    entry, which might mean not freeing it.
+    
+    In tp_dbus_daemon_cancel_name_owner_watch, it was done correctly (because
+    there were no deletions), but it did hurt clarity.
+
+commit b936c7277db3818012d69d0fa4fd76a23a89e3c0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 17:19:51 +0000
+
+    Allow tests to be run without a timeout: export TP_TESTS_NO_TIMEOUT=1
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit b5f91061714d1471fa15a03ea8f1d5179f9693c4
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-14 13:01:30 +0000
+
+    Add a test case for removing name watches during dispatch
+    
+    This test case failed before the previous patch.
+
+commit e19b12900f0c1c2eab01f1b28ca9752f66852d5a
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 17:16:39 +0000
+
+    Don't remove NameOwnerChanged callbacks while invoking them
+
+commit 8d7da3442d674e383375e3b7c0092d01a06f4142
+Merge: 1757ae2 19c22f7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 16:05:04 +0000
+
+    Merge branch 'leave-the-area'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=30617
+
+commit 1757ae2c07a6ef6d8699c729a4d74740e3771bd2
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:47:35 +0100
+
+    pending_messages_removed_cb: early return if we didn't fetch pending messages yet
+
+commit 8375259908c5a997f8a01767cb72bc111cb51330
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:45:59 +0100
+
+    check type of self in getters
+
+commit 78cf4c971f1eb56df690e8c50478bfa3958ca801
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:44:38 +0100
+
+    fail to prepare if we can't connect signals
+
+commit fdf36f4291a6c08604fd676ebf205bc7ac5ef26e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:42:27 +0100
+
+    replace retrieving_pending by got_initial_messages
+
+commit 8e88018c188a2cef571150ef9fb1b484c16979b7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:40:04 +0100
+
+    default to plain if SupportedContentTypes is missing
+
+commit 79f33c157e0689b18c0c7af2088a0aeffbfaa3c0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:36:37 +0100
+
+    make find_msg_by_id clearer
+
+commit 9444fd8d967aaa28282df6e3c5fc9d62bcc61f1e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:31:47 +0100
+
+    raise a warning if we can't connect to MessageSent
+
+commit 5f66dfc17b21dc0ee71481944aa200aa2767347d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 15:23:18 +0100
+
+    tp_text_channel_get_supported_content_types: return a const gchar * const *
+
+commit 64f4b4ea54824b879878ade739843e099078f327
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 14:54:31 +0100
+
+    rename TP_TEXT_CHANNEL_FEATURE_PENDING_MESSAGES to TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES
+
+commit 9eca18317b370759493cdc53d0117f6b5da1cb74
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 14:47:53 +0100
+
+    remove obsolete TODO
+
+commit ee4f0a3bd856d58d1e6ab52448d8e0272a821e49
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 14:33:47 +0100
+
+    make text-handler example more exemplary
+
+commit d9782472a57473de24f1a0e5de59fb2aaf6e58da
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 14:29:22 +0100
+
+    doc: say to include telepathy-glib.h to use TpTextChannel
+
+commit 58a806fb1571be0d6ed5d1248870bc2296074f70
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-16 12:22:29 +0100
+
+    get_pending_messages_cb: check the value is of the right type
+
+commit df0e9ea27f780200694a76bf8d06f3a469f013a8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 12:15:43 +0100
+
+    not having message-sender is not an error
+
+commit cc4987f5e83c09f7ef1a4abfd562240b4a233887
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 12:02:13 +0100
+
+    turn pending_messages to a GQueue
+
+commit 5cc352873f102b6a43c2a95b71a9a2e5a38526ab
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 11:47:36 +0100
+
+    remove 2 goto
+
+commit 5a10176b50c287f66c2df2d8337df779a214175c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 11:40:23 +0100
+
+    free the parts_list using a GDestroyNotify
+    
+    That's cleaner and don't leak it if the callback is not called.
+
+commit 609769e00f913a25a3e4351d782b33974a4b66e0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 11:26:05 +0100
+
+    get_pending_messages_cb: add a comment
+
+commit fb285a84480aa68eb5fa93e0128a1de9b30780f3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 11:19:23 +0100
+
+    use ID to get TpContact if message-sender-id is set on ALL messages
+
+commit b22e3111bc3702001d409f90bff231c19b5a03a4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 10:59:16 +0100
+
+    display path of the connection in debug msg
+
+commit 89045877f7532221c2fcffa27e59e622f73c4a0e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 10:56:24 +0100
+
+    fix typo
+
+commit b64c6bd0b45dc64045c7e3a95076da15de7a62de
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 09:13:27 +0100
+
+    send_message_cb: set token to NULL if empty
+
+commit 0b4b60c4ae0bc4451a40f8cb254434406871ecb3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 09:04:59 +0100
+
+    move get_pending_message_id as internal API
+
+commit e1a2b7ae7db2dfdaf39d898cf08ab5beb87d5d64
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 08:54:06 +0100
+
+    rename SIG_ macro to fit the actual name of the signal
+
+commit d1c93bb79fae2231ea96b6e183f6dd3f54f16388
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 08:46:57 +0100
+
+    improve ack messages doc
+
+commit 07346be4436536301dfed37498f5a8f346e46832
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 08:39:10 +0100
+
+    automatic_proxy_factory_dup_channel: the channel arg is now used
+
+commit fe3a95ccec0452a65ee81782d69f7e62099a3eaf
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 08:33:37 +0100
+
+    automatic-proxy-factory: fix doc
+
+commit 661a9b2386c2d68d5e7685ab3a17bb168d063444
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-14 08:21:16 +0100
+
+    test-text-handler: use tp_message_to_text()
+
+commit 3a3c5c344b94dadf5fa7040bce2651b4a304feea
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 15:56:59 +0100
+
+    pending_messages_removed_cb: stop iterating over messages once we found the right one
+
+commit 178f7170c0b95996ae45904a66a1615482260d97
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 15:23:38 +0100
+
+    get_sender: set contact to NULL if we don't have the sender handle
+
+commit 9ad02335635de50b6e967a36c1b7194b950b85cc
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 14:52:19 +0100
+
+    set the sender on outgoing messages
+
+commit c0aa7bafb0a1eb595f0913e7540ccdfbbf6a3607
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 14:47:55 +0100
+
+    get_pending_messages_cb: don't leak the contact
+
+commit f04d6411cbac8b8b07d8a403eb6e72495cf59e27
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 14:10:40 +0100
+
+    get the senders using ID, if possible, when fetching pending messages
+
+commit d002233b6e5373be0fc2579c8fe725c9575a1522
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 13:39:59 +0100
+
+    message_received_cb: get the sender using his ID, if possible
+
+commit 653a9c13cec2555323b90bd07f70faec48dcd1ed
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 13:32:06 +0100
+
+    get_sender: allow to return the sender-id as well
+
+commit 0f6b655952fba5851ab699b6df724bf64fb09623
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 13:22:31 +0100
+
+    don't skip pending message without a sender
+
+commit 8e4fb763f084b8d5dcc60339e59690136fe75074
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 13:19:39 +0100
+
+    use add_message_received() also when fetching pending messages
+
+commit c115fb5657c82740bd05c2e8a3b9dbf57549e744
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 12:15:03 +0100
+
+    Try to get the TpContact right away when fetching pending messages
+
+commit 8e5bac777a149d08357ff3b30cea8df2c9541c11
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-12-10 11:33:19 +0100
+
+    use tp_connection_dup_contact_if_possible() when receiving a new message
+
+commit 1d189bb9238015a3448d41f295baebd04d02a746
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-10 15:15:06 +0100
+
+    _tp_signalled_message_new now takes the sender
+
+commit 4cf6b985e0136a0f30a2fef329c6d2dca0f8334d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-02 09:09:48 +0100
+
+    set senders of pending messages
+
+commit b5de797e4b45d4dbf11bd256f73b711c83a25c63
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 16:39:23 +0200
+
+    set the sender of incoming messages
+
+commit c262d6327d4ab639911080256202aeaa72b90cae
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 15:46:00 +0200
+
+    factor out add_message_received()
+
+commit 50f4c6ac7d1758254138ad63ddf137eedc0ddeb4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 14:57:17 +0200
+
+    use tp_message_to_text() in tests
+
+commit e6d929bb06af891133cbd459f2f1510e43399f13
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 13:20:45 +0200
+
+    add tp_text_channel_set_chat_state_async
+
+commit b17ebf9bbb78db2461c8e8acd225b48a5aaf1a88
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 12:29:02 +0200
+
+    test message-sent signal
+
+commit 023a9fcdc8f046e7d90b6665c420ae7115fe4283
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 12:08:28 +0200
+
+    add message-sent signal
+
+commit 27c7a6f6adda494d0bf180a631c262911ea6741b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-29 11:24:18 +0200
+
+    tp_text_channel_send_message_finish: return the token
+
+commit 7369a9bbb0cbd01257957e7a7f672174b4e58f1d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-28 17:41:14 +0200
+
+    tp_client_message_text_new has been renamed
+
+commit 2d6963a9a8335d90d1f5723796da23d76eba4958
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 15:41:23 +0200
+
+    examples/client/text-handler: use TpTextChannel
+
+commit abd2e3c233ed19f9d6a71b1a9449af51ecbe36d8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 15:29:22 +0200
+
+    automatic-proxy-factory: create TpTextChannel objects when needed
+
+commit 212237ae87136c789309f3d2624b46652dde4418
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 14:37:31 +0200
+
+    test pending-message-removed signal
+
+commit 9ab78ca2a745212ebb3ce3d3d225b2879178dafa
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 14:37:24 +0200
+
+    add pending-message-removed signal
+
+commit 451dcb09cd44796a7cf3682d2d01047ca83549ef
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 13:22:22 +0200
+
+    test tp_text_channel_ack_message_async()
+
+commit 9ac3e4e88c297f7d32a5aa8b0846ac0ca07697fd
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 13:22:12 +0200
+
+    add tp_text_channel_ack_message_async
+
+commit 13ea099b13f5598e3c9e9d4ef23cead1eab817bb
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 12:47:24 +0200
+
+    test tp_text_channel_ack_messages_async()
+
+commit 2ed1ca5850e4f57879c89d73dcd3a8a0673c1e1f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 12:47:12 +0200
+
+    remove acked messages from pending
+
+commit d3ea0b3a968bd674c27edb5420154117140ca854
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 12:46:02 +0200
+
+    add tp_text_channel_ack_messages_async()
+
+commit a83dd64380ceedaf8c7b19f2774aab3acaa8be21
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 11:40:20 +0200
+
+    test message-received signal
+
+commit fd86f28f39c2a5f81cc34099656b48cbc99036ed
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 11:40:02 +0200
+
+    TpTextChannel: add message-received signal
+
+commit 80cbfeb035bad542a892cf8eecdcb9b7d9a1f185
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-26 10:58:17 +0200
+
+    check content of pending messages
+
+commit d12ac4e50487dabf371c04e754dd7487c7e8b805
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-25 17:02:24 +0200
+
+    get_pending_messages_cb: update pending messages
+
+commit 8d624499b3cd243ce7a1069c96a372c5a707096c
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-25 13:21:27 +0200
+
+    test tp_text_channel_send_message_async()
+
+commit d74d6aed93b77eeafee2551c4bcfeba5d8cf59d1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-25 13:06:21 +0200
+
+    add tp_text_channel_send_message_{async,finish}
+
+commit e0cdee40ea8b64253fdba4db1909901e83acbd57
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-22 16:16:52 +0200
+
+    add TP_TEXT_CHANNEL_FEATURE_PENDING_MESSAGES and tp_text_channel_get_pending_messages()
+
+commit 02e7318e51895c8d565b8344a492a9ad0e91fa72
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-13 10:22:55 +0200
+
+    test properties
+
+commit f183964c18d0a45a0361723372d75fbaa6455772
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-13 09:36:43 +0200
+
+    add test-text-channel
+
+commit 8c312d3a71da7b45776ec851a1e95854264a7df1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-13 09:33:46 +0200
+
+    simple-conn: unref all our channels when we are disconnected
+    
+    This breaks a circular reference if the channels keep a reference on the
+    connection (which will be the case when using the TpMessageMixin).
+
+commit 39e0a765badc6e831ccf3d479aa12ebc852c5326
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-10-12 14:32:45 +0200
+
+    add TpTextChannel (fdo #29531)
+
+commit f86c69c7fd2003eb98b8e9b4ed08703d150945af
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 11:20:23 +0000
+
+    NEWS
+
+commit 8e82d53f190281d8fe9173a487dfebfeb917663a
+Merge: f9bd5f8 d9d6df6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-16 11:13:29 +0000
+
+    Merge branch 'account-features'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=32423
+
+commit f9bd5f8328d02c905f45a2ee8489fd68ee2a8454
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-15 11:34:13 +0000
+
+    fd.o #32411: tp_g_signal_connect_object: fail if unsupported flags are used
+    
+    If more flags are added and we don't support them, that's likely to cause
+    silent bugs. We should at least turn them into loud, obvious bugs.
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=32411
+
+commit d9d6df6d4215fd8e22146960a6b8a6170b5860cc
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-15 19:45:25 +0000
+
+    Test TP_ACCOUNT_FEATURE_ADDRESSING
+
+commit ea8b9e1e8c69daa6f04e0fdb08d1e3729bbe1e52
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-15 19:36:06 +0000
+
+    TpAccount test: separate out the tests for storage
+    
+    Also test preparing the storage feature before and after the core feature
+    is ready; this caught the bug fixed by the previous commit.
+
+commit ac8e11b1a32c17da21c45b94ac813a7700869330
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-15 19:51:50 +0000
+
+    fd.o #32423: _tp_account_update: when the account becomes ready, try other features
+
+commit 19d92d41bd371b833c08c3f474456944ee544018
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2010-12-15 12:45:00 +0100
+
+    Add high-level service-side APIs in telepathy-glib.h
+    
+    Fixes bug #32408
+
+commit 99830254d26a7194b5d0f6cf9f0def35714b33f9
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-14 01:10:06 +0000
+
+    Simplify dispatching NameOwnerChanged signals.
+    
+    Previously there was this weird model where TpDBusDaemon had a dict
+    mapping bus names being watched to a watch struct. The watch struct had
+    a callback and some user data. When the library user first added a watch
+    for a name, their callback would be shoved into a new struct that was
+    put into the dict, and all was bright. But when a second call to
+    _watch_name_owner() came along … a GArray of "sub watches" would be
+    created, the old callback copied into it and the new callback added to
+    it, and then the original struct's callback would be replaced by an
+    callback that iterates the subwatches.
+    
+    I couldn't see any good reason not to always have a list of callbacks,
+    so deleted that code. Now all watches have a list of callbacks, and it's
+    a bit clearer.
+    
+    Making this change found a nasty bug where, if one callback removes its
+    own watch, subsequent callbacks may not be called for this signal. Test
+    case and fix to follow.
+
+commit 4f00eb1dcdaeb5637aa517d5263c9f6481333fe4
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-14 02:22:19 +0000
+
+    Make 'dbus' test use GTest.
+
+commit a83bff2591540aee8a17bee920ed089a4b559009
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-14 02:01:19 +0000
+
+    Modernize 'dbus' test a bit.
+    
+    This excellently named test tests TpDBusDaemon and a bunch of utility
+    functions which should be in libdbus, but aren't.
+    
+    MYASSERT brings me out in a rash. MYASSERT (foo, "") actually causes
+    boils to sprout fully formed from my neck.
+
+commit f77d9dd5af7160789f6f7b893e296e3afa9bea8b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-14 11:02:26 +0000
+
+    NEWS
+
+commit c197574dda46912f784397a2f2648e9ac1c87238
+Merge: 933247b ff5a93e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-14 10:59:27 +0000
+
+    Merge branch 'misc'
+    
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit ff5a93e70123fda641579479f78f6efe55c5c92b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 18:10:11 +0000
+
+    Move entirely-obsolete documentation sections to their own chapter
+
+commit e54ff5e811caece8ac46b98f435502f430b88d26
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 18:02:49 +0000
+
+    Make the <releaseinfo/> look less stupid
+
+commit 6a1620b7036903055c35e57aa3b65abd0a63b681
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 17:59:59 +0000
+
+    Test tp_cm_message_new_text
+
+commit 72a436b2b953185ca6314fd34de87a2b32605aac
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 15:49:36 +0000
+
+    tp_cm_message_new_text: add
+    
+    This is convenient for simple text-only CMs.
+
+commit 54590e37f68e499aaab25cd0c2d7ebd0d7afeef0
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 18:00:53 +0000
+
+    Test tp_message_get_message_type
+
+commit cc240fc026233a2c95a17c12c1e4266cef6aeb69
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 18:12:41 +0000
+
+    tp_message_get_message_type: add
+
+commit 2a6b7bdd2baa6028c9f2f1bdf4fa5715c192426e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 18:12:29 +0000
+
+    Use "Since:" and "Deprecated:" instead of "@since" and "@deprecated"
+    
+    The latter don't actually have any special meaning in gtk-doc: they're
+    a reference to a (presumably nonexistent) parameter or variable called
+    "since" or "deprecated".
+
+commit fb5a2dd47f50b687c7ea9dd8bd844a5ba3bb5ce6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-13 15:41:13 +0000
+
+    Add some missing Since annotations
+
+commit 933247b93af9c3e27c156a427a0cd78e1db35af8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-13 11:02:29 +0000
+
+    NEWS for fd.o#32184 fix.
+
+commit f4533e95a39fce578f1331681b1f899c25aa8cff
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-07 16:00:30 +0000
+
+    BaseConnection: avoid unregistering bus name twice.
+    
+    I have a Gabble currently running with four open connections but only
+    one corresponding bus name. Here's what I think happened:
+    
+    • I undocked my laptop. This got rid of the wired connection, but MC
+      doesn't notice so the connections stayed open.
+    • I switched to Offline in Empathy. This made MC call Disconnect() on
+      Gabble. The connection released its bus name (because tp-glib does
+      this in change_status(Disconnected)), but stayed alive waiting for
+      some callbacks.
+    • I switched back to Online. A new connection was made; it claimed the
+      same bus name.
+    • Finally the callbacks fired, and thus the old connection was unreffed
+      and could be disposed. In _dispose(), TpBaseConnection drops its bus
+      name again.
+    
+    This patch ensures that the name is released at most once, which should
+    fix this issue. I don't have a test case.
+    
+    Fixes: <https://bugs.freedesktop.org/show_bug.cgi?id=32184>
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit b3568d858fff7fcad587d0e8371bb390dc087c30
+Merge: 99de95b 8ae5881
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-13 10:58:00 +0000
+
+    Merge branch 'telepathy-glib-0.12'
+
+commit 8ae5881117202aa7c1ebccef0f8ab74271dea364
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-13 10:57:14 +0000
+
+    NEWS for minor fixes from fd.o#32184
+
+commit ef2a060342bc3780870eba118261654596cc694c
+Merge: 7570666 1841a32
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-13 10:54:49 +0000
+
+    Merge branch 'fd.o-32184-trivial-fixes' into telepathy-glib-0.12
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 1841a32749f2c6979840fe72694feb2547fd99ec
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-07 16:14:10 +0000
+
+    AM.ensure_account(): Don't critical on invalid paths
+    
+    Currently, tp_account_manager_ensure_account() g_return_val_if_fail()s
+    if tp_account_new() returns NULL, but doesn't actually check the path
+    that the user passes in, so the latter can quite legitimately return
+    NULL. So, let's return NULL cleanly instead.
+
+commit 1e4a7475948a7b6d73fcb1654c1eb0d6498cc95a
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2010-12-07 16:04:01 +0000
+
+    BaseClient.ObserveChannels: handle broken connection paths
+    
+    Previously, if someone passed an invalid connection path to
+    ObserveChannels, tp-glib wouldn't pass the call up to the application,
+    but nor would it return an error from the method.
+    
+    This manifested itself in the logger failing to return (or indeed log
+    messages) when I hit
+    <https://bugs.freedesktop.org/show_bug.cgi?id=32184>.
+
+commit 99de95bcf66d0ccae383e7185290e240f6620851
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-10 18:35:11 +0000
+
+    Nano version
+
 commit 26112e5f5b3481bc1f369c15021943a0c84c066b
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2010-12-10 17:09:34 +0000
@@ -292,6 +1210,64 @@ Date:   2010-12-09 17:49:59 +0000
     
     Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
     Bug: https://bugs.freedesktop.org/show_bug.cgi?id=32234
+
+commit 19c22f75378922acf6acaad40f43ef70e375d76f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 17:19:33 +0000
+
+    tp_channel_close_async: ignore reply to Close() at the D-Bus level if no callback
+
+commit 11928fcc640d09e55e3f6f8251716efd73187edd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 16:55:18 +0000
+
+    channel_close_cb: complete in an idle
+    
+    tp_cli callbacks don't guarantee not to call the callback re-entrantly:
+    if the interface is absent, or the proxy has been invalidated, they'll
+    call the callback before returning. Sad times.
+    
+    Also document why channel_remove_self_cb doesn't have to do this: it's
+    only called after preparing the GROUP feature, which does guarantee to
+    be idle.
+
+commit 34d4788bcaa0ebb70157a0556df9456b388ac568
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 16:40:13 +0000
+
+    If Close() fails but channel has gone, consider that to be success
+    
+    This is consistent with what we do for RemoveMembersWithReason.
+
+commit c2156c6f6b0cd7bba0524aa0258563497dad878e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 16:17:39 +0000
+
+    channel test: use TpExportableChannel:channel-properties for the Group
+
+commit a8171b2c2621cbb2828118d83b2928589b1a6811
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 15:43:49 +0000
+
+    tp_channel_leave_async: don't call Close as a synonym for reason NONE
+    
+    If we add proxy mode to Idle (Bug #24273) we'll need to distinguish
+    between the two actions.
+
+commit f3e6e1c061fd1d920e5178a085c97571fb19fe8f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 15:38:19 +0000
+
+    channel test: check that closing a room doesn't secretly leave it instead
+
+commit 1b88700659566ec535dd66c26e16d92b82de1984
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-12-09 15:37:52 +0000
+
+    tp_channel_close_async: always call Close()
+    
+    On second thoughts, we do need to distinguish between closing a channel,
+    and leaving it.
 
 commit 473111247b63bf96762169a4413ffa517a708142
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
@@ -1842,6 +2818,84 @@ Date:   2010-11-05 11:21:41 -0700
     Force the namespace "TelepathyGLib" for the g-i bindings.
     
     Fixes fdo#31473.
+
+commit 366f2e0db5a0ce27bbfbf1578d49a765d4aaaac7
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-08 15:35:11 +0100
+
+    textchan-group: has no handle now
+
+commit 4d629d87166b2e4af989214a94b3af75e7a0e3f3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-08 15:34:37 +0100
+
+    textchan-group: use TpBaseChannel
+
+commit 611cc8091f0d1156874273313d8e0dfeede0481b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-08 14:58:51 +0100
+
+    use tp_tests_object_new_static_class()
+
+commit d7b1635b54cca6d3ea61b17054ed10bbac8fe2b4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-08 14:57:24 +0100
+
+    remove typo in comment
+
+commit 12199b5873cbb598170ebb7975ed8dbdeeaacada
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-08 14:53:48 +0100
+
+    fix typo in doc
+
+commit 939b90f56e12614f0ccf9819b363b612d0e5f4e2
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-08 10:15:07 +0100
+
+    add tp_channel_close_async()
+
+commit c5172489648a7f835e975c1c7b2304b605e71581
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 18:47:57 +0100
+
+    test tp_channel_leave_async() with a group channel
+
+commit ad667021c058305275ff3ee62f9f0f1663b4b5cc
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 18:43:59 +0100
+
+    TpTestsTextChannelGroup: implment self handle removing
+
+commit 054da87b9d02320cfce833a89f147e63c9c15456
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 18:23:10 +0100
+
+    add tp_tests_text_channel_group_join()
+
+commit fce116a208e77a8552a09093df7dc5d01ab2caf0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 17:23:13 +0100
+
+    tp_tests_text_channel_get_props: add Interfaces
+
+commit 0c70c0d58a4efe3d541fd519c0ed3ebd6e604ba4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 17:20:03 +0100
+
+    tp_tests_text_channel_get_props: don't hardcode target handle type
+
+commit 9c4715c6dd756932bdef8e530be08d491c75c0fb
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 14:58:10 +0100
+
+    test tp_channel_leave_async() with a channel not implementing Group
+
+commit ce930a934392c573914214da70c9ff20664efe7f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2010-11-04 14:43:23 +0100
+
+    add tp_channel_leave_async() (fdo #30617)
 
 commit eb587d2fbdf4f44b7ef85042507153f191ff8200
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
