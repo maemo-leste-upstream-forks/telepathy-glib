@@ -446,6 +446,9 @@ tp_account_maybe_prepare_storage (TpProxy *proxy)
   if (self->priv->storage_provider != NULL)
     return;
 
+  if (!_tp_proxy_is_preparing (proxy, TP_ACCOUNT_FEATURE_STORAGE))
+    return;
+
   tp_cli_dbus_properties_call_get_all (self, -1,
       TP_IFACE_ACCOUNT_INTERFACE_STORAGE,
       _tp_account_got_all_storage_cb, NULL, NULL, G_OBJECT (self));
@@ -455,6 +458,7 @@ static void
 _tp_account_update (TpAccount *account,
     GHashTable *properties)
 {
+  TpProxy *proxy = TP_PROXY (account);
   TpAccountPrivate *priv = account->priv;
   GValueArray *arr;
   TpConnectionStatus old_s = priv->connection_status;
@@ -797,8 +801,10 @@ _tp_account_update (TpAccount *account,
         g_object_notify (G_OBJECT (account), "has-been-online");
     }
 
-  _tp_proxy_set_feature_prepared ((TpProxy *) account,
-      TP_ACCOUNT_FEATURE_CORE, TRUE);
+  _tp_proxy_set_feature_prepared (proxy, TP_ACCOUNT_FEATURE_CORE, TRUE);
+
+  tp_account_maybe_prepare_storage (proxy);
+  tp_account_maybe_prepare_addressing (proxy);
 }
 
 static void
@@ -3227,7 +3233,7 @@ tp_account_get_avatar_async (TpAccount *account,
  *
  * Finishes an async get operation of @account's avatar.
  *
- * Returns: (element-type uint8): a #GArray of #guchar
+ * Returns: (element-type uchar): a #GArray of #guchar
  *  containing the bytes of the account's avatar, or %NULL on failure
  *
  * Since: 0.9.0
@@ -3583,7 +3589,7 @@ tp_account_get_detailed_error (TpAccount *self,
 
 /**
  * tp_account_get_storage_provider:
- * @account: a #TpAccount
+ * @self: a #TpAccount
  *
  * <!-- -->
  *
@@ -3601,7 +3607,7 @@ tp_account_get_storage_provider (TpAccount *self)
 
 /**
  * tp_account_get_storage_identifier:
- * @account: a #TpAccount
+ * @self: a #TpAccount
  *
  * <!-- -->
  *
@@ -3619,7 +3625,7 @@ tp_account_get_storage_identifier (TpAccount *self)
 
 /**
  * tp_account_get_storage_restrictions:
- * @account: a #TpAccount
+ * @self: a #TpAccount
  *
  * <!-- -->
  *
@@ -3760,6 +3766,9 @@ tp_account_maybe_prepare_addressing (TpProxy *proxy)
   TpAccount *self = TP_ACCOUNT (proxy);
 
   if (self->priv->uri_schemes != NULL)
+    return;
+
+  if (!_tp_proxy_is_preparing (proxy, TP_ACCOUNT_FEATURE_ADDRESSING))
     return;
 
   tp_cli_dbus_properties_call_get_all (self, -1,
@@ -3926,7 +3935,7 @@ tp_account_get_automatic_presence (TpAccount *self,
 
 /**
  * tp_account_get_normalized_name:
- * @account: a #TpAccount
+ * @self: a #TpAccount
  *
  * <!-- -->
  *

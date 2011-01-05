@@ -29,7 +29,7 @@
  * or a delivery report indicating that delivery of a message has
  * succeeded or failed.
  *
- * @since 0.13.9
+ * Since: 0.13.9
  */
 
 #include "signalled-message.h"
@@ -45,6 +45,8 @@
  *
  * Opaque structure representing a received message using the Telepathy
  * messages interface
+ *
+ * Since: 0.13.9
  */
 
 enum
@@ -220,7 +222,7 @@ _tp_signalled_message_new (const GPtrArray *parts,
  *
  * Returns: (transfer none): the sender of the message
  *
- * @since 0.13.9
+ * Since: 0.13.9
  */
 TpContact *
 tp_signalled_message_get_sender (TpMessage *message)
@@ -232,4 +234,23 @@ tp_signalled_message_get_sender (TpMessage *message)
   self = (TpSignalledMessage *) message;
 
   return self->priv->sender;
+}
+
+guint
+_tp_signalled_message_get_pending_message_id (TpMessage *message,
+    gboolean *valid)
+{
+  const GHashTable *part0;
+
+  g_return_val_if_fail (TP_IS_SIGNALLED_MESSAGE (message), 0);
+  g_return_val_if_fail (valid != NULL, 0);
+
+  part0 = tp_message_peek (message, 0);
+  if (part0 == NULL)
+    {
+      *valid = FALSE;
+      return 0;
+    }
+
+  return tp_asv_get_uint32 (part0, "pending-message-id", valid);
 }

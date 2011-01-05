@@ -38,7 +38,7 @@ noinst_PROGRAMS = test-account$(EXEEXT) \
 	test-account-channel-request$(EXEEXT) \
 	test-account-manager$(EXEEXT) test-base-client$(EXEEXT) \
 	test-call-cancellation$(EXEEXT) test-call-example$(EXEEXT) \
-	test-callable-example$(EXEEXT) \
+	test-callable-example$(EXEEXT) test-channel$(EXEEXT) \
 	test-channel-dispatcher$(EXEEXT) \
 	test-channel-dispatch-operation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
@@ -66,8 +66,9 @@ noinst_PROGRAMS = test-account$(EXEEXT) \
 	test-protocol-objects$(EXEEXT) test-self-handle$(EXEEXT) \
 	test-self-presence$(EXEEXT) test-simple-approver$(EXEEXT) \
 	test-simple-handler$(EXEEXT) test-simple-observer$(EXEEXT) \
-	test-stream-tube$(EXEEXT) test-text-mixin$(EXEEXT) \
-	test-text-respawn$(EXEEXT) test-unsupported-interface$(EXEEXT)
+	test-stream-tube$(EXEEXT) test-text-channel$(EXEEXT) \
+	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
+	test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
 	$(top_srcdir)/tools/valgrind.mk
@@ -140,6 +141,13 @@ am_test_callable_example_OBJECTS = callable-example.$(OBJEXT)
 test_callable_example_OBJECTS = $(am_test_callable_example_OBJECTS)
 test_callable_example_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	$(top_builddir)/examples/cm/callable/libexample-cm-callable.la
+am_test_channel_OBJECTS = channel.$(OBJEXT)
+test_channel_OBJECTS = $(am_test_channel_OBJECTS)
+test_channel_LDADD = $(LDADD)
+test_channel_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_channel_dispatch_operation_OBJECTS =  \
 	channel-dispatch-operation.$(OBJEXT)
 test_channel_dispatch_operation_OBJECTS =  \
@@ -450,6 +458,10 @@ test_stream_tube_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_text_channel_OBJECTS = text-channel.$(OBJEXT)
+test_text_channel_OBJECTS = $(am_test_text_channel_OBJECTS)
+test_text_channel_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 am_test_text_mixin_OBJECTS = text-mixin.$(OBJEXT)
 test_text_mixin_OBJECTS = $(am_test_text_mixin_OBJECTS)
 test_text_mixin_LDADD = $(LDADD)
@@ -503,7 +515,7 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_account_channel_request_SOURCES) \
 	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
 	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
-	$(test_callable_example_SOURCES) \
+	$(test_callable_example_SOURCES) $(test_channel_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
@@ -535,14 +547,14 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_protocol_objects_SOURCES) $(test_self_handle_SOURCES) \
 	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
 	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
-	$(test_stream_tube_SOURCES) $(test_text_mixin_SOURCES) \
-	$(test_text_respawn_SOURCES) \
+	$(test_stream_tube_SOURCES) $(test_text_channel_SOURCES) \
+	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_account_channel_request_SOURCES) \
 	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
 	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
-	$(test_callable_example_SOURCES) \
+	$(test_callable_example_SOURCES) $(test_channel_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
@@ -573,7 +585,8 @@ DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
 	$(test_simple_approver_SOURCES) $(test_simple_handler_SOURCES) \
 	$(test_simple_observer_SOURCES) $(test_stream_tube_SOURCES) \
-	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
+	$(test_text_channel_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -753,6 +766,7 @@ test_account_channel_request_SOURCES = account-channel-request.c
 test_account_manager_SOURCES = account-manager.c
 test_base_client_SOURCES = base-client.c
 test_call_cancellation_SOURCES = call-cancellation.c
+test_channel_SOURCES = channel.c
 test_channel_dispatcher_SOURCES = channel-dispatcher.c
 test_channel_dispatch_operation_SOURCES = channel-dispatch-operation.c
 test_channel_introspect_SOURCES = channel-introspect.c
@@ -845,6 +859,11 @@ test_cm_message_LDADD = \
     $(top_builddir)/tests/lib/libtp-glib-tests.la \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
     $(GLIB_LIBS)
+
+test_text_channel_SOURCES = text-channel.c
+test_text_channel_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 
 check_c_sources = *.c
 AM_CPPFLAGS = \
@@ -964,6 +983,9 @@ test-call-example$(EXEEXT): $(test_call_example_OBJECTS) $(test_call_example_DEP
 test-callable-example$(EXEEXT): $(test_callable_example_OBJECTS) $(test_callable_example_DEPENDENCIES) 
 	@rm -f test-callable-example$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_callable_example_OBJECTS) $(test_callable_example_LDADD) $(LIBS)
+test-channel$(EXEEXT): $(test_channel_OBJECTS) $(test_channel_DEPENDENCIES) 
+	@rm -f test-channel$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_channel_OBJECTS) $(test_channel_LDADD) $(LIBS)
 test-channel-dispatch-operation$(EXEEXT): $(test_channel_dispatch_operation_OBJECTS) $(test_channel_dispatch_operation_DEPENDENCIES) 
 	@rm -f test-channel-dispatch-operation$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_channel_dispatch_operation_OBJECTS) $(test_channel_dispatch_operation_LDADD) $(LIBS)
@@ -1090,6 +1112,9 @@ test-simple-observer$(EXEEXT): $(test_simple_observer_OBJECTS) $(test_simple_obs
 test-stream-tube$(EXEEXT): $(test_stream_tube_OBJECTS) $(test_stream_tube_DEPENDENCIES) 
 	@rm -f test-stream-tube$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_stream_tube_OBJECTS) $(test_stream_tube_LDADD) $(LIBS)
+test-text-channel$(EXEEXT): $(test_text_channel_OBJECTS) $(test_text_channel_DEPENDENCIES) 
+	@rm -f test-text-channel$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_text_channel_OBJECTS) $(test_text_channel_LDADD) $(LIBS)
 test-text-mixin$(EXEEXT): $(test_text_mixin_OBJECTS) $(test_text_mixin_DEPENDENCIES) 
 	@rm -f test-text-mixin$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_text_mixin_OBJECTS) $(test_text_mixin_LDADD) $(LIBS)
@@ -1117,6 +1142,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-request.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli-group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-channel-factory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
@@ -1156,6 +1182,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream-tube.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-respawn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unsupported-interface.Po@am__quote@

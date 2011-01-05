@@ -34,7 +34,7 @@ TP_USER_ACTION_TIME_CURRENT_TIME
 </SECTION>
 
 <SECTION>
-<INCLUDE>telepathy-glib/base-connection.h</INCLUDE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
 <FILE>base-connection</FILE>
 <TITLE>TpBaseConnection</TITLE>
 TP_INTERNAL_CONNECTION_STATUS_NEW
@@ -77,7 +77,7 @@ TpBaseConnectionPrivate
 
 <SECTION>
 <TITLE>TpBaseConnectionManager</TITLE>
-<INCLUDE>telepathy-glib/base-connection-manager.h</INCLUDE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
 <FILE>base-connection-manager</FILE>
 TpCMParamFilter
 tp_cm_param_filter_string_nonempty
@@ -179,7 +179,7 @@ TP_EXPORTABLE_CHANNEL_GET_INTERFACE
 </SECTION>
 
 <SECTION>
-<INCLUDE>telepathy-glib/base-channel.h</INCLUDE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
 <FILE>base-channel</FILE>
 <TITLE>TpBaseChannel</TITLE>
 TpBaseChannel
@@ -1142,6 +1142,7 @@ TpSvcConnectionInterfaceContactList
 TpSvcConnectionInterfaceContactListClass
 tp_svc_connection_interface_contact_list_authorize_publication_impl
 tp_svc_connection_interface_contact_list_emit_contacts_changed
+tp_svc_connection_interface_contact_list_emit_contacts_changed_with_id
 tp_svc_connection_interface_contact_list_emit_contact_list_state_changed
 tp_svc_connection_interface_contact_list_get_contact_list_attributes_impl
 tp_svc_connection_interface_contact_list_implement_authorize_publication
@@ -1929,7 +1930,9 @@ tp_intset_is_equal
 tp_intset_copy
 tp_intset_intersection
 tp_intset_union
+tp_intset_union_update
 tp_intset_difference
+tp_intset_difference_update
 tp_intset_symmetric_difference
 tp_intset_dump
 TpIntsetFastIter
@@ -2227,6 +2230,7 @@ TpMessage
 tp_message_count_parts
 tp_message_peek
 tp_message_to_text
+tp_message_get_message_type
 tp_message_get_received_timestamp
 tp_message_get_sent_timestamp
 tp_message_get_specific_to_interface
@@ -2273,6 +2277,7 @@ tp_message_get_type
 <TITLE>TpCMMessage</TITLE>
 TpCMMessage
 tp_cm_message_new
+tp_cm_message_new_text
 tp_cm_message_take_message
 tp_cm_message_get_sender
 tp_cm_message_set_sender
@@ -3019,6 +3024,10 @@ tp_channel_get_identifier
 tp_channel_get_requested
 tp_channel_get_initiator_handle
 tp_channel_get_initiator_identifier
+tp_channel_leave_async
+tp_channel_leave_finish
+tp_channel_close_async
+tp_channel_close_finish
 <SUBSECTION Private>
 tp_channel_get_feature_quark_chat_states
 tp_channel_get_feature_quark_core
@@ -3632,6 +3641,8 @@ tp_cli_connection_interface_contact_list_callback_for_request_subscription
 tp_cli_connection_interface_contact_list_callback_for_unpublish
 tp_cli_connection_interface_contact_list_callback_for_unsubscribe
 tp_cli_connection_interface_contact_list_connect_to_contacts_changed
+tp_cli_connection_interface_contact_list_signal_callback_contacts_changed_with_id
+tp_cli_connection_interface_contact_list_connect_to_contacts_changed_with_id
 tp_cli_connection_interface_contact_list_signal_callback_contacts_changed
 tp_cli_connection_interface_contact_list_connect_to_contact_list_state_changed
 tp_cli_connection_interface_contact_list_signal_callback_contact_list_state_changed
@@ -4614,7 +4625,7 @@ TpDebugSenderPrivate
 </SECTION>
 
 <SECTION>
-<INCLUDE>telepathy-glib/base-client.h</INCLUDE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
 <FILE>base-client</FILE>
 <TITLE>base-client</TITLE>
 TpBaseClient
@@ -4813,7 +4824,7 @@ TpSimplePasswordManagerPrivate
 </SECTION>
 
 <SECTION>
-<INCLUDE>telepathy-glib/base-protocol.h</INCLUDE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
 <FILE>base-protocol</FILE>
 <TITLE>base-protocol</TITLE>
 TpBaseProtocol
@@ -5030,7 +5041,7 @@ tp_svc_channel_type_server_tls_connection_get_type
 </SECTION>
 
 <SECTION>
-<INCLUDE>telepathy-glib/base-contact-list.h</INCLUDE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
 <FILE>base-contact-list</FILE>
 <TITLE>base-contact-list</TITLE>
 TpBaseContactList
@@ -5376,4 +5387,38 @@ TP_SIGNALLED_MESSAGE_CLASS
 TP_SIGNALLED_MESSAGE_GET_CLASS
 TP_TYPE_SIGNALLED_MESSAGE
 tp_signalled_message_get_type
+</SECTION>
+
+<SECTION>
+<FILE>text-channel</FILE>
+<TITLE>text-channel</TITLE>
+<INCLUDE>telepathy-glib/telepathy-glib.h</INCLUDE>
+<SUBSECTION>
+TpTextChannel
+TpTextChannelClass
+tp_text_channel_new
+tp_text_channel_get_supported_content_types
+tp_text_channel_get_message_part_support_flags
+tp_text_channel_get_delivery_reporting_support
+tp_text_channel_get_pending_messages
+TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES
+tp_text_channel_send_message_async
+tp_text_channel_send_message_finish
+tp_text_channel_ack_messages_async
+tp_text_channel_ack_messages_finish
+tp_text_channel_ack_message_async
+tp_text_channel_ack_message_finish
+tp_text_channel_set_chat_state_async
+tp_text_channel_set_chat_state_finish
+<SUBSECTION Standard>
+TP_IS_TEXT_CHANNEL
+TP_IS_TEXT_CHANNEL_CLASS
+TP_TEXT_CHANNEL
+TP_TEXT_CHANNEL_CLASS
+TP_TEXT_CHANNEL_GET_CLASS
+TP_TYPE_TEXT_CHANNEL
+tp_text_channel_get_type
+TpTextChannelPrivate
+<SUBSECTION Private>
+tp_text_channel_get_feature_quark_incoming_messages
 </SECTION>
