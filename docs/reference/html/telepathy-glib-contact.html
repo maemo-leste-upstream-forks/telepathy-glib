@@ -130,6 +130,9 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html"><span class="type">GAsyncResult</span></a> *result</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<a class="link" href="telepathy-glib-enums.html#TpSubscriptionState" title="enum TpSubscriptionState"><span class="returnvalue">TpSubscriptionState</span></a>  <a class="link" href="telepathy-glib-contact.html#tp-contact-get-subscribe-state" title="tp_contact_get_subscribe_state ()">tp_contact_get_subscribe_state</a>     (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>);
+<a class="link" href="telepathy-glib-enums.html#TpSubscriptionState" title="enum TpSubscriptionState"><span class="returnvalue">TpSubscriptionState</span></a>  <a class="link" href="telepathy-glib-contact.html#tp-contact-get-publish-state" title="tp_contact_get_publish_state ()">tp_contact_get_publish_state</a>       (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>);
+const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="telepathy-glib-contact.html#tp-contact-get-publish-request" title="tp_contact_get_publish_request ()">tp_contact_get_publish_request</a>      (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-contact.html#tp-contact-has-feature" title="tp_contact_has_feature ()">tp_contact_has_feature</a>              (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContactFeature" title="enum TpContactFeature"><span class="type">TpContactFeature</span></a> feature</code></em>);
 </pre>
@@ -158,12 +161,16 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
   "<a class="link" href="telepathy-glib-contact.html#TpContact--presence-message" title='The "presence-message" property'>presence-message</a>"         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
   "<a class="link" href="telepathy-glib-contact.html#TpContact--presence-status" title='The "presence-status" property'>presence-status</a>"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
   "<a class="link" href="telepathy-glib-contact.html#TpContact--presence-type" title='The "presence-type" property'>presence-type</a>"            <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
+  "<a class="link" href="telepathy-glib-contact.html#TpContact--publish-request" title='The "publish-request" property'>publish-request</a>"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
+  "<a class="link" href="telepathy-glib-contact.html#TpContact--publish-state" title='The "publish-state" property'>publish-state</a>"            <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
+  "<a class="link" href="telepathy-glib-contact.html#TpContact--subscribe-state" title='The "subscribe-state" property'>subscribe-state</a>"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
 </pre>
 </div>
 <div class="refsect1" title="Signals">
 <a name="telepathy-glib-contact.signals"></a><h2>Signals</h2>
 <pre class="synopsis">
   "<a class="link" href="telepathy-glib-contact.html#TpContact-presence-changed" title='The "presence-changed" signal'>presence-changed</a>"                               : Run Last
+  "<a class="link" href="telepathy-glib-contact.html#TpContact-subscription-states-changed" title='The "subscription-states-changed" signal'>subscription-states-changed</a>"                    : Run Last
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -216,6 +223,7 @@ Those functions should be avoided in favour of using <a class="link" href="telep
     TP_CONTACT_FEATURE_AVATAR_DATA,
     TP_CONTACT_FEATURE_CONTACT_INFO,
     TP_CONTACT_FEATURE_CLIENT_TYPES,
+    TP_CONTACT_FEATURE_SUBSCRIPTION_STATES,
 } TpContactFeature;
 </pre>
 <p>
@@ -285,6 +293,15 @@ Since 0.11.5, there is a corresponding <a href="http://library.gnome.org/devel/g
  (available since 0.13.1)
 </td>
 </tr>
+<tr>
+<td><p><a name="TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"></a><span class="term"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></span></p></td>
+<td>
+<a class="link" href="telepathy-glib-contact.html#TpContact--subscribe-state" title='The "subscribe-state" property'><span class="type">"subscribe-state"</span></a>,
+ <a class="link" href="telepathy-glib-contact.html#TpContact--publish-state" title='The "publish-state" property'><span class="type">"publish-state"</span></a> and <a class="link" href="telepathy-glib-contact.html#TpContact--publish-request" title='The "publish-request" property'><span class="type">"publish-request"</span></a>. Require a
+ Connection implementing the <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-LIST:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST</code></a>
+ interface. (available since 0.13.12)
+</td>
+</tr>
 </tbody>
 </table></div>
 <p class="since">Since 0.7.18</p>
@@ -292,7 +309,7 @@ Since 0.11.5, there is a corresponding <a href="http://library.gnome.org/devel/g
 <hr>
 <div class="refsect2" title="NUM_TP_CONTACT_FEATURES">
 <a name="NUM-TP-CONTACT-FEATURES:CAPS"></a><h3>NUM_TP_CONTACT_FEATURES</h3>
-<pre class="programlisting">#define NUM_TP_CONTACT_FEATURES (TP_CONTACT_FEATURE_CLIENT_TYPES + 1)
+<pre class="programlisting">#define NUM_TP_CONTACT_FEATURES (TP_CONTACT_FEATURE_SUBSCRIPTION_STATES + 1)
 </pre>
 <p>
 1 higher than the highest <a class="link" href="telepathy-glib-contact.html#TpContactFeature" title="enum TpContactFeature"><span class="type">TpContactFeature</span></a> supported by this version of
@@ -1395,6 +1412,99 @@ the contact's vCard can be accessed using <a class="link" href="telepathy-glib-c
 <p class="since">Since 0.11.7</p>
 </div>
 <hr>
+<div class="refsect2" title="tp_contact_get_subscribe_state ()">
+<a name="tp-contact-get-subscribe-state"></a><h3>tp_contact_get_subscribe_state ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-enums.html#TpSubscriptionState" title="enum TpSubscriptionState"><span class="returnvalue">TpSubscriptionState</span></a>  tp_contact_get_subscribe_state     (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>);</pre>
+<p>
+Return the state of the local user's subscription to this remote contact's
+presence.
+</p>
+<p>
+This is set to <a class="link" href="telepathy-glib-enums.html#TP-SUBSCRIPTION-STATE-UNKNOWN:CAPS"><code class="literal">TP_SUBSCRIPTION_STATE_UNKNOWN</code></a> until
+<a class="link" href="telepathy-glib-contact.html#TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></a> has been prepared
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of <a class="link" href="telepathy-glib-contact.html#TpContact--subscribe-state" title='The "subscribe-state" property'><span class="type">"subscribe-state"</span></a>.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.12</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_contact_get_publish_state ()">
+<a name="tp-contact-get-publish-state"></a><h3>tp_contact_get_publish_state ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-enums.html#TpSubscriptionState" title="enum TpSubscriptionState"><span class="returnvalue">TpSubscriptionState</span></a>  tp_contact_get_publish_state       (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>);</pre>
+<p>
+Return the state of this remote contact's subscription to the local user's
+presence.
+</p>
+<p>
+This is set to <a class="link" href="telepathy-glib-enums.html#TP-SUBSCRIPTION-STATE-UNKNOWN:CAPS"><code class="literal">TP_SUBSCRIPTION_STATE_UNKNOWN</code></a> until
+<a class="link" href="telepathy-glib-contact.html#TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></a> has been prepared
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of <a class="link" href="telepathy-glib-contact.html#TpContact--publish-state" title='The "publish-state" property'><span class="type">"publish-state"</span></a>.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.12</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_contact_get_publish_request ()">
+<a name="tp-contact-get-publish-request"></a><h3>tp_contact_get_publish_request ()</h3>
+<pre class="programlisting">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       tp_contact_get_publish_request      (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>);</pre>
+<p>
+If <a class="link" href="telepathy-glib-contact.html#TpContact--publish-state" title='The "publish-state" property'><span class="type">"publish-state"</span></a> is set to <a class="link" href="telepathy-glib-enums.html#TP-SUBSCRIPTION-STATE-ASK:CAPS"><code class="literal">TP_SUBSCRIPTION_STATE_ASK</code></a>, return the
+message that this remote contact sent when they requested permission to see
+the local user's presence, an empty string ("") otherwise. This remains valid
+until the main loop is re-entered; if the caller requires a string that will
+persist for longer than that, it must be copied with <a href="http://library.gnome.org/devel/glib/unstable/glib-String-Utility-Functions.html#g-strdup"><code class="function">g_strdup()</code></a>.
+</p>
+<p>
+This is set to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> until <a class="link" href="telepathy-glib-contact.html#TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></a> has been
+prepared, and it is guaranteed to be non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> afterward.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of <a class="link" href="telepathy-glib-contact.html#TpContact--publish-request" title='The "publish-request" property'><span class="type">"publish-request"</span></a>.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.12</p>
+</div>
+<hr>
 <div class="refsect2" title="tp_contact_has_feature ()">
 <a name="tp-contact-has-feature"></a><h3>tp_contact_has_feature ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_contact_has_feature              (<em class="parameter"><code><a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *self</code></em>,
@@ -1655,6 +1765,52 @@ has not been set up to track <a class="link" href="telepathy-glib-contact.html#T
 </p>
 <p>Default value: 0</p>
 </div>
+<hr>
+<div class="refsect2" title='The "publish-request" property'>
+<a name="TpContact--publish-request"></a><h3>The <code class="literal">"publish-request"</code> property</h3>
+<pre class="programlisting">  "publish-request"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read</pre>
+<p>
+The message that contact sent when they requested permission to see the
+local user's presence, if <a class="link" href="telepathy-glib-contact.html#TpContact--publish-state" title='The "publish-state" property'><span class="type">"publish-state"</span></a> is
+<a class="link" href="telepathy-glib-enums.html#TP-SUBSCRIPTION-STATE-ASK:CAPS"><code class="literal">TP_SUBSCRIPTION_STATE_ASK</code></a>, an empty string ("") otherwise.
+</p>
+<p>
+This is set to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> until <a class="link" href="telepathy-glib-contact.html#TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></a> has been
+prepared, and it is guaranteed to be non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> afterward.
+</p>
+<p>Default value: NULL</p>
+<p class="since">Since 0.13.12</p>
+</div>
+<hr>
+<div class="refsect2" title='The "publish-state" property'>
+<a name="TpContact--publish-state"></a><h3>The <code class="literal">"publish-state"</code> property</h3>
+<pre class="programlisting">  "publish-state"            <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
+<p>
+A <a class="link" href="telepathy-glib-enums.html#TpSubscriptionState" title="enum TpSubscriptionState"><span class="type">TpSubscriptionState</span></a> indicating the state of this contact's subscription
+to the local user's presence.
+</p>
+<p>
+This is set to <a class="link" href="telepathy-glib-enums.html#TP-SUBSCRIPTION-STATE-UNKNOWN:CAPS"><code class="literal">TP_SUBSCRIPTION_STATE_UNKNOWN</code></a> until
+<a class="link" href="telepathy-glib-contact.html#TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></a> has been prepared
+</p>
+<p>Default value: 0</p>
+<p class="since">Since 0.13.12</p>
+</div>
+<hr>
+<div class="refsect2" title='The "subscribe-state" property'>
+<a name="TpContact--subscribe-state"></a><h3>The <code class="literal">"subscribe-state"</code> property</h3>
+<pre class="programlisting">  "subscribe-state"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
+<p>
+A <a class="link" href="telepathy-glib-enums.html#TpSubscriptionState" title="enum TpSubscriptionState"><span class="type">TpSubscriptionState</span></a> indicating the state of the local user's
+subscription to this contact's presence.
+</p>
+<p>
+This is set to <a class="link" href="telepathy-glib-enums.html#TP-SUBSCRIPTION-STATE-UNKNOWN:CAPS"><code class="literal">TP_SUBSCRIPTION_STATE_UNKNOWN</code></a> until
+<a class="link" href="telepathy-glib-contact.html#TP-CONTACT-FEATURE-SUBSCRIPTION-STATES:CAPS"><code class="literal">TP_CONTACT_FEATURE_SUBSCRIPTION_STATES</code></a> has been prepared
+</p>
+<p>Default value: 0</p>
+<p class="since">Since 0.13.12</p>
+</div>
 </div>
 <div class="refsect1" title="Signal Details">
 <a name="telepathy-glib-contact.signal-details"></a><h2>Signal Details</h2>
@@ -1673,7 +1829,7 @@ Emitted when this contact's presence changes.
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>contact</code></em> :</span></p></td>
-<td>A <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>
+<td>a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>
 </td>
 </tr>
 <tr>
@@ -1698,6 +1854,48 @@ Emitted when this contact's presence changes.
 </tbody>
 </table></div>
 <p class="since">Since 0.11.7</p>
+</div>
+<hr>
+<div class="refsect2" title='The "subscription-states-changed" signal'>
+<a name="TpContact-subscription-states-changed"></a><h3>The <code class="literal">"subscription-states-changed"</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> *contact,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>      subscribe,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>      publish,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>     *publish_request,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>   user_data)            : Run Last</pre>
+<p>
+Emitted when this contact's subscription states changes.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>contact</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>subscribe</code></em> :</span></p></td>
+<td>the new value of <a class="link" href="telepathy-glib-contact.html#TpContact--subscribe-state" title='The "subscribe-state" property'><span class="type">"subscribe-state"</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>publish</code></em> :</span></p></td>
+<td>the new value of <a class="link" href="telepathy-glib-contact.html#TpContact--publish-state" title='The "publish-state" property'><span class="type">"publish-state"</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>publish_request</code></em> :</span></p></td>
+<td>the new value of <a class="link" href="telepathy-glib-contact.html#TpContact--publish-request" title='The "publish-request" property'><span class="type">"publish-request"</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.12</p>
 </div>
 </div>
 <div class="refsect1" title="See Also">
