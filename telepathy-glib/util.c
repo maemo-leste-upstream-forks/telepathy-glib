@@ -2,6 +2,8 @@
  * util.c - Source for telepathy-glib utility functions
  * Copyright © 2006-2010 Collabora Ltd. <http://www.collabora.co.uk/>
  * Copyright © 2006-2008 Nokia Corporation
+ * Copyright © 1999 Tom Tromey
+ * Copyright © 2000 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1540,3 +1542,89 @@ _tp_create_temp_unix_socket (GSocketService *service,
   return NULL;
 }
 #endif /* HAVE_GIO_UNIX */
+
+GList *
+_tp_create_channel_request_list (TpDBusDaemon *dbus,
+    GHashTable *request_props)
+{
+  GHashTableIter iter;
+  GList *result = NULL;
+  gpointer key, value;
+
+  g_hash_table_iter_init (&iter, request_props);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      TpChannelRequest *req;
+      const gchar *path = key;
+      GHashTable *props = value;
+      GError *error = NULL;
+
+      req = tp_channel_request_new (dbus, path, props, &error);
+      if (req == NULL)
+        {
+          DEBUG ("Failed to create TpChannelRequest: %s", error->message);
+          g_error_free (error);
+          continue;
+        }
+
+      result = g_list_prepend (result, req);
+    }
+
+  return result;
+}
+
+/**
+ * tp_utf8_make_valid:
+ * @name: string to coerce into UTF8
+ *
+ * Validate that the provided string is valid UTF8. If not,
+ * replace all invalid bytes with unicode replacement
+ * character (U+FFFD).
+ *
+ * This method is a verbatim copy of glib's internal
+ * _g_utf8_make_valid() function, and will be deprecated as
+ * soon as the glib one becomes public.
+ *
+ * Returns: a new valid UTF8 string
+ *
+ * Since: 0.13.15
+ */
+gchar *
+tp_utf8_make_valid (const gchar *name)
+{
+  GString *string;
+  const gchar *remainder, *invalid;
+  gint remaining_bytes, valid_bytes;
+
+  g_return_val_if_fail (name != NULL, NULL);
+
+  string = NULL;
+  remainder = name;
+  remaining_bytes = strlen (name);
+
+  while (remaining_bytes != 0)
+    {
+      if (g_utf8_validate (remainder, remaining_bytes, &invalid))
+        break;
+      valid_bytes = invalid - remainder;
+
+      if (string == NULL)
+        string = g_string_sized_new (remaining_bytes);
+
+      g_string_append_len (string, remainder, valid_bytes);
+      /* append U+FFFD REPLACEMENT CHARACTER */
+      g_string_append (string, "\357\277\275");
+
+      remaining_bytes -= valid_bytes + 1;
+      remainder = invalid + 1;
+    }
+
+  if (string == NULL)
+    return g_strdup (name);
+
+  g_string_append (string, remainder);
+
+  g_assert (g_utf8_validate (string->str, -1, NULL));
+
+  return g_string_free (string, FALSE);
+}

@@ -119,6 +119,7 @@
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="returnvalue">gint64</span></a>              <a class="link" href="telepathy-glib-util.html#tp-user-action-time-from-x11" title="tp_user_action_time_from_x11 ()">tp_user_action_time_from_x11</a>        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint32"><span class="type">guint32</span></a> x11_time</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-util.html#tp-user-action-time-should-present" title="tp_user_action_time_should_present ()">tp_user_action_time_should_present</a>  (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint32"><span class="type">guint32</span></a> *x11_time</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             <a class="link" href="telepathy-glib-util.html#tp-utf8-make-valid" title="tp_utf8_make_valid ()">tp_utf8_make_valid</a>                  (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -1160,24 +1161,13 @@ their type.
 <p>
 </p>
 <div class="example">
-<a name="id1194333"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
-<div class="example-contents">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4</pre></td>
-        <td class="listing_code"><pre class="programlisting">GValueArray <span class="symbol">*</span>array <span class="symbol">=</span> <span class="function"><a href="telepathy-glib-util.html#tp-value-array-build">tp_value_array_build</a></span> <span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span>
-   G_TYPE_STRING<span class="symbol">,</span> host<span class="symbol">,</span>
-   G_TYPE_UINT<span class="symbol">,</span> port<span class="symbol">,</span>
-   G_TYPE_INVALID<span class="symbol">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<a name="id1251928"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
+<div class="example-contents"><pre class="programlisting">
+GValueArray *array = tp_value_array_build (2,
+   G_TYPE_STRING, host,
+   G_TYPE_UINT, port,
+   G_TYPE_INVALID);
+   </pre></div>
 </div>
 <p><br class="example-break">
 </p>
@@ -1226,28 +1216,15 @@ invalid when <em class="parameter"><code>array</code></em> is freed.
 <p>
 </p>
 <div class="example">
-<a name="id1194512"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
-<div class="example-contents">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">const</span> gchar <span class="symbol">*</span>host<span class="symbol">;</span>
-guint port<span class="symbol">;</span>
+<a name="id1252107"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
+<div class="example-contents"><pre class="programlisting">
+const gchar *host;
+guint port;
 
-<span class="function"><a href="telepathy-glib-util.html#tp-value-array-unpack">tp_value_array_unpack</a></span> <span class="symbol">(</span>array<span class="symbol">,</span> <span class="number">2</span><span class="symbol">,</span>
-   <span class="symbol">&amp;</span>host<span class="symbol">,</span>
-   <span class="symbol">&amp;</span>port<span class="symbol">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_value_array_unpack (array, 2,
+   &amp;host,
+   &amp;port);
+   </pre></div>
 </div>
 <p><br class="example-break">
 </p>
@@ -1425,43 +1402,22 @@ Typical usage is something like this:
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwc">typedef</span> <span class="gtkdoc kwb">struct</span> <span class="symbol">{</span>
-  TpConnection <span class="symbol">*</span>conn<span class="symbol">;</span>
-  GError <span class="symbol">*</span>error<span class="symbol">;</span>
-  GHashTable <span class="symbol">*</span>table<span class="symbol">;</span>
-  MyStruct <span class="symbol">*</span>misc<span class="symbol">;</span>
-<span class="symbol">}</span> Foo<span class="symbol">;</span>
-Foo <span class="symbol">*</span>foo<span class="symbol">;</span>
+<div class="informalexample"><pre class="programlisting">
+typedef struct {
+  TpConnection *conn;
+  GError *error;
+  GHashTable *table;
+  MyStruct *misc;
+} Foo;
+Foo *foo;
 
-<span class="symbol">...</span>
+...
 
-<span class="function"><a href="telepathy-glib-util.html#tp-clear-object">tp_clear_object</a></span> <span class="symbol">(&amp;</span>foo<span class="symbol">-&gt;</span>conn<span class="symbol">);</span>
-<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#g-clear-error">g_clear_error</a></span> <span class="symbol">(&amp;</span>foo<span class="symbol">-&gt;</span>error<span class="symbol">);</span>
-<span class="function"><a href="telepathy-glib-util.html#tp-clear-boxed">tp_clear_boxed</a></span> <span class="symbol">(</span>G_TYPE_HASH_TABLE<span class="symbol">, &amp;</span>foo<span class="symbol">-&gt;</span>table<span class="symbol">);</span>
-<span class="function"><a href="telepathy-glib-util.html#tp-clear-pointer">tp_clear_pointer</a></span> <span class="symbol">(&amp;</span>foo<span class="symbol">-&gt;</span>misc<span class="symbol">,</span> my_struct_destroy<span class="symbol">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_clear_object (&amp;foo-&gt;conn);
+g_clear_error (&amp;foo-&gt;error);
+tp_clear_boxed (G_TYPE_HASH_TABLE, &amp;foo-&gt;table);
+tp_clear_pointer (&amp;foo-&gt;misc, my_struct_destroy);
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">
@@ -1629,7 +1585,7 @@ it may or may not work with other toolkits or versions.
 <p>
 Interpret a Telepathy user action time to decide whether a Handler should
 attempt to gain focus. If <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> is returned, it would be appropriate to
-call <a href="/usr/share/gtk-doc/html/gtk/GtkWindow.html#gtk-window-present-with-time"><code class="function">gtk_window_present_with_time()</code></a> using <em class="parameter"><code>x11_time</code></em> as input, for instance.
+call <a href="http://library.gnome.org/devel/gtk/unstable/GtkWindow.html#gtk-window-present-with-time"><code class="function">gtk_window_present_with_time()</code></a> using <em class="parameter"><code>x11_time</code></em> as input, for instance.
 </p>
 <p>
 <em class="parameter"><code>x11_time</code></em> is used to return a timestamp in the right format for X11,
@@ -1660,6 +1616,38 @@ versions.
 </tbody>
 </table></div>
 <p class="since">Since 0.11.13</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_utf8_make_valid ()">
+<a name="tp-utf8-make-valid"></a><h3>tp_utf8_make_valid ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             tp_utf8_make_valid                  (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>);</pre>
+<p>
+Validate that the provided string is valid UTF8. If not,
+replace all invalid bytes with unicode replacement
+character (U+FFFD).
+</p>
+<p>
+This method is a verbatim copy of glib's internal
+<code class="function">_g_utf8_make_valid()</code> function, and will be deprecated as
+soon as the glib one becomes public.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td>string to coerce into UTF8
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a new valid UTF8 string
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.15</p>
 </div>
 </div>
 </div>

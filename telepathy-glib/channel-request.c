@@ -21,16 +21,23 @@
 
 #include "telepathy-glib/channel-request.h"
 
+#include <telepathy-glib/automatic-proxy-factory.h>
+#include <telepathy-glib/channel.h>
+#include <telepathy-glib/connection.h>
 #include <telepathy-glib/defs.h>
 #include <telepathy-glib/errors.h>
+#include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/proxy-subclass.h>
+#include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_DISPATCHER
 #include "telepathy-glib/dbus-internal.h"
 #include "telepathy-glib/debug-internal.h"
 
 #include "telepathy-glib/_gen/tp-cli-channel-request-body.h"
+
+#include "_gen/signals-marshal.h"
 
 /**
  * SECTION:channel-request
@@ -86,10 +93,25 @@
  * The class of a #TpChannelRequest.
  */
 
-static guint signal_id_succeeded = 0;
+enum {
+  SIGNAL_SUCCEEDED,
+  SIGNAL_SUCCEEDED_WITH_CHANNEL,
+  N_SIGNALS
+};
+
+enum {
+  PROP_CHANNEL_FACTORY = 1,
+  PROP_IMMUTABLE_PROPERTIES,
+  PROP_HINTS,
+};
+
+static guint signals[N_SIGNALS] = { 0 };
 
 struct _TpChannelRequestPrivate {
-    gpointer dummy;
+    GHashTable *immutable_properties;
+
+    TpClientChannelFactory *channel_factory;
+    gboolean succeeded_with_chan_fired;
 };
 
 G_DEFINE_TYPE (TpChannelRequest, tp_channel_request, TP_TYPE_PROXY)
@@ -99,6 +121,60 @@ tp_channel_request_init (TpChannelRequest *self)
 {
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, TP_TYPE_CHANNEL_REQUEST,
       TpChannelRequestPrivate);
+}
+
+static void
+tp_channel_request_set_property (GObject *object,
+    guint property_id,
+    const GValue *value,
+    GParamSpec *pspec)
+{
+  TpChannelRequest *self = TP_CHANNEL_REQUEST (object);
+
+  switch (property_id)
+    {
+      case PROP_CHANNEL_FACTORY:
+        tp_clear_object (&self->priv->channel_factory);
+        self->priv->channel_factory = g_value_dup_object (value);
+        break;
+
+      case PROP_IMMUTABLE_PROPERTIES:
+        g_assert (self->priv->immutable_properties == NULL);
+        self->priv->immutable_properties = g_value_dup_boxed (value);
+        break;
+
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+        break;
+  }
+}
+
+static void
+tp_channel_request_get_property (GObject *object,
+    guint property_id,
+    GValue *value,
+    GParamSpec *pspec)
+{
+  TpChannelRequest *self = TP_CHANNEL_REQUEST (object);
+
+  switch (property_id)
+    {
+      case PROP_CHANNEL_FACTORY:
+        g_value_set_object (value, self->priv->channel_factory);
+        break;
+
+      case PROP_IMMUTABLE_PROPERTIES:
+        g_value_set_boxed (value, self->priv->immutable_properties);
+        break;
+
+      case PROP_HINTS:
+        g_value_set_boxed (value, tp_channel_request_get_hints (self));
+        break;
+
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+        break;
+  }
 }
 
 static void
@@ -123,8 +199,63 @@ tp_channel_request_succeeded_cb (TpChannelRequest *self,
   GError e = { TP_DBUS_ERRORS, TP_DBUS_ERROR_OBJECT_REMOVED,
       "ChannelRequest succeeded and was removed" };
 
-  g_signal_emit (self, signal_id_succeeded, 0);
+  if (!self->priv->succeeded_with_chan_fired)
+    {
+      DEBUG ("MC is too old and didn't fired SucceededWithChannel");
+
+      g_signal_emit (self, signals[SIGNAL_SUCCEEDED_WITH_CHANNEL], 0,
+          NULL, NULL);
+
+      self->priv->succeeded_with_chan_fired = TRUE;
+    }
+
+  /* Fire the old legacy signal as well */
+  g_signal_emit (self, signals[SIGNAL_SUCCEEDED], 0);
+
   tp_proxy_invalidate ((TpProxy *) self, &e);
+}
+
+static void
+tp_channel_request_succeeded_with_channel_cb (TpChannelRequest *self,
+    const gchar *conn_path,
+    GHashTable *conn_props,
+    const gchar *chan_path,
+    GHashTable *chan_props,
+    gpointer unused G_GNUC_UNUSED,
+    GObject *object G_GNUC_UNUSED)
+{
+  TpDBusDaemon *dbus;
+  TpConnection *connection;
+  TpChannel *channel;
+  GError *error = NULL;
+
+  dbus = tp_proxy_get_dbus_daemon (self);
+
+  connection = tp_connection_new (dbus, NULL, conn_path, &error);
+  if (connection == NULL)
+    {
+      DEBUG ("Failed to create TpConnection: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  channel = tp_client_channel_factory_create_channel (
+      self->priv->channel_factory, connection, chan_path, chan_props, &error);
+  if (channel == NULL)
+    {
+      DEBUG ("Failed to create TpChannel: %s", error->message);
+      g_error_free (error);
+      g_object_unref (channel);
+      return;
+    }
+
+  g_signal_emit (self, signals[SIGNAL_SUCCEEDED_WITH_CHANNEL], 0,
+      connection, channel);
+
+  self->priv->succeeded_with_chan_fired = TRUE;
+
+  g_object_unref (connection);
+  g_object_unref (channel);
 }
 
 static void
@@ -140,6 +271,12 @@ tp_channel_request_constructed (GObject *object)
     chain_up (object);
 
   g_return_if_fail (tp_proxy_get_dbus_daemon (self) != NULL);
+
+  if (self->priv->channel_factory == NULL)
+    {
+      self->priv->channel_factory = TP_CLIENT_CHANNEL_FACTORY (
+          tp_automatic_proxy_factory_dup ());
+    }
 
   sc = tp_cli_channel_request_connect_to_failed (self,
       tp_channel_request_failed_cb, NULL, NULL, NULL, &error);
@@ -162,6 +299,31 @@ tp_channel_request_constructed (GObject *object)
       g_assert_not_reached ();
       return;
     }
+
+  sc = tp_cli_channel_request_connect_to_succeeded_with_channel (self,
+      tp_channel_request_succeeded_with_channel_cb, NULL, NULL, NULL, &error);
+
+  if (sc == NULL)
+    {
+      DEBUG ("Couldn't connect to SucceededWithChannel: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+}
+
+static void
+tp_channel_request_dispose (GObject *object)
+{
+  TpChannelRequest *self = TP_CHANNEL_REQUEST (object);
+  void (*dispose) (GObject *) =
+    G_OBJECT_CLASS (tp_channel_request_parent_class)->dispose;
+
+  tp_clear_pointer (&self->priv->immutable_properties, g_hash_table_unref);
+
+  tp_clear_object (&self->priv->channel_factory);
+
+  if (dispose != NULL)
+    dispose (object);
 }
 
 static void
@@ -169,28 +331,122 @@ tp_channel_request_class_init (TpChannelRequestClass *klass)
 {
   TpProxyClass *proxy_class = (TpProxyClass *) klass;
   GObjectClass *object_class = (GObjectClass *) klass;
+  GParamSpec *param_spec;
 
   g_type_class_add_private (klass, sizeof (TpChannelRequestPrivate));
 
+  object_class->set_property = tp_channel_request_set_property;
+  object_class->get_property = tp_channel_request_get_property;
   object_class->constructed = tp_channel_request_constructed;
+  object_class->dispose = tp_channel_request_dispose;
 
   proxy_class->interface = TP_IFACE_QUARK_CHANNEL_REQUEST;
   tp_channel_request_init_known_interfaces ();
   proxy_class->must_have_unique_name = TRUE;
 
   /**
+   * TpChannelRequest:channel-factory:
+   *
+   * The object implementing the #TpClientChannelFactoryInterface interface
+   * that will be used to create channel proxies when the
+   * #TpChannelRequest::succeeded-with-channel signal is fired.
+   * This property can be changed using
+   * tp_channel_request_set_channel_factory().
+   *
+   * If no channel factory is specified then #TpAutomaticProxyFactory is used.
+   *
+   * Since: 0.13.14
+   */
+  param_spec = g_param_spec_object ("channel-factory", "Channel factory",
+      "Object implementing TpClientChannelFactoryInterface",
+      G_TYPE_OBJECT,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CHANNEL_FACTORY,
+      param_spec);
+
+  /**
+   * TpChannelRequest:immutable-properties:
+   *
+   * The immutable D-Bus properties of this channel request, represented by a
+   * #GHashTable where the keys are D-Bus interface name + "." + property
+   * name, and the values are #GValue instances.
+   *
+   * Note that this property is set only if the immutable properties have been
+   * set during the construction of the #TpChannelRequest.
+   *
+   * Read-only except during construction.
+   *
+   * Since: 0.13.14
+   */
+  param_spec = g_param_spec_boxed ("immutable-properties",
+      "Immutable D-Bus properties",
+      "A map D-Bus interface + \".\" + property name => GValue",
+      TP_HASH_TYPE_QUALIFIED_PROPERTY_VALUE_MAP,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_IMMUTABLE_PROPERTIES,
+      param_spec);
+
+  /**
+   * TpChannelRequest:hints:
+   *
+   * A #TP_HASH_TYPE_STRING_VARIANT_MAP of metadata provided by
+   * the channel requester; or %NULL if #TpChannelRequest:immutable-properties
+   * is not defined or if no hints has been defined.
+   *
+   * Read-only.
+   *
+   * Since: 0.13.14
+   */
+  param_spec = g_param_spec_boxed ("hints", "Hints", "Hints",
+      TP_HASH_TYPE_STRING_VARIANT_MAP,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_HINTS, param_spec);
+
+  /**
    * TpChannelRequest::succeeded:
    * @self: the channel request proxy
    *
    * Emitted when the channel request succeeds.
+   *
+   * Deprecated: since 0.13.14. Use
+   * #TpChannelRequest::succeeded-with-channel, which provides the resulting
+   * channel, instead.
    */
-  signal_id_succeeded = g_signal_new ("succeeded",
+  signals[SIGNAL_SUCCEEDED] = g_signal_new ("succeeded",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
       0,
       NULL, NULL,
       g_cclosure_marshal_VOID__VOID,
       G_TYPE_NONE, 0);
+
+  /**
+   * TpChannelRequest::succeeded-with-channel:
+   * @self: the channel request proxy
+   * @connection: the #TpConnection of @channel, or %NULL
+   * @channel: the #TpChannel created, or %NULL
+   *
+   * Emitted when the channel request succeeds.
+   *
+   * With telepathy-mission-control version 5.7.1 and earlier, @connection and
+   * @channel will be %NULL. When using newer versions, they will be correctly
+   * set to the newly-created channel, and the connection which owns it.
+   *
+   * The #TpChannel is created using #TpChannelRequest:channel-factory but
+   * the features of the factory are NOT prepared. It's up to the user to
+   * prepare the features returned by
+   * tp_client_channel_factory_dup_channel_features() himself.
+   *
+   * Since: 0.13.14
+   */
+  signals[SIGNAL_SUCCEEDED_WITH_CHANNEL] = g_signal_new (
+      "succeeded-with-channel",
+      G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL,
+      _tp_marshal_VOID__OBJECT_OBJECT,
+      G_TYPE_NONE, 2, TP_TYPE_CONNECTION, TP_TYPE_CHANNEL);
 }
 
 /**
@@ -238,8 +494,6 @@ tp_channel_request_init_known_interfaces (void)
  * is responsible for calling tp_cli_channel_request_call_proceed() when it
  * is ready for the channel request to proceed.
  *
- * The @immutable_properties argument is not yet used.
- *
  * Returns: a new reference to an channel request proxy, or %NULL if
  *    @object_path is not syntactically valid or the channel dispatcher is
  *    not running
@@ -247,7 +501,7 @@ tp_channel_request_init_known_interfaces (void)
 TpChannelRequest *
 tp_channel_request_new (TpDBusDaemon *bus_daemon,
     const gchar *object_path,
-    GHashTable *immutable_properties G_GNUC_UNUSED,
+    GHashTable *immutable_properties,
     GError **error)
 {
   TpChannelRequest *self;
@@ -269,9 +523,71 @@ tp_channel_request_new (TpDBusDaemon *bus_daemon,
         "dbus-connection", ((TpProxy *) bus_daemon)->dbus_connection,
         "bus-name", unique_name,
         "object-path", object_path,
+        "immutable-properties", immutable_properties,
         NULL));
 
   g_free (unique_name);
 
   return self;
+}
+
+/**
+ * tp_channel_request_set_channel_factory:
+ * @self: a #TpChannelRequest
+ * @factory: an object implementing the #TpClientChannelFactoryInterface
+ * interface
+ *
+ * Change the value of the #TpChannelRequest:channel-factory property.
+ *
+ * Since: 0.13.14
+ */
+void
+tp_channel_request_set_channel_factory (TpChannelRequest *self,
+    TpClientChannelFactory *factory)
+{
+  tp_clear_object (&self->priv->channel_factory);
+  self->priv->channel_factory = g_object_ref (factory);
+  g_object_notify (G_OBJECT (self), "channel-factory");
+}
+
+/**
+ * tp_channel_request_get_immutable_properties:
+ * @self: a #TpChannelRequest
+ *
+ * Return the #TpChannelRequest:immutable-properties construct-only property
+ *
+ * Returns: (transfer none): the value of
+ * #TpChannelRequest:immutable-properties
+ *
+ * Since: 0.13.14
+ */
+const GHashTable *
+tp_channel_request_get_immutable_properties (TpChannelRequest *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL_REQUEST (self), NULL);
+
+  return self->priv->immutable_properties;
+}
+
+/**
+ * tp_channel_request_get_hints:
+ * @self: a #TpChannelRequest
+ *
+ * Return the #TpChannelRequest:hints property
+ *
+ * Returns: (transfer none): the value of
+ * #TpChannelRequest:hints
+ *
+ * Since: 0.13.14
+ */
+const GHashTable *
+tp_channel_request_get_hints (TpChannelRequest *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL_REQUEST (self), NULL);
+
+  if (self->priv->immutable_properties == NULL)
+    return NULL;
+
+  return tp_asv_get_boxed (self->priv->immutable_properties,
+      TP_PROP_CHANNEL_REQUEST_HINTS, TP_HASH_TYPE_STRING_VARIANT_MAP);
 }

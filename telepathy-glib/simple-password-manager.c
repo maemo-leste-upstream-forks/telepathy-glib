@@ -75,7 +75,7 @@
 
 #define DEBUG_FLAG TP_DEBUG_SASL
 #include "telepathy-glib/debug-internal.h"
-#include "telepathy-glib/simple-password-channel-internal.h"
+#include "telepathy-glib/base-password-channel.h"
 
 static void channel_manager_iface_init (gpointer, gpointer);
 static void tp_simple_password_manager_close_all (TpSimplePasswordManager *self);
@@ -98,7 +98,7 @@ struct _TpSimplePasswordManagerPrivate
   TpBaseConnection *conn;
   guint status_changed_id;
 
-  TpSimplePasswordChannel *channel;
+  TpBasePasswordChannel *channel;
   GAsyncResult *result;
 
   gboolean dispose_has_run;
@@ -307,7 +307,7 @@ tp_simple_password_manager_channel_closed_cb (GObject *chan,
 
 static void
 tp_simple_password_manager_channel_finished_cb (
-    TpSimplePasswordChannel *channel,
+    TpBasePasswordChannel *channel,
     const GString *str,
     guint domain,
     gint code,
@@ -330,6 +330,73 @@ tp_simple_password_manager_channel_finished_cb (
     }
 
   g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+static void
+tp_simple_password_manager_prompt_common_async (
+    TpSimplePasswordManager *self,
+    TpBasePasswordChannel *channel,
+    GSimpleAsyncResult *result)
+{
+  TpSimplePasswordManagerPrivate *priv = self->priv;
+
+  g_return_if_fail (channel != NULL);
+  g_return_if_fail (TP_IS_SIMPLE_PASSWORD_MANAGER (self));
+  g_return_if_fail (priv->channel == NULL);
+  g_return_if_fail (priv->result == NULL);
+
+  priv->channel = g_object_ref (channel);
+  priv->result = g_object_ref (result);
+
+  tp_g_signal_connect_object (priv->channel, "closed",
+      G_CALLBACK (tp_simple_password_manager_channel_closed_cb), self, 0);
+  tp_g_signal_connect_object (priv->channel, "finished",
+      G_CALLBACK (tp_simple_password_manager_channel_finished_cb),
+      priv->result, 0);
+
+  tp_base_channel_register ((TpBaseChannel *) priv->channel);
+
+  tp_channel_manager_emit_new_channel (self,
+      TP_EXPORTABLE_CHANNEL (priv->channel), NULL);
+}
+
+/**
+ * tp_simple_password_manager_prompt_for_channel_async:
+ * @self: a #TpSimplePasswordManager
+ * @channel: a #TpBasePasswordChannel
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Pops up a new server authentication channel and handles the
+ * X-TELEPATHY-PASSWORD mechanism to obtain a password for the
+ * connection.
+ *
+ * When the operation is finished, @callback will be called. You must then
+ * call tp_simple_password_manager_prompt_for_channel_finish() to get the
+ * result of the request.
+ *
+ * Most of the time, tp_simple_password_manager_prompt_async() should be used
+ * instead.  This function enables applications to provide custom channels
+ * instead of letting the password manager handle all of the channel details
+ * automatically.  This may be useful if your SASL channel needs to implement
+ * additional interfaces (such as Channel.Interface.CredentialsStorage)
+ *
+ * Since: 0.13.15
+ */
+void
+tp_simple_password_manager_prompt_for_channel_async (
+    TpSimplePasswordManager *self,
+    TpBasePasswordChannel *channel,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result = g_simple_async_result_new (
+       G_OBJECT (self), callback, user_data,
+       tp_simple_password_manager_prompt_for_channel_async);
+
+  tp_simple_password_manager_prompt_common_async (self, channel, result);
+
   g_object_unref (result);
 }
 
@@ -356,39 +423,25 @@ tp_simple_password_manager_prompt_async (
     gpointer user_data)
 {
   TpSimplePasswordManagerPrivate *priv = self->priv;
-  TpBaseConnection *base_conn = priv->conn;
-  gchar *object_path;
+  gchar *object_path = g_strdup_printf ("%s/BasePasswordChannel",
+      priv->conn->object_path);
+  TpBasePasswordChannel *channel;
+  GSimpleAsyncResult *result = g_simple_async_result_new (G_OBJECT (self),
+      callback, user_data, tp_simple_password_manager_prompt_async);
 
-  g_return_if_fail (TP_IS_SIMPLE_PASSWORD_MANAGER (self));
-  g_return_if_fail (priv->channel == NULL);
-  g_return_if_fail (priv->result == NULL);
-
-  object_path = g_strdup_printf ("%s/SimplePasswordChannel",
-      base_conn->object_path);
-
-  priv->channel = g_object_new (TP_TYPE_SIMPLE_PASSWORD_CHANNEL,
+  channel = g_object_new (TP_TYPE_BASE_PASSWORD_CHANNEL,
       "connection", priv->conn,
       "object-path", object_path,
       "handle", 0,
       "requested", FALSE,
-      "initiator-handle", base_conn->self_handle,
+      "initiator-handle", priv->conn->self_handle,
       NULL);
 
+  tp_simple_password_manager_prompt_common_async (self, channel, result);
+
   g_free (object_path);
-
-  priv->result = G_ASYNC_RESULT (g_simple_async_result_new (G_OBJECT (self),
-          callback, user_data, tp_simple_password_manager_prompt_async));
-
-  tp_g_signal_connect_object (priv->channel, "closed",
-      G_CALLBACK (tp_simple_password_manager_channel_closed_cb), self, 0);
-  tp_g_signal_connect_object (priv->channel, "finished",
-      G_CALLBACK (tp_simple_password_manager_channel_finished_cb),
-      priv->result, 0);
-
-  tp_base_channel_register ((TpBaseChannel *) priv->channel);
-
-  tp_channel_manager_emit_new_channel (self,
-      TP_EXPORTABLE_CHANNEL (priv->channel), NULL);
+  g_object_unref (channel);
+  g_object_unref (result);
 }
 
 /**
@@ -400,8 +453,8 @@ tp_simple_password_manager_prompt_async (
  * Retrieve the value of the request begun with
  * tp_simple_password_manager_prompt_async().
  *
- * Returns: a #GString with the password (or byte-blob) retrieved
- *  by @manager
+ * Returns: (transfer none): a #GString with the password (or byte-blob)
+ * retrieved by @manager
  *
  * Since: 0.13.8
  */
@@ -424,6 +477,51 @@ tp_simple_password_manager_prompt_finish (
   g_return_val_if_fail (g_simple_async_result_is_valid (result,
           G_OBJECT (self), tp_simple_password_manager_prompt_async),
       NULL);
+
+  return g_simple_async_result_get_op_res_gpointer (simple);
+}
+
+/**
+ * tp_simple_password_manager_prompt_for_channel_finish:
+ * @self: a #TpSimplePasswordManager
+ * @result: a #GAsyncResult
+ * @channel: (transfer none): an output location to retrieve the custom
+ * password channel that was passed to
+ * tp_simple_password_manager_prompt_for_channel_async()
+ * @error: a #GError to fill
+ *
+ * Retrieve the value of the request begun with
+ * tp_simple_password_manager_prompt_for_channel_async().
+ *
+ * Returns: (transfer none): a #GString with the password (or byte-blob)
+ * retrieved by @manager
+ *
+ * Since: 0.13.15
+ */
+const GString *
+tp_simple_password_manager_prompt_for_channel_finish (
+    TpSimplePasswordManager *self,
+    GAsyncResult *result,
+    TpBasePasswordChannel **channel,
+    GError **error)
+{
+  TpSimplePasswordManagerPrivate *priv = self->priv;
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_SIMPLE_PASSWORD_MANAGER (self), NULL);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), NULL);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return NULL;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (self), tp_simple_password_manager_prompt_for_channel_async),
+      NULL);
+
+  if (channel != NULL)
+    *channel = priv->channel;
 
   return g_simple_async_result_get_op_res_gpointer (simple);
 }

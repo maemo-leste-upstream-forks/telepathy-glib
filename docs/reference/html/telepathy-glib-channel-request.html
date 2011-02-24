@@ -27,6 +27,8 @@
                    | 
                   <a href="#telepathy-glib-channel-request.object-hierarchy" class="shortcut">Object Hierarchy</a>
                    | 
+                  <a href="#telepathy-glib-channel-request.properties" class="shortcut">Properties</a>
+                   | 
                   <a href="#telepathy-glib-channel-request.signals" class="shortcut">Signals</a>
 </td></tr>
 </table>
@@ -53,6 +55,12 @@
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-channel-request.html#tp-channel-request-init-known-interfaces" title="tp_channel_request_init_known_interfaces ()">tp_channel_request_init_known_interfaces</a>
                                                         (<em class="parameter"><code><span class="type">void</span></code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-channel-request.html#tp-channel-request-set-channel-factory" title="tp_channel_request_set_channel_factory ()">tp_channel_request_set_channel_factory</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-client-channel-factory.html#TpClientChannelFactory"><span class="type">TpClientChannelFactory</span></a> *factory</code></em>);
+const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *  <a class="link" href="telepathy-glib-channel-request.html#tp-channel-request-get-immutable-properties" title="tp_channel_request_get_immutable_properties ()">tp_channel_request_get_immutable_properties</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self</code></em>);
+const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *  <a class="link" href="telepathy-glib-channel-request.html#tp-channel-request-get-hints" title="tp_channel_request_get_hints ()">tp_channel_request_get_hints</a>        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self</code></em>);
 
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-channel-request.html#tp-cli-channel-request-callback-for-cancel" title="tp_cli_channel_request_callback_for_cancel ()">*tp_cli_channel_request_callback_for_cancel</a>)
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *proxy</code></em>,
@@ -126,10 +134,19 @@
          +----TpChannelRequest
 </pre>
 </div>
+<div class="refsect1" title="Properties">
+<a name="telepathy-glib-channel-request.properties"></a><h2>Properties</h2>
+<pre class="synopsis">
+  "<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--channel-factory" title='The "channel-factory" property'>channel-factory</a>"          <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a>*              : Read / Write / Construct
+  "<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--hints" title='The "hints" property'>hints</a>"                    <span class="type">GHashTable_gchararray+GValue_*</span>  : Read
+  "<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--immutable-properties" title='The "immutable-properties" property'>immutable-properties</a>"     <span class="type">GHashTable_gchararray+GValue_*</span>  : Read / Write / Construct Only
+</pre>
+</div>
 <div class="refsect1" title="Signals">
 <a name="telepathy-glib-channel-request.signals"></a><h2>Signals</h2>
 <pre class="synopsis">
   "<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest-succeeded" title='The "succeeded" signal'>succeeded</a>"                                      : Run Last / Has Details
+  "<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest-succeeded-with-channel" title='The "succeeded-with-channel" signal'>succeeded-with-channel</a>"                         : Run Last / Has Details
 </pre>
 </div>
 <div class="refsect1" title="Description">
@@ -209,9 +226,6 @@ If the channel request was newly created, the client making the request
 is responsible for calling <a class="link" href="telepathy-glib-channel-request.html#tp-cli-channel-request-call-proceed" title="tp_cli_channel_request_call_proceed ()"><code class="function">tp_cli_channel_request_call_proceed()</code></a> when it
 is ready for the channel request to proceed.
 </p>
-<p>
-The <em class="parameter"><code>immutable_properties</code></em> argument is not yet used.
-</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -260,6 +274,84 @@ call this function before calling
 <code class="literal">TP_TYPE_CHANNEL_REQUEST</code>.
 </p>
 <p class="since">Since 0.7.32</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_request_set_channel_factory ()">
+<a name="tp-channel-request-set-channel-factory"></a><h3>tp_channel_request_set_channel_factory ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_channel_request_set_channel_factory
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-client-channel-factory.html#TpClientChannelFactory"><span class="type">TpClientChannelFactory</span></a> *factory</code></em>);</pre>
+<p>
+Change the value of the <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--channel-factory" title='The "channel-factory" property'><span class="type">"channel-factory"</span></a> property.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>factory</code></em> :</span></p></td>
+<td>an object implementing the <a class="link" href="telepathy-glib-client-channel-factory.html#TpClientChannelFactoryInterface" title="TpClientChannelFactoryInterface"><span class="type">TpClientChannelFactoryInterface</span></a>
+interface
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.14</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_request_get_immutable_properties ()">
+<a name="tp-channel-request-get-immutable-properties"></a><h3>tp_channel_request_get_immutable_properties ()</h3>
+<pre class="programlisting">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *  tp_channel_request_get_immutable_properties
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self</code></em>);</pre>
+<p>
+Return the <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--immutable-properties" title='The "immutable-properties" property'><span class="type">"immutable-properties"</span></a> construct-only property
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of
+<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--immutable-properties" title='The "immutable-properties" property'><span class="type">"immutable-properties"</span></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.14</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_request_get_hints ()">
+<a name="tp-channel-request-get-hints"></a><h3>tp_channel_request_get_hints ()</h3>
+<pre class="programlisting">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *  tp_channel_request_get_hints        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self</code></em>);</pre>
+<p>
+Return the <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--hints" title='The "hints" property'><span class="type">"hints"</span></a> property
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the value of
+<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--hints" title='The "hints" property'><span class="type">"hints"</span></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.14</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_cli_channel_request_callback_for_cancel ()">
@@ -807,12 +899,68 @@ or has become invalid.
 </table></div>
 </div>
 </div>
+<div class="refsect1" title="Property Details">
+<a name="telepathy-glib-channel-request.property-details"></a><h2>Property Details</h2>
+<div class="refsect2" title='The "channel-factory" property'>
+<a name="TpChannelRequest--channel-factory"></a><h3>The <code class="literal">"channel-factory"</code> property</h3>
+<pre class="programlisting">  "channel-factory"          <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a>*              : Read / Write / Construct</pre>
+<p>
+The object implementing the <a class="link" href="telepathy-glib-client-channel-factory.html#TpClientChannelFactoryInterface" title="TpClientChannelFactoryInterface"><span class="type">TpClientChannelFactoryInterface</span></a> interface
+that will be used to create channel proxies when the
+<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest-succeeded-with-channel" title='The "succeeded-with-channel" signal'><span class="type">"succeeded-with-channel"</span></a> signal is fired.
+This property can be changed using
+<a class="link" href="telepathy-glib-channel-request.html#tp-channel-request-set-channel-factory" title="tp_channel_request_set_channel_factory ()"><code class="function">tp_channel_request_set_channel_factory()</code></a>.
+</p>
+<p>
+If no channel factory is specified then <a class="link" href="telepathy-glib-automatic-proxy-factory.html#TpAutomaticProxyFactory"><span class="type">TpAutomaticProxyFactory</span></a> is used.
+</p>
+<p class="since">Since 0.13.14</p>
+</div>
+<hr>
+<div class="refsect2" title='The "hints" property'>
+<a name="TpChannelRequest--hints"></a><h3>The <code class="literal">"hints"</code> property</h3>
+<pre class="programlisting">  "hints"                    <span class="type">GHashTable_gchararray+GValue_*</span>  : Read</pre>
+<p>
+A <a class="link" href="telepathy-glib-gtypes.html#TP-HASH-TYPE-STRING-VARIANT-MAP:CAPS" title="TP_HASH_TYPE_STRING_VARIANT_MAP"><span class="type">TP_HASH_TYPE_STRING_VARIANT_MAP</span></a> of metadata provided by
+the channel requester; or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--immutable-properties" title='The "immutable-properties" property'><span class="type">"immutable-properties"</span></a>
+is not defined or if no hints has been defined.
+</p>
+<p>
+Read-only.
+</p>
+<p class="since">Since 0.13.14</p>
+</div>
+<hr>
+<div class="refsect2" title='The "immutable-properties" property'>
+<a name="TpChannelRequest--immutable-properties"></a><h3>The <code class="literal">"immutable-properties"</code> property</h3>
+<pre class="programlisting">  "immutable-properties"     <span class="type">GHashTable_gchararray+GValue_*</span>  : Read / Write / Construct Only</pre>
+<p>
+The immutable D-Bus properties of this channel request, represented by a
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> where the keys are D-Bus interface name + "." + property
+name, and the values are <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> instances.
+</p>
+<p>
+Note that this property is set only if the immutable properties have been
+set during the construction of the <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a>.
+</p>
+<p>
+Read-only except during construction.
+</p>
+<p class="since">Since 0.13.14</p>
+</div>
+</div>
 <div class="refsect1" title="Signal Details">
 <a name="telepathy-glib-channel-request.signal-details"></a><h2>Signal Details</h2>
 <div class="refsect2" title='The "succeeded" signal'>
 <a name="TpChannelRequest-succeeded"></a><h3>The <code class="literal">"succeeded"</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self,
                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>          user_data)      : Run Last / Has Details</pre>
+<div class="warning" title="Warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">TpChannelRequest::succeeded</code> is deprecated and should not be used in newly-written code. since 0.13.14. Use
+<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest-succeeded-with-channel" title='The "succeeded-with-channel" signal'><span class="type">"succeeded-with-channel"</span></a>, which provides the resulting
+channel, instead.</p>
+</div>
 <p>
 Emitted when the channel request succeeds.
 </p>
@@ -830,6 +978,53 @@ Emitted when the channel request succeeds.
 </tr>
 </tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2" title='The "succeeded-with-channel" signal'>
+<a name="TpChannelRequest-succeeded-with-channel"></a><h3>The <code class="literal">"succeeded-with-channel"</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> *self,
+                                                        <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>     *connection,
+                                                        <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>        *channel,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>          user_data)       : Run Last / Has Details</pre>
+<p>
+Emitted when the channel request succeeds.
+</p>
+<p>
+With telepathy-mission-control version 5.7.1 and earlier, <em class="parameter"><code>connection</code></em> and
+<em class="parameter"><code>channel</code></em> will be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. When using newer versions, they will be correctly
+set to the newly-created channel, and the connection which owns it.
+</p>
+<p>
+The <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> is created using <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest--channel-factory" title='The "channel-factory" property'><span class="type">"channel-factory"</span></a> but
+the features of the factory are NOT prepared. It's up to the user to
+prepare the features returned by
+<a class="link" href="telepathy-glib-client-channel-factory.html#tp-client-channel-factory-dup-channel-features" title="tp_client_channel_factory_dup_channel_features ()"><code class="function">tp_client_channel_factory_dup_channel_features()</code></a> himself.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>the channel request proxy
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>connection</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> of <em class="parameter"><code>channel</code></em>, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channel</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> created, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.13.14</p>
 </div>
 </div>
 <div class="refsect1" title="See Also">

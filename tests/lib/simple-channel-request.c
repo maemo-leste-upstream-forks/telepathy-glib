@@ -46,6 +46,7 @@ enum
   PROP_REQUESTS,
   PROP_CONNECTION,
   PROP_INTERFACES,
+  PROP_HINTS,
 };
 
 struct _TpTestsSimpleChannelRequestPrivate
@@ -55,6 +56,7 @@ struct _TpTestsSimpleChannelRequestPrivate
   gint64 user_action_time;
   gchar *preferred_handler;
   GPtrArray *requests;
+  GHashTable *hints;
 
   /* Our own path */
   gchar *path;
@@ -113,6 +115,24 @@ free_channel_details (gpointer data,
   g_boxed_free (TP_STRUCT_TYPE_CHANNEL_DETAILS, data);
 }
 
+static GHashTable *
+dup_immutable_props (TpTestsSimpleChannelRequest *self)
+{
+  return tp_asv_new (
+      TP_PROP_CHANNEL_REQUEST_ACCOUNT, DBUS_TYPE_G_OBJECT_PATH,
+        self->priv->account_path,
+      TP_PROP_CHANNEL_REQUEST_USER_ACTION_TIME, G_TYPE_INT64,
+        self->priv->user_action_time,
+      TP_PROP_CHANNEL_REQUEST_PREFERRED_HANDLER, G_TYPE_STRING,
+        self->priv->preferred_handler,
+      TP_PROP_CHANNEL_REQUEST_REQUESTS, TP_ARRAY_TYPE_CHANNEL_CLASS_LIST,
+        self->priv->requests,
+      TP_PROP_CHANNEL_REQUEST_INTERFACES, G_TYPE_STRV, NULL,
+      TP_PROP_CHANNEL_REQUEST_HINTS, TP_HASH_TYPE_STRING_VARIANT_MAP,
+        self->priv->hints,
+      NULL);
+}
+
 static void
 tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
     DBusGMethodInvocation *context)
@@ -126,6 +146,7 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
   GHashTable *info;
   TpBaseConnection *base_conn = (TpBaseConnection *) self->priv->conn;
   GHashTable *req;
+  GHashTable *request_props;
 
   req = g_ptr_array_index (self->priv->requests, 0);
   g_assert (req != NULL);
@@ -161,6 +182,21 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
   if (!tp_strdiff (self->priv->preferred_handler, "Fake"))
     {
       /* Pretend that the channel has been handled */
+      GHashTable *props;
+      props = g_hash_table_new (NULL, NULL);
+
+      tp_svc_channel_request_emit_succeeded_with_channel (self,
+          base_conn->object_path, props, "/chan", props);
+      tp_svc_channel_request_emit_succeeded (self);
+
+      g_hash_table_unref (props);
+      return;
+    }
+  else if (!tp_strdiff (self->priv->preferred_handler, "FakeNoChannel"))
+    {
+      /* Pretend that the channel has been handled but only fire the old
+       * Succeeded signal. */
+
       tp_svc_channel_request_emit_succeeded (self);
       return;
     }
@@ -188,7 +224,16 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
   satisfied = g_ptr_array_sized_new (1);
   g_ptr_array_add (satisfied, self->priv->path);
 
-  info = g_hash_table_new (NULL, NULL);
+  request_props = g_hash_table_new_full (g_str_hash, g_str_equal,
+      g_free, (GDestroyNotify) g_hash_table_unref);
+
+  g_hash_table_insert (request_props, g_strdup (self->priv->path),
+      dup_immutable_props (self));
+
+  info = tp_asv_new (
+      "request-properties", TP_HASH_TYPE_OBJECT_IMMUTABLE_PROPERTIES_MAP,
+        request_props,
+      NULL);
 
   tp_cli_client_handler_call_handle_channels (client, -1,
       self->priv->account_path, base_conn->object_path, channels,
@@ -200,6 +245,7 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
   g_ptr_array_free (channels, TRUE);
   g_ptr_array_free (satisfied, TRUE);
   g_hash_table_unref (info);
+  g_hash_table_unref (request_props);
   g_object_unref (dbus);
   g_object_unref (client);
 }
@@ -266,6 +312,10 @@ tp_tests_simple_channel_request_get_property (GObject *object,
       g_value_set_boxed (value, CHANNEL_REQUEST_INTERFACES);
       break;
 
+    case PROP_HINTS:
+      g_value_set_boxed (value, self->priv->hints);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, spec);
       break;
@@ -305,6 +355,10 @@ tp_tests_simple_channel_request_set_property (GObject *object,
       self->priv->conn = g_value_dup_object (value);
       break;
 
+    case PROP_HINTS:
+      self->priv->hints = g_value_dup_boxed (value);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, spec);
       break;
@@ -327,6 +381,7 @@ tp_tests_simple_channel_request_dispose (GObject *object)
     }
 
   tp_clear_object (&self->priv->conn);
+  tp_clear_pointer (&self->priv->hints, g_hash_table_unref);
 
   if (G_OBJECT_CLASS (tp_tests_simple_channel_request_parent_class)->dispose != NULL)
     G_OBJECT_CLASS (tp_tests_simple_channel_request_parent_class)->dispose (object);
@@ -341,6 +396,7 @@ tp_tests_simple_channel_request_class_init (
 
   static TpDBusPropertiesMixinPropImpl am_props[] = {
         { "Interfaces", "interfaces", NULL },
+        { "Hints", "hints", NULL },
         { NULL }
   };
 
@@ -403,6 +459,12 @@ tp_tests_simple_channel_request_class_init (
       G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_CONNECTION, param_spec);
 
+  param_spec = g_param_spec_boxed ("hints", "Hints",
+      "Metadata provided by the channel's requester, if any",
+      TP_HASH_TYPE_STRING_VARIANT_MAP,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_HINTS, param_spec);
+
   klass->dbus_props_class.interfaces = prop_interfaces;
   tp_dbus_properties_mixin_class_init (object_class,
       G_STRUCT_OFFSET (TpTestsSimpleChannelRequestClass, dbus_props_class));
@@ -414,7 +476,8 @@ tp_tests_simple_channel_request_new (const gchar *path,
     const gchar *account_path,
     gint64 user_action_time,
     const gchar *preferred_handler,
-    GPtrArray *requests)
+    GPtrArray *requests,
+    GHashTable *hints)
 {
   return tp_tests_object_new_static_class (
       TP_TESTS_TYPE_SIMPLE_CHANNEL_REQUEST,
@@ -424,5 +487,6 @@ tp_tests_simple_channel_request_new (const gchar *path,
       "user-action-time", user_action_time,
       "preferred-handler", preferred_handler,
       "requests", requests,
+      "hints", hints,
       NULL);
 }

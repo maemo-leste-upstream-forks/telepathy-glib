@@ -27,6 +27,7 @@
 
 #include <telepathy-glib/account.h>
 #include <telepathy-glib/channel.h>
+#include <telepathy-glib/channel-request.h>
 #include <telepathy-glib/client-channel-factory.h>
 #include <telepathy-glib/handle-channels-context.h>
 
@@ -73,6 +74,13 @@ gint64 tp_account_channel_request_get_user_action_time (
 void tp_account_channel_request_set_channel_factory (
     TpAccountChannelRequest *self,
     TpClientChannelFactory *factory);
+
+
+TpChannelRequest * tp_account_channel_request_get_channel_request (
+    TpAccountChannelRequest *self);
+
+void tp_account_channel_request_set_hints (TpAccountChannelRequest *self,
+    GHashTable *hints);
 
 /* Request and handle API */
 
@@ -125,6 +133,32 @@ gboolean tp_account_channel_request_ensure_channel_finish (
     TpAccountChannelRequest *self,
     GAsyncResult *result,
     GError **error);
+
+/* Request and observe API */
+
+void tp_account_channel_request_create_and_observe_channel_async (
+    TpAccountChannelRequest *self,
+    const gchar *preferred_handler,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+TpChannel * tp_account_channel_request_create_and_observe_channel_finish (
+    TpAccountChannelRequest *self,
+    GAsyncResult *result,
+    GError **error) G_GNUC_WARN_UNUSED_RESULT;
+
+void tp_account_channel_request_ensure_and_observe_channel_async (
+    TpAccountChannelRequest *self,
+    const gchar *preferred_handler,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+TpChannel * tp_account_channel_request_ensure_and_observe_channel_finish (
+    TpAccountChannelRequest *self,
+    GAsyncResult *result,
+    GError **error) G_GNUC_WARN_UNUSED_RESULT;
 
 G_END_DECLS
 
