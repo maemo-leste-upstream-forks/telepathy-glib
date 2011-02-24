@@ -57,6 +57,7 @@
 
 #include "telepathy-glib/account-channel-request.h"
 
+#include <telepathy-glib/automatic-proxy-factory.h>
 #include "telepathy-glib/base-client-internal.h"
 #include <telepathy-glib/channel-dispatcher.h>
 #include <telepathy-glib/channel-request.h>
@@ -64,6 +65,7 @@
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/simple-handler.h>
 #include <telepathy-glib/util.h>
+#include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
 #include "telepathy-glib/debug-internal.h"
@@ -87,6 +89,7 @@ enum {
     PROP_ACCOUNT = 1,
     PROP_REQUEST,
     PROP_USER_ACTION_TIME,
+    PROP_CHANNEL_REQUEST,
     N_PROPS
 };
 
@@ -96,6 +99,13 @@ enum {
 };
 
 static guint signals[N_SIGNALS] = { 0 };
+
+typedef enum
+{
+  ACTION_TYPE_FORGET,
+  ACTION_TYPE_HANDLE,
+  ACTION_TYPE_OBSERVE
+} ActionType;
 
 struct _TpAccountChannelRequestPrivate
 {
@@ -109,19 +119,19 @@ struct _TpAccountChannelRequestPrivate
   GSimpleAsyncResult *result;
   TpChannelRequest *chan_request;
   gulong invalidated_sig;
+  gulong succeeded_chan_sig;
   gulong cancel_id;
   TpChannel *channel;
   TpHandleChannelsContext *handle_context;
   TpDBusDaemon *dbus;
   TpClientChannelFactory *factory;
+  GHashTable *hints;
 
   /* TRUE if the channel has been requested (an _async function has been called
    * on the TpAccountChannelRequest) */
   gboolean requested;
 
-  /* TRUE if The TpAccountChannelRequest should handle the requested channel
-   * itself */
-  gboolean should_handle;
+  ActionType action_type;
 };
 
 static void
@@ -130,6 +140,9 @@ tp_account_channel_request_init (TpAccountChannelRequest *self)
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       TP_TYPE_ACCOUNT_CHANNEL_REQUEST,
       TpAccountChannelRequestPrivate);
+
+  self->priv->factory = TP_CLIENT_CHANNEL_FACTORY (
+      tp_automatic_proxy_factory_dup ());
 }
 
 static void
@@ -143,6 +156,10 @@ request_disconnect (TpAccountChannelRequest *self)
   g_signal_handler_disconnect (self->priv->chan_request,
       self->priv->invalidated_sig);
   self->priv->invalidated_sig = 0;
+
+  g_signal_handler_disconnect (self->priv->chan_request,
+      self->priv->succeeded_chan_sig);
+  self->priv->succeeded_chan_sig = 0;
 }
 
 static void
@@ -168,6 +185,7 @@ tp_account_channel_request_dispose (GObject *object)
   tp_clear_object (&self->priv->handle_context);
   tp_clear_object (&self->priv->dbus);
   tp_clear_object (&self->priv->factory);
+  tp_clear_pointer (&self->priv->hints, g_hash_table_unref);
 
   if (dispose != NULL)
     dispose (object);
@@ -194,6 +212,10 @@ tp_account_channel_request_get_property (GObject *object,
 
       case PROP_USER_ACTION_TIME:
         g_value_set_int64 (value, self->priv->user_action_time);
+        break;
+
+      case PROP_CHANNEL_REQUEST:
+        g_value_set_object (value, self->priv->chan_request);
         break;
 
       default:
@@ -332,6 +354,30 @@ tp_account_channel_request_class_init (
       G_MININT64, G_MAXINT64, 0,
       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_USER_ACTION_TIME,
+      param_spec);
+
+  /**
+   * TpAccountChannelRequest:channel-request:
+   *
+   * The #TpChannelRequest used to request the channel, or %NULL if the
+   * channel has not be requested yet.
+   *
+   * This can be useful for example to compare with the #TpChannelRequest
+   * objects received from the requests_satisfied argument of
+   * #TpSimpleHandlerHandleChannelsImpl to check if the client is asked to
+   * handle the channel it just requested.
+   *
+   * Note that the #TpChannelRequest objects may be different while still
+   * representing the same ChannelRequest on D-Bus. You have to compare
+   * them using their object paths (tp_proxy_get_object_path()).
+   *
+   * Since 0.13.13
+   */
+  param_spec = g_param_spec_object ("channel-request", "channel request",
+      "TpChannelRequest",
+      TP_TYPE_CHANNEL_REQUEST,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CHANNEL_REQUEST,
       param_spec);
 
  /**
@@ -552,26 +598,23 @@ handle_channels (TpSimpleHandler *handler,
 }
 
 static void
-channel_request_succeeded (TpAccountChannelRequest *self)
+channel_prepare_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
 {
-  if (self->priv->should_handle)
-    {
-      GError err = { TP_ERRORS, TP_ERROR_NOT_YOURS,
-          "Another Handler is handling this channel" };
+  TpAccountChannelRequest *self = user_data;
+  GError *error = NULL;
 
-      if (self->priv->result == NULL)
-        /* Our handler has been called, all good */
-        return;
-
-      /* Our handler hasn't be called but the channel request is complete.
-       * That means another handler handled the channels so we don't own it. */
-      request_fail (self, &err);
-    }
-  else
+  if (!tp_proxy_prepare_finish (source, result, &error))
     {
-      /* We don't have to handle the channel so we're done */
-      complete_result (self);
+      DEBUG ("Failed to prepare channel: %s", error->message);
+      g_error_free (error);
     }
+
+  g_simple_async_result_set_op_res_gpointer (self->priv->result,
+    g_object_ref (source), g_object_unref);
+
+  complete_result (self);
 }
 
 static void
@@ -590,7 +633,7 @@ acr_channel_request_proceed_cb (TpChannelRequest *request,
       return;
     }
 
-  if (self->priv->should_handle)
+  if (self->priv->action_type == ACTION_TYPE_HANDLE)
     DEBUG ("Proceed succeeded; waiting for the channel to be handled");
   else
     DEBUG ("Proceed succeeded; waiting for the Succeeded signal");
@@ -608,13 +651,67 @@ acr_channel_request_invalidated_cb (TpProxy *proxy,
   if (g_error_matches (&error, TP_DBUS_ERRORS, TP_DBUS_ERROR_OBJECT_REMOVED))
     {
       /* Object has been removed without error, so ChannelRequest succeeded */
-      channel_request_succeeded (self);
       return;
     }
 
   DEBUG ("ChannelRequest has been invalidated: %s", message);
 
   request_fail (self, &error);
+}
+
+static void
+acr_channel_request_succeeded_with_channel (TpChannelRequest *chan_req,
+    TpConnection *connection,
+    TpChannel *channel,
+    TpAccountChannelRequest *self)
+{
+  if (channel != NULL)
+    self->priv->channel = g_object_ref (channel);
+
+  /* ChannelRequest succeeded */
+  if (self->priv->action_type == ACTION_TYPE_HANDLE)
+    {
+      GError err = { TP_ERRORS, TP_ERROR_NOT_YOURS,
+          "Another Handler is handling this channel" };
+
+      if (self->priv->result == NULL)
+        /* Our handler has been called, all good */
+        return;
+
+      /* Our handler hasn't be called but the channel request is complete.
+       * That means another handler handled the channels so we don't own it. */
+      request_fail (self, &err);
+    }
+  else if (self->priv->action_type == ACTION_TYPE_OBSERVE)
+    {
+      GArray *features;
+
+      if (self->priv->channel == NULL)
+        {
+          GError err = { TP_ERRORS, TP_ERROR_CONFUSED,
+              "Channel has been created but MC didn't give it back to us" };
+
+          DEBUG ("%s", err.message);
+
+          request_fail (self, &err);
+          return;
+        }
+
+      /* Operation will be complete once the channel have been prepared */
+      features = tp_client_channel_factory_dup_channel_features (
+          self->priv->factory, self->priv->channel);
+      g_assert (features != NULL);
+
+      tp_proxy_prepare_async (self->priv->channel, (GQuark *) features->data,
+          channel_prepare_cb, self);
+
+      g_array_free (features, TRUE);
+    }
+  else
+    {
+      /* We don't have to handle the channel so we're done */
+      complete_result (self);
+    }
 }
 
 static void
@@ -681,8 +778,15 @@ acr_request_cb (TpChannelDispatcher *cd,
       goto fail;
     }
 
+  tp_channel_request_set_channel_factory (self->priv->chan_request,
+      self->priv->factory);
+
   self->priv->invalidated_sig = g_signal_connect (self->priv->chan_request,
       "invalidated", G_CALLBACK (acr_channel_request_invalidated_cb), self);
+
+  self->priv->succeeded_chan_sig = g_signal_connect (self->priv->chan_request,
+      "succeeded-with-channel",
+      G_CALLBACK (acr_channel_request_succeeded_with_channel), self);
 
   if (self->priv->cancellable != NULL)
     {
@@ -719,7 +823,7 @@ request_and_handle_channel_async (TpAccountChannelRequest *self,
   g_return_if_fail (!self->priv->requested);
   self->priv->requested = TRUE;
 
-  self->priv->should_handle = TRUE;
+  self->priv->action_type = ACTION_TYPE_HANDLE;
 
   if (g_cancellable_is_cancelled (cancellable))
     {
@@ -740,11 +844,8 @@ request_and_handle_channel_async (TpAccountChannelRequest *self,
   _tp_base_client_set_only_for_account (self->priv->handler,
       self->priv->account);
 
-  if (self->priv->factory != NULL)
-    {
-      tp_base_client_set_channel_factory (self->priv->handler,
-          self->priv->factory);
-    }
+  tp_base_client_set_channel_factory (self->priv->handler,
+      self->priv->factory);
 
   if (!tp_base_client_register (self->priv->handler, &error))
     {
@@ -765,11 +866,23 @@ request_and_handle_channel_async (TpAccountChannelRequest *self,
           user_data,
           tp_account_channel_request_ensure_and_handle_channel_async);
 
-      tp_cli_channel_dispatcher_call_ensure_channel (cd, -1,
-          tp_proxy_get_object_path (self->priv->account), self->priv->request,
-          self->priv->user_action_time,
-          tp_base_client_get_bus_name (self->priv->handler),
-          acr_request_cb, self, NULL, G_OBJECT (self));
+      if (self->priv->hints == NULL)
+        {
+          tp_cli_channel_dispatcher_call_ensure_channel (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request, self->priv->user_action_time,
+              tp_base_client_get_bus_name (self->priv->handler),
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
+      else
+        {
+          tp_cli_channel_dispatcher_call_ensure_channel_with_hints (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request, self->priv->user_action_time,
+              tp_base_client_get_bus_name (self->priv->handler),
+              self->priv->hints,
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
     }
   else
     {
@@ -777,11 +890,25 @@ request_and_handle_channel_async (TpAccountChannelRequest *self,
           user_data,
           tp_account_channel_request_create_and_handle_channel_async);
 
-      tp_cli_channel_dispatcher_call_create_channel (cd, -1,
-          tp_proxy_get_object_path (self->priv->account), self->priv->request,
-          self->priv->user_action_time,
-          tp_base_client_get_bus_name (self->priv->handler),
-          acr_request_cb, self, NULL, G_OBJECT (self));
+      if (self->priv->hints == NULL)
+        {
+          tp_cli_channel_dispatcher_call_create_channel (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request,
+              self->priv->user_action_time,
+              tp_base_client_get_bus_name (self->priv->handler),
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
+      else
+        {
+          tp_cli_channel_dispatcher_call_create_channel_with_hints (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request,
+              self->priv->user_action_time,
+              tp_base_client_get_bus_name (self->priv->handler),
+              self->priv->hints,
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
     }
 
   g_object_unref (cd);
@@ -972,7 +1099,7 @@ request_channel_async (TpAccountChannelRequest *self,
   g_return_if_fail (!self->priv->requested);
   self->priv->requested = TRUE;
 
-  self->priv->should_handle = FALSE;
+  self->priv->action_type = ACTION_TYPE_FORGET;
 
   if (g_cancellable_is_cancelled (cancellable))
     {
@@ -994,22 +1121,50 @@ request_channel_async (TpAccountChannelRequest *self,
       self->priv->result = g_simple_async_result_new (G_OBJECT (self), callback,
           user_data, tp_account_channel_request_ensure_channel_async);
 
-      tp_cli_channel_dispatcher_call_ensure_channel (cd, -1,
-          tp_proxy_get_object_path (self->priv->account), self->priv->request,
-          self->priv->user_action_time,
-          preferred_handler == NULL ? "" : preferred_handler,
-          acr_request_cb, self, NULL, G_OBJECT (self));
+      if (self->priv->hints == NULL)
+        {
+          tp_cli_channel_dispatcher_call_ensure_channel (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request,
+              self->priv->user_action_time,
+              preferred_handler == NULL ? "" : preferred_handler,
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
+      else
+        {
+          tp_cli_channel_dispatcher_call_ensure_channel_with_hints (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request,
+              self->priv->user_action_time,
+              preferred_handler == NULL ? "" : preferred_handler,
+              self->priv->hints,
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
     }
   else
     {
       self->priv->result = g_simple_async_result_new (G_OBJECT (self), callback,
           user_data, tp_account_channel_request_create_channel_async);
 
-      tp_cli_channel_dispatcher_call_create_channel (cd, -1,
-          tp_proxy_get_object_path (self->priv->account), self->priv->request,
-          self->priv->user_action_time,
-          preferred_handler == NULL ? "" : preferred_handler,
-          acr_request_cb, self, NULL, G_OBJECT (self));
+      if (self->priv->hints == NULL)
+        {
+          tp_cli_channel_dispatcher_call_create_channel (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request,
+              self->priv->user_action_time,
+              preferred_handler == NULL ? "" : preferred_handler,
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
+      else
+        {
+          tp_cli_channel_dispatcher_call_create_channel_with_hints (cd, -1,
+              tp_proxy_get_object_path (self->priv->account),
+              self->priv->request,
+              self->priv->user_action_time,
+              preferred_handler == NULL ? "" : preferred_handler,
+              self->priv->hints,
+              acr_request_cb, self, NULL, G_OBJECT (self));
+        }
     }
 
   g_object_unref (cd);
@@ -1111,9 +1266,9 @@ tp_account_channel_request_create_channel_finish (
  * If a suitable channel already existed, its handler will be notified that
  * the channel was requested again (for instance with
  * #TpAccountChannelRequest::re-handled, #TpBaseClientClassHandleChannelsImpl
- * or #TpSimpleHandler:callback), and can move its window to the foreground,
- * if applicable. Otherwise, a new channel will be created and dispatched to
- * a handler.
+ * or #TpSimpleHandler:callback, if it is implemented using Telepathy-GLib),
+ * so that it can re-present the window to the user, for example.
+ * Otherwise, a new channel will be created and dispatched to a handler.
  *
  * @callback will be called when an existing channel's handler has been
  * notified, a new channel has been created and dispatched, or the request
@@ -1181,4 +1336,240 @@ tp_account_channel_request_set_channel_factory (TpAccountChannelRequest *self,
 
   tp_clear_object (&self->priv->factory);
   self->priv->factory = g_object_ref (factory);
+}
+
+
+/**
+ * tp_account_channel_request_get_channel_request:
+ * @self: a #TpAccountChannelRequest
+ *
+ * Return the #TpAccountChannelRequest:channel-request property
+ *
+ * Returns: (transfer none): the value of
+ * #TpAccountChannelRequest:channel-request
+ *
+ * Since: 0.13.13
+ */
+TpChannelRequest *
+tp_account_channel_request_get_channel_request (TpAccountChannelRequest *self)
+{
+  return self->priv->chan_request;
+}
+
+static void
+request_and_observe_channel_async (TpAccountChannelRequest *self,
+    const gchar *preferred_handler,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data,
+    gboolean ensure)
+{
+  TpChannelDispatcher *cd;
+
+  g_return_if_fail (!self->priv->requested);
+  self->priv->requested = TRUE;
+
+  self->priv->action_type = ACTION_TYPE_OBSERVE;
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
+          user_data, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+          "Operation has been cancelled");
+
+      return;
+    }
+
+  if (cancellable != NULL)
+    self->priv->cancellable = g_object_ref (cancellable);
+  self->priv->ensure = ensure;
+
+  cd = tp_channel_dispatcher_new (self->priv->dbus);
+
+  if (self->priv->hints == NULL)
+    self->priv->hints = g_hash_table_new (NULL, NULL);
+
+  if (ensure)
+    {
+      self->priv->result = g_simple_async_result_new (G_OBJECT (self), callback,
+          user_data,
+          tp_account_channel_request_ensure_and_observe_channel_async);
+
+      tp_cli_channel_dispatcher_call_ensure_channel_with_hints (cd, -1,
+          tp_proxy_get_object_path (self->priv->account), self->priv->request,
+          self->priv->user_action_time,
+          preferred_handler == NULL ? "" : preferred_handler,
+          self->priv->hints,
+          acr_request_cb, self, NULL, G_OBJECT (self));
+    }
+  else
+    {
+      self->priv->result = g_simple_async_result_new (G_OBJECT (self), callback,
+          user_data,
+          tp_account_channel_request_create_and_observe_channel_async);
+
+      tp_cli_channel_dispatcher_call_create_channel_with_hints (cd, -1,
+          tp_proxy_get_object_path (self->priv->account), self->priv->request,
+          self->priv->user_action_time,
+          preferred_handler == NULL ? "" : preferred_handler,
+          self->priv->hints,
+          acr_request_cb, self, NULL, G_OBJECT (self));
+    }
+
+  g_object_unref (cd);
+}
+
+/**
+ * tp_account_channel_request_create_and_observe_channel_async:
+ * @self: a #TpAccountChannelRequest
+ * @preferred_handler: Either the well-known bus name (starting with
+ * %TP_CLIENT_BUS_NAME_BASE) of the preferred handler for the channel,
+ * or %NULL to indicate that any handler would be acceptable.
+ * @cancellable: optional #GCancellable object, %NULL to ignore
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Asynchronously calls CreateChannel on the ChannelDispatcher to create a
+ * channel with the properties defined in #TpAccountChannelRequest:request
+ * and let the ChannelDispatcher dispatch it to an handler.
+ * @callback will be called when the channel has been created and dispatched,
+ * or the request has failed.
+ * You can then call tp_account_channel_request_create_channel_finish() to
+ * get the result of the operation and a #TpChannel representing the channel
+ * which has been created. Note that you are <emphasis>not</emphasis> handling
+ * this channel and so should interact with the channel as an Observer.
+ * See <ulink url="http://telepathy.freedesktop.org/doc/book/sect.channel-dispatcher.clients.html">
+ * the Telepathy book</ulink> for details about how clients should interact
+ * with channels.
+ *
+ * Since: 0.13.14
+ */
+void
+tp_account_channel_request_create_and_observe_channel_async (
+    TpAccountChannelRequest *self,
+    const gchar *preferred_handler,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  request_and_observe_channel_async (self, preferred_handler, cancellable,
+      callback, user_data, FALSE);
+}
+
+/**
+ * tp_account_channel_request_create_and_observe_channel_finish:
+ * @self: a #TpAccountChannelRequest
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes an async channel creation started using
+ * tp_account_channel_request_create_and_observe_channel_async().
+ *
+ * Returns: (transfer full): a newly created #TpChannel if the channel was
+ * successfully created and dispatched, otherwise %NULL.
+ *
+ * Since: 0.13.14
+ */
+TpChannel *
+tp_account_channel_request_create_and_observe_channel_finish (
+    TpAccountChannelRequest *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_return_copy_pointer (self,
+      tp_account_channel_request_create_and_observe_channel_async,
+      g_object_ref);
+}
+
+/**
+ * tp_account_channel_request_ensure_and_observe_channel_async:
+ * @self: a #TpAccountChannelRequest
+ * @preferred_handler: Either the well-known bus name (starting with
+ * %TP_CLIENT_BUS_NAME_BASE) of the preferred handler for the channel,
+ * or %NULL to indicate that any handler would be acceptable.
+ * @cancellable: optional #GCancellable object, %NULL to ignore
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Asynchronously calls EnsureChannel on the ChannelDispatcher to create a
+ * channel with the properties defined in #TpAccountChannelRequest:request
+ * and let the ChannelDispatcher dispatch it to an handler.
+ * @callback will be called when the channel has been created and dispatched,
+ * or the request has failed.
+ * You can then call tp_account_channel_request_create_channel_finish() to
+ * get the result of the operation and a #TpChannel representing the channel
+ * which has been created. Note that you are <emphasis>not</emphasis> handling
+ * this channel and so should interact with the channel as an Observer.
+ * See <ulink url="http://telepathy.freedesktop.org/doc/book/sect.channel-dispatcher.clients.html">
+ * the Telepathy book</ulink> for details about how clients should interact
+ * with channels.
+ *
+ * If a suitable channel already existed, its handler will be notified that
+ * the channel was requested again (for instance with
+ * #TpAccountChannelRequest::re-handled, #TpBaseClientClassHandleChannelsImpl
+ * or #TpSimpleHandler:callback, if it is implemented using Telepathy-GLib),
+ * so that it can re-present the window to the user, for example.
+ * Otherwise, a new channel will be created and dispatched to a handler.
+ *
+ * Since: 0.13.14
+ */
+void
+tp_account_channel_request_ensure_and_observe_channel_async (
+    TpAccountChannelRequest *self,
+    const gchar *preferred_handler,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  request_and_observe_channel_async (self, preferred_handler, cancellable,
+      callback, user_data, TRUE);
+}
+
+/**
+ * tp_account_channel_request_ensure_and_observe_channel_finish:
+ * @self: a #TpAccountChannelRequest
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes an async channel creation started using
+ * tp_account_channel_request_create_and_observe_channel_async().
+ *
+ * Returns: (transfer full): a newly created #TpChannel if the channel was
+ * successfully ensure and (re-)dispatched, otherwise %NULL.
+ *
+ * Since: 0.13.14
+ */
+TpChannel *
+tp_account_channel_request_ensure_and_observe_channel_finish (
+    TpAccountChannelRequest *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_return_copy_pointer (self,
+      tp_account_channel_request_ensure_and_observe_channel_async,
+      g_object_ref);
+}
+
+/**
+ * tp_account_channel_request_set_hints:
+ * @self: a #TpAccountChannelRequest
+ * @hints: a #TP_HASH_TYPE_STRING_VARIANT_MAP
+ *
+ * Set additional information about the channel request, which will be used
+ * as the value for the resulting request's #TpChannelRequest:hints property.
+ *
+ * This function can't be called once @self has been used to request a
+ * channel.
+ *
+ * Since: 0.13.14
+ */
+void
+tp_account_channel_request_set_hints (TpAccountChannelRequest *self,
+    GHashTable *hints)
+{
+  g_return_if_fail (!self->priv->requested);
+  g_return_if_fail (hints != NULL);
+
+  tp_clear_pointer (&self->priv->hints, g_hash_table_unref);
+  self->priv->hints = g_hash_table_ref (hints);
 }

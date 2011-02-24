@@ -48,8 +48,10 @@
 #include "telepathy-glib/observe-channels-context.h"
 
 #include <telepathy-glib/channel.h>
+#include <telepathy-glib/channel-request.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/gtypes.h>
+#include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
 #include "telepathy-glib/debug-internal.h"
@@ -667,4 +669,30 @@ _tp_observe_channels_context_prepare_finish (
           G_OBJECT (self), _tp_observe_channels_context_prepare_async), FALSE);
 
   return TRUE;
+}
+
+/**
+ * tp_observe_channels_context_get_requests:
+ * @self: a #TpObserveChannelsContext
+ *
+ * Return a list of the #TpChannelRequest which have been satisfied by the
+ * channels associated with #self.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.ChannelRequest):
+ *  a newly allocated #GList of reffed #TpChannelRequest.
+ *
+ * Since: 0.13.14
+ */
+GList *
+tp_observe_channels_context_get_requests (TpObserveChannelsContext *self)
+{
+  GHashTable *request_props;
+
+  request_props = tp_asv_get_boxed (self->observer_info, "request-properties",
+      TP_HASH_TYPE_OBJECT_IMMUTABLE_PROPERTIES_MAP);
+  if (request_props == NULL)
+    return NULL;
+
+  return _tp_create_channel_request_list (
+      tp_proxy_get_dbus_daemon (self->account), request_props);
 }

@@ -92,6 +92,11 @@
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *in_Property_Name</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> *in_Value</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-generic.html#tp-svc-dbus-properties-emit-properties-changed" title="tp_svc_dbus_properties_emit_properties_changed ()">tp_svc_dbus_properties_emit_properties_changed</a>
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> instance</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Interface_Name</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *arg_Changed_Properties</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **arg_Invalidated_Properties</code></em>);
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-svc-generic.html#tp-svc-properties-interface-get-properties-impl" title="tp_svc_properties_interface_get_properties_impl ()">*tp_svc_properties_interface_get_properties_impl</a>)
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-generic.html#TpSvcPropertiesInterface"><span class="type">TpSvcPropertiesInterface</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> *in_Properties</code></em>,
@@ -147,11 +152,12 @@
 <a name="telepathy-glib-svc-generic.implementations"></a><h2>Known Implementations</h2>
 <p>
 TpSvcDBusProperties is implemented by
- <a class="link" href="TpBaseChannel.html" title="TpBaseChannel">TpBaseChannel</a>,  <a class="link" href="telepathy-glib-base-client.html#TpBaseClient">TpBaseClient</a>,  <a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a>,  <a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager">TpBaseConnectionManager</a>,  <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol">TpBaseProtocol</a>,  <a class="link" href="telepathy-glib-debug-sender.html#TpDebugSender">TpDebugSender</a>,  <a class="link" href="telepathy-glib-simple-approver.html#TpSimpleApprover">TpSimpleApprover</a>,  <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler">TpSimpleHandler</a> and  <a class="link" href="telepathy-glib-simple-observer.html#TpSimpleObserver">TpSimpleObserver</a>.</p>
+ <a class="link" href="TpBaseChannel.html" title="TpBaseChannel">TpBaseChannel</a>,  <a class="link" href="telepathy-glib-base-client.html#TpBaseClient">TpBaseClient</a>,  <a class="link" href="TpBaseConnection.html" title="TpBaseConnection">TpBaseConnection</a>,  <a class="link" href="TpBaseConnectionManager.html" title="TpBaseConnectionManager">TpBaseConnectionManager</a>,  TpBasePasswordChannel,  <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol">TpBaseProtocol</a>,  <a class="link" href="telepathy-glib-debug-sender.html#TpDebugSender">TpDebugSender</a>,  <a class="link" href="telepathy-glib-simple-approver.html#TpSimpleApprover">TpSimpleApprover</a>,  <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler">TpSimpleHandler</a> and  <a class="link" href="telepathy-glib-simple-observer.html#TpSimpleObserver">TpSimpleObserver</a>.</p>
 </div>
 <div class="refsect1" title="Signals">
 <a name="telepathy-glib-svc-generic.signals"></a><h2>Signals</h2>
 <pre class="synopsis">
+  "<a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties-properties-changed" title='The "properties-changed" signal'>properties-changed</a>"                             : Run Last / Has Details
   "<a class="link" href="telepathy-glib-svc-generic.html#TpSvcPropertiesInterface-properties-changed" title='The "properties-changed" signal'>properties-changed</a>"                             : Run Last / Has Details
   "<a class="link" href="telepathy-glib-svc-generic.html#TpSvcPropertiesInterface-property-flags-changed" title='The "property-flags-changed" signal'>property-flags-changed</a>"                         : Run Last / Has Details
 </pre>
@@ -633,6 +639,44 @@ Set on interface org.freedesktop.DBus.Properties.
 </table></div>
 </div>
 <hr>
+<div class="refsect2" title="tp_svc_dbus_properties_emit_properties_changed ()">
+<a name="tp-svc-dbus-properties-emit-properties-changed"></a><h3>tp_svc_dbus_properties_emit_properties_changed ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_svc_dbus_properties_emit_properties_changed
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> instance</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Interface_Name</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *arg_Changed_Properties</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **arg_Invalidated_Properties</code></em>);</pre>
+<p>
+Type-safe wrapper around g_signal_emit to emit the
+PropertiesChanged signal on interface org.freedesktop.DBus.Properties.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>instance</code></em> :</span></p></td>
+<td>The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Interface_Name</code></em> :</span></p></td>
+<td>const gchar * (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Changed_Properties</code></em> :</span></p></td>
+<td>GHashTable * (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Invalidated_Properties</code></em> :</span></p></td>
+<td>const gchar ** (FIXME, generate documentation)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title="tp_svc_properties_interface_get_properties_impl ()">
 <a name="tp-svc-properties-interface-get-properties-impl"></a><h3>tp_svc_properties_interface_get_properties_impl ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                (*tp_svc_properties_interface_get_properties_impl)
@@ -928,6 +972,46 @@ PropertyFlagsChanged signal on interface org.freedesktop.Telepathy.Properties.
 </div>
 <div class="refsect1" title="Signal Details">
 <a name="telepathy-glib-svc-generic.signal-details"></a><h2>Signal Details</h2>
+<div class="refsect2" title='The "properties-changed" signal'>
+<a name="TpSvcDBusProperties-properties-changed"></a><h3>The <code class="literal">"properties-changed"</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="telepathy-glib-svc-generic.html#TpSvcDBusProperties"><span class="type">TpSvcDBusProperties</span></a> *self,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>               *arg_Interface_Name,
+                                                        <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>               *arg_Invalidated_Properties,
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)                       : Run Last / Has Details</pre>
+<p>
+The PropertiesChanged D-Bus signal is emitted whenever this GObject signal is.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>an object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Interface_Name</code></em> :</span></p></td>
+<td>const gchar * (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Changed_Properties</code></em> :</span></p></td>
+<td>GHashTable * (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Invalidated_Properties</code></em> :</span></p></td>
+<td>const gchar ** (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
 <div class="refsect2" title='The "properties-changed" signal'>
 <a name="TpSvcPropertiesInterface-properties-changed"></a><h3>The <code class="literal">"properties-changed"</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="telepathy-glib-svc-generic.html#TpSvcPropertiesInterface"><span class="type">TpSvcPropertiesInterface</span></a> *self,

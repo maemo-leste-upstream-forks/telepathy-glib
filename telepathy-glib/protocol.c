@@ -44,7 +44,6 @@
 #include "telepathy-glib/proxy-internal.h"
 
 #include "telepathy-glib/_gen/signals-marshal.h"
-#include "telepathy-glib/_gen/tp-cli-protocol.h"
 #include "telepathy-glib/_gen/tp-cli-protocol-body.h"
 
 #include <string.h>
@@ -630,7 +629,7 @@ tp_protocol_class_init (TpProtocolClass *klass)
    * The name of an icon in the system's icon theme. If none was supplied
    * by the Protocol, or the %TP_PROTOCOL_FEATURE_CORE feature has not been
    * prepared, a default is used; currently, this is "im-" plus
-   * #TpProtocol:name.
+   * #TpProtocol:protocol-name.
    *
    * Since: 0.11.11
    */
