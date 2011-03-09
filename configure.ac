@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [13])
-m4_define([tp_glib_micro_version], [15])
+m4_define([tp_glib_micro_version], [17])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision

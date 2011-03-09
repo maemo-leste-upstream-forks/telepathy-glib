@@ -1879,6 +1879,8 @@ tp_base_contact_list_set_list_received (TpBaseContactList *self)
 
       while (g_hash_table_iter_next (&h_iter, NULL, &channel))
         tp_base_contact_list_announce_channel (self, channel, NULL);
+
+      g_strfreev (groups);
     }
 
   tp_handle_set_destroy (contacts);
@@ -2579,8 +2581,9 @@ tp_base_contact_list_store_contacts_async (TpBaseContactList *self,
   if (mutable_iface->store_contacts_async == NULL)
     tp_simple_async_report_success_in_idle ((GObject *) self,
         callback, user_data, NULL);
-
-  mutable_iface->store_contacts_async (self, contacts, callback, user_data);
+  else
+    mutable_iface->store_contacts_async (self, contacts, callback,
+        user_data);
 }
 
 /**
@@ -3603,10 +3606,10 @@ tp_base_contact_list_group_renamed (TpBaseContactList *self,
     {
       tp_group_mixin_change_members (old_chan, "", NULL, set, NULL, NULL,
           self->priv->conn->self_handle, TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
+      tp_channel_manager_emit_channel_closed_for_object (self, old_chan);
+      _tp_base_contact_list_channel_close (old_chan);
     }
 
-  tp_channel_manager_emit_channel_closed_for_object (self, old_chan);
-  _tp_base_contact_list_channel_close (old_chan);
   g_hash_table_remove (self->priv->groups, GUINT_TO_POINTER (old_handle));
 
   /* get normalized forms */
