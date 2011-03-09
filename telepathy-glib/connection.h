@@ -126,6 +126,10 @@ TpConnection *tp_connection_new (TpDBusDaemon *dbus, const gchar *bus_name,
 TpConnectionStatus tp_connection_get_status (TpConnection *self,
     TpConnectionStatusReason *reason);
 
+const gchar *tp_connection_get_connection_manager_name (TpConnection *self);
+
+const gchar *tp_connection_get_protocol_name (TpConnection *self);
+
 TpHandle tp_connection_get_self_handle (TpConnection *self);
 TpContact *tp_connection_get_self_contact (TpConnection *self);
 
@@ -286,6 +290,8 @@ void tp_connection_get_contact_list_attributes (TpConnection *self,
     gint timeout_ms, const gchar * const *interfaces, gboolean hold,
     tp_cli_connection_interface_contacts_callback_for_get_contact_attributes callback,
     gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
+GBinding *tp_connection_bind_connection_status_to_property (TpConnection *self,
+    gpointer target, const char *target_property, gboolean invert);
 
 G_END_DECLS
 
