@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [13])
-m4_define([tp_glib_micro_version], [17])
+m4_define([tp_glib_minor_version], [14])
+m4_define([tp_glib_micro_version], [1])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -93,6 +93,22 @@ TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$official_release" = xno],
   [missing-field-initializers \
    unused-parameter])
 AC_SUBST([ERROR_CFLAGS])
+
+# these aren't really error flags but they serve a similar purpose for us -
+# making the toolchain stricter
+if test "x$official_release" = xno; then
+  TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-copy-dt-needed-entries])
+
+  # --no-copy-dt-needed-entries is the new name for --no-add-needed which
+  # is much more widely supported
+  case "$ERROR_LDFLAGS" in
+  (*-Wl,--no-copy-dt-needed-entries*)
+    ;;
+  (*)
+    TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-add-needed])
+    ;;
+  esac
+fi
 
 AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])
 
