@@ -68,7 +68,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/tp-compiler-flag.m4 \
 	$(top_srcdir)/m4/tp-compiler-warnings.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/tp-linker-flag.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -583,6 +583,10 @@ AM_CFLAGS = \
     -I$(top_builddir) \
     -I$(top_srcdir)
 
+AM_LDFLAGS = \
+    $(ERROR_LDFLAGS) \
+    $(NULL)
+
 ALL_LIBS = \
     @DBUS_LIBS@ \
     @GLIB_LIBS@
@@ -653,13 +657,14 @@ ABI_LISTS = \
     versions/0.13.14.abi \
     versions/0.13.15.abi \
     versions/0.13.16.abi \
+    versions/0.14.1.abi \
     $(NULL)
 
 
 # The quoting here is unnecessary but harmless, and has the useful side-effect
 # that vim quickfix mode (:make) doesn't interpret the libtool --mode=link
 # command as an error message in a bizarrely named file
-libtelepathy_glib_la_LDFLAGS = -version-info \
+libtelepathy_glib_la_LDFLAGS = $(AM_LDFLAGS) -version-info \
 	"$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)" $(am__append_3) \
 	$(am__append_4)
 libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
@@ -834,7 +839,6 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-connection.c $(srcdir)/stream-tube-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/text-channel.c $(srcdir)/text-channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/client-message.c $(srcdir)/client-message.h \
-@HAVE_INTROSPECTION_TRUE@	$(srcdir)/cm-message.c $(srcdir)/cm-message.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/message.c $(srcdir)/message.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/signalled-message.c $(srcdir)/signalled-message.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/errors.c $(srcdir)/errors.h \
