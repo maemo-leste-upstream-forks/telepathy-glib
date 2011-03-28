@@ -17,14 +17,11 @@ DEB_DH_STRIP_ARGS := --dbg-package=libtelepathy-glib0-dbg
 DEB_MAKE_CHECK_TARGET := check
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-Werror \
-	--enable-introspection \
+	--disable-introspection \
 	--enable-gtk-doc \
 	--with-html-dir=\$${prefix}/share/doc/libtelepathy-glib-doc
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
-
-$(patsubst %,binary-predeb/%,$(DEB_ALL_PACKAGES)) ::
-	dh_girepository -p$(cdbs_curpkg)
 
 # we symlink many of the doc directories together
 DEB_INSTALL_DOCS_ALL :=
@@ -32,11 +29,10 @@ DEB_INSTALL_DOCS_libtelepathy-glib0 := README NEWS AUTHORS
 DEB_INSTALL_DOCS_libtelepathy-glib-doc := README NEWS AUTHORS
 DEB_INSTALL_DOCS_libtelepathy-glib0-dbg := --link-doc=libtelepathy-glib0
 DEB_INSTALL_DOCS_libtelepathy-glib-dev := --link-doc=libtelepathy-glib0
-DEB_INSTALL_DOCS_gir1.0-telepathyglib-0.12 := --link-doc=libtelepathy-glib0
 
 debian/stamp-buildinfo: insist-on-symlinks
 insist-on-symlinks:
-	for p in libtelepathy-glib0-dbg libtelepathy-glib-dev gir1.0-telepathyglib-0.12; do \
+	for p in libtelepathy-glib0-dbg libtelepathy-glib-dev; do \
 		install -d debian/$$p/usr/share/doc || exit $$?; \
 		ln -s libtelepathy-glib0 debian/$$p/usr/share/doc/$$p || exit $$?; \
 	done
