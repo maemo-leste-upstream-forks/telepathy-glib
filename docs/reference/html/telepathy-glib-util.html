@@ -49,6 +49,8 @@
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GBoxedCopyFunc"><span class="type">GBoxedCopyFunc</span></a> value_dup</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-util.html#tp-g-ptr-array-contains" title="tp_g_ptr_array_contains ()">tp_g_ptr_array_contains</a>             (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *haystack</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> needle</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-util.html#tp-g-ptr-array-extend" title="tp_g_ptr_array_extend ()">tp_g_ptr_array_extend</a>               (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *target</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *source</code></em>);
 <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="returnvalue">GValue</span></a> *            <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new" title="tp_g_value_slice_new ()">tp_g_value_slice_new</a>                (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> type</code></em>);
 <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="returnvalue">GValue</span></a> *            <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-boolean" title="tp_g_value_slice_new_boolean ()">tp_g_value_slice_new_boolean</a>        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> b</code></em>);
 <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="returnvalue">GValue</span></a> *            <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-boxed" title="tp_g_value_slice_new_boxed ()">tp_g_value_slice_new_boxed</a>          (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GType"><span class="type">GType</span></a> type</code></em>,
@@ -299,6 +301,39 @@ principle they could also be used to convert between types.
 </tr>
 </tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_g_ptr_array_extend ()">
+<a name="tp-g-ptr-array-extend"></a><h3>tp_g_ptr_array_extend ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_g_ptr_array_extend               (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *target</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *source</code></em>);</pre>
+<p>
+Appends all elements of <em class="parameter"><code>source</code></em> to <em class="parameter"><code>target</code></em>. Note that this only copies the
+pointers from <em class="parameter"><code>source</code></em>; any duplication or reference-incrementing must be
+performed by the caller.
+</p>
+<p>
+After this function has been called, it is safe to call
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#g-ptr-array-free"><code class="function">g_ptr_array_free()</code></a> on <em class="parameter"><code>source</code></em> and also free the actual pointer array,
+as long as doing so does not free the data pointed to by the new
+items in <em class="parameter"><code>target</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>target</code></em> :</span></p></td>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> to copy items to
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>source</code></em> :</span></p></td>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> to copy items from
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.14.3</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_g_value_slice_new ()">
@@ -1161,7 +1196,7 @@ their type.
 <p>
 </p>
 <div class="example">
-<a name="id1308589"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
+<a name="id1198382"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
 <div class="example-contents">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
@@ -1227,7 +1262,7 @@ invalid when <em class="parameter"><code>array</code></em> is freed.
 <p>
 </p>
 <div class="example">
-<a name="id1308768"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
+<a name="id1198561"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
 <div class="example-contents">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
