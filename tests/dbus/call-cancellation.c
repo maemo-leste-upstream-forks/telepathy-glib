@@ -27,9 +27,9 @@ static TpDBusDaemon *i;
 static TpDBusDaemon *j;
 static TpDBusDaemon *k;
 static TpDBusDaemon *z;
-static TpIntSet *method_ok;
-static TpIntSet *method_error;
-static TpIntSet *freed_user_data;
+static TpIntset *method_ok;
+static TpIntset *method_error;
+static TpIntset *freed_user_data;
 static gpointer copy_of_d;
 static gpointer copy_of_g;
 static gpointer copy_of_h;
@@ -173,6 +173,7 @@ main (int argc,
   gpointer tmp_obj;
 
   g_type_init ();
+  tp_tests_abort_after (10);
   tp_debug_set_flags ("all");
 
   freed_user_data = tp_intset_sized_new (N_DAEMONS);

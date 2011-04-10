@@ -79,7 +79,7 @@ gboolean tp_handle_is_valid (TpHandleRepoIface *self,
 gboolean tp_handles_are_valid (TpHandleRepoIface *self,
     const GArray *handles, gboolean allow_zero, GError **error);
 
-void tp_handle_ref (TpHandleRepoIface *self, TpHandle handle);
+TpHandle tp_handle_ref (TpHandleRepoIface *self, TpHandle handle);
 void tp_handles_ref (TpHandleRepoIface *self, const GArray *handles);
 void tp_handle_unref (TpHandleRepoIface *self, TpHandle handle);
 void tp_handles_unref (TpHandleRepoIface *self, const GArray *handles);
@@ -115,10 +115,15 @@ TpHandleSet * tp_handle_set_new (TpHandleRepoIface *repo)
   G_GNUC_WARN_UNUSED_RESULT;
 TpHandleSet *tp_handle_set_copy (const TpHandleSet *other)
   G_GNUC_WARN_UNUSED_RESULT;
+TpHandleSet *tp_handle_set_new_from_intset (TpHandleRepoIface *repo,
+    const TpIntset *intset);
+TpHandleSet *tp_handle_set_new_containing (TpHandleRepoIface *repo,
+    TpHandle handle);
+
 void tp_handle_set_clear (TpHandleSet *set);
 void tp_handle_set_destroy (TpHandleSet *set);
 
-TpIntSet *tp_handle_set_peek (TpHandleSet *set) G_GNUC_WARN_UNUSED_RESULT;
+TpIntset *tp_handle_set_peek (TpHandleSet *set) G_GNUC_WARN_UNUSED_RESULT;
 
 void tp_handle_set_add (TpHandleSet *set, TpHandle handle);
 gboolean tp_handle_set_remove (TpHandleSet *set, TpHandle handle);
@@ -134,10 +139,12 @@ GArray *tp_handle_set_to_array (const TpHandleSet *set)
 TpHandleSet *tp_handle_set_new_from_array (TpHandleRepoIface *repo,
     const GArray *array) G_GNUC_WARN_UNUSED_RESULT;
 
-TpIntSet *tp_handle_set_update (TpHandleSet *set, const TpIntSet *add)
+TpIntset *tp_handle_set_update (TpHandleSet *set, const TpIntset *add)
   G_GNUC_WARN_UNUSED_RESULT;
-TpIntSet *tp_handle_set_difference_update (TpHandleSet *set,
-    const TpIntSet *remove) G_GNUC_WARN_UNUSED_RESULT;
+TpIntset *tp_handle_set_difference_update (TpHandleSet *set,
+    const TpIntset *remove) G_GNUC_WARN_UNUSED_RESULT;
+
+gchar *tp_handle_set_dump (const TpHandleSet *self) G_GNUC_WARN_UNUSED_RESULT;
 
 /* static inline because it relies on NUM_TP_HANDLE_TYPES */
 /**

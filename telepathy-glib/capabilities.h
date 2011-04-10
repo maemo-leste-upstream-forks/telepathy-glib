@@ -22,6 +22,8 @@
 
 #include <glib-object.h>
 
+#include <telepathy-glib/enums.h>
+
 G_BEGIN_DECLS
 
 typedef struct _TpCapabilities TpCapabilities;
@@ -52,6 +54,21 @@ gboolean tp_capabilities_is_specific_to_contact (TpCapabilities *self);
 
 gboolean tp_capabilities_supports_text_chats (TpCapabilities *self);
 gboolean tp_capabilities_supports_text_chatrooms (TpCapabilities *self);
+
+gboolean tp_capabilities_supports_stream_tubes (TpCapabilities *self,
+    TpHandleType handle_type,
+    const gchar *service);
+
+gboolean tp_capabilities_supports_dbus_tubes (TpCapabilities *self,
+    TpHandleType handle_type,
+    const gchar *service_name);
+
+gboolean tp_capabilities_supports_contact_search (TpCapabilities *self,
+    gboolean *with_limit,
+    gboolean *with_server);
+
+gboolean tp_capabilities_supports_room_list (TpCapabilities *self,
+    gboolean *with_server);
 
 G_END_DECLS
 

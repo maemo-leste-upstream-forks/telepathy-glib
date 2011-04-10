@@ -1,6 +1,6 @@
 /* Object representing the capabilities a Connection or a Contact supports.
  *
- * Copyright (C) 2010 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright (C) 2010-2011 Collabora Ltd. <http://www.collabora.co.uk/>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ struct _TpCapabilities {
     TpCapabilitiesPrivate *priv;
 };
 
-G_DEFINE_TYPE (TpCapabilities, tp_capabilities, G_TYPE_OBJECT);
+G_DEFINE_TYPE (TpCapabilities, tp_capabilities, G_TYPE_OBJECT)
 
 enum {
     PROP_CHANNEL_CLASSES = 1,
@@ -104,7 +104,7 @@ tp_capabilities_get_channel_classes (TpCapabilities *self)
 gboolean
 tp_capabilities_is_specific_to_contact (TpCapabilities *self)
 {
-  g_return_val_if_fail (self != NULL, FALSE);
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
 
   return self->priv->contact_specific;
 }
@@ -275,6 +275,8 @@ supports_simple_channel (TpCapabilities *self,
 {
   guint i;
 
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
+
   for (i = 0; i < self->priv->classes->len; i++)
     {
       GValueArray *arr = g_ptr_array_index (self->priv->classes, i);
@@ -354,4 +356,282 @@ tp_capabilities_supports_text_chatrooms (TpCapabilities *self)
 {
   return supports_simple_channel (self, TP_IFACE_CHANNEL_TYPE_TEXT,
       TP_HANDLE_TYPE_ROOM);
+}
+
+static gboolean
+tp_capabilities_supports_tubes_common (TpCapabilities *self,
+    const gchar *expected_channel_type,
+    TpHandleType expected_handle_type,
+    const gchar *service_prop,
+    const gchar *expected_service)
+{
+  guint i;
+
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
+  g_return_val_if_fail (expected_handle_type == TP_HANDLE_TYPE_CONTACT ||
+      expected_handle_type == TP_HANDLE_TYPE_ROOM, FALSE);
+
+  for (i = 0; i < self->priv->classes->len; i++)
+    {
+      GValueArray *arr = g_ptr_array_index (self->priv->classes, i);
+      GHashTable *fixed;
+      const gchar *chan_type;
+      TpHandleType handle_type;
+      gboolean valid;
+      const gchar *service;
+
+      fixed =  g_value_get_boxed (g_value_array_get_nth (arr, 0));
+
+      chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
+
+      if (tp_strdiff (chan_type, expected_channel_type))
+        continue;
+
+      handle_type = tp_asv_get_uint32 (fixed,
+          TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, &valid);
+
+      if (!valid)
+        continue;
+
+      if (handle_type != expected_handle_type)
+        continue;
+
+      if (expected_service == NULL || !self->priv->contact_specific)
+        /* No need to check the service */
+        return TRUE;
+
+      service = tp_asv_get_string (fixed, service_prop);
+
+      if (tp_strdiff (service, expected_service))
+        continue;
+
+      /* We found the right service */
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+/**
+ * tp_capabilities_supports_stream_tubes:
+ * @self: a #TpCapabilities object
+ * @handle_type: the handle type of the tube (either #TP_HANDLE_TYPE_CONTACT
+ * or #TP_HANDLE_TYPE_ROOM)
+ * @service: the service of the tube, or %NULL
+ *
+ * If the #TpCapabilities:contact-specific property is %TRUE, this function
+ * checks if the contact associated with this #TpCapabilities supports
+ * stream tubes with @handle_type as TargetHandleType.
+ * If @service is not %NULL, it also checks if it supports stream tubes
+ * with @service as #TP_PROP_CHANNEL_TYPE_STREAM_TUBE_SERVICE.
+ *
+ * If the #TpCapabilities:contact-specific property is %FALSE, this function
+ * checks if the connection supports requesting stream tube channels with
+ * @handle_type as ChannelType. The @service argument is unused in this case.
+ *
+ * Returns: %TRUE if the contact or connection supports this type of stream
+ * tubes.
+ *
+ * Since: 0.13.0
+ */
+gboolean
+tp_capabilities_supports_stream_tubes (TpCapabilities *self,
+    TpHandleType handle_type,
+    const gchar *service)
+{
+  return tp_capabilities_supports_tubes_common (self,
+      TP_IFACE_CHANNEL_TYPE_STREAM_TUBE, handle_type,
+      TP_PROP_CHANNEL_TYPE_STREAM_TUBE_SERVICE, service);
+}
+
+/**
+ * tp_capabilities_supports_dbus_tubes:
+ * @self: a #TpCapabilities object
+ * @handle_type: the handle type of the tube (either #TP_HANDLE_TYPE_CONTACT
+ * or #TP_HANDLE_TYPE_ROOM)
+ * @service_name: the service name of the tube, or %NULL
+ *
+ * If the #TpCapabilities:contact-specific property is %TRUE, this function
+ * checks if the contact associated with this #TpCapabilities supports
+ * D-Bus tubes with @handle_type as TargetHandleType.
+ * If @service_name is not %NULL, it also checks if it supports stream tubes
+ * with @service as #TP_PROP_CHANNEL_TYPE_DBUS_TUBE_SERVICE_NAME.
+ *
+ * If the #TpCapabilities:contact-specific property is %FALSE, this function
+ * checks if the connection supports requesting D-Bus tube channels with
+ * @handle_type as ChannelType. The @service_name argument is unused in
+ * this case.
+ *
+ * Returns: %TRUE if the contact or connection supports this type of D-Bus
+ * tubes.
+ *
+ * Since: 0.13.0
+ */
+gboolean
+tp_capabilities_supports_dbus_tubes (TpCapabilities *self,
+    TpHandleType handle_type,
+    const gchar *service_name)
+{
+  return tp_capabilities_supports_tubes_common (self,
+      TP_IFACE_CHANNEL_TYPE_DBUS_TUBE, handle_type,
+      TP_PROP_CHANNEL_TYPE_DBUS_TUBE_SERVICE_NAME, service_name);
+}
+
+/**
+ * tp_capabilities_supports_contact_search:
+ * @self: a #TpCapabilities object
+ * @with_limit: (out): if not %NULL, used to return %TRUE if the limit
+ * parameter to tp_contact_search_new_async() and
+ * tp_contact_search_reset_async() can be nonzero
+ * @with_server: (out): if not %NULL, used to return %TRUE if the server
+ * parameter to tp_contact_search_new_async() and
+ * tp_contact_search_reset_async() can be non-%NULL
+ *
+ * Return whether this protocol or connection can perform contact
+ * searches. Optionally, also return whether a limited number of
+ * results can be specified, and whether alternative servers can be
+ * searched.
+ *
+ * Returns: %TRUE if #TpContactSearch can be used.
+ *
+ * Since: 0.13.11
+ */
+gboolean
+tp_capabilities_supports_contact_search (TpCapabilities *self,
+    gboolean *with_limit,
+    gboolean *with_server)
+{
+  gboolean ret = FALSE;
+  guint i, j;
+
+  g_return_val_if_fail (TP_IS_CAPABILITIES (self), FALSE);
+
+  if (with_limit)
+    *with_limit = FALSE;
+
+  if (with_server)
+    *with_server = FALSE;
+
+  for (i = 0; i < self->priv->classes->len; i++)
+    {
+      GValueArray *arr = g_ptr_array_index (self->priv->classes, i);
+      GHashTable *fixed;
+      const gchar *chan_type;
+      const gchar **allowed_properties;
+
+      tp_value_array_unpack (arr, 2, &fixed, &allowed_properties);
+
+      if (g_hash_table_size (fixed) != 1)
+        continue;
+
+      chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
+
+      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_CONTACT_SEARCH))
+        continue;
+
+      ret = TRUE;
+
+      for (j = 0; allowed_properties[j] != NULL; j++)
+        {
+          if (with_limit)
+            {
+              if (!tp_strdiff (allowed_properties[j],
+                       TP_PROP_CHANNEL_TYPE_CONTACT_SEARCH_LIMIT))
+                *with_limit = TRUE;
+            }
+
+          if (with_server)
+            {
+              if (!tp_strdiff (allowed_properties[j],
+                       TP_PROP_CHANNEL_TYPE_CONTACT_SEARCH_SERVER))
+                *with_server = TRUE;
+            }
+        }
+    }
+
+  return ret;
+}
+
+/**
+ * tp_capabilities_supports_room_list:
+ * @self: a #TpCapabilities object
+ * @with_server: (out): if not %NULL, used to return %TRUE if the
+ * #TP_PROP_CHANNEL_TYPE_ROOM_LIST_SERVER property can be defined when
+ * requesting a RoomList channel.
+ *
+ * Discovers whether this protocol or connection supports listing rooms.
+ * Specifically, if this function returns %TRUE, a room list channel can be
+ * requested as follows:
+ * |[
+ * GHashTable *request;
+ * TpAccountChannelRequest *req;
+ *
+ * request = tp_asv_new (
+ *     TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+ *       TP_IFACE_CHANNEL_TYPE_ROOM_LIST,
+ *     TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_NONE,
+ *     NULL);
+ *
+ * req = tp_account_channel_request_new (account, request,
+ *    TP_USER_ACTION_TIME_CURRENT_TIME);
+ *
+ * tp_account_channel_request_create_and_handle_channel_async (req, NULL,
+ *     create_channel_cb, NULL);
+ *
+ * g_object_unref (req);
+ * g_hash_table_unref (request);
+ * ]|
+ *
+ * If @with_server is set to %TRUE, a list of rooms on a particular server can
+ * be requested as follows:
+ * |[
+ * /\* Same code as above but with request defined using: *\/
+ * request = tp_asv_new (
+ *     TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+ *       TP_IFACE_CHANNEL_TYPE_ROOM_LIST,
+ *     TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_NONE,
+ *     TP_PROP_CHANNEL_TYPE_ROOM_LIST_SERVER, G_TYPE_STRING,
+ *       "characters.shakespeare.lit",
+ *     NULL);
+ * ]|
+ *
+ * Returns: %TRUE if a channel request containing RoomList as ChannelType,
+ * HandleTypeNone as TargetHandleType can be expected to work,
+ * %FALSE otherwise.
+ *
+ * Since: 0.13.14
+ */
+gboolean
+tp_capabilities_supports_room_list (TpCapabilities *self,
+    gboolean *with_server)
+{
+  gboolean result = FALSE;
+  gboolean server = FALSE;
+  guint i;
+
+  for (i = 0; i < self->priv->classes->len; i++)
+    {
+      GValueArray *arr = g_ptr_array_index (self->priv->classes, i);
+      GHashTable *fixed;
+      const gchar *chan_type;
+      const gchar **allowed_properties;
+
+      tp_value_array_unpack (arr, 2, &fixed, &allowed_properties);
+
+      chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
+
+      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_ROOM_LIST))
+        continue;
+
+      result = TRUE;
+
+      server = tp_strv_contains (allowed_properties,
+          TP_PROP_CHANNEL_TYPE_ROOM_LIST_SERVER);
+      break;
+    }
+
+  if (with_server != NULL)
+    *with_server = server;
+
+  return result;
 }

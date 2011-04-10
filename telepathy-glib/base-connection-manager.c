@@ -93,7 +93,7 @@ GType _tp_legacy_protocol_get_type (void) G_GNUC_CONST;
 
 G_DEFINE_TYPE(_TpLegacyProtocol,
     _tp_legacy_protocol,
-    TP_TYPE_BASE_PROTOCOL);
+    TP_TYPE_BASE_PROTOCOL)
 
 static const TpCMParamSpec *
 _tp_legacy_protocol_get_parameters (TpBaseProtocol *protocol)
@@ -104,7 +104,7 @@ _tp_legacy_protocol_get_parameters (TpBaseProtocol *protocol)
 }
 
 static gboolean parse_parameters (const TpCMParamSpec *paramspec,
-    GHashTable *provided, TpIntSet *params_present,
+    GHashTable *provided, TpIntset *params_present,
     const TpCMParamSetter set_param, void *params, GError **error);
 
 static TpBaseConnection *
@@ -117,7 +117,7 @@ _tp_legacy_protocol_new_connection (TpBaseProtocol *protocol,
   TpBaseConnectionManagerClass *cls;
   TpBaseConnection *conn = NULL;
   void *params = NULL;
-  TpIntSet *params_present = NULL;
+  TpIntset *params_present = NULL;
   TpCMParamSetter set_param;
 
   if (self->cm == NULL)
@@ -571,16 +571,24 @@ connection_shutdown_finished_cb (TpBaseConnection *conn,
   TpBaseConnectionManager *self = TP_BASE_CONNECTION_MANAGER (data);
   TpBaseConnectionManagerPrivate *priv = self->priv;
 
+  /* temporary ref, because disconnecting this signal handler might release
+   * the last ref */
+  g_object_ref (self);
+
   g_assert (g_hash_table_lookup (priv->connections, conn));
   g_hash_table_remove (priv->connections, conn);
-
-  g_object_unref (conn);
 
   DEBUG ("dereferenced connection");
   if (g_hash_table_size (priv->connections) == 0)
     {
       g_signal_emit (self, signals[NO_MORE_CONNECTIONS], 0);
     }
+
+  g_signal_handlers_disconnect_by_func (conn,
+      connection_shutdown_finished_cb, data);
+
+  g_object_unref (conn);
+  g_object_unref (self);
 }
 
 /* Parameter parsing */
@@ -814,7 +822,7 @@ set_param_from_value (const TpCMParamSpec *paramspec,
 static gboolean
 parse_parameters (const TpCMParamSpec *paramspec,
                   GHashTable *provided,
-                  TpIntSet *params_present,
+                  TpIntset *params_present,
                   const TpCMParamSetter set_param,
                   void *params,
                   GError **error)
@@ -990,9 +998,9 @@ tp_base_connection_manager_request_connection (TpSvcConnectionManager *iface,
     }
 
   /* bind to status change signals from the connection object */
-  g_signal_connect (conn, "shutdown-finished",
-                    G_CALLBACK (connection_shutdown_finished_cb),
-                    self);
+  g_signal_connect_data (conn, "shutdown-finished",
+      G_CALLBACK (connection_shutdown_finished_cb),
+      g_object_ref (self), (GClosureNotify) g_object_unref, 0);
 
   /* store the connection, using a hash table as a set */
   g_hash_table_insert (priv->connections, conn, GINT_TO_POINTER(TRUE));
@@ -1045,8 +1053,11 @@ tp_base_connection_manager_register (TpBaseConnectionManager *self)
     {
       for (i = 0; cls->protocol_params[i].name != NULL; i++)
         {
-          tp_base_connection_manager_add_protocol (self,
-              _tp_legacy_protocol_new (self, cls->protocol_params + i));
+          TpBaseProtocol *p = _tp_legacy_protocol_new (self,
+              cls->protocol_params + i);
+
+          tp_base_connection_manager_add_protocol (self, p);
+          g_object_unref (p);
         }
     }
 

@@ -24,13 +24,13 @@
  * @short_description: a subclass of #TpBaseClient implementing
  * a simple Handler
  *
- * This class makes it easier to write #TpSvcClient implementing the
- * TpSvcClientHandler interface.
+ * This class makes it easier to construct a #TpSvcClient implementing the
+ * #TpSvcClientHandler interface.
  *
  * A typical simple handler would look liks this:
  * |[
  * static void
- * my_handle_channels (TpSimpleHandler *self,
+ * my_handle_channels (TpSimpleHandler *handler,
  *    TpAccount *account,
  *    TpConnection *connection,
  *    GList *channels,
@@ -79,7 +79,7 @@
 
 /**
  * TpSimpleHandlerHandleChannelsImpl:
- * @self: a #TpSimpleHandler instance
+ * @handler: a #TpSimpleHandler instance
  * @account: a #TpAccount having %TP_ACCOUNT_FEATURE_CORE prepared if possible
  * @connection: a #TpConnection having %TP_CONNECTION_FEATURE_CORE prepared
  * if possible
@@ -88,8 +88,10 @@
  * @requests_satisfied: (element-type TelepathyGLib.ChannelRequest): a #GList of
  * #TpChannelRequest having their object-path defined but are not guaranteed
  * to be prepared.
- * @user_action_time: the time at which user action occurred, or 0 if this
- * channel is to be handled for some reason not involving user action.
+ * @user_action_time: the time at which user action occurred, or one of the
+ *  special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or
+ *  %TP_USER_ACTION_TIME_CURRENT_TIME
+ *  (see #TpAccountChannelRequest:user-action-time for details)
  * @context: a #TpHandleChannelsContext representing the context of this
  *  D-Bus call
  * @user_data: arbitrary user-supplied data passed to tp_simple_handler_new()
@@ -262,7 +264,7 @@ tp_simple_handler_class_init (TpSimpleHandlerClass *cls)
   /**
    * TpSimpleHandler:callback:
    *
-   * The TpSimpleHandlerHandleChannelsImpl callback implementing the
+   * The #TpSimpleHandlerHandleChannelsImpl callback implementing the
    * HandleChannels D-Bus method.
    *
    * This property can't be %NULL.
@@ -279,8 +281,7 @@ tp_simple_handler_class_init (TpSimpleHandlerClass *cls)
   /**
    * TpSimpleHandler:user-data:
    *
-   * The user-data pointer passed to the callback implementing the
-   * HandleChannels D-Bus method.
+   * The user-data pointer passed to #TpSimpleHandler:callback.
    *
    * Since: 0.11.6
    */
@@ -293,8 +294,8 @@ tp_simple_handler_class_init (TpSimpleHandlerClass *cls)
   /**
    * TpSimpleHandler:destroy:
    *
-   * The #GDestroyNotify function called to free the user-data pointer when
-   * the #TpSimpleHandler is destroyed.
+   * The #GDestroyNotify function called to free #TpSimpleHandler:user-data
+   * when the #TpSimpleHandler is destroyed.
    *
    * Since: 0.11.6
    */
@@ -304,7 +305,7 @@ tp_simple_handler_class_init (TpSimpleHandlerClass *cls)
   g_object_class_install_property (object_class, PROP_DESTROY,
       param_spec);
 
-  tp_base_client_implement_handle_channels (base_clt_cls, handle_channels);
+  base_clt_cls->handle_channels = handle_channels;
 }
 
 /**
@@ -312,16 +313,20 @@ tp_simple_handler_class_init (TpSimpleHandlerClass *cls)
  * @dbus: a #TpDBusDaemon object, may not be %NULL
  * @bypass_approval: the value of the Handler.BypassApproval D-Bus property
  * (see tp_base_client_set_handler_bypass_approval() for details)
- * @requests: if this handler implement Requests (see
+ * @requests: whether this handler should implement Requests (see
  * tp_base_client_set_handler_request_notification() for details)
- * @name: the name of the Handler (see #TpBaseClient:name: for details)
- * @unique: the value of the TpBaseClient:uniquify-name: property
+ * @name: the name of the Handler (see #TpBaseClient:name for details)
+ * @uniquify: the value of the #TpBaseClient:uniquify-name property
  * @callback: the function called when HandleChannels is called
  * @user_data: arbitrary user-supplied data passed to @callback
- * @destroy: called with the user_data as argument, when the #TpSimpleHandler
+ * @destroy: called with @user_data as its argument when the #TpSimpleHandler
  * is destroyed
  *
  * Convenient function to create a new #TpSimpleHandler instance.
+ *
+ * If @dbus is not the result of tp_dbus_daemon_dup(), you should call
+ * tp_simple_handler_new_with_am() instead, so that #TpAccount,
+ * #TpConnection and #TpContact instances can be shared between modules.
  *
  * Returns: (type TelepathyGLib.SimpleHandler): a new #TpSimpleHandler
  *
@@ -332,7 +337,7 @@ tp_simple_handler_new (TpDBusDaemon *dbus,
     gboolean bypass_approval,
     gboolean requests,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
     TpSimpleHandlerHandleChannelsImpl callback,
     gpointer user_data,
     GDestroyNotify destroy)
@@ -342,7 +347,53 @@ tp_simple_handler_new (TpDBusDaemon *dbus,
       "bypass-approval", bypass_approval,
       "requests", requests,
       "name", name,
-      "uniquify-name", unique,
+      "uniquify-name", uniquify,
+      "callback", callback,
+      "user-data", user_data,
+      "destroy", destroy,
+      NULL);
+}
+
+/**
+ * tp_simple_handler_new_with_am:
+ * @account_manager: an account manager, which may not be %NULL
+ * @bypass_approval: the value of the Handler.BypassApproval D-Bus property
+ * (see tp_base_client_set_handler_bypass_approval() for details)
+ * @requests: whether this handler should implement Requests (see
+ * tp_base_client_set_handler_request_notification() for details)
+ * @name: the name of the Handler (see #TpBaseClient:name for details)
+ * @uniquify: the value of the #TpBaseClient:uniquify-name property
+ * @callback: the function called when HandleChannels is called
+ * @user_data: arbitrary user-supplied data passed to @callback
+ * @destroy: called with @user_data as its argument when the #TpSimpleHandler
+ * is destroyed
+ *
+ * Convenient function to create a new #TpSimpleHandler instance with a
+ * specified #TpAccountManager.
+ *
+ * It is not necessary to prepare any features on @account_manager before
+ * calling this function.
+ *
+ * Returns: (type TelepathyGLib.SimpleHandler): a new #TpSimpleHandler
+ *
+ * Since: 0.11.14
+ */
+TpBaseClient *
+tp_simple_handler_new_with_am (TpAccountManager *account_manager,
+    gboolean bypass_approval,
+    gboolean requests,
+    const gchar *name,
+    gboolean uniquify,
+    TpSimpleHandlerHandleChannelsImpl callback,
+    gpointer user_data,
+    GDestroyNotify destroy)
+{
+  return g_object_new (TP_TYPE_SIMPLE_HANDLER,
+      "account-manager", account_manager,
+      "bypass-approval", bypass_approval,
+      "requests", requests,
+      "name", name,
+      "uniquify-name", uniquify,
       "callback", callback,
       "user-data", user_data,
       "destroy", destroy,

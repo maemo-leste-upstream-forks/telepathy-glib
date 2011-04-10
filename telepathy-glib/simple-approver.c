@@ -24,13 +24,15 @@
  * @short_description: a subclass of #TpBaseClient implementing
  * a simple Approver
  *
- * This class makes it easier to write #TpSvcClient implementing the
- * TpSvcClientApprover interface.
+ * This class makes it easier to construct a #TpSvcClient implementing the
+ * #TpSvcClientApprover interface.
  *
  * A typical simple approver would look liks this:
  * |[
  * static void
- * my_add_dispatch_operation (TpSimpleApprover *self,
+ * my_add_dispatch_operation (TpSimpleApprover *approver,
+ *    TpAccount *account,
+ *    TpConnection *connection,
  *    GList *channels,
  *    TpChannelDispatchOperation *dispatch_operation,
  *    TpAddDispatchOperationContext *context,
@@ -74,7 +76,7 @@
 
 /**
  * TpSimpleApproverAddDispatchOperationImpl:
- * @self: a #TpSimpleApprover instance
+ * @approver: a #TpSimpleApprover instance
  * @account: a #TpAccount having %TP_ACCOUNT_FEATURE_CORE prepared if possible
  * @connection: a #TpConnection having %TP_CONNECTION_FEATURE_CORE prepared
  * if possible
@@ -212,8 +214,8 @@ tp_simple_approver_class_init (TpSimpleApproverClass *cls)
   /**
    * TpSimpleApprover:callback:
    *
-   * The TpSimpleApproverAddDispatchOperationImpl callback implementing the
-   * ApproverChannels D-Bus method.
+   * The #TpSimpleApproverAddDispatchOperationImpl callback implementing the
+   * AddDispatchOperation D-Bus method.
    *
    * This property can't be %NULL.
    *
@@ -229,8 +231,7 @@ tp_simple_approver_class_init (TpSimpleApproverClass *cls)
   /**
    * TpSimpleApprover:user-data:
    *
-   * The user-data pointer passed to the callback implementing the
-   * ApproverChannels D-Bus method.
+   * The user-data pointer passed to #TpSimpleApprover:callback.
    *
    * Since: 0.11.5
    */
@@ -243,8 +244,8 @@ tp_simple_approver_class_init (TpSimpleApproverClass *cls)
   /**
    * TpSimpleApprover:destroy:
    *
-   * The #GDestroyNotify function called to free the user-data pointer when
-   * the #TpSimpleApprover is destroyed.
+   * The #GDestroyNotify function called to free #TpSimpleApprover:user-data
+   * when the #TpSimpleApprover is destroyed.
    *
    * Since: 0.11.5
    */
@@ -254,21 +255,24 @@ tp_simple_approver_class_init (TpSimpleApproverClass *cls)
   g_object_class_install_property (object_class, PROP_DESTROY,
       param_spec);
 
-  tp_base_client_implement_add_dispatch_operation (base_clt_cls,
-      add_dispatch_operation);
+  base_clt_cls->add_dispatch_operation = add_dispatch_operation;
 }
 
 /**
  * tp_simple_approver_new:
  * @dbus: a #TpDBusDaemon object, may not be %NULL
- * @name: the name of the Approver (see #TpBaseClient:name: for details)
- * @unique: the value of the TpBaseClient:uniquify-name: property
- * @callback: the function called when ApproverChannels is called
+ * @name: the name of the Approver (see #TpBaseClient:name for details)
+ * @uniquify: the value of the #TpBaseClient:uniquify-name property
+ * @callback: the function called when AddDispatchOperation is called
  * @user_data: arbitrary user-supplied data passed to @callback
- * @destroy: called with the user_data as argument, when the #TpSimpleApprover
+ * @destroy: called with @user_data as its argument when the #TpSimpleApprover
  * is destroyed
  *
  * Convenient function to create a new #TpSimpleApprover instance.
+ *
+ * If @dbus is not the result of tp_dbus_daemon_dup(), you should call
+ * tp_simple_approver_new_with_am() instead, so that #TpAccount,
+ * #TpConnection and #TpContact instances can be shared between modules.
  *
  * Returns: (type TelepathyGLib.SimpleApprover): a new #TpSimpleApprover
  *
@@ -277,7 +281,7 @@ tp_simple_approver_class_init (TpSimpleApproverClass *cls)
 TpBaseClient *
 tp_simple_approver_new (TpDBusDaemon *dbus,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
     TpSimpleApproverAddDispatchOperationImpl callback,
     gpointer user_data,
     GDestroyNotify destroy)
@@ -285,7 +289,45 @@ tp_simple_approver_new (TpDBusDaemon *dbus,
   return g_object_new (TP_TYPE_SIMPLE_APPROVER,
       "dbus-daemon", dbus,
       "name", name,
-      "uniquify-name", unique,
+      "uniquify-name", uniquify,
+      "callback", callback,
+      "user-data", user_data,
+      "destroy", destroy,
+      NULL);
+}
+
+/**
+ * tp_simple_approver_new_with_am:
+ * @account_manager: an account manager, which may not be %NULL
+ * @name: the name of the Approver (see #TpBaseClient:name for details)
+ * @uniquify: the value of the #TpBaseClient:uniquify-name property
+ * @callback: the function called when AddDispatchOperation is called
+ * @user_data: arbitrary user-supplied data passed to @callback
+ * @destroy: called with @user_data as its argument when the #TpSimpleApprover
+ * is destroyed
+ *
+ * Convenient function to create a new #TpSimpleApprover instance with a
+ * specified #TpAccountManager.
+ *
+ * It is not necessary to prepare any features on @account_manager before
+ * calling this function.
+ *
+ * Returns: (type TelepathyGLib.SimpleApprover): a new #TpSimpleApprover
+ *
+ * Since: 0.11.14
+ */
+TpBaseClient *
+tp_simple_approver_new_with_am (TpAccountManager *account_manager,
+    const gchar *name,
+    gboolean uniquify,
+    TpSimpleApproverAddDispatchOperationImpl callback,
+    gpointer user_data,
+    GDestroyNotify destroy)
+{
+  return g_object_new (TP_TYPE_SIMPLE_APPROVER,
+      "account-manager", account_manager,
+      "name", name,
+      "uniquify-name", uniquify,
       "callback", callback,
       "user-data", user_data,
       "destroy", destroy,

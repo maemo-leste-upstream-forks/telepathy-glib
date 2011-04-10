@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [11])
-m4_define([tp_glib_micro_version], [11])
+m4_define([tp_glib_minor_version], [14])
+m4_define([tp_glib_micro_version], [3])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [40])
+m4_define([tp_glib_lt_current], [54])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [40])
+m4_define([tp_glib_lt_age], [54])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -42,10 +42,10 @@ AC_INIT([Telepathy-GLib], [tp_glib_version],
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.9 -Wno-portability])
+AM_INIT_AUTOMAKE([1.11 -Wno-portability])
 AM_CONFIG_HEADER(config.h)
 
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+AM_SILENT_RULES
 
 dnl check for tools
 AC_PROG_CC
@@ -57,8 +57,9 @@ AM_PROG_MKDIR_P
 # pkg-config 0.21 adds CFLAGS from Requires.private, which we need
 PKG_PROG_PKG_CONFIG([0.21])
 
-GOBJECT_INTROSPECTION_CHECK([0.6.14])
 GTK_DOC_CHECK([1.15])
+
+GOBJECT_INTROSPECTION_CHECK([0.9.6])
 
 LT_CURRENT=tp_glib_lt_current
 LT_REVISION=tp_glib_lt_revision
@@ -93,11 +94,38 @@ TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$official_release" = xno],
    unused-parameter])
 AC_SUBST([ERROR_CFLAGS])
 
+# these aren't really error flags but they serve a similar purpose for us -
+# making the toolchain stricter
+if test "x$official_release" = xno; then
+  TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-copy-dt-needed-entries])
+
+  # --no-copy-dt-needed-entries is the new name for --no-add-needed which
+  # is much more widely supported
+  case "$ERROR_LDFLAGS" in
+  (*-Wl,--no-copy-dt-needed-entries*)
+    ;;
+  (*)
+    TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-add-needed])
+    ;;
+  esac
+fi
+
 AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])
 
 AC_ARG_ENABLE(debug,
   AC_HELP_STRING([--disable-debug],[compile without debug code (note that this will disable much of the debug code in all GLib connection managers)]),
     enable_debug=$enableval, enable_debug=yes )
+
+AC_ARG_ENABLE(debug-cache,
+  AS_HELP_STRING([--enable-debug-cache],
+                 [compile with code to unconditionally cache all debug messages whether or not they are actually emitted]),
+                 [enable_debug_cache=$enableval],
+                 [enable_debug_cache=yes])
+
+if test x"$enable_debug_cache" != xno
+then
+  AC_DEFINE([ENABLE_DEBUG_CACHE], [1], [Define to enable debug message cache])
+fi
 
 AC_ARG_ENABLE(handle-leak-debug,
   AC_HELP_STRING([--enable-handle-leak-debug],[compile with handle leak debugging code (the CM should be built with -rdynamic)]),
@@ -136,16 +164,10 @@ if test x$enable_debug = xyes; then
   AC_DEFINE(ENABLE_DEBUG, [], [Enable debug code])
 fi
 
-if test x$enable_handle_leak_debug = xyes; then
-  AC_DEFINE(ENABLE_HANDLE_LEAK_DEBUG, [], [Enable handle leak debug code])
-  HANDLE_LEAK_DEBUG_CFLAGS="-rdynamic"
-fi
-
 if test x$enable_backtrace = xyes; then
   AC_DEFINE(ENABLE_BACKTRACE, [], [Enable backtrace output on crashes])
 fi
 
-AC_SUBST(HANDLE_LEAK_DEBUG_CFLAGS)
 AC_SUBST(COVERAGE_CFLAGS)
 
 AC_ARG_ENABLE([installed-examples],
@@ -161,7 +183,7 @@ AM_CONDITIONAL([OUT_OF_TREE_BUILD], [test "z$ac_srcdir" != z.])
 
 dnl Check for Glib
 PKG_CHECK_MODULES(GLIB,
-  [glib-2.0 >= 2.24, gobject-2.0 >= 2.24, gio-2.0 >= 2.24])
+  [glib-2.0 >= 2.25.16, gobject-2.0 >= 2.25.16, gio-2.0 >= 2.25.16])
 
 dnl Check for GIO-Unix
 PKG_CHECK_MODULES(GIO_UNIX, [gio-unix-2.0],
@@ -196,21 +218,21 @@ AC_ARG_ENABLE(vala-bindings,
                   enable_vala_bindings=no )
 
 if test x$enable_vala_bindings = xyes; then
-  PKG_CHECK_MODULES(VALA,
-                    [vala-1.0 >= 0.9.2.97-2b08])
+  if test "x$INTROSPECTION_SCANNER" = x; then
+    AC_MSG_ERROR([GObject-Introspection must be enabled for Vala bindings])
+  fi
+
+  AM_PROG_VALAC([0.10.0])
   have_vala=yes
 
   AC_PATH_PROG(VALAC, valac, valac)
   AC_SUBST(VALAC)
   AC_SUBST(VALAFLAGS)
 
-  AC_MSG_CHECKING([for vapigen])
-  VAPIGEN=`$PKG_CONFIG --variable=vapigen vala-1.0`
+  AC_PATH_PROG([VAPIGEN], [vapigen], [false])
 
-  if test "x$VAPIGEN" = "x"; then
-    AC_MSG_ERROR([not found. Was vala compiled with --enable-vapigen?])
-  else
-    AC_MSG_RESULT([$VAPIGEN])
+  if test "x$VAPIGEN" = "xfalse"; then
+    AC_MSG_ERROR([vapigen not found. Was vala compiled with --enable-vapigen?])
   fi
 
   AC_SUBST(VAPIGEN)
@@ -275,11 +297,12 @@ AC_OUTPUT( Makefile \
 	   docs/reference/Makefile \
 	   examples/Makefile \
 	   examples/client/Makefile \
+	   examples/client/python/Makefile \
+	   examples/client/stream-tubes/Makefile \
 	   examples/cm/Makefile \
 	   examples/cm/callable/Makefile \
 	   examples/cm/channelspecific/Makefile \
 	   examples/cm/contactlist/Makefile \
-	   examples/cm/echo/Makefile \
 	   examples/cm/echo-message-parts/Makefile \
 	   examples/cm/extended/Makefile \
 	   examples/cm/no-protocols/Makefile \
@@ -297,7 +320,5 @@ AC_OUTPUT( Makefile \
 	   tests/tools/Makefile \
 	   tools/Makefile \
 	   m4/Makefile \
-	   vala/Makefile \
-	   vala/telepathy-vala.pc \
-	   vala/telepathy-vala-uninstalled.pc
+	   vala/Makefile
 )

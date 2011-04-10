@@ -69,14 +69,21 @@ GType tp_account_get_type (void);
 
 #define TP_ACCOUNT_FEATURE_CORE \
   tp_account_get_feature_quark_core ()
+#define TP_ACCOUNT_FEATURE_STORAGE \
+  tp_account_get_feature_quark_storage ()
+#define TP_ACCOUNT_FEATURE_ADDRESSING \
+  tp_account_get_feature_quark_addressing ()
 
 GQuark tp_account_get_feature_quark_core (void) G_GNUC_CONST;
+GQuark tp_account_get_feature_quark_storage (void) G_GNUC_CONST;
+GQuark tp_account_get_feature_quark_addressing (void) G_GNUC_CONST;
 
 TpAccount *tp_account_new (TpDBusDaemon *bus_daemon, const gchar *object_path,
     GError **error) G_GNUC_WARN_UNUSED_RESULT;
 
 gboolean tp_account_parse_object_path (const gchar *object_path,
     gchar **cm, gchar **protocol, gchar **account_id, GError **error);
+const gchar *tp_account_get_path_suffix (TpAccount *account);
 
 void tp_account_init_known_interfaces (void);
 
@@ -93,6 +100,8 @@ const gchar *tp_account_get_protocol (TpAccount *account);
 const gchar *tp_account_get_service (TpAccount *self);
 
 const gchar *tp_account_get_icon_name (TpAccount *account);
+
+const gchar *tp_account_get_normalized_name (TpAccount *self);
 
 void tp_account_set_enabled_async (TpAccount *account,
     gboolean enabled, GAsyncReadyCallback callback, gpointer user_data);
@@ -151,6 +160,13 @@ void tp_account_request_presence_async (TpAccount *account,
 gboolean tp_account_request_presence_finish (TpAccount *account,
     GAsyncResult *result, GError **error);
 
+void tp_account_set_automatic_presence_async (TpAccount *account,
+    TpConnectionPresenceType type, const gchar *status, const gchar *message,
+    GAsyncReadyCallback callback, gpointer user_data);
+
+gboolean tp_account_set_automatic_presence_finish (TpAccount *account,
+    GAsyncResult *result, GError **error);
+
 gboolean tp_account_get_connect_automatically (TpAccount *account);
 
 void tp_account_set_connect_automatically_async (TpAccount *account,
@@ -173,6 +189,9 @@ TpConnectionPresenceType tp_account_get_current_presence (TpAccount *account,
 
 TpConnectionPresenceType tp_account_get_requested_presence (
     TpAccount *account, gchar **status, gchar **status_message);
+
+TpConnectionPresenceType tp_account_get_automatic_presence (
+    TpAccount *self, gchar **status, gchar **status_message);
 
 const GHashTable *tp_account_get_parameters (TpAccount *account);
 
@@ -210,6 +229,28 @@ gboolean tp_account_set_avatar_finish (TpAccount *self,
     GError **error);
 
 gboolean tp_account_get_changing_presence (TpAccount *self);
+
+const gchar *tp_account_get_storage_provider (TpAccount *self);
+const GValue *tp_account_get_storage_identifier (TpAccount *self);
+TpStorageRestrictionFlags tp_account_get_storage_restrictions (TpAccount *self);
+void tp_account_get_storage_specific_information_async (TpAccount *self,
+    GAsyncReadyCallback callback, gpointer user_data);
+GHashTable *tp_account_get_storage_specific_information_finish (TpAccount *self,
+    GAsyncResult *result, GError **error);
+
+const gchar * const *
+/* ugh, gtk-doc */
+tp_account_get_uri_schemes (TpAccount *self);
+gboolean tp_account_associated_with_uri_scheme (TpAccount *self,
+    const gchar *scheme);
+void tp_account_set_uri_scheme_association_async (TpAccount *self,
+    const gchar *scheme, gboolean associate,
+    GAsyncReadyCallback callback, gpointer user_data);
+gboolean tp_account_set_uri_scheme_association_finish (TpAccount *self,
+    GAsyncResult *result, GError **error);
+
+GBinding *tp_account_bind_connection_status_to_property (TpAccount *self,
+    gpointer target, const char *target_property, gboolean invert);
 
 G_END_DECLS
 

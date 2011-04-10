@@ -42,6 +42,7 @@
 #include "telepathy-glib/dbus-internal.h"
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/proxy-internal.h"
+#include "telepathy-glib/util-internal.h"
 
 #include "_gen/tp-cli-connection-body.h"
 
@@ -124,6 +125,7 @@ tp_connection_get_feature_quark_core (void)
  *  <listitem>#TpConnection:status is
  *    %TP_CONNECTION_STATUS_CONNECTED</listitem>
  *  <listitem>#TpConnection:self-handle is valid and non-zero</listitem>
+ *  <listitem>#TpConnection:self-contact is non-%NULL</listitem>
  *  <listitem>all interfaces have been added to the set of
  *    #TpProxy:interfaces, and that set will not change again</listitem>
  * </itemizedlist>
@@ -229,11 +231,15 @@ tp_errors_disconnected_quark (void)
  * Since: 0.7.1
  */
 
+/* properties */
 enum
 {
   PROP_STATUS = 1,
   PROP_STATUS_REASON,
+  PROP_CONNECTION_MANAGER_NAME,
+  PROP_PROTOCOL_NAME,
   PROP_CONNECTION_READY,
+  PROP_SELF_CONTACT,
   PROP_SELF_HANDLE,
   PROP_CAPABILITIES,
   N_PROPS
@@ -241,7 +247,7 @@ enum
 
 G_DEFINE_TYPE (TpConnection,
     tp_connection,
-    TP_TYPE_PROXY);
+    TP_TYPE_PROXY)
 
 static void
 tp_connection_get_property (GObject *object,
@@ -253,6 +259,12 @@ tp_connection_get_property (GObject *object,
 
   switch (property_id)
     {
+    case PROP_CONNECTION_MANAGER_NAME:
+      g_value_set_string (value, self->priv->cm_name);
+      break;
+    case PROP_PROTOCOL_NAME:
+      g_value_set_string (value, self->priv->proto_name);
+      break;
     case PROP_CONNECTION_READY:
       g_value_set_boolean (value, self->priv->ready);
       break;
@@ -262,8 +274,11 @@ tp_connection_get_property (GObject *object,
     case PROP_STATUS_REASON:
       g_value_set_uint (value, self->priv->status_reason);
       break;
+    case PROP_SELF_CONTACT:
+      g_value_set_object (value, tp_connection_get_self_contact (self));
+      break;
     case PROP_SELF_HANDLE:
-      g_value_set_uint (value, self->priv->self_handle);
+      g_value_set_uint (value, tp_connection_get_self_handle (self));
       break;
     case PROP_CAPABILITIES:
       g_value_set_object (value, self->priv->capabilities);
@@ -483,13 +498,78 @@ introspect_contacts (TpConnection *self)
 }
 
 static void
-_tp_connection_set_self_handle (TpConnection *self,
-                 guint self_handle)
+tp_connection_set_self_contact (TpConnection *self,
+    TpContact *contact)
 {
-  if (self_handle != self->priv->self_handle)
+  if (contact != self->priv->self_contact)
     {
-      self->priv->self_handle = self_handle;
+      TpContact *tmp = self->priv->self_contact;
+
+      self->priv->self_contact = g_object_ref (contact);
+      tp_clear_object (&tmp);
+      g_object_notify ((GObject *) self, "self-contact");
       g_object_notify ((GObject *) self, "self-handle");
+    }
+
+  if (self->priv->introspecting_self_contact)
+    {
+      self->priv->introspecting_self_contact = FALSE;
+      tp_connection_continue_introspection (self);
+    }
+}
+
+static void
+tp_connection_got_self_contact_cb (TpConnection *self,
+    guint n_contacts,
+    TpContact * const *contacts,
+    guint n_failed,
+    const TpHandle *failed,
+    const GError *error,
+    gpointer unused_data G_GNUC_UNUSED,
+    GObject *unused_object G_GNUC_UNUSED)
+{
+  if (n_contacts != 0)
+    {
+      g_assert (n_contacts == 1);
+      g_assert (n_failed == 0);
+      g_assert (error == NULL);
+
+      if (tp_contact_get_handle (contacts[0]) ==
+          self->priv->last_known_self_handle)
+        {
+          tp_connection_set_self_contact (self, contacts[0]);
+        }
+      else
+        {
+          DEBUG ("SelfHandle is now %u, ignoring contact object for %u",
+              self->priv->last_known_self_handle,
+              tp_contact_get_handle (contacts[0]));
+        }
+    }
+  else if (error != NULL)
+    {
+      /* Unrecoverable error: we were probably invalidated, but in case
+       * we weren't... */
+      DEBUG ("Failed to hold the handle from GetSelfHandle(): %s",
+          error->message);
+      tp_proxy_invalidate ((TpProxy *) self, error);
+    }
+  else if (n_failed == 1 && failed[0] != self->priv->last_known_self_handle)
+    {
+      /* Since we tried to make the TpContact, our self-handle has changed,
+       * so it doesn't matter that we couldn't make a TpContact for the old
+       * one - carry on and make a TpContact for the new one instead. */
+      DEBUG ("Failed to hold handle %u from GetSelfHandle(), but it's "
+          "changed to %u anyway, so never mind", failed[0],
+          self->priv->last_known_self_handle);
+    }
+  else
+    {
+      GError e = { TP_DBUS_ERRORS, TP_DBUS_ERROR_INCONSISTENT,
+          "The handle from GetSelfHandle() was considered invalid" };
+
+      DEBUG ("%s", e.message);
+      tp_proxy_invalidate ((TpProxy *) self, &e);
     }
 }
 
@@ -506,12 +586,25 @@ got_self_handle (TpConnection *self,
   if (error != NULL)
     {
       DEBUG ("%p: GetSelfHandle() failed: %s", self, error->message);
-      self_handle = 0;
-      /* FIXME: abort the readying process */
+      tp_proxy_invalidate ((TpProxy *) self, error);
+      return;
     }
 
-  _tp_connection_set_self_handle (self, self_handle);
-  tp_connection_continue_introspection (self);
+  if (self_handle == 0)
+    {
+      GError e = { TP_DBUS_ERRORS, TP_DBUS_ERROR_INCONSISTENT,
+          "GetSelfHandle() returned 0" };
+      DEBUG ("%s", e.message);
+      tp_proxy_invalidate ((TpProxy *) self, &e);
+      return;
+    }
+
+  self->priv->last_known_self_handle = self_handle;
+  self->priv->introspecting_self_contact = TRUE;
+  /* This relies on the special case in tp_connection_get_contacts_by_handle()
+   * which makes it start working slightly early. */
+  tp_connection_get_contacts_by_handle (self, 1, &self_handle, 0, NULL,
+      tp_connection_got_self_contact_cb, NULL, NULL, NULL);
 }
 
 static void
@@ -520,7 +613,16 @@ on_self_handle_changed (TpConnection *self,
                         gpointer user_data G_GNUC_UNUSED,
                         GObject *user_object G_GNUC_UNUSED)
 {
-  _tp_connection_set_self_handle (self, self_handle);
+  if (self_handle == 0)
+    {
+      DEBUG ("Ignoring alleged change of self-handle to %u", self_handle);
+      return;
+    }
+
+  DEBUG ("SelfHandleChanged to %u, I wonder what that means?", self_handle);
+  self->priv->last_known_self_handle = self_handle;
+  tp_connection_get_contacts_by_handle (self, 1, &self_handle, 0, NULL,
+      tp_connection_got_self_contact_cb, NULL, NULL, NULL);
 }
 
 static void
@@ -874,9 +976,28 @@ tp_connection_invalidated (TpConnection *self)
       tp_proxy_pending_call_cancel (self->priv->introspection_call);
       self->priv->introspection_call = NULL;
     }
+}
 
-  _tp_connection_set_self_handle (self, 0);
-  _tp_connection_clean_up_handle_refs (self);
+static void
+_tp_connection_got_properties (TpProxy *proxy,
+    GHashTable *asv,
+    const GError *error,
+    gpointer unused G_GNUC_UNUSED,
+    GObject *unused_object G_GNUC_UNUSED)
+{
+  TpConnection *self = TP_CONNECTION (proxy);
+
+  if (error == NULL)
+    {
+      /* FIXME: fd.o #27459: use more of the properties, as a fast-path */
+
+      if (tp_asv_get_boolean (asv, "HasImmortalHandles", NULL))
+        self->priv->has_immortal_handles = TRUE;
+    }
+  else
+    {
+      DEBUG ("GetAll failed, will use 0.18 API instead: %s", error->message);
+    }
 }
 
 static GObject *
@@ -897,13 +1018,18 @@ tp_connection_constructor (GType type,
   tp_cli_connection_connect_to_connection_error (self,
       tp_connection_connection_error_cb, NULL, NULL, NULL, NULL);
 
+  tp_connection_parse_object_path (self, &(self->priv->proto_name),
+          &(self->priv->cm_name));
+
+  /* get the properties, currently only for HasImmortalHandles */
+  tp_cli_dbus_properties_call_get_all (self, -1,
+      TP_IFACE_CONNECTION, _tp_connection_got_properties, NULL, NULL, NULL);
+
   /* get my initial status */
   DEBUG ("Calling GetStatus");
   g_assert (self->priv->introspection_call == NULL);
   self->priv->introspection_call = tp_cli_connection_call_get_status (self, -1,
       tp_connection_got_status_cb, NULL, NULL, NULL);
-
-  _tp_connection_init_handle_refs (self);
 
   g_signal_connect (self, "invalidated",
       G_CALLBACK (tp_connection_invalidated), NULL);
@@ -924,6 +1050,7 @@ tp_connection_init (TpConnection *self)
   self->priv->status_reason = TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED;
   self->priv->contacts = g_hash_table_new (g_direct_hash, g_direct_equal);
   self->priv->introspection_call = NULL;
+  self->priv->interests = tp_intset_new ();
 }
 
 static void
@@ -999,6 +1126,36 @@ tp_connection_dispose (GObject *object)
   tp_clear_object (&self->priv->capabilities);
   tp_clear_pointer (&self->priv->avatar_requirements,
       tp_avatar_requirements_destroy);
+
+  if (self->priv->interests != NULL)
+    {
+      TpIntSetIter iter = TP_INTSET_ITER_INIT (self->priv->interests);
+      guint size = tp_intset_size (self->priv->interests);
+      GPtrArray *strings;
+
+      /* Before freeing the set of tokens in which we declared an
+       * interest, cancel those interests. We'll still get the signals
+       * if there's another interested TpConnection in this process,
+       * because the CM uses distributed refcounting. */
+      if (size > 0)
+        {
+          strings = g_ptr_array_sized_new (size + 1);
+
+          while (tp_intset_iter_next (&iter))
+            g_ptr_array_add (strings,
+                (gchar *) g_quark_to_string (iter.element));
+
+          g_ptr_array_add (strings, NULL);
+
+          /* no callback - if the CM replies, we'll ignore it anyway */
+          tp_cli_connection_call_remove_client_interest (self, -1,
+              (const gchar **) strings->pdata, NULL, NULL, NULL, NULL);
+          g_ptr_array_unref (strings);
+        }
+
+      tp_intset_destroy (self->priv->interests);
+      self->priv->interests = NULL;
+    }
 
   ((GObjectClass *) tp_connection_parent_class)->dispose (object);
 }
@@ -1087,10 +1244,46 @@ tp_connection_class_init (TpConnectionClass *klass)
       param_spec);
 
   /**
+   * TpConnection:connection-manager-name:
+   *
+   * This connection's connection manager name.
+   *
+   * Since: 0.13.16
+   *
+   */
+  g_object_class_install_property (object_class, PROP_CONNECTION_MANAGER_NAME,
+      g_param_spec_string ("connection-manager-name",
+          "Connection manager name",
+          "The connection's connection manager name",
+          NULL,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpConnection:protocol-name:
+   *
+   * The connection's machine-readable protocol name, such as "jabber",
+   * "msn" or "local-xmpp". Recommended names for most protocols can be
+   * found in the Telepathy D-Bus Interface Specification.
+   *
+   * Since: 0.13.16
+   *
+   */
+  g_object_class_install_property (object_class, PROP_PROTOCOL_NAME,
+      g_param_spec_string ("protocol-name",
+          "Protocol name",
+          "The connection's protocol name",
+          NULL,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
    * TpConnection:self-handle:
    *
    * The %TP_HANDLE_TYPE_CONTACT handle of the local user on this connection,
    * or 0 if we don't know yet or if the connection has become invalid.
+   *
+   * This may change if the local user's unique identifier changes (for
+   * instance by using /nick on IRC), in which case #GObject::notify will be
+   * emitted.
    *
    * To wait for a valid self-handle (and other properties), call
    * tp_proxy_prepare_async() with the feature
@@ -1101,6 +1294,28 @@ tp_connection_class_init (TpConnectionClass *klass)
       0,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_SELF_HANDLE,
+      param_spec);
+
+  /**
+   * TpConnection:self-contact:
+   *
+   * A #TpContact representing the local user on this connection,
+   * or %NULL if not yet available.
+   *
+   * If the local user's unique identifier changes (for instance by using
+   * /nick on IRC), this property will change to a different #TpContact object
+   * representing the new identifier, and #GObject::notify will be emitted.
+   *
+   * To wait for a non-%NULL self-contact (and other properties), call
+   * tp_proxy_prepare_async() with the feature
+   * %TP_CONNECTION_FEATURE_CONNECTED.
+   *
+   * Since: 0.13.9
+   */
+  param_spec = g_param_spec_object ("self-contact", "Self contact",
+      "The local user's Contact object on this connection", TP_TYPE_CONTACT,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_SELF_CONTACT,
       param_spec);
 
   /**
@@ -1261,7 +1476,11 @@ TpHandle
 tp_connection_get_self_handle (TpConnection *self)
 {
   g_return_val_if_fail (TP_IS_CONNECTION (self), 0);
-  return self->priv->self_handle;
+
+  if (self->priv->self_contact == NULL)
+    return 0;
+
+  return tp_contact_get_handle (self->priv->self_contact);
 }
 
 /**
@@ -1287,6 +1506,44 @@ tp_connection_get_status (TpConnection *self,
     *reason = self->priv->status_reason;
 
   return self->priv->status;
+}
+
+/**
+* tp_connection_get_connection_manager_name:
+* @self: a #TpConnection
+*
+* <!-- -->
+*
+* Returns: the same as the #TpConnection:connection-manager-name property
+*
+* Since: 0.13.16
+*
+*/
+const gchar *
+tp_connection_get_connection_manager_name (TpConnection *self)
+{
+    g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+    return self->priv->cm_name;
+}
+
+/**
+* tp_connection_get_protocol_name:
+* @self: a #TpConnection
+*
+* <!-- -->
+*
+* Returns: the same as the #TpConnection:protocol-name property
+*
+* Since: 0.13.16
+*
+*/
+const gchar *
+tp_connection_get_protocol_name (TpConnection *self)
+{
+    g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+    return self->priv->proto_name;
 }
 
 /**
@@ -1888,6 +2145,8 @@ tp_connection_parse_object_path (TpConnection *self,
   return _tp_connection_parse (object_path, '/', protocol, cm_name);
 }
 
+/* Can return a contact that's not meant to be visible to library users
+ * because it lacks an identifier */
 TpContact *
 _tp_connection_lookup_contact (TpConnection *self,
                                TpHandle handle)
@@ -2048,4 +2307,142 @@ tp_connection_get_detailed_error (TpConnection *self,
           return TP_ERROR_STR_DISCONNECTED;
         }
     }
+}
+
+/**
+ * tp_connection_add_client_interest:
+ * @self: a connection
+ * @interested_in: a string identifying an interface or part of an interface
+ *  to which this connection will subscribe
+ *
+ * Subscribe to any opt-in change notifications for @interested_in.
+ *
+ * For contact information, use #TpContact instead, which will call this
+ * automatically.
+ *
+ * Since: 0.11.3
+ */
+void
+tp_connection_add_client_interest (TpConnection *self,
+    const gchar *interested_in)
+{
+  tp_connection_add_client_interest_by_id (self,
+      g_quark_from_string (interested_in));
+}
+
+/**
+ * tp_connection_add_client_interest_by_id: (skip)
+ * @self: a connection
+ * @interested_in: a quark identifying an interface or part of an interface
+ *  to which this connection will subscribe
+ *
+ * Subscribe to any opt-in change notifications for @interested_in.
+ *
+ * Equivalent to, but a little more efficient than, calling
+ * tp_connection_add_client_interest() for the string value of @interested_in.
+ *
+ * Since: 0.11.3
+ */
+void
+tp_connection_add_client_interest_by_id (TpConnection *self,
+    GQuark interested_in)
+{
+  TpProxy *proxy = (TpProxy *) self;
+  const gchar *interest = g_quark_to_string (interested_in);
+  const gchar *strv[2] = { interest, NULL };
+
+  g_return_if_fail (TP_IS_CONNECTION (self));
+  g_return_if_fail (interest != NULL);
+
+  if (proxy->invalidated != NULL ||
+      tp_intset_is_member (self->priv->interests, interested_in))
+    return;
+
+  tp_intset_add (self->priv->interests, interested_in);
+
+  /* no-reply flag set, and we ignore any reply */
+  tp_cli_connection_call_add_client_interest (self, -1,
+      strv, NULL, NULL, NULL, NULL);
+}
+
+/**
+ * tp_connection_has_immortal_handles:
+ * @self: a connection
+ *
+ * Return %TRUE if this connection is known to not destroy handles
+ * (#TpHandle) until it disconnects.
+ *
+ * On such connections, if you know that a handle maps to a particular
+ * identifier now, then you can rely on that handle mapping to that
+ * identifier for the whole lifetime of the connection.
+ *
+ * Returns: %TRUE if handles last as long as the connection itself
+ */
+gboolean
+tp_connection_has_immortal_handles (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), FALSE);
+
+  return self->priv->has_immortal_handles;
+}
+
+/**
+ * tp_connection_get_self_contact:
+ * @self: a connection
+ *
+ * Return a #TpContact representing the local user on this connection.
+ *
+ * The returned object is not necessarily valid after the main loop is
+ * re-entered; ref it with g_object_ref() if you want to keep it.
+ *
+ * Returns: (transfer none): the value of the TpConnection:self-contact
+ *  property, which may be %NULL
+ *
+ * Since: 0.13.9
+ */
+TpContact *
+tp_connection_get_self_contact (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+  return self->priv->self_contact;
+}
+
+/**
+ * tp_connection_bind_connection_status_to_property:
+ * @self: a #TpConnection
+ * @target: the target #GObject
+ * @target_property: the property on @target to bind (must be %G_TYPE_BOOLEAN)
+ * @invert: %TRUE if you wish to invert the value of @target_property
+ *   (i.e. %FALSE if connected)
+ *
+ * Binds the :status of @self to the boolean property of another
+ * object using a #GBinding such that the @target_property will be set to
+ * %TRUE when @self is connected (and @invert is %FALSE).
+ *
+ * @target_property will be synchronised immediately (%G_BINDING_SYNC_CREATE).
+ * @invert can be interpreted as analogous to %G_BINDING_INVERT_BOOLEAN.
+ *
+ * For instance, this function can be used to bind the GtkWidget:sensitive
+ * property to only make a widget sensitive when the account is connected.
+ *
+ * See g_object_bind_property() for more information.
+ *
+ * Returns: (transfer none): the #GBinding instance representing the binding
+ *   between the @self and the @target. The binding is released whenever the
+ *   #GBinding reference count reaches zero.
+ * Since: 0.13.16
+ */
+GBinding *
+tp_connection_bind_connection_status_to_property (TpConnection *self,
+    gpointer target,
+    const char *target_property,
+    gboolean invert)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+  return g_object_bind_property_full (self, "status",
+      target, target_property,
+      G_BINDING_SYNC_CREATE,
+      _tp_bind_connection_status_to_boolean,
+      NULL, GUINT_TO_POINTER (invert), NULL);
 }

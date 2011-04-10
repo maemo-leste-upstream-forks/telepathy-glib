@@ -69,6 +69,8 @@ setup (Test *test,
   test->error = NULL;
   test->interfaces = NULL;
 
+  /* The case of a non-shared TpAccountManager is tested in
+   * simple-approver.c */
   test->account_mgr = tp_account_manager_dup ();
   g_assert (test->account_mgr != NULL);
 
@@ -180,9 +182,34 @@ setup (Test *test,
 }
 
 static void
+teardown_channel_invalidated_cb (TpChannel *self,
+  guint domain,
+  gint code,
+  gchar *message,
+  Test *test)
+{
+  g_main_loop_quit (test->mainloop);
+}
+
+static void
+teardown_run_close_channel (Test *test, TpChannel *channel)
+{
+  if (channel != NULL && tp_proxy_get_invalidated (channel) == NULL)
+    {
+      g_signal_connect (channel, "invalidated",
+          G_CALLBACK (teardown_channel_invalidated_cb), test);
+      tp_cli_channel_call_close (channel, -1, NULL, NULL, NULL, NULL);
+      g_main_loop_run (test->mainloop);
+    }
+}
+
+static void
 teardown (Test *test,
           gconstpointer data)
 {
+  teardown_run_close_channel (test, test->text_chan);
+  teardown_run_close_channel (test, test->text_chan_2);
+
   g_clear_error (&test->error);
 
   g_strfreev (test->interfaces);
@@ -232,20 +259,30 @@ static void
 test_basics (Test *test,
     gconstpointer data G_GNUC_UNUSED)
 {
+  TpAccountManager *account_manager;
   TpDBusDaemon *dbus;
   gchar *name;
   gboolean unique;
 
   g_object_get (test->base_client,
+      "account-manager", &account_manager,
       "dbus-daemon", &dbus,
       "name", &name,
       "uniquify-name", &unique,
       NULL);
 
+  g_assert (test->account_mgr == account_manager);
   g_assert (test->dbus == dbus);
   g_assert_cmpstr ("Test", ==, name);
   g_assert (!unique);
 
+  g_assert (test->account_mgr == tp_base_client_get_account_manager (
+        test->base_client));
+  g_assert (test->dbus == tp_base_client_get_dbus_daemon (test->base_client));
+  g_assert_cmpstr ("Test", ==, tp_base_client_get_name (test->base_client));
+  g_assert (!tp_base_client_get_uniquify_name (test->base_client));
+
+  g_object_unref (account_manager);
   g_object_unref (dbus);
   g_free (name);
 }
@@ -359,7 +396,7 @@ get_observer_prop_cb (TpProxy *proxy,
 {
   Test *test = user_data;
   GPtrArray *filters;
-  gboolean recover;
+  gboolean recover, delay;
   gboolean valid;
 
   if (error != NULL)
@@ -368,7 +405,7 @@ get_observer_prop_cb (TpProxy *proxy,
       goto out;
     }
 
-  g_assert_cmpint (g_hash_table_size (properties), == , 2);
+  g_assert_cmpint (g_hash_table_size (properties), == , 3);
 
   filters = tp_asv_get_boxed (properties, "ObserverChannelFilter",
       TP_ARRAY_TYPE_CHANNEL_CLASS_LIST);
@@ -377,6 +414,10 @@ get_observer_prop_cb (TpProxy *proxy,
   recover = tp_asv_get_boolean (properties, "Recover", &valid);
   g_assert (valid);
   g_assert (recover);
+
+  delay = tp_asv_get_boolean (properties, "DelayApprovers", &valid);
+  g_assert (valid);
+  g_assert (delay);
 
 out:
   g_main_loop_quit (test->mainloop);
@@ -453,6 +494,7 @@ test_observer (Test *test,
         NULL));
 
   tp_base_client_set_observer_recover (test->base_client, TRUE);
+  tp_base_client_set_observer_delay_approvers (test->base_client, TRUE);
 
   tp_base_client_register (test->base_client, &test->error);
   g_assert_no_error (test->error);
@@ -1052,6 +1094,7 @@ main (int argc,
       char **argv)
 {
   g_type_init ();
+  tp_tests_abort_after (10);
   tp_debug_set_flags ("all");
 
   g_test_init (&argc, &argv, NULL);

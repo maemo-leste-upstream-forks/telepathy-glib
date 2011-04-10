@@ -277,9 +277,9 @@ test_crash (Test *test,
   dbus_g_connection_unref (test->private_conn);
   test->private_conn = NULL;
 
-  tp_tests_proxy_run_until_dbus_queue_processed (test->cdo);
+  while (tp_proxy_get_invalidated (test->cdo) == NULL)
+    g_main_context_iteration (NULL, TRUE);
 
-  g_assert (tp_proxy_get_invalidated (test->cdo) != NULL);
   g_assert (tp_proxy_get_invalidated (test->cdo)->domain == TP_DBUS_ERRORS);
   g_assert (tp_proxy_get_invalidated (test->cdo)->code ==
       TP_DBUS_ERROR_NAME_OWNER_LOST);
@@ -780,6 +780,7 @@ int
 main (int argc,
       char **argv)
 {
+  tp_tests_abort_after (10);
   g_test_init (&argc, &argv, NULL);
   g_test_bug_base ("http://bugs.freedesktop.org/show_bug.cgi?id=");
 

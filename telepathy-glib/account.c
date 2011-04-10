@@ -1,8 +1,8 @@
 /*
  * account.c - proxy for an account in the Telepathy account manager
  *
- * Copyright (C) 2009 Collabora Ltd. <http://www.collabora.co.uk/>
- * Copyright (C) 2009 Nokia Corporation
+ * Copyright © 2009–2010 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright © 2009–2010 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,18 +89,23 @@ struct _TpAccountPrivate {
   gchar *error;
   GHashTable *error_details;
 
-  TpConnectionPresenceType presence;
-  gchar *status;
-  gchar *message;
+  TpConnectionPresenceType cur_presence;
+  gchar *cur_status;
+  gchar *cur_message;
 
   TpConnectionPresenceType requested_presence;
   gchar *requested_status;
   gchar *requested_message;
 
+  TpConnectionPresenceType auto_presence;
+  gchar *auto_status;
+  gchar *auto_message;
+
   gboolean changing_presence;
   gboolean connect_automatically;
   gboolean has_been_online;
 
+  gchar *normalized_name;
   gchar *nickname;
 
   gboolean enabled;
@@ -115,9 +120,15 @@ struct _TpAccountPrivate {
   gchar *display_name;
 
   GHashTable *parameters;
+
+  gchar *storage_provider;
+  GValue *storage_identifier;
+  TpStorageRestrictionFlags storage_restrictions;
+
+  GStrv uri_schemes;
 };
 
-G_DEFINE_TYPE (TpAccount, tp_account, TP_TYPE_PROXY);
+G_DEFINE_TYPE (TpAccount, tp_account, TP_TYPE_PROXY)
 
 /* signals */
 enum {
@@ -151,8 +162,18 @@ enum {
   PROP_REQUESTED_PRESENCE_TYPE,
   PROP_REQUESTED_STATUS,
   PROP_REQUESTED_STATUS_MESSAGE,
-  PROP_NICKNAME
+  PROP_NICKNAME,
+  PROP_AUTOMATIC_PRESENCE_TYPE,
+  PROP_AUTOMATIC_STATUS,
+  PROP_AUTOMATIC_STATUS_MESSAGE,
+  PROP_NORMALIZED_NAME,
+  PROP_STORAGE_PROVIDER,
+  PROP_STORAGE_IDENTIFIER,
+  PROP_STORAGE_RESTRICTIONS
 };
+
+static void tp_account_maybe_prepare_addressing (TpProxy *proxy);
+static void tp_account_maybe_prepare_storage (TpProxy *proxy);
 
 /**
  * TP_ACCOUNT_FEATURE_CORE:
@@ -171,6 +192,36 @@ enum {
  */
 
 /**
+ * TP_ACCOUNT_FEATURE_STORAGE:
+ *
+ * Expands to a call to a function that returns a quark for the "storage"
+ * feature on a #TpAccount.
+ *
+ * When this feature is prepared, the Account.Interface.Storage properties have
+ * been retrieved and are available for use.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.13.2
+ */
+
+/**
+ * TP_ACCOUNT_FEATURE_ADDRESSING:
+ *
+ * Expands to a call to a function that returns a quark for the "addressing"
+ * feature on a #TpAccount.
+ *
+ * When this feature is prepared, the list of URI schemes from
+ * Account.Interface.Addressing has been retrieved and is available for use.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.13.8
+ */
+
+/**
  * tp_account_get_feature_quark_core:
  *
  * <!-- -->
@@ -186,8 +237,32 @@ tp_account_get_feature_quark_core (void)
   return g_quark_from_static_string ("tp-account-feature-core");
 }
 
+/**
+ * tp_account_get_feature_quark_storage:
+ *
+ * <!-- -->
+ *
+ * Returns: the quark used for representing the storage interface of a
+ *          #TpAccount
+ *
+ * Since: 0.13.2
+ */
+GQuark
+tp_account_get_feature_quark_storage (void)
+{
+  return g_quark_from_static_string ("tp-account-feature-storage");
+}
+
+GQuark
+tp_account_get_feature_quark_addressing (void)
+{
+  return g_quark_from_static_string ("tp-account-feature-addressing");
+}
+
 enum {
     FEAT_CORE,
+    FEAT_ADDRESSING,
+    FEAT_STORAGE,
     N_FEAT
 };
 
@@ -201,6 +276,14 @@ _tp_account_list_features (TpProxyClass *cls G_GNUC_UNUSED)
       features[FEAT_CORE].name = TP_ACCOUNT_FEATURE_CORE;
       features[FEAT_CORE].core = TRUE;
       /* no need for a start_preparing function - the constructor starts it */
+
+      features[FEAT_ADDRESSING].name = TP_ACCOUNT_FEATURE_ADDRESSING;
+      features[FEAT_ADDRESSING].start_preparing =
+        tp_account_maybe_prepare_addressing;
+
+      features[FEAT_STORAGE].name = TP_ACCOUNT_FEATURE_STORAGE;
+      features[FEAT_STORAGE].start_preparing =
+        tp_account_maybe_prepare_storage;
 
       /* assert that the terminator at the end is there */
       g_assert (features[N_FEAT].name == 0);
@@ -323,9 +406,59 @@ _tp_account_set_connection (TpAccount *account,
 }
 
 static void
+_tp_account_got_all_storage_cb (TpProxy *proxy,
+    GHashTable *properties,
+    const GError *error,
+    gpointer user_data,
+    GObject *object)
+{
+  TpAccount *self = TP_ACCOUNT (proxy);
+
+  if (error != NULL)
+    DEBUG ("Error getting Storage properties: %s", error->message);
+
+  if (properties == NULL)
+    self->priv->storage_provider = NULL;
+  else
+    self->priv->storage_provider = g_strdup (tp_asv_get_string (properties,
+          "StorageProvider"));
+
+  if (!tp_str_empty (self->priv->storage_provider))
+    {
+      self->priv->storage_identifier = tp_g_value_slice_dup (
+          tp_asv_get_boxed (properties, "StorageIdentifier", G_TYPE_VALUE));
+      self->priv->storage_restrictions = tp_asv_get_uint32 (properties,
+          "StorageRestrictions", NULL);
+    }
+
+  /* if the StorageProvider isn't known, set it to the empty string */
+  if (self->priv->storage_provider == NULL)
+    self->priv->storage_provider = g_strdup ("");
+
+  _tp_proxy_set_feature_prepared (proxy, TP_ACCOUNT_FEATURE_STORAGE, TRUE);
+}
+
+static void
+tp_account_maybe_prepare_storage (TpProxy *proxy)
+{
+  TpAccount *self = TP_ACCOUNT (proxy);
+
+  if (self->priv->storage_provider != NULL)
+    return;
+
+  if (!_tp_proxy_is_preparing (proxy, TP_ACCOUNT_FEATURE_STORAGE))
+    return;
+
+  tp_cli_dbus_properties_call_get_all (self, -1,
+      TP_IFACE_ACCOUNT_INTERFACE_STORAGE,
+      _tp_account_got_all_storage_cb, NULL, NULL, G_OBJECT (self));
+}
+
+static void
 _tp_account_update (TpAccount *account,
     GHashTable *properties)
 {
+  TpProxy *proxy = TP_PROXY (account);
   TpAccountPrivate *priv = account->priv;
   GValueArray *arr;
   TpConnectionStatus old_s = priv->connection_status;
@@ -440,13 +573,13 @@ _tp_account_update (TpAccount *account,
       presence_changed = TRUE;
       arr = tp_asv_get_boxed (properties, "CurrentPresence",
           TP_STRUCT_TYPE_SIMPLE_PRESENCE);
-      priv->presence = g_value_get_uint (g_value_array_get_nth (arr, 0));
+      priv->cur_presence = g_value_get_uint (g_value_array_get_nth (arr, 0));
 
-      g_free (priv->status);
-      priv->status = g_value_dup_string (g_value_array_get_nth (arr, 1));
+      g_free (priv->cur_status);
+      priv->cur_status = g_value_dup_string (g_value_array_get_nth (arr, 1));
 
-      g_free (priv->message);
-      priv->message = g_value_dup_string (g_value_array_get_nth (arr, 2));
+      g_free (priv->cur_message);
+      priv->cur_message = g_value_dup_string (g_value_array_get_nth (arr, 2));
     }
 
   if (g_hash_table_lookup (properties, "RequestedPresence") != NULL)
@@ -463,6 +596,30 @@ _tp_account_update (TpAccount *account,
       g_free (priv->requested_message);
       priv->requested_message =
         g_value_dup_string (g_value_array_get_nth (arr, 2));
+
+      g_object_notify (G_OBJECT (account), "requested-presence-type");
+      g_object_notify (G_OBJECT (account), "requested-status");
+      g_object_notify (G_OBJECT (account), "requested-status-message");
+    }
+
+  if (g_hash_table_lookup (properties, "AutomaticPresence") != NULL)
+    {
+      arr = tp_asv_get_boxed (properties, "AutomaticPresence",
+          TP_STRUCT_TYPE_SIMPLE_PRESENCE);
+      priv->auto_presence =
+        g_value_get_uint (g_value_array_get_nth (arr, 0));
+
+      g_free (priv->auto_status);
+      priv->auto_status =
+        g_value_dup_string (g_value_array_get_nth (arr, 1));
+
+      g_free (priv->auto_message);
+      priv->auto_message =
+        g_value_dup_string (g_value_array_get_nth (arr, 2));
+
+      g_object_notify (G_OBJECT (account), "automatic-presence-type");
+      g_object_notify (G_OBJECT (account), "automatic-status");
+      g_object_notify (G_OBJECT (account), "automatic-status-message");
     }
 
   if (g_hash_table_lookup (properties, "DisplayName") != NULL)
@@ -486,6 +643,19 @@ _tp_account_update (TpAccount *account,
 
       if (tp_strdiff (old, priv->nickname))
         g_object_notify (G_OBJECT (account), "nickname");
+
+      g_free (old);
+    }
+
+  if (g_hash_table_lookup (properties, "NormalizedName") != NULL)
+    {
+      gchar *old = priv->normalized_name;
+
+      priv->normalized_name = g_strdup (tp_asv_get_string (properties,
+            "NormalizedName"));
+
+      if (tp_strdiff (old, priv->normalized_name))
+        g_object_notify (G_OBJECT (account), "normalized-name");
 
       g_free (old);
     }
@@ -558,6 +728,7 @@ _tp_account_update (TpAccount *account,
 
       priv->parameters = g_boxed_copy (TP_HASH_TYPE_STRING_VARIANT_MAP,
           parameters);
+      /* this isn't a property, so we don't notify */
     }
 
   if (status_changed)
@@ -575,7 +746,7 @@ _tp_account_update (TpAccount *account,
   if (presence_changed)
     {
       g_signal_emit (account, signals[PRESENCE_CHANGED], 0,
-          priv->presence, priv->status, priv->message);
+          priv->cur_presence, priv->cur_status, priv->cur_message);
       g_object_notify (G_OBJECT (account), "current-presence-type");
       g_object_notify (G_OBJECT (account), "current-status");
       g_object_notify (G_OBJECT (account), "current-status-message");
@@ -630,8 +801,10 @@ _tp_account_update (TpAccount *account,
         g_object_notify (G_OBJECT (account), "has-been-online");
     }
 
-  _tp_proxy_set_feature_prepared ((TpProxy *) account,
-      TP_ACCOUNT_FEATURE_CORE, TRUE);
+  _tp_proxy_set_feature_prepared (proxy, TP_ACCOUNT_FEATURE_CORE, TRUE);
+
+  tp_account_maybe_prepare_storage (proxy);
+  tp_account_maybe_prepare_addressing (proxy);
 }
 
 static void
@@ -725,13 +898,13 @@ _tp_account_get_property (GObject *object,
       g_value_set_boolean (value, self->priv->enabled);
       break;
     case PROP_CURRENT_PRESENCE_TYPE:
-      g_value_set_uint (value, self->priv->presence);
+      g_value_set_uint (value, self->priv->cur_presence);
       break;
     case PROP_CURRENT_STATUS:
-      g_value_set_string (value, self->priv->status);
+      g_value_set_string (value, self->priv->cur_status);
       break;
     case PROP_CURRENT_STATUS_MESSAGE:
-      g_value_set_string (value, self->priv->message);
+      g_value_set_string (value, self->priv->cur_message);
       break;
     case PROP_CONNECTION_STATUS:
       g_value_set_uint (value, self->priv->connection_status);
@@ -789,6 +962,28 @@ _tp_account_get_property (GObject *object,
     case PROP_NICKNAME:
       g_value_set_string (value, self->priv->nickname);
       break;
+    case PROP_AUTOMATIC_PRESENCE_TYPE:
+      g_value_set_uint (value, self->priv->auto_presence);
+      break;
+    case PROP_AUTOMATIC_STATUS:
+      g_value_set_string (value, self->priv->auto_status);
+      break;
+    case PROP_AUTOMATIC_STATUS_MESSAGE:
+      g_value_set_string (value, self->priv->auto_message);
+      break;
+    case PROP_NORMALIZED_NAME:
+      g_value_set_string (value,
+          tp_account_get_normalized_name (self));
+      break;
+    case PROP_STORAGE_PROVIDER:
+      g_value_set_string (value, self->priv->storage_provider);
+      break;
+    case PROP_STORAGE_IDENTIFIER:
+      g_value_set_boxed (value, self->priv->storage_identifier);
+      break;
+    case PROP_STORAGE_RESTRICTIONS:
+      g_value_set_uint (value, self->priv->storage_restrictions);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -820,11 +1015,14 @@ _tp_account_finalize (GObject *object)
   TpAccountPrivate *priv = self->priv;
 
   g_free (priv->connection_object_path);
-  g_free (priv->status);
-  g_free (priv->message);
+  g_free (priv->cur_status);
+  g_free (priv->cur_message);
   g_free (priv->requested_status);
   g_free (priv->requested_message);
   g_free (priv->error);
+  g_free (priv->auto_status);
+  g_free (priv->auto_message);
+  g_free (priv->normalized_name);
 
   g_free (priv->nickname);
 
@@ -836,6 +1034,11 @@ _tp_account_finalize (GObject *object)
 
   tp_clear_pointer (&priv->parameters, g_hash_table_unref);
   tp_clear_pointer (&priv->error_details, g_hash_table_unref);
+
+  g_free (priv->storage_provider);
+  tp_clear_pointer (&priv->storage_identifier, tp_g_value_slice_free);
+
+  g_strfreev (priv->uri_schemes);
 
   /* free any data held directly by the object here */
   if (G_OBJECT_CLASS (tp_account_parent_class)->finalize != NULL)
@@ -884,7 +1087,9 @@ tp_account_class_init (TpAccountClass *klass)
    *
    * One can receive change notifications on this property by connecting
    * to the #GObject::notify signal and using this property as the signal
-   * detail.
+   * detail. Change notifications for current-presence-type,
+   * current-status and current-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
    *
    * This is not guaranteed to have been retrieved until
    * tp_proxy_prepare_async() has finished; until then, the value is
@@ -908,7 +1113,9 @@ tp_account_class_init (TpAccountClass *klass)
    *
    * One can receive change notifications on this property by connecting
    * to the #GObject::notify signal and using this property as the signal
-   * detail.
+   * detail. Change notifications for current-presence-type,
+   * current-status and current-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
    *
    * This is not guaranteed to have been retrieved until
    * tp_proxy_prepare_async() has finished; until then, the value is
@@ -930,7 +1137,9 @@ tp_account_class_init (TpAccountClass *klass)
    *
    * One can receive change notifications on this property by connecting
    * to the #GObject::notify signal and using this property as the signal
-   * detail.
+   * detail. Change notifications for current-presence-type,
+   * current-status and current-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
    *
    * This is not guaranteed to have been retrieved until
    * tp_proxy_prepare_async() has finished; until then, the value is
@@ -1275,9 +1484,16 @@ tp_account_class_init (TpAccountClass *klass)
    *
    * The account's requested presence type (a #TpConnectionPresenceType).
    *
-   * One can receive change notifications on this property by connecting
+   * Since 0.13.8,
+   * one can receive change notifications on this property by connecting
    * to the #GObject::notify signal and using this property as the signal
-   * detail.
+   * detail. Change notifications for requested-presence-type,
+   * requested-status and requested-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %NULL.
    *
    * Since: 0.9.0
    */
@@ -1295,9 +1511,16 @@ tp_account_class_init (TpAccountClass *klass)
    *
    * The requested Status string of the account.
    *
-   * One can receive change notifications on this property by connecting
+   * Since 0.13.8,
+   * one can receive change notifications on this property by connecting
    * to the #GObject::notify signal and using this property as the signal
-   * detail.
+   * detail. Change notifications for requested-presence-type,
+   * requested-status and requested-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %NULL.
    *
    * Since: 0.9.0
    */
@@ -1313,9 +1536,16 @@ tp_account_class_init (TpAccountClass *klass)
    *
    * The requested status message message of the account.
    *
-   * One can receive change notifications on this property by connecting
+   * Since 0.13.8,
+   * one can receive change notifications on this property by connecting
    * to the #GObject::notify signal and using this property as the signal
-   * detail.
+   * detail. Change notifications for requested-presence-type,
+   * requested-status and requested-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %NULL.
    *
    * Since: 0.9.0
    */
@@ -1347,6 +1577,180 @@ tp_account_class_init (TpAccountClass *klass)
           "The account's nickname",
           NULL,
           G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:automatic-presence-type:
+   *
+   * The account's automatic presence type (a #TpConnectionPresenceType).
+   *
+   * When the account is put online automatically, for instance to make a
+   * channel request or because network connectivity becomes available,
+   * the automatic presence type, status and message will be copied to
+   * their "requested" counterparts.
+   *
+   * One can receive change notifications on this property by connecting
+   * to the #GObject::notify signal and using this property as the signal
+   * detail. Change notifications for automatic-presence-type,
+   * automatic-status and automatic-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %TP_CONNECTION_PRESENCE_TYPE_UNSET.
+   *
+   * Since: 0.13.8
+   */
+  g_object_class_install_property (object_class, PROP_AUTOMATIC_PRESENCE_TYPE,
+      g_param_spec_uint ("automatic-presence-type",
+          "AutomaticPresence type",
+          "Presence type used to put the account online automatically",
+          0,
+          NUM_TP_CONNECTION_PRESENCE_TYPES,
+          TP_CONNECTION_PRESENCE_TYPE_UNSET,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:automatic-status:
+   *
+   * The string status name to use in conjunction with the
+   * #TpAccount:automatic-presence-type.
+   *
+   * One can receive change notifications on this property by connecting
+   * to the #GObject::notify signal and using this property as the signal
+   * detail. Change notifications for automatic-presence-type,
+   * automatic-status and automatic-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %NULL.
+   *
+   * Since: 0.13.8
+   */
+  g_object_class_install_property (object_class, PROP_AUTOMATIC_STATUS,
+      g_param_spec_string ("automatic-status",
+          "AutomaticPresence status",
+          "Presence status used to put the account online automatically",
+          NULL,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:automatic-status-message:
+   *
+   * The user-defined message to use in conjunction with the
+   * #TpAccount:automatic-presence-type.
+   *
+   * One can receive change notifications on this property by connecting
+   * to the #GObject::notify signal and using this property as the signal
+   * detail. Change notifications for automatic-presence-type,
+   * automatic-status and automatic-status-message are always emitted together,
+   * so it is sufficient to connect to one of the notification signals.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %NULL.
+   *
+   * Since: 0.13.8
+   */
+  g_object_class_install_property (object_class, PROP_AUTOMATIC_STATUS_MESSAGE,
+      g_param_spec_string ("automatic-status-message",
+          "AutomaticPresence message",
+          "User-defined message used to put the account online automatically",
+          NULL,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:normalized-name
+   *
+   * The normalized form of the user's own identifier on this protocol.
+   *
+   * One can receive change notifications on this property by connecting
+   * to the #GObject::notify signal and using this property as the signal
+   * detail.
+   *
+   * This is not guaranteed to have been retrieved until
+   * tp_proxy_prepare_async() has finished; until then, the value is
+   * %NULL.
+   *
+   * Since: 0.13.8
+   */
+  g_object_class_install_property (object_class, PROP_NORMALIZED_NAME,
+      g_param_spec_string ("normalized-name",
+          "NormalizedName",
+          "The normalized identifier of the user",
+          NULL,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:storage-provider:
+   *
+   * The storage provider for this account.
+   *
+   * The name of the account storage implementation. When this
+   * is the empty string the account is internally stored.
+   *
+   * This property cannot change once an Account has been created.
+   *
+   * This is not guaranteed to have been retrieved until the
+   * %TP_ACCOUNT_FEATURE_STORAGE feature has been prepared; until then,
+   * the value is %NULL.
+   *
+   * Since: 0.13.2
+   */
+  g_object_class_install_property (object_class, PROP_STORAGE_PROVIDER,
+      g_param_spec_string ("storage-provider",
+        "StorageProvider",
+        "The storage provider for this account",
+        NULL,
+        G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:storage-identifier:
+   *
+   * The storage identifier for this account.
+   *
+   * A provider-specific variant type used to identify this account with the
+   * provider. This value will be %NULL if #TpAccount:storage-provider is
+   * an empty string.
+   *
+   * This property cannot change once an Account has been created.
+   *
+   * This is not guaranteed to have been retrieved until the
+   * %TP_ACCOUNT_FEATURE_STORAGE feature has been prepared; until then,
+   * the value is %NULL.
+   *
+   * Since: 0.13.2
+   */
+  g_object_class_install_property (object_class, PROP_STORAGE_IDENTIFIER,
+      g_param_spec_boxed ("storage-identifier",
+        "StorageIdentifier",
+        "The storage identifier for this account",
+        G_TYPE_VALUE,
+        G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpAccount:storage-restrictions
+   *
+   * The storage restrictions for this account.
+   *
+   * A bitfield of #TpStorageRestrictionFlags that give the limitations of
+   * this account imposed by the storage provider. This value will be 0
+   * if #TpAccount:storage-provider is an empty string.
+   *
+   * This property cannot change once an Account has been created.
+   *
+   * This is not guaranteed to have been retrieved until the
+   * %TP_ACCOUNT_FEATURE_STORAGE feature has been prepared; until then,
+   * the value is 0.
+   *
+   * Since: 0.13.2
+   */
+  g_object_class_install_property (object_class, PROP_STORAGE_RESTRICTIONS,
+      g_param_spec_uint ("storage-restrictions",
+        "StorageRestrictions",
+        "The storage restrictions for this account",
+        0, G_MAXUINT, 0,
+        G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
   /**
    * TpAccount::status-changed:
@@ -1551,6 +1955,38 @@ tp_account_ensure_connection (TpAccount *account,
   _tp_account_set_connection (account, path);
 
   return priv->connection;
+}
+
+/**
+ * tp_account_get_path_suffix:
+ * @account: a #TpAccount
+ *
+ * Returns the portion of @account's object path after the standard
+ * #TP_ACCOUNT_OBJECT_PATH_BASE prefix, of the form "cm/protocol/acct". This
+ * string uniquely identifies the account.
+ *
+ * This function is only intended to be used when printing debug messages or in
+ * tools for developer. For a string suitable for displaying to the user, see
+ * tp_account_get_display_name(). To retrieve the connection manager and
+ * protocol name parts of the object path, see
+ * tp_account_get_connection_manager() and tp_account_get_protocol(). For
+ * persistent identification of the account, use tp_proxy_get_object_path().
+ *
+ * Returns: a suffix of @account's object path, for debugging purposes.
+ * Since: 0.13.9
+ */
+const gchar *
+tp_account_get_path_suffix (TpAccount *account)
+{
+  const gchar *path;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
+
+  path = tp_proxy_get_object_path (account);
+  g_return_val_if_fail (g_str_has_prefix (path, TP_ACCOUNT_OBJECT_PATH_BASE),
+      path);
+
+  return path + strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
 }
 
 /**
@@ -1779,22 +2215,13 @@ tp_account_set_enabled_async (TpAccount *account,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
-  TpAccountPrivate *priv;
   GValue value = {0, };
   GSimpleAsyncResult *result;
 
   g_return_if_fail (TP_IS_ACCOUNT (account));
 
-  priv = account->priv;
-
   result = g_simple_async_result_new (G_OBJECT (account),
       callback, user_data, tp_account_set_enabled_finish);
-
-  if (priv->enabled == enabled)
-    {
-      g_simple_async_result_complete_in_idle (result);
-      return;
-    }
 
   g_value_init (&value, G_TYPE_BOOLEAN);
   g_value_set_boolean (&value, enabled);
@@ -1880,6 +2307,73 @@ tp_account_reconnect_async (TpAccount *account,
 
   tp_cli_account_call_reconnect (account, -1, _tp_account_reconnected_cb,
       result, NULL, G_OBJECT (account));
+}
+
+/**
+ * tp_account_set_automatic_presence_finish:
+ * @account: a #TpAccount
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes an asynchronous request to change the automatic presence of
+ * @account.
+ *
+ * Returns: %TRUE if the operation was successful, otherwise %FALSE
+ *
+ * Since: 0.13.8
+ */
+gboolean
+tp_account_set_automatic_presence_finish (TpAccount *account,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (account, tp_account_set_automatic_presence_async)
+}
+
+/**
+ * tp_account_set_automatic_presence_async:
+ * @account: a #TpAccount
+ * @type: the requested presence
+ * @status: a status message to set, or %NULL
+ * @message: a message for the change, or %NULL
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Requests an asynchronous change of @account's automatic presence. When the
+ * operation is finished, @callback will be called. You can then call
+ * tp_account_set_automatic_presence_finish() to get the result of the
+ * operation.
+ *
+ * Since: 0.13.8
+ */
+void
+tp_account_set_automatic_presence_async (TpAccount *account,
+    TpConnectionPresenceType type,
+    const gchar *status,
+    const gchar *message,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GValue value = {0, };
+  GSimpleAsyncResult *result;
+
+  g_return_if_fail (TP_IS_ACCOUNT (account));
+
+  result = g_simple_async_result_new (G_OBJECT (account),
+      callback, user_data, tp_account_set_automatic_presence_async);
+
+  g_value_init (&value, TP_STRUCT_TYPE_SIMPLE_PRESENCE);
+  g_value_take_boxed (&value, tp_value_array_build (3,
+        G_TYPE_UINT, type,
+        G_TYPE_STRING, status,
+        G_TYPE_STRING, message,
+        G_TYPE_INVALID));
+
+  tp_cli_dbus_properties_call_set (TP_PROXY (account), -1,
+      TP_IFACE_ACCOUNT, "AutomaticPresence", &value,
+      _tp_account_property_set_cb, result, NULL, G_OBJECT (account));
+
+  g_value_unset (&value);
 }
 
 /**
@@ -2284,7 +2778,7 @@ tp_account_set_icon_name_finish (TpAccount *account,
 }
 
 static void
-_tp_account_remove_cb (TpAccount *proxy,
+_tp_account_void_cb (TpAccount *proxy,
     const GError *error,
     gpointer user_data,
     GObject *weak_object)
@@ -2322,7 +2816,7 @@ tp_account_remove_async (TpAccount *account,
   result = g_simple_async_result_new (G_OBJECT (account),
       callback, user_data, tp_account_remove_finish);
 
-  tp_cli_account_call_remove (account, -1, _tp_account_remove_cb, result, NULL,
+  tp_cli_account_call_remove (account, -1, _tp_account_void_cb, result, NULL,
       G_OBJECT (account));
 }
 
@@ -2534,12 +3028,12 @@ tp_account_get_current_presence (TpAccount *account,
       TP_CONNECTION_PRESENCE_TYPE_UNSET);
 
   if (status != NULL)
-    *status = g_strdup (account->priv->status);
+    *status = g_strdup (account->priv->cur_status);
 
   if (status_message != NULL)
-    *status_message = g_strdup (account->priv->message);
+    *status_message = g_strdup (account->priv->cur_message);
 
-  return account->priv->presence;
+  return account->priv->cur_presence;
 }
 
 /**
@@ -2736,7 +3230,7 @@ tp_account_get_avatar_async (TpAccount *account,
  *
  * Finishes an async get operation of @account's avatar.
  *
- * Returns: (element-type uint8): a #GArray of #guchar
+ * Returns: (element-type guchar): a #GArray of #guchar
  *  containing the bytes of the account's avatar, or %NULL on failure
  *
  * Since: 0.9.0
@@ -3088,4 +3582,409 @@ tp_account_get_detailed_error (TpAccount *self,
     *details = self->priv->error_details;
 
   return self->priv->error;
+}
+
+/**
+ * tp_account_get_storage_provider:
+ * @self: a #TpAccount
+ *
+ * <!-- -->
+ *
+ * Returns: the same as the #TpAccount:storage-provider property
+ *
+ * Since: 0.13.2
+ */
+const gchar *
+tp_account_get_storage_provider (TpAccount *self)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+
+  return self->priv->storage_provider;
+}
+
+/**
+ * tp_account_get_storage_identifier:
+ * @self: a #TpAccount
+ *
+ * <!-- -->
+ *
+ * Returns: the same as the #TpAccount:storage-identifier property
+ *
+ * Since: 0.13.2
+ */
+const GValue *
+tp_account_get_storage_identifier (TpAccount *self)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+
+  return self->priv->storage_identifier;
+}
+
+/**
+ * tp_account_get_storage_restrictions:
+ * @self: a #TpAccount
+ *
+ * <!-- -->
+ *
+ * Returns: the same as the #TpAccount:storage-restrictions property
+ *
+ * Since: 0.13.2
+ */
+TpStorageRestrictionFlags
+tp_account_get_storage_restrictions (TpAccount *self)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), 0);
+
+  return self->priv->storage_restrictions;
+}
+
+static void
+_tp_account_get_storage_specific_information_cb (TpProxy *self,
+    const GValue *value,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_obj)
+{
+  GSimpleAsyncResult *result = user_data;
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to retrieve StorageSpecificInformation: %s",
+          error->message);
+      g_simple_async_result_set_from_error (result, error);
+    }
+  else
+    {
+      GHashTable *info;
+
+      info = g_value_get_boxed (value);
+      g_simple_async_result_set_op_res_gpointer (result, info, NULL);
+    }
+
+  g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+/**
+ * tp_account_get_storage_specific_information_async:
+ * @self: a #TpAccount
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Makes an asynchronous request of @self's StorageSpecificInformation
+ * property (part of the Account.Interface.Storage interface).
+ *
+ * When the operation is finished, @callback will be called. You must then
+ * call tp_account_get_storage_specific_information_finish() to get the
+ * result of the request.
+ *
+ * Since: 0.13.2
+ */
+void
+tp_account_get_storage_specific_information_async (TpAccount *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+
+  g_return_if_fail (TP_IS_ACCOUNT (self));
+
+  result = g_simple_async_result_new (G_OBJECT (self),
+      callback, user_data, tp_account_get_storage_specific_information_async);
+
+  tp_cli_dbus_properties_call_get (self, -1,
+      TP_IFACE_ACCOUNT_INTERFACE_STORAGE, "StorageSpecificInformation",
+      _tp_account_get_storage_specific_information_cb, result, NULL, NULL);
+}
+
+/**
+ * tp_account_get_storage_specific_information_finish:
+ * @self: a #TpAccount
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Retrieve the value of the request begun with
+ * tp_account_get_storage_specific_information_async().
+ *
+ * Returns: (element-type utf8 GObject.Value) (transfer none): a #GHashTable
+ *  of strings to GValues representing the D-Bus type a{sv}.
+ *
+ * Since: 0.13.2
+ */
+GHashTable *
+tp_account_get_storage_specific_information_finish (TpAccount *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), NULL);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return NULL;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result, G_OBJECT (self),
+        tp_account_get_storage_specific_information_async), NULL);
+
+  return g_simple_async_result_get_op_res_gpointer (simple);
+}
+
+static void
+_tp_account_got_all_addressing_cb (TpProxy *proxy,
+    GHashTable *properties,
+    const GError *error,
+    gpointer user_data,
+    GObject *object)
+{
+  TpAccount *self = TP_ACCOUNT (proxy);
+
+  if (error != NULL)
+    {
+      DEBUG ("Error getting Addressing properties: %s", error->message);
+    }
+  else
+    {
+      self->priv->uri_schemes = g_strdupv (tp_asv_get_boxed (properties,
+            "URISchemes", G_TYPE_STRV));
+    }
+
+  if (self->priv->uri_schemes == NULL)
+    self->priv->uri_schemes = g_new0 (gchar *, 1);
+
+  _tp_proxy_set_feature_prepared (proxy, TP_ACCOUNT_FEATURE_ADDRESSING, TRUE);
+}
+
+static void
+tp_account_maybe_prepare_addressing (TpProxy *proxy)
+{
+  TpAccount *self = TP_ACCOUNT (proxy);
+
+  if (self->priv->uri_schemes != NULL)
+    return;
+
+  if (!_tp_proxy_is_preparing (proxy, TP_ACCOUNT_FEATURE_ADDRESSING))
+    return;
+
+  tp_cli_dbus_properties_call_get_all (self, -1,
+      TP_IFACE_ACCOUNT_INTERFACE_ADDRESSING,
+      _tp_account_got_all_addressing_cb, NULL, NULL, NULL);
+}
+
+/**
+ * tp_account_get_uri_schemes:
+ * @self: a #TpAccount
+ *
+ * If the %TP_ACCOUNT_FEATURE_ADDRESSING feature has been prepared
+ * successfully, return a list of additional URI schemes for which this
+ * account should be used if possible. Otherwise return %NULL.
+ *
+ * For instance, a SIP or Skype account might have "tel" in this list if the
+ * user would like to use that account to call phone numbers.
+ *
+ * This list should not contain the primary URI scheme(s) for the account's
+ * protocol (for instance, "xmpp" for XMPP, or "sip" or "sips" for SIP),
+ * since it should be assumed to be useful for those schemes in any case.
+ *
+ * Returns: (transfer none): a list of URI schemes, or %NULL
+ *
+ * Since: 0.13.8
+ */
+const gchar * const *
+tp_account_get_uri_schemes (TpAccount *self)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+
+  return (const gchar * const *) self->priv->uri_schemes;
+}
+
+/**
+ * tp_account_associated_with_uri_scheme:
+ * @self: a #TpAccount
+ * @scheme: (transfer none): a URI scheme such as "tel", "sip" or "xmpp"
+ *
+ * <!-- -->
+ *
+ * Returns: %TRUE if the result of tp_account_get_uri_schemes() would include
+ *  @scheme
+ *
+ * Since: 0.13.8
+ */
+gboolean
+tp_account_associated_with_uri_scheme (TpAccount *self,
+    const gchar *scheme)
+{
+  return tp_strv_contains (tp_account_get_uri_schemes (self), scheme);
+}
+
+/**
+ * tp_account_set_uri_scheme_association_async:
+ * @self: a #TpAccount
+ * @scheme: a non-%NULL URI scheme such as "tel"
+ * @associate: %TRUE to use this account for @scheme, or %FALSE to not use it
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Add @scheme to the list of additional URI schemes that would be returned
+ * by tp_account_get_uri_schemes(), or remove it from that list.
+ *
+ * @scheme should not be the primary URI scheme for the account's
+ * protocol (for instance, "xmpp" for XMPP, or "sip" or "sips" for SIP),
+ * since the account should be assumed to be useful for those schemes
+ * regardless of the contents of the list.
+ *
+ * Calling this method does not require the %TP_ACCOUNT_FEATURE_ADDRESSING
+ * feature to be enabled, but the change will not be reflected in the result
+ * of tp_account_get_uri_schemes() or tp_account_associated_with_uri_scheme()
+ * unless that feature has been enabled.
+ *
+ * Since: 0.13.8
+ */
+void
+tp_account_set_uri_scheme_association_async (TpAccount *self,
+    const gchar *scheme,
+    gboolean associate,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+
+  g_return_if_fail (TP_IS_ACCOUNT (self));
+  g_return_if_fail (scheme != NULL);
+
+  result = g_simple_async_result_new (G_OBJECT (self), callback,
+      user_data, tp_account_set_uri_scheme_association_finish);
+
+  tp_cli_account_interface_addressing_call_set_uri_scheme_association (
+      self, -1, scheme, associate,
+      _tp_account_void_cb, result, NULL, NULL);
+}
+
+/**
+ * tp_account_set_uri_scheme_association_finish:
+ * @self: a #TpAccount
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Interpret the result of tp_account_set_uri_scheme_association_async().
+ *
+ * Returns: %TRUE if the call was successful, otherwise %FALSE
+ *
+ * Since: 0.13.8
+ */
+gboolean
+tp_account_set_uri_scheme_association_finish (TpAccount *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), FALSE);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return FALSE;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (self), tp_account_set_uri_scheme_association_async),
+      FALSE);
+
+  return TRUE;
+}
+
+/**
+ * tp_account_get_automatic_presence:
+ * @self: an account
+ * @status: (out) (transfer none): return location for the presence status
+ * @status_message: (out) (transfer full): return location for the
+ *  user-defined message
+ *
+ * Gets the automatic presence, status and status message of @account. These
+ * values are the same as the #TpAccount:automatic-presence-type,
+ * #TpAccount:automatic-status and #TpAccount:automatic-status-message
+ * properties, and are the values that will be used if the account should
+ * be put online automatically.
+ *
+ * Returns: the same as the #TpAccount:automatic-presence-type property
+ *
+ * Since: 0.13.8
+ */
+TpConnectionPresenceType
+tp_account_get_automatic_presence (TpAccount *self,
+    gchar **status,
+    gchar **status_message)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self),
+      TP_CONNECTION_PRESENCE_TYPE_UNSET);
+
+  if (status != NULL)
+    *status = g_strdup (self->priv->auto_status);
+
+  if (status_message != NULL)
+    *status_message = g_strdup (self->priv->auto_message);
+
+  return self->priv->auto_presence;
+}
+
+/**
+ * tp_account_get_normalized_name:
+ * @self: a #TpAccount
+ *
+ * <!-- -->
+ *
+ * Returns: (transfer none): the same as the #TpAccount:normalized-name
+ *  property
+ *
+ * Since: 0.13.8
+ **/
+const gchar *
+tp_account_get_normalized_name (TpAccount *self)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+
+  return self->priv->normalized_name;
+}
+
+/**
+ * tp_account_bind_connection_status_to_property:
+ * @self: a #TpAccount
+ * @target: the target #GObject
+ * @target_property: the property on @target to bind (must be %G_TYPE_BOOLEAN)
+ * @invert: %TRUE if you wish to invert the value of @target_property
+ *   (i.e. %FALSE if connected)
+ *
+ * Binds the :connection-status of @self to the boolean property of another
+ * object using a #GBinding such that the @target_property will be set to
+ * %TRUE when @self is connected (and @invert is %FALSE).
+ *
+ * @target_property will be synchronised immediately (%G_BINDING_SYNC_CREATE).
+ * @invert can be interpreted as analogous to %G_BINDING_INVERT_BOOLEAN.
+ *
+ * For instance, this function can be used to bind the GtkWidget:sensitive
+ * property to only make a widget sensitive when the account is connected.
+ *
+ * See g_object_bind_property() for more information.
+ *
+ * Returns: (transfer none): the #GBinding instance representing the binding
+ *   between the @self and the @target. The binding is released whenever the
+ *   #GBinding reference count reaches zero.
+ * Since: 0.13.16
+ */
+GBinding *
+tp_account_bind_connection_status_to_property (TpAccount *self,
+    gpointer target,
+    const char *target_property,
+    gboolean invert)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+
+  return g_object_bind_property_full (self, "connection-status",
+      target, target_property,
+      G_BINDING_SYNC_CREATE,
+      _tp_bind_connection_status_to_boolean,
+      NULL, GUINT_TO_POINTER (invert), NULL);
 }

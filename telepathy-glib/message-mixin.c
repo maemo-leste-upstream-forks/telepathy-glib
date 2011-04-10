@@ -24,7 +24,7 @@
  * @short_description: a mixin implementation of the text channel type and the
  *  Messages interface
  * @see_also: #TpSvcChannelTypeText, #TpSvcChannelInterfaceMessages,
- *  <link linkend="dbus-properties-mixin">TpDBusPropertiesMixin</link>
+ *  <link linkend="telepathy-glib-dbus-properties-mixin">TpDBusPropertiesMixin</link>
  *
  * This mixin can be added to a channel GObject class to implement the
  * text channel type (with the Messages interface) in a general way.
@@ -49,7 +49,7 @@
  * tp_message_mixin_implement_sending() in the constructor function. If you do
  * not, any attempt to send a message will fail with NotImplemented.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 
 #include <telepathy-glib/message-mixin.h>
@@ -57,11 +57,15 @@
 #include <dbus/dbus-glib.h>
 #include <string.h>
 
+#include <telepathy-glib/cm-message.h>
+#include <telepathy-glib/cm-message-internal.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/enums.h>
 #include <telepathy-glib/errors.h>
+#include <telepathy-glib/group-mixin.h>
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/interfaces.h>
+#include <telepathy-glib/message-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_IM
 
@@ -75,7 +79,7 @@
  *
  * There are no public fields.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 
 struct _TpMessageMixinPrivate
@@ -125,6 +129,7 @@ static const char * const body_only_incoming[] = {
 static const char * const headers_only[] = {
     "message-type",
     "message-sender",
+    "message-sender-id",
     "message-sent",
     "message-received",
     "message-token",
@@ -134,6 +139,7 @@ static const char * const headers_only[] = {
 
 static const char * const headers_only_incoming[] = {
     "message-sender",
+    "message-sender-id",
     "message-sent",
     "message-received",
     NULL
@@ -147,655 +153,6 @@ static const char * const headers_only_incoming[] = {
 #define TP_MESSAGE_MIXIN(o) \
   ((TpMessageMixin *) tp_mixin_offset_cast (o, TP_MESSAGE_MIXIN_OFFSET (o)))
 
-
-/**
- * TpMessage:
- *
- * Opaque structure representing a message in the Telepathy messages interface
- * (an array of at least one mapping from string to variant, where the first
- * mapping contains message headers and subsequent mappings contain the
- * message body).
- */
-
-
-struct _TpMessage {
-    TpBaseConnection *connection;
-
-    /* array of hash tables, allocated string => sliced GValue */
-    GPtrArray *parts;
-
-    /* handles referenced by this message */
-    TpHandleSet *reffed_handles[NUM_TP_HANDLE_TYPES];
-
-    /* from here down is implementation-specific for TpMessageMixin */
-
-    /* for receiving */
-    guint32 incoming_id;
-
-    /* for sending */
-    DBusGMethodInvocation *outgoing_context;
-    TpMessageSendingFlags outgoing_flags;
-    gboolean outgoing_text_api:1;
-};
-
-
-/**
- * tp_message_new:
- * @connection: a connection on which to reference handles
- * @initial_parts: number of parts to create (at least 1)
- * @size_hint: preallocate space for this many parts (at least @initial_parts)
- *
- * <!-- nothing more to say -->
- *
- * Returns: a newly allocated message suitable to be passed to
- * tp_message_mixin_take_received
- *
- * @since 0.7.21
- */
-TpMessage *
-tp_message_new (TpBaseConnection *connection,
-                guint initial_parts,
-                guint size_hint)
-{
-  TpMessage *self;
-  guint i;
-
-  g_return_val_if_fail (connection != NULL, NULL);
-  g_return_val_if_fail (initial_parts >= 1, NULL);
-  g_return_val_if_fail (size_hint >= initial_parts, NULL);
-
-  self = g_slice_new0 (TpMessage);
-  self->connection = g_object_ref (connection);
-  self->parts = g_ptr_array_sized_new (size_hint);
-  self->incoming_id = G_MAXUINT32;
-  self->outgoing_context = NULL;
-
-  for (i = 0; i < initial_parts; i++)
-    {
-      g_ptr_array_add (self->parts, g_hash_table_new_full (g_str_hash,
-            g_str_equal, g_free, (GDestroyNotify) tp_g_value_slice_free));
-    }
-
-  return self;
-}
-
-
-/**
- * tp_message_destroy:
- * @self: a message
- *
- * Destroy @self.
- *
- * @since 0.7.21
- */
-void
-tp_message_destroy (TpMessage *self)
-{
-  guint i;
-
-  g_return_if_fail (TP_IS_BASE_CONNECTION (self->connection));
-  g_return_if_fail (self->parts != NULL);
-  g_return_if_fail (self->parts->len >= 1);
-
-  for (i = 0; i < self->parts->len; i++)
-    {
-      g_hash_table_destroy (g_ptr_array_index (self->parts, i));
-    }
-
-  g_ptr_array_free (self->parts, TRUE);
-
-  for (i = 0; i < NUM_TP_HANDLE_TYPES; i++)
-    {
-      if (self->reffed_handles[i] != NULL)
-        tp_handle_set_destroy (self->reffed_handles[i]);
-    }
-
-  g_object_unref (self->connection);
-
-  g_slice_free (TpMessage, self);
-}
-
-
-/**
- * tp_message_count_parts:
- * @self: a message
- *
- * <!-- nothing more to say -->
- *
- * Returns: the number of parts in the message, including the headers in
- * part 0
- *
- * @since 0.7.21
- */
-guint
-tp_message_count_parts (TpMessage *self)
-{
-  return self->parts->len;
-}
-
-
-/**
- * tp_message_peek:
- * @self: a message
- * @part: a part number
- *
- * <!-- nothing more to say -->
- *
- * Returns: the #GHashTable used to implement the given part, or %NULL if the
- *  part number is out of range. The hash table is only valid as long as the
- *  message is valid and the part is not deleted.
- *
- * @since 0.7.21
- */
-const GHashTable *
-tp_message_peek (TpMessage *self,
-                 guint part)
-{
-  if (part >= self->parts->len)
-    return NULL;
-
-  return g_ptr_array_index (self->parts, part);
-}
-
-
-/**
- * tp_message_append_part:
- * @self: a message
- *
- * Append a body part to the message.
- *
- * Returns: the part number
- *
- * @since 0.7.21
- */
-guint
-tp_message_append_part (TpMessage *self)
-{
-  g_ptr_array_add (self->parts, g_hash_table_new_full (g_str_hash,
-        g_str_equal, g_free, (GDestroyNotify) tp_g_value_slice_free));
-  return self->parts->len - 1;
-}
-
-/**
- * tp_message_delete_part:
- * @self: a message
- * @part: a part number, which must be strictly greater than 0, and strictly
- *  less than the number returned by tp_message_count_parts()
- *
- * Delete the given body part from the message.
- *
- * @since 0.7.21
- */
-void
-tp_message_delete_part (TpMessage *self,
-                        guint part)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (part > 0);
-
-  g_hash_table_unref (g_ptr_array_remove_index (self->parts, part));
-}
-
-
-static void
-_ensure_handle_set (TpMessage *self,
-                    TpHandleType handle_type)
-{
-  if (self->reffed_handles[handle_type] == NULL)
-    {
-      TpHandleRepoIface *handles = tp_base_connection_get_handles (
-          self->connection, handle_type);
-
-      g_return_if_fail (handles != NULL);
-
-      self->reffed_handles[handle_type] = tp_handle_set_new (handles);
-    }
-}
-
-
-/**
- * tp_message_ref_handle:
- * @self: a message
- * @handle_type: a handle type, greater than %TP_HANDLE_TYPE_NONE and less than
- *  %NUM_TP_HANDLE_TYPES
- * @handle: a handle of the given type
- *
- * Reference the given handle until this message is destroyed.
- *
- * @since 0.7.21
- */
-void
-tp_message_ref_handle (TpMessage *self,
-                       TpHandleType handle_type,
-                       TpHandle handle)
-{
-  g_return_if_fail (handle_type > TP_HANDLE_TYPE_NONE);
-  g_return_if_fail (handle_type < NUM_TP_HANDLE_TYPES);
-  g_return_if_fail (handle != 0);
-
-  _ensure_handle_set (self, handle_type);
-
-  tp_handle_set_add (self->reffed_handles[handle_type], handle);
-}
-
-
-/**
- * tp_message_ref_handles:
- * @self: a message
- * @handle_type: a handle type, greater than %TP_HANDLE_TYPE_NONE and less
- *  than %NUM_TP_HANDLE_TYPES
- * @handles: a set of handles of the given type
- *
- * References all of the given handles until this message is destroyed.
- *
- * @since 0.7.21
- */
-static void
-tp_message_ref_handles (TpMessage *self,
-                        TpHandleType handle_type,
-                        TpIntSet *handles)
-{
-  TpIntSet *updated;
-
-  g_return_if_fail (handle_type > TP_HANDLE_TYPE_NONE);
-  g_return_if_fail (handle_type < NUM_TP_HANDLE_TYPES);
-  g_return_if_fail (!tp_intset_is_member (handles, 0));
-
-  _ensure_handle_set (self, handle_type);
-
-  updated = tp_handle_set_update (self->reffed_handles[handle_type], handles);
-  tp_intset_destroy (updated);
-}
-
-
-/**
- * tp_message_delete_key:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- *
- * Remove the given key and its value from the given part.
- *
- * Returns: %TRUE if the key previously existed
- *
- * @since 0.7.21
- */
-gboolean
-tp_message_delete_key (TpMessage *self,
-                       guint part,
-                       const gchar *key)
-{
-  g_return_val_if_fail (part < self->parts->len, FALSE);
-
-  return g_hash_table_remove (g_ptr_array_index (self->parts, part), key);
-}
-
-
-/**
- * tp_message_set_handle:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @handle_type: a handle type
- * @handle_or_0: a handle of that type, or 0
- *
- * If @handle_or_0 is not zero, reference it with tp_message_ref_handle().
- *
- * Set @key in part @part of @self to have @handle_or_0 as an unsigned integer
- * value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_handle (TpMessage *self,
-                       guint part,
-                       const gchar *key,
-                       TpHandleType handle_type,
-                       TpHandle handle_or_0)
-{
-  if (handle_or_0 != 0)
-    tp_message_ref_handle (self, handle_type, handle_or_0);
-
-  tp_message_set_uint32 (self, part, key, handle_or_0);
-}
-
-
-/**
- * tp_message_set_boolean:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @b: a boolean value
- *
- * Set @key in part @part of @self to have @b as a boolean value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_boolean (TpMessage *self,
-                        guint part,
-                        const gchar *key,
-                        gboolean b)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_boolean (b));
-}
-
-
-/**
- * tp_message_set_int16:
- * @s: a message
- * @p: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @k: a key in the mapping representing the part
- * @i: an integer value
- *
- * Set @key in part @part of @self to have @i as a signed integer value.
- *
- * @since 0.7.21
- */
-
-/**
- * tp_message_set_int32:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @i: an integer value
- *
- * Set @key in part @part of @self to have @i as a signed integer value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_int32 (TpMessage *self,
-                      guint part,
-                      const gchar *key,
-                      gint32 i)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_int (i));
-}
-
-
-/**
- * tp_message_set_int64:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @i: an integer value
- *
- * Set @key in part @part of @self to have @i as a signed integer value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_int64 (TpMessage *self,
-                      guint part,
-                      const gchar *key,
-                      gint64 i)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_int64 (i));
-}
-
-
-/**
- * tp_message_set_uint16:
- * @s: a message
- * @p: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @k: a key in the mapping representing the part
- * @u: an unsigned integer value
- *
- * Set @key in part @part of @self to have @u as an unsigned integer value.
- *
- * @since 0.7.21
- */
-
-/**
- * tp_message_set_uint32:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @u: an unsigned integer value
- *
- * Set @key in part @part of @self to have @u as an unsigned integer value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_uint32 (TpMessage *self,
-                       guint part,
-                       const gchar *key,
-                       guint32 u)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_uint (u));
-}
-
-
-/**
- * tp_message_set_uint64:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @u: an unsigned integer value
- *
- * Set @key in part @part of @self to have @u as an unsigned integer value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_uint64 (TpMessage *self,
-                       guint part,
-                       const gchar *key,
-                       guint64 u)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_uint64 (u));
-}
-
-
-/**
- * tp_message_set_string:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @s: a string value
- *
- * Set @key in part @part of @self to have @s as a string value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_string (TpMessage *self,
-                       guint part,
-                       const gchar *key,
-                       const gchar *s)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-  g_return_if_fail (s != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_string (s));
-}
-
-
-/**
- * tp_message_set_string_printf:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @fmt: a printf-style format string for the string value
- * @...: arguments for the format string
- *
- * Set @key in part @part of @self to have a string value constructed from a
- * printf-style format string.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_string_printf (TpMessage *self,
-                              guint part,
-                              const gchar *key,
-                              const gchar *fmt,
-                              ...)
-{
-  va_list va;
-  gchar *s;
-
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-  g_return_if_fail (fmt != NULL);
-
-  va_start (va, fmt);
-  s = g_strdup_vprintf (fmt, va);
-  va_end (va);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_new_take_string (s));
-}
-
-
-/**
- * tp_message_set_bytes:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @len: a number of bytes
- * @bytes: an array of @len bytes
- *
- * Set @key in part @part of @self to have @bytes as a byte-array value.
- *
- * @since 0.7.21
- */
-void
-tp_message_set_bytes (TpMessage *self,
-                      guint part,
-                      const gchar *key,
-                      guint len,
-                      gconstpointer bytes)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-  g_return_if_fail (bytes != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key),
-      tp_g_value_slice_new_bytes (len, bytes));
-}
-
-
-/**
- * tp_message_set:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @source: a value
- *
- * Set @key in part @part of @self to have a copy of @source as its value.
- *
- * If @source represents a data structure containing handles, they should
- * all be referenced with tp_message_ref_handle() first.
- *
- * @since 0.7.21
- */
-void
-tp_message_set (TpMessage *self,
-                guint part,
-                const gchar *key,
-                const GValue *source)
-{
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-  g_return_if_fail (source != NULL);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key), tp_g_value_slice_dup (source));
-}
-
-
-/**
- * tp_message_take_message:
- * @self: a message
- * @part: a part number, which must be strictly less than the number
- *  returned by tp_message_count_parts()
- * @key: a key in the mapping representing the part
- * @message: another (distinct) message created for the same #TpBaseConnection
- *
- * Set @key in part @part of @self to have @message as an aa{sv} value (that
- * is, an array of Message_Part), and take ownership of @message.  The caller
- * should not use @message after passing it to this function.  All handle
- * references owned by @message will subsequently belong to and be released
- * with @self.
- *
- * @since 0.7.21
- */
-void
-tp_message_take_message (TpMessage *self,
-                         guint part,
-                         const gchar *key,
-                         TpMessage *message)
-{
-  guint i;
-
-  g_return_if_fail (self != NULL);
-  g_return_if_fail (part < self->parts->len);
-  g_return_if_fail (key != NULL);
-  g_return_if_fail (message != NULL);
-  g_return_if_fail (self != message);
-  g_return_if_fail (self->connection == message->connection);
-
-  g_hash_table_insert (g_ptr_array_index (self->parts, part),
-      g_strdup (key),
-      tp_g_value_slice_new_take_boxed (TP_ARRAY_TYPE_MESSAGE_PART_LIST,
-          message->parts));
-
-  /* Now that @self has stolen @message's parts, replace them with a stub to
-   * keep tp_message_destroy happy.
-   */
-  message->parts = g_ptr_array_sized_new (1);
-  g_ptr_array_add (message->parts, g_hash_table_new_full (g_str_hash,
-        g_str_equal, g_free, (GDestroyNotify) tp_g_value_slice_free));
-
-  for (i = 0; i < NUM_TP_HANDLE_TYPES; i++)
-    {
-      if (message->reffed_handles[i] != NULL)
-        tp_message_ref_handles (self, i,
-            tp_handle_set_peek (message->reffed_handles[i]));
-    }
-
-  tp_message_destroy (message);
-}
-
-
 /**
  * tp_message_mixin_get_offset_quark:
  *
@@ -803,7 +160,7 @@ tp_message_take_message (TpMessage *self,
  *
  * Returns: the quark used for storing mixin offset on a GObject
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 static GQuark
 tp_message_mixin_get_offset_quark (void)
@@ -822,7 +179,7 @@ static gint
 pending_item_id_equals_data (gconstpointer item,
                              gconstpointer data)
 {
-  const TpMessage *self = item;
+  const TpCMMessage *self = item;
   guint id = GPOINTER_TO_UINT (data);
 
   /* The sense of this comparison is correct: the callback passed to
@@ -831,182 +188,14 @@ pending_item_id_equals_data (gconstpointer item,
   return (self->incoming_id != id);
 }
 
-
-static inline void
-nullify_hash (GHashTable **hash)
-{
-  if (*hash == NULL)
-    return;
-
-  g_hash_table_destroy (*hash);
-  *hash = NULL;
-}
-
-
-static void
-subtract_from_hash (gpointer key,
-                    gpointer value,
-                    gpointer user_data)
-{
-  DEBUG ("... removing %s", (gchar *) key);
-  g_hash_table_remove (user_data, key);
-}
-
-
 static gchar *
-parts_to_text (const GPtrArray *parts,
+parts_to_text (TpMessage *msg,
                TpChannelTextMessageFlags *out_flags,
                TpChannelTextMessageType *out_type,
                TpHandle *out_sender,
                guint *out_timestamp)
 {
-  guint i;
-  GHashTable *header = g_ptr_array_index (parts, 0);
-  /* Lazily created hash tables, used as a sets: keys are borrowed
-   * "alternative" string values from @parts, value == key. */
-  /* Alternative IDs for which we have already extracted an alternative */
-  GHashTable *alternatives_used = NULL;
-  /* Alternative IDs for which we expect to extract text, but have not yet;
-   * cleared if the flag Channel_Text_Message_Flag_Non_Text_Content is set.
-   * At the end, if this contains any item not in alternatives_used,
-   * Channel_Text_Message_Flag_Non_Text_Content must be set. */
-  GHashTable *alternatives_needed = NULL;
-  GString *buffer = g_string_new ("");
-  TpChannelTextMessageFlags flags = 0;
-
-  if (tp_asv_get_boolean (header, "scrollback", NULL))
-    flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK;
-
-  if (tp_asv_get_boolean (header, "rescued", NULL))
-    flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_RESCUED;
-
-  /* If the message is on an extended interface or only contains headers,
-   * definitely set the "your client is too old" flag. */
-  if (parts->len <= 1 || g_hash_table_lookup (header, "interface") != NULL)
-    {
-      flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT;
-    }
-
-  for (i = 1; i < parts->len; i++)
-    {
-      GHashTable *part = g_ptr_array_index (parts, i);
-      const gchar *type = tp_asv_get_string (part, "content-type");
-      const gchar *alternative = tp_asv_get_string (part, "alternative");
-
-      /* Renamed to "content-type" in spec 0.17.14 */
-      if (type == NULL)
-        type = tp_asv_get_string (part, "type");
-
-      DEBUG ("Parsing part %u, type %s, alternative %s", i, type, alternative);
-
-      if (!tp_strdiff (type, "text/plain"))
-        {
-          GValue *value;
-
-          DEBUG ("... is text/plain");
-
-          if (alternative != NULL && alternative[0] != '\0')
-            {
-              if (alternatives_used == NULL)
-                {
-                  /* We can't have seen an alternative for this part yet.
-                   * However, we need to create the hash table now */
-                  alternatives_used = g_hash_table_new (g_str_hash,
-                      g_str_equal);
-                }
-              else if (g_hash_table_lookup (alternatives_used,
-                    alternative) != NULL)
-                {
-                  /* we've seen a "better" alternative for this part already.
-                   * Skip it */
-                  DEBUG ("... already saw a better alternative, skipping it");
-                  continue;
-                }
-
-              g_hash_table_insert (alternatives_used, (gpointer) alternative,
-                  (gpointer) alternative);
-            }
-
-          value = g_hash_table_lookup (part, "content");
-
-          if (value != NULL && G_VALUE_HOLDS_STRING (value))
-            {
-              DEBUG ("... using its text");
-              g_string_append (buffer, g_value_get_string (value));
-
-              value = g_hash_table_lookup (part, "truncated");
-
-              if (value != NULL && (!G_VALUE_HOLDS_BOOLEAN (value) ||
-                  g_value_get_boolean (value)))
-                {
-                  DEBUG ("... appears to have been truncated");
-                  flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED;
-                }
-            }
-          else
-            {
-              /* There was a text/plain part we couldn't parse:
-               * that counts as "non-text content" I think */
-              DEBUG ("... didn't understand it, setting NON_TEXT_CONTENT");
-              flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT;
-              nullify_hash (&alternatives_needed);
-            }
-        }
-      else if ((flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT) == 0)
-        {
-          DEBUG ("... wondering whether this is NON_TEXT_CONTENT?");
-
-          if (tp_str_empty (alternative))
-            {
-              /* This part can't possibly have a text alternative, since it
-               * isn't part of a multipart/alternative group
-               * (attached image or something, perhaps) */
-              DEBUG ("... ... yes, no possibility of a text alternative");
-              flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT;
-              nullify_hash (&alternatives_needed);
-            }
-          else if (alternatives_used != NULL &&
-              g_hash_table_lookup (alternatives_used, (gpointer) alternative)
-              != NULL)
-            {
-              DEBUG ("... ... no, we already saw a text alternative");
-            }
-          else
-            {
-              /* This part might have a text alternative later, if we're
-               * lucky */
-              if (alternatives_needed == NULL)
-                alternatives_needed = g_hash_table_new (g_str_hash,
-                    g_str_equal);
-
-              DEBUG ("... ... perhaps, but might have text alternative later");
-              g_hash_table_insert (alternatives_needed, (gpointer) alternative,
-                  (gpointer) alternative);
-            }
-        }
-    }
-
-  if ((flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT) == 0 &&
-      alternatives_needed != NULL)
-    {
-      if (alternatives_used != NULL)
-        g_hash_table_foreach (alternatives_used, subtract_from_hash,
-            alternatives_needed);
-
-      if (g_hash_table_size (alternatives_needed) > 0)
-        flags |= TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT;
-    }
-
-  if (alternatives_needed != NULL)
-    g_hash_table_destroy (alternatives_needed);
-
-  if (alternatives_used != NULL)
-    g_hash_table_destroy (alternatives_used);
-
-  if (out_flags != NULL)
-    {
-      *out_flags = flags;
-    }
+  GHashTable *header = g_ptr_array_index (msg->parts, 0);
 
   if (out_type != NULL)
     {
@@ -1035,7 +224,7 @@ parts_to_text (const GPtrArray *parts,
         *out_timestamp = time (NULL);
     }
 
-  return g_string_free (buffer, FALSE);
+  return tp_message_to_text (msg, out_flags);
 }
 
 
@@ -1068,7 +257,7 @@ parts_to_text (const GPtrArray *parts,
  * constructed callback, after tp_message_mixin_init(), and may only be called
  * once per object.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 void
 tp_message_mixin_implement_sending (GObject *object,
@@ -1118,7 +307,7 @@ tp_message_mixin_implement_sending (GObject *object,
  *     self->connection);
  * </programlisting></informalexample>
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 void
 tp_message_mixin_init (GObject *obj,
@@ -1173,7 +362,7 @@ tp_message_mixin_clear (GObject *obj)
  *
  * Free resources held by the text mixin.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 void
 tp_message_mixin_finalize (GObject *obj)
@@ -1201,7 +390,6 @@ tp_message_mixin_acknowledge_pending_messages_async (
 {
   TpMessageMixin *mixin = TP_MESSAGE_MIXIN (iface);
   GList **nodes;
-  TpMessage *item;
   guint i;
 
   nodes = g_new (GList *, ids->len);
@@ -1232,9 +420,12 @@ tp_message_mixin_acknowledge_pending_messages_async (
 
   for (i = 0; i < ids->len; i++)
     {
-      item = nodes[i]->data;
+      TpMessage *item = nodes[i]->data;
+#ifdef ENABLE_DEBUG
+      TpCMMessage *cm_msg = nodes[i]->data;
+#endif
 
-      DEBUG ("acknowledging message id %u", item->incoming_id);
+      DEBUG ("acknowledging message id %u", cm_msg->incoming_id);
 
       g_queue_remove (mixin->priv->pending, item);
       tp_message_destroy (item);
@@ -1264,6 +455,7 @@ tp_message_mixin_list_pending_messages_async (TpSvcChannelTypeText *iface,
        cur = cur->next)
     {
       TpMessage *msg = cur->data;
+      TpCMMessage *cm_msg = cur->data;
       GValue val = { 0, };
       gchar *text;
       TpChannelTextMessageFlags flags;
@@ -1271,13 +463,13 @@ tp_message_mixin_list_pending_messages_async (TpSvcChannelTypeText *iface,
       TpHandle sender;
       guint timestamp;
 
-      text = parts_to_text (msg->parts, &flags, &type, &sender, &timestamp);
+      text = parts_to_text (msg, &flags, &type, &sender, &timestamp);
 
       g_value_init (&val, pending_type);
       g_value_take_boxed (&val,
           dbus_g_type_specialized_construct (pending_type));
       dbus_g_type_struct_set (&val,
-          0, msg->incoming_id,
+          0, cm_msg->incoming_id,
           1, timestamp,
           2, sender,
           3, type,
@@ -1302,9 +494,10 @@ tp_message_mixin_list_pending_messages_async (TpSvcChannelTypeText *iface,
       while (cur != NULL)
         {
           TpMessage *msg = cur->data;
+          TpCMMessage *cm_msg = cur->data;
           GList *next = cur->next;
 
-          i = msg->incoming_id;
+          i = cm_msg->incoming_id;
           g_array_append_val (ids, i);
           g_queue_delete_link (mixin->priv->pending, cur);
           tp_message_destroy (msg);
@@ -1428,11 +621,12 @@ queue_pending (GObject *object, TpMessage *pending)
   gchar *text;
   const GHashTable *header;
   TpDeliveryStatus delivery_status;
+  TpCMMessage *cm_message = (TpCMMessage *) pending;
 
   g_queue_push_tail (mixin->priv->pending, pending);
 
-  text = parts_to_text (pending->parts, &flags, &type, &sender, &timestamp);
-  tp_svc_channel_type_text_emit_received (object, pending->incoming_id,
+  text = parts_to_text (pending, &flags, &type, &sender, &timestamp);
+  tp_svc_channel_type_text_emit_received (object, cm_message->incoming_id,
       timestamp, sender, type, flags, text);
   g_free (text);
 
@@ -1458,6 +652,10 @@ queue_pending (GObject *object, TpMessage *pending)
       if (echo != NULL)
         {
           const GHashTable *echo_header = g_ptr_array_index (echo, 1);
+          TpMessage *echo_msg;
+
+          echo_msg = _tp_cm_message_new_from_parts (mixin->priv->connection,
+              echo);
 
           /* The specification says that the timestamp in SendError should be the
            * time at which the original message was sent.  parts_to_text falls
@@ -1468,8 +666,10 @@ queue_pending (GObject *object, TpMessage *pending)
            * timestamp to be 0 if we can't determine when the original message
            * was sent.
            */
-          text = parts_to_text (echo, NULL, &type, NULL, NULL);
+          text = parts_to_text (echo_msg, NULL, &type, NULL, NULL);
           timestamp = tp_asv_get_uint32 (echo_header, "message-sent", NULL);
+
+          g_object_unref (echo_msg);
         }
       else
         {
@@ -1497,16 +697,17 @@ queue_pending (GObject *object, TpMessage *pending)
  *
  * Returns: the message ID
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 guint
 tp_message_mixin_take_received (GObject *object,
                                 TpMessage *message)
 {
   TpMessageMixin *mixin = TP_MESSAGE_MIXIN (object);
+  TpCMMessage *cm_msg = (TpCMMessage *) message;
   GHashTable *header;
 
-  g_return_val_if_fail (message->incoming_id == G_MAXUINT32, 0);
+  g_return_val_if_fail (cm_msg->incoming_id == G_MAXUINT32, 0);
   g_return_val_if_fail (message->parts->len >= 1, 0);
 
   header = g_ptr_array_index (message->parts, 0);
@@ -1516,10 +717,10 @@ tp_message_mixin_take_received (GObject *object,
 
   /* FIXME: we don't check for overflow, so in highly pathological cases we
    * might end up with multiple messages with the same ID */
-  message->incoming_id = mixin->priv->recv_id++;
+  cm_msg->incoming_id = mixin->priv->recv_id++;
 
   tp_message_set_uint32 (message, 0, "pending-message-id",
-      message->incoming_id);
+      cm_msg->incoming_id);
 
   if (tp_asv_get_uint64 (header, "message-received", NULL) == 0)
     tp_message_set_uint64 (message, 0, "message-received",
@@ -1533,7 +734,7 @@ tp_message_mixin_take_received (GObject *object,
    */
   queue_pending (object, message);
 
-  return message->incoming_id;
+  return cm_msg->incoming_id;
 }
 
 
@@ -1614,7 +815,7 @@ tp_message_mixin_set_rescued (GObject *obj)
  * the connection manager has no way to know how the keys and values will be
  * freed).
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 
 
@@ -1645,7 +846,7 @@ struct _TpMessageMixinOutgoingMessagePrivate {
  * After this function is called, @message will have been freed, and must not
  * be dereferenced.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 void
 tp_message_mixin_sent (GObject *object,
@@ -1655,14 +856,14 @@ tp_message_mixin_sent (GObject *object,
                        const GError *error)
 {
   TpMessageMixin *mixin = TP_MESSAGE_MIXIN (object);
+  TpCMMessage *cm_msg = (TpCMMessage *) message;
   time_t now = time (NULL);
 
   g_return_if_fail (mixin != NULL);
-  g_return_if_fail (object != NULL);
-  g_return_if_fail (message != NULL);
-  g_return_if_fail (message != NULL);
+  g_return_if_fail (G_IS_OBJECT (object));
+  g_return_if_fail (TP_IS_CM_MESSAGE (message));
   g_return_if_fail (message->parts != NULL);
-  g_return_if_fail (message->outgoing_context != NULL);
+  g_return_if_fail (cm_msg->outgoing_context != NULL);
   g_return_if_fail (token == NULL || error == NULL);
   g_return_if_fail (token != NULL || error != NULL);
 
@@ -1670,7 +871,7 @@ tp_message_mixin_sent (GObject *object,
     {
       GError *e = g_error_copy (error);
 
-      dbus_g_method_return_error (message->outgoing_context, e);
+      dbus_g_method_return_error (cm_msg->outgoing_context, e);
       g_error_free (e);
     }
   else
@@ -1678,34 +879,46 @@ tp_message_mixin_sent (GObject *object,
       TpChannelTextMessageType message_type;
       gchar *string;
       GHashTable *header = g_ptr_array_index (message->parts, 0);
+      TpHandle self_handle = 0;
 
       if (tp_asv_get_uint64 (header, "message-sent", NULL) == 0)
         tp_message_set_uint64 (message, 0, "message-sent", time (NULL));
+
+      if (TP_HAS_GROUP_MIXIN (object))
+        {
+          tp_group_mixin_get_self_handle (object, &self_handle, NULL);
+        }
+
+      if (self_handle == 0)
+        self_handle = tp_base_connection_get_self_handle (
+            mixin->priv->connection);
+
+      tp_cm_message_set_sender (message, self_handle);
 
       /* emit Sent and MessageSent */
 
       tp_svc_channel_interface_messages_emit_message_sent (object,
           message->parts, flags, token);
-      string = parts_to_text (message->parts, NULL, &message_type, NULL, NULL);
+      string = parts_to_text (message, NULL, &message_type, NULL, NULL);
       tp_svc_channel_type_text_emit_sent (object, now, message_type,
           string);
       g_free (string);
 
       /* return successfully */
 
-      if (message->outgoing_text_api)
+      if (cm_msg->outgoing_text_api)
         {
           tp_svc_channel_type_text_return_from_send (
-              message->outgoing_context);
+              cm_msg->outgoing_context);
         }
       else
         {
           tp_svc_channel_interface_messages_return_from_send_message (
-              message->outgoing_context, token);
+              cm_msg->outgoing_context, token);
         }
     }
 
-  message->outgoing_context = NULL;
+  cm_msg->outgoing_context = NULL;
   tp_message_destroy (message);
 }
 
@@ -1718,6 +931,7 @@ tp_message_mixin_send_async (TpSvcChannelTypeText *iface,
 {
   TpMessageMixin *mixin = TP_MESSAGE_MIXIN (iface);
   TpMessage *message;
+  TpCMMessage *cm_msg;
 
   if (mixin->priv->send_message == NULL)
     {
@@ -1725,7 +939,8 @@ tp_message_mixin_send_async (TpSvcChannelTypeText *iface,
       return;
     }
 
-  message = tp_message_new (mixin->priv->connection, 2, 2);
+  message = tp_cm_message_new (mixin->priv->connection, 2);
+  cm_msg = (TpCMMessage *) message;
 
   if (message_type != 0)
     tp_message_set_uint32 (message, 0, "message-type", message_type);
@@ -1734,8 +949,8 @@ tp_message_mixin_send_async (TpSvcChannelTypeText *iface,
   tp_message_set_string (message, 1, "type", "text/plain"); /* Removed in 0.17.14 */
   tp_message_set_string (message, 1, "content", text);
 
-  message->outgoing_context = context;
-  message->outgoing_text_api = TRUE;
+  cm_msg->outgoing_context = context;
+  cm_msg->outgoing_text_api = TRUE;
 
   mixin->priv->send_message ((GObject *) iface, message, 0);
 }
@@ -1749,6 +964,7 @@ tp_message_mixin_send_message_async (TpSvcChannelInterfaceMessages *iface,
 {
   TpMessageMixin *mixin = TP_MESSAGE_MIXIN (iface);
   TpMessage *message;
+  TpCMMessage *cm_msg;
   GHashTable *header;
   guint i;
   const char * const *iter;
@@ -1830,7 +1046,8 @@ tp_message_mixin_send_message_async (TpSvcChannelInterfaceMessages *iface,
         }
     }
 
-  message = tp_message_new (mixin->priv->connection, parts->len, parts->len);
+  message = tp_cm_message_new (mixin->priv->connection, parts->len);
+  cm_msg = (TpCMMessage *) message;
 
   for (i = 0; i < parts->len; i++)
     {
@@ -1840,8 +1057,8 @@ tp_message_mixin_send_message_async (TpSvcChannelInterfaceMessages *iface,
           (GBoxedCopyFunc) tp_g_value_slice_dup);
     }
 
-  message->outgoing_context = context;
-  message->outgoing_text_api = FALSE;
+  cm_msg->outgoing_context = context;
+  cm_msg->outgoing_text_api = FALSE;
 
   mixin->priv->send_message ((GObject *) iface, message, flags);
 }
@@ -1864,6 +1081,8 @@ tp_message_mixin_init_dbus_properties (GObjectClass *cls)
       { "PendingMessages", NULL, NULL },
       { "SupportedContentTypes", NULL, NULL },
       { "MessagePartSupportFlags", NULL, NULL },
+      { "MessageTypes", NULL, NULL },
+      { "DeliveryReportingSupport", NULL, NULL },
       { NULL }
   };
 
@@ -1899,6 +1118,7 @@ tp_message_mixin_get_dbus_property (GObject *object,
   static GQuark q_supported_content_types = 0;
   static GQuark q_message_part_support_flags = 0;
   static GQuark q_delivery_reporting_support_flags = 0;
+  static GQuark q_message_types = 0;
 
   if (G_UNLIKELY (q_pending_messages == 0))
     {
@@ -1908,7 +1128,9 @@ tp_message_mixin_get_dbus_property (GObject *object,
       q_message_part_support_flags =
           g_quark_from_static_string ("MessagePartSupportFlags");
       q_delivery_reporting_support_flags =
-          g_quark_from_static_string ("DeliveryReportingSupportFlags");
+          g_quark_from_static_string ("DeliveryReportingSupport");
+      q_message_types =
+          g_quark_from_static_string ("MessageTypes");
     }
 
   mixin = TP_MESSAGE_MIXIN (object);
@@ -1950,6 +1172,10 @@ tp_message_mixin_get_dbus_property (GObject *object,
     {
       g_value_set_boxed (value, mixin->priv->supported_content_types);
     }
+  else if (name == q_message_types)
+    {
+      g_value_set_boxed (value, mixin->priv->msg_types);
+    }
 }
 
 
@@ -1961,7 +1187,7 @@ tp_message_mixin_get_dbus_property (GObject *object,
  * Fill in this mixin's Text method implementations in the given interface
  * vtable.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 void
 tp_message_mixin_text_iface_init (gpointer g_iface,
@@ -1987,7 +1213,7 @@ tp_message_mixin_text_iface_init (gpointer g_iface,
  * Fill in this mixin's Messages method implementations in the given interface
  * vtable.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 void
 tp_message_mixin_messages_iface_init (gpointer g_iface,

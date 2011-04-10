@@ -2,6 +2,8 @@
  * util.c - Source for telepathy-glib utility functions
  * Copyright © 2006-2010 Collabora Ltd. <http://www.collabora.co.uk/>
  * Copyright © 2006-2008 Nokia Corporation
+ * Copyright © 1999 Tom Tromey
+ * Copyright © 2000 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,11 +29,19 @@
  * GLib, but aren't.
  */
 
+#include <config.h>
+
 #include <gobject/gvaluecollector.h>
+
+#ifdef HAVE_GIO_UNIX
+#include <gio/gunixsocketaddress.h>
+#include <gio/gunixconnection.h>
+#endif /* HAVE_GIO_UNIX */
 
 #include <telepathy-glib/util-internal.h>
 #include <telepathy-glib/util.h>
 
+#include <stdio.h>
 #include <string.h>
 
 #define DEBUG_FLAG TP_DEBUG_MISC
@@ -112,6 +122,8 @@ tp_g_ptr_array_contains (GPtrArray *haystack, gpointer needle)
 {
   guint i;
 
+  g_return_val_if_fail (haystack != NULL, FALSE);
+
   for (i = 0; i < haystack->len; i++)
     {
       if (g_ptr_array_index (haystack, i) == needle)
@@ -121,6 +133,38 @@ tp_g_ptr_array_contains (GPtrArray *haystack, gpointer needle)
   return FALSE;
 }
 
+static void
+add_to_array (gpointer data,
+    gpointer user_data)
+{
+  g_ptr_array_add (user_data, data);
+}
+
+/**
+ * tp_g_ptr_array_extend:
+ * @target: a #GPtrArray to copy items to
+ * @source: a #GPtrArray to copy items from
+ *
+ * Appends all elements of @source to @target. Note that this only copies the
+ * pointers from @source; any duplication or reference-incrementing must be
+ * performed by the caller.
+ *
+ * After this function has been called, it is safe to call
+ * g_ptr_array_free() on @source and also free the actual pointer array,
+ * as long as doing so does not free the data pointed to by the new
+ * items in @target.
+ *
+ * Since: 0.14.3
+ */
+void
+tp_g_ptr_array_extend (GPtrArray *target,
+    GPtrArray *source)
+{
+  g_return_if_fail (source != NULL);
+  g_return_if_fail (target != NULL);
+
+  g_ptr_array_foreach (source, add_to_array, target);
+}
 
 /**
  * tp_g_value_slice_new:
@@ -548,14 +592,7 @@ tp_g_hash_table_update (GHashTable *target,
 gboolean
 tp_strdiff (const gchar *left, const gchar *right)
 {
-  if ((NULL == left) != (NULL == right))
-    return TRUE;
-
-  else if (left == right)
-    return FALSE;
-
-  else
-    return (0 != strcmp (left, right));
+  return g_strcmp0 (left, right) != 0;
 }
 
 
@@ -587,7 +624,11 @@ tp_mixin_offset_cast (gpointer instance, guint offset)
  *
  * If the type of @instance, or any of its ancestor types, has had an offset
  * attached using qdata with the given @quark, return that offset. If not,
- * this indicates a programming error and results are undefined.
+ * return 0.
+ *
+ * In older telepathy-glib versions, calling this function on an instance that
+ * did not have the mixin was considered to be a programming error. Since
+ * version 0.13.9, 0 is returned, without error.
  *
  * This is used to implement the telepathy-glib mixin classes.
  *
@@ -609,7 +650,7 @@ tp_mixin_instance_get_offset (gpointer instance,
         return GPOINTER_TO_UINT (qdata);
     }
 
-  g_return_val_if_reached (0);
+  return 0;
 }
 
 
@@ -619,8 +660,12 @@ tp_mixin_instance_get_offset (gpointer instance,
  * @quark: A quark that was used to store the offset with g_type_set_qdata()
  *
  * If the type of @klass, or any of its ancestor types, has had an offset
- * attached using qdata with the given @quark, return that offset. If not,
- * this indicates a programming error and results are undefined.
+ * attached using qdata with the given @quark, return that offset; if not,
+ * return 0.
+ *
+ * In older telepathy-glib versions, calling this function on an instance that
+ * did not have the mixin was considered to be a programming error. Since
+ * version 0.13.9, 0 is returned, without error.
  *
  * This is used to implement the telepathy-glib mixin classes.
  *
@@ -642,7 +687,7 @@ tp_mixin_class_get_offset (gpointer klass,
         return GPOINTER_TO_UINT (qdata);
     }
 
-  g_return_val_if_reached (0);
+  return 0;
 }
 
 
@@ -977,6 +1022,8 @@ tp_g_signal_connect_object (gpointer instance,
   g_return_val_if_fail (detailed_signal != NULL, 0);
   g_return_val_if_fail (c_handler != NULL, 0);
   g_return_val_if_fail (G_IS_OBJECT (gobject), 0);
+  g_return_val_if_fail (
+      (connect_flags & ~(G_CONNECT_AFTER|G_CONNECT_SWAPPED)) == 0, 0);
 
   if (connect_flags & G_CONNECT_SWAPPED)
     ctx->closure = g_cclosure_new_object_swap (c_handler, gobject);
@@ -1264,8 +1311,7 @@ tp_weak_ref_destroy (TpWeakRef *self)
 
 /**
  * tp_clear_object: (skip)
- * @op: (allow-none): a pointer to a variable, struct member etc. holding a
- *  #GObject
+ * @op: a pointer to a variable, struct member etc. holding a #GObject
  *
  * Set a variable holding a #GObject to %NULL. If it was not already %NULL,
  * unref the object it previously pointed to.
@@ -1278,8 +1324,7 @@ tp_weak_ref_destroy (TpWeakRef *self)
 
 /**
  * tp_clear_pointer: (skip)
- * @pp: (allow-none): a pointer to a variable, struct member etc. holding a
- *  pointer
+ * @pp: a pointer to a variable, struct member etc. holding a pointer
  * @destroy: a function to which a gpointer can be passed, to destroy *@pp
  *  (if calling this macro from C++, explicitly casting the function to
  *  #GDestroyNotify may be necessary)
@@ -1287,7 +1332,7 @@ tp_weak_ref_destroy (TpWeakRef *self)
  * Set a variable holding a pointer to %NULL. If it was not already %NULL,
  * unref or destroy the object it previously pointed to with @destroy.
  *
- * More precisely, if both @pp and *@pp are non-%NULL, set *@pp to %NULL, then
+ * More precisely, if *@pp is non-%NULL, set *@pp to %NULL, then
  * call @destroy on the object that *@pp previously pointed to.
  *
  * This is analogous to g_clear_error() for non-error objects, but also
@@ -1318,14 +1363,13 @@ tp_weak_ref_destroy (TpWeakRef *self)
 /**
  * tp_clear_boxed: (skip)
  * @gtype: (type GObject.Type): the #GType of *@pp, e.g. %G_TYPE_HASH_TABLE
- * @pp: (allow-none): a pointer to a variable, struct member etc. holding a
- *  boxed object
+ * @pp: a pointer to a variable, struct member etc. holding a boxed object
  *
  * Set a variable holding a boxed object to %NULL. If it was not already %NULL,
  * destroy the boxed object it previously pointed to, as appropriate for
  * @gtype.
  *
- * More precisely, if both @pp and *@pp are non-%NULL, set *@pp to %NULL, then
+ * More precisely, if *@pp is non-%NULL, set *@pp to %NULL, then
  * call g_boxed_free() on the object that *@pp previously pointed to.
  *
  * This is similar to tp_clear_pointer(); see that function's documentation
@@ -1364,4 +1408,269 @@ tp_simple_async_report_success_in_idle (GObject *source,
   simple = g_simple_async_result_new (source, callback, user_data, source_tag);
   g_simple_async_result_complete_in_idle (simple);
   g_object_unref (simple);
+}
+
+/**
+ * tp_user_action_time_from_x11:
+ * @x11_time: an X11 timestamp, or 0 to indicate the current time
+ *
+ * Convert an X11 timestamp into a user action time as used in Telepathy.
+ *
+ * This also works for the timestamps used by Gdk 2.x and Clutter 1.0;
+ * it may or may not work with other toolkits or versions.
+ *
+ * Returns: a nonzero Telepathy user action time, or
+ *  %TP_USER_ACTION_TIME_CURRENT_TIME
+ *
+ * Since: 0.11.13
+ */
+gint64
+tp_user_action_time_from_x11 (guint32 x11_time)
+{
+  if (x11_time == 0)
+    {
+      return TP_USER_ACTION_TIME_CURRENT_TIME;
+    }
+
+  return x11_time;
+}
+
+/**
+ * tp_user_action_time_should_present:
+ * @user_action_time: (type gint64): the Telepathy user action time
+ * @x11_time: (out) (allow-none): a pointer to guint32 used to
+ *  return an X11 timestamp, or 0 to indicate the current time; if
+ *  %FALSE is returned, the value placed here is not meaningful
+ *
+ * Interpret a Telepathy user action time to decide whether a Handler should
+ * attempt to gain focus. If %TRUE is returned, it would be appropriate to
+ * call gtk_window_present_with_time() using @x11_time as input, for instance.
+ *
+ * @x11_time is used to return a timestamp in the right format for X11,
+ * Gdk 2.x and Clutter 1.0; it may or may not work with other toolkits or
+ * versions.
+ *
+ * Returns: %TRUE if it would be appropriate to present a window
+ *
+ * Since: 0.11.13
+ */
+
+gboolean
+tp_user_action_time_should_present (gint64 user_action_time,
+    guint32 *x11_time)
+{
+  guint32 when = 0;
+  gboolean ret;
+
+  if (user_action_time > 0 && user_action_time <= G_MAXUINT32)
+    {
+      when = (guint32) user_action_time;
+      ret = TRUE;
+    }
+  else if (user_action_time == TP_USER_ACTION_TIME_CURRENT_TIME)
+    {
+      ret = TRUE;
+    }
+  else
+    {
+      ret = FALSE;
+    }
+
+  if (ret && x11_time != NULL)
+    *x11_time = when;
+
+  return ret;
+}
+
+/* Add each of @quarks to @array if it isn't already present.
+ *
+ * There are @n quarks, or if @n == -1, the array is 0-terminated. */
+void
+_tp_quark_array_merge (GArray *array,
+    const GQuark *quarks,
+    gssize n)
+{
+  gssize i;
+  guint j;
+
+  g_return_if_fail (array != NULL);
+  g_return_if_fail (g_array_get_element_size (array) == sizeof (GQuark));
+  g_return_if_fail (n >= -1);
+  g_return_if_fail (n <= 0 || quarks != NULL);
+
+  if (quarks == NULL || n == 0)
+    return;
+
+  if (n < 0)
+    {
+      n = 0;
+
+      for (i = 0; quarks[i] != 0; i++)
+        n++;
+    }
+  else
+    {
+      for (i = 0; i < n; i++)
+        g_return_if_fail (quarks[i] != 0);
+    }
+
+  if (array->len == 0)
+    {
+      /* fast-path for the common case: there's nothing to merge with */
+      g_array_append_vals (array, quarks, n);
+      return;
+    }
+
+  for (i = 0; i < n; i++)
+    {
+      for (j = 0; j < array->len; j++)
+        {
+          if (g_array_index (array, GQuark, j) == quarks[i])
+            goto next_i;
+        }
+
+      g_array_append_val (array, quarks[i]);
+next_i:
+      continue;
+    }
+}
+
+#ifdef HAVE_GIO_UNIX
+GSocketAddress *
+_tp_create_temp_unix_socket (GSocketService *service,
+    GError **error)
+{
+  guint i;
+  GSocketAddress *address;
+
+  /* why doesn't GIO provide a method to create a socket we don't
+   * care about? Iterate until we find a valid temporary name.
+   *
+   * Try a maximum of 10 times to get a socket */
+  for (i = 0; i < 10; i++)
+    {
+      address = g_unix_socket_address_new (tmpnam (NULL));
+
+      g_clear_error (error);
+
+      if (g_socket_listener_add_address (
+            G_SOCKET_LISTENER (service),
+            address, G_SOCKET_TYPE_STREAM,
+            G_SOCKET_PROTOCOL_DEFAULT,
+            NULL, NULL, error))
+        return address;
+      else
+        g_object_unref (address);
+    }
+
+  return NULL;
+}
+#endif /* HAVE_GIO_UNIX */
+
+GList *
+_tp_create_channel_request_list (TpDBusDaemon *dbus,
+    GHashTable *request_props)
+{
+  GHashTableIter iter;
+  GList *result = NULL;
+  gpointer key, value;
+
+  g_hash_table_iter_init (&iter, request_props);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      TpChannelRequest *req;
+      const gchar *path = key;
+      GHashTable *props = value;
+      GError *error = NULL;
+
+      req = tp_channel_request_new (dbus, path, props, &error);
+      if (req == NULL)
+        {
+          DEBUG ("Failed to create TpChannelRequest: %s", error->message);
+          g_error_free (error);
+          continue;
+        }
+
+      result = g_list_prepend (result, req);
+    }
+
+  return result;
+}
+
+/**
+ * tp_utf8_make_valid:
+ * @name: string to coerce into UTF8
+ *
+ * Validate that the provided string is valid UTF8. If not,
+ * replace all invalid bytes with unicode replacement
+ * character (U+FFFD).
+ *
+ * This method is a verbatim copy of glib's internal
+ * _g_utf8_make_valid() function, and will be deprecated as
+ * soon as the glib one becomes public.
+ *
+ * Returns: a new valid UTF8 string
+ *
+ * Since: 0.13.15
+ */
+gchar *
+tp_utf8_make_valid (const gchar *name)
+{
+  GString *string;
+  const gchar *remainder, *invalid;
+  gint remaining_bytes, valid_bytes;
+
+  g_return_val_if_fail (name != NULL, NULL);
+
+  string = NULL;
+  remainder = name;
+  remaining_bytes = strlen (name);
+
+  while (remaining_bytes != 0)
+    {
+      if (g_utf8_validate (remainder, remaining_bytes, &invalid))
+        break;
+      valid_bytes = invalid - remainder;
+
+      if (string == NULL)
+        string = g_string_sized_new (remaining_bytes);
+
+      g_string_append_len (string, remainder, valid_bytes);
+      /* append U+FFFD REPLACEMENT CHARACTER */
+      g_string_append (string, "\357\277\275");
+
+      remaining_bytes -= valid_bytes + 1;
+      remainder = invalid + 1;
+    }
+
+  if (string == NULL)
+    return g_strdup (name);
+
+  g_string_append (string, remainder);
+
+  g_assert (g_utf8_validate (string->str, -1, NULL));
+
+  return g_string_free (string, FALSE);
+}
+
+gboolean
+_tp_bind_connection_status_to_boolean (GBinding *binding,
+    const GValue *src_value,
+    GValue *dest_value,
+    gpointer user_data)
+{
+  gboolean invert = GPOINTER_TO_UINT (user_data);
+  gboolean value;
+
+  g_return_val_if_fail (G_VALUE_HOLDS_UINT (src_value), FALSE);
+  g_return_val_if_fail (G_VALUE_HOLDS_BOOLEAN (dest_value), FALSE);
+
+  value = (g_value_get_uint (src_value) == TP_CONNECTION_STATUS_CONNECTED);
+
+  if (invert)
+    value = !value;
+
+  g_value_set_boolean (dest_value, value);
+
+  return TRUE;
 }

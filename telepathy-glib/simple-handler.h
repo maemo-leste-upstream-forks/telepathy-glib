@@ -63,7 +63,7 @@ GType tp_simple_handler_get_type (void);
                               TpSimpleHandlerClass))
 
 typedef void (*TpSimpleHandlerHandleChannelsImpl) (
-    TpSimpleHandler *self,
+    TpSimpleHandler *handler,
     TpAccount *account,
     TpConnection *connection,
     GList *channels,
@@ -76,7 +76,16 @@ TpBaseClient * tp_simple_handler_new (TpDBusDaemon *dbus,
     gboolean bypass_approval,
     gboolean requests,
     const gchar *name,
-    gboolean unique,
+    gboolean uniquify,
+    TpSimpleHandlerHandleChannelsImpl callback,
+    gpointer user_data,
+    GDestroyNotify destroy);
+
+TpBaseClient *tp_simple_handler_new_with_am (TpAccountManager *account_manager,
+    gboolean bypass_approval,
+    gboolean requests,
+    const gchar *name,
+    gboolean uniquify,
     TpSimpleHandlerHandleChannelsImpl callback,
     gpointer user_data,
     GDestroyNotify destroy);

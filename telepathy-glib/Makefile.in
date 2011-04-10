@@ -68,7 +68,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/tp-compiler-flag.m4 \
 	$(top_srcdir)/m4/tp-compiler-warnings.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/tp-linker-flag.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -103,24 +103,33 @@ LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
-	account-manager.lo add-dispatch-operation-context.lo \
-	base-client.lo base-connection.lo base-connection-manager.lo \
-	base-protocol.lo capabilities.lo channel.lo channel-group.lo \
-	channel-dispatcher.lo channel-dispatch-operation.lo \
-	channel-manager.lo channel-request.lo client.lo connection.lo \
-	connection-avatars.lo connection-contact-info.lo \
-	connection-handles.lo connection-manager.lo contact.lo \
-	contacts-mixin.lo dbus.lo dbus-daemon.lo \
-	dbus-properties-mixin.lo debug.lo debug-sender.lo \
-	interfaces.lo errors.lo exportable-channel.lo gnio-util.lo \
-	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
-	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
-	handle-set.lo heap.lo intset.lo channel-iface.lo \
-	channel-factory-iface.lo media-interfaces.lo message-mixin.lo \
+	account-channel-request.lo account-manager.lo \
+	automatic-proxy-factory.lo add-dispatch-operation-context.lo \
+	base-channel.lo base-client.lo base-connection.lo \
+	base-connection-manager.lo base-password-channel.lo \
+	base-protocol.lo basic-proxy-factory.lo capabilities.lo \
+	channel.lo channel-group.lo channel-dispatcher.lo \
+	channel-dispatch-operation.lo channel-manager.lo \
+	channel-request.lo client.lo client-channel-factory.lo \
+	client-message.lo connection.lo connection-avatars.lo \
+	connection-contact-info.lo connection-handles.lo \
+	connection-manager.lo contact.lo contact-list-channel.lo \
+	contact-search.lo contact-search-result.lo \
+	base-contact-list.lo cm-message.lo contacts-mixin.lo dbus.lo \
+	dbus-daemon.lo dbus-properties-mixin.lo debug.lo \
+	debug-sender.lo dtmf.lo interfaces.lo errors.lo \
+	exportable-channel.lo gnio-util.lo group-mixin.lo gtypes.lo \
+	handle.lo handle-channels-context.lo handle-repo.lo \
+	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
+	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
+	media-interfaces.lo message.lo message-mixin.lo \
 	observe-channels-context.lo presence-mixin.lo \
 	properties-mixin.lo protocol.lo proxy.lo proxy-methods.lo \
-	proxy-signals.lo run.lo simple-approver.lo simple-handler.lo \
-	simple-observer.lo text-mixin.lo util.lo
+	proxy-signals.lo run.lo signalled-message.lo \
+	simple-approver.lo simple-handler.lo simple-observer.lo \
+	simple-password-manager.lo stream-tube-channel.lo \
+	stream-tube-connection.lo text-channel.lo text-mixin.lo \
+	util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	signals-marshal.lo genums.lo tp-svc-account.lo \
 	tp-svc-account-manager.lo tp-svc-channel.lo \
@@ -129,7 +138,7 @@ nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	tp-svc-client.lo tp-svc-connection.lo \
 	tp-svc-connection-manager.lo tp-svc-debug.lo tp-svc-generic.lo \
 	tp-svc-media-session-handler.lo tp-svc-media-stream-handler.lo \
-	tp-svc-protocol.lo
+	tp-svc-protocol.lo tp-svc-tls-cert.lo
 libtelepathy_glib_internal_la_OBJECTS =  \
 	$(am_libtelepathy_glib_internal_la_OBJECTS) \
 	$(nodist_libtelepathy_glib_internal_la_OBJECTS)
@@ -222,7 +231,6 @@ GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
-HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
 HAVE_VALA = @HAVE_VALA@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -278,8 +286,6 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 VALAC = @VALAC@
 VALAFLAGS = @VALAFLAGS@
-VALA_CFLAGS = @VALA_CFLAGS@
-VALA_LIBS = @VALA_LIBS@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
 VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
@@ -363,12 +369,17 @@ noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 # headers that are subject to coding-style checks
 our_headers = \
     account.h \
+    account-channel-request.h \
     account-manager.h \
+    automatic-proxy-factory.h \
     add-dispatch-operation-context.h \
     base-client.h \
+    base-channel.h \
     base-connection.h \
     base-connection-manager.h \
+    base-password-channel.h \
     base-protocol.h \
+    basic-proxy-factory.h \
     channel.h \
     channel-iface.h \
     channel-dispatcher.h \
@@ -377,10 +388,16 @@ our_headers = \
     channel-manager.h \
     channel-request.h \
     client.h \
+    client-channel-factory.h \
+    client-message.h \
+    cm-message.h \
     connection.h \
     connection-manager.h \
+    contact-search.h \
+    contact-search-result.h \
     capabilities.h \
     contact.h \
+    base-contact-list.h \
     contacts-mixin.h \
     dbus.h \
     dbus-daemon.h \
@@ -389,6 +406,7 @@ our_headers = \
     debug.h \
     debug-sender.h \
     debug-ansi.h \
+    dtmf.h \
     enums.h \
     errors.h \
     exportable-channel.h \
@@ -404,6 +422,7 @@ our_headers = \
     interfaces.h \
     intset.h \
     media-interfaces.h \
+    message.h \
     message-mixin.h \
     observe-channels-context.h \
     presence-mixin.h \
@@ -412,9 +431,13 @@ our_headers = \
     proxy.h \
     proxy-subclass.h \
     run.h \
+    signalled-message.h \
     simple-approver.h \
     simple-handler.h \
     simple-observer.h \
+    simple-password-manager.h \
+    stream-tube-channel.h \
+    stream-tube-connection.h \
     svc-account.h \
     svc-account-manager.h \
     svc-channel-dispatcher.h \
@@ -429,7 +452,9 @@ our_headers = \
     svc-media-interfaces.h \
     svc-properties-interface.h \
     svc-protocol.h \
+    svc-tls.h \
     telepathy-glib.h \
+    text-channel.h \
     text-mixin.h \
     util.h
 
@@ -446,16 +471,23 @@ check_c_sources = \
 libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)
 libtelepathy_glib_internal_la_SOURCES = \
     account.c \
+    account-channel-request.c \
     account-internal.h \
     account-manager.c \
     account-manager-internal.h \
+    automatic-proxy-factory.c \
     add-dispatch-operation-context-internal.h \
     add-dispatch-operation-context.c \
+    base-channel.c \
     base-client.c \
+    base-client-internal.h \
     base-connection.c \
+    base-connection-internal.h \
     base-connection-manager.c \
+    base-password-channel.c \
     base-protocol-internal.h \
     base-protocol.c \
+    basic-proxy-factory.c \
     capabilities.c \
     capabilities-internal.h \
     channel.c \
@@ -467,6 +499,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-manager.c \
     channel-request.c \
     client.c \
+    client-channel-factory.c \
+    client-message.c \
+    client-message-internal.h \
     connection.c \
     connection-avatars.c \
     connection-contact-info.c \
@@ -474,6 +509,15 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection-handles.c \
     connection-manager.c \
     contact.c \
+    contact-list-channel-internal.h \
+    contact-list-channel.c \
+    contact-search.c \
+    contact-search-internal.h \
+    contact-search-result.c \
+    base-contact-list.c \
+    base-contact-list-internal.h \
+    cm-message.c \
+    cm-message-internal.h \
     contacts-mixin.c \
     dbus.c \
     dbus-daemon.c \
@@ -481,6 +525,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-properties-mixin.c \
     debug.c \
     debug-sender.c \
+    dtmf.c \
     interfaces.c \
     debug-internal.h \
     errors.c \
@@ -501,6 +546,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-iface.c \
     channel-factory-iface.c \
     media-interfaces.c \
+    message.c \
+    message-internal.h \
     message-mixin.c \
     observe-channels-context-internal.h \
     observe-channels-context.c \
@@ -514,9 +561,16 @@ libtelepathy_glib_internal_la_SOURCES = \
     proxy-signals.c \
     run.c \
     signals-marshal.list \
+    signalled-message.c \
+    signalled-message-internal.h \
     simple-approver.c \
     simple-handler.c \
     simple-observer.c \
+    simple-password-manager.c \
+    stream-tube-channel.c \
+    stream-tube-connection-internal.h \
+    stream-tube-connection.c \
+    text-channel.c \
     text-mixin.c \
     util.c \
     util-internal.h
@@ -526,9 +580,12 @@ AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     @DBUS_CFLAGS@ \
     @GLIB_CFLAGS@ \
-    @HANDLE_LEAK_DEBUG_CFLAGS@ \
     -I$(top_builddir) \
     -I$(top_srcdir)
+
+AM_LDFLAGS = \
+    $(ERROR_LDFLAGS) \
+    $(NULL)
 
 ALL_LIBS = \
     @DBUS_LIBS@ \
@@ -578,13 +635,37 @@ ABI_LISTS = \
     versions/0.11.6.abi \
     versions/0.11.7.abi \
     versions/0.11.9.abi \
-    versions/0.11.11.abi
+    versions/0.11.11.abi \
+    versions/0.11.12.abi \
+    versions/0.11.13.abi \
+    versions/0.11.14.abi \
+    versions/0.11.15.abi \
+    versions/0.11.16.abi \
+    versions/0.13.0.abi \
+    versions/0.13.1.abi \
+    versions/0.13.2.abi \
+    versions/0.13.3.abi \
+    versions/0.13.4.abi \
+    versions/0.13.5.abi \
+    versions/0.13.7.abi \
+    versions/0.13.8.abi \
+    versions/0.13.9.abi \
+    versions/0.13.10.abi \
+    versions/0.13.11.abi \
+    versions/0.13.12.abi \
+    versions/0.13.13.abi \
+    versions/0.13.14.abi \
+    versions/0.13.15.abi \
+    versions/0.13.16.abi \
+    versions/0.14.1.abi \
+    versions/0.14.3.abi \
+    $(NULL)
 
 
 # The quoting here is unnecessary but harmless, and has the useful side-effect
 # that vim quickfix mode (:make) doesn't interpret the libtool --mode=link
 # command as an error message in a bizarrely named file
-libtelepathy_glib_la_LDFLAGS = -version-info \
+libtelepathy_glib_la_LDFLAGS = $(AM_LDFLAGS) -version-info \
 	"$(LT_CURRENT)":"$(LT_REVISION)":"$(LT_AGE)" $(am__append_3) \
 	$(am__append_4)
 libtelepathy_glib_la_LIBADD = libtelepathy-glib-internal.la
@@ -620,7 +701,8 @@ codegen_extra_dist = \
     media-session-handler.xml \
     media-stream-handler.xml \
     protocol.xml \
-    stable-interfaces.xml
+    stable-interfaces.xml \
+    tls-cert.xml
 
 codegen_sources = \
     $(nodist_libtelepathy_glib_internal_la_SOURCES) \
@@ -662,7 +744,8 @@ nodist_geninclude_HEADERS = \
     _gen/tp-svc-generic.h \
     _gen/tp-svc-media-session-handler.h \
     _gen/tp-svc-media-stream-handler.h \
-    _gen/tp-svc-protocol.h
+    _gen/tp-svc-protocol.h \
+    _gen/tp-svc-tls-cert.h
 
 nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/error-str.c \
@@ -701,30 +784,41 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/tp-svc-generic.c \
     _gen/tp-svc-media-session-handler.c \
     _gen/tp-svc-media-stream-handler.c \
-    _gen/tp-svc-protocol.c
+    _gen/tp-svc-protocol.c \
+    _gen/tp-svc-tls-cert.c
 
 
 # Generated stuff
 DROP_NAMESPACE = sed -e 's@xmlns:tp="http://telepathy\.freedesktop\.org/wiki/DbusSpec.extensions-v0"@@g'
 tools_dir = $(top_srcdir)/tools
-introspection_extra_dist = kludge-616375.xsl
+introspection_extra_dist = \
+	TelepathyGLib-0.12.metadata \
+	kludge.xsl \
+	$(NULL)
+
 @HAVE_INTROSPECTION_TRUE@INTROSPECTION_FILES = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-channel-request.c $(srcdir)/account-channel-request.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-manager.c $(srcdir)/account-manager.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/automatic-proxy-factory.c $(srcdir)/automatic-proxy-factory.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/basic-proxy-factory.c $(srcdir)/basic-proxy-factory.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/client-channel-factory.c $(srcdir)/client-channel-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection.c $(srcdir)/connection.h \
-@HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-handles.c \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-handles.c $(srcdir)/connection-contact-info.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-manager.c $(srcdir)/connection-manager.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel.c $(srcdir)/channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle.c $(srcdir)/handle.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-channels-context.c $(srcdir)/handle-channels-context.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-daemon.c $(srcdir)/dbus-daemon.h \
-@HAVE_INTROSPECTION_TRUE@	$(srcdir)/interfaces.c $(srcdir)/interfaces.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/interfaces.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/intset.c $(srcdir)/intset.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus.c $(srcdir)/dbus.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/capabilities.c $(srcdir)/capabilities.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact.c $(srcdir)/contact.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact-search.c $(srcdir)/contact-search.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact-search-result.c $(srcdir)/contact-search-result.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/defs.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/debug.c $(srcdir)/debug.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-client.c $(srcdir)/base-client.h \
@@ -732,6 +826,9 @@ introspection_extra_dist = kludge-616375.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-handler.c $(srcdir)/simple-handler.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-observer.c $(srcdir)/simple-observer.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-properties-mixin.c $(srcdir)/dbus-properties-mixin.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/contacts-mixin.c $(srcdir)/contacts-mixin.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/group-mixin.c $(srcdir)/group-mixin.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/presence-mixin.c $(srcdir)/presence-mixin.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-dispatch-operation.c $(srcdir)/channel-dispatch-operation.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-request.c $(srcdir)/channel-request.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/observe-channels-context.c $(srcdir)/observe-channels-context.h \
@@ -739,8 +836,16 @@ introspection_extra_dist = kludge-616375.xsl
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-connection.c $(srcdir)/base-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-repo.c $(srcdir)/handle-repo.h $(srcdir)/handle-set.c \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-channel.c $(srcdir)/stream-tube-channel.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-connection.c $(srcdir)/stream-tube-connection.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/text-channel.c $(srcdir)/text-channel.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/client-message.c $(srcdir)/client-message.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/message.c $(srcdir)/message.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/signalled-message.c $(srcdir)/signalled-message.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/errors.c $(srcdir)/errors.h \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h \
-@HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h
+@HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h \
+@HAVE_INTROSPECTION_TRUE@	$(NULL)
 
 @HAVE_INTROSPECTION_TRUE@girdir = $(datadir)/gir-1.0
 @HAVE_INTROSPECTION_TRUE@gir_DATA = TelepathyGLib-0.12.gir
@@ -836,13 +941,19 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-channel-request.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/add-dispatch-operation-context.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/automatic-proxy-factory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-contact-list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-password-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-protocol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic-proxy-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatch-operation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Plo@am__quote@
@@ -852,12 +963,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-request.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-channel-factory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm-message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-avatars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-list-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-search-result.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-search.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-daemon.Plo@am__quote@
@@ -865,6 +982,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-sender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtmf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-str.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exportable-channel.Plo@am__quote@
@@ -883,6 +1001,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/media-interfaces.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message-mixin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observe-channels-context.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/presence-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties-mixin.Plo@am__quote@
@@ -891,10 +1010,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/run.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalled-message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-password-manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream-tube-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream-tube-connection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-account-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-account.Plo@am__quote@
@@ -910,6 +1034,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-session-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-media-stream-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-protocol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tp-svc-tls-cert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 
 .c.o:
@@ -1071,6 +1196,14 @@ tp-svc-protocol.lo: _gen/tp-svc-protocol.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-protocol.c' object='tp-svc-protocol.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-protocol.lo `test -f '_gen/tp-svc-protocol.c' || echo '$(srcdir)/'`_gen/tp-svc-protocol.c
+
+tp-svc-tls-cert.lo: _gen/tp-svc-tls-cert.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tp-svc-tls-cert.lo -MD -MP -MF $(DEPDIR)/tp-svc-tls-cert.Tpo -c -o tp-svc-tls-cert.lo `test -f '_gen/tp-svc-tls-cert.c' || echo '$(srcdir)/'`_gen/tp-svc-tls-cert.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tp-svc-tls-cert.Tpo $(DEPDIR)/tp-svc-tls-cert.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='_gen/tp-svc-tls-cert.c' object='tp-svc-tls-cert.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tp-svc-tls-cert.lo `test -f '_gen/tp-svc-tls-cert.c' || echo '$(srcdir)/'`_gen/tp-svc-tls-cert.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1299,7 +1432,7 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
@@ -1375,7 +1508,7 @@ uninstall-am: uninstall-girDATA uninstall-libLTLIBRARIES \
 .MAKE: all check check-am install install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am check-local clean \
-	clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-local \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
@@ -1401,6 +1534,9 @@ check-syntax:
 
 distclean-local:
 	rm -rf _gen
+
+clean-local:
+	rm -rf tmp-introspect*
 check-coding-style:
 	@fail=0; \
 	if test -n "$(check_misc_sources)"; then \
@@ -1607,12 +1743,12 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib-0.12.gir: $(INTROSPECTION_SCANNER) \
 @HAVE_INTROSPECTION_TRUE@		libtelepathy-glib.la \
-@HAVE_INTROSPECTION_TRUE@		$(srcdir)/kludge-616375.xsl \
+@HAVE_INTROSPECTION_TRUE@		$(srcdir)/kludge.xsl \
 @HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
 @HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 @HAVE_INTROSPECTION_TRUE@		--namespace TelepathyGLib \
 @HAVE_INTROSPECTION_TRUE@		--nsversion=0.12 \
-@HAVE_INTROSPECTION_TRUE@		--strip-prefix=tp \
+@HAVE_INTROSPECTION_TRUE@		--identifier-prefix=Tp \
 @HAVE_INTROSPECTION_TRUE@		-I$(top_builddir) \
 @HAVE_INTROSPECTION_TRUE@		-I$(top_srcdir) \
 @HAVE_INTROSPECTION_TRUE@		--include=GLib-2.0 \
@@ -1621,9 +1757,12 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 @HAVE_INTROSPECTION_TRUE@		--library=libtelepathy-glib.la \
 @HAVE_INTROSPECTION_TRUE@		--pkg gio-2.0 \
 @HAVE_INTROSPECTION_TRUE@		--pkg dbus-glib-1 \
+@HAVE_INTROSPECTION_TRUE@		--pkg-export telepathy-glib \
+@HAVE_INTROSPECTION_TRUE@		--c-include="telepathy-glib/telepathy-glib.h" \
+@HAVE_INTROSPECTION_TRUE@		--warn-all \
 @HAVE_INTROSPECTION_TRUE@		--output _gen/$@.tmp \
 @HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
-@HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge-616375.xsl _gen/$@.tmp > $@
+@HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge.xsl _gen/$@.tmp > $@
 @HAVE_INTROSPECTION_TRUE@	@rm -f _gen/$@.tmp
 
 @HAVE_INTROSPECTION_TRUE@%.typelib: %.gir $(INTROSPECTION_COMPILER)

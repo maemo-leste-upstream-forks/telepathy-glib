@@ -24,12 +24,17 @@ noinst_LTLIBRARIES = libtelepathy-glib-internal.la
 # headers that are subject to coding-style checks
 our_headers = \
     account.h \
+    account-channel-request.h \
     account-manager.h \
+    automatic-proxy-factory.h \
     add-dispatch-operation-context.h \
     base-client.h \
+    base-channel.h \
     base-connection.h \
     base-connection-manager.h \
+    base-password-channel.h \
     base-protocol.h \
+    basic-proxy-factory.h \
     channel.h \
     channel-iface.h \
     channel-dispatcher.h \
@@ -38,10 +43,16 @@ our_headers = \
     channel-manager.h \
     channel-request.h \
     client.h \
+    client-channel-factory.h \
+    client-message.h \
+    cm-message.h \
     connection.h \
     connection-manager.h \
+    contact-search.h \
+    contact-search-result.h \
     capabilities.h \
     contact.h \
+    base-contact-list.h \
     contacts-mixin.h \
     dbus.h \
     dbus-daemon.h \
@@ -50,6 +61,7 @@ our_headers = \
     debug.h \
     debug-sender.h \
     debug-ansi.h \
+    dtmf.h \
     enums.h \
     errors.h \
     exportable-channel.h \
@@ -65,6 +77,7 @@ our_headers = \
     interfaces.h \
     intset.h \
     media-interfaces.h \
+    message.h \
     message-mixin.h \
     observe-channels-context.h \
     presence-mixin.h \
@@ -73,9 +86,13 @@ our_headers = \
     proxy.h \
     proxy-subclass.h \
     run.h \
+    signalled-message.h \
     simple-approver.h \
     simple-handler.h \
     simple-observer.h \
+    simple-password-manager.h \
+    stream-tube-channel.h \
+    stream-tube-connection.h \
     svc-account.h \
     svc-account-manager.h \
     svc-channel-dispatcher.h \
@@ -90,7 +107,9 @@ our_headers = \
     svc-media-interfaces.h \
     svc-properties-interface.h \
     svc-protocol.h \
+    svc-tls.h \
     telepathy-glib.h \
+    text-channel.h \
     text-mixin.h \
     util.h
 
@@ -106,6 +125,9 @@ CLEANFILES = \
 distclean-local:
 	rm -rf _gen
 
+clean-local:
+	rm -rf tmp-introspect*
+
 check_c_sources = \
     $(our_headers) \
     $(libtelepathy_glib_internal_la_SOURCES)
@@ -116,16 +138,23 @@ check-local: check-coding-style
 libtelepathy_glib_internal_la_LIBADD = $(ALL_LIBS)
 libtelepathy_glib_internal_la_SOURCES = \
     account.c \
+    account-channel-request.c \
     account-internal.h \
     account-manager.c \
     account-manager-internal.h \
+    automatic-proxy-factory.c \
     add-dispatch-operation-context-internal.h \
     add-dispatch-operation-context.c \
+    base-channel.c \
     base-client.c \
+    base-client-internal.h \
     base-connection.c \
+    base-connection-internal.h \
     base-connection-manager.c \
+    base-password-channel.c \
     base-protocol-internal.h \
     base-protocol.c \
+    basic-proxy-factory.c \
     capabilities.c \
     capabilities-internal.h \
     channel.c \
@@ -137,6 +166,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-manager.c \
     channel-request.c \
     client.c \
+    client-channel-factory.c \
+    client-message.c \
+    client-message-internal.h \
     connection.c \
     connection-avatars.c \
     connection-contact-info.c \
@@ -144,6 +176,15 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection-handles.c \
     connection-manager.c \
     contact.c \
+    contact-list-channel-internal.h \
+    contact-list-channel.c \
+    contact-search.c \
+    contact-search-internal.h \
+    contact-search-result.c \
+    base-contact-list.c \
+    base-contact-list-internal.h \
+    cm-message.c \
+    cm-message-internal.h \
     contacts-mixin.c \
     dbus.c \
     dbus-daemon.c \
@@ -151,6 +192,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-properties-mixin.c \
     debug.c \
     debug-sender.c \
+    dtmf.c \
     interfaces.c \
     debug-internal.h \
     errors.c \
@@ -171,6 +213,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     channel-iface.c \
     channel-factory-iface.c \
     media-interfaces.c \
+    message.c \
+    message-internal.h \
     message-mixin.c \
     observe-channels-context-internal.h \
     observe-channels-context.c \
@@ -184,9 +228,16 @@ libtelepathy_glib_internal_la_SOURCES = \
     proxy-signals.c \
     run.c \
     signals-marshal.list \
+    signalled-message.c \
+    signalled-message-internal.h \
     simple-approver.c \
     simple-handler.c \
     simple-observer.c \
+    simple-password-manager.c \
+    stream-tube-channel.c \
+    stream-tube-connection-internal.h \
+    stream-tube-connection.c \
+    text-channel.c \
     text-mixin.c \
     util.c \
     util-internal.h
@@ -196,9 +247,11 @@ AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     @DBUS_CFLAGS@ \
     @GLIB_CFLAGS@ \
-    @HANDLE_LEAK_DEBUG_CFLAGS@ \
     -I$(top_builddir) \
     -I$(top_srcdir)
+AM_LDFLAGS = \
+    $(ERROR_LDFLAGS) \
+    $(NULL)
 
 ALL_LIBS = \
     @DBUS_LIBS@ \

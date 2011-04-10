@@ -44,7 +44,6 @@
 #include "telepathy-glib/proxy-internal.h"
 
 #include "telepathy-glib/_gen/signals-marshal.h"
-#include "telepathy-glib/_gen/tp-cli-protocol.h"
 #include "telepathy-glib/_gen/tp-cli-protocol-body.h"
 
 #include <string.h>
@@ -71,7 +70,7 @@ struct _TpProtocolClass
  * Since: 0.11.11
  */
 
-G_DEFINE_TYPE(TpProtocol, tp_protocol, TP_TYPE_PROXY);
+G_DEFINE_TYPE(TpProtocol, tp_protocol, TP_TYPE_PROXY)
 
 /**
  * TP_PROTOCOL_FEATURE_PARAMETERS:
@@ -140,6 +139,7 @@ struct _TpProtocolPrivate
   gchar *vcard_field;
   gchar *english_name;
   gchar *icon_name;
+  GStrv authentication_types;
   TpCapabilities *capabilities;
 };
 
@@ -152,6 +152,7 @@ enum
     PROP_ICON_NAME,
     PROP_CAPABILITIES,
     PROP_PARAM_NAMES,
+    PROP_AUTHENTICATION_TYPES,
     N_PROPS
 };
 
@@ -274,6 +275,10 @@ tp_protocol_get_property (GObject *object,
       g_value_take_boxed (value, tp_protocol_dup_param_names (self));
       break;
 
+    case PROP_AUTHENTICATION_TYPES:
+      g_value_set_boxed (value, tp_protocol_get_authentication_types (self));
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -346,6 +351,12 @@ tp_protocol_dispose (GObject *object)
       self->priv->capabilities = NULL;
     }
 
+  if (self->priv->authentication_types)
+    {
+      g_strfreev (self->priv->authentication_types);
+      self->priv->authentication_types = NULL;
+    }
+
   if (dispose != NULL)
     dispose (object);
 }
@@ -360,6 +371,7 @@ tp_protocol_finalize (GObject *object)
   _tp_connection_manager_protocol_free_contents (&self->priv->protocol_struct);
   g_free (self->priv->vcard_field);
   g_free (self->priv->english_name);
+  g_free (self->priv->icon_name);
 
   if (self->priv->protocol_properties != NULL)
     g_hash_table_unref (self->priv->protocol_properties);
@@ -423,6 +435,7 @@ tp_protocol_constructed (GObject *object)
   const gchar *s;
   const GPtrArray *rccs;
   gboolean had_immutables = TRUE;
+  const gchar * const *auth_types = NULL;
 
   if (chain_up != NULL)
     chain_up (object);
@@ -474,6 +487,20 @@ tp_protocol_constructed (GObject *object)
 
   if (rccs != NULL)
     self->priv->capabilities = _tp_capabilities_new (rccs, FALSE);
+
+  auth_types = tp_asv_get_boxed (
+      self->priv->protocol_properties,
+      TP_PROP_PROTOCOL_AUTHENTICATION_TYPES, G_TYPE_STRV);
+
+  if (auth_types != NULL)
+    {
+      self->priv->authentication_types = g_strdupv ((GStrv) auth_types);
+    }
+  else
+    {
+      gchar *tmp[] = { NULL };
+      self->priv->authentication_types = g_strdupv (tmp);
+    }
 
   /* become ready immediately */
   _tp_proxy_set_feature_prepared (proxy, TP_PROTOCOL_FEATURE_PARAMETERS,
@@ -562,14 +589,14 @@ tp_protocol_class_init (TpProtocolClass *klass)
    * TpProtocol:english-name:
    *
    * The name of the protocol in a form suitable for display to users,
-   * such as "AIM" or "Yahoo!", or a string based on #TpProtocol:name
+   * such as "AIM" or "Yahoo!", or a string based on #TpProtocol:protocol-name
    * (currently constructed by putting the first character in title case,
    * but this is not guaranteed) if no better name is available or the
    * %TP_PROTOCOL_FEATURE_CORE feature has not been prepared.
    *
    * This is effectively in the C locale (international English); user
    * interfaces requiring a localized protocol name should look one up in their
-   * own message catalog based on either #TpProtocol:name or
+   * own message catalog based on either #TpProtocol:protocol-name or
    * #TpProtocol:english-name, but should use this English version as a
    * fallback if no translated version can be found.
    *
@@ -602,7 +629,7 @@ tp_protocol_class_init (TpProtocolClass *klass)
    * The name of an icon in the system's icon theme. If none was supplied
    * by the Protocol, or the %TP_PROTOCOL_FEATURE_CORE feature has not been
    * prepared, a default is used; currently, this is "im-" plus
-   * #TpProtocol:name.
+   * #TpProtocol:protocol-name.
    *
    * Since: 0.11.11
    */
@@ -640,6 +667,22 @@ tp_protocol_class_init (TpProtocolClass *klass)
       g_param_spec_boxed ("param-names",
         "Parameter names",
         "A list of parameter names",
+        G_TYPE_STRV, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+  /**
+   * TpProtocol:authentication-types:
+   *
+   * A non-%NULL #GStrv of interfaces which provide information as to
+   * what kind of authentication channels can possibly appear before
+   * the connection reaches the CONNECTED state, or %NULL if
+   * %TP_PROTOCOL_FEATURE_CORE has not been prepared.
+   *
+   * Since: 0.13.9
+   */
+  g_object_class_install_property (object_class, PROP_AUTHENTICATION_TYPES,
+      g_param_spec_boxed ("authentication-types",
+        "AuthenticationTypes",
+        "A list of authentication types",
         G_TYPE_STRV, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
   proxy_class->list_features = tp_protocol_list_features;
@@ -890,6 +933,24 @@ tp_protocol_get_icon_name (TpProtocol *self)
 {
   g_return_val_if_fail (TP_IS_PROTOCOL (self), "dialog-error");
   return self->priv->icon_name;
+}
+
+/**
+ * tp_protocol_get_authentication_types
+ * @self: a protocol object
+ *
+ *
+ <!-- -->
+ *
+ * Returns: (transfer none): the value of #TpProtocol:authentication-types
+ *
+ * Since: 0.13.9
+ */
+const gchar * const *
+tp_protocol_get_authentication_types (TpProtocol *self)
+{
+  g_return_val_if_fail (TP_IS_PROTOCOL (self), NULL);
+  return (const gchar * const *) self->priv->authentication_types;
 }
 
 /**
@@ -1184,7 +1245,7 @@ _tp_protocol_parse_channel_class (GKeyFile *file,
       gchar *value = NULL;
       gchar *property = NULL;
       const gchar *dbus_type;
-      GValue *v = NULL;
+      GValue *v = g_slice_new0 (GValue);
 
       value = g_key_file_get_string (file, group, *key, NULL);
 
@@ -1208,7 +1269,12 @@ _tp_protocol_parse_channel_class (GKeyFile *file,
 
 cleanup:
       if (v != NULL)
-        tp_g_value_slice_free (v);
+        {
+          if (G_IS_VALUE (v))
+            tp_g_value_slice_free (v);
+          else
+            g_slice_free (GValue, v);
+        }
 
       g_free (property);
       g_free (value);
@@ -1385,6 +1451,9 @@ _tp_protocol_parse_manager_file (GKeyFile *file,
   tp_asv_take_string (immutables, TP_PROP_PROTOCOL_ICON,
       replace_null_with_empty (
         g_key_file_get_string (file, group, "Icon", NULL)));
+  tp_asv_take_boxed (immutables, TP_PROP_PROTOCOL_AUTHENTICATION_TYPES,
+      G_TYPE_STRV, g_key_file_get_string_list (file, group,
+          "AuthenticationTypes", NULL, NULL));
 
   rccs = g_ptr_array_new ();
 
@@ -1398,6 +1467,9 @@ _tp_protocol_parse_manager_file (GKeyFile *file,
     }
 
   g_strfreev (rcc_groups);
+
+  tp_asv_take_boxed (immutables, TP_PROP_PROTOCOL_REQUESTABLE_CHANNEL_CLASSES,
+      TP_ARRAY_TYPE_REQUESTABLE_CHANNEL_CLASS_LIST, rccs);
 
   if (protocol_name != NULL)
     *protocol_name = g_strdup (name);

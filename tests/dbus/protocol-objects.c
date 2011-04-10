@@ -10,22 +10,13 @@
 #include <telepathy-glib/protocol.h>
 #include <telepathy-glib/telepathy-glib.h>
 
-#include "examples/cm/echo/connection-manager.h"
+#include "tests/lib/echo-cm.h"
 
 #include "examples/cm/echo-message-parts/connection-manager.h"
 #include "examples/cm/echo-message-parts/chan.h"
 #include "examples/cm/echo-message-parts/conn.h"
 
 #include "tests/lib/util.h"
-
-#define CLEAR_OBJECT(o) \
-  G_STMT_START { \
-      if (*(o) != NULL) \
-        { \
-          g_object_unref (*(o)); \
-          *(o) = NULL; \
-        } \
-  } G_STMT_END
 
 typedef struct
 {
@@ -38,9 +29,12 @@ typedef struct
   TpConnectionManager *cm;
   TpProtocol *protocol;
 
-  ExampleEchoConnectionManager *old_service_cm;
+  TpTestsEchoConnectionManager *old_service_cm;
   TpConnectionManager *old_cm;
   TpProtocol *old_protocol;
+
+  TpConnectionManager *file_cm;
+  TpProtocol *file_protocol;
 } Test;
 
 static void
@@ -72,8 +66,8 @@ setup (Test *test,
   g_assert (test->cm != NULL);
   tp_tests_proxy_run_until_prepared (test->cm, NULL);
 
-  test->old_service_cm = EXAMPLE_ECHO_CONNECTION_MANAGER (g_object_new (
-        EXAMPLE_TYPE_ECHO_CONNECTION_MANAGER,
+  test->old_service_cm = TP_TESTS_ECHO_CONNECTION_MANAGER (g_object_new (
+        TP_TESTS_TYPE_ECHO_CONNECTION_MANAGER,
         NULL));
   g_assert (test->old_service_cm != NULL);
   service_cm_as_base = TP_BASE_CONNECTION_MANAGER (test->old_service_cm);
@@ -87,6 +81,11 @@ setup (Test *test,
   g_assert (test->old_cm != NULL);
   tp_tests_proxy_run_until_prepared (test->old_cm, NULL);
 
+  test->file_cm = tp_connection_manager_new (test->dbus, "test_manager_file",
+      NULL, &test->error);
+  g_assert (test->file_cm != NULL);
+  tp_tests_proxy_run_until_prepared (test->file_cm, NULL);
+
   test->old_protocol = NULL;
 }
 
@@ -94,19 +93,34 @@ static void
 teardown (Test *test,
           gconstpointer data G_GNUC_UNUSED)
 {
-  CLEAR_OBJECT (&test->protocol);
-  CLEAR_OBJECT (&test->cm);
-  CLEAR_OBJECT (&test->service_cm);
-  CLEAR_OBJECT (&test->old_service_cm);
+  tp_clear_object (&test->protocol);
+  tp_clear_object (&test->cm);
+  tp_clear_object (&test->service_cm);
+  tp_clear_object (&test->old_service_cm);
+  tp_clear_object (&test->old_cm);
+  tp_clear_object (&test->old_protocol);
+  tp_clear_object (&test->file_cm);
+  tp_clear_object (&test->file_protocol);
 
-  CLEAR_OBJECT (&test->dbus);
+  tp_clear_object (&test->dbus);
   g_main_loop_unref (test->mainloop);
   test->mainloop = NULL;
 }
 
 const gchar * const expected_interfaces[] = {
     TP_IFACE_CONNECTION_INTERFACE_REQUESTS,
+    TP_IFACE_CONNECTION_INTERFACE_CONTACTS,
     NULL };
+
+const gchar * const expected_protocol_interfaces[] = {
+    TP_IFACE_PROTOCOL_INTERFACE_AVATARS,
+    NULL };
+
+const gchar * const expected_supported_avatar_mime_types[] = {
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  NULL };
 
 static void
 test_protocol_properties (Test *test,
@@ -125,8 +139,9 @@ test_protocol_properties (Test *test,
       TP_IFACE_PROTOCOL, &properties, &test->error, NULL);
   g_assert_no_error (test->error);
 
-  test_assert_empty_strv (tp_asv_get_boxed (properties, "Interfaces",
-        G_TYPE_STRV));
+  tp_tests_assert_strv_equals (
+      tp_asv_get_boxed (properties, "Interfaces", G_TYPE_STRV),
+      expected_protocol_interfaces);
 
   g_assert_cmpstr (tp_asv_get_string (properties, "Icon"), ==, "im-icq");
   g_assert_cmpstr (tp_asv_get_string (properties, "EnglishName"), ==,
@@ -159,6 +174,55 @@ test_protocol_properties (Test *test,
 }
 
 static void
+test_protocol_avatar_properties (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GHashTable *properties = NULL;
+  gboolean is_set;
+  guint num;
+
+  test->protocol = tp_protocol_new (test->dbus, "example_echo_2",
+      "example", NULL, NULL);
+  g_assert (test->protocol != NULL);
+
+  tp_cli_dbus_properties_run_get_all (test->protocol, -1,
+      TP_IFACE_PROTOCOL_INTERFACE_AVATARS, &properties, &test->error, NULL);
+  g_assert_no_error (test->error);
+
+  tp_tests_assert_strv_equals (
+      tp_asv_get_boxed (properties, "SupportedAvatarMIMETypes", G_TYPE_STRV),
+      expected_supported_avatar_mime_types);
+
+  num = tp_asv_get_uint32 (properties, "MinimumAvatarHeight", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 32);
+
+  num = tp_asv_get_uint32 (properties, "MinimumAvatarWidth", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 32);
+
+  num = tp_asv_get_uint32 (properties, "RecommendedAvatarHeight", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 64);
+
+  num = tp_asv_get_uint32 (properties, "RecommendedAvatarWidth", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 64);
+
+  num = tp_asv_get_uint32 (properties, "MaximumAvatarHeight", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 96);
+
+  num = tp_asv_get_uint32 (properties, "MaximumAvatarWidth", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 96);
+
+  num = tp_asv_get_uint32 (properties, "MaximumAvatarBytes", &is_set);
+  g_assert (is_set);
+  g_assert_cmpuint (num, ==, 37748736);
+}
+
+static void
 test_protocols_property (Test *test,
     gconstpointer data G_GNUC_UNUSED)
 {
@@ -185,8 +249,9 @@ test_protocols_property (Test *test,
   pp = g_hash_table_lookup (protocols, "example");
   g_assert (pp != NULL);
 
-  test_assert_empty_strv (tp_asv_get_boxed (pp, TP_PROP_PROTOCOL_INTERFACES,
-        G_TYPE_STRV));
+  tp_tests_assert_strv_equals (
+      tp_asv_get_boxed (pp, TP_PROP_PROTOCOL_INTERFACES, G_TYPE_STRV),
+      expected_protocol_interfaces);
 
   g_assert_cmpstr (tp_asv_get_string (pp, TP_PROP_PROTOCOL_ICON), ==,
       "im-icq");
@@ -318,15 +383,57 @@ test_protocol_object_old (Test *test,
   g_assert (tp_protocol_get_capabilities (test->old_protocol) == NULL);
 }
 
+static void
+test_protocol_object_from_file (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GQuark features[] = { TP_PROTOCOL_FEATURE_CORE, 0 };
+  TpCapabilities *caps;
+
+  g_assert_cmpstr (tp_connection_manager_get_name (test->file_cm), ==,
+      "test_manager_file");
+  tp_tests_proxy_run_until_prepared (test->file_cm, NULL);
+  test->file_protocol = g_object_ref (
+      tp_connection_manager_get_protocol_object (test->file_cm, "foo"));
+
+  g_assert_cmpstr (tp_protocol_get_name (test->file_protocol), ==, "foo");
+
+  g_assert (tp_proxy_is_prepared (test->file_protocol,
+        TP_PROTOCOL_FEATURE_PARAMETERS));
+
+  g_assert (tp_protocol_has_param (test->file_protocol, "account"));
+  g_assert (!tp_protocol_has_param (test->file_protocol, "no-way"));
+
+  tp_tests_proxy_run_until_prepared (test->file_protocol, features);
+  g_assert (tp_proxy_is_prepared (test->file_protocol,
+        TP_PROTOCOL_FEATURE_CORE));
+
+  g_assert_cmpstr (tp_protocol_get_icon_name (test->file_protocol), ==,
+      "im-icq");
+  g_assert_cmpstr (tp_protocol_get_english_name (test->file_protocol), ==,
+      "Regression tests");
+  g_assert_cmpstr (tp_protocol_get_vcard_field (test->file_protocol), ==,
+      "x-telepathy-tests");
+
+  g_assert (tp_protocol_get_capabilities (test->file_protocol) != NULL);
+  caps = tp_protocol_get_capabilities (test->file_protocol);
+  g_assert (!tp_capabilities_is_specific_to_contact (caps));
+  g_assert (tp_capabilities_supports_text_chats (caps));
+  g_assert (!tp_capabilities_supports_text_chatrooms (caps));
+}
+
 int
 main (int argc,
       char **argv)
 {
+  tp_tests_abort_after (10);
   g_test_init (&argc, &argv, NULL);
   g_test_bug_base ("http://bugs.freedesktop.org/show_bug.cgi?id=");
 
   g_test_add ("/protocol-objects/protocol-properties", Test, NULL, setup,
       test_protocol_properties, teardown);
+  g_test_add ("/protocol-objects/protocol-avatar-properties", Test, NULL,
+      setup, test_protocol_avatar_properties, teardown);
   g_test_add ("/protocol-objects/protocols-property", Test, NULL, setup,
       test_protocols_property, teardown);
   g_test_add ("/protocol-objects/protocols-property-old", Test, NULL, setup,
@@ -335,6 +442,8 @@ main (int argc,
       test_protocol_object, teardown);
   g_test_add ("/protocol-objects/object-old", Test, NULL, setup,
       test_protocol_object_old, teardown);
+  g_test_add ("/protocol-objects/object-from-file", Test, NULL, setup,
+      test_protocol_object_from_file, teardown);
 
   return g_test_run ();
 }

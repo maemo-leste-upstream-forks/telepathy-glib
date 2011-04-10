@@ -34,17 +34,22 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
-	test-base-client$(EXEEXT) test-call-cancellation$(EXEEXT) \
-	test-call-example$(EXEEXT) test-callable-example$(EXEEXT) \
+noinst_PROGRAMS = test-account$(EXEEXT) \
+	test-account-channel-request$(EXEEXT) \
+	test-account-manager$(EXEEXT) test-base-client$(EXEEXT) \
+	test-call-cancellation$(EXEEXT) test-call-example$(EXEEXT) \
+	test-callable-example$(EXEEXT) test-channel$(EXEEXT) \
 	test-channel-dispatcher$(EXEEXT) \
 	test-channel-dispatch-operation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
-	test-cli-group$(EXEEXT) test-client$(EXEEXT) test-cm$(EXEEXT) \
-	test-connection$(EXEEXT) test-connection-bug-18845$(EXEEXT) \
+	test-cli-group$(EXEEXT) test-client$(EXEEXT) \
+	test-client-channel-factory$(EXEEXT) test-cm$(EXEEXT) \
+	test-cm-message$(EXEEXT) test-connection$(EXEEXT) \
+	test-connection-bug-18845$(EXEEXT) \
 	test-connection-error$(EXEEXT) \
 	test-connection-handles$(EXEEXT) \
 	test-connection-inject-bug16307$(EXEEXT) \
+	test-connection-interests$(EXEEXT) \
 	test-connection-getinterfaces-failure$(EXEEXT) \
 	test-contact-lists$(EXEEXT) test-contacts$(EXEEXT) \
 	test-contacts-bug-19101$(EXEEXT) test-contacts-mixin$(EXEEXT) \
@@ -61,6 +66,7 @@ noinst_PROGRAMS = test-account$(EXEEXT) test-account-manager$(EXEEXT) \
 	test-protocol-objects$(EXEEXT) test-self-handle$(EXEEXT) \
 	test-self-presence$(EXEEXT) test-simple-approver$(EXEEXT) \
 	test-simple-handler$(EXEEXT) test-simple-observer$(EXEEXT) \
+	test-stream-tube$(EXEEXT) test-text-channel$(EXEEXT) \
 	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
 	test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -75,7 +81,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/tp-compiler-flag.m4 \
 	$(top_srcdir)/m4/tp-compiler-warnings.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/tp-linker-flag.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -88,38 +94,46 @@ test_account_OBJECTS = $(am_test_account_OBJECTS)
 test_account_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 test_account_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
+am_test_account_channel_request_OBJECTS =  \
+	account-channel-request.$(OBJEXT)
+test_account_channel_request_OBJECTS =  \
+	$(am_test_account_channel_request_OBJECTS)
+test_account_channel_request_LDADD = $(LDADD)
+test_account_channel_request_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_account_manager_OBJECTS = account-manager.$(OBJEXT)
 test_account_manager_OBJECTS = $(am_test_account_manager_OBJECTS)
 test_account_manager_LDADD = $(LDADD)
 test_account_manager_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_base_client_OBJECTS = base-client.$(OBJEXT)
 test_base_client_OBJECTS = $(am_test_base_client_OBJECTS)
 test_base_client_LDADD = $(LDADD)
 test_base_client_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_call_cancellation_OBJECTS = call-cancellation.$(OBJEXT)
 test_call_cancellation_OBJECTS = $(am_test_call_cancellation_OBJECTS)
 test_call_cancellation_LDADD = $(LDADD)
 test_call_cancellation_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_call_example_OBJECTS = call-example.$(OBJEXT)
 test_call_example_OBJECTS = $(am_test_call_example_OBJECTS)
-am__DEPENDENCIES_2 =  \
+am__DEPENDENCIES_2 = $(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 test_call_example_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	$(top_builddir)/examples/future/call-cm/libexample-cm-call.la
@@ -127,77 +141,101 @@ am_test_callable_example_OBJECTS = callable-example.$(OBJEXT)
 test_callable_example_OBJECTS = $(am_test_callable_example_OBJECTS)
 test_callable_example_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	$(top_builddir)/examples/cm/callable/libexample-cm-callable.la
+am_test_channel_OBJECTS = channel.$(OBJEXT)
+test_channel_OBJECTS = $(am_test_channel_OBJECTS)
+test_channel_LDADD = $(LDADD)
+test_channel_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_channel_dispatch_operation_OBJECTS =  \
 	channel-dispatch-operation.$(OBJEXT)
 test_channel_dispatch_operation_OBJECTS =  \
 	$(am_test_channel_dispatch_operation_OBJECTS)
 test_channel_dispatch_operation_LDADD = $(LDADD)
 test_channel_dispatch_operation_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_channel_dispatcher_OBJECTS = channel-dispatcher.$(OBJEXT)
 test_channel_dispatcher_OBJECTS =  \
 	$(am_test_channel_dispatcher_OBJECTS)
 test_channel_dispatcher_LDADD = $(LDADD)
 test_channel_dispatcher_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_channel_introspect_OBJECTS = channel-introspect.$(OBJEXT)
 test_channel_introspect_OBJECTS =  \
 	$(am_test_channel_introspect_OBJECTS)
 test_channel_introspect_LDADD = $(LDADD)
 test_channel_introspect_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_channel_request_OBJECTS = channel-request.$(OBJEXT)
 test_channel_request_OBJECTS = $(am_test_channel_request_OBJECTS)
 test_channel_request_LDADD = $(LDADD)
 test_channel_request_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_cli_group_OBJECTS = cli-group.$(OBJEXT)
 test_cli_group_OBJECTS = $(am_test_cli_group_OBJECTS)
 test_cli_group_LDADD = $(LDADD)
 test_cli_group_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_client_OBJECTS = client.$(OBJEXT)
 test_client_OBJECTS = $(am_test_client_OBJECTS)
 test_client_LDADD = $(LDADD)
 test_client_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_client_channel_factory_OBJECTS =  \
+	client-channel-factory.$(OBJEXT)
+test_client_channel_factory_OBJECTS =  \
+	$(am_test_client_channel_factory_OBJECTS)
+test_client_channel_factory_LDADD = $(LDADD)
+test_client_channel_factory_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_cm_OBJECTS = cm.$(OBJEXT)
 test_cm_OBJECTS = $(am_test_cm_OBJECTS)
-test_cm_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_cm_LDADD = $(LDADD)
+test_cm_DEPENDENCIES = $(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_cm_message_OBJECTS = cm-message.$(OBJEXT)
+test_cm_message_OBJECTS = $(am_test_cm_message_OBJECTS)
+test_cm_message_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+	$(am__DEPENDENCIES_1)
 am_test_connection_OBJECTS = connection.$(OBJEXT)
 test_connection_OBJECTS = $(am_test_connection_OBJECTS)
 test_connection_LDADD = $(LDADD)
 test_connection_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_connection_bug_18845_OBJECTS = connection-bug-18845.$(OBJEXT)
 test_connection_bug_18845_OBJECTS =  \
 	$(am_test_connection_bug_18845_OBJECTS)
 test_connection_bug_18845_LDADD = $(LDADD)
 test_connection_bug_18845_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_connection_error_OBJECTS = connection-error.$(OBJEXT)
 test_connection_error_OBJECTS = $(am_test_connection_error_OBJECTS)
 test_connection_error_LDADD = $(LDADD)
 test_connection_error_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_connection_getinterfaces_failure_OBJECTS =  \
 	connection-getinterfaces-failure.$(OBJEXT)
@@ -205,16 +243,16 @@ test_connection_getinterfaces_failure_OBJECTS =  \
 	$(am_test_connection_getinterfaces_failure_OBJECTS)
 test_connection_getinterfaces_failure_LDADD = $(LDADD)
 test_connection_getinterfaces_failure_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_connection_handles_OBJECTS = connection-handles.$(OBJEXT)
 test_connection_handles_OBJECTS =  \
 	$(am_test_connection_handles_OBJECTS)
 test_connection_handles_LDADD = $(LDADD)
 test_connection_handles_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_connection_inject_bug16307_OBJECTS =  \
 	connection-inject-bug16307.$(OBJEXT)
@@ -222,8 +260,16 @@ test_connection_inject_bug16307_OBJECTS =  \
 	$(am_test_connection_inject_bug16307_OBJECTS)
 test_connection_inject_bug16307_LDADD = $(LDADD)
 test_connection_inject_bug16307_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_connection_interests_OBJECTS = connection-interests.$(OBJEXT)
+test_connection_interests_OBJECTS =  \
+	$(am_test_connection_interests_OBJECTS)
+test_connection_interests_LDADD = $(LDADD)
+test_connection_interests_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_contact_lists_OBJECTS = contact-lists.$(OBJEXT)
 test_contact_lists_OBJECTS = $(am_test_contact_lists_OBJECTS)
@@ -233,45 +279,45 @@ am_test_contacts_OBJECTS = contacts.$(OBJEXT)
 test_contacts_OBJECTS = $(am_test_contacts_OBJECTS)
 test_contacts_LDADD = $(LDADD)
 test_contacts_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_contacts_bug_19101_OBJECTS = contacts-bug-19101.$(OBJEXT)
 test_contacts_bug_19101_OBJECTS =  \
 	$(am_test_contacts_bug_19101_OBJECTS)
 test_contacts_bug_19101_LDADD = $(LDADD)
 test_contacts_bug_19101_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_contacts_mixin_OBJECTS = contacts-mixin.$(OBJEXT)
 test_contacts_mixin_OBJECTS = $(am_test_contacts_mixin_OBJECTS)
 test_contacts_mixin_LDADD = $(LDADD)
 test_contacts_mixin_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_contacts_slow_path_OBJECTS = contacts-slow-path.$(OBJEXT)
 test_contacts_slow_path_OBJECTS =  \
 	$(am_test_contacts_slow_path_OBJECTS)
 test_contacts_slow_path_LDADD = $(LDADD)
 test_contacts_slow_path_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_dbus_OBJECTS = dbus.$(OBJEXT)
 test_dbus_OBJECTS = $(am_test_dbus_OBJECTS)
 test_dbus_LDADD = $(LDADD)
 test_dbus_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_disconnection_OBJECTS = disconnection.$(OBJEXT)
 test_disconnection_OBJECTS = $(am_test_disconnection_OBJECTS)
 test_disconnection_LDADD = $(LDADD)
 test_disconnection_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_error_enum_OBJECTS = error-enum.$(OBJEXT)
 nodist_test_error_enum_OBJECTS =
@@ -279,16 +325,16 @@ test_error_enum_OBJECTS = $(am_test_error_enum_OBJECTS) \
 	$(nodist_test_error_enum_OBJECTS)
 test_error_enum_LDADD = $(LDADD)
 test_error_enum_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_example_no_protocols_OBJECTS = example-no-protocols.$(OBJEXT)
 test_example_no_protocols_OBJECTS =  \
 	$(am_test_example_no_protocols_OBJECTS)
 test_example_no_protocols_LDADD = $(LDADD)
 test_example_no_protocols_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_finalized_in_invalidated_handler_OBJECTS =  \
 	finalized-in-invalidated-handler.$(OBJEXT)
@@ -296,8 +342,8 @@ test_finalized_in_invalidated_handler_OBJECTS =  \
 	$(am_test_finalized_in_invalidated_handler_OBJECTS)
 test_finalized_in_invalidated_handler_LDADD = $(LDADD)
 test_finalized_in_invalidated_handler_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_get_interface_after_invalidate_OBJECTS =  \
 	get-interface-after-invalidate.$(OBJEXT)
@@ -305,29 +351,29 @@ test_get_interface_after_invalidate_OBJECTS =  \
 	$(am_test_get_interface_after_invalidate_OBJECTS)
 test_get_interface_after_invalidate_LDADD = $(LDADD)
 test_get_interface_after_invalidate_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_group_mixin_OBJECTS = group-mixin.$(OBJEXT)
 test_group_mixin_OBJECTS = $(am_test_group_mixin_OBJECTS)
 test_group_mixin_LDADD = $(LDADD)
 test_group_mixin_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_handle_repo_OBJECTS = handle-repo.$(OBJEXT)
 test_handle_repo_OBJECTS = $(am_test_handle_repo_OBJECTS)
 test_handle_repo_LDADD = $(LDADD)
 test_handle_repo_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_handle_set_OBJECTS = handle-set.$(OBJEXT)
 test_handle_set_OBJECTS = $(am_test_handle_set_OBJECTS)
 test_handle_set_LDADD = $(LDADD)
 test_handle_set_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_invalidated_while_invoking_signals_OBJECTS =  \
 	invalidated-while-invoking-signals.$(OBJEXT)
@@ -335,14 +381,17 @@ test_invalidated_while_invoking_signals_OBJECTS =  \
 	$(am_test_invalidated_while_invoking_signals_OBJECTS)
 test_invalidated_while_invoking_signals_LDADD = $(LDADD)
 test_invalidated_while_invoking_signals_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_long_connection_name_OBJECTS = long-connection-name.$(OBJEXT)
 test_long_connection_name_OBJECTS =  \
 	$(am_test_long_connection_name_OBJECTS)
-test_long_connection_name_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_long_connection_name_LDADD = $(LDADD)
+test_long_connection_name_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_message_mixin_OBJECTS = message-mixin.$(OBJEXT)
 test_message_mixin_OBJECTS = $(am_test_message_mixin_OBJECTS)
 test_message_mixin_DEPENDENCIES = $(am__DEPENDENCIES_2) \
@@ -351,8 +400,8 @@ am_test_params_cm_OBJECTS = params-cm.$(OBJEXT)
 test_params_cm_OBJECTS = $(am_test_params_cm_OBJECTS)
 test_params_cm_LDADD = $(LDADD)
 test_params_cm_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_properties_OBJECTS = properties.$(OBJEXT)
 nodist_test_properties_OBJECTS = svc.$(OBJEXT)
@@ -360,65 +409,81 @@ test_properties_OBJECTS = $(am_test_properties_OBJECTS) \
 	$(nodist_test_properties_OBJECTS)
 test_properties_LDADD = $(LDADD)
 test_properties_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_protocol_objects_OBJECTS = protocol-objects.$(OBJEXT)
 test_protocol_objects_OBJECTS = $(am_test_protocol_objects_OBJECTS)
 test_protocol_objects_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la \
 	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 am_test_self_handle_OBJECTS = self-handle.$(OBJEXT)
 test_self_handle_OBJECTS = $(am_test_self_handle_OBJECTS)
 test_self_handle_LDADD = $(LDADD)
 test_self_handle_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_self_presence_OBJECTS = self-presence.$(OBJEXT)
 test_self_presence_OBJECTS = $(am_test_self_presence_OBJECTS)
 test_self_presence_LDADD = $(LDADD)
 test_self_presence_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_simple_approver_OBJECTS = simple-approver.$(OBJEXT)
 test_simple_approver_OBJECTS = $(am_test_simple_approver_OBJECTS)
 test_simple_approver_LDADD = $(LDADD)
 test_simple_approver_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_simple_handler_OBJECTS = simple-handler.$(OBJEXT)
 test_simple_handler_OBJECTS = $(am_test_simple_handler_OBJECTS)
 test_simple_handler_LDADD = $(LDADD)
 test_simple_handler_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_simple_observer_OBJECTS = simple-observer.$(OBJEXT)
 test_simple_observer_OBJECTS = $(am_test_simple_observer_OBJECTS)
 test_simple_observer_LDADD = $(LDADD)
 test_simple_observer_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_stream_tube_OBJECTS = stream-tube.$(OBJEXT)
+test_stream_tube_OBJECTS = $(am_test_stream_tube_OBJECTS)
+test_stream_tube_LDADD = $(LDADD)
+test_stream_tube_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_text_channel_OBJECTS = text-channel.$(OBJEXT)
+test_text_channel_OBJECTS = $(am_test_text_channel_OBJECTS)
+test_text_channel_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 am_test_text_mixin_OBJECTS = text-mixin.$(OBJEXT)
 test_text_mixin_OBJECTS = $(am_test_text_mixin_OBJECTS)
-test_text_mixin_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_text_mixin_LDADD = $(LDADD)
+test_text_mixin_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_text_respawn_OBJECTS = text-respawn.$(OBJEXT)
 test_text_respawn_OBJECTS = $(am_test_text_respawn_OBJECTS)
-test_text_respawn_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/examples/cm/echo/libexample-cm-echo.la
+test_text_respawn_LDADD = $(LDADD)
+test_text_respawn_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_unsupported_interface_OBJECTS =  \
 	unsupported-interface.$(OBJEXT)
 test_unsupported_interface_OBJECTS =  \
 	$(am_test_unsupported_interface_OBJECTS)
 test_unsupported_interface_LDADD = $(LDADD)
 test_unsupported_interface_DEPENDENCIES =  \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -446,20 +511,24 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
-	$(test_call_example_SOURCES) $(test_callable_example_SOURCES) \
+SOURCES = $(test_account_SOURCES) \
+	$(test_account_channel_request_SOURCES) \
+	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
+	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
+	$(test_callable_example_SOURCES) $(test_channel_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
 	$(test_channel_request_SOURCES) $(test_cli_group_SOURCES) \
-	$(test_client_SOURCES) $(test_cm_SOURCES) \
+	$(test_client_SOURCES) $(test_client_channel_factory_SOURCES) \
+	$(test_cm_SOURCES) $(test_cm_message_SOURCES) \
 	$(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
+	$(test_connection_interests_SOURCES) \
 	$(test_contact_lists_SOURCES) $(test_contacts_SOURCES) \
 	$(test_contacts_bug_19101_SOURCES) \
 	$(test_contacts_mixin_SOURCES) \
@@ -478,22 +547,27 @@ SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_protocol_objects_SOURCES) $(test_self_handle_SOURCES) \
 	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
 	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
+	$(test_stream_tube_SOURCES) $(test_text_channel_SOURCES) \
 	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
-DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
-	$(test_base_client_SOURCES) $(test_call_cancellation_SOURCES) \
-	$(test_call_example_SOURCES) $(test_callable_example_SOURCES) \
+DIST_SOURCES = $(test_account_SOURCES) \
+	$(test_account_channel_request_SOURCES) \
+	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
+	$(test_call_cancellation_SOURCES) $(test_call_example_SOURCES) \
+	$(test_callable_example_SOURCES) $(test_channel_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
 	$(test_channel_dispatcher_SOURCES) \
 	$(test_channel_introspect_SOURCES) \
 	$(test_channel_request_SOURCES) $(test_cli_group_SOURCES) \
-	$(test_client_SOURCES) $(test_cm_SOURCES) \
+	$(test_client_SOURCES) $(test_client_channel_factory_SOURCES) \
+	$(test_cm_SOURCES) $(test_cm_message_SOURCES) \
 	$(test_connection_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
 	$(test_connection_handles_SOURCES) \
 	$(test_connection_inject_bug16307_SOURCES) \
+	$(test_connection_interests_SOURCES) \
 	$(test_contact_lists_SOURCES) $(test_contacts_SOURCES) \
 	$(test_contacts_bug_19101_SOURCES) \
 	$(test_contacts_mixin_SOURCES) \
@@ -510,7 +584,8 @@ DIST_SOURCES = $(test_account_SOURCES) $(test_account_manager_SOURCES) \
 	$(test_properties_SOURCES) $(test_protocol_objects_SOURCES) \
 	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
 	$(test_simple_approver_SOURCES) $(test_simple_handler_SOURCES) \
-	$(test_simple_observer_SOURCES) $(test_text_mixin_SOURCES) \
+	$(test_simple_observer_SOURCES) $(test_stream_tube_SOURCES) \
+	$(test_text_channel_SOURCES) $(test_text_mixin_SOURCES) \
 	$(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
@@ -562,7 +637,6 @@ GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
-HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
 HAVE_VALA = @HAVE_VALA@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -618,8 +692,6 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 VALAC = @VALAC@
 VALAFLAGS = @VALAFLAGS@
-VALA_CFLAGS = @VALA_CFLAGS@
-VALA_LIBS = @VALA_LIBS@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
 VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
@@ -683,15 +755,18 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TESTS = $(noinst_PROGRAMS)
 LDADD = \
-    $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
     $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+    $(GLIB_LIBS) \
     $(DBUS_LIBS) \
-    $(GLIB_LIBS)
+    $(NULL)
 
 test_account_SOURCES = account.c
+test_account_channel_request_SOURCES = account-channel-request.c
 test_account_manager_SOURCES = account-manager.c
 test_base_client_SOURCES = base-client.c
 test_call_cancellation_SOURCES = call-cancellation.c
+test_channel_SOURCES = channel.c
 test_channel_dispatcher_SOURCES = channel-dispatcher.c
 test_channel_dispatch_operation_SOURCES = channel-dispatch-operation.c
 test_channel_introspect_SOURCES = channel-introspect.c
@@ -709,10 +784,6 @@ test_callable_example_LDADD = \
 test_client_SOURCES = client.c
 test_cli_group_SOURCES = cli-group.c
 test_cm_SOURCES = cm.c
-test_cm_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_connection_SOURCES = connection.c
 test_contact_lists_SOURCES = contact-lists.c
 test_contact_lists_LDADD = \
@@ -723,6 +794,7 @@ test_connection_bug_18845_SOURCES = connection-bug-18845.c
 test_connection_handles_SOURCES = connection-handles.c
 test_connection_error_SOURCES = connection-error.c
 test_connection_inject_bug16307_SOURCES = connection-inject-bug16307.c
+test_connection_interests_SOURCES = connection-interests.c
 test_connection_getinterfaces_failure_SOURCES = \
     connection-getinterfaces-failure.c
 
@@ -747,10 +819,6 @@ test_handle_set_SOURCES = handle-set.c
 test_invalidated_while_invoking_signals_SOURCES = \
     invalidated-while-invoking-signals.c
 
-test_long_connection_name_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_long_connection_name_SOURCES = long-connection-name.c
 test_message_mixin_LDADD = \
     $(LDADD) \
@@ -766,21 +834,12 @@ nodist_test_properties_SOURCES = \
 
 test_protocol_objects_LDADD = \
     $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la \
     $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 
 test_protocol_objects_SOURCES = protocol-objects.c
 test_self_handle_SOURCES = self-handle.c
 test_self_presence_SOURCES = self-presence.c
-test_text_mixin_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_text_mixin_SOURCES = text-mixin.c
-test_text_respawn_LDADD = \
-    $(LDADD) \
-    $(top_builddir)/examples/cm/echo/libexample-cm-echo.la
-
 test_text_respawn_SOURCES = text-respawn.c
 test_unsupported_interface_SOURCES = unsupported-interface.c
 test_params_cm_SOURCES = \
@@ -789,20 +848,43 @@ test_params_cm_SOURCES = \
 test_simple_observer_SOURCES = simple-observer.c
 test_simple_approver_SOURCES = simple-approver.c
 test_simple_handler_SOURCES = simple-handler.c
-check_c_sources = *.c
-AM_CFLAGS = \
-    $(ERROR_CFLAGS) \
-    $(DBUS_CFLAGS) \
-    $(GLIB_CFLAGS) \
-    -D_TP_IGNORE_DEPRECATIONS \
-    $(TP_GLIB_CFLAGS)
+test_stream_tube_SOURCES = stream-tube.c
+test_client_channel_factory_SOURCES = client-channel-factory.c
 
+# this one uses internal ABI
+test_cm_message_SOURCES = \
+    cm-message.c
+
+test_cm_message_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS)
+
+test_text_channel_SOURCES = text-channel.c
+test_text_channel_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
+
+check_c_sources = *.c
+AM_CPPFLAGS = \
+    -I${top_srcdir} -I${top_builddir} \
+    -D_TP_IGNORE_DEPRECATIONS \
+    $(GLIB_CFLAGS) \
+    $(DBUS_CFLAGS) \
+    $(NULL)
+
+AM_LDFLAGS = \
+    $(ERROR_LDFLAGS) \
+    $(NULL)
+
+AM_CFLAGS = $(ERROR_CFLAGS)
 TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     XDG_DATA_HOME=@abs_builddir@ \
     XDG_DATA_DIRS=@abs_srcdir@ \
     G_SLICE=debug-blocks \
     G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
+    $(top_srcdir)/tools/test-wrapper.sh \
     sh $(top_srcdir)/tools/with-session-bus.sh \
         --config-file=dbus-1/session.conf -- \
     $(EXTRA_TESTS_ENVIRONMENT)
@@ -819,7 +901,7 @@ VALGRIND = valgrind --tool=memcheck \
 
 VALGRIND_TESTS_ENVIRONMENT = \
     $(TESTS_ENVIRONMENT) \
-    env G_SLICE=always-malloc \
+    env G_SLICE=always-malloc CHECK_VERBOSE=1 \
     $(top_builddir)/libtool --mode=execute \
     $(VALGRIND) --suppressions=$(top_srcdir)/tests/tests.supp $(VALGRIND_FLAGS)
 
@@ -887,6 +969,9 @@ clean-noinstPROGRAMS:
 test-account$(EXEEXT): $(test_account_OBJECTS) $(test_account_DEPENDENCIES) 
 	@rm -f test-account$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_account_OBJECTS) $(test_account_LDADD) $(LIBS)
+test-account-channel-request$(EXEEXT): $(test_account_channel_request_OBJECTS) $(test_account_channel_request_DEPENDENCIES) 
+	@rm -f test-account-channel-request$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_account_channel_request_OBJECTS) $(test_account_channel_request_LDADD) $(LIBS)
 test-account-manager$(EXEEXT): $(test_account_manager_OBJECTS) $(test_account_manager_DEPENDENCIES) 
 	@rm -f test-account-manager$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_account_manager_OBJECTS) $(test_account_manager_LDADD) $(LIBS)
@@ -902,6 +987,9 @@ test-call-example$(EXEEXT): $(test_call_example_OBJECTS) $(test_call_example_DEP
 test-callable-example$(EXEEXT): $(test_callable_example_OBJECTS) $(test_callable_example_DEPENDENCIES) 
 	@rm -f test-callable-example$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_callable_example_OBJECTS) $(test_callable_example_LDADD) $(LIBS)
+test-channel$(EXEEXT): $(test_channel_OBJECTS) $(test_channel_DEPENDENCIES) 
+	@rm -f test-channel$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_channel_OBJECTS) $(test_channel_LDADD) $(LIBS)
 test-channel-dispatch-operation$(EXEEXT): $(test_channel_dispatch_operation_OBJECTS) $(test_channel_dispatch_operation_DEPENDENCIES) 
 	@rm -f test-channel-dispatch-operation$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_channel_dispatch_operation_OBJECTS) $(test_channel_dispatch_operation_LDADD) $(LIBS)
@@ -920,9 +1008,15 @@ test-cli-group$(EXEEXT): $(test_cli_group_OBJECTS) $(test_cli_group_DEPENDENCIES
 test-client$(EXEEXT): $(test_client_OBJECTS) $(test_client_DEPENDENCIES) 
 	@rm -f test-client$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_client_OBJECTS) $(test_client_LDADD) $(LIBS)
+test-client-channel-factory$(EXEEXT): $(test_client_channel_factory_OBJECTS) $(test_client_channel_factory_DEPENDENCIES) 
+	@rm -f test-client-channel-factory$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_client_channel_factory_OBJECTS) $(test_client_channel_factory_LDADD) $(LIBS)
 test-cm$(EXEEXT): $(test_cm_OBJECTS) $(test_cm_DEPENDENCIES) 
 	@rm -f test-cm$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_cm_OBJECTS) $(test_cm_LDADD) $(LIBS)
+test-cm-message$(EXEEXT): $(test_cm_message_OBJECTS) $(test_cm_message_DEPENDENCIES) 
+	@rm -f test-cm-message$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_cm_message_OBJECTS) $(test_cm_message_LDADD) $(LIBS)
 test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENCIES) 
 	@rm -f test-connection$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_connection_OBJECTS) $(test_connection_LDADD) $(LIBS)
@@ -941,6 +1035,9 @@ test-connection-handles$(EXEEXT): $(test_connection_handles_OBJECTS) $(test_conn
 test-connection-inject-bug16307$(EXEEXT): $(test_connection_inject_bug16307_OBJECTS) $(test_connection_inject_bug16307_DEPENDENCIES) 
 	@rm -f test-connection-inject-bug16307$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_connection_inject_bug16307_OBJECTS) $(test_connection_inject_bug16307_LDADD) $(LIBS)
+test-connection-interests$(EXEEXT): $(test_connection_interests_OBJECTS) $(test_connection_interests_DEPENDENCIES) 
+	@rm -f test-connection-interests$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_connection_interests_OBJECTS) $(test_connection_interests_LDADD) $(LIBS)
 test-contact-lists$(EXEEXT): $(test_contact_lists_OBJECTS) $(test_contact_lists_DEPENDENCIES) 
 	@rm -f test-contact-lists$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_contact_lists_OBJECTS) $(test_contact_lists_LDADD) $(LIBS)
@@ -1016,6 +1113,12 @@ test-simple-handler$(EXEEXT): $(test_simple_handler_OBJECTS) $(test_simple_handl
 test-simple-observer$(EXEEXT): $(test_simple_observer_OBJECTS) $(test_simple_observer_DEPENDENCIES) 
 	@rm -f test-simple-observer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_simple_observer_OBJECTS) $(test_simple_observer_LDADD) $(LIBS)
+test-stream-tube$(EXEEXT): $(test_stream_tube_OBJECTS) $(test_stream_tube_DEPENDENCIES) 
+	@rm -f test-stream-tube$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_stream_tube_OBJECTS) $(test_stream_tube_LDADD) $(LIBS)
+test-text-channel$(EXEEXT): $(test_text_channel_OBJECTS) $(test_text_channel_DEPENDENCIES) 
+	@rm -f test-text-channel$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_text_channel_OBJECTS) $(test_text_channel_LDADD) $(LIBS)
 test-text-mixin$(EXEEXT): $(test_text_mixin_OBJECTS) $(test_text_mixin_DEPENDENCIES) 
 	@rm -f test-text-mixin$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_text_mixin_OBJECTS) $(test_text_mixin_LDADD) $(LIBS)
@@ -1032,6 +1135,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-channel-request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Po@am__quote@
@@ -1042,14 +1146,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-introspect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-request.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli-group.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-channel-factory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm-message.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-bug-18845.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-getinterfaces-failure.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-inject-bug16307.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-interests.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-lists.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-bug-19101.Po@am__quote@
@@ -1076,7 +1184,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream-tube.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text-respawn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unsupported-interface.Po@am__quote@
@@ -1452,6 +1562,7 @@ check-valgrind:
 # --track-origins=yes    better diagnostics for uninit values (slow)
 
 distclean-local:
+	rm -f capture-*.log
 	rm -rf _gen
 
 dbus-1/%.conf: $(srcdir)/dbus-1/%.conf.in

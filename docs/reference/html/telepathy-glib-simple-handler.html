@@ -4,10 +4,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpSimpleHandler</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="index.html" title="telepathy-glib Reference Manual">
+<link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="telepathy-glib-simple-approver.html" title="TpSimpleApprover">
-<link rel="next" href="ch-service-handles.html" title="Service-side handle repositories">
+<link rel="next" href="telepathy-glib-dtmf.html" title="DTMF dialstring interpreter">
 <meta name="generator" content="GTK-Doc V1.15 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
@@ -17,8 +17,8 @@
 <td><a accesskey="p" href="telepathy-glib-simple-approver.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
 <td><a accesskey="u" href="ch-service-base.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
-<th width="100%" align="center">telepathy-glib Reference Manual</th>
-<td><a accesskey="n" href="ch-service-handles.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+<th width="100%" align="center">telepathy-glib API Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-dtmf.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
 <tr><td colspan="5" class="shortcuts">
 <a href="#telepathy-glib-simple-handler.synopsis" class="shortcut">Top</a>
@@ -49,28 +49,36 @@ a simple Handler</p>
 
                     <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler-struct" title="TpSimpleHandler">TpSimpleHandler</a>;
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" title="TpSimpleHandlerHandleChannelsImpl ()">*TpSimpleHandlerHandleChannelsImpl</a>)
-                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> *self</code></em>,
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> *handler</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> *account</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *channels</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *requests_satisfied</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *channels</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *requests_satisfied</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-handle-channels-context.html#TpHandleChannelsContext"><span class="type">TpHandleChannelsContext</span></a> *context</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);
 <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="returnvalue">TpBaseClient</span></a> *      <a class="link" href="telepathy-glib-simple-handler.html#tp-simple-handler-new" title="tp_simple_handler_new ()">tp_simple_handler_new</a>               (<em class="parameter"><code><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> *dbus</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bypass_approval</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> requests</code></em>,
-                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> unique</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bypass_approval</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> requests</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> uniquify</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" title="TpSimpleHandlerHandleChannelsImpl ()"><span class="type">TpSimpleHandlerHandleChannelsImpl</span></a> callback</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);
+<a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="returnvalue">TpBaseClient</span></a> *      <a class="link" href="telepathy-glib-simple-handler.html#tp-simple-handler-new-with-am" title="tp_simple_handler_new_with_am ()">tp_simple_handler_new_with_am</a>       (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *account_manager</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bypass_approval</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> requests</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> uniquify</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" title="TpSimpleHandlerHandleChannelsImpl ()"><span class="type">TpSimpleHandlerHandleChannelsImpl</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Object Hierarchy">
 <a name="telepathy-glib-simple-handler.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="synopsis">
-  <a href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject">GObject</a>
+  <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
    +----<a class="link" href="telepathy-glib-base-client.html#TpBaseClient">TpBaseClient</a>
          +----TpSimpleHandler
 </pre>
@@ -84,18 +92,18 @@ TpSimpleHandler implements
 <div class="refsect1" title="Properties">
 <a name="telepathy-glib-simple-handler.properties"></a><h2>Properties</h2>
 <pre class="synopsis">
-  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--bypass-approval" title='The "bypass-approval" property'>bypass-approval</a>"          <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only
-  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--callback" title='The "callback" property'>callback</a>"                 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only
-  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--destroy" title='The "destroy" property'>destroy</a>"                  <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only
-  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--requests" title='The "requests" property'>requests</a>"                 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only
-  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--user-data" title='The "user-data" property'>user-data</a>"                <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only
+  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--bypass-approval" title='The "bypass-approval" property'>bypass-approval</a>"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only
+  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--callback" title='The "callback" property'>callback</a>"                 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only
+  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--destroy" title='The "destroy" property'>destroy</a>"                  <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only
+  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--requests" title='The "requests" property'>requests</a>"                 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only
+  "<a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--user-data" title='The "user-data" property'>user-data</a>"                <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only
 </pre>
 </div>
 <div class="refsect1" title="Description">
 <a name="telepathy-glib-simple-handler.description"></a><h2>Description</h2>
 <p>
-This class makes it easier to write <a class="link" href="telepathy-glib-svc-client.html#TpSvcClient"><span class="type">TpSvcClient</span></a> implementing the
-TpSvcClientHandler interface.
+This class makes it easier to construct a <a class="link" href="telepathy-glib-svc-client.html#TpSvcClient"><span class="type">TpSvcClient</span></a> implementing the
+<a class="link" href="telepathy-glib-svc-client.html#TpSvcClientHandler"><span class="type">TpSvcClientHandler</span></a> interface.
 </p>
 <p>
 A typical simple handler would look liks this:
@@ -130,7 +138,7 @@ A typical simple handler would look liks this:
 24
 25</pre></td>
         <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static void</span>
-<span class="function">my_handle_channels</span> <span class="symbol">(</span>TpSimpleHandler <span class="symbol">*</span>self<span class="symbol">,</span>
+<span class="function">my_handle_channels</span> <span class="symbol">(</span>TpSimpleHandler <span class="symbol">*</span>handler<span class="symbol">,</span>
    TpAccount <span class="symbol">*</span>account<span class="symbol">,</span>
    TpConnection <span class="symbol">*</span>connection<span class="symbol">,</span>
    GList <span class="symbol">*</span>channels<span class="symbol">,</span>
@@ -179,14 +187,14 @@ Data structure representing a simple Handler implementation.
 <div class="refsect2" title="TpSimpleHandlerHandleChannelsImpl ()">
 <a name="TpSimpleHandlerHandleChannelsImpl"></a><h3>TpSimpleHandlerHandleChannelsImpl ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                (*TpSimpleHandlerHandleChannelsImpl)
-                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> *self</code></em>,
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> *handler</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> *account</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *connection</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *channels</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *requests_satisfied</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *channels</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *requests_satisfied</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> user_action_time</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-handle-channels-context.html#TpHandleChannelsContext"><span class="type">TpHandleChannelsContext</span></a> *context</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
 <p>
 Signature of the implementation of the HandleChannels method.
 </p>
@@ -199,7 +207,7 @@ on <em class="parameter"><code>context</code></em> before it returns.
 <col align="left" valign="top">
 <tbody>
 <tr>
-<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td><p><span class="term"><em class="parameter"><code>handler</code></em> :</span></p></td>
 <td>a <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> instance
 </td>
 </tr>
@@ -216,21 +224,23 @@ if possible
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>channels</code></em> :</span></p></td>
-<td> a <a href="/usr/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>,
+<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>,
  all having <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-FEATURE-CORE:CAPS" title="TP_CHANNEL_FEATURE_CORE"><code class="literal">TP_CHANNEL_FEATURE_CORE</code></a> prepared if possible. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Channel]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>requests_satisfied</code></em> :</span></p></td>
-<td> a <a href="/usr/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of
+<td> a <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of
 <a class="link" href="telepathy-glib-channel-request.html#TpChannelRequest"><span class="type">TpChannelRequest</span></a> having their object-path defined but are not guaranteed
 to be prepared. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.ChannelRequest]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_action_time</code></em> :</span></p></td>
-<td>the time at which user action occurred, or 0 if this
-channel is to be handled for some reason not involving user action.
+<td>the time at which user action occurred, or one of the
+ special values <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-NOT-USER-ACTION:CAPS" title="TP_USER_ACTION_TIME_NOT_USER_ACTION"><code class="literal">TP_USER_ACTION_TIME_NOT_USER_ACTION</code></a> or
+ <a class="link" href="telepathy-glib-defs.html#TP-USER-ACTION-TIME-CURRENT-TIME:CAPS" title="TP_USER_ACTION_TIME_CURRENT_TIME"><code class="literal">TP_USER_ACTION_TIME_CURRENT_TIME</code></a>
+ (see <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest--user-action-time" title='The "user-action-time" property'><span class="type">"user-action-time"</span></a> for details)
 </td>
 </tr>
 <tr>
@@ -252,22 +262,27 @@ channel is to be handled for some reason not involving user action.
 <div class="refsect2" title="tp_simple_handler_new ()">
 <a name="tp-simple-handler-new"></a><h3>tp_simple_handler_new ()</h3>
 <pre class="programlisting"><a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="returnvalue">TpBaseClient</span></a> *      tp_simple_handler_new               (<em class="parameter"><code><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> *dbus</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bypass_approval</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> requests</code></em>,
-                                                         <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> unique</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bypass_approval</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> requests</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> uniquify</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" title="TpSimpleHandlerHandleChannelsImpl ()"><span class="type">TpSimpleHandlerHandleChannelsImpl</span></a> callback</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);</pre>
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);</pre>
 <p>
 Convenient function to create a new <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> instance.
+</p>
+<p>
+If <em class="parameter"><code>dbus</code></em> is not the result of <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()"><code class="function">tp_dbus_daemon_dup()</code></a>, you should call
+<a class="link" href="telepathy-glib-simple-handler.html#tp-simple-handler-new-with-am" title="tp_simple_handler_new_with_am ()"><code class="function">tp_simple_handler_new_with_am()</code></a> instead, so that <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>,
+<a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> and <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> instances can be shared between modules.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>dbus</code></em> :</span></p></td>
-<td>a <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> object, may not be <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+<td>a <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> object, may not be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
@@ -278,18 +293,18 @@ Convenient function to create a new <a class="link" href="telepathy-glib-simple-
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>requests</code></em> :</span></p></td>
-<td>if this handler implement Requests (see
+<td>whether this handler should implement Requests (see
 <a class="link" href="telepathy-glib-base-client.html#tp-base-client-set-handler-request-notification" title="tp_base_client_set_handler_request_notification ()"><code class="function">tp_base_client_set_handler_request_notification()</code></a> for details)
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
-<td>the name of the Handler (see <a class="link" href="telepathy-glib-base-client.html#TpBaseClient--name" title='The "name" property'><span class="type">"name"</span></a>: for details)
+<td>the name of the Handler (see <a class="link" href="telepathy-glib-base-client.html#TpBaseClient--name" title='The "name" property'><span class="type">"name"</span></a> for details)
 </td>
 </tr>
 <tr>
-<td><p><span class="term"><em class="parameter"><code>unique</code></em> :</span></p></td>
-<td>the value of the TpBaseClient:uniquify-name: property
+<td><p><span class="term"><em class="parameter"><code>uniquify</code></em> :</span></p></td>
+<td>the value of the <a class="link" href="telepathy-glib-base-client.html#TpBaseClient--uniquify-name" title='The "uniquify-name" property'><span class="type">"uniquify-name"</span></a> property
 </td>
 </tr>
 <tr>
@@ -304,7 +319,7 @@ Convenient function to create a new <a class="link" href="telepathy-glib-simple-
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
-<td>called with the user_data as argument, when the <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a>
+<td>called with <em class="parameter"><code>user_data</code></em> as its argument when the <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a>
 is destroyed
 </td>
 </tr>
@@ -317,12 +332,86 @@ is destroyed
 </table></div>
 <p class="since">Since 0.11.6</p>
 </div>
+<hr>
+<div class="refsect2" title="tp_simple_handler_new_with_am ()">
+<a name="tp-simple-handler-new-with-am"></a><h3>tp_simple_handler_new_with_am ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="returnvalue">TpBaseClient</span></a> *      tp_simple_handler_new_with_am       (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *account_manager</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bypass_approval</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> requests</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> uniquify</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" title="TpSimpleHandlerHandleChannelsImpl ()"><span class="type">TpSimpleHandlerHandleChannelsImpl</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>);</pre>
+<p>
+Convenient function to create a new <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> instance with a
+specified <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a>.
+</p>
+<p>
+It is not necessary to prepare any features on <em class="parameter"><code>account_manager</code></em> before
+calling this function.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>account_manager</code></em> :</span></p></td>
+<td>an account manager, which may not be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bypass_approval</code></em> :</span></p></td>
+<td>the value of the Handler.BypassApproval D-Bus property
+(see <a class="link" href="telepathy-glib-base-client.html#tp-base-client-set-handler-bypass-approval" title="tp_base_client_set_handler_bypass_approval ()"><code class="function">tp_base_client_set_handler_bypass_approval()</code></a> for details)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>requests</code></em> :</span></p></td>
+<td>whether this handler should implement Requests (see
+<a class="link" href="telepathy-glib-base-client.html#tp-base-client-set-handler-request-notification" title="tp_base_client_set_handler_request_notification ()"><code class="function">tp_base_client_set_handler_request_notification()</code></a> for details)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td>the name of the Handler (see <a class="link" href="telepathy-glib-base-client.html#TpBaseClient--name" title='The "name" property'><span class="type">"name"</span></a> for details)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>uniquify</code></em> :</span></p></td>
+<td>the value of the <a class="link" href="telepathy-glib-base-client.html#TpBaseClient--uniquify-name" title='The "uniquify-name" property'><span class="type">"uniquify-name"</span></a> property
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>the function called when HandleChannels is called
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>arbitrary user-supplied data passed to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>called with <em class="parameter"><code>user_data</code></em> as its argument when the <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a>
+is destroyed
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a new <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a>. <span class="annotation">[type TelepathyGLib.SimpleHandler]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.11.14</p>
+</div>
 </div>
 <div class="refsect1" title="Property Details">
 <a name="telepathy-glib-simple-handler.property-details"></a><h2>Property Details</h2>
 <div class="refsect2" title='The "bypass-approval" property'>
 <a name="TpSimpleHandler--bypass-approval"></a><h3>The <code class="literal">"bypass-approval"</code> property</h3>
-<pre class="programlisting">  "bypass-approval"          <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only</pre>
+<pre class="programlisting">  "bypass-approval"          <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only</pre>
 <p>
 The value of the Handler.BypassApproval D-Bus property.
 </p>
@@ -332,32 +421,32 @@ The value of the Handler.BypassApproval D-Bus property.
 <hr>
 <div class="refsect2" title='The "callback" property'>
 <a name="TpSimpleHandler--callback"></a><h3>The <code class="literal">"callback"</code> property</h3>
-<pre class="programlisting">  "callback"                 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only</pre>
+<pre class="programlisting">  "callback"                 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only</pre>
 <p>
-The TpSimpleHandlerHandleChannelsImpl callback implementing the
+The <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" title="TpSimpleHandlerHandleChannelsImpl ()"><span class="type">TpSimpleHandlerHandleChannelsImpl</span></a> callback implementing the
 HandleChannels D-Bus method.
 </p>
 <p>
-This property can't be <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+This property can't be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <p class="since">Since 0.11.6</p>
 </div>
 <hr>
 <div class="refsect2" title='The "destroy" property'>
 <a name="TpSimpleHandler--destroy"></a><h3>The <code class="literal">"destroy"</code> property</h3>
-<pre class="programlisting">  "destroy"                  <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only</pre>
+<pre class="programlisting">  "destroy"                  <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only</pre>
 <p>
-The <a href="/usr/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> function called to free the user-data pointer when
-the <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> is destroyed.
+The <a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> function called to free <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--user-data" title='The "user-data" property'><span class="type">"user-data"</span></a>
+when the <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler"><span class="type">TpSimpleHandler</span></a> is destroyed.
 </p>
 <p class="since">Since 0.11.6</p>
 </div>
 <hr>
 <div class="refsect2" title='The "requests" property'>
 <a name="TpSimpleHandler--requests"></a><h3>The <code class="literal">"requests"</code> property</h3>
-<pre class="programlisting">  "requests"                 <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only</pre>
+<pre class="programlisting">  "requests"                 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Write / Construct Only</pre>
 <p>
-If <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the Handler will implement the Requests interface
+If <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the Handler will implement the Requests interface
 </p>
 <p>Default value: FALSE</p>
 <p class="since">Since 0.11.6</p>
@@ -365,10 +454,9 @@ If <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><c
 <hr>
 <div class="refsect2" title='The "user-data" property'>
 <a name="TpSimpleHandler--user-data"></a><h3>The <code class="literal">"user-data"</code> property</h3>
-<pre class="programlisting">  "user-data"                <a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only</pre>
+<pre class="programlisting">  "user-data"                <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>              : Write / Construct Only</pre>
 <p>
-The user-data pointer passed to the callback implementing the
-HandleChannels D-Bus method.
+The user-data pointer passed to <a class="link" href="telepathy-glib-simple-handler.html#TpSimpleHandler--callback" title='The "callback" property'><span class="type">"callback"</span></a>.
 </p>
 <p class="since">Since 0.11.6</p>
 </div>

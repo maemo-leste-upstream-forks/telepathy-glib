@@ -58,7 +58,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/tp-compiler-flag.m4 \
 	$(top_srcdir)/m4/tp-compiler-warnings.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/tp-linker-flag.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -118,7 +118,6 @@ GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
-HANDLE_LEAK_DEBUG_CFLAGS = @HANDLE_LEAK_DEBUG_CFLAGS@
 HAVE_VALA = @HAVE_VALA@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -174,8 +173,6 @@ STRIP = @STRIP@
 TP_GLIB_CFLAGS = @TP_GLIB_CFLAGS@
 VALAC = @VALAC@
 VALAFLAGS = @VALAFLAGS@
-VALA_CFLAGS = @VALA_CFLAGS@
-VALA_LIBS = @VALA_LIBS@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
 VERSION_SCRIPT_ARG = @VERSION_SCRIPT_ARG@
@@ -289,17 +286,25 @@ CFILE_GLOB = $(top_srcdir)/telepathy-glib/*.c $(top_builddir)/telepathy-glib/_ge
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 IGNORE_HFILES = \
     add-dispatch-operation-context-internal.h \
+    base-connection-internal.h \
+    base-contact-list-internal.h \
     channel-dispatch-operation-internal.h \
+    client-message-internal.h \
     base-protocol-internal.h \
     channel-internal.h \
+    cm-message-internal.h \
     connection-internal.h \
+    contact-list-channel-internal.h \
     debug-internal.h \
     handle-channels-context-internal.h \
     handle-repo-internal.h \
+    message-internal.h \
     observe-channels-context-internal.h \
     protocol-internal.h \
     proxy-internal.h \
-    proxy-introspectable.h
+    proxy-introspectable.h \
+    signalled-message-internal.h \
+    util-internal.h
 
 
 # Images to copy into HTML directory.
@@ -323,8 +328,8 @@ expand_content_files =
 INCLUDES = -I$(top_srcdir) -I$(top_builddir) \
 	 @DBUS_CFLAGS@ @GLIB_CFLAGS@
 
-GTKDOC_LIBS = @DBUS_LIBS@ @GLIB_LIBS@ \
-	    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
+GTKDOC_LIBS = $(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+            @DBUS_LIBS@ @GLIB_LIBS@
 
 @GTK_DOC_USE_LIBTOOL_FALSE@GTKDOC_CC = $(CC) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 @GTK_DOC_USE_LIBTOOL_TRUE@GTKDOC_CC = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -563,6 +568,13 @@ uninstall-am: uninstall-local
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-local
 
+
+html-build.stamp: $(srcdir)/version.xml
+pdf-build.stamp: $(srcdir)/version.xml
+
+$(srcdir)/version.xml: Makefile
+	@-chmod u+w $(srcdir) $(srcdir)/version.xml
+	echo @PACKAGE_VERSION@ > $(srcdir)/version.xml
 
 @ENABLE_GTK_DOC_TRUE@all-local: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
 @ENABLE_GTK_DOC_FALSE@all-local:

@@ -26,15 +26,10 @@
  * @see_also: #TpSvcConnectionInterfacePresence
  *
  * This mixin can be added to a #TpBaseConnection subclass to implement the
- * presence interface in a general way. It does not support protocols where it
- * is possible to set multiple statuses on yourself at once, however. Hence all
- * presence statuses will have the exclusive flag set.
- *
- * There are plans to deprecate the notion of last activity time in the D-Bus
- * presence interface, so #TpPresenceStatus doesn't include it at all.
- * Consequently, the last activity time field in presence data presented over
- * D-Bus will always be zero and the SetLastActivityTime method doesn't actually
- * do anything.
+ * SimplePresence and/or Presence interfaces. Implementing both interfaces
+ * (as described below) is recommended. In particular, you must implement the
+ * old-style Presence interface if compatibility with telepathy-glib
+ * versions older than 0.11.13 is required.
  *
  * To use the presence mixin, include a #TpPresenceMixinClass somewhere in your
  * class structure and a #TpPresenceMixin somewhere in your instance structure,
@@ -42,24 +37,216 @@
  * tp_presence_mixin_init() from your init function or constructor, and
  * tp_presence_mixin_finalize() from your dispose or finalize function.
  *
- * To use the presence mixin as the implementation of
- * #TpSvcConnectionInterfacePresence, in the function you pass to
- * G_IMPLEMENT_INTERFACE, you should call tp_presence_mixin_iface_init.
- * TpPresenceMixin implements all of the D-Bus methods in the Presence
- * interface.
- *
- * Since 0.7.13 you can also implement
- * #TpSvcConnectionInterfaceSimplePresence by using this mixin, in this case
- * you should pass tp_presence_mixin_iface_init as an argument to
- * G_IMPLEMENT_INTERFACE. Note that this can cause the status_available
- * callback to be called while disconnected. Also to fully implement this
- * interface some dbus properties need to be supported. To do that using this
- * mixin the instance needs to use the dbus properties mixin and call
- * tp_presence_mixin_simple_presence_init_dbus_properties in the class init
- * function
- *
+ * <section>
+ * <title>Implementing SimplePresence</title>
+ * <para>
+ *   Since 0.7.13 this mixin supports the entire SimplePresence interface.
+ *   You can implement #TpSvcConnectionInterfaceSimplePresence as follows:
+ *   <itemizedlist>
+ *     <listitem>
+ *       <para>use the #TpContactsMixin and
+ *        <link linkend="telepathy-glib-dbus-properties-mixin">TpDBusPropertiesMixin</link>;</para>
+ *     </listitem>
+ *     <listitem>
+ *       <para>pass tp_presence_mixin_simple_presence_iface_init() as an
+ *         argument to G_IMPLEMENT_INTERFACE(), like so:
+ *       </para>
+ *       |[
+ *       G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
+ *           TP_TYPE_BASE_CONNECTION,
+ *           // ...
+ *           G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_SIMPLE_PRESENCE,
+ *               tp_presence_mixin_simple_presence_iface_init);
+ *           // ...
+ *           )
+ *       ]|
+ *     </listitem>
+ *     <listitem>
+ *       <para>
+ *         call tp_presence_mixin_simple_presence_init_dbus_properties() in the
+ *         #GTypeInfo class_init function;
+ *       </para>
+ *     </listitem>
+ *     <listitem>
+ *       <para>
+ *         call tp_presence_mixin_simple_presence_register_with_contacts_mixin()
+ *         in the #GObjectClass constructed function.
+ *       </para>
+ *     </listitem>
+ *   </itemizedlist>
+ * </para>
+ * </section> <!-- Simple Presence -->
+ * <section>
+ * <title>Implementing old-style Presence</title>
+ * <para>
+ *   This mixin also supports a large subset of the deprecated Presence
+ *   interface. It does not support protocols where it is possible to set
+ *   multiple statuses on yourself at once (all presence statuses will have the
+ *   exclusive flag set), or last-activity-time information.
+ * </para>
+ * <para>
+ *   To use the presence mixin as the implementation of
+ *   #TpSvcConnectionInterfacePresence, use tp_presence_mixin_iface_init() as
+ *   the function you pass to G_IMPLEMENT_INTERFACE(), as in the following
+ *   example.  The presence mixin implements all of the D-Bus methods in the
+ *   Presence interface.
+ * </para>
+ * |[
+ * G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
+ *     TP_TYPE_BASE_CONNECTION,
+ *     // ...
+ *     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE,
+ *         tp_presence_mixin_iface_init);
+ *     // ...
+ *     )
+ * ]|
+ * <para>
+ *   In telepathy-glib versions older than 0.11.13, every connection
+ *   that used the #TpPresenceMixin was required to implement
+ *   #TpSvcConnectionInterfacePresence; failing to do so would lead to an
+ *   assertion failure. Since 0.11.13, this is no longer required.
+ * </para>
+ * </section> <!-- complex Presence -->
  *
  * Since: 0.5.13
+ */
+
+/**
+ * TpPresenceStatusOptionalArgumentSpec
+ * @name: Name of the argument as passed over D-Bus
+ * @dtype: D-Bus type signature of the argument
+ *
+ * Structure specifying a supported optional argument for a presence status.
+ *
+ * In addition to the fields documented here, there are two gpointer fields
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
+ */
+
+/**
+ * TpPresenceStatusSpec
+ * @name: String identifier of the presence status
+ * @presence_type: A type value, as specified by #TpConnectionPresenceType
+ * @self: Indicates if this status may be set on yourself
+ * @optional_arguments: An array of #TpPresenceStatusOptionalArgumentSpec
+ *  structures representing the optional arguments for this status, terminated
+ *  by a NULL name. If there are no optional arguments for a status, this can
+ *  be NULL.
+ *
+ * Structure specifying a supported presence status.
+ *
+ * In addition to the fields documented here, there are two gpointer fields
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
+ */
+
+/**
+ * TpPresenceStatus:
+ * @index: Index of the presence status in the provided supported presence
+ *  statuses array
+ * @optional_arguments: A GHashTable mapping of string identifiers to GValues
+ *  of the optional status arguments, if any. If there are no optional
+ *  arguments, this pointer may be NULL.
+ *
+ * Structure representing a presence status.
+ *
+ * In addition to the fields documented here, there are two gpointer fields
+ * which must currently be %NULL. A meaning may be defined for these in a
+ * future version of telepathy-glib.
+ */
+
+
+/**
+ * TpPresenceMixinStatusAvailableFunc:
+ * @obj: An instance of a #TpBaseConnection subclass implementing the presence
+ *  interface with this mixin
+ * @which: An index into the array of #TpPresenceStatusSpec provided to
+ *  tp_presence_mixin_class_init()
+ *
+ * Signature of a callback to be used to determine if a given presence
+ * status can be set on the connection. Most users of this mixin do not need to
+ * supply an implementation of this callback: the value of
+ * #TpPresenceStatusSpec.self is enough to determine whether this is a
+ * user-settable presence, so %NULL should be passed to
+ * tp_presence_mixin_class_init() for this callback.
+ *
+ * One place where this callback may be needed is on XMPP: not all server
+ * implementation support the user becoming invisible. So an XMPP
+ * implementation would implement this function, so that—once connected—the
+ * hidden status is only available if the server supports it. Before the
+ * connection is connected, this callback should return %TRUE for every status
+ * that might possibly be supported: this allows the user to at least try to
+ * sign in as invisible.
+ *
+ * Returns: %TRUE if the status can be set on this connection; %FALSE if not.
+ */
+
+/**
+ * TpPresenceMixinGetContactStatusesFunc:
+ * @obj: An object with this mixin.
+ * @contacts: An array of #TpHandle for the contacts to get presence status for
+ * @error: Used to return a Telepathy D-Bus error if %NULL is returned
+ *
+ * Signature of the callback used to get the stored presence status of
+ * contacts. The returned hash table should have contact handles mapped to
+ * their respective presence statuses in #TpPresenceStatus structs.
+ *
+ * The returned hash table will be freed with g_hash_table_destroy. The
+ * callback is responsible for ensuring that this does any cleanup that
+ * may be necessary.
+ *
+ * Returns: (transfer full): The contact presence on success, %NULL with
+ *  error set on error
+ */
+
+/**
+ * TpPresenceMixinSetOwnStatusFunc:
+ * @obj: An object with this mixin.
+ * @status: The status to set, or NULL for whatever the protocol defines as a
+ *  "default" status
+ * @error: Used to return a Telepathy D-Bus error if %FALSE is returned
+ *
+ * Signature of the callback used to commit changes to the user's own presence
+ * status in SetStatuses. It is also used in ClearStatus and RemoveStatus to
+ * reset the user's own status back to the "default" one with a %NULL status
+ * argument.
+ *
+ * The optional_arguments hash table in @status, if not NULL, will have been
+ * filtered so it only contains recognised parameters, so the callback
+ * need not (and cannot) check for unrecognised parameters. However, the
+ * types of the parameters are not currently checked, so the callback is
+ * responsible for doing so.
+ *
+ * The callback is responsible for emitting PresenceUpdate, if appropriate,
+ * by calling tp_presence_mixin_emit_presence_update().
+ *
+ * Returns: %TRUE if the operation was successful, %FALSE if not.
+ */
+
+/**
+ * TpPresenceMixinClass:
+ * @status_available: The status-available function that was passed to
+ *  tp_presence_mixin_class_init()
+ * @get_contact_statuses: The get-contact-statuses function that was passed to
+ *  tp_presence_mixin_class_init()
+ * @set_own_status: The set-own-status function that was passed to
+ *  tp_presence_mixin_class_init()
+ * @statuses: The presence statuses array that was passed to
+ *  tp_presence_mixin_class_init()
+ *
+ * Structure to be included in the class structure of objects that
+ * use this mixin. Initialize it with tp_presence_mixin_class_init().
+ *
+ * All fields should be considered read-only.
+ */
+
+/**
+ * TpPresenceMixin:
+ *
+ * Structure to be included in the instance structure of objects that
+ * use this mixin. Initialize it with tp_presence_mixin_init().
+ *
+ * There are no public fields.
  */
 
 #include <telepathy-glib/presence-mixin.h>
@@ -103,7 +290,7 @@ deep_copy_hashtable (GHashTable *hash_table)
 
 
 /**
- * tp_presence_status_new
+ * tp_presence_status_new: (skip)
  * @which: Index of the presence status in the provided supported presence
  *  statuses array
  * @optional_arguments: Optional arguments for the presence statuses. Can be
@@ -129,7 +316,7 @@ tp_presence_status_new (guint which,
 
 
 /**
- * tp_presence_status_free
+ * tp_presence_status_free: (skip)
  * @status: A pointer to the presence status structure to free.
  *
  * Deallocate all resources associated with a presence status structure.
@@ -148,7 +335,7 @@ tp_presence_status_free (TpPresenceStatus *status)
 
 
 /**
- * tp_presence_mixin_class_get_offset_quark:
+ * tp_presence_mixin_class_get_offset_quark: (skip)
  *
  * <!--no documentation beyond Returns: needed-->
  *
@@ -164,7 +351,7 @@ tp_presence_mixin_class_get_offset_quark ()
 }
 
 /**
- * tp_presence_mixin_get_offset_quark:
+ * tp_presence_mixin_get_offset_quark: (skip)
  *
  * <!--no documentation beyond Returns: needed-->
  *
@@ -179,15 +366,15 @@ tp_presence_mixin_get_offset_quark ()
   return offset_quark;
 }
 
-
 /**
- * tp_presence_mixin_class_init:
+ * tp_presence_mixin_class_init: (skip)
  * @obj_cls: The class of the implementation that uses this mixin
  * @offset: The byte offset of the TpPresenceMixinClass within the class
  * structure
  * @status_available: A callback to be used to determine if a given presence
- *  status is available to be set on the connection. If NULL, all statuses are
- *  always considered available.
+ *  status can be set on a particular connection. Should usually be %NULL, to
+ *  consider all statuses with #TpPresenceStatusSpec.self set to %TRUE to be
+ *  settable.
  * @get_contact_statuses: A callback to be used get the current presence status
  *  for contacts. This is used in implementations of various D-Bus methods and
  *  hence must be provided.
@@ -258,9 +445,8 @@ tp_presence_mixin_class_init (GObjectClass *obj_cls,
     }
 }
 
-
 /**
- * tp_presence_mixin_init:
+ * tp_presence_mixin_init: (skip)
  * @obj: An instance of the implementation that uses this mixin
  * @offset: The byte offset of the TpPresenceMixin within the object structure
  *
@@ -286,7 +472,7 @@ tp_presence_mixin_init (GObject *obj,
 }
 
 /**
- * tp_presence_mixin_finalize:
+ * tp_presence_mixin_finalize: (skip)
  * @obj: An object with this mixin.
  *
  * Free resources held by the presence mixin.
@@ -367,7 +553,7 @@ construct_presence_hash (const TpPresenceStatusSpec *supported_statuses,
 
 
 /**
- * tp_presence_mixin_emit_presence_update:
+ * tp_presence_mixin_emit_presence_update: (skip)
  * @obj: A connection object with this mixin
  * @contact_presences: A mapping of contact handles to #TpPresenceStatus
  *  structures with the presence data to emit
@@ -386,12 +572,16 @@ tp_presence_mixin_emit_presence_update (GObject *obj,
 
   DEBUG ("called.");
 
-  presence_hash = construct_presence_hash (mixin_cls->statuses,
-      contact_statuses);
-  tp_svc_connection_interface_presence_emit_presence_update (obj,
-      presence_hash);
+  if (g_type_interface_peek (G_OBJECT_GET_CLASS (obj),
+      TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE) != NULL)
+    {
+      presence_hash = construct_presence_hash (mixin_cls->statuses,
+          contact_statuses);
+      tp_svc_connection_interface_presence_emit_presence_update (obj,
+          presence_hash);
 
-  g_hash_table_destroy (presence_hash);
+      g_hash_table_destroy (presence_hash);
+    }
 
   if (g_type_interface_peek (G_OBJECT_GET_CLASS (obj),
       TP_TYPE_SVC_CONNECTION_INTERFACE_SIMPLE_PRESENCE) != NULL)
@@ -407,7 +597,7 @@ tp_presence_mixin_emit_presence_update (GObject *obj,
 
 
 /**
- * tp_presence_mixin_emit_one_presence_update:
+ * tp_presence_mixin_emit_one_presence_update: (skip)
  * @obj: A connection object with this mixin
  * @handle: The handle of the contact to emit the signal for
  * @status: The new status to emit
@@ -434,7 +624,7 @@ tp_presence_mixin_emit_one_presence_update (GObject *obj,
 
 
 /**
- * tp_presence_mixin_add_status:
+ * tp_presence_mixin_add_status: (skip)
  *
  * Implements D-Bus method AddStatus
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -461,7 +651,7 @@ tp_presence_mixin_add_status (TpSvcConnectionInterfacePresence *iface,
 
 
 /**
- * tp_presence_mixin_clear_status:
+ * tp_presence_mixin_clear_status: (skip)
  *
  * Implements D-Bus method ClearStatus
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -495,7 +685,7 @@ tp_presence_mixin_clear_status (TpSvcConnectionInterfacePresence *iface,
 
 
 /**
- * tp_presence_mixin_get_presence:
+ * tp_presence_mixin_get_presence: (skip)
  *
  * Implements D-Bus method GetPresence
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -618,7 +808,7 @@ check_status_available (GObject *object,
 }
 
 /**
- * tp_presence_mixin_get_statuses:
+ * tp_presence_mixin_get_statuses: (skip)
  *
  * Implements D-Bus method GetStatuses
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -686,7 +876,7 @@ tp_presence_mixin_get_statuses (TpSvcConnectionInterfacePresence *iface,
 
 
 /**
- * tp_presence_mixin_set_last_activity_time
+ * tp_presence_mixin_set_last_activity_time: (skip)
  *
  * Implements D-Bus method SetLastActivityTime
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -709,9 +899,9 @@ tp_presence_mixin_set_last_activity_time (TpSvcConnectionInterfacePresence *ifac
 
 
 /**
- * tp_presence_mixin_remove_status:
+ * tp_presence_mixin_remove_status: (skip)
  *
- * Implements D-Bus method GetStatuses
+ * Implements D-Bus method RemoveStatus
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
  *
  * @context: The D-Bus invocation context to use to return values
@@ -785,7 +975,7 @@ tp_presence_mixin_remove_status (TpSvcConnectionInterfacePresence *iface,
 
 
 /**
- * tp_presence_mixin_request_presence
+ * tp_presence_mixin_request_presence: (skip)
  *
  * Implements D-Bus method RequestPresence
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -959,7 +1149,7 @@ set_status_foreach (gpointer key, gpointer value, gpointer user_data)
 
 
 /**
- * tp_presence_mixin_set_status
+ * tp_presence_mixin_set_status: (skip)
  *
  * Implements D-Bus method SetStatus
  * on interface org.freedesktop.Telepathy.Connection.Interface.Presence
@@ -1008,7 +1198,7 @@ tp_presence_mixin_set_status (TpSvcConnectionInterfacePresence *iface,
 
 
 /**
- * tp_presence_mixin_iface_init:
+ * tp_presence_mixin_iface_init: (skip)
  * @g_iface: A pointer to the #TpSvcConnectionInterfacePresenceClass in an
  *  object class
  * @iface_data: Ignored
@@ -1127,14 +1317,14 @@ tp_presence_mixin_get_simple_presence_dbus_property (GObject *object,
 }
 
 /**
- * tp_presence_mixin_simple_presence_init_dbus_properties:
+ * tp_presence_mixin_simple_presence_init_dbus_properties: (skip)
  * @cls: The class of an object with this mixin
  *
  * Set up #TpDBusPropertiesMixinClass to use this mixin's implementation of
  * the SimplePresence interface's properties.
  *
- * This uses tp_presence_mixin_get_simple_dbus_property() as the property
- * getter and sets up a list of the supported properties for it.
+ * This automatically sets up a list of the supported properties for the
+ * SimplePresence interface.
  *
  * Since: 0.7.13
  */
@@ -1149,7 +1339,7 @@ tp_presence_mixin_simple_presence_init_dbus_properties (GObjectClass *cls)
 }
 
 /**
- * tp_presence_mixin_simple_presence_set_presence
+ * tp_presence_mixin_simple_presence_set_presence: (skip)
  *
  * Implements D-Bus method SetPresence
  * on interface org.freedesktop.Telepathy.Connection.Interface.SimplePresence
@@ -1284,7 +1474,7 @@ construct_simple_presence_hash (const TpPresenceStatusSpec *supported_statuses,
 }
 
 /**
- * tp_presence_mixin_get_simple_presence:
+ * tp_presence_mixin_get_simple_presence: (skip)
  *
  * Implements D-Bus method GetPresence
  * on interface org.freedesktop.Telepathy.Connection.Interface.SimplePresence
@@ -1346,7 +1536,7 @@ tp_presence_mixin_simple_presence_get_presences (
 }
 
 /**
- * tp_presence_mixin_simple_presence_iface_init:
+ * tp_presence_mixin_simple_presence_iface_init: (skip)
  * @g_iface: A pointer to the #TpSvcConnectionInterfaceSimplePresenceClass in
  * an object class
  * @iface_data: Ignored
@@ -1419,7 +1609,7 @@ tp_presence_mixin_simple_presence_fill_contact_attributes (GObject *obj,
 }
 
 /**
- * tp_presence_mixin_simple_presence_register_with_contacts_mixin:
+ * tp_presence_mixin_simple_presence_register_with_contacts_mixin: (skip)
  * @obj: An instance that of the implementation that uses both the Contacts
  * mixin and this mixin
  *

@@ -11,15 +11,14 @@
 
 #include "conn.h"
 
-#include <string.h>
-
 #include <dbus/dbus-glib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/handle-repo-dynamic.h>
 #include <telepathy-glib/handle-repo-static.h>
 
-#include "contact-list-manager.h"
+#include "contact-list.h"
+#include "protocol.h"
 
 static void init_aliasing (gpointer, gpointer);
 
@@ -30,6 +29,10 @@ G_DEFINE_TYPE_WITH_CODE (ExampleContactListConnection,
       init_aliasing);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACTS,
       tp_contacts_mixin_iface_init);
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST,
+      tp_base_contact_list_mixin_list_iface_init);
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_GROUPS,
+      tp_base_contact_list_mixin_groups_iface_init);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE,
       tp_presence_mixin_iface_init);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_SIMPLE_PRESENCE,
@@ -46,7 +49,7 @@ struct _ExampleContactListConnectionPrivate
 {
   gchar *account;
   guint simulation_delay;
-  ExampleContactListManager *list_manager;
+  ExampleContactList *contact_list;
   gboolean away;
 };
 
@@ -134,30 +137,12 @@ example_contact_list_normalize_contact (TpHandleRepoIface *repo,
                                         gpointer context,
                                         GError **error)
 {
-  if (id[0] == '\0')
-    {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
-          "Contact ID must not be empty");
-      return NULL;
-    }
+  gchar *normal = NULL;
 
-  return g_utf8_normalize (id, -1, G_NORMALIZE_ALL_COMPOSE);
-}
-
-static gchar *
-example_contact_list_normalize_group (TpHandleRepoIface *repo,
-                                      const gchar *id,
-                                      gpointer context,
-                                      GError **error)
-{
-  if (id[0] == '\0')
-    {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
-          "Contact group name cannot be empty");
-      return NULL;
-    }
-
-  return g_utf8_normalize (id, -1, G_NORMALIZE_ALL_COMPOSE);
+  if (example_contact_list_protocol_check_contact_id (id, &normal, error))
+    return normal;
+  else
+    return NULL;
 }
 
 static void
@@ -166,16 +151,10 @@ create_handle_repos (TpBaseConnection *conn,
 {
   repos[TP_HANDLE_TYPE_CONTACT] = tp_dynamic_handle_repo_new
       (TP_HANDLE_TYPE_CONTACT, example_contact_list_normalize_contact, NULL);
-
-  repos[TP_HANDLE_TYPE_LIST] = tp_static_handle_repo_new
-      (TP_HANDLE_TYPE_LIST, example_contact_lists ());
-
-  repos[TP_HANDLE_TYPE_GROUP] = tp_dynamic_handle_repo_new
-      (TP_HANDLE_TYPE_GROUP, example_contact_list_normalize_group, NULL);
 }
 
 static void
-alias_updated_cb (ExampleContactListManager *manager,
+alias_updated_cb (ExampleContactList *contact_list,
                   TpHandle contact,
                   ExampleContactListConnection *self)
 {
@@ -189,7 +168,7 @@ alias_updated_cb (ExampleContactListManager *manager,
   g_value_init (pair->values + 1, G_TYPE_STRING);
   g_value_set_uint (pair->values + 0, contact);
   g_value_set_string (pair->values + 1,
-      example_contact_list_manager_get_alias (manager, contact));
+      example_contact_list_get_alias (contact_list, contact));
 
   aliases = g_ptr_array_sized_new (1);
   g_ptr_array_add (aliases, pair);
@@ -201,7 +180,7 @@ alias_updated_cb (ExampleContactListManager *manager,
 }
 
 static void
-presence_updated_cb (ExampleContactListManager *manager,
+presence_updated_cb (ExampleContactList *contact_list,
                      TpHandle contact,
                      ExampleContactListConnection *self)
 {
@@ -213,7 +192,7 @@ presence_updated_cb (ExampleContactListManager *manager,
     return;
 
   status = tp_presence_status_new (
-      example_contact_list_manager_get_presence (manager, contact),
+      example_contact_list_get_presence (contact_list, contact),
       NULL);
   tp_presence_mixin_emit_one_presence_update ((GObject *) self,
       contact, status);
@@ -227,19 +206,18 @@ create_channel_managers (TpBaseConnection *conn)
     EXAMPLE_CONTACT_LIST_CONNECTION (conn);
   GPtrArray *ret = g_ptr_array_sized_new (1);
 
-  self->priv->list_manager =
-    EXAMPLE_CONTACT_LIST_MANAGER (g_object_new (
-          EXAMPLE_TYPE_CONTACT_LIST_MANAGER,
+  self->priv->contact_list = EXAMPLE_CONTACT_LIST (g_object_new (
+          EXAMPLE_TYPE_CONTACT_LIST,
           "connection", conn,
           "simulation-delay", self->priv->simulation_delay,
           NULL));
 
-  g_signal_connect (self->priv->list_manager, "alias-updated",
+  g_signal_connect (self->priv->contact_list, "alias-updated",
       G_CALLBACK (alias_updated_cb), self);
-  g_signal_connect (self->priv->list_manager, "presence-updated",
+  g_signal_connect (self->priv->contact_list, "presence-updated",
       G_CALLBACK (presence_updated_cb), self);
 
-  g_ptr_array_add (ret, self->priv->list_manager);
+  g_ptr_array_add (ret, self->priv->contact_list);
 
   return ret;
 }
@@ -293,7 +271,7 @@ aliasing_fill_contact_attributes (GObject *object,
       tp_contacts_mixin_set_contact_attribute (attributes, contact,
           TP_TOKEN_CONNECTION_INTERFACE_ALIASING_ALIAS,
           tp_g_value_slice_new_string (
-            example_contact_list_manager_get_alias (self->priv->list_manager,
+            example_contact_list_get_alias (self->priv->contact_list,
               contact)));
     }
 }
@@ -310,7 +288,10 @@ constructed (GObject *object)
 
   tp_contacts_mixin_init (object,
       G_STRUCT_OFFSET (ExampleContactListConnection, contacts_mixin));
+
   tp_base_connection_register_with_contacts_mixin (base);
+  tp_base_contact_list_mixin_register_with_contacts_mixin (base);
+
   tp_contacts_mixin_add_contact_attributes_iface (object,
       TP_IFACE_CONNECTION_INTERFACE_ALIASING,
       aliasing_fill_contact_attributes);
@@ -359,8 +340,8 @@ get_contact_statuses (GObject *object,
         }
       else
         {
-          presence = example_contact_list_manager_get_presence (
-              self->priv->list_manager, contact);
+          presence = example_contact_list_get_presence (
+              self->priv->contact_list, contact);
         }
 
       parameters = g_hash_table_new_full (g_str_hash,
@@ -407,17 +388,28 @@ set_own_status (GObject *object,
   return TRUE;
 }
 
+static const gchar *interfaces_always_present[] = {
+    TP_IFACE_CONNECTION_INTERFACE_ALIASING,
+    TP_IFACE_CONNECTION_INTERFACE_CONTACTS,
+    TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST,
+    TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS,
+    TP_IFACE_CONNECTION_INTERFACE_PRESENCE,
+    TP_IFACE_CONNECTION_INTERFACE_REQUESTS,
+    TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE,
+    NULL };
+
+const gchar * const *
+example_contact_list_connection_get_possible_interfaces (void)
+{
+  /* in this example CM we don't have any extra interfaces that are sometimes,
+   * but not always, present */
+  return interfaces_always_present;
+}
+
 static void
 example_contact_list_connection_class_init (
     ExampleContactListConnectionClass *klass)
 {
-  static const gchar *interfaces_always_present[] = {
-      TP_IFACE_CONNECTION_INTERFACE_ALIASING,
-      TP_IFACE_CONNECTION_INTERFACE_CONTACTS,
-      TP_IFACE_CONNECTION_INTERFACE_PRESENCE,
-      TP_IFACE_CONNECTION_INTERFACE_REQUESTS,
-      TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE,
-      NULL };
   TpBaseConnectionClass *base_class = (TpBaseConnectionClass *) klass;
   GObjectClass *object_class = (GObjectClass *) klass;
   GParamSpec *param_spec;
@@ -451,11 +443,14 @@ example_contact_list_connection_class_init (
 
   tp_contacts_mixin_class_init (object_class,
       G_STRUCT_OFFSET (ExampleContactListConnectionClass, contacts_mixin));
+
   tp_presence_mixin_class_init (object_class,
       G_STRUCT_OFFSET (ExampleContactListConnectionClass, presence_mixin),
       status_available, get_contact_statuses, set_own_status,
       example_contact_list_presence_statuses ());
   tp_presence_mixin_simple_presence_init_dbus_properties (object_class);
+
+  tp_base_contact_list_mixin_class_init (base_class);
 }
 
 static void
@@ -497,8 +492,8 @@ get_aliases (TpSvcConnectionInterfaceAliasing *aliasing,
   for (i = 0; i < contacts->len; i++)
     {
       TpHandle contact = g_array_index (contacts, TpHandle, i);
-      const gchar *alias = example_contact_list_manager_get_alias (
-          self->priv->list_manager, contact);
+      const gchar *alias = example_contact_list_get_alias (
+          self->priv->contact_list, contact);
 
       g_hash_table_insert (result, GUINT_TO_POINTER (contact),
           (gchar *) alias);
@@ -538,8 +533,8 @@ request_aliases (TpSvcConnectionInterfaceAliasing *aliasing,
   for (i = 0; i < contacts->len; i++)
     {
       TpHandle contact = g_array_index (contacts, TpHandle, i);
-      const gchar *alias = example_contact_list_manager_get_alias (
-          self->priv->list_manager, contact);
+      const gchar *alias = example_contact_list_get_alias (
+          self->priv->contact_list, contact);
 
       g_ptr_array_add (result, (gchar *) alias);
     }
@@ -583,7 +578,7 @@ set_aliases (TpSvcConnectionInterfaceAliasing *aliasing,
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
-      example_contact_list_manager_set_alias (self->priv->list_manager,
+      example_contact_list_set_alias (self->priv->contact_list,
           GPOINTER_TO_UINT (key), value);
     }
 

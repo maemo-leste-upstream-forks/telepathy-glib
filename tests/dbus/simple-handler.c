@@ -102,9 +102,33 @@ setup (Test *test,
 }
 
 static void
+teardown_channel_invalidated_cb (TpChannel *self,
+  guint domain,
+  gint code,
+  gchar *message,
+  Test *test)
+{
+  g_main_loop_quit (test->mainloop);
+}
+
+static void
+teardown_run_close_channel (Test *test, TpChannel *channel)
+{
+  if (channel != NULL && tp_proxy_get_invalidated (channel) == NULL)
+    {
+      g_signal_connect (channel, "invalidated",
+          G_CALLBACK (teardown_channel_invalidated_cb), test);
+      tp_cli_channel_call_close (channel, -1, NULL, NULL, NULL, NULL);
+      g_main_loop_run (test->mainloop);
+    }
+}
+
+static void
 teardown (Test *test,
           gconstpointer data)
 {
+  teardown_run_close_channel (test, test->text_chan);
+
   g_clear_error (&test->error);
 
   g_object_unref (test->simple_handler);
@@ -353,6 +377,7 @@ call_handle_channels (Test *test)
 {
   GPtrArray *channels, *requests_satisified;
   GHashTable *info;
+  int i;
 
   channels = g_ptr_array_sized_new (1);
   add_channel_to_ptr_array (channels, test->text_chan);
@@ -363,13 +388,16 @@ call_handle_channels (Test *test)
   tp_proxy_add_interface_by_id (TP_PROXY (test->client),
       TP_IFACE_QUARK_CLIENT_HANDLER);
 
-  tp_cli_client_handler_call_handle_channels (test->client, -1,
-      tp_proxy_get_object_path (test->account),
-      tp_proxy_get_object_path (test->connection),
-      channels, requests_satisified, 0, info,
-      no_return_cb, test, NULL, NULL);
+  for (i = 0 ; i < 10 ; i ++)
+    {
+      tp_cli_client_handler_call_handle_channels (test->client, -1,
+          tp_proxy_get_object_path (test->account),
+          tp_proxy_get_object_path (test->connection),
+          channels, requests_satisified, 0, info,
+          no_return_cb, test, NULL, NULL);
 
-  g_main_loop_run (test->mainloop);
+      g_main_loop_run (test->mainloop);
+    }
 
   g_ptr_array_foreach (channels, free_channel_details, NULL);
   g_ptr_array_free (channels, TRUE);
@@ -475,6 +503,7 @@ int
 main (int argc,
       char **argv)
 {
+  tp_tests_abort_after (10);
   g_type_init ();
   tp_debug_set_flags ("all");
 

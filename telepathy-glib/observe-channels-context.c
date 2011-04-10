@@ -48,8 +48,10 @@
 #include "telepathy-glib/observe-channels-context.h"
 
 #include <telepathy-glib/channel.h>
+#include <telepathy-glib/channel-request.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/gtypes.h>
+#include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
 #include "telepathy-glib/debug-internal.h"
@@ -577,7 +579,7 @@ out:
 }
 
 static void
-channel_prepare_cb (GObject *source,
+occ_channel_prepare_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
@@ -601,11 +603,11 @@ out:
 }
 
 static void
-context_prepare (TpObserveChannelsContext *self)
+context_prepare (TpObserveChannelsContext *self,
+    const GQuark *account_features,
+    const GQuark *connection_features,
+    const GQuark *channel_features)
 {
-  GQuark account_features[] = { TP_ACCOUNT_FEATURE_CORE, 0 };
-  GQuark conn_features[] = { TP_CONNECTION_FEATURE_CORE, 0 };
-  GQuark channel_features[] = { TP_CHANNEL_FEATURE_CORE, 0 };
   guint i;
 
   self->priv->num_pending = 2;
@@ -613,7 +615,7 @@ context_prepare (TpObserveChannelsContext *self)
   tp_proxy_prepare_async (self->account, account_features,
       account_prepare_cb, g_object_ref (self));
 
-  tp_proxy_prepare_async (self->connection, conn_features,
+  tp_proxy_prepare_async (self->connection, connection_features,
       conn_prepare_cb, g_object_ref (self));
 
   for (i = 0; i < self->channels->len; i++)
@@ -623,12 +625,15 @@ context_prepare (TpObserveChannelsContext *self)
       self->priv->num_pending++;
 
       tp_proxy_prepare_async (channel, channel_features,
-          channel_prepare_cb, g_object_ref (self));
+          occ_channel_prepare_cb, g_object_ref (self));
     }
 }
 
 void
 _tp_observe_channels_context_prepare_async (TpObserveChannelsContext *self,
+    const GQuark *account_features,
+    const GQuark *connection_features,
+    const GQuark *channel_features,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
@@ -640,7 +645,8 @@ _tp_observe_channels_context_prepare_async (TpObserveChannelsContext *self,
   self->priv->result = g_simple_async_result_new (G_OBJECT (self),
       callback, user_data, _tp_observe_channels_context_prepare_async);
 
-  context_prepare (self);
+  context_prepare (self, account_features, connection_features,
+      channel_features);
 }
 
 gboolean
@@ -663,4 +669,30 @@ _tp_observe_channels_context_prepare_finish (
           G_OBJECT (self), _tp_observe_channels_context_prepare_async), FALSE);
 
   return TRUE;
+}
+
+/**
+ * tp_observe_channels_context_get_requests:
+ * @self: a #TpObserveChannelsContext
+ *
+ * Return a list of the #TpChannelRequest which have been satisfied by the
+ * channels associated with #self.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.ChannelRequest):
+ *  a newly allocated #GList of reffed #TpChannelRequest.
+ *
+ * Since: 0.13.14
+ */
+GList *
+tp_observe_channels_context_get_requests (TpObserveChannelsContext *self)
+{
+  GHashTable *request_props;
+
+  request_props = tp_asv_get_boxed (self->observer_info, "request-properties",
+      TP_HASH_TYPE_OBJECT_IMMUTABLE_PROPERTIES_MAP);
+  if (request_props == NULL)
+    return NULL;
+
+  return _tp_create_channel_request_list (
+      tp_proxy_get_dbus_daemon (self->account), request_props);
 }

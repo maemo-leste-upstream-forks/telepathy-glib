@@ -32,6 +32,7 @@
 G_BEGIN_DECLS
 
 gboolean tp_g_ptr_array_contains (GPtrArray *haystack, gpointer needle);
+void tp_g_ptr_array_extend (GPtrArray *target, GPtrArray *source);
 
 GValue *tp_g_value_slice_new (GType type) G_GNUC_WARN_UNUSED_RESULT;
 
@@ -109,15 +110,13 @@ void tp_weak_ref_destroy (TpWeakRef *self);
 #define tp_clear_pointer(pp, destroy) \
   G_STMT_START \
     { \
-      if (pp != NULL) \
-        { \
-          gpointer _tp_clear_pointer_tmp = *(pp); \
-          \
-          *(pp) = NULL; \
-          \
-          if (_tp_clear_pointer_tmp != NULL) \
-            (destroy) (_tp_clear_pointer_tmp); \
-        } \
+      gpointer _tp_clear_pointer_tmp; \
+      \
+      _tp_clear_pointer_tmp = *(pp); \
+      *(pp) = NULL; \
+      \
+      if (_tp_clear_pointer_tmp != NULL) \
+        (destroy) (_tp_clear_pointer_tmp); \
     } \
   G_STMT_END
 
@@ -126,20 +125,24 @@ void tp_weak_ref_destroy (TpWeakRef *self);
 #define tp_clear_boxed(gtype, pp) \
   G_STMT_START \
     { \
-      if (pp != NULL) \
-        { \
-          gpointer _tp_clear_boxed_tmp = *(pp); \
-          \
-          *(pp) = NULL; \
-          \
-          if (_tp_clear_boxed_tmp != NULL) \
-            g_boxed_free (gtype, _tp_clear_boxed_tmp); \
-        } \
+      gpointer _tp_clear_boxed_tmp; \
+      \
+      _tp_clear_boxed_tmp = *(pp); \
+      *(pp) = NULL; \
+      \
+      if (_tp_clear_boxed_tmp != NULL) \
+        g_boxed_free (gtype, _tp_clear_boxed_tmp); \
     } \
   G_STMT_END
 
 void tp_simple_async_report_success_in_idle (GObject *source,
     GAsyncReadyCallback callback, gpointer user_data, gpointer source_tag);
+
+gint64 tp_user_action_time_from_x11 (guint32 x11_time);
+gboolean tp_user_action_time_should_present (gint64 user_action_time,
+    guint32 *x11_time);
+
+gchar *tp_utf8_make_valid (const gchar *name);
 
 G_END_DECLS
 

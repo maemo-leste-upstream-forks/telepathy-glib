@@ -25,7 +25,9 @@
 #include <glib-object.h>
 
 #include <telepathy-glib/account.h>
+#include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/add-dispatch-operation-context.h>
+#include <telepathy-glib/client-channel-factory.h>
 #include <telepathy-glib/handle-channels-context.h>
 #include <telepathy-glib/observe-channels-context.h>
 #include <telepathy-glib/channel-dispatch-operation.h>
@@ -41,10 +43,40 @@ typedef struct _TpBaseClientClass TpBaseClientClass;
 typedef struct _TpBaseClientPrivate TpBaseClientPrivate;
 typedef struct _TpBaseClientClassPrivate TpBaseClientClassPrivate;
 
+typedef void (*TpBaseClientClassObserveChannelsImpl) (
+    TpBaseClient *client,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    GList *requests,
+    TpObserveChannelsContext *context);
+
+typedef void (*TpBaseClientClassAddDispatchOperationImpl) (
+    TpBaseClient *client,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context);
+
+typedef void (*TpBaseClientClassHandleChannelsImpl) (
+    TpBaseClient *client,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    GList *requests_satisfied,
+    gint64 user_action_time,
+    TpHandleChannelsContext *context);
+
 struct _TpBaseClientClass {
-    /*<private>*/
+    /*<public>*/
     GObjectClass parent_class;
-    GCallback _padding[7];
+    TpBaseClientClassObserveChannelsImpl observe_channels;
+    TpBaseClientClassAddDispatchOperationImpl add_dispatch_operation;
+    TpBaseClientClassHandleChannelsImpl handle_channels;
+    /*<private>*/
+    GCallback _padding[4];
     TpDBusPropertiesMixinClass dbus_properties_class;
     TpBaseClientClassPrivate *priv;
 };
@@ -59,37 +91,11 @@ GType tp_base_client_get_type (void);
 
 /* Protected methods; should be called only by subclasses */
 
-typedef void (*TpBaseClientClassObserveChannelsImpl) (
-    TpBaseClient *client,
-    TpAccount *account,
-    TpConnection *connection,
-    GList *channels,
-    TpChannelDispatchOperation *dispatch_operation,
-    GList *requests,
-    TpObserveChannelsContext *context);
-
 void tp_base_client_implement_observe_channels (TpBaseClientClass *klass,
     TpBaseClientClassObserveChannelsImpl impl);
 
-typedef void (*TpBaseClientClassAddDispatchOperationImpl) (
-    TpBaseClient *client,
-    TpAccount *account,
-    TpConnection *connection,
-    GList *channels,
-    TpChannelDispatchOperation *dispatch_operation,
-    TpAddDispatchOperationContext *context);
-
 void tp_base_client_implement_add_dispatch_operation (TpBaseClientClass *klass,
     TpBaseClientClassAddDispatchOperationImpl impl);
-
-typedef void (*TpBaseClientClassHandleChannelsImpl) (
-    TpBaseClient *client,
-    TpAccount *account,
-    TpConnection *connection,
-    GList *channels,
-    GList *requests_satisfied,
-    gint64 user_action_time,
-    TpHandleChannelsContext *context);
 
 void tp_base_client_implement_handle_channels (TpBaseClientClass *klass,
     TpBaseClientClassHandleChannelsImpl impl);
@@ -104,6 +110,8 @@ void tp_base_client_take_observer_filter (TpBaseClient *self,
 
 void tp_base_client_set_observer_recover (TpBaseClient *self,
     gboolean recover);
+void tp_base_client_set_observer_delay_approvers (TpBaseClient *self,
+    gboolean delay);
 
 void tp_base_client_add_approver_filter (TpBaseClient *self,
     GHashTable *filter);
@@ -128,6 +136,27 @@ void tp_base_client_add_handler_capabilities (TpBaseClient *self,
 void tp_base_client_add_handler_capabilities_varargs (TpBaseClient *self,
     const gchar *first_token, ...) G_GNUC_NULL_TERMINATED;
 
+void tp_base_client_add_account_features (TpBaseClient *self,
+    const GQuark *features, gssize n);
+void tp_base_client_add_account_features_varargs (TpBaseClient *self,
+    GQuark feature, ...);
+
+void tp_base_client_add_channel_features (TpBaseClient *self,
+    const GQuark *features, gssize n);
+void tp_base_client_add_channel_features_varargs (TpBaseClient *self,
+    GQuark feature, ...);
+
+void tp_base_client_add_connection_features (TpBaseClient *self,
+    const GQuark *features, gssize n);
+void tp_base_client_add_connection_features_varargs (TpBaseClient *self,
+    GQuark feature, ...);
+
+void tp_base_client_set_channel_factory (TpBaseClient *self,
+    TpClientChannelFactory *factory);
+
+TpClientChannelFactory *tp_base_client_get_channel_factory (
+    TpBaseClient *self);
+
 /* future, potentially (currently in spec as a draft):
 void tp_base_client_set_handler_related_conferences_bypass_approval (
     TpBaseClient *self, gboolean bypass_approval);
@@ -146,6 +175,7 @@ gboolean tp_base_client_get_uniquify_name (TpBaseClient *self);
 const gchar *tp_base_client_get_bus_name (TpBaseClient *self);
 const gchar *tp_base_client_get_object_path (TpBaseClient *self);
 TpDBusDaemon *tp_base_client_get_dbus_daemon (TpBaseClient *self);
+TpAccountManager *tp_base_client_get_account_manager (TpBaseClient *self);
 
 void tp_base_client_unregister (TpBaseClient *self);
 

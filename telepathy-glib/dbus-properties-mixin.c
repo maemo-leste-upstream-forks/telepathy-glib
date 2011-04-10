@@ -43,7 +43,7 @@
  *
  * To register D-Bus properties in a GInterface to be implementable with this
  * mixin, either use the code-generation tools from telepathy-glib >= 0.7.3,
- * or call tp_svc_interface_set_properties_info() from a section of the
+ * or call tp_svc_interface_set_dbus_properties_info() from a section of the
  * base_init function that only runs once.
  *
  * To use this mixin, include a #TpDBusPropertiesMixinClass somewhere
@@ -362,7 +362,8 @@ link_interface (GType type,
 
   if (iface_info == NULL)
     {
-      CRITICAL ("%s tried to implement undefined interface %s",
+      CRITICAL ("%s tried to implement undefined interface %s "
+          "(perhaps you forgot to call G_IMPLEMENT_INTERFACE?)",
           g_type_name (type), iface_impl->name);
       return FALSE;
     }
@@ -408,8 +409,10 @@ link_interface (GType type,
  * architecture, so do some evil trick with unions or something */
 G_STATIC_ASSERT (sizeof (GCallback) == sizeof (gpointer));
 
+/* FIXME: GNOME#556489: getter and setter should be (scope infinite) if that
+ * existed */
 /**
- * tp_dbus_properties_mixin_implement_interface:
+ * tp_dbus_properties_mixin_implement_interface: (skip)
  * @cls: a subclass of #GObjectClass
  * @iface: a quark representing the the name of the interface to implement
  * @getter: a callback to get properties on this interface, or %NULL if they
@@ -763,6 +766,13 @@ tp_dbus_properties_mixin_get (GObject *self,
       return FALSE;
     }
 
+  if (iface_impl->getter == NULL)
+    {
+      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+          "Getting properties on %s is unimplemented", interface_name);
+      return FALSE;
+    }
+
   g_value_init (value, prop_info->type);
   iface_impl->getter (self, iface_info->dbus_interface,
       prop_info->name, value, prop_impl->getter_data);
@@ -938,7 +948,7 @@ _tp_dbus_properties_mixin_get_all (TpSvcDBusProperties *iface,
   iface_impl = _tp_dbus_properties_mixin_find_iface_impl (self,
       interface_name);
 
-  if (iface_impl == NULL)
+  if (iface_impl == NULL || iface_impl->getter == NULL)
     goto out;   /* no properties, but we need to return that */
 
   iface_info = iface_impl->mixin_priv;
@@ -1011,6 +1021,15 @@ _tp_dbus_properties_mixin_set (TpSvcDBusProperties *iface,
     {
       GError e = { TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
           "This property is read-only" };
+
+      dbus_g_method_return_error (context, &e);
+      return;
+    }
+
+  if (iface_impl->setter == NULL)
+    {
+      GError e = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+          "Setting properties on this interface is unimplemented" };
 
       dbus_g_method_return_error (context, &e);
       return;

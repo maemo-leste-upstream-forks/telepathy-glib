@@ -529,3 +529,42 @@ text_iface_init (gpointer iface,
   IMPLEMENT (send);
 #undef IMPLEMENT
 }
+
+GHashTable *
+tp_tests_text_channel_get_props (TpTestsTextChannelNull *self)
+{
+  GHashTable *props;
+  TpHandleType handle_type;
+  TpHandle handle;
+  gchar *target_id;
+  gboolean requested;
+  TpHandle initiator_handle;
+  gchar *initiator_id;
+  GStrv interfaces;
+
+  g_object_get (self,
+      "handle-type", &handle_type,
+      "handle", &handle,
+      "target-id", &target_id,
+      "requested", &requested,
+      "initiator-handle", &initiator_handle,
+      "initiator-id", &initiator_id,
+      "interfaces", &interfaces,
+      NULL);
+
+  props = tp_asv_new (
+      TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_TEXT,
+      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, handle_type,
+      TP_PROP_CHANNEL_TARGET_HANDLE, G_TYPE_UINT, handle,
+      TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING, target_id,
+      TP_PROP_CHANNEL_REQUESTED, G_TYPE_BOOLEAN, requested,
+      TP_PROP_CHANNEL_INITIATOR_HANDLE, G_TYPE_UINT, initiator_handle,
+      TP_PROP_CHANNEL_INITIATOR_ID, G_TYPE_STRING, initiator_id,
+      TP_PROP_CHANNEL_INTERFACES, G_TYPE_STRV, interfaces,
+      NULL);
+
+  g_free (target_id);
+  g_free (initiator_id);
+  g_strfreev (interfaces);
+  return props;
+}

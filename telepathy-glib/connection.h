@@ -74,6 +74,9 @@ GType tp_contact_info_list_get_type (void);
 GList *tp_contact_info_list_copy (GList *list);
 void tp_contact_info_list_free (GList *list);
 
+/* forward declaration, see contact.h for the rest */
+typedef struct _TpContact TpContact;
+
 typedef struct _TpConnection TpConnection;
 typedef struct _TpConnectionPrivate TpConnectionPrivate;
 typedef struct _TpConnectionClass TpConnectionClass;
@@ -123,7 +126,12 @@ TpConnection *tp_connection_new (TpDBusDaemon *dbus, const gchar *bus_name,
 TpConnectionStatus tp_connection_get_status (TpConnection *self,
     TpConnectionStatusReason *reason);
 
+const gchar *tp_connection_get_connection_manager_name (TpConnection *self);
+
+const gchar *tp_connection_get_protocol_name (TpConnection *self);
+
 TpHandle tp_connection_get_self_handle (TpConnection *self);
+TpContact *tp_connection_get_self_contact (TpConnection *self);
 
 TpCapabilities * tp_connection_get_capabilities (TpConnection *self);
 
@@ -172,6 +180,14 @@ gboolean tp_connection_parse_object_path (TpConnection *self, gchar **protocol,
 
 const gchar *tp_connection_get_detailed_error (TpConnection *self,
     const GHashTable **details);
+
+void tp_connection_add_client_interest (TpConnection *self,
+    const gchar *interested_in);
+
+void tp_connection_add_client_interest_by_id (TpConnection *self,
+    GQuark interested_in);
+
+gboolean tp_connection_has_immortal_handles (TpConnection *self);
 
 #define TP_CONNECTION_FEATURE_CORE \
   (tp_connection_get_feature_quark_core ())
@@ -269,6 +285,13 @@ void tp_connection_get_contact_attributes (TpConnection *self,
     const gchar * const *interfaces, gboolean hold,
     tp_cli_connection_interface_contacts_callback_for_get_contact_attributes callback,
     gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
+
+void tp_connection_get_contact_list_attributes (TpConnection *self,
+    gint timeout_ms, const gchar * const *interfaces, gboolean hold,
+    tp_cli_connection_interface_contacts_callback_for_get_contact_attributes callback,
+    gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
+GBinding *tp_connection_bind_connection_status_to_property (TpConnection *self,
+    gpointer target, const char *target_property, gboolean invert);
 
 G_END_DECLS
 

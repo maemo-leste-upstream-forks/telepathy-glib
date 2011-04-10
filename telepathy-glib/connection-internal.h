@@ -25,6 +25,7 @@
 #include <telepathy-glib/capabilities.h>
 #include <telepathy-glib/connection.h>
 #include <telepathy-glib/contact.h>
+#include <telepathy-glib/intset.h>
 
 G_BEGIN_DECLS
 
@@ -34,7 +35,11 @@ struct _TpConnectionPrivate {
     /* list of TpConnectionProc */
     GList *introspect_needed;
 
-    TpHandle self_handle;
+    gchar *cm_name;
+    gchar *proto_name;
+
+    TpHandle last_known_self_handle;
+    TpContact *self_contact;
     TpConnectionStatus status;
     TpConnectionStatusReason status_reason;
     gchar *connection_error;
@@ -43,6 +48,10 @@ struct _TpConnectionPrivate {
 
     /* GArray of GQuark */
     GArray *contact_attribute_interfaces;
+
+    /* items are GQuarks that represent arguments to
+     * Connection.AddClientInterests */
+    TpIntSet *interests;
 
     /* TpHandle => weak ref to TpContact */
     GHashTable *contacts;
@@ -62,6 +71,7 @@ struct _TpConnectionPrivate {
     unsigned contact_info_fetched:1;
 
     unsigned ready:1;
+    unsigned has_immortal_handles:1;
     unsigned tracking_aliases_changed:1;
     unsigned tracking_avatar_updated:1;
     unsigned tracking_avatar_retrieved:1;
@@ -71,15 +81,16 @@ struct _TpConnectionPrivate {
     unsigned tracking_contact_caps_changed:1;
     unsigned tracking_contact_info_changed:1;
     unsigned introspecting_after_connected:1;
+    unsigned tracking_client_types_updated:1;
+    unsigned introspecting_self_contact:1;
+    unsigned tracking_contacts_changed:1;
+    unsigned tracking_contact_groups_changed:1;
 };
 
 void _tp_connection_status_reason_to_gerror (TpConnectionStatusReason reason,
     TpConnectionStatus prev_status,
     const gchar **ret_str,
     GError **error);
-
-void _tp_connection_init_handle_refs (TpConnection *self);
-void _tp_connection_clean_up_handle_refs (TpConnection *self);
 
 void _tp_connection_add_contact (TpConnection *self, TpHandle handle,
     TpContact *contact);

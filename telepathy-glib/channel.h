@@ -105,14 +105,19 @@ GHashTable *tp_channel_borrow_immutable_properties (TpChannel *self);
 
 TpHandle tp_channel_group_get_self_handle (TpChannel *self);
 TpChannelGroupFlags tp_channel_group_get_flags (TpChannel *self);
-const TpIntSet *tp_channel_group_get_members (TpChannel *self);
-const TpIntSet *tp_channel_group_get_local_pending (TpChannel *self);
-const TpIntSet *tp_channel_group_get_remote_pending (TpChannel *self);
+const TpIntset *tp_channel_group_get_members (TpChannel *self);
+const TpIntset *tp_channel_group_get_local_pending (TpChannel *self);
+const TpIntset *tp_channel_group_get_remote_pending (TpChannel *self);
 gboolean tp_channel_group_get_local_pending_info (TpChannel *self,
     TpHandle local_pending, TpHandle *actor,
     TpChannelGroupChangeReason *reason, const gchar **message);
 
 TpHandle tp_channel_group_get_handle_owner (TpChannel *self, TpHandle handle);
+
+gboolean tp_channel_get_requested (TpChannel *self);
+
+TpHandle tp_channel_get_initiator_handle (TpChannel *self);
+const gchar * tp_channel_get_initiator_identifier (TpChannel *self);
 
 #define TP_CHANNEL_FEATURE_CORE \
   tp_channel_get_feature_quark_core ()
@@ -128,6 +133,24 @@ GQuark tp_channel_get_feature_quark_group (void) G_GNUC_CONST;
 GQuark tp_channel_get_feature_quark_chat_states (void) G_GNUC_CONST;
 TpChannelChatState tp_channel_get_chat_state (TpChannel *self,
     TpHandle contact);
+
+void tp_channel_leave_async (TpChannel *self,
+    TpChannelGroupChangeReason reason,
+    const gchar *message,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean tp_channel_leave_finish (TpChannel *self,
+    GAsyncResult *result,
+    GError **error);
+
+void tp_channel_close_async (TpChannel *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean tp_channel_close_finish (TpChannel *self,
+    GAsyncResult *result,
+    GError **error);
 
 G_END_DECLS
 

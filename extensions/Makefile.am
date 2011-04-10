@@ -9,6 +9,9 @@ AM_CFLAGS = \
     $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
     $(TP_GLIB_CFLAGS)
+AM_LDFLAGS = \
+    $(ERROR_LDFLAGS) \
+    $(NULL)
 
 EXTRA_DIST = \
     all.xml \
@@ -79,7 +82,7 @@ XSLTPROCFLAGS = --nonet --novalid
 
 # Generated files which can be generated for all categories simultaneously
 
-_gen/all.xml: all.xml $(wildcard *.xml) $(tools_dir)/xincludator.py
+_gen/all.xml: all.xml $(wildcard $(srcdir)/*.xml) $(wildcard $(top_srcdir)/spec/*.xml) $(tools_dir)/xincludator.py
 	$(mkdir_p) _gen
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/xincludator.py $< > $@
 
@@ -119,7 +122,7 @@ _gen/interfaces-body.h _gen/interfaces.h: _gen/all.xml \
 # subclass you want to use with --subclass will need to have its own category,
 # although you can subdivide further if you want.
 
-_gen/%.xml: %.xml $(wildcard *.xml) $(tools_dir)/xincludator.py
+_gen/%.xml: %.xml $(wildcard $(srcdir)/*.xml) $(wildcard $(top_srcdir)/spec/*.xml) $(tools_dir)/xincludator.py
 	$(mkdir_p) _gen
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/xincludator.py $< > $@
 

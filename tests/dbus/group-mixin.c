@@ -157,7 +157,6 @@ check_initial_properties (void)
 {
   GHashTable *props = NULL;
   GArray *members;
-  TpHandle h;
   gboolean valid;
   GError *error = NULL;
   TpChannelGroupFlags flags;
@@ -180,7 +179,7 @@ check_initial_properties (void)
   MYASSERT (members != NULL, ": LocalPendingMembers should be defined"); \
   MYASSERT (members->len == 0, ": LocalPendingMembers should be empty initally");
 
-  h = tp_asv_get_uint32 (props, "SelfHandle", &valid);
+  tp_asv_get_uint32 (props, "SelfHandle", &valid);
   MYASSERT (valid, ": SelfHandle property should be defined");
 
   flags = tp_asv_get_uint32 (props, "GroupFlags", &valid);
@@ -271,7 +270,7 @@ check_incoming_invitation (void)
 
   /* We get an invitation to the channel */
   {
-    TpIntSet *add_local_pending = tp_intset_new ();
+    TpIntset *add_local_pending = tp_intset_new ();
     tp_intset_add (add_local_pending, self_handle);
 
     expect_signals ("HELLO THAR", 0, TP_CHANNEL_GROUP_CHANGE_REASON_INVITED,
@@ -386,7 +385,7 @@ in_the_desert (void)
 
   /* A camel is approaching */
   {
-    TpIntSet *add = tp_intset_new ();
+    TpIntset *add = tp_intset_new ();
 
     tp_intset_add (add, camel);
     expect_signals ("", camel, TP_CHANNEL_GROUP_CHANGE_REASON_NONE,
@@ -402,7 +401,7 @@ in_the_desert (void)
 
   /* A second camel is approaching (invited by the first camel) */
   {
-    TpIntSet *add = tp_intset_new ();
+    TpIntset *add = tp_intset_new ();
     GHashTable *details = g_hash_table_new_full (g_str_hash, g_str_equal,
         NULL, (GDestroyNotify) tp_g_value_slice_free);
 
@@ -423,7 +422,7 @@ in_the_desert (void)
   }
 
   {
-    TpIntSet *del = tp_intset_new ();
+    TpIntset *del = tp_intset_new ();
     GHashTable *details = g_hash_table_new_full (g_str_hash, g_str_equal,
         NULL, (GDestroyNotify) tp_g_value_slice_free);
 
@@ -460,7 +459,7 @@ in_the_desert (void)
 
   /* We and the second camel should be left in the channel */
   {
-    const TpIntSet *members = tp_channel_group_get_members (chan);
+    const TpIntset *members = tp_channel_group_get_members (chan);
     GArray *service_members;
     TpHandle a, b;
 
@@ -523,6 +522,7 @@ main (int argc,
   gchar *conn_path;
   gchar *chan_path;
 
+  tp_tests_abort_after (10);
   g_type_init ();
   tp_debug_set_flags ("all");
   dbus = tp_tests_dbus_daemon_dup_or_die ();

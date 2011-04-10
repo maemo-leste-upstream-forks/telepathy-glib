@@ -122,13 +122,12 @@ local_pending_info_new (TpHandleRepoIface *repo,
                         const gchar *message)
 {
   LocalPendingInfo *info = g_slice_new0 (LocalPendingInfo);
-  info->actor = actor;
   info->reason = reason;
   info->message = g_strdup (message);
   info->repo = repo;
 
   if (actor != 0)
-    tp_handle_ref (repo, actor);
+    info->actor = tp_handle_ref (repo, actor);
 
   return info;
 }
@@ -156,9 +155,30 @@ struct _TpGroupMixinPrivate {
     GPtrArray *externals;
 };
 
+/**
+ * TP_HAS_GROUP_MIXIN:
+ * @o: a #GObject instance
+ *
+ * <!-- -->
+ *
+ * Returns: %TRUE if @o (or one of its parent classes) has the group mixin.
+ *
+ * Since: 0.13.9
+ */
 
 /**
- * tp_group_mixin_class_get_offset_quark:
+ * TP_HAS_GROUP_MIXIN_CLASS:
+ * @cls: a #GObjectClass structure
+ *
+ * <!-- -->
+ *
+ * Returns: %TRUE if @cls (or one of its parent classes) has the group mixin.
+ *
+ * Since: 0.13.9
+ */
+
+/**
+ * tp_group_mixin_class_get_offset_quark: (skip)
  *
  * <!--Returns: says it all-->
  *
@@ -174,7 +194,7 @@ tp_group_mixin_class_get_offset_quark ()
 }
 
 /**
- * tp_group_mixin_get_offset_quark:
+ * tp_group_mixin_get_offset_quark: (skip)
  *
  * <!--Returns: says it all-->
  *
@@ -190,7 +210,7 @@ tp_group_mixin_get_offset_quark ()
 }
 
 /**
- * tp_group_mixin_class_set_remove_with_reason_func:
+ * tp_group_mixin_class_set_remove_with_reason_func: (skip)
  * @cls: The class of an object implementing the group interface using this
  *  mixin
  * @func: A callback to be used to remove contacts from this group with a
@@ -216,7 +236,7 @@ tp_group_mixin_class_set_remove_with_reason_func (GObjectClass *cls,
 }
 
 /**
- * tp_group_mixin_class_init:
+ * tp_group_mixin_class_init: (skip)
  * @obj_cls: The class of an object implementing the group interface using this
  *  mixin
  * @offset: The offset of the TpGroupMixinClass structure within the class
@@ -251,7 +271,7 @@ tp_group_mixin_class_init (GObjectClass *obj_cls,
 }
 
 /**
- * tp_group_mixin_class_allow_self_removal:
+ * tp_group_mixin_class_allow_self_removal: (skip)
  * @obj_cls: The class of an object implementing the group interface using this
  *  mixin
  *
@@ -284,7 +304,7 @@ tp_group_mixin_class_allow_self_removal (GObjectClass *obj_cls)
 }
 
 /**
- * tp_group_mixin_init:
+ * tp_group_mixin_init: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @offset: The offset of the TpGroupMixin structure within the instance
  *  structure
@@ -310,10 +330,9 @@ tp_group_mixin_init (GObject *obj,
   mixin = TP_GROUP_MIXIN (obj);
 
   mixin->handle_repo = handle_repo;
-  mixin->self_handle = self_handle;
 
-  if (mixin->self_handle != 0)
-    tp_handle_ref (handle_repo, mixin->self_handle);
+  if (self_handle != 0)
+    mixin->self_handle = tp_handle_ref (handle_repo, self_handle);
 
   mixin->group_flags = 0;
 
@@ -363,7 +382,7 @@ handle_owners_foreach_unref (gpointer key,
 }
 
 /**
- * tp_group_mixin_finalize:
+ * tp_group_mixin_finalize: (skip)
  * @obj: An object implementing the group interface using this mixin
  *
  * Unreference handles and free resources used by this mixin.
@@ -396,7 +415,7 @@ tp_group_mixin_finalize (GObject *obj)
 }
 
 /**
- * tp_group_mixin_get_self_handle:
+ * tp_group_mixin_get_self_handle: (skip)
  * @obj: An object implementing the group mixin using this interface
  * @ret: Used to return the local user's handle in this group
  * @error: Unused
@@ -429,7 +448,7 @@ tp_group_mixin_get_self_handle (GObject *obj,
 
 
 /**
- * tp_group_mixin_change_self_handle:
+ * tp_group_mixin_change_self_handle: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @new_self_handle: The new self-handle for this group
  *
@@ -445,10 +464,11 @@ tp_group_mixin_change_self_handle (GObject *obj,
   DEBUG ("%u '%s'", new_self_handle,
       tp_handle_inspect (mixin->handle_repo, new_self_handle));
 
-  if (new_self_handle != 0)
-    tp_handle_ref (mixin->handle_repo, new_self_handle);
+  mixin->self_handle = 0;
 
-  mixin->self_handle = new_self_handle;
+  if (new_self_handle != 0)
+    mixin->self_handle = tp_handle_ref (mixin->handle_repo,
+        new_self_handle);
 
   tp_svc_channel_interface_group_emit_self_handle_changed (obj,
       new_self_handle);
@@ -478,7 +498,7 @@ tp_group_mixin_get_self_handle_async (TpSvcChannelInterfaceGroup *obj,
 }
 
 /**
- * tp_group_mixin_get_group_flags:
+ * tp_group_mixin_get_group_flags: (skip)
  * @obj: An object implementing the group mixin using this interface
  * @ret: Used to return the flags
  * @error: Unused
@@ -520,7 +540,7 @@ tp_group_mixin_get_group_flags_async (TpSvcChannelInterfaceGroup *obj,
 }
 
 /**
- * tp_group_mixin_add_members:
+ * tp_group_mixin_add_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @contacts: A GArray of guint representing contacts
  * @message: A message associated with the addition request, if supported
@@ -616,7 +636,7 @@ tp_group_mixin_add_members_async (TpSvcChannelInterfaceGroup *obj,
 }
 
 /**
- * tp_group_mixin_remove_members:
+ * tp_group_mixin_remove_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @contacts: A GArray of guint representing contacts
  * @message: A message to be sent to those contacts, if supported
@@ -642,7 +662,7 @@ tp_group_mixin_remove_members (GObject *obj,
 }
 
 /**
- * tp_group_mixin_remove_members_with_reason:
+ * tp_group_mixin_remove_members_with_reason: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @contacts: A GArray of guint representing contacts
  * @message: A message to be sent to those contacts, if supported
@@ -720,8 +740,7 @@ tp_group_mixin_remove_members_with_reason (GObject *obj,
         {
           DEBUG ("handle %u is not a current or pending member",
                    handle);
-          /* skip this handle during the second pass */
-          g_array_index (contacts, TpHandle, i) = 0;
+          /* we'll skip this handle during the second pass */
         }
     }
 
@@ -730,7 +749,9 @@ tp_group_mixin_remove_members_with_reason (GObject *obj,
     {
       handle = g_array_index (contacts, TpHandle, i);
 
-      if (handle == 0)
+      if (!tp_handle_set_is_member (mixin->members, handle) &&
+          !tp_handle_set_is_member (mixin->remote_pending, handle) &&
+          !tp_handle_set_is_member (mixin->local_pending, handle))
         continue;
 
       if (mixin_cls->priv->remove_with_reason != NULL)
@@ -803,7 +824,7 @@ tp_group_mixin_remove_members_async (TpSvcChannelInterfaceGroup *obj,
 }
 
 /**
- * tp_group_mixin_get_members:
+ * tp_group_mixin_get_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @ret: Used to return a newly-allocated GArray of guint contact handles
  * @error: Unused
@@ -845,7 +866,7 @@ tp_group_mixin_get_members_async (TpSvcChannelInterfaceGroup *obj,
 }
 
 /**
- * tp_group_mixin_get_local_pending_members:
+ * tp_group_mixin_get_local_pending_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @ret: Used to return a newly-allocated GArray of guint contact handles
  * @error: Unused
@@ -918,7 +939,7 @@ local_pending_members_with_info_foreach (TpHandleSet *set,
 }
 
 /**
- * tp_group_mixin_get_local_pending_members_with_info:
+ * tp_group_mixin_get_local_pending_members_with_info: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @ret: Used to return a newly-allocated GPtrArray of D-Bus structures each
  * containing the handle of a local-pending contact, the handle of a contact
@@ -976,7 +997,7 @@ tp_group_mixin_get_local_pending_members_with_info_async (
 }
 
 /**
- * tp_group_mixin_get_remote_pending_members:
+ * tp_group_mixin_get_remote_pending_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @ret: Used to return a newly-allocated GArray of guint representing the
  * handles of the group's remote pending members
@@ -1020,7 +1041,7 @@ tp_group_mixin_get_remote_pending_members_async (TpSvcChannelInterfaceGroup *obj
 }
 
 /**
- * tp_group_mixin_get_all_members:
+ * tp_group_mixin_get_all_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @members: Used to return a newly-allocated GArray of guint representing
  * the handles of the group's members
@@ -1074,7 +1095,7 @@ tp_group_mixin_get_all_members_async (TpSvcChannelInterfaceGroup *obj,
 }
 
 /**
- * tp_group_mixin_get_handle_owners:
+ * tp_group_mixin_get_handle_owners: (skip)
  * @obj: An object implementing the group interface with this mixin
  * @handles: An array of guint representing locally valid handles
  * @ret: Used to return an array of guint representing globally valid
@@ -1177,7 +1198,7 @@ group_flags_to_string (TpChannelGroupFlags flags)
   gint i = 0;
   GString *str;
 
-  str = g_string_new ("[" TP_ANSI_BOLD_OFF);
+  str = g_string_new ("[");
 
   GFTS_APPEND_FLAG_IF_SET (TP_CHANNEL_GROUP_FLAG_CAN_ADD);
   GFTS_APPEND_FLAG_IF_SET (TP_CHANNEL_GROUP_FLAG_CAN_REMOVE);
@@ -1204,13 +1225,13 @@ group_flags_to_string (TpChannelGroupFlags flags)
       g_string_append_printf (str, "%u", flags);
     }
 
-  g_string_append (str, TP_ANSI_BOLD_ON "]");
+  g_string_append (str, "]");
 
   return g_string_free (str, FALSE);
 }
 
 /**
- * tp_group_mixin_change_flags:
+ * tp_group_mixin_change_flags: (skip)
  * @obj: An object implementing the groups interface using this mixin
  * @add: Flags to be added
  * @del: Flags to be removed
@@ -1255,11 +1276,10 @@ tp_group_mixin_change_flags (GObject *obj,
           str_removed = group_flags_to_string (removed);
           str_flags = group_flags_to_string (mixin->group_flags);
 
-          printf (TP_ANSI_BOLD_ON TP_ANSI_FG_WHITE
-                  "%s: emitting group flags changed\n"
+          printf ("%s: emitting group flags changed\n"
                   "  added    : %s\n"
                   "  removed  : %s\n"
-                  "  flags now: %s\n" TP_ANSI_RESET,
+                  "  flags now: %s\n",
                   G_STRFUNC, str_added, str_removed, str_flags);
 
           fflush (stdout);
@@ -1292,7 +1312,7 @@ member_array_to_string (TpHandleRepoIface *repo,
   GString *str;
   guint i;
 
-  str = g_string_new ("[" TP_ANSI_BOLD_OFF);
+  str = g_string_new ("[");
 
   for (i = 0; i < array->len; i++)
     {
@@ -1309,7 +1329,7 @@ member_array_to_string (TpHandleRepoIface *repo,
           handle, handle_str);
     }
 
-  g_string_append (str, TP_ANSI_BOLD_ON "]");
+  g_string_append (str, "]");
 
   return g_string_free (str, FALSE);
 }
@@ -1337,7 +1357,7 @@ local_pending_added_foreach (guint i,
 
 static void
 local_pending_added (TpGroupMixin *mixin,
-    const TpIntSet *added,
+    const TpIntset *added,
     TpHandle actor,
     guint reason,
     const gchar *message)
@@ -1363,7 +1383,7 @@ local_pending_remove_foreach (guint i,
 
 static void
 local_pending_remove (TpGroupMixin *mixin,
-                     TpIntSet *removed)
+                     TpIntset *removed)
 {
   tp_intset_foreach (removed, local_pending_remove_foreach, mixin);
 }
@@ -1463,15 +1483,14 @@ emit_members_changed_signals (GObject *channel,
       local_str = member_array_to_string (mixin->handle_repo, local_pending);
       remote_str = member_array_to_string (mixin->handle_repo, remote_pending);
 
-      printf (TP_ANSI_BOLD_ON TP_ANSI_FG_CYAN
-              "%s: emitting members changed\n"
+      printf ("%s: emitting members changed\n"
               "  message       : \"%s\"\n"
               "  added         : %s\n"
               "  removed       : %s\n"
               "  local_pending : %s\n"
               "  remote_pending: %s\n"
               "  actor         : %u\n"
-              "  reason        : %u: %s\n" TP_ANSI_RESET,
+              "  reason        : %u: %s\n",
               G_STRFUNC, message, add_str, rem_str, local_str, remote_str,
               actor, reason, group_change_reason_str (reason));
 
@@ -1514,16 +1533,16 @@ emit_members_changed_signals (GObject *channel,
 static gboolean
 change_members (GObject *obj,
                 const gchar *message,
-                const TpIntSet *add,
-                const TpIntSet *del,
-                const TpIntSet *add_local_pending,
-                const TpIntSet *add_remote_pending,
+                const TpIntset *add,
+                const TpIntset *del,
+                const TpIntset *add_local_pending,
+                const TpIntset *add_remote_pending,
                 TpHandle actor,
                 TpChannelGroupChangeReason reason,
                 const GHashTable *details)
 {
   TpGroupMixin *mixin = TP_GROUP_MIXIN (obj);
-  TpIntSet *new_add, *new_remove, *new_local_pending,
+  TpIntset *new_add, *new_remove, *new_local_pending,
            *new_remote_pending, *tmp, *tmp2, *empty;
   gboolean ret;
 
@@ -1684,7 +1703,7 @@ change_members (GObject *obj,
 
 
 /**
- * tp_group_mixin_change_members:
+ * tp_group_mixin_change_members: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @message: A message to be sent to the affected contacts if possible;
  *  %NULL is allowed, and is mapped to an empty string
@@ -1711,7 +1730,7 @@ change_members (GObject *obj,
  * If any two of add, del, add_local_pending and add_remote_pending have
  * a non-empty intersection, the result is undefined. Don't do that.
  *
- * Each of the TpIntSet arguments may be %NULL, which is treated as
+ * Each of the TpIntset arguments may be %NULL, which is treated as
  * equivalent to an empty set.
  *
  * Returns: %TRUE if the group was changed and the MembersChanged(Detailed)
@@ -1721,10 +1740,10 @@ change_members (GObject *obj,
 gboolean
 tp_group_mixin_change_members (GObject *obj,
                                const gchar *message,
-                               const TpIntSet *add,
-                               const TpIntSet *del,
-                               const TpIntSet *add_local_pending,
-                               const TpIntSet *add_remote_pending,
+                               const TpIntset *add,
+                               const TpIntset *del,
+                               const TpIntset *add_local_pending,
+                               const TpIntset *add_remote_pending,
                                TpHandle actor,
                                TpChannelGroupChangeReason reason)
 {
@@ -1758,7 +1777,7 @@ tp_group_mixin_change_members (GObject *obj,
 }
 
 /**
- * tp_group_mixin_change_members_detailed:
+ * tp_group_mixin_change_members_detailed: (skip)
  * @obj: An object implementing the group interface using this mixin
  * @add: A set of contact handles to be added to the members (if not
  *  already present) and removed from local pending and remote pending
@@ -1782,7 +1801,7 @@ tp_group_mixin_change_members (GObject *obj,
  * If any two of add, del, add_local_pending and add_remote_pending have
  * a non-empty intersection, the result is undefined. Don't do that.
  *
- * Each of the TpIntSet arguments may be %NULL, which is treated as
+ * Each of the TpIntset arguments may be %NULL, which is treated as
  * equivalent to an empty set.
  *
  * details may contain, among other entries, the well-known
@@ -1804,14 +1823,14 @@ tp_group_mixin_change_members (GObject *obj,
  *  signals were emitted; %FALSE if nothing actually changed and the signals
  *  were suppressed.
  *
- * @since 0.7.21
+ * Since: 0.7.21
  */
 gboolean
 tp_group_mixin_change_members_detailed (GObject *obj,
-                                        const TpIntSet *add,
-                                        const TpIntSet *del,
-                                        const TpIntSet *add_local_pending,
-                                        const TpIntSet *add_remote_pending,
+                                        const TpIntset *add,
+                                        const TpIntset *del,
+                                        const TpIntset *add_local_pending,
+                                        const TpIntset *add_remote_pending,
                                         const GHashTable *details)
 {
   const gchar *message;
@@ -1842,7 +1861,7 @@ tp_group_mixin_change_members_detailed (GObject *obj,
 }
 
 /**
- * tp_group_mixin_add_handle_owner:
+ * tp_group_mixin_add_handle_owner: (skip)
  * @obj: A GObject implementing the group interface with this mixin
  * @local_handle: A contact handle valid within this group (may not be 0)
  * @owner_handle: A contact handle valid globally, or 0 if the owner of the
@@ -1909,7 +1928,7 @@ add_handle_owners_helper (gpointer key,
 
 
 /**
- * tp_group_mixin_add_handle_owners:
+ * tp_group_mixin_add_handle_owners: (skip)
  * @obj: A GObject implementing the group interface with this mixin
  * @local_to_owner_handle: A map from contact handles valid within this group
  *  (which may not be 0) to either contact handles valid globally, or 0 if the
@@ -1923,7 +1942,7 @@ add_handle_owners_helper (gpointer key,
  * handle to the members, local-pending members or remote-pending members, you
  * must call either this function or tp_group_mixin_add_handle_owner().
  *
- * @since 0.7.10
+ * Since: 0.7.10
  */
 void
 tp_group_mixin_add_handle_owners (GObject *obj,
@@ -1986,7 +2005,7 @@ remove_handle_owners_if_exist (GObject *obj,
 }
 
 /**
- * tp_group_mixin_iface_init:
+ * tp_group_mixin_iface_init: (skip)
  * @g_iface: A #TpSvcChannelInterfaceGroupClass
  * @iface_data: Unused
  *
@@ -2028,7 +2047,7 @@ enum {
 
 
 /**
- * tp_group_mixin_get_dbus_property:
+ * tp_group_mixin_get_dbus_property: (skip)
  * @object: An object with this mixin
  * @interface: Must be %TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP
  * @name: A quark representing the D-Bus property name, either
@@ -2136,7 +2155,7 @@ static TpDBusPropertiesMixinPropImpl known_group_props[] = {
 };
 
 /**
- * tp_group_mixin_init_dbus_properties:
+ * tp_group_mixin_init_dbus_properties: (skip)
  * @cls: The class of an object with this mixin
  *
  * Set up #TpDBusPropertiesMixinClass to use this mixin's implementation of
@@ -2175,7 +2194,7 @@ _external_group_mixin_get_obj_quark (void)
 }
 
 /**
- * tp_external_group_mixin_init:
+ * tp_external_group_mixin_init: (skip)
  * @obj: An object implementing the groups interface using an external group
  *    mixin
  * @obj_with_mixin: A GObject with the group mixin
@@ -2196,7 +2215,7 @@ tp_external_group_mixin_init (GObject *obj, GObject *obj_with_mixin)
 }
 
 /**
- * tp_external_group_mixin_finalize:
+ * tp_external_group_mixin_finalize: (skip)
  * @obj: An object implementing the groups interface using an external group
  *    mixin
  *
@@ -2216,7 +2235,7 @@ tp_external_group_mixin_finalize (GObject *obj)
 }
 
 /**
- * tp_external_group_mixin_init_dbus_properties:
+ * tp_external_group_mixin_init_dbus_properties: (skip)
  * @cls: The class of an object with this mixin
  *
  * Set up #TpDBusPropertiesMixinClass to use this mixin's implementation of
@@ -2241,7 +2260,7 @@ tp_external_group_mixin_init_dbus_properties (GObjectClass *cls)
 }
 
 /**
- * tp_external_group_mixin_get_dbus_property:
+ * tp_external_group_mixin_get_dbus_property: (skip)
  * @object: An object with this mixin
  * @interface: Must be %TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP
  * @name: A quark representing the D-Bus property name, either
@@ -2408,7 +2427,7 @@ tp_external_group_mixin_remove_members_with_reason_async
        context);
 }
 /**
- * tp_external_group_mixin_iface_init:
+ * tp_external_group_mixin_iface_init: (skip)
  * @g_iface: A #TpSvcChannelInterfaceGroupClass
  * @iface_data: Unused
  *

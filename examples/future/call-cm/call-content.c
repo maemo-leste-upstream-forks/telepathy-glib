@@ -38,6 +38,7 @@ enum
 {
   PROP_OBJECT_PATH = 1,
   PROP_CONNECTION,
+  PROP_INTERFACES,
   PROP_NAME,
   PROP_TYPE,
   PROP_CREATOR,
@@ -85,6 +86,8 @@ constructed (GObject *object)
   tp_handle_ref (contact_repo, self->priv->creator);
 }
 
+static const gchar * const empty_strv[] = { NULL };
+
 static void
 get_property (GObject *object,
     guint property_id,
@@ -101,6 +104,10 @@ get_property (GObject *object,
 
     case PROP_CONNECTION:
       g_value_set_object (value, self->priv->conn);
+      break;
+
+    case PROP_INTERFACES:
+      g_value_set_static_boxed (value, empty_strv);
       break;
 
     case PROP_NAME:
@@ -236,8 +243,8 @@ example_call_content_class_init (ExampleCallContentClass *klass)
 {
   static TpDBusPropertiesMixinPropImpl content_props[] = {
       { "Name", "name", NULL },
+      { "Interfaces", "interfaces", NULL },
       { "Type", "type", NULL },
-      { "Creator", "creator", NULL },
       { "Disposition", "disposition", NULL },
       { "Streams", "stream-paths", NULL },
       { NULL }
@@ -306,6 +313,11 @@ example_call_content_class_init (ExampleCallContentClass *klass)
   g_object_class_install_property (object_class, PROP_STREAM_PATHS,
       param_spec);
 
+  param_spec = g_param_spec_boxed ("interfaces", "Interfaces",
+      "List of D-Bus interfaces",
+      G_TYPE_STRV, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_INTERFACES, param_spec);
+
   klass->dbus_properties_class.interfaces = prop_interfaces;
   tp_dbus_properties_mixin_class_init (object_class,
       G_STRUCT_OFFSET (ExampleCallContentClass,
@@ -323,6 +335,7 @@ static void
 example_call_content_stream_removed_cb (ExampleCallContent *self,
     ExampleCallStream *stream)
 {
+  GPtrArray *paths;
   gchar *path;
 
   g_return_if_fail (EXAMPLE_IS_CALL_CONTENT (self));
@@ -332,8 +345,11 @@ example_call_content_stream_removed_cb (ExampleCallContent *self,
   g_object_get (stream,
       "object-path", &path,
       NULL);
-  future_svc_call_content_emit_stream_removed (self, path);
+  paths = g_ptr_array_sized_new (1);
+  g_ptr_array_add (paths, path);
+  future_svc_call_content_emit_streams_removed (self, paths);
   g_free (path);
+  g_ptr_array_free (paths, TRUE);
 
   g_object_unref (self->priv->stream);
   self->priv->stream = NULL;
@@ -343,6 +359,7 @@ void
 example_call_content_add_stream (ExampleCallContent *self,
     ExampleCallStream *stream)
 {
+  GPtrArray *paths;
   gchar *path;
 
   g_return_if_fail (EXAMPLE_IS_CALL_CONTENT (self));
@@ -353,8 +370,11 @@ example_call_content_add_stream (ExampleCallContent *self,
   g_object_get (stream,
       "object-path", &path,
       NULL);
-  future_svc_call_content_emit_stream_added (self, path);
+  paths = g_ptr_array_sized_new (1);
+  g_ptr_array_add (paths, path);
+  future_svc_call_content_emit_streams_added (self, paths);
   g_free (path);
+  g_ptr_array_free (paths, TRUE);
 
   tp_g_signal_connect_object (stream, "removed",
       G_CALLBACK (example_call_content_stream_removed_cb), self,

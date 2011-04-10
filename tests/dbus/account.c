@@ -12,6 +12,7 @@
 #include <telepathy-glib/debug.h>
 #include <telepathy-glib/defs.h>
 #include <telepathy-glib/svc-account.h>
+#include <telepathy-glib/enums.h>
 
 #include "tests/lib/simple-account.h"
 #include "tests/lib/util.h"
@@ -85,6 +86,7 @@ typedef struct {
     gulong notify_id;
     /* g_strdup (property name) => GUINT_TO_POINTER (counter) */
     GHashTable *times_notified;
+    GAsyncResult *result;
     GError *error /* initialized where needed */;
 
     TpTestsSimpleAccount *account_service /* initialized in prepare_service */;
@@ -189,6 +191,9 @@ teardown (Test *test,
   test->dbus = NULL;
   g_main_loop_unref (test->mainloop);
   test->mainloop = NULL;
+
+  g_clear_error (&test->error);
+  tp_clear_object (&test->result);
 }
 
 static void
@@ -231,6 +236,23 @@ test_new (Test *test,
 }
 
 static void
+test_setters (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  test->account = tp_account_new (test->dbus,
+      "/org/freedesktop/Telepathy/Account/what/ev/er", NULL);
+  g_assert (test->account != NULL);
+
+  tp_account_set_enabled_async (test->account, TRUE, tp_tests_result_ready_cb,
+    &test->result);
+  tp_tests_run_until_result (&test->result);
+  tp_account_set_enabled_finish (test->account, test->result, &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED);
+  g_clear_error (&test->error);
+  tp_clear_object (&test->result);
+}
+
+static void
 account_prepare_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
@@ -243,6 +265,35 @@ account_prepare_cb (GObject *source,
 
   g_main_loop_quit (test->mainloop);
 }
+
+#define assert_strprop(self, prop, val) \
+  {\
+    gchar *s; \
+    \
+    g_object_get (self, \
+        prop, &s, \
+        NULL); \
+    g_assert_cmpstr (s, ==, val);\
+    g_free (s); \
+  }
+#define assert_uintprop(self, prop, val) \
+  {\
+    guint u; \
+    \
+    g_object_get (self, \
+        prop, &u, \
+        NULL); \
+    g_assert_cmpuint (u, ==, val);\
+  }
+#define assert_boolprop(self, prop, val) \
+  {\
+    gboolean b; \
+    \
+    g_object_get (self, \
+        prop, &b, \
+        NULL); \
+    g_assert_cmpint (b, ==, val);\
+  }
 
 static void
 test_prepare_success (Test *test,
@@ -264,21 +315,32 @@ test_prepare_success (Test *test,
   /* the obvious accessors */
   g_assert (tp_account_is_prepared (test->account, TP_ACCOUNT_FEATURE_CORE));
   g_assert (tp_account_is_enabled (test->account));
+  assert_boolprop (test->account, "enabled", TRUE);
   g_assert (tp_account_is_valid (test->account));
+  assert_boolprop (test->account, "valid", TRUE);
   g_assert_cmpstr (tp_account_get_display_name (test->account), ==,
       "Fake Account");
+  assert_strprop (test->account, "display-name", "Fake Account");
   g_assert_cmpstr (tp_account_get_nickname (test->account), ==, "badger");
+  assert_strprop (test->account, "nickname", "badger");
   g_assert_cmpuint (tp_asv_size (tp_account_get_parameters (test->account)),
       ==, 0);
   g_assert (!tp_account_get_connect_automatically (test->account));
+  assert_boolprop (test->account, "connect-automatically", FALSE);
   g_assert (tp_account_get_has_been_online (test->account));
+  assert_boolprop (test->account, "has-been-online", TRUE);
   g_assert_cmpint (tp_account_get_connection_status (test->account, NULL),
       ==, TP_CONNECTION_STATUS_CONNECTED);
+  assert_uintprop (test->account, "connection-status",
+      TP_CONNECTION_STATUS_CONNECTED);
   g_assert_cmpint (tp_account_get_connection_status (test->account, &reason),
       ==, TP_CONNECTION_STATUS_CONNECTED);
   g_assert_cmpint (reason, ==, TP_CONNECTION_STATUS_REASON_REQUESTED);
+  assert_uintprop (test->account, "connection-status-reason",
+      TP_CONNECTION_STATUS_REASON_REQUESTED);
   g_assert_cmpstr (tp_account_get_detailed_error (test->account, NULL), ==,
       NULL);
+  assert_strprop (test->account, "connection-error", NULL);
   g_assert_cmpstr (tp_account_get_detailed_error (test->account, &details), ==,
       NULL);
   /* this is documented to be untouched */
@@ -287,36 +349,199 @@ test_prepare_success (Test *test,
   /* the CM and protocol come from the object path */
   g_assert_cmpstr (tp_account_get_connection_manager (test->account),
       ==, "what");
+  assert_strprop (test->account, "connection-manager", "what");
   g_assert_cmpstr (tp_account_get_protocol (test->account), ==, "ev");
+  assert_strprop (test->account, "protocol", "ev");
 
   /* the icon name in SimpleAccount is "", so we guess based on the protocol */
   g_assert_cmpstr (tp_account_get_icon_name (test->account), ==, "im-ev");
+  assert_strprop (test->account, "icon-name", "im-ev");
 
-  /* RequestedPresence is (Available, "available", "") */
+  /* RequestedPresence */
   g_assert_cmpint (tp_account_get_requested_presence (test->account, NULL,
-        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
+        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_BUSY);
+  assert_uintprop (test->account, "requested-presence-type",
+      TP_CONNECTION_PRESENCE_TYPE_BUSY);
   g_assert_cmpint (tp_account_get_requested_presence (test->account, &status,
-        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
-  g_assert_cmpstr (status, ==, "available");
+        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_BUSY);
+  g_assert_cmpstr (status, ==, "requesting");
   g_free (status);
+  assert_strprop (test->account, "requested-status", "requesting");
   g_assert_cmpint (tp_account_get_requested_presence (test->account, NULL,
-        &message), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
-  g_assert_cmpstr (message, ==, "");
+        &message), ==, TP_CONNECTION_PRESENCE_TYPE_BUSY);
+  g_assert_cmpstr (message, ==, "this is my RequestedPresence");
   g_free (message);
+  assert_strprop (test->account, "requested-status-message",
+      "this is my RequestedPresence");
 
-  /* CurrentPresence is the same as RequestedPresence */
+  /* CurrentPresence */
   g_assert_cmpint (tp_account_get_current_presence (test->account, NULL,
-        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
+        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AWAY);
+  assert_uintprop (test->account, "current-presence-type",
+      TP_CONNECTION_PRESENCE_TYPE_AWAY);
   g_assert_cmpint (tp_account_get_current_presence (test->account, &status,
-        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
-  g_assert_cmpstr (status, ==, "available");
+        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AWAY);
+  g_assert_cmpstr (status, ==, "currently-away");
   g_free (status);
+  assert_strprop (test->account, "current-status", "currently-away");
   g_assert_cmpint (tp_account_get_current_presence (test->account, NULL,
-        &message), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
-  g_assert_cmpstr (message, ==, "");
+        &message), ==, TP_CONNECTION_PRESENCE_TYPE_AWAY);
+  g_assert_cmpstr (message, ==, "this is my CurrentPresence");
   g_free (message);
+  assert_strprop (test->account, "current-status-message",
+      "this is my CurrentPresence");
 
-  /* NormalizedName and AutomaticPresence aren't available yet */
+  /* AutomaticPresence */
+  g_assert_cmpint (tp_account_get_automatic_presence (test->account, NULL,
+        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
+  assert_uintprop (test->account, "automatic-presence-type",
+      TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
+  g_assert_cmpint (tp_account_get_automatic_presence (test->account, &status,
+        NULL), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
+  g_assert_cmpstr (status, ==, "automatically-available");
+  g_free (status);
+  assert_strprop (test->account, "automatic-status",
+      "automatically-available");
+  g_assert_cmpint (tp_account_get_automatic_presence (test->account, NULL,
+        &message), ==, TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
+  g_assert_cmpstr (message, ==, "this is my AutomaticPresence");
+  g_free (message);
+  assert_strprop (test->account, "automatic-status-message",
+      "this is my AutomaticPresence");
+
+  /* NormalizedName */
+  g_assert_cmpstr (tp_account_get_normalized_name (test->account), ==,
+      "bob.mcbadgers@example.com");
+  assert_strprop (test->account, "normalized-name",
+      "bob.mcbadgers@example.com");
+}
+
+static void
+get_storage_specific_info_cb (GObject *account,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  Test *test = user_data;
+  GHashTable *info;
+  GError *error = NULL;
+
+  info = tp_account_get_storage_specific_information_finish (
+      TP_ACCOUNT (account), result, &error);
+  g_assert_no_error (error);
+
+  g_assert_cmpuint (g_hash_table_size (info), ==, 3);
+
+  g_assert_cmpint (tp_asv_get_int32 (info, "one", NULL), ==, 1);
+  g_assert_cmpuint (tp_asv_get_uint32 (info, "two", NULL), ==, 2);
+  g_assert_cmpstr (tp_asv_get_string (info, "marco"), ==, "polo");
+
+  g_main_loop_quit (test->mainloop);
+}
+
+static void
+test_storage (Test *test,
+    gconstpointer mode)
+{
+  GQuark account_features[] = { TP_ACCOUNT_FEATURE_STORAGE, 0 };
+  GValue *gvalue;
+
+  test->account = tp_account_new (test->dbus, ACCOUNT_PATH, NULL);
+  g_assert (test->account != NULL);
+
+  if (g_str_equal (mode, "later"))
+    {
+      /* prepare the core feature first */
+      tp_proxy_prepare_async (test->account, NULL, account_prepare_cb, test);
+      g_main_loop_run (test->mainloop);
+
+      /* storage stuff doesn't work yet */
+      g_assert_cmpstr (tp_account_get_storage_provider (test->account), ==,
+          NULL);
+      assert_strprop (test->account, "storage-provider", NULL);
+      g_assert (tp_account_get_storage_identifier (test->account) == NULL);
+      g_object_get (test->account,
+          "storage-identifier", &gvalue,
+          NULL);
+      g_assert (gvalue == NULL);
+      g_assert_cmpuint (tp_account_get_storage_restrictions (test->account), ==,
+          0);
+      assert_uintprop (test->account, "storage-restrictions", 0);
+    }
+
+  /* prepare the storage feature */
+  tp_proxy_prepare_async (test->account, account_features,
+      account_prepare_cb, test);
+  g_main_loop_run (test->mainloop);
+
+  g_assert_cmpstr (tp_account_get_storage_provider (test->account), ==,
+      "org.freedesktop.Telepathy.glib.test");
+  assert_strprop (test->account, "storage-provider",
+      "org.freedesktop.Telepathy.glib.test");
+  g_assert_cmpstr (
+      g_value_get_string (tp_account_get_storage_identifier (test->account)),
+      ==, "unique-identifier");
+  g_object_get (test->account,
+      "storage-identifier", &gvalue,
+      NULL);
+  g_assert_cmpstr (g_value_get_string (gvalue), ==, "unique-identifier");
+  g_boxed_free (G_TYPE_VALUE, gvalue);
+  g_assert_cmpuint (tp_account_get_storage_restrictions (test->account), ==,
+      TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED |
+      TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS);
+  assert_uintprop (test->account, "storage-restrictions",
+      TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED |
+      TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS);
+
+  /* request the StorageSpecificProperties hash */
+  tp_account_get_storage_specific_information_async (test->account,
+      get_storage_specific_info_cb, test);
+  g_main_loop_run (test->mainloop);
+}
+
+static void
+test_addressing (Test *test,
+    gconstpointer mode)
+{
+  GQuark account_features[] = { TP_ACCOUNT_FEATURE_ADDRESSING, 0 };
+  const gchar * const *schemes;
+
+  test->account = tp_account_new (test->dbus, ACCOUNT_PATH, NULL);
+  g_assert (test->account != NULL);
+
+  if (g_str_equal (mode, "later"))
+    {
+      /* prepare the core feature first */
+      tp_proxy_prepare_async (test->account, NULL, account_prepare_cb, test);
+      g_main_loop_run (test->mainloop);
+
+      /* addressing stuff doesn't work yet */
+      g_assert (tp_account_get_uri_schemes (test->account) == NULL);
+      g_assert (!tp_account_associated_with_uri_scheme (test->account,
+            "about"));
+      g_assert (!tp_account_associated_with_uri_scheme (test->account,
+            "telnet"));
+      g_assert (!tp_account_associated_with_uri_scheme (test->account,
+            "xmpp"));
+    }
+
+  /* prepare the addressing feature */
+  tp_proxy_prepare_async (test->account, account_features,
+      account_prepare_cb, test);
+  g_main_loop_run (test->mainloop);
+
+  schemes = tp_account_get_uri_schemes (test->account);
+  g_assert (schemes != NULL);
+  g_assert (tp_strv_contains (schemes, "about"));
+  g_assert (tp_strv_contains (schemes, "telnet"));
+  g_assert (schemes[2] == NULL);
+
+  g_assert (tp_account_associated_with_uri_scheme (test->account,
+        "about"));
+  g_assert (tp_account_associated_with_uri_scheme (test->account,
+        "telnet"));
+  g_assert (!tp_account_associated_with_uri_scheme (test->account,
+        "xmpp"));
+
 }
 
 static void
@@ -486,6 +711,7 @@ main (int argc,
       char **argv)
 {
   g_type_init ();
+  tp_tests_abort_after (10);
   tp_debug_set_flags ("all");
 
   g_test_init (&argc, &argv, NULL);
@@ -530,11 +756,24 @@ main (int argc,
 
   g_test_add ("/account/new", Test, NULL, setup, test_new, teardown);
 
+  g_test_add ("/account/setters", Test, NULL, setup_service, test_setters,
+      teardown_service);
+
   g_test_add ("/account/prepare/success", Test, NULL, setup_service,
               test_prepare_success, teardown_service);
 
   g_test_add ("/account/connection", Test, NULL, setup_service,
               test_connection, teardown_service);
+
+  g_test_add ("/account/storage", Test, "first", setup_service, test_storage,
+      teardown_service);
+  g_test_add ("/account/storage", Test, "later", setup_service, test_storage,
+      teardown_service);
+
+  g_test_add ("/account/addressing", Test, "first", setup_service,
+      test_addressing, teardown_service);
+  g_test_add ("/account/addressing", Test, "later", setup_service,
+      test_addressing, teardown_service);
 
   return g_test_run ();
 }

@@ -152,12 +152,14 @@ struct _TpGroupMixin {
 #define TP_GROUP_MIXIN_CLASS(o) \
   ((TpGroupMixinClass *) tp_mixin_offset_cast (o, \
     TP_GROUP_MIXIN_CLASS_OFFSET (o)))
+#define TP_HAS_GROUP_MIXIN_CLASS(cls) (TP_GROUP_MIXIN_CLASS_OFFSET (cls) != 0)
 
 #define TP_GROUP_MIXIN_OFFSET_QUARK (tp_group_mixin_get_offset_quark ())
 #define TP_GROUP_MIXIN_OFFSET(o) \
   tp_mixin_instance_get_offset (o, TP_GROUP_MIXIN_OFFSET_QUARK)
 #define TP_GROUP_MIXIN(o) ((TpGroupMixin *) tp_mixin_offset_cast (o, \
       TP_GROUP_MIXIN_OFFSET(o)))
+#define TP_HAS_GROUP_MIXIN(o) (TP_GROUP_MIXIN_OFFSET (o) != 0)
 
 GQuark tp_group_mixin_class_get_offset_quark (void);
 GQuark tp_group_mixin_get_offset_quark (void);
@@ -202,12 +204,12 @@ gboolean tp_group_mixin_get_handle_owners (GObject *obj,
 void tp_group_mixin_change_flags (GObject *obj,
     TpChannelGroupFlags add, TpChannelGroupFlags del);
 gboolean tp_group_mixin_change_members (GObject *obj,
-    const gchar *message, const TpIntSet *add, const TpIntSet *del,
-    const TpIntSet *add_local_pending, const TpIntSet *add_remote_pending,
+    const gchar *message, const TpIntset *add, const TpIntset *del,
+    const TpIntset *add_local_pending, const TpIntset *add_remote_pending,
     TpHandle actor, TpChannelGroupChangeReason reason);
 gboolean tp_group_mixin_change_members_detailed (GObject *obj,
-    const TpIntSet *add, const TpIntSet *del,
-    const TpIntSet *add_local_pending, const TpIntSet *add_remote_pending,
+    const TpIntset *add, const TpIntset *del,
+    const TpIntset *add_local_pending, const TpIntset *add_remote_pending,
     const GHashTable *details);
 void tp_group_mixin_change_self_handle (GObject *obj,
     TpHandle new_self_handle);

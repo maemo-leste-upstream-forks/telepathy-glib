@@ -32,26 +32,43 @@
 #include <telepathy-glib/intset.h>
 #include <telepathy-glib/heap.h>
 
-#include <telepathy-glib/base-client.h>
-#include <telepathy-glib/proxy.h>
-#include <telepathy-glib/dbus.h>
-#include <telepathy-glib/channel.h>
-#include <telepathy-glib/connection.h>
-#include <telepathy-glib/connection-manager.h>
-#include <telepathy-glib/account.h>
+#include <telepathy-glib/account-channel-request.h>
 #include <telepathy-glib/account-manager.h>
-#include <telepathy-glib/channel-dispatcher.h>
+#include <telepathy-glib/account.h>
+#include <telepathy-glib/automatic-proxy-factory.h>
+#include <telepathy-glib/base-client.h>
+#include <telepathy-glib/basic-proxy-factory.h>
 #include <telepathy-glib/channel-dispatch-operation.h>
+#include <telepathy-glib/channel-dispatcher.h>
 #include <telepathy-glib/channel-request.h>
-#include <telepathy-glib/handle.h>
+#include <telepathy-glib/channel.h>
+#include <telepathy-glib/client-channel-factory.h>
+#include <telepathy-glib/connection-manager.h>
+#include <telepathy-glib/connection.h>
 #include <telepathy-glib/contact.h>
+#include <telepathy-glib/contact-search.h>
+#include <telepathy-glib/contact-search-result.h>
+#include <telepathy-glib/dbus.h>
+#include <telepathy-glib/dtmf.h>
 #include <telepathy-glib/debug.h>
+#include <telepathy-glib/handle.h>
+#include <telepathy-glib/proxy.h>
+#include <telepathy-glib/signalled-message.h>
 #include <telepathy-glib/simple-approver.h>
 #include <telepathy-glib/simple-handler.h>
 #include <telepathy-glib/simple-observer.h>
+#include <telepathy-glib/stream-tube-channel.h>
+#include <telepathy-glib/stream-tube-connection.h>
+#include <telepathy-glib/text-channel.h>
 
 #include <telepathy-glib/svc-generic.h>
 #include <telepathy-glib/svc-client.h>
+
+#include <telepathy-glib/base-channel.h>
+#include <telepathy-glib/base-connection.h>
+#include <telepathy-glib/base-connection-manager.h>
+#include <telepathy-glib/base-contact-list.h>
+#include <telepathy-glib/base-protocol.h>
 
 #undef  __TP_IN_GLIB_H__
 #endif /* __TP_GLIB_H__ */

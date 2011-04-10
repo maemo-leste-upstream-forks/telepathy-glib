@@ -7,7 +7,17 @@ libtp_glib_tests_la_SOURCES = \
     bug16307-conn.h \
     contacts-conn.c \
     contacts-conn.h \
+    contact-list-manager.c \
+    contact-list-manager.h \
     debug.h \
+    echo-chan.h \
+    echo-chan.c \
+    echo-cm.h \
+    echo-cm.c \
+    echo-conn.h \
+    echo-conn.c \
+    echo-im-manager.h \
+    echo-im-manager.c \
     myassert.h \
     params-cm.h \
     params-cm.c \
@@ -17,12 +27,18 @@ libtp_glib_tests_la_SOURCES = \
     simple-account-manager.h\
     simple-channel-dispatch-operation.c \
     simple-channel-dispatch-operation.h \
+    simple-channel-dispatcher.c \
+    simple-channel-dispatcher.h \
+    simple-channel-request.c \
+    simple-channel-request.h \
     simple-client.c \
     simple-client.h \
     simple-conn.c \
     simple-conn.h \
     simple-manager.c \
     simple-manager.h \
+    stream-tube-chan.c \
+    stream-tube-chan.h \
     stub-object.c \
     stub-object.h \
     textchan-null.c \
@@ -41,6 +57,9 @@ AM_CFLAGS = \
     $(DBUS_CFLAGS) \
     $(GLIB_CFLAGS) \
     $(TP_GLIB_CFLAGS)
+AM_LDFLAGS = \
+    $(ERROR_LDFLAGS) \
+    $(NULL)
 
 libtp_glib_tests_la_LIBADD = \
     $(DBUS_LIBS) \

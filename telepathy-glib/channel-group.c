@@ -110,7 +110,7 @@ tp_channel_group_get_flags (TpChannel *self)
  * @self: a channel
  *
  * If @self is a group and the %TP_CHANNEL_FEATURE_GROUP feature has been
- * prepared, return a #TpIntSet containing its members.
+ * prepared, return a #TpIntset containing its members.
  *
  * If @self is a group but %TP_CHANNEL_FEATURE_GROUP has not been prepared,
  * the result may either be a set of members, or %NULL.
@@ -120,7 +120,7 @@ tp_channel_group_get_flags (TpChannel *self)
  * Returns: the members, or %NULL
  * Since: 0.7.12
  */
-const TpIntSet *
+const TpIntset *
 tp_channel_group_get_members (TpChannel *self)
 {
   g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
@@ -134,7 +134,7 @@ tp_channel_group_get_members (TpChannel *self)
  * @self: a channel
  *
  * If @self is a group and the %TP_CHANNEL_FEATURE_GROUP feature has been
- * prepared, return a #TpIntSet containing its local-pending members.
+ * prepared, return a #TpIntset containing its local-pending members.
  *
  * If @self is a group but %TP_CHANNEL_FEATURE_GROUP has not been prepared,
  * the result may either be a set of local-pending members, or %NULL.
@@ -144,7 +144,7 @@ tp_channel_group_get_members (TpChannel *self)
  * Returns: the local-pending members, or %NULL
  * Since: 0.7.12
  */
-const TpIntSet *
+const TpIntset *
 tp_channel_group_get_local_pending (TpChannel *self)
 {
   g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
@@ -158,7 +158,7 @@ tp_channel_group_get_local_pending (TpChannel *self)
  * @self: a channel
  *
  * If @self is a group and the %TP_CHANNEL_FEATURE_GROUP feature has been
- * prepared, return a #TpIntSet containing its remote-pending members.
+ * prepared, return a #TpIntset containing its remote-pending members.
  *
  * If @self is a group but %TP_CHANNEL_FEATURE_GROUP has not been prepared,
  * the result may either be a set of remote-pending members, or %NULL.
@@ -168,7 +168,7 @@ tp_channel_group_get_local_pending (TpChannel *self)
  * Returns: the remote-pending members, or %NULL
  * Since: 0.7.12
   */
-const TpIntSet *
+const TpIntset *
 tp_channel_group_get_remote_pending (TpChannel *self)
 {
   g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
@@ -263,7 +263,8 @@ tp_channel_group_get_local_pending_info (TpChannel *self,
  *   result is undefined;
  * - if %TP_CHANNEL_FEATURE_GROUP has not yet been prepared, result is
  *   undefined;
- * - if @self does not have flags that include %TP_CHANNEL_FLAG_PROPERTIES,
+ * - if @self does not have flags that include
+ *   %TP_CHANNEL_GROUP_FLAG_PROPERTIES,
  *   result is undefined;
  * - if @handle is channel-specific and its globally valid "owner" is known,
  *   return that owner;
@@ -272,7 +273,7 @@ tp_channel_group_get_local_pending_info (TpChannel *self,
  * - if @handle is globally valid, return @handle itself
  *
  * Some channels (those with flags that include
- * %TP_CHANNEL_FLAG_CHANNEL_SPECIFIC_HANDLES) have a concept of
+ * %TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES) have a concept of
  * "channel-specific handles". These are handles that only have meaning within
  * the context of the channel - for instance, in XMPP Multi-User Chat,
  * participants in a chatroom are identified by an in-room JID consisting
@@ -291,7 +292,7 @@ tp_channel_group_get_local_pending_info (TpChannel *self,
  * Group's remote-pending set).
  *
  * This function's result is undefined unless the channel is ready
- * and its flags include %TP_CHANNEL_FLAG_PROPERTIES (an implementation
+ * and its flags include %TP_CHANNEL_GROUP_FLAG_PROPERTIES (an implementation
  * without extra D-Bus round trips is not possible using the older API).
  *
  * Returns: the global handle that owns the given handle, or 0
@@ -668,7 +669,7 @@ _tp_channel_emit_initial_sets (TpChannel *self)
 {
   GArray *added, *remote_pending;
   GArray empty_array = { NULL, 0 };
-  TpIntSetFastIter iter;
+  TpIntsetFastIter iter;
   TpHandle handle;
 
   tp_intset_fast_iter_init (&iter, self->priv->group_local_pending);

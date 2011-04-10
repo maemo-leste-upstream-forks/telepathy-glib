@@ -44,13 +44,15 @@
  * <listitem><literal>im</literal> - (text) instant messaging
  *    (service)</listitem>
  * <listitem><literal>properties</literal> -
- *    #TpDBusPropertiesMixin and #TpPropertiesMixin (service)</listitem>
+ *    <link linkend="telepathy-glib-dbus-properties-mixin">TpDBusPropertiesMixin</link> and #TpPropertiesMixin (service)</listitem>
  * <listitem><literal>params</literal> - connection manager parameters
  *    (service)</listitem>
  * <listitem><literal>handles</literal> - handle reference tracking tracking
  *    in #TpBaseConnection (service) and #TpConnection (client)</listitem>
  * <listitem><literal>accounts</literal> - the #TpAccountManager and
  *     #TpAccount objects (client)</listitem>
+ * <listitem><literal>contact-lists</literal> - the #TpBaseContactList
+ *    (service)</listitem>
  * <listitem><literal>all</literal> - all of the above</listitem>
  * </itemizedlist>
  */
@@ -83,7 +85,7 @@ static gboolean tp_debug_persistent = FALSE;
  * Activate all possible debug modes. This also activates persistent mode,
  * which should have been orthogonal.
  *
- * @deprecated since 0.6.1. Use tp_debug_set_flags ("all") and
+ * Deprecated: since 0.6.1. Use tp_debug_set_flags ("all") and
  * tp_debug_set_persistent() instead.
  */
 void
@@ -109,6 +111,8 @@ static GDebugKey keys[] = {
   { "accounts",      TP_DEBUG_ACCOUNTS },
   { "dispatcher",    TP_DEBUG_DISPATCHER },
   { "client",        TP_DEBUG_CLIENT },
+  { "contact-lists", TP_DEBUG_CONTACT_LISTS },
+  { "sasl",          TP_DEBUG_SASL },
   { 0, }
 };
 
@@ -139,6 +143,8 @@ static DebugKeyToDomain key_to_domain[] = {
   { TP_DEBUG_ACCOUNTS,   G_LOG_DOMAIN "/accounts" },
   { TP_DEBUG_DISPATCHER, G_LOG_DOMAIN "/dispatcher" },
   { TP_DEBUG_CLIENT,     G_LOG_DOMAIN "/client" },
+  { TP_DEBUG_CONTACT_LISTS, G_LOG_DOMAIN "/contact-lists" },
+  { TP_DEBUG_SASL,       G_LOG_DOMAIN "/sasl" },
   { 0, NULL }
 };
 
@@ -161,7 +167,7 @@ static GDebugKey persist_keys[] = {
  * this function has no practical effect, since the debug messages it would
  * enable were removed at compile time.
  *
- * @since 0.6.1
+ * Since: 0.6.1
  */
 void
 tp_debug_set_flags (const gchar *flags_string)
@@ -187,7 +193,7 @@ tp_debug_set_flags (const gchar *flags_string)
  *
  * The parsing matches that of g_parse_debug_string().
  *
- * @deprecated since 0.6.1. Use tp_debug_set_flags() and
+ * Deprecated: since 0.6.1. Use tp_debug_set_flags() and
  * tp_debug_set_persistent() instead
  */
 void
@@ -208,7 +214,7 @@ tp_debug_set_flags_from_string (const gchar *flags_string)
  * <literal>tp_debug_set_flags_from_string (g_getenv (var))</literal>,
  * and has the same problem with persistence being included in "all".
  *
- * @deprecated since 0.6.1. Use tp_debug_set_flags(g_getenv(...)) and
+ * Deprecated: since 0.6.1. Use tp_debug_set_flags(g_getenv(...)) and
  * tp_debug_set_persistent() instead
  */
 void
@@ -424,10 +430,12 @@ tp_debug_timestamped_log_handler (const gchar *log_domain,
 {
 #ifdef ENABLE_DEBUG
   GTimeVal now;
-  gchar *tmp;
+  gchar *tmp, *now_str;
 
   g_get_current_time (&now);
-  tmp = g_time_val_to_iso8601 (&now);
+  now_str = g_time_val_to_iso8601 (&now);
+  tmp = g_strdup_printf ("%s: %s", now_str, message);
+  g_free (now_str);
   message = tmp;
 #endif
 

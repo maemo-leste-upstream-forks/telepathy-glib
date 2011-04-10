@@ -21,6 +21,7 @@
 #include <telepathy-glib/contact.h>
 
 #include <errno.h>
+#include <string.h>
 
 #include <telepathy-glib/capabilities-internal.h>
 #include <telepathy-glib/dbus.h>
@@ -31,6 +32,7 @@
 #define DEBUG_FLAG TP_DEBUG_CONTACTS
 #include "telepathy-glib/connection-internal.h"
 #include "telepathy-glib/debug-internal.h"
+#include "telepathy-glib/util-internal.h"
 
 #include "telepathy-glib/_gen/signals-marshal.h"
 
@@ -98,8 +100,14 @@ struct _TpContact {
  *  (available since 0.11.6)
  * @TP_CONTACT_FEATURE_CONTACT_INFO: #TpContact:contact-info
  *  (available since 0.11.7)
- * @NUM_TP_CONTACT_FEATURES: 1 higher than the highest TpContactFeature
- *  supported by this version of telepathy-glib
+ * @TP_CONTACT_FEATURE_CLIENT_TYPES: #TpContact:client-types
+ *  (available since 0.13.1)
+ * @TP_CONTACT_FEATURE_SUBSCRIPTION_STATES: #TpContact:subscribe-state,
+ *  #TpContact:publish-state and #TpContact:publish-request. Require a
+ *  Connection implementing the %TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST
+ *  interface. (available since 0.13.12)
+ * @TP_CONTACT_FEATURE_CONTACT_GROUPS: #TpContact:contact-groups
+ *  (available since 0.13.14)
  *
  * Enumeration representing the features a #TpContact can optionally support.
  * When requesting a #TpContact, library users specify the desired features;
@@ -113,6 +121,15 @@ struct _TpContact {
  */
 
 /**
+ * NUM_TP_CONTACT_FEATURES:
+ *
+ * 1 higher than the highest #TpContactFeature supported by this version of
+ * telepathy-glib.
+ *
+ * Since: 0.7.18
+ */
+
+/**
  * TP_TYPE_CONTACT_FEATURE:
  *
  * The #GEnumClass type of a #TpContactFeature.
@@ -120,7 +137,7 @@ struct _TpContact {
  * Since: 0.11.5
  */
 
-G_DEFINE_TYPE (TpContact, tp_contact, G_TYPE_OBJECT);
+G_DEFINE_TYPE (TpContact, tp_contact, G_TYPE_OBJECT)
 
 
 enum {
@@ -137,11 +154,18 @@ enum {
     PROP_LOCATION,
     PROP_CAPABILITIES,
     PROP_CONTACT_INFO,
+    PROP_CLIENT_TYPES,
+    PROP_SUBSCRIBE_STATE,
+    PROP_PUBLISH_STATE,
+    PROP_PUBLISH_REQUEST,
+    PROP_CONTACT_GROUPS,
     N_PROPS
 };
 
 enum {
     SIGNAL_PRESENCE_CHANGED,
+    SIGNAL_SUBSCRIPTION_STATES_CHANGED,
+    SIGNAL_CONTACT_GROUPS_CHANGED,
     N_SIGNALS
 };
 
@@ -157,6 +181,9 @@ typedef enum {
     CONTACT_FEATURE_FLAG_CAPABILITIES = 1 << TP_CONTACT_FEATURE_CAPABILITIES,
     CONTACT_FEATURE_FLAG_AVATAR_DATA = 1 << TP_CONTACT_FEATURE_AVATAR_DATA,
     CONTACT_FEATURE_FLAG_CONTACT_INFO = 1 << TP_CONTACT_FEATURE_CONTACT_INFO,
+    CONTACT_FEATURE_FLAG_CLIENT_TYPES = 1 << TP_CONTACT_FEATURE_CLIENT_TYPES,
+    CONTACT_FEATURE_FLAG_STATES = 1 << TP_CONTACT_FEATURE_SUBSCRIPTION_STATES,
+    CONTACT_FEATURE_FLAG_CONTACT_GROUPS = 1 << TP_CONTACT_FEATURE_CONTACT_GROUPS,
 } ContactFeatureFlags;
 
 struct _TpContactPrivate {
@@ -182,11 +209,23 @@ struct _TpContactPrivate {
     /* location */
     GHashTable *location;
 
+    /* client types */
+    gchar **client_types;
+
     /* capabilities */
     TpCapabilities *capabilities;
 
     /* a list of TpContactInfoField */
     GList *contact_info;
+
+    /* Subscribe/Publish states */
+    TpSubscriptionState subscribe;
+    TpSubscriptionState publish;
+    gchar *publish_request;
+
+    /* ContactGroups */
+    /* array of dupped strings */
+    GPtrArray *contact_groups;
 };
 
 
@@ -466,6 +505,26 @@ tp_contact_get_location (TpContact *self)
 }
 
 /**
+ * tp_contact_get_client_types:
+ * @self: a contact
+ *
+ * Return the contact's client types or %NULL if the client types are
+ * unspecified.
+ *
+ * Returns: (array zero-terminated=1) (transfer none): the same
+ *  #GStrv as the #TpContact:client-types property
+ *
+ * Since: 0.13.1
+ */
+const gchar * const *
+tp_contact_get_client_types (TpContact *self)
+{
+  g_return_val_if_fail (self != NULL, NULL);
+
+  return (const gchar * const *) self->priv->client_types;
+}
+
+/**
  * tp_contact_get_capabilities:
  * @self: a contact
  *
@@ -510,6 +569,200 @@ tp_contact_get_contact_info (TpContact *self)
   return g_list_copy (self->priv->contact_info);
 }
 
+/**
+ * tp_contact_get_subscribe_state:
+ * @self: a #TpContact
+ *
+ * Return the state of the local user's subscription to this remote contact's
+ * presence.
+ *
+ * This is set to %TP_SUBSCRIPTION_STATE_UNKNOWN until
+ * %TP_CONTACT_FEATURE_SUBSCRIPTION_STATES has been prepared
+ *
+ * Returns: the value of #TpContact:subscribe-state.
+ *
+ * Since: 0.13.12
+ */
+TpSubscriptionState
+tp_contact_get_subscribe_state (TpContact *self)
+{
+  g_return_val_if_fail (TP_IS_CONTACT (self), TP_SUBSCRIPTION_STATE_UNKNOWN);
+
+  return self->priv->subscribe;
+}
+
+/**
+ * tp_contact_get_publish_state:
+ * @self: a #TpContact
+ *
+ * Return the state of this remote contact's subscription to the local user's
+ * presence.
+ *
+ * This is set to %TP_SUBSCRIPTION_STATE_UNKNOWN until
+ * %TP_CONTACT_FEATURE_SUBSCRIPTION_STATES has been prepared
+ *
+ * Returns: the value of #TpContact:publish-state.
+ *
+ * Since: 0.13.12
+ */
+TpSubscriptionState
+tp_contact_get_publish_state (TpContact *self)
+{
+  g_return_val_if_fail (TP_IS_CONTACT (self), TP_SUBSCRIPTION_STATE_UNKNOWN);
+
+  return self->priv->publish;
+}
+
+/**
+ * tp_contact_get_publish_request:
+ * @self: a #TpContact
+ *
+ * If #TpContact:publish-state is set to %TP_SUBSCRIPTION_STATE_ASK, return the
+ * message that this remote contact sent when they requested permission to see
+ * the local user's presence, an empty string ("") otherwise. This remains valid
+ * until the main loop is re-entered; if the caller requires a string that will
+ * persist for longer than that, it must be copied with g_strdup().
+ *
+ * This is set to %NULL until %TP_CONTACT_FEATURE_SUBSCRIPTION_STATES has been
+ * prepared, and it is guaranteed to be non-%NULL afterward.
+
+ * Returns: the value of #TpContact:publish-request.
+ *
+ * Since: 0.13.12
+ */
+const gchar *
+tp_contact_get_publish_request (TpContact *self)
+{
+  g_return_val_if_fail (TP_IS_CONTACT (self), NULL);
+
+  return self->priv->publish_request;
+}
+
+/**
+ * tp_contact_get_contact_groups:
+ * @self: a #TpContact
+ *
+ * Return names of groups of which a contact is a member. It is incorrect to
+ * call this method before %TP_CONTACT_FEATURE_CONTACT_GROUPS has been
+ * prepared. This remains valid until the main loop is re-entered; if the caller
+ * requires a #GStrv that will persist for longer than that, it must be copied
+ * with g_strdupv().
+ *
+ * Returns: (array zero-terminated=1) (transfer none): the same
+ *  #GStrv as the #TpContact:contact-groups property
+ *
+ * Since: 0.13.14
+ */
+const gchar * const *
+tp_contact_get_contact_groups (TpContact *self)
+{
+  g_return_val_if_fail (TP_IS_CONTACT (self), NULL);
+
+  if (self->priv->contact_groups == NULL)
+    return NULL;
+
+  return (const gchar * const *) self->priv->contact_groups->pdata;
+}
+
+static void
+set_contact_groups_cb (TpConnection *connection,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  GSimpleAsyncResult *result = user_data;
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to set contact groups: %s", error->message);
+      g_simple_async_result_set_from_error (result, error);
+    }
+
+  g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+/**
+ * tp_contact_set_contact_groups_async:
+ * @self: a #TpContact
+ * @n_groups: the number of groups, or -1 if @groups is %NULL-terminated
+ * @groups: (array length=n_groups) (element-type utf8) (allow-none): the set of
+ *  groups which the contact should be in (may be %NULL if @n_groups is 0)
+ * @callback: a callback to call when the request is satisfied
+ * @user_data: data to pass to @callback
+ *
+ * Add @self to the given groups (creating new groups if necessary), and remove
+ * it from all other groups. If the user is removed from a group of which they
+ * were the only member, the group MAY be removed automatically. You can then
+ * call tp_contact_set_contact_groups_finish() to get the result of the
+ * operation.
+ *
+ * If the operation is successful and %TP_CONTACT_FEATURE_CONTACT_GROUPS is
+ * prepared, the #TpContact:contact-groups property will be
+ * updated (emitting "notify::contact-groups" signal) and
+ * #TpContact:contact-groups-changed signal will be emitted before @callback
+ * is called. That means you can call tp_contact_get_contact_groups() to get the
+ * new contact groups inside @callback.
+ *
+ * Since: 0.13.14
+ */
+void
+tp_contact_set_contact_groups_async (TpContact *self,
+    gint n_groups,
+    const gchar * const *groups,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  static const gchar *empty_groups[] = { NULL };
+  GSimpleAsyncResult *result;
+  gchar **new_groups = NULL;
+
+  g_return_if_fail (TP_IS_CONTACT (self));
+  g_return_if_fail (n_groups >= -1);
+  g_return_if_fail (n_groups <= 0 || groups != NULL);
+
+  if (groups == NULL)
+    {
+      groups = empty_groups;
+    }
+  else if (n_groups > 0)
+    {
+      /* Create NULL-terminated array */
+      new_groups = g_new0 (gchar *, n_groups + 1);
+      g_memmove (new_groups, groups, n_groups * sizeof (gchar *));
+      groups = (const gchar * const *) new_groups;
+    }
+
+  result = g_simple_async_result_new (G_OBJECT (self),
+      callback, user_data, tp_contact_set_contact_groups_finish);
+
+  tp_cli_connection_interface_contact_groups_call_set_contact_groups (
+      self->priv->connection, -1, self->priv->handle, (const gchar **) groups,
+      set_contact_groups_cb, result, NULL, G_OBJECT (self));
+
+  g_free (new_groups);
+}
+
+/**
+ * tp_contact_set_contact_groups_finish:
+ * @self: a #TpContact
+ * @result: a #GAsyncResult
+ * @error: a #GError to be filled
+ *
+ * Finishes an async set of @self contact groups.
+ *
+ * Returns: %TRUE if the request call was successful, otherwise %FALSE
+ *
+ * Since: 0.13.14
+ */
+gboolean
+tp_contact_set_contact_groups_finish (TpContact *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (self, tp_contact_set_contact_groups_finish);
+}
+
 void
 _tp_contact_connection_invalidated (TpContact *contact)
 {
@@ -532,8 +785,6 @@ tp_contact_dispose (GObject *object)
 
       _tp_connection_remove_contact (self->priv->connection,
           self->priv->handle, self);
-      tp_connection_unref_handles (self->priv->connection,
-          TP_HANDLE_TYPE_CONTACT, 1, &self->priv->handle);
 
       self->priv->handle = 0;
     }
@@ -542,6 +793,7 @@ tp_contact_dispose (GObject *object)
   tp_clear_pointer (&self->priv->location, g_hash_table_unref);
   tp_clear_object (&self->priv->capabilities);
   tp_clear_object (&self->priv->avatar_file);
+  tp_clear_pointer (&self->priv->contact_groups, g_ptr_array_unref);
 
   ((GObjectClass *) tp_contact_parent_class)->dispose (object);
 }
@@ -558,7 +810,9 @@ tp_contact_finalize (GObject *object)
   g_free (self->priv->avatar_mime_type);
   g_free (self->priv->presence_status);
   g_free (self->priv->presence_message);
+  g_strfreev (self->priv->client_types);
   tp_contact_info_list_free (self->priv->contact_info);
+  g_free (self->priv->publish_request);
 
   ((GObjectClass *) tp_contact_parent_class)->finalize (object);
 }
@@ -627,6 +881,26 @@ tp_contact_get_property (GObject *object,
 
     case PROP_CONTACT_INFO:
       g_value_set_boxed (value, self->priv->contact_info);
+      break;
+
+    case PROP_CLIENT_TYPES:
+      g_value_set_boxed (value, tp_contact_get_client_types (self));
+      break;
+
+    case PROP_SUBSCRIBE_STATE:
+      g_value_set_uint (value, tp_contact_get_subscribe_state (self));
+      break;
+
+    case PROP_PUBLISH_STATE:
+      g_value_set_uint (value, tp_contact_get_publish_state (self));
+      break;
+
+    case PROP_PUBLISH_REQUEST:
+      g_value_set_string (value, tp_contact_get_publish_request (self));
+      break;
+
+    case PROP_CONTACT_GROUPS:
+      g_value_set_boxed (value, tp_contact_get_contact_groups (self));
       break;
 
     default:
@@ -905,8 +1179,147 @@ tp_contact_class_init (TpContactClass *klass)
       param_spec);
 
   /**
-   * TpContact::presence-changed:
+   * TpContact:client-types:
+   *
+   * A #GStrv containing the client types of this contact.
+   *
+   * This is set to %NULL if %TP_CONTACT_FEATURE_CLIENT_TYPES is not
+   * set on this contact.
+   *
+   * Since: 0.13.1
+   */
+  param_spec = g_param_spec_boxed ("client-types",
+      "Client types",
+      "Client types of the contact, or NULL",
+      G_TYPE_STRV,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CLIENT_TYPES,
+      param_spec);
+
+  /**
+   * TpContact:subscribe-state:
+   *
+   * A #TpSubscriptionState indicating the state of the local user's
+   * subscription to this contact's presence.
+   *
+   * This is set to %TP_SUBSCRIPTION_STATE_UNKNOWN until
+   * %TP_CONTACT_FEATURE_SUBSCRIPTION_STATES has been prepared
+   *
+   * Since: 0.13.12
+   */
+  param_spec = g_param_spec_uint ("subscribe-state",
+      "Subscribe State",
+      "Subscribe state of the contact",
+      0,
+      G_MAXUINT,
+      TP_SUBSCRIPTION_STATE_UNKNOWN,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_SUBSCRIBE_STATE,
+      param_spec);
+
+  /**
+   * TpContact:publish-state:
+   *
+   * A #TpSubscriptionState indicating the state of this contact's subscription
+   * to the local user's presence.
+   *
+   * This is set to %TP_SUBSCRIPTION_STATE_UNKNOWN until
+   * %TP_CONTACT_FEATURE_SUBSCRIPTION_STATES has been prepared
+   *
+   * Since: 0.13.12
+   */
+  param_spec = g_param_spec_uint ("publish-state",
+      "Publish State",
+      "Publish state of the contact",
+      0,
+      G_MAXUINT,
+      TP_SUBSCRIPTION_STATE_UNKNOWN,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_PUBLISH_STATE,
+      param_spec);
+
+  /**
+   * TpContact:publish-request:
+   *
+   * The message that contact sent when they requested permission to see the
+   * local user's presence, if #TpContact:publish-state is
+   * %TP_SUBSCRIPTION_STATE_ASK, an empty string ("") otherwise.
+   *
+   * This is set to %NULL until %TP_CONTACT_FEATURE_SUBSCRIPTION_STATES has been
+   * prepared, and it is guaranteed to be non-%NULL afterward.
+   *
+   * Since: 0.13.12
+   */
+  param_spec = g_param_spec_string ("publish-request",
+      "Publish Request",
+      "Publish request message of the contact",
+      NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_PUBLISH_REQUEST,
+      param_spec);
+
+  /**
+   * TpContact:contact-groups:
+   *
+   * a #GStrv with names of groups of which a contact is a member.
+   *
+   * This is set to %NULL if %TP_CONTACT_FEATURE_CONTACT_GROUPS is not prepared
+   * on this contact, or if the connection does not implement ContactGroups
+   * interface.
+   *
+   * Since: 0.13.14
+   */
+  param_spec = g_param_spec_boxed ("contact-groups",
+      "Contact Groups",
+      "Groups of the contact",
+      G_TYPE_STRV,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CONTACT_GROUPS,
+      param_spec);
+
+  /**
+   * TpContact::contact-groups-changed:
    * @contact: A #TpContact
+   * @added: A #GStrv with added contact groups
+   * @removed: A #GStrv with removed contact groups
+   *
+   * Emitted when this contact's groups changes. When this signal is emitted,
+   * #TpContact:contact-groups property is already updated.
+   *
+   * Since: 0.13.14
+   */
+  signals[SIGNAL_CONTACT_GROUPS_CHANGED] = g_signal_new (
+      "contact-groups-changed",
+      G_TYPE_FROM_CLASS (object_class),
+      G_SIGNAL_RUN_LAST,
+      0,
+      NULL, NULL,
+      _tp_marshal_VOID__BOXED_BOXED,
+      G_TYPE_NONE, 2, G_TYPE_STRV, G_TYPE_STRV);
+
+  /**
+   * TpContact::subscription-states-changed:
+   * @contact: a #TpContact
+   * @subscribe: the new value of #TpContact:subscribe-state
+   * @publish: the new value of #TpContact:publish-state
+   * @publish_request: the new value of #TpContact:publish-request
+   *
+   * Emitted when this contact's subscription states changes.
+   *
+   * Since: 0.13.12
+   */
+  signals[SIGNAL_SUBSCRIPTION_STATES_CHANGED] = g_signal_new (
+      "subscription-states-changed",
+      G_TYPE_FROM_CLASS (object_class),
+      G_SIGNAL_RUN_LAST,
+      0,
+      NULL, NULL,
+      _tp_marshal_VOID__UINT_UINT_STRING,
+      G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING);
+
+  /**
+   * TpContact::presence-changed:
+   * @contact: a #TpContact
    * @type: The new value of #TpContact:presence-type
    * @status: The new value of #TpContact:presence-status
    * @message: The new value of #TpContact:presence-message
@@ -925,7 +1338,6 @@ tp_contact_class_init (TpContactClass *klass)
 }
 
 
-/* Consumes one reference to @handle. */
 static TpContact *
 tp_contact_ensure (TpConnection *connection,
                    TpHandle handle)
@@ -935,11 +1347,6 @@ tp_contact_ensure (TpConnection *connection,
   if (self != NULL)
     {
       g_assert (self->priv->handle == handle);
-
-      /* we have one ref to this handle more than we need, so consume it */
-      tp_connection_unref_handles (self->priv->connection,
-          TP_HANDLE_TYPE_CONTACT, 1, &self->priv->handle);
-
       return g_object_ref (self);
     }
 
@@ -952,12 +1359,94 @@ tp_contact_ensure (TpConnection *connection,
   return self;
 }
 
+/**
+ * tp_connection_dup_contact_if_possible:
+ * @connection: a connection
+ * @handle: a handle of type %TP_HANDLE_TYPE_CONTACT
+ * @identifier: (transfer none): the normalized identifier (XMPP JID, etc.)
+ *  corresponding to @handle, or %NULL if not known
+ *
+ * Try to return an existing contact object or create a new contact object
+ * immediately.
+ *
+ * If tp_connection_has_immortal_handles() would return %TRUE and
+ * @identifier is non-%NULL, this function always succeeds.
+ *
+ * On connections without immortal handles, it is not possible to guarantee
+ * that @handle remains valid without making asynchronous D-Bus calls, so
+ * it might be necessary to delay processing of messages or other events
+ * until a #TpContact can be constructed asynchronously, for instance by using
+ * tp_connection_get_contacts_by_id().
+ *
+ * Similarly, if @identifier is %NULL, it might not be possible to find the
+ * identifier for @handle without making asynchronous D-Bus calls, so
+ * it might be necessary to delay processing of messages or other events
+ * until a #TpContact can be constructed asynchronously, for instance by using
+ * tp_connection_get_contacts_by_handle().
+ *
+ * Returns: (transfer full): a contact or %NULL
+ *
+ * Since: 0.13.9
+ */
+TpContact *
+tp_connection_dup_contact_if_possible (TpConnection *connection,
+    TpHandle handle,
+    const gchar *identifier)
+{
+  TpContact *ret;
+
+  g_return_val_if_fail (TP_IS_CONNECTION (connection), NULL);
+  g_return_val_if_fail (handle != 0, NULL);
+
+  ret = _tp_connection_lookup_contact (connection, handle);
+
+  if (ret != NULL && ret->priv->identifier != NULL)
+    {
+      g_object_ref (ret);
+    }
+  else if (tp_connection_has_immortal_handles (connection) &&
+      identifier != NULL)
+    {
+      ret = tp_contact_ensure (connection, handle);
+
+      if (ret->priv->identifier == NULL)
+        {
+          /* new object, I suppose we'll have to believe the caller */
+          ret->priv->identifier = g_strdup (identifier);
+        }
+    }
+  else
+    {
+      /* we don't already have a contact, and we can't make one without
+       * D-Bus calls (either because we can't rely on the handle staying
+       * static, or we don't know the identifier) */
+      return NULL;
+    }
+
+  g_assert (ret->priv->handle == handle);
+
+  if (G_UNLIKELY (identifier != NULL &&
+        tp_strdiff (ret->priv->identifier, identifier)))
+    {
+      WARNING ("Either this client, or connection manager %s, is broken: "
+          "handle %u is thought to be '%s', but we already have "
+          "a TpContact that thinks the identifier is '%s'",
+          tp_proxy_get_bus_name (connection), handle, identifier,
+          ret->priv->identifier);
+      g_object_unref (ret);
+      return NULL;
+    }
+
+  return ret;
+}
 
 static void
 tp_contact_init (TpContact *self)
 {
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, TP_TYPE_CONTACT,
       TpContactPrivate);
+
+  self->priv->client_types = NULL;
 }
 
 
@@ -1009,6 +1498,9 @@ struct _ContactsContext {
      * failed with InvalidHandle, or the RequestHandles call failed with
      * NotAvailable */
     guint next_index;
+
+    /* TRUE if all contacts already have IDs */
+    gboolean contacts_have_ids;
 };
 
 /* This code (and lots of telepathy-glib, really) won't work if this
@@ -1407,6 +1899,7 @@ contacts_held_handles (TpConnection *connection,
       guint i;
 
       g_assert (n_handles == c->handles->len);
+      g_assert (c->contacts->len == 0);
 
       for (i = 0; i < c->handles->len; i++)
         {
@@ -1893,6 +2386,9 @@ contacts_bind_to_location_updated (TpConnection *connection)
 
       tp_cli_connection_interface_location_connect_to_location_updated
         (connection, contacts_location_updated, NULL, NULL, NULL, NULL);
+
+      tp_connection_add_client_interest (connection,
+          TP_IFACE_CONNECTION_INTERFACE_LOCATION);
     }
 }
 
@@ -1950,6 +2446,46 @@ contacts_get_locations (ContactsContext *c)
     }
 
   contacts_context_continue (c);
+}
+
+static void
+contact_maybe_set_client_types (TpContact *self,
+    const gchar * const *types)
+{
+  if (self == NULL || types == NULL)
+    return;
+
+  if (self->priv->client_types != NULL)
+    g_strfreev (self->priv->client_types);
+
+  self->priv->has_features |= CONTACT_FEATURE_FLAG_CLIENT_TYPES;
+  self->priv->client_types = g_strdupv ((gchar **) types);
+  g_object_notify ((GObject *) self, "client-types");
+}
+
+static void
+contacts_client_types_updated (TpConnection *connection,
+    guint handle,
+    const gchar **types,
+    gpointer user_data G_GNUC_UNUSED,
+    GObject *weak_object G_GNUC_UNUSED)
+{
+  TpContact *contact = _tp_connection_lookup_contact (connection,
+          GPOINTER_TO_UINT (handle));
+
+  contact_maybe_set_client_types (contact, types);
+}
+
+static void
+contacts_bind_to_client_types_updated (TpConnection *connection)
+{
+  if (!connection->priv->tracking_client_types_updated)
+    {
+      connection->priv->tracking_client_types_updated = TRUE;
+
+      tp_cli_connection_interface_client_types_connect_to_client_types_updated
+        (connection, contacts_client_types_updated, NULL, NULL, NULL, NULL);
+    }
 }
 
 static void
@@ -2732,6 +3268,180 @@ tp_connection_refresh_contact_info (TpConnection *self,
   g_array_free (handles, TRUE);
 }
 
+static void
+contact_set_subscription_states (TpContact *self,
+    TpSubscriptionState subscribe,
+    TpSubscriptionState publish,
+    const gchar *publish_request)
+{
+  if (publish_request == NULL)
+    publish_request = "";
+
+  DEBUG ("contact#%u state changed:", self->priv->handle);
+  DEBUG ("  subscribe: %d", subscribe);
+  DEBUG ("  publish: %d", publish);
+  DEBUG ("  publish request: %s", publish_request);
+
+  self->priv->has_features |= CONTACT_FEATURE_FLAG_STATES;
+
+  g_free (self->priv->publish_request);
+
+  self->priv->subscribe = subscribe;
+  self->priv->publish = publish;
+  self->priv->publish_request = g_strdup (publish_request);
+
+  g_object_notify ((GObject *) self, "subscribe-state");
+  g_object_notify ((GObject *) self, "publish-state");
+  g_object_notify ((GObject *) self, "publish-request");
+
+  g_signal_emit (self, signals[SIGNAL_SUBSCRIPTION_STATES_CHANGED], 0,
+      self->priv->subscribe, self->priv->publish, self->priv->publish_request);
+}
+
+static void
+contacts_changed_cb (TpConnection *connection,
+    GHashTable *changes,
+    const GArray *removals,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  GHashTableIter iter;
+  gpointer key, value;
+  guint i;
+
+  g_hash_table_iter_init (&iter, changes);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      TpHandle handle = GPOINTER_TO_UINT (key);
+      GValueArray *value_array = value;
+      TpContact *contact = _tp_connection_lookup_contact (connection, handle);
+      TpSubscriptionState subscribe;
+      TpSubscriptionState publish;
+      const gchar *publish_request;
+
+      if (contact == NULL)
+        continue;
+
+      tp_value_array_unpack (value_array, 3,
+          &subscribe, &publish, &publish_request);
+
+      contact_set_subscription_states (contact, subscribe, publish,
+          publish_request);
+    }
+
+  for (i = 0; i < removals->len; i++)
+    {
+      TpHandle handle = g_array_index (removals, TpHandle, i);
+      TpContact *contact = _tp_connection_lookup_contact (connection, handle);
+
+      if (contact == NULL)
+        continue;
+
+      contact_set_subscription_states (contact, TP_SUBSCRIPTION_STATE_NO,
+          TP_SUBSCRIPTION_STATE_NO, NULL);
+    }
+}
+
+static void
+contacts_bind_to_contacts_changed (TpConnection *connection)
+{
+  if (!connection->priv->tracking_contacts_changed)
+    {
+      connection->priv->tracking_contacts_changed = TRUE;
+
+      tp_cli_connection_interface_contact_list_connect_to_contacts_changed
+        (connection, contacts_changed_cb, NULL, NULL, NULL, NULL);
+    }
+}
+
+static void
+contact_maybe_set_contact_groups (TpContact *self,
+    GStrv contact_groups)
+{
+  gchar **iter;
+
+  if (self == NULL || contact_groups == NULL)
+    return;
+
+  self->priv->has_features |= CONTACT_FEATURE_FLAG_CONTACT_GROUPS;
+
+  tp_clear_pointer (&self->priv->contact_groups, g_ptr_array_unref);
+  self->priv->contact_groups = g_ptr_array_sized_new (
+      g_strv_length (contact_groups) + 1);
+  g_ptr_array_set_free_func (self->priv->contact_groups, g_free);
+
+  for (iter = contact_groups; *iter != NULL; iter++)
+    g_ptr_array_add (self->priv->contact_groups, g_strdup (*iter));
+  g_ptr_array_add (self->priv->contact_groups, NULL);
+
+  g_object_notify ((GObject *) self, "contact-groups");
+}
+
+static void
+contact_groups_changed_cb (TpConnection *connection,
+    const GArray *contacts,
+    const gchar **added,
+    const gchar **removed,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  guint i;
+
+  for (i = 0; i < contacts->len; i++)
+    {
+      TpHandle handle = g_array_index (contacts, TpHandle, i);
+      TpContact *contact = _tp_connection_lookup_contact (connection, handle);
+      const gchar **iter;
+      guint j;
+
+      if (contact == NULL || contact->priv->contact_groups == NULL)
+        continue;
+
+      /* Remove the ending NULL */
+      g_ptr_array_remove_index_fast (contact->priv->contact_groups,
+          contact->priv->contact_groups->len - 1);
+
+      /* Remove old groups */
+      for (iter = removed; *iter != NULL; iter++)
+        {
+          for (j = 0; j < contact->priv->contact_groups->len; j++)
+            {
+              const gchar *str;
+
+              str = g_ptr_array_index (contact->priv->contact_groups, j);
+              if (!tp_strdiff (str, *iter))
+                {
+                  g_ptr_array_remove_index_fast (contact->priv->contact_groups, j);
+                  break;
+                }
+            }
+        }
+
+      /* Add new groups */
+      for (iter = added; *iter != NULL; iter++)
+        g_ptr_array_add (contact->priv->contact_groups, g_strdup (*iter));
+
+      /* Add back the ending NULL */
+      g_ptr_array_add (contact->priv->contact_groups, NULL);
+
+      g_object_notify ((GObject *) contact, "contact-groups");
+      g_signal_emit (contact, signals[SIGNAL_CONTACT_GROUPS_CHANGED], 0,
+          added, removed);
+    }
+}
+
+static void
+contacts_bind_to_contact_groups_changed (TpConnection *connection)
+{
+  if (!connection->priv->tracking_contact_groups_changed)
+    {
+      connection->priv->tracking_contact_groups_changed = TRUE;
+
+      tp_cli_connection_interface_contact_groups_connect_to_groups_changed
+        (connection, contact_groups_changed_cb, NULL, NULL, NULL, NULL);
+    }
+}
+
 static gboolean
 contacts_context_supports_iface (ContactsContext *context,
     GQuark iface)
@@ -2744,7 +3454,8 @@ contacts_context_supports_iface (ContactsContext *context,
         TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS))
     return FALSE;
 
-  g_assert (contact_attribute_interfaces != NULL);
+  if (contact_attribute_interfaces == NULL)
+    return FALSE;
 
   for (i = 0; i < contact_attribute_interfaces->len; i++)
     {
@@ -2758,9 +3469,10 @@ contacts_context_supports_iface (ContactsContext *context,
 }
 
 static void
-contacts_context_queue_features (ContactsContext *context,
-                                 ContactFeatureFlags feature_flags)
+contacts_context_queue_features (ContactsContext *context)
 {
+  ContactFeatureFlags feature_flags = context->wanted;
+
   /* Start slow path for requested features that are not in
    * ContactAttributeInterfaces */
 
@@ -2844,7 +3556,6 @@ contacts_context_queue_features (ContactsContext *context,
     }
 }
 
-
 static void
 contacts_got_attributes (TpConnection *connection,
                          GHashTable *attributes,
@@ -2863,10 +3574,8 @@ contacts_got_attributes (TpConnection *connection,
 
   i = 0;
 
-  if (c->signature == CB_BY_HANDLE)
+  if (c->signature == CB_BY_HANDLE && c->contacts->len == 0)
     {
-      g_assert (c->contacts->len == 0);
-
       while (i < c->handles->len)
         {
           TpHandle handle = g_array_index (c->handles, guint, i);
@@ -2881,27 +3590,9 @@ contacts_got_attributes (TpConnection *connection,
             }
           else
             {
-              TpContact *contact = NULL;
-              guint j;
-
-              /* we might already have consumed the only reference we have to
-               * the handle - if we have, we must recycle the same object
-               * rather than calling tp_contact_ensure again */
-              for (j = 0; j < i; j++)
-                {
-                  if (handle == g_array_index (c->handles, guint, j))
-                    {
-                      contact = g_object_ref (g_ptr_array_index (c->contacts,
-                            j));
-                    }
-                }
-
-              if (contact == NULL)
-                contact = tp_contact_ensure (connection, handle);
+              TpContact *contact = tp_contact_ensure (connection, handle);
 
               g_ptr_array_add (c->contacts, contact);
-
-              /* save the contact and move on to the next handle */
               i++;
             }
         }
@@ -2999,6 +3690,42 @@ contacts_got_attributes (TpConnection *connection,
           TP_TOKEN_CONNECTION_INTERFACE_CONTACT_INFO_INFO,
           TP_ARRAY_TYPE_CONTACT_INFO_FIELD_LIST);
       contact_maybe_set_info (contact, boxed);
+
+      /* ClientTypes */
+      boxed = tp_asv_get_boxed (asv,
+          TP_TOKEN_CONNECTION_INTERFACE_CLIENT_TYPES_CLIENT_TYPES,
+          G_TYPE_STRV);
+      contact_maybe_set_client_types (contact, boxed);
+
+      /* ContactList subscription states */
+      {
+        TpSubscriptionState subscribe;
+        TpSubscriptionState publish;
+        const gchar *publish_request;
+        gboolean subscribe_valid = FALSE;
+        gboolean publish_valid = FALSE;
+
+        subscribe = tp_asv_get_uint32 (asv,
+              TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_SUBSCRIBE,
+              &subscribe_valid);
+        publish = tp_asv_get_uint32 (asv,
+              TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_PUBLISH,
+              &publish_valid);
+        publish_request = tp_asv_get_string (asv,
+              TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_PUBLISH_REQUEST);
+
+        if (subscribe_valid && publish_valid)
+          {
+            contact_set_subscription_states (contact, subscribe, publish,
+                publish_request);
+          }
+      }
+
+      /* ContactGroups */
+      boxed = tp_asv_get_boxed (asv,
+          TP_TOKEN_CONNECTION_INTERFACE_CONTACT_GROUPS_GROUPS,
+          G_TYPE_STRV);
+      contact_maybe_set_contact_groups (contact, boxed);
     }
 
   contacts_context_continue (c);
@@ -3013,6 +3740,10 @@ contacts_get_attributes (ContactsContext *context)
   GPtrArray *array;
   const gchar **supported_interfaces;
   guint i;
+  guint len = 0;
+
+  if (contact_attribute_interfaces != NULL)
+      len = contact_attribute_interfaces->len;
 
   /* tp_connection_get_contact_attributes insists that you have at least one
    * handle; skip it if we don't (can only happen if we started from IDs) */
@@ -3024,11 +3755,10 @@ contacts_get_attributes (ContactsContext *context)
 
   g_assert (tp_proxy_has_interface_by_id (context->connection,
         TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS));
-  g_assert (contact_attribute_interfaces != NULL);
 
-  array = g_ptr_array_sized_new (contact_attribute_interfaces->len);
+  array = g_ptr_array_sized_new (len);
 
-  for (i = 0; i < contact_attribute_interfaces->len; i++)
+  for (i = 0; i < len; i++)
     {
       GQuark q = g_array_index (contact_attribute_interfaces, GQuark, i);
 
@@ -3086,17 +3816,57 @@ contacts_get_attributes (ContactsContext *context)
               contacts_bind_to_contact_info_changed (context->connection);
             }
         }
+      else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_CLIENT_TYPES)
+        {
+          if ((context->wanted & CONTACT_FEATURE_FLAG_CLIENT_TYPES) != 0)
+            {
+              g_ptr_array_add (array,
+                  TP_IFACE_CONNECTION_INTERFACE_CLIENT_TYPES);
+              contacts_bind_to_client_types_updated (context->connection);
+            }
+        }
+      else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_LIST)
+        {
+          if ((context->wanted & CONTACT_FEATURE_FLAG_STATES) != 0)
+            {
+              g_ptr_array_add (array,
+                  TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST);
+              contacts_bind_to_contacts_changed (context->connection);
+            }
+        }
+      else if (q == TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_GROUPS)
+        {
+          if ((context->wanted & CONTACT_FEATURE_FLAG_CONTACT_GROUPS) != 0)
+            {
+              g_ptr_array_add (array,
+                  TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS);
+              contacts_bind_to_contact_groups_changed (context->connection);
+            }
+        }
+    }
+
+  if (array->len == 0 &&
+      !(context->signature == CB_BY_HANDLE && context->contacts->len == 0) &&
+      context->contacts_have_ids)
+    {
+      /* We're not going to do anything useful: we're not holding/inspecting
+       * the handles, and we're not inspecting any extended interfaces
+       * either. Skip it. */
+      g_ptr_array_free (array, TRUE);
+      contacts_context_continue (context);
+      return;
     }
 
   g_ptr_array_add (array, NULL);
   supported_interfaces = (const gchar **) g_ptr_array_free (array, FALSE);
 
-  /* we want to hold the handles if and only if the call is by_handle -
-   * for the other modes, we already have handles */
+  /* The Hold parameter is only true if we started from handles, and we don't
+   * already have all the contacts we need. */
   context->refcount++;
   tp_connection_get_contact_attributes (context->connection, -1,
       context->handles->len, (const TpHandle *) context->handles->data,
-      supported_interfaces, (context->signature == CB_BY_HANDLE),
+      supported_interfaces,
+      (context->signature == CB_BY_HANDLE && context->contacts->len == 0),
       contacts_got_attributes,
       context, contacts_context_unref, context->weak_object);
   g_free (supported_interfaces);
@@ -3200,7 +3970,14 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
   GPtrArray *contacts;
   guint i;
 
-  g_return_if_fail (tp_connection_is_ready (self));
+  /* As an implementation detail, this method actually starts working slightly
+   * before we're officially ready, but only if you don't want any features.
+   * We use this to get the TpContact for the SelfHandle. */
+  if (n_features != 0 || !self->priv->introspecting_after_connected)
+    {
+      g_return_if_fail (tp_connection_is_ready (self));
+    }
+
   g_return_if_fail (tp_proxy_get_invalidated (self) == NULL);
   g_return_if_fail (n_handles >= 1);
   g_return_if_fail (handles != NULL);
@@ -3220,15 +3997,36 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
 
   if (contacts != NULL)
     {
-      /* We have already held/inspected handles, so we can skip that. */
+      ContactFeatureFlags minimal_feature_flags = 0xFFFFFFFF;
+
+      /* We have already held (and possibly inspected) handles, so we can
+       * skip that. */
+
+      context->contacts_have_ids = TRUE;
+
       for (i = 0; i < n_handles; i++)
         {
           TpContact *contact = g_object_ref (g_ptr_array_index (contacts, i));
 
+          minimal_feature_flags &= contact->priv->has_features;
           g_ptr_array_add (context->contacts, contact);
+
+          if (contact->priv->identifier == NULL)
+            context->contacts_have_ids = FALSE;
         }
 
-      contacts_context_queue_features (context, feature_flags);
+      /* This context won't need to retrieve any features that every
+       * contact in the list already has. */
+      context->wanted &= (~minimal_feature_flags);
+
+      /* We do need to retrieve any features that aren't there yet, though. */
+      if (tp_proxy_has_interface_by_id (self,
+            TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS))
+        {
+          g_queue_push_head (&context->todo, contacts_get_attributes);
+        }
+
+      contacts_context_queue_features (context);
 
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
           contacts_context_idle_continue, context, contacts_context_unref);
@@ -3243,12 +4041,11 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
       /* we support the Contacts interface, so we can hold the handles and
        * simultaneously inspect them. After that, we'll fill in any
        * features that are necessary (this becomes a no-op if Contacts
-       * gave us everything). */
-      contacts_get_attributes (context);
-      contacts_context_queue_features (context, feature_flags);
-      /* we have one excess ref to the context because we create it,
-       * and then contacts_get_attributes refs it */
-      contacts_context_unref (context);
+       * will give us everything). */
+      g_queue_push_head (&context->todo, contacts_get_attributes);
+      contacts_context_queue_features (context);
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
+          contacts_context_idle_continue, context, contacts_context_unref);
       return;
     }
 
@@ -3258,7 +4055,7 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
   g_queue_push_head (&context->todo, contacts_inspect);
 
   /* After that we'll get the features */
-  contacts_context_queue_features (context, feature_flags);
+  contacts_context_queue_features (context);
 
   /* but first, we need to hold onto them */
   tp_connection_hold_handles (self, -1,
@@ -3321,6 +4118,7 @@ tp_connection_upgrade_contacts (TpConnection *self,
   for (i = 0; i < n_contacts; i++)
     {
       g_return_if_fail (contacts[i]->priv->connection == self);
+      g_return_if_fail (contacts[i]->priv->identifier != NULL);
     }
 
   if (!get_feature_flags (n_features, features, &feature_flags))
@@ -3336,6 +4134,8 @@ tp_connection_upgrade_contacts (TpConnection *self,
       g_array_append_val (context->handles, contacts[i]->priv->handle);
     }
 
+  context->contacts_have_ids = TRUE;
+
   g_assert (context->handles->len == n_contacts);
 
   if (tp_proxy_has_interface_by_id (self,
@@ -3344,7 +4144,7 @@ tp_connection_upgrade_contacts (TpConnection *self,
       g_queue_push_head (&context->todo, contacts_get_attributes);
     }
 
-  contacts_context_queue_features (context, feature_flags);
+  contacts_context_queue_features (context);
 
   /* use an idle to make sure the callback is called after we return,
    * even if all the contacts actually have all the features, just to be
@@ -3563,7 +4363,7 @@ tp_connection_get_contacts_by_id (TpConnection *self,
       g_queue_push_head (&context->todo, contacts_inspect);
     }
 
-  contacts_context_queue_features (context, feature_flags);
+  contacts_context_queue_features (context);
 
   /* but first, we need to get the handles in the first place */
   tp_connection_request_handles (self, -1,

@@ -45,14 +45,42 @@
           <code>/org/freedesktop/Telepathy/ConnectionManager/salut/local_xmpp</code>,
           respectively.</p>
       </tp:rationale>
+
+      <p>If the ConnectionManager has a <tt>.manager</tt> file, each
+        Protocol's immutable properties must be represented in that file;
+        the representation is described as part of the documentation for
+        each property. For instance, a very simple ConnectionManager with one
+        Protocol might be represented like this:</p>
+
+<pre>
+[ConnectionManager]
+Interfaces=
+
+[Protocol example]
+Interfaces=
+ConnectionInterfaces=org.freedesktop.Telepathy.Connection.Interface.Requests;
+param-account=s required
+param-password=s required secret
+RequestableChannelClasses=text;
+VCardField=x-example
+EnglishName=Example
+Icon=im-example
+AuthenticationTypes=org.freedesktop.Telepathy.Channel.Type.ServerTLSConnection;org.freedesktop.Telepathy.Channel.Interface.SASLAuthentication;
+
+[text]
+org.freedesktop.Telepathy.Channel.ChannelType s=org.freedesktop.Telepathy.Channel.Type.Text
+org.freedesktop.Telepathy.Channel.TargetHandleType u=1
+allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy.Channel.TargetID;
+</pre>
     </tp:docstring>
 
     <property name="Interfaces" tp:name-for-bindings="Interfaces"
-      access="read" type="as" tp:type="DBus_Interface[]">
+      access="read" type="as" tp:type="DBus_Interface[]"
+      tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
         <p>A list of interfaces supported by this Protocol object.</p>
 
-        <p>This property is immutable, and should not be confused with
+        <p>This property should not be confused with
           <tp:member-ref>ConnectionInterfaces</tp:member-ref>,
           which refers to the interfaces of <em>connections</em> to this
           protocol.</p>
@@ -68,12 +96,18 @@
     </property>
 
     <property name="Parameters" tp:name-for-bindings="Parameters"
-      access="read" type="a(susv)" tp:type="Param_Spec[]">
+      access="read" type="a(susv)" tp:type="Param_Spec[]"
+      tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
-        <p>The parameters which must or may be provided to the
-          <tp:dbus-ref namespace="org.freedesktop.Telepathy.ConnectionManager"
-            >RequestConnection</tp:dbus-ref> method when connecting to the
-          given protocol. This property is immutable.</p>
+        <p>The parameters which may be specified in the
+          <tp:dbus-ref namespace='ofdT.Account'>Parameters</tp:dbus-ref> of an
+          <tp:dbus-ref namespace='ofdT'>Account</tp:dbus-ref> (or, for
+          specialised applications which do not use the account manager, passed
+          to <tp:dbus-ref
+          namespace='ofdT.ConnectionManager'>RequestConnection</tp:dbus-ref>).
+          Some parameters are mandatory, and some parameters only make sense
+          when registering new accounts with the server; see the
+          <tp:type>Param_Spec</tp:type> documentation for more details.</p>
 
         <p>Connection managers with a <code>.manager</code> file
           (as described as part of the
@@ -89,7 +123,8 @@
 
     <property name="ConnectionInterfaces"
       tp:name-for-bindings="Connection_Interfaces"
-      access="read" type="as" tp:type="DBus_Interface[]">
+      access="read" type="as" tp:type="DBus_Interface[]"
+      tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
         <p>A list of interface names which might be in the
           <tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection"
@@ -99,7 +134,7 @@
           will have all, some or none of these interfaces depends on server
           capabilities.</p>
 
-        <p>This property is immutable, and should not be confused with
+        <p>This property should not be confused with
           <tp:member-ref>Interfaces</tp:member-ref>.</p>
 
         <p>Connection managers with a <code>.manager</code> file
@@ -112,7 +147,8 @@
 
     <property name="RequestableChannelClasses"
       tp:name-for-bindings="Requestable_Channel_Classes"
-      access="read" type="a(a{sv}as)" tp:type="Requestable_Channel_Class[]">
+      access="read" type="a(a{sv}as)" tp:type="Requestable_Channel_Class[]"
+      tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
         <p>A list of channel classes which might be requestable from a
           <tp:dbus-ref namespace="org.freedesktop.Telepathy"
@@ -126,8 +162,6 @@
           similarly, individual contacts are not guaranteed to support
           all of these channel classes.</p>
 
-        <p>This property is immutable.</p>
-
         <p>Connection managers with a <code>.manager</code> file
           MUST cache this property in the protocol's section of the
           <code>.manager</code> file, using the key
@@ -135,6 +169,12 @@
           is a list of opaque strings, each followed by a semicolon; each
           of those strings is the name of a group in the <code>.manager</code>
           file which represents a channel class.</p>
+
+        <p>The names of the groups representing channel classes are not
+          significant, and MUST NOT be interpreted. When writing
+          <tt>.manager</tt> files, authors MAY choose mnemonic group names,
+          generate group names mechanically (e.g. with an incrementing
+          integer), or use some combination of these.</p>
 
         <p>Each group representing a channel class has a key
           <code>allowed</code> which is a list of D-Bus property names
@@ -152,23 +192,29 @@
           <code>.manager</code> files.</p>
 
         <p>For instance, this <code>.manager</code> file could represent
-          a simple Text-only connection manager:</p>
+          a connection manager that supports 1-1 Text messages and
+          StreamedMedia audio calls:</p>
 
 <pre>[Protocol jabber]
 param-account=s required
 param-password=s required
-RequestableChannelClasses=text
+RequestableChannelClasses=rcc0;rcc1;
 
-[text]
+[rcc0]
 org.freedesktop.Telepathy.Channel.ChannelType s=org.freedesktop.Telepathy.Channel.Type.Text
 org.freedesktop.Telepathy.Channel.TargetHandleType u=1
 allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy.Channel.TargetID;
+
+[rcc1]
+org.freedesktop.Telepathy.Channel.ChannelType s=org.freedesktop.Telepathy.Channel.Type.StreamedMedia
+org.freedesktop.Telepathy.Channel.TargetHandleType u=1
+allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy.Channel.TargetID;org.freedesktop.Telepathy.Channel.Type.StreamedMedia.InitialAudio;
 </pre>
       </tp:docstring>
     </property>
 
     <property name="VCardField" tp:name-for-bindings="VCard_Field"
-      access="read" type="s">
+      access="read" type="s" tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
         <p>The name of the most common vCard field used for this protocol's
           contact identifiers, normalized to lower case, or the empty string
@@ -177,6 +223,20 @@ allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy
         <p>For example, this would be <code>x-jabber</code> for
           Jabber/XMPP (including Google Talk), or <code>tel</code> for
           the <abbr title="Public Switched Telephone Network">PSTN</abbr>.</p>
+
+        <p>A more exhaustive list of addressable vCard fields can be found in
+          the Protocol's Addressing interface's
+          <tp:dbus-ref namespace="org.freedesktop.Telepathy.Protocol.Interface.Addressing.DRAFT">AddressableVCardFields</tp:dbus-ref>.</p>
+
+        <p>It is not necessarily valid to interpret contacts' identifiers
+          as values of this vCard field. For instance, telepathy-sofiasip
+          supports contacts whose identifiers are of the form
+          sip:jenny@example.com or tel:8675309, which would not normally
+          both be represented by any single vCard field. Arbitrary
+          handles/identifiers as vCard fields are represented
+          through the Connection's
+          <tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection.Interface">Addressing.DRAFT</tp:dbus-ref>
+          contact attributes.</p>
 
         <tp:rationale>
           <p>This is taken from Mission Control profiles as used on Maemo 5.
@@ -187,20 +247,19 @@ allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy
             protocols that handle x-jabber, then offer the user a list of
             accounts for those protocols and/or the option to create a new
             account for one of those protocols.</p>
-
-          <p>It is not necessarily valid to interpret contacts' identifiers
-            as values of this vCard field. For instance, telepathy-sofiasip
-            supports contacts whose identifiers are of the form
-            sip:jenny@example.com or tel:8675309, which would not normally
-            both be represented by any single vCard field. Representing
-            arbitrary handles/identifiers as vCard fields is a topic for
-            future work.</p>
         </tp:rationale>
+
+        <p>Connection managers with a <code>.manager</code> file
+          MUST cache this property in the protocol's section of the
+          <code>.manager</code> file if it is non-empty, using the key
+          <code>VCardField</code>. The corresponding value
+          is a string, following the syntax of the "localestring" type from
+          the Desktop Entry Specification.</p>
       </tp:docstring>
     </property>
 
     <property name="EnglishName" tp:name-for-bindings="English_Name"
-      access="read" type="s">
+      access="read" type="s" tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
         <p>The name of the protocol in a form suitable for display to users,
           such as "AIM" or "Yahoo!", or the empty string if none is
@@ -223,11 +282,18 @@ allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy
         <p>If this property's value is empty, clients MAY fall back to using
           the Telepathy <tp:type>Protocol</tp:type> name, possibly with its
           capitalization adjusted.</p>
+
+        <p>Connection managers with a <code>.manager</code> file
+          MUST cache this property in the protocol's section of the
+          <code>.manager</code> file if it is non-empty, using the key
+          <code>EnglishName</code>. The corresponding value
+          is a string, following the syntax of the "localestring" type from
+          the Desktop Entry Specification.</p>
       </tp:docstring>
     </property>
 
     <property name="Icon" tp:name-for-bindings="Icon"
-      access="read" type="s">
+      access="read" type="s" tp:immutable="yes">
       <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
         <p>The name of an icon in the system's icon theme, such as "im-msn", or
           the empty string.</p>
@@ -243,6 +309,13 @@ allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy
 
         <p>If this property's value is empty, clients MAY fall back to
           generating a name based on the <tp:type>Protocol</tp:type> name.</p>
+
+        <p>Connection managers with a <code>.manager</code> file
+          MUST cache this property in the protocol's section of the
+          <code>.manager</code> file if it is non-empty, using the key
+          <code>Icon</code>. The corresponding value
+          is a string, following the syntax of the "localestring" type from
+          the Desktop Entry Specification.</p>
       </tp:docstring>
     </property>
 
@@ -364,6 +437,54 @@ allowed=org.freedesktop.Telepathy.Channel.TargetHandle;org.freedesktop.Telepathy
       </tp:possible-errors>
     </method>
 
-  </interface>
+    <property name="AuthenticationTypes"
+      tp:name-for-bindings="Authentication_Types" access="read" type="as"
+      tp:type="DBus_Interface[]" tp:immutable="yes">
+      <tp:added version="0.21.7"/>
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>A list of D-Bus interfaces which provide information as to
+          what kind of authentication channels can possibly appear
+          before the connection reaches the CONNECTED state.</p>
+
+        <p>These can either be channel types, or where the channel
+          type isn't enough information to be useful, interfaces
+          indicating a specific use of a channel type. For example,
+          <tp:dbus-ref namespace="ofdT.Channel.Type">ServerTLSConnection</tp:dbus-ref>
+          channels are obviously about TLS certificates so the channel
+          type would appear in this list. However, a
+          <tp:dbus-ref namespace="ofdT.Channel.Type">ServerAuthentication</tp:dbus-ref>
+          channel type alone does not explain enough about the authentication type
+          in use as it is merely a base for the channel interfaces that appear in
+          said channels. In this case, CMs should use the value of the
+          <tp:dbus-ref namespace="ofdT.Channel.Type">ServerAuthentication.AuthenticationMethod</tp:dbus-ref>
+          property in this list.</p>
+
+        <p>For example, if a protocol's
+          <tp:member-ref>AuthenticationTypes</tp:member-ref> contains
+          two values:</p>
+
+        <blockquote>
+          <pre>
+[ ...<tp:dbus-ref namespace="ofdT">Channel.Type.ServerTLSConnection</tp:dbus-ref>,
+  ...<tp:dbus-ref namespace="ofdT">Channel.Interface.SASLAuthentication</tp:dbus-ref> ]</pre></blockquote>
+
+        <p>This tells a client that before the connection status
+          reached CONNECTED, a <tp:dbus-ref
+          namespace="ofdT.Channel.Type">ServerTLSConnection</tp:dbus-ref>
+          could appear carrying a TLS certificate. It also tells the
+          client that before the connection status reaches CONNECTED, a
+          <tp:dbus-ref
+          namespace="ofdT.Channel.Type">ServerAuthentication</tp:dbus-ref>
+          channel could also appear, where <tp:dbus-ref
+          namespace="ofdT.Channel.Type">ServerAuthentication.AuthenticationMethod</tp:dbus-ref>=<tp:dbus-ref
+          namespace="ofdT.Channel.Interface">SASLAuthentication</tp:dbus-ref>. A
+          hypothetical future Channel.Interface.Captcha interface would
+          also appear in this list if the CM might require the user
+          solve a captcha before connecting.</p>
+
+      </tp:docstring>
+    </property>
+
+ </interface>
 </node>
 <!-- vim:set sw=2 sts=2 et ft=xml: -->

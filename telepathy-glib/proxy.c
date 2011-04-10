@@ -90,14 +90,21 @@ tp_dbus_errors_quark (void)
  * @TP_DBUS_ERROR_CANCELLED: Raised from calls that re-enter the main
  *  loop (*_run_*) if they are cancelled
  * @TP_DBUS_ERROR_INCONSISTENT: Raised if information received from a remote
- *  object is inconsistent or otherwise obviously wrong (added in 0.7.17)
- * @NUM_TP_DBUS_ERRORS: 1 more than the highest valid #TpDBusError at the
- *  time of compilation
+ *  object is inconsistent or otherwise obviously wrong (added in 0.7.17).
+ *  See also %TP_ERROR_CONFUSED.
  *
  * #GError codes for use with the %TP_DBUS_ERRORS domain.
  *
  * Since 0.11.5, there is a corresponding #GEnumClass type,
  * %TP_TYPE_DBUS_ERROR.
+ *
+ * Since: 0.7.1
+ */
+
+/**
+ * NUM_TP_DBUS_ERRORS:
+ *
+ * 1 more than the highest valid #TpDBusError at the time of compilation
  *
  * Since: 0.7.1
  */
@@ -336,9 +343,7 @@ struct _TpProxyPrivate {
     gboolean dispose_has_run;
 };
 
-G_DEFINE_TYPE (TpProxy,
-    tp_proxy,
-    G_TYPE_OBJECT);
+G_DEFINE_TYPE (TpProxy, tp_proxy, G_TYPE_OBJECT)
 
 enum
 {
@@ -908,8 +913,8 @@ tp_proxy_constructor (GType type,
         n_params, params));
   TpProxyClass *klass = TP_PROXY_GET_CLASS (self);
   TpProxyInterfaceAddLink *iter;
-  GType ancestor_type = type;
   GType proxy_parent_type = G_TYPE_FROM_CLASS (tp_proxy_parent_class);
+  GType ancestor_type;
   GArray *core_features;
 
   _tp_register_dbus_glib_marshallers ();
@@ -1569,7 +1574,7 @@ _tp_proxy_is_preparing (gpointer self,
  * |[
  * TpChannel *channel = ...;
  *
- * tp_proxy_prepare_async (channel, NULL, NULL, callback, user_data);
+ * tp_proxy_prepare_async (channel, NULL, callback, user_data);
  * ]|
  *
  * is equivalent to
@@ -1578,7 +1583,7 @@ _tp_proxy_is_preparing (gpointer self,
  * TpChannel *channel = ...;
  * GQuark features[] = { TP_CHANNEL_FEATURE_CORE, 0 };
  *
- * tp_proxy_prepare_async (channel, features, NULL, callback, user_data);
+ * tp_proxy_prepare_async (channel, features, callback, user_data);
  * ]|
  *
  * If a feature represents core functionality (like %TP_CHANNEL_FEATURE_CORE),

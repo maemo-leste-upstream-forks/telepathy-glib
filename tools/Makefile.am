@@ -27,12 +27,14 @@ EXTRA_DIST = \
     lcov.am \
     libtpcodegen.py \
     libglibcodegen.py \
+    make-release-mail.py \
     make-version-script.py \
     manager-file.py \
     shave.mk \
     telepathy.am \
     telepathy-glib.supp \
     telepathy-glib-env.in \
+    test-wrapper.sh \
     with-session-bus.sh \
     xincludator.py
 

@@ -1,3 +1,860 @@
+telepathy-glib 0.14.3 (2011-03-31)
+==================================
+
+The “where the wind blows” release. This release flatly contradicts the
+statement that the previous stable release would be the last to add API,
+by adding API from version 0.22.1 of the specification plus a new
+utility function. This time, we shall merely claim that no major API
+additions will be made on this stable branch, and once a 0.15.x release
+is made no further API additions will be made on 0.14.x at all.
+
+Enhancements:
+
+• Update to spec 0.22.1 (Will):
+  · Generated code for new StreamHandler methods and signals and types;
+  · TP_ERROR_INSUFFICIENT_BALANCE.
+• tp_g_ptr_array_extend() for concatenating two GPtrArrays. (Jonny)
+
+telepathy-glib 0.14.2 (never)
+=============================
+
+There is no telepathy-glib 0.14.2.
+
+telepathy-glib 0.14.1 (2011-03-22)
+==================================
+
+The “work by the windows” release. This release adds API from version
+0.22 of the Telepathy specification which was accidentally omitted from
+the previous release. Further releases on this stable branch should not
+add any further API.
+
+Enhancements:
+
+• Update to spec 0.22.0 (Guillaume)
+  · TP_PROP_CHANNEL_TYPE_SERVER_TLS_CONNECTION_REFERENCE_IDENTITIES
+  · generate code for Connection.I.ContactBlocking
+
+telepathy-glib 0.14.0 (2011-03-21)
+==================================
+
+The “welded in gridlock” release, starting a 0.14.x stable branch. This
+branch corresponds to the 0.22 stable branch of the specification.
+
+Highlights since 0.12.0
+-----------------------
+
+• TpBaseContactList, a base class for the ContactList and ContactGroups
+  connection interfaces, as well as old-style ContactList channels.
+  While this helper class supports the old 'deny' channel for blocked
+  contact, it unfortunately does not implement the new ContactBlocking
+  interface yet.
+
+• CMs implemented using telepathy-glib will now have immortal handles.
+
+• TpContact supports ClientTypes.
+
+• TpClientChannelFactory, TpAutomaticProxyFactory and
+  TpBasicProxyFactory have been added to help applications construct
+  particular TpChannel subclasses for channels of different types, with
+  particular features prepared.
+
+• TpStreamTubeChannel, a high-level client API for stream tubes, has
+  been added.
+
+• TpBaseProtocol supports the Avatars and Presence interfaces.
+
+• tp_get_bus() is deprecated (again). Please use tp_dbus_daemon_dup(),
+  followed by tp_dbus_daemon_register_object() if that's what you're
+  using it for, or tp_proxy_get_dbus_connection() if you really need a
+  DBusGConnection.
+
+• TpClientMessage and TpSignalledMessage, client-side representations
+  for multipart messages used by TpTextChannel, have been added.
+
+• The TpContactSearch object has been added. It represents ongoing
+  searches for contacts.
+
+• Code is now generated to emit and listen for the PropertiesChanged
+  signal on org.freedesktop.DBus.Properties. Note that
+  TpDBusPropertiesMixin does not emit this signal on it own, nor does
+  TpProxy listen for it of its own accord.
+
+• Previously, tp_clear_object (NULL), tp_clear_boxed (type, NULL) and
+  tp_clear_pointer (NULL) were no-ops. However, this behaviour was not
+  very useful—these functions are always called as
+  tp_clear_object (&priv->foo) in practice—and triggered compiler
+  warnings (because these are actually implemented as macros). Thus,
+  this usage is no longer supported. (This should not affect anything
+  except contrived code, but CM authors may wish to check.)
+
+Fixes since 0.13.18
+-------------------
+
+• The error handling code paths when looking up the senders of incoming
+  messages have been fixed. This issue led to TpSignalledMessages not
+  specifying a sender with CMs that omit sender-id, like telepathy-idle.
+  (stormer)
+
+telepathy-glib 0.13.18 (2011-03-15)
+===================================
+
+The “chilled coconut-chocolate security blanket” release.
+
+Changes:
+
+• Previously, tp_clear_object (NULL), tp_clear_boxed (type, NULL) and
+  tp_clear_pointer (NULL) were no-ops. However, this behaviour was not
+  very useful—these functions are always called as
+  tp_clear_object (&priv->foo) in practice—and triggered compiler
+  warnings (because these are actually implemented as macros). Thus,
+  this usage is no longer supported. (This should not affect anything
+  except contrived code, but CM authors may wish to check.)
+
+Fixes:
+
+• TpCMMessage is no longer included in the .gir file. This class is only
+  useful in CMs; we only support client-side API in the .gir file.
+  (Benjamin Otte)
+
+• Correctly include TpBasePasswordChannel documentation. (Danielle)
+
+• Fix GCC 4.6 and Clang analyzer warnings (Dan Winship, Will)
+
+telepathy-glib 0.13.17 (2011-03-09)
+===================================
+
+Enhancements:
+
+• Update to spec 0.21.11 (Sjoerd)
+  · TP_ERROR_STR_SOFTWARE_UPGRADE_REQUIRED
+  · TP_ERROR_STR_EMERGENCY_CALLS_NOT_SUPPORTED
+
+telepathy-glib 0.13.16 (2011-03-07)
+===================================
+
+Enhancements:
+
+• Update to spec 0.21.11 (Guillaume)
+  · TP_PROP_CLIENT_OBSERVER_DELAY_APPROVERS
+
+• Two new functions, tp_connection_get_connection_manager_name() and
+  tp_connection_get_protocol_name(), allow you to grab these properties
+  from a TpConnection without having to drive
+  tp_connection_parse_object_path() yourself. (sjokkis)
+
+• GBinding utilities for connection-status on TpAccount and TpConnection:
+  tp_connection_bind_connection_status_to_property() and
+  tp_account_bind_connection_status_to_property(). (Danielle)
+
+• TpTextChannel now has a "message-types" property and accessor.
+  It also gained tp_text_channel_supports_message_type() a convenient function
+  to check if a specific message type is supported. (Guillaume)
+
+• TpContactSearch: only close channels if there was an error (Emilio)
+
+• TpBaseClient gained tp_base_client_set_observer_delay_approvers() which can
+  be used to indicate that an Observer has to block Approvers.
+
+Fixes:
+
+• Various crashes fixed in TpBaseContactList. (Marco)
+
+telepathy-glib 0.13.15 (2011-02-24)
+===================================
+
+The “Continents all made of clay” release.
+
+Enhancements:
+
+• Update to spec 0.21.10 (Guillaume)
+  · TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_MAY_SAVE_RESPONSE
+
+• tp_utf8_make_valid(): an UTF-8 string validation function. (Senko)
+
+• SimplePasswordManager now has API to let the CM create its own
+  SASL channel. (Jonner)
+
+• TpBasePasswordChannel: a base class to implement SASL channels. (Jonner)
+
+telepathy-glib 0.13.14 (2011-02-23)
+===================================
+
+The “Things that London never saw” release.
+
+Enhancements:
+
+• TpContact now supports modifying the contact's groups on connection
+  managers which implement Connection.Interface.ContactGroups. (Zdra)
+
+• It's now possible to get a list of TpChannelRequest objects from a
+  TpObserveChannelsContext or TpHandleChannelsContext; adding hints to
+  channel requests, and retrieving them again, is supported with
+  telepathy-mission-control ≥ 5.7.2. (cassidy)
+
+• tp_account_channel_request_create_and_observe_channel_async() and
+  friends, analogous to
+  tp_account_channel_request_create_and_handle_channel_async() but for
+  Observers rather than Handlers, have been added. (cassidy)
+
+• Code is now generated to emit and listen for the PropertiesChanged
+  signal on org.freedesktop.DBus.Properties. Note that
+  TpDBusPropertiesMixin does not emit this signal on it own, nor does
+  TpProxy listen for it of its own accord. (danni)
+
+• tp_capabilities_supports_room_list(), a convenient way to check
+  whether a connection supports listing chat rooms, has been added.
+  (cassidy)
+
+Fixes:
+
+• Including telepathy-glib/protocol.h now correctly includes generated
+  client-side functions. (danni)
+
+telepathy-glib 0.13.13 (2011-02-09)
+===================================
+
+The “Duckworth Lewis” release.
+
+Enhancements:
+
+• Many doc fixes, including: TpBaseClientClass is now included;
+  INCOMING_MESSAGES is now explained. (wjt)
+
+• Compiler flags reordered (clang is order-sensitive) to allow
+  static analysis. (wjt)
+
+• Account Channel Requests now give you access to the originating
+  TpChannelRequest. (cassidy)
+
+• The speculative debug cache may now be disabled at compile time.
+  tp_debug_sender_add_message_vprintf and
+  tp_debug_sender_add_message_printf added to allow callers who care
+  about optimisation to reduce debug overhead. (fledermaus)
+
+telepathy-glib 0.13.12 (2011-02-01)
+===================================
+
+The “You look good by siren light” release.
+
+Enhancements:
+
+• TpContact now tracks incoming and outgoing presence subscriptions,
+  albeit only if the connection implements the new
+  Connection.Interface.ContactList API. (Xavier)
+
+• Code is generated for new API added in telepathy-spec version 0.21.9;
+  specifically, the FileTransfer.URI property is supported. (Guillaume)
+
+• TpPresenceMixinStatusAvailableFunc, which has confused many a CM
+  author, now has clearer documentation. (Will)
+
+Fixes:
+
+• We no longer accidentally depend on GLib 2.28. (Will)
+
+• tests/contact-search-result no longer fails on x86. (Will)
+
+telepathy-glib 0.13.11 (2011-01-27)
+===================================
+
+The “and, erm … I own an M-16 fully-automatic ground assault rifle” release.
+
+Enhancements:
+
+• fd.o#32053: The TpContactSearch object has been added. It represents
+  ongoing searches for contacts. (pochu)
+
+Fixes:
+
+• fd.o#32551: tp_base_client_set_observer_recover now works with all
+  possible gboolean arguments! (jonny)
+
+• tp_debug_timestamped_log_handler will now print the message and not
+  just the time, which was broken over a year ago. (jonny)
+
+• TpProtocol will now consider a manager file's AuthenticationTypes
+  value. (jonny)
+
+telepathy-glib 0.13.10 (2010-12-20)
+===================================
+
+The “I own a 9 millimetre, a 357, a 45 handgun, a 38 special” release.
+
+Enhancements:
+
+• New TpMessage API: tp_message_get_message_type, tp_cm_message_new_text (smcv)
+
+• fd.o #32411: warn and do nothing if unsupported flags are passed to
+  tp_g_signal_connect_object (smcv)
+
+• Updated to spec 0.21.8.
+  · The ContactList.ContactsChangedWithID signal was added. It's automatically
+    emitted by TpBaseContactList, so CMs don't need to make any changes to take
+    advantage of it. (smcv)
+
+Fixes:
+
+• tp_account_manager_ensure_account() no longer criticals if you pass it a
+  malformed account path. (wjt)
+
+• TpBaseClient will now return (an error) from ObserveChannels if an invalid
+  connection path is passed to it by the Channel Dispatcher. (wjt)
+
+• fd.o#32184: Connection bus names are no longer erroneously released while
+  connections are still open. This was a regression in 0.13.5. (wjt)
+
+• fd.o #32423: Preparing TpAccount features when the CORE feature is already
+  prepared now works (smcv)
+
+• fd.o #32391: correctly deal with removing name owner watches during
+  dispatch of their callbacks (wjt, smcv)
+
+• Documentation improvements (smcv)
+
+• TpBaseClient no longer breaks if HandleChannels is called more than once for
+  the same channel. This was a regression introduced by the leak fix in the
+  previous release (sjoerd)
+
+telepathy-glib 0.13.9 (2010-12-10)
+==================================
+
+The "please mind the gap between the table and the table" release.
+
+This release includes all the bugfixes from version 0.12.6.
+
+Deprecations:
+
+• tp_message_new (replace with tp_cm_message_new)
+• tp_message_ref_handle (no longer needed)
+• tp_message_set_handle (use tp_cm_message_set_sender for the only supported
+  handle in a message)
+• tp_message_take_message (replace with tp_cm_message_take_message)
+
+Enhancements:
+
+• tp_account_get_path_suffix: new function to get the varying suffix of an
+  account's object path (wjt)
+
+• TpAccountManager: document which TpAccount objects are prepared (wjt)
+
+• tp_connection_dup_contact_if_possible: new function to make
+  TpContact objects synchronously in some situations (smcv)
+
+• convert TpMessage into a GObject, with subclasses for use in CMs
+  (TpCMMessage) and clients (TpClientMessage, TpSignalledMessage) (cassidy)
+
+• add TpConnection:self-contact, a TpContact for the self-handle (smcv)
+
+Fixes:
+
+• In TpSimplePasswordManager, clear the pointer to the channel when it's closed
+  (jonny)
+
+• fd.o #32116: don't leak LegacyProtocol object references when a
+  TpBaseConnectionManager is registered (smcv)
+
+• Fix an unlikely crash in which a TpBaseConnection outlives its
+  TpBaseConnectionManager (smcv)
+
+• Documentation improvements (cassidy)
+
+• fd.o #32191: when tp_connection_get_contacts_by_handle would return
+  contacts that already exist, make sure they have the desired features (smcv)
+
+• Fix memory leaks in TpAccount and TpDynamicHandleRepo introduced in 0.13.8
+  (cassidy)
+
+• fd.o #32222: fix a leak of TpChannel objects in TpBaseClient, document that
+  Handlers are responsible for closing their channels, warn if channels are
+  still handled when a Handler is disposed, and close channels in some
+  regression tests (Zdra)
+
+telepathy-glib 0.13.8 (2010-12-01)
+==================================
+
+The "many of my best conversations are when un-agonized" release.
+
+Deprecations:
+
+• fd.o #24114: tp_get_bus() is deprecated (again). Please use
+  tp_dbus_daemon_dup(), followed by tp_dbus_daemon_register_object() if that's
+  what you're using it for, or tp_proxy_get_dbus_connection() if you really
+  need a DBusGConnection. (smcv)
+
+Changes:
+
+• fd.o #23155: handles now persist until the TpBaseConnection disconnects,
+  and most of the reference-counting machinery has been removed (smcv)
+
+• fd.o #31997: in the ContactList channels produced by TpBaseContactList,
+  AddMembers, RemoveMembers etc. don't return until the implementation
+  reports success or failure (smcv)
+
+Enhancements:
+
+• Update to spec 0.21.6 (smcv)
+  · Connection.HasImmortalHandles property
+
+• fd.o #31900: add TpSimplePasswordManager (jonny)
+
+• fd.o #32004: add tp_account_get_automatic_presence,
+  tp_account_get_normalized_name, tp_account_set_automatic_presence_async
+  (smcv)
+
+• fd.o #31918: add convenience API for Account.I.Addressing (smcv)
+
+Fixes:
+
+• return a zero-terminated array of features from
+  tp_client_channel_factory_dup_channel_features (cassidy)
+
+• fd.o #32004: emit GObject::notify for TpAccount::requested-* (smcv)
+
+telepathy-glib 0.13.7 (2010-11-25)
+==================================
+
+The "moustache pattern released under a Creative Commons licence" release.
+
+This release includes all bugfixes from 0.12.5.
+
+Enhancements:
+
+• Update to spec 0.21.5 (smcv)
+  · Conn.I.PowerSaving
+  · Chan.T.ServerAuthentication, Chan.I.SASLAuthentication, Chan.I.Securable
+  · Account.I.Addressing
+  · Protocol.I.Avatars
+  · enhanced ChannelDispatcher and ChannelRequest API with "request hints"
+  · new errors: CONFUSED, SERVER_CONFUSED
+  · new property: Messages.MessageTypes
+  · TP_CONTACT_INFO_FIELD_FLAG_OVERWRITTEN_BY_NICKNAME
+
+• fd.o #31686: add Protocol.I.Avatars support to TpBaseProtocol (eeejay)
+
+• implement the MessageTypes property in the TpMessagesMixin (smcv)
+
+• use G_N_ELEMENTS more (smcv)
+
+Fixes:
+
+• use the right getter for TpAccountChannelRequest:request (smcv)
+
+telepathy-glib 0.13.6 (2010-11-17)
+==================================
+
+The "please stop trying to find me on Wikipedia" release.
+
+This release includes all the fixes from 0.12.4.
+
+API changes:
+
+• Pointers to a GObject implementing TP_TYPE_CLIENT_CHANNEL_FACTORY are now
+  referred to as having type TpClientChannelFactory*, rather than misusing
+  TpClientChannelFactoryInterface*. The ABI has not changed.
+
+Enhancements:
+
+• Return the reffed handle from tp_handle_ref() (jonny)
+
+Fixes:
+
+• fd.o #31473: force the namespace TelepathyGLib for the g-i-derived Vala
+  bindings (treitter)
+
+• fd.o #31581: don't modify a const array in
+  tp_group_mixin_remove_members_with_reason (smcv)
+
+• fd.o #31631: set a TpBaseClient's TpClientChannelFactory correctly (cassidy)
+
+• fd.o #31631: fix confusion between TpClientChannelFactory and
+  TpClientChannelFactoryIface (smcv)
+
+• Run the stream tube IPv6 tests again, if ::1 is assigned to an
+  interface (smcv)
+
+telepathy-glib 0.13.5 (2010-11-05)
+==================================
+
+The "gunpowder, treason and plot" release.
+
+Enhancements:
+
+• fd.o #30088: add support for Protocol.I.Presence to TpBaseProtocol
+  (fledermaus, smcv)
+
+Fixes:
+
+• fd.o #10613: release connections' object paths before their bus
+  names, and do both sooner (smcv)
+
+• fd.o #31377: fix a race condition in the connection-interests test that
+  sometimes caused it to fail or segfault, and similar races (not seen
+  in practice) in two other tests (smcv)
+
+telepathy-glib 0.13.4 (2010-11-03)
+==================================
+
+The "request_module: runaway loop modprobe binfmt-464c" release.
+
+This release includes all the fixes from 0.12.3.
+
+Enhancements:
+
+• Update to spec 0.21.4 (smcv)
+  - fd.o #31215: fix incorrect namespace for MailNotification
+  - add bindings for NewActiveTransportPair
+
+Fixes:
+
+• fd.o #31321: don't crash if the TpAccountManager is disposed while
+  an account from tp_account_manager_ensure_account is preparing (cassidy)
+
+• fd.o #31198: avoid some C99 features not supported by MSVC 9
+  (Thomas Fluueli, smcv)
+
+• fd.o #31291: add pkg-config and C header information to GIR for the
+  benefit of future Vala versions (Evan Nemerson)
+
+• In the echo2 example CM, advertise Messages' immutable properties (cassidy)
+
+• In TpBaseChannel, don't unref handles we didn't ref (jonny)
+
+telepathy-glib 0.13.3 (2010-10-26)
+==================================
+
+The "reminds me of daf's random dbus type generator" release.
+
+This release includes all the fixes from version 0.12.2.
+
+Deprecations:
+
+• <telepathy-glib/debug-ansi.h> is now deprecated, and the Group and
+  Properties mixins no longer output brightly-coloured logs
+
+Enhancements:
+
+• fd.o #31102: update to spec 0.21.3 (smcv):
+  - add TP_ERROR_PICKED_UP_ELSEWHERE
+  - generate code for Chan.I.DTMF.TonesDeferred and DeferredTones
+  - generate code for Conn.I.MailNotification
+  - generate code for Protocol.I.Presence
+  - generate code for AddClientInterest, RemoveClientInterest
+  - update the Call example CM and its regression test
+
+• fd.o #27948: add generic support for AddClientInterest,
+  RemoveClientInterest on TpBaseConnection and TpConnection (smcv)
+
+• fd.o #30505: add TpDTMFPlayer, a DTMF dialstring interpreter (smcv)
+
+• TpClientChannelFactory: ask callers to prepare a given set of features,
+  and do so in TpBaseClient (cassidy)
+
+Fixes:
+
+• fd.o #30730: order tests' and examples' CFLAGS and LIBS
+  consistently, fixing builds in some situations (an older telepathy-glib
+  built with -rpath already installed, possibly) (smcv)
+
+• fd.o #30949: fix a typo that made DeliveryReportingSupport always come out
+  as 0, and test a nonzero value (smcv)
+
+• Don't leak an array of features in TpBaseClient (cassidy)
+
+• fd.o #31027: if stdout is a tty, tests now succeed silently, and only
+  produce output on failure; also, they will automatically fail after a
+  few seconds if an expected event does not happen (smcv)
+
+• fd.o #30999: tests now succeed on machines where IPv6 is supported but ::1
+  is not assigned to an interface (smcv)
+
+telepathy-glib 0.13.2 (2010-10-15)
+==================================
+
+The "whose thighs are capacitive?" release.
+
+This release includes all the fixes from version 0.12.1.
+
+Enhancements:
+
+• Update to spec 0.21.2 (smcv)
+  - add TP_ERROR_REJECTED, SendNamedTelephonyEvent, SendSoundTelephonyEvent
+  - change the experimental Call interfaces and adjust the example CM to match
+
+• fd.o #29973: add TpClientChannelFactory, TpAutomaticProxyFactory and
+  TpBasicProxyFactory, and use them in TpBaseClient and TpAccountChannelRequest
+  (cassidy)
+
+• fd.o #29218: add TpStreamTubeChannel, a higher-level API for stream tubes
+  (danni, cassidy)
+
+• fd.o #30478: add TP_ACCOUNT_FEATURE_STORAGE (danni)
+
+• Improve the error message for an undefined D-Bus interface (wjt)
+
+Fixes:
+
+• fd.o #30791: fix building with gtk-doc enabled, and an older telepathy-glib
+  installed in a non-default library search path (danni)
+
+• fd.o #30644: don't 'return' a void expression from a void function, which
+  isn't valid C99 and breaks compilation on Sun Studio C (smcv)
+
+• Remove redundant trailing semicolons from G_DEFINE_TYPE etc., which are
+  not valid C99 (smcv)
+
+• Add DeliveryReportingSupport to the properties offered by TpMessageMixin
+  (cassidy)
+
+• Add ContactListState to the properties offered by TpBaseContactList (smcv)
+
+• Avoid using a gboolean (which is signed) as a one-bit bitfield (smcv)
+
+telepathy-glib 0.13.1 (2010-10-04)
+==================================
+
+The "we're out of bear-shaped biscuits" release.
+
+Enhancements:
+
+• Update to spec 0.21.1 (smcv):
+  - add Access_Control, Access_Control_Type, Conn.I.ClientTypes
+
+• Add ClientTypes support to TpContact (jonny)
+
+Fixes:
+
+• In TpCapabilities, do more checks on the self pointer (cassidy)
+
+telepathy-glib 0.13.0 (2010-09-28)
+==================================
+
+The "this whiteboard needs scrollbars" release.
+
+Dependencies:
+
+• Automake ≥ 1.11 is now required (when building from git or changing the
+  build system)
+• If GObject-Introspection is enabled, it must be version 0.9.6 or later
+
+Enhancements:
+
+• Update to spec 0.21.0 (smcv)
+  · generate code for the ContactList and ContactGroups interfaces
+
+• fd.o #28200: add TpBaseContactList, a base class for contact list/contact
+  groups implementations (smcv)
+
+• fd.o #30204: add checks for stream and D-Bus tubes to
+  TpCapabilities (cassidy)
+
+• fd.o #30327: add some new utility functions for TpHandleSet (smcv)
+
+• fd.o #30310: make tp_contacts_mixin_get_contact_attributes public for
+  re-use (eeejay)
+
+• debug-log the error message when a Protocol filter rejects a parameter (wjt)
+
+telepathy-glib 0.12.0 (2010-09-20)
+==================================
+
+The "you rang?" release, starting a 0.12.x stable branch.
+
+Highlights since 0.10.x
+-----------------------
+
+Changes:
+
+• when the local user is removed from a Group Channel, the GError used to
+  invalidate the TpChannel has changed
+
+New features:
+
+• the TpProxy "feature" (prepare_async) mechanism
+• high-level bindings for ChatStates, ContactCapabilities, ContactInfo, Avatars,
+  detailed connection errors, and Protocol objects
+• TpAccountChannelRequest, a high-level channel-requesting mechanism
+• TpBaseClient, a base class for Observers, Approvers and Handlers
+• generated constants for contact attributes and handler capability tokens
+• base classes for Channel and Protocol in connection managers
+• TpWeakRef, a wrapper for a weak reference and optional extra pointer
+• experimental GObject-Introspection bindings, requiring version 0.6.14 or later
+• experimental Vala bindings, requiring GObject-Introspection 0.9.6 and Vala
+  0.10.0 or later
+• generated code for all stable APIs in telepathy-spec 0.20, apart from
+  client code for Channel.Type.ServerTLSConnection (which will follow in 0.13.x)
+
+Note that the GObject-Introspection and Vala bindings are not subject to the
+same API guarantees as the C API, and are likely to have incompatible changes
+during the 0.13.x series.
+
+Changes since 0.11.16
+---------------------
+
+• Disable documentation completeness checks and redirect documentation uploads
+  for stable branch
+• Add the version number, and a link to the latest version, to the documentation
+• Increase dependencies for Vala bindings to versions that the libfolks
+  developers have verified to work: gobject-introspection 0.9.6 and
+  Vala 0.10.0
+
+telepathy-glib 0.11.16 (2010-09-15)
+===================================
+
+The "Fear my moo of fury!" release.
+
+Enhancements:
+
+• Update to stable spec 0.20.1 (smcv)
+  - generate basic API for Chan.I.Conference
+  - generate basic API for Chan.T.ServerTLSConnection and TLSCertificate
+    (server-side only for now, since TLSCertificate will require a new TpProxy
+    subclass)
+
+• When connections are created in a CM, debug-log the sanitized parameter
+  values (wjt)
+
+• When a TpBaseChannel is created, log an error if it doesn't have a parent
+  connection (wjt)
+
+Fixes:
+
+• fd.o #30134: rename TpIntSet to TpIntset, with compatibility typedefs for
+  the old name, to avoid breaking recent gobject-introspection (pwithnall)
+
+• fd.o #30134: add more gobject-introspection annotations to work better
+  with recent versions, and work around another case of (skip) not working
+  in older versions (pwithnall, treitter, smcv)
+
+Compatibility notes:
+
+• If the Vala bindings are enabled, either GObject-Introspection must be
+  older than 0.9.5, or GObject-Introspection and Vala must both be very
+  recent (g-i 0.9.6 and Vala 0.9.9 will hopefully be suitable).
+
+telepathy-glib 0.11.15 (2010-09-13)
+===================================
+
+The “Castle Turing” release.
+
+Enhancements:
+
+• Update to spec 0.19.12 (smcv)
+  - generate code for SMS interface for Text channels, NotYet error,
+    Object_Immutable_Properties type and
+    TP_PROP_CONNECTION_INTERFACE_CELLULAR_OVERRIDE_MESSAGE_SERVICE_CENTRE
+
+• fd.o #28420: add tp_channel_get_requested() etc. (cassidy)
+
+• Add basic introspectability for the Connection mixins (treitter)
+
+Fixes:
+
+• fd.o #30090: fix parsing TpProtocol information from .manager files
+  (fledermaus, smcv)
+
+• fd.o #29943: make tp_debug_sender_log_handler thread-safe (smcv)
+
+• fd.o #30111: make GObject-Introspection work again with g-i >= 0.9.5
+  (danni, smcv)
+
+• fd.o #30134: make configure fail if Vala bindings are enabled but g-i is
+  disabled, which can't work (smcv)
+
+• fd.o #25582, #27806, #30118: fix miscellaneous memory leaks (smcv)
+
+telepathy-glib 0.11.14 (2010-08-25)
+===================================
+
+The “One hundred men can skin 5,000 cats a day.” release.
+
+Enhancements:
+
+• fd.o #29375: there's now a TpBaseChannel class which deals with all the
+  boring boilerplate previously needed to implement channels. Public response
+  to the class has been uniform. "The class is perfect", said one passer-by.
+  (jonner, wjt)
+
+• fd.o #29614: add TpBaseClient:account-manager (smcv)
+
+• Allow TpBaseClient instances to wait for any desired set of TpAccount,
+  TpConnection and TpChannel features (smcv)
+
+• fd.o #29671: add TP_ARRAY_TYPE_UCHAR_ARRAY_LIST, i.e. signature 'aay' in
+  dbus-glib (smcv)
+
+Fixes:
+
+• Ensure that when a TpAccountChannelRequest produces a connection and
+  a channel, they're obtained from the same TpAccount we started from (smcv)
+
+• fd.o #29756, #29795: various documentation improvements (smcv)
+
+telepathy-glib 0.11.13 (2010-08-17)
+===================================
+
+The “Brand New Name” release.
+
+Dependencies:
+
+• When building from git or otherwise running automake, automake 1.11 is
+  strongly recommended. If an older version is used, it will not be possible
+  to generate Vala bindings, or to make tarball distributions.
+
+Changes to experimental API:
+
+• fd.o #29070: remove telepathy-vala.pc. Vala bindings should ask pkg-config
+  for telepathy-glib, and can check that the VAPI file exists by attempting
+  to link a trivial Vala program; see libfolks for example code (cassidy)
+
+Enhancements:
+
+• fd.o #29358: add TP_ERROR as an alias for TP_ERRORS, for introspectability
+  (pwithnall)
+
+• add TP_USER_ACTION_TIME_NOT_USER_ACTION, TP_USER_ACTION_TIME_CURRENT_TIME,
+  tp_user_action_time_from_x11, tp_user_action_time_should_present (smcv)
+
+• improve various documentation (smcv, danni)
+
+• convert TpBaseClient virtual methods into normal GObject virtual methods
+  so they can be introspected (smcv)
+
+Fixes:
+
+• Don't rely on vala-1.0.pc to check for vala version and vapigen (treitter)
+
+• fd.o #25019: let the TpPresenceMixin work on connections that implement
+  SimplePresence but not complex Presence (Butch Howard)
+
+• Fix a harmless misuse of enums that caused warnings on gcc 4.5 (smcv)
+
+• Fix out-of-tree builds with Vala enabled (smcv)
+
+telepathy-glib 0.11.12 (2010-08-10)
+===================================
+
+The “Fire and Forget” release.
+
+Enhancements:
+
+• Added TpAccountChannelRequest, a request to create or ensure a channel (cassidy)
+  ‣ fd.o #29456: tp_account_channel_request_create_async (plus an _ensure_
+    variant): create a channel which will be handled by an existing Handler,
+    probably another application
+  ‣ fd.o #13422: tp_account_channel_request_create_and_handle_async (plus an
+    _ensure_ variant): create a channel and handle it yourself
+
+• fd.o #29461: updated to telepathy-spec 0.19.11 (smcv)
+  ‣ more error codes for SSL/TLS - Insecure, Revoked, LimitExceeded
+  ‣ Conference_Host call state flag
+
+Fixes:
+
+• fd.o #29174: update example connection managers to follow current
+  telepathy-spec best practices, including Protocol objects (smcv)
+
+• fd.o #29268: fix compilation from a tarball with --enable-vala-bindings (smcv)
+
 telepathy-glib 0.11.11 (2010-07-26)
 ===================================
 

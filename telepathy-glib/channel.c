@@ -27,6 +27,7 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/proxy-subclass.h>
 #include <telepathy-glib/util.h>
+#include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CHANNEL
 #include "telepathy-glib/debug-internal.h"
@@ -96,6 +97,9 @@ enum
   PROP_CHANNEL_PROPERTIES,
   PROP_GROUP_SELF_HANDLE,
   PROP_GROUP_FLAGS,
+  PROP_REQUESTED,
+  PROP_INITIATOR_HANDLE,
+  PROP_INITIATOR_IDENTIFIER,
   N_PROPS
 };
 
@@ -113,7 +117,7 @@ static guint signals[N_SIGNALS] = { 0 };
 G_DEFINE_TYPE_WITH_CODE (TpChannel,
     tp_channel,
     TP_TYPE_PROXY,
-    G_IMPLEMENT_INTERFACE (TP_TYPE_CHANNEL_IFACE, NULL));
+    G_IMPLEMENT_INTERFACE (TP_TYPE_CHANNEL_IFACE, NULL))
 
 /**
  * TP_CHANNEL_FEATURE_CORE:
@@ -126,12 +130,13 @@ G_DEFINE_TYPE_WITH_CODE (TpChannel,
  *
  * Specifically, this implies that:
  *
- * - #TpChannel:channel-type is set
- * - #TpChannel:handle-type and #TpChannel:handle are set
+ * - #TpChannelIface:channel-type is set
+ * - #TpChannelIface:handle-type and #TpChannelIface:handle are set
  * - any extra interfaces will have been set up in TpProxy (i.e.
  *   #TpProxy:interfaces contains at least all extra Channel interfaces)
  *
- * (These are a subset of the guarantees offered by the older #TpChannel:ready
+ * (These are a subset of the guarantees offered by the older
+ * #TpChannel:channel-ready
  * and tp_channel_call_when_ready() mechanisms, which are now equivalent to
  * (%TP_CHANNEL_FEATURE_CORE, %TP_CHANNEL_FEATURE_GROUP) if the channel is
  * a group, or just %TP_CHANNEL_FEATURE_CORE otherwise.)
@@ -164,7 +169,7 @@ tp_channel_get_feature_quark_core (void)
  *   have been fetched and change notification will have been set up
  *
  * (These are the same guarantees offered for Group channels by the older
- * #TpChannel:ready and tp_channel_call_when_ready() mechanisms.)
+ * #TpChannel:channel-ready and tp_channel_call_when_ready() mechanisms.)
  *
  * One can ask for a feature to be prepared using the
  * tp_proxy_prepare_async() function, and waiting for it to callback.
@@ -210,7 +215,7 @@ tp_channel_get_feature_quark_chat_states (void)
  * Get the D-Bus interface name representing this channel's type,
  * if it has been discovered.
  *
- * This is the same as the #TpChannel:channel-type property; it isn't
+ * This is the same as the #TpChannelIface:channel-type property; it isn't
  * guaranteed to be non-%NULL until the %TP_CHANNEL_FEATURE_CORE feature has
  * been prepared.
  *
@@ -234,7 +239,7 @@ tp_channel_get_channel_type (TpChannel *self)
  * Get the D-Bus interface name representing this channel's type, as a GQuark,
  * if it has been discovered.
  *
- * This is the same as the #TpChannel:channel-type property, except that it
+ * This is the same as the #TpChannelIface:channel-type property, except that it
  * is a GQuark rather than a string. It isn't guaranteed to be nonzero until
  * the %TP_CHANNEL_FEATURE_CORE property is ready.
  *
@@ -260,14 +265,15 @@ tp_channel_get_channel_type_id (TpChannel *self)
  * channel communicates for its whole lifetime, or 0 if there is no such
  * handle or it has not yet been discovered.
  *
- * This is the same as the #TpChannel:handle property. It isn't guaranteed to
- * have its final value until the %TP_CHANNEL_FEATURE_CORE property is ready.
+ * This is the same as the #TpChannelIface:handle property. It isn't
+ * guaranteed to have its final value until the %TP_CHANNEL_FEATURE_CORE
+ * feature is ready.
  *
  * If %handle_type is not %NULL, the type of handle is written into it.
  * This will be %TP_UNKNOWN_HANDLE_TYPE if the handle has not yet been
  * discovered, or %TP_HANDLE_TYPE_NONE if there is no handle with which this
  * channel will always communicate. This is the same as the
- * #TpChannel:handle-type property.
+ * #TpChannelIface:handle-type property.
  *
  * Returns: the handle
  * Since: 0.7.12
@@ -328,7 +334,7 @@ tp_channel_get_identifier (TpChannel *self)
  * non-group channels, it's equivalent to checking for
  * %TP_CHANNEL_FEATURE_CORE.
  *
- * One important difference is that after #TpChannel::invalidated is
+ * One important difference is that after #TpProxy::invalidated is
  * signalled, #TpChannel:channel-ready keeps its current value - which might
  * be %TRUE, if the channel was successfully prepared before it became
  * invalidated - but tp_proxy_is_prepared() returns %FALSE for all features.
@@ -434,6 +440,15 @@ tp_channel_get_property (GObject *object,
       break;
     case PROP_GROUP_FLAGS:
       g_value_set_uint (value, self->priv->group_flags);
+      break;
+    case PROP_REQUESTED:
+      g_value_set_boolean (value, tp_channel_get_requested (self));
+      break;
+    case PROP_INITIATOR_HANDLE:
+      g_value_set_uint (value, tp_channel_get_initiator_handle (self));
+      break;
+    case PROP_INITIATOR_IDENTIFIER:
+      g_value_set_string (value, tp_channel_get_initiator_identifier (self));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1399,53 +1414,10 @@ tp_channel_class_init (TpChannelClass *klass)
   proxy_class->must_have_unique_name = TRUE;
   proxy_class->list_features = tp_channel_list_features;
 
-  /**
-   * TpChannel:channel-type:
-   *
-   * The D-Bus interface representing the type of this channel.
-   *
-   * Read-only except during construction. If %NULL during construction
-   * (default), we ask the remote D-Bus object what its channel type is;
-   * reading this property will yield %NULL until we get the reply, or if
-   * GetChannelType() fails.
-   *
-   * This is not guaranteed to be set until tp_proxy_prepare_async() has
-   * finished preparing %TP_CHANNEL_FEATURE_CORE.
-   */
   g_object_class_override_property (object_class, PROP_CHANNEL_TYPE,
       "channel-type");
-
-  /**
-   * TpChannel:handle-type:
-   *
-   * The #TpHandleType of this channel's associated handle, or 0 if no
-   * handle, or TP_UNKNOWN_HANDLE_TYPE if unknown.
-   *
-   * Read-only except during construction. If this is TP_UNKNOWN_HANDLE_TYPE
-   * during construction (default), we ask the remote D-Bus object what its
-   * handle type is; reading this property will yield TP_UNKNOWN_HANDLE_TYPE
-   * until we get the reply.
-   *
-   * This is not guaranteed to be set until tp_proxy_prepare_async() has
-   * finished preparing %TP_CHANNEL_FEATURE_CORE.
-   */
   g_object_class_override_property (object_class, PROP_HANDLE_TYPE,
       "handle-type");
-
-  /**
-   * TpChannel:handle:
-   *
-   * This channel's associated handle, or 0 if no handle or unknown.
-   *
-   * Read-only except during construction. If this is 0
-   * during construction, and handle-type is not TP_HANDLE_TYPE_NONE (== 0),
-   * we ask the remote D-Bus object what its handle type is; reading this
-   * property will yield 0 until we get the reply, or if GetHandle()
-   * fails.
-   *
-   * This is not guaranteed to be set until tp_proxy_prepare_async() has
-   * finished preparing %TP_CHANNEL_FEATURE_CORE.
-   */
   g_object_class_override_property (object_class, PROP_HANDLE,
       "handle");
 
@@ -1455,8 +1427,8 @@ tp_channel_class_init (TpChannelClass *klass)
    * This channel's associated identifier, or the empty string if it has
    * handle type %TP_HANDLE_TYPE_NONE.
    *
-   * For channels where #TpChannel:handle is non-zero, this is the result of
-   * inspecting #TpChannel:handle.
+   * For channels where #TpChannelIface:handle is non-zero, this is the result
+   * of inspecting #TpChannelIface:handle.
    *
    * This is not guaranteed to be set until tp_proxy_prepare_async() has
    * finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may be
@@ -1505,7 +1477,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * This is a less general form of tp_proxy_is_prepared(), which should be
    * used in new code.
    *
-   * One important difference is that after #TpChannel::invalidated is
+   * One important difference is that after #TpProxy::invalidated is
    * signalled, #TpChannel:channel-ready keeps its current value - which might
    * be %TRUE, if the channel was successfully prepared before it became
    * invalidated - but tp_proxy_is_prepared() returns %FALSE for all features.
@@ -1571,6 +1543,84 @@ tp_channel_class_init (TpChannelClass *klass)
       G_PARAM_READABLE
       | G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
   g_object_class_install_property (object_class, PROP_GROUP_FLAGS,
+      param_spec);
+
+  /**
+   * TpChannel:requested:
+   *
+   * %TRUE if this channel was created in response to a local request, such
+   * as a call to tp_account_channel_request_create_channel_async(). %FALSE
+   * if this channel was initiated by a remote contact
+   * (the #TpChannel:initiator-handle), or if it appeared as a side-effect
+   * of some other action.
+   *
+   * For instance, this is %FALSE on incoming calls and file transfers,
+   * remotely-initiated 1-1 text conversations, and invitations to chatrooms,
+   * and %TRUE on outgoing calls and file transfers, locally-initiated 1-1
+   * text conversations, and chatrooms joined by local user action.
+   *
+   * This is not guaranteed to be meaningful until tp_proxy_prepare_async() has
+   * finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may return
+   * %FALSE even if the channel was actually requested.
+   *
+   * Since: 0.11.15
+   */
+  param_spec = g_param_spec_boolean ("requested", "Requested",
+      "TRUE if the channel has been requested",
+      FALSE,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_REQUESTED,
+      param_spec);
+
+  /**
+   * TpChannel:initiator-handle:
+   *
+   * The %TP_HANDLE_TYPE_CONTACT #TpHandle of the initiator of this
+   * channel, or 0 if there is no particular initiator.
+   *
+   * If the channel was initiated by a remote contact, this handle represents
+   * that contact, and #TpChannel:requested will be %FALSE. For instance,
+   * for an incoming call this property indicates the caller, and for a
+   * chatroom invitation this property indicates who sent the invitation.
+   *
+   * If the channel was requested by the local user, #TpChannel:requested
+   * will be %TRUE, and this property may be the #TpChannel:group-self-handle
+   * or #TpConnection:self-handle.
+   *
+   * If the channel appeared for some other reason (for instance as a
+   * side-effect of connecting to the server), this property may be 0.
+   *
+   * This is not guaranteed to be set until tp_proxy_prepare_async() has
+   * finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may be 0.
+   *
+   * Since: 0.11.15
+   */
+  param_spec = g_param_spec_uint ("initiator-handle", "TpHandle",
+      "The handle of the initiator of the channel",
+      0, G_MAXUINT32, 0,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_INITIATOR_HANDLE,
+      param_spec);
+
+  /**
+   * TpChannel:initiator-identifier:
+   *
+   * If #TpChannel:initiator-handle is 0, this will always be "".
+   * Otherwise, this will be the #TpContact:identifier of the contact
+   * with that handle.
+   *
+   * This is not guaranteed to be set until tp_proxy_prepare_async() has
+   * finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may be
+   * the empty string.
+   *
+   * Since: 0.11.15
+   */
+  param_spec = g_param_spec_string ("initiator-identifier",
+      "Initiator identifier",
+      "The identifier of the initiator of the channel",
+      "",
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_INITIATOR_IDENTIFIER,
       param_spec);
 
   /**
@@ -2017,4 +2067,340 @@ tp_channel_init_known_interfaces (void)
   static GOnce once = G_ONCE_INIT;
 
   g_once (&once, tp_channel_once, NULL);
+}
+
+/**
+ * tp_channel_get_requested: (skip)
+ * @self: a #TpChannel
+ *
+ * Return the #TpChannel:requested property
+ *
+ * Returns: the value of #TpChannel:requested
+ *
+ * Since: 0.11.15
+ */
+gboolean
+tp_channel_get_requested (TpChannel *self)
+{
+  return tp_asv_get_boolean (self->priv->channel_properties,
+      TP_PROP_CHANNEL_REQUESTED, NULL);
+}
+
+/**
+ * tp_channel_get_initiator_handle: (skip)
+ * @self: a #TpChannel
+ *
+ * Return the #TpChannel:initiator-handle property
+ *
+ * Returns: the value of #TpChannel:initiator-handle
+ *
+ * Since: 0.11.15
+ */
+TpHandle
+tp_channel_get_initiator_handle (TpChannel *self)
+{
+  return tp_asv_get_uint32 (self->priv->channel_properties,
+      TP_PROP_CHANNEL_INITIATOR_HANDLE, NULL);
+}
+
+/**
+ * tp_channel_get_initiator_identifier: (skip)
+ * @self: a #TpChannel
+ *
+ * Return the #TpChannel:initiator-identifier property
+ *
+ * Returns: the value of #TpChannel:initiator-identifier
+ *
+ * Since: 0.11.15
+ */
+const gchar *
+tp_channel_get_initiator_identifier (TpChannel *self)
+{
+  const gchar *id;
+
+  id = tp_asv_get_string (self->priv->channel_properties,
+      TP_PROP_CHANNEL_INITIATOR_ID);
+
+  return id != NULL ? id : "";
+}
+
+/* tp_cli callbacks can potentially be called in a re-entrant way,
+ * so we can't necessarily complete @result without using an idle. */
+static void
+channel_close_cb (TpChannel *channel,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  GSimpleAsyncResult *result = user_data;
+
+  if (error != NULL)
+    {
+      DEBUG ("Close() failed: %s", error->message);
+
+      if (tp_proxy_get_invalidated (channel) == NULL)
+        {
+          g_simple_async_result_set_from_error (result, error);
+        }
+      else
+        {
+          DEBUG ("... but channel was already invalidated, so never mind");
+        }
+    }
+
+  g_simple_async_result_complete_in_idle (result);
+  g_object_unref (result);
+}
+
+/* This is only called from the main loop, as a result of group_prepared_cb
+ * having the same property, so it can complete LeaveCtx.result without
+ * an idle. */
+static void
+channel_remove_self_cb (TpChannel *channel,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  GSimpleAsyncResult *result = user_data;
+
+  if (error != NULL)
+    {
+      DEBUG ("RemoveMembersWithDetails() with self handle failed: %s",
+          error->message);
+
+      if (tp_proxy_get_invalidated (channel) != NULL)
+        {
+          DEBUG ("Proxy has been invalidated; succeed");
+          goto succeed;
+        }
+
+      DEBUG ("Close channel then");
+
+      tp_cli_channel_call_close (channel, -1, channel_close_cb, result,
+          NULL, NULL);
+      return;
+    }
+
+ DEBUG ("RemoveMembersWithDetails() succeeded");
+
+succeed:
+  g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+typedef struct
+{
+  GSimpleAsyncResult *result;
+  gchar *message;
+  TpChannelGroupChangeReason reason;
+} LeaveCtx;
+
+/* Takes the reference on @result */
+static LeaveCtx *
+leave_ctx_new (GSimpleAsyncResult *result,
+    const gchar *message,
+    TpChannelGroupChangeReason reason)
+{
+  LeaveCtx *ctx = g_slice_new (LeaveCtx);
+
+  ctx->result = result;
+  ctx->message = message != NULL ? g_strdup (message) : g_strdup ("");
+  ctx->reason = reason;
+
+  return ctx;
+}
+
+static void
+leave_ctx_free (LeaveCtx *ctx)
+{
+  g_object_unref (ctx->result);
+  g_free (ctx->message);
+
+  g_slice_free (LeaveCtx, ctx);
+}
+
+/* This is only called from the main loop, so it can safely complete
+ * LeaveCtx.result without an idle. */
+static void
+group_prepared_cb (GObject *source,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  LeaveCtx *ctx = user_data;
+  TpChannel *self = (TpChannel *) source;
+  GError *error = NULL;
+  TpHandle self_handle;
+  GArray *handles;
+
+  if (!tp_proxy_prepare_finish (source, res, &error))
+    {
+      DEBUG ("Failed to prepare Group feature; fallback to Close(): %s",
+          error->message);
+
+      g_error_free (error);
+      goto call_close;
+    }
+
+  self_handle = tp_channel_group_get_self_handle (self);
+  if (self_handle == 0)
+    {
+      DEBUG ("We are not in the channel, fallback to Close()");
+      goto call_close;
+    }
+
+  handles = g_array_sized_new (FALSE, FALSE, sizeof (TpHandle), 1);
+  g_array_append_val (handles, self_handle);
+
+  tp_cli_channel_interface_group_call_remove_members_with_reason (
+      self, -1, handles, ctx->message, ctx->reason,
+      channel_remove_self_cb, g_object_ref (ctx->result), NULL, NULL);
+
+  g_array_unref (handles);
+  leave_ctx_free (ctx);
+  return;
+
+call_close:
+  tp_cli_channel_call_close (self, -1, channel_close_cb,
+      g_object_ref (ctx->result), NULL, NULL);
+
+  leave_ctx_free (ctx);
+}
+
+static void
+leave_channel_async (TpChannel *self,
+    TpChannelGroupChangeReason reason,
+    const gchar *message,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+  GQuark features[] = { TP_CHANNEL_FEATURE_GROUP, 0 };
+  LeaveCtx *ctx;
+
+  g_return_if_fail (TP_IS_CHANNEL (self));
+
+  result = g_simple_async_result_new (G_OBJECT (self), callback,
+      user_data, tp_channel_leave_async);
+
+  if (tp_proxy_is_prepared (self, TP_CHANNEL_FEATURE_CORE) &&
+      !tp_proxy_has_interface_by_id (self,
+        TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP))
+    {
+      DEBUG ("Channel doesn't implement Group; fallback to Close()");
+
+      tp_cli_channel_call_close (self, -1, channel_close_cb, result,
+          NULL, NULL);
+      return;
+    }
+
+  /* We need to prepare TP_CHANNEL_FEATURE_GROUP to get
+   * tp_channel_group_get_self_handle() working */
+  ctx = leave_ctx_new (result, message, reason);
+
+  tp_proxy_prepare_async (self, features, group_prepared_cb, ctx);
+}
+
+/**
+ * tp_channel_leave_async:
+ * @self: a #TpChannel
+ * @reason: the leave reason
+ * @message: the leave message
+ * @callback: a callback to call when we left the channel
+ * @user_data: data to pass to @callback
+ *
+ * Leave channel @self with @reason as reason and @message as leave message.
+ * If @self doesn't implement #TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP or if
+ * for any reason we can't properly leave the channel, we close it.
+ *
+ * When we left the channel, @callback will be called.
+ * You can then call tp_channel_leave_finish() to get the result of
+ * the operation.
+ *
+ * Since: 0.13.10
+ */
+void
+tp_channel_leave_async (TpChannel *self,
+    TpChannelGroupChangeReason reason,
+    const gchar *message,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  leave_channel_async (self, reason, message, callback, user_data);
+}
+
+/**
+ * tp_channel_leave_finish:
+ * @self: a #TpChannel
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes to leave a channel.
+ *
+ * Returns: %TRUE if the channel has been left; %FALSE otherwise
+ *
+ * Since: 0.13.10
+ */
+gboolean
+tp_channel_leave_finish (TpChannel *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (self, tp_channel_leave_async)
+}
+
+/**
+ * tp_channel_close_async:
+ * @self: a #TpChannel
+ * @callback: a callback to call when we closed the channel, or %NULL
+ *  to ignore any reply
+ * @user_data: data to pass to @callback
+ *
+ * Close channel @self. In most cases, it's generally cleaner to use
+ * tp_channel_leave_async() instead to properly leave and close the channel.
+ *
+ * When the channel has been closed, @callback will be called.
+ * You can then call tp_channel_close_finish() to get the result of
+ * the operation.
+ *
+ * Since: 0.13.10
+ */
+void
+tp_channel_close_async (TpChannel *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+
+  g_return_if_fail (TP_IS_CHANNEL (self));
+
+  if (callback == NULL)
+    {
+      tp_cli_channel_call_close (self, -1, NULL, NULL, NULL, NULL);
+      return;
+    }
+
+  result = g_simple_async_result_new (G_OBJECT (self), callback,
+      user_data, tp_channel_close_async);
+  tp_cli_channel_call_close (self, -1, channel_close_cb, result,
+      NULL, NULL);
+}
+
+/**
+ * tp_channel_close_finish:
+ * @self: a #TpChannel
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes to close a channel.
+ *
+ * Returns: %TRUE if the channel has been closed; %FALSE otherwise
+ *
+ * Since: 0.13.10
+ */
+gboolean
+tp_channel_close_finish (TpChannel *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (self, tp_channel_close_async)
 }

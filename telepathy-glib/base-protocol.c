@@ -36,7 +36,7 @@
  *         (@gtype is INT), 16- and 32-bit unsigned integers (gtype is UINT),
  *         strings (gtype is STRING) and booleans (gtype is BOOLEAN).
  * @gtype: GLib type, derived from @dtype as above
- * @flags: Some combination of TP_CONN_MGR_PARAM_FLAG_foo
+ * @flags: Some combination of #TpConnMgrParamFlags
  * @def: Default value, as a (const gchar *) for string parameters, or
          using #GINT_TO_POINTER or #GUINT_TO_POINTER for integer parameters
  * @offset: Offset of the parameter in the opaque data structure, if
@@ -352,6 +352,9 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
  * Signature of a virtual method to get the D-Bus interfaces implemented by
  * @self, in addition to the Protocol interface.
  *
+ * If you implement #TpBaseProtocolClass.get_statuses, you should include
+ * %TP_IFACE_PROTOCOL_INTERFACE_PRESENCE in the returned array.
+ *
  * Returns: (transfer full): a %NULL-terminated array of D-Bus interface names
  *
  * Since: 0.11.11
@@ -383,6 +386,32 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
  */
 
 /**
+ * TpBaseProtocolGetAvatarDetailsFunc:
+ * @self: a protocol
+ * @supported_mime_types: (out) (transfer full): used to return a
+ *  %NULL-terminated array of supported avatar mime types
+ * @min_height: (out): used to return the minimum height in pixels of an
+ *  avatar on this protocol, which may be 0
+ * @min_width: (out): used to return the minimum width in pixels of an avatar
+ *  on this protocol, which may be 0
+ * @rec_height: (out): used to return the rec height in pixels
+ *  of an avatar on this protocol, or 0 if there is no preferred height
+ * @rec_width: (out): used to return the rec width in pixels
+ *  of an avatar on this protocol, or 0 if there is no preferred width
+ * @max_height: (out): used to return the maximum height in pixels of an
+ *  avatar on this protocol, or 0 if there is no limit
+ * @max_width: (out): used to return the maximum width in pixels of an avatar
+ *  on this protocol, or 0 if there is no limit
+ * @max_bytes: (out): used to return the maximum size in bytes of an avatar on
+ *  this protocol, or 0 if there is no limit
+ *
+ * Signature of a virtual method to get the supported avatar details for the
+ * protocol implemented by @self.
+ *
+ * Since: 0.13.7
+ */
+
+/**
  * TpBaseProtocolClass:
  * @parent_class: the parent class
  * @dbus_properties_class: a D-Bus properties mixin
@@ -409,6 +438,13 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
  * @get_connection_details: a callback used to implement the Protocol D-Bus
  *  properties that represent details of the connections provided by this
  *  protocol
+ * @get_statuses: a callback used to implement the Protocol.Interface.Presence
+ * interface's Statuses property. Since 0.13.5
+ * @get_avatar_details: a callback used to implement the
+ *  Protocol.Interface.Avatars interface's properties. Since 0.13.7
+ * @dup_authentication_types: a callback used to implement the
+ *  AuthenticationTypes D-Bus property; it must return a newly allocated #GStrv
+ *  containing D-Bus interface names. Since 0.13.9
  *
  * The class of a #TpBaseProtocol.
  *
@@ -416,22 +452,41 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
  */
 
 static void protocol_iface_init (TpSvcProtocolClass *cls);
+static void presence_iface_init (TpSvcProtocolInterfacePresenceClass *cls);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (TpBaseProtocol, tp_base_protocol,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
       tp_dbus_properties_mixin_iface_init);
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_PROTOCOL, protocol_iface_init));
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_PROTOCOL, protocol_iface_init);
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_PROTOCOL_INTERFACE_PRESENCE,
+      presence_iface_init);
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_PROTOCOL_INTERFACE_AVATARS,
+        NULL))
+
+typedef struct
+{
+  gchar **supported_mime_types;
+  guint min_height;
+  guint min_width;
+  guint rec_height;
+  guint rec_width;
+  guint max_height;
+  guint max_width;
+  guint max_bytes;
+} AvatarSpecs;
 
 struct _TpBaseProtocolPrivate
 {
   gchar *name;
   GStrv interfaces;
   GStrv connection_interfaces;
+  GStrv authentication_types;
   GPtrArray *requestable_channel_classes;
   gchar *icon;
   gchar *english_name;
   gchar *vcard_field;
+  AvatarSpecs avatar_specs;
 };
 
 enum
@@ -534,6 +589,32 @@ tp_base_protocol_constructed (GObject *object)
       self->priv->english_name = g_strdup ("");
       self->priv->vcard_field = g_strdup ("");
     }
+
+  if (cls->get_avatar_details != NULL)
+    {
+      (cls->get_avatar_details) (self,
+          &self->priv->avatar_specs.supported_mime_types,
+          &self->priv->avatar_specs.min_height,
+          &self->priv->avatar_specs.min_width,
+          &self->priv->avatar_specs.rec_height,
+          &self->priv->avatar_specs.rec_width,
+          &self->priv->avatar_specs.max_height,
+          &self->priv->avatar_specs.max_width,
+          &self->priv->avatar_specs.max_bytes);
+    }
+
+  if (self->priv->avatar_specs.supported_mime_types == NULL)
+    self->priv->avatar_specs.supported_mime_types = g_new0 (gchar *, 1);
+
+  if (cls->dup_authentication_types != NULL)
+    {
+      self->priv->authentication_types = cls->dup_authentication_types (self);
+    }
+  else
+    {
+      const gchar * const tmp[] = { NULL };
+      self->priv->authentication_types = g_strdupv ((GStrv) tmp);
+    }
 }
 
 /**
@@ -601,6 +682,7 @@ tp_base_protocol_get_immutable_properties (TpBaseProtocol *self)
       TP_IFACE_PROTOCOL, "VCardField",
       TP_IFACE_PROTOCOL, "EnglishName",
       TP_IFACE_PROTOCOL, "Icon",
+      TP_IFACE_PROTOCOL, "AuthenticationTypes",
       NULL);
 
   /* FIXME: when we support avatar requirements, etc., we could use
@@ -665,9 +747,12 @@ tp_base_protocol_finalize (GObject *object)
   g_free (self->priv->name);
   g_strfreev (self->priv->interfaces);
   g_strfreev (self->priv->connection_interfaces);
+  g_strfreev (self->priv->authentication_types);
   g_free (self->priv->icon);
   g_free (self->priv->english_name);
   g_free (self->priv->vcard_field);
+
+  g_strfreev (self->priv->avatar_specs.supported_mime_types);
 
   if (self->priv->requestable_channel_classes != NULL)
     g_boxed_free (TP_ARRAY_TYPE_REQUESTABLE_CHANNEL_CLASS_LIST,
@@ -685,8 +770,138 @@ typedef enum {
     PP_VCARD_FIELD,
     PP_ENGLISH_NAME,
     PP_ICON,
+    PP_AUTHENTICATION_TYPES,
     N_PP
 } ProtocolProp;
+
+typedef enum {
+    PPP_STATUSES,
+    N_PPP
+} ProtocolPresenceProp;
+
+typedef enum {
+    PAP_SUPPORTED_AVATAR_MIME_TYPES,
+    PAP_MIN_AVATAR_HEIGHT,
+    PAP_MIN_AVATAR_WIDTH,
+    PAP_REC_AVATAR_HEIGHT,
+    PAP_REC_AVATAR_WIDTH,
+    PAP_MAX_AVATAR_HEIGHT,
+    PAP_MAX_AVATAR_WIDTH,
+    PAP_MAX_AVATAR_BYTES,
+    N_PPA
+} ProtocolAvatarProp;
+
+static void
+protocol_prop_presence_getter (GObject *object,
+    GQuark iface G_GNUC_UNUSED,
+    GQuark name G_GNUC_UNUSED,
+    GValue *value,
+    gpointer getter_data)
+{
+  TpBaseProtocol *self = (TpBaseProtocol *) object;
+
+  switch (GPOINTER_TO_INT (getter_data))
+    {
+      case PPP_STATUSES:
+        {
+          const TpPresenceStatusSpec *status =
+            tp_base_protocol_get_statuses (self);
+          GHashTable *ret = g_hash_table_new_full (
+              g_str_hash, g_str_equal,
+              g_free, (GDestroyNotify) g_value_array_free);
+
+          for (; status->name != NULL; status++)
+            {
+              GValueArray *val = NULL;
+              gchar *key = NULL;
+              gboolean message = FALSE;
+              gboolean settable = status->self;
+              TpConnectionPresenceType type = status->presence_type;
+
+              key = g_strdup (status->name);
+
+              /* look for a string argument named 'message' */
+              if (settable && status->optional_arguments != NULL)
+                {
+                  const TpPresenceStatusOptionalArgumentSpec *arg =
+                    status->optional_arguments;
+
+                  for (; !message && arg->name != NULL; arg++)
+                    {
+                      if (tp_strdiff (arg->dtype, "s") ||
+                          tp_strdiff (arg->name, "message"))
+                        continue;
+
+                      message = TRUE;
+                    }
+                }
+
+              val = tp_value_array_build (3,
+                  G_TYPE_UINT, type,
+                  G_TYPE_BOOLEAN, settable,
+                  G_TYPE_BOOLEAN, message,
+                  G_TYPE_INVALID);
+
+              g_hash_table_insert (ret, key, val);
+            }
+
+          g_value_take_boxed (value, ret);
+        }
+        break;
+
+      default:
+        g_assert_not_reached ();
+    }
+}
+
+static void
+protocol_prop_avatar_getter (GObject *object,
+    GQuark iface G_GNUC_UNUSED,
+    GQuark name G_GNUC_UNUSED,
+    GValue *value,
+    gpointer getter_data)
+{
+  TpBaseProtocol *self = (TpBaseProtocol *) object;
+
+  switch (GPOINTER_TO_INT (getter_data))
+    {
+      case PAP_SUPPORTED_AVATAR_MIME_TYPES:
+        g_value_set_boxed (value,
+            self->priv->avatar_specs.supported_mime_types);
+        break;
+
+      case PAP_MIN_AVATAR_HEIGHT:
+        g_value_set_uint (value, self->priv->avatar_specs.min_height);
+        break;
+
+      case PAP_MIN_AVATAR_WIDTH:
+        g_value_set_uint (value, self->priv->avatar_specs.min_width);
+        break;
+
+      case PAP_REC_AVATAR_HEIGHT:
+        g_value_set_uint (value, self->priv->avatar_specs.rec_height);
+        break;
+
+      case PAP_REC_AVATAR_WIDTH:
+        g_value_set_uint (value, self->priv->avatar_specs.rec_width);
+        break;
+
+      case PAP_MAX_AVATAR_HEIGHT:
+        g_value_set_uint (value, self->priv->avatar_specs.max_height);
+        break;
+
+      case PAP_MAX_AVATAR_WIDTH:
+        g_value_set_uint (value, self->priv->avatar_specs.max_width);
+        break;
+
+      case PAP_MAX_AVATAR_BYTES:
+        g_value_set_uint (value, self->priv->avatar_specs.max_bytes);
+        break;
+
+      default:
+        g_assert_not_reached ();
+    }
+}
 
 static void
 protocol_properties_getter (GObject *object,
@@ -739,6 +954,10 @@ protocol_properties_getter (GObject *object,
       g_value_set_string (value, self->priv->icon);
       break;
 
+    case PP_AUTHENTICATION_TYPES:
+      g_value_set_boxed (value, self->priv->authentication_types);
+      break;
+
     default:
       g_assert_not_reached ();
     }
@@ -757,12 +976,40 @@ tp_base_protocol_class_init (TpBaseProtocolClass *klass)
       { "VCardField", GINT_TO_POINTER (PP_VCARD_FIELD), NULL },
       { "EnglishName", GINT_TO_POINTER (PP_ENGLISH_NAME), NULL },
       { "Icon", GINT_TO_POINTER (PP_ICON), NULL },
+      { "AuthenticationTypes", GINT_TO_POINTER (PP_AUTHENTICATION_TYPES),
+        NULL },
       { NULL }
   };
+
+  static TpDBusPropertiesMixinPropImpl presence_props[] = {
+      { "Statuses", GINT_TO_POINTER (PPP_STATUSES), NULL },
+      { NULL }
+  };
+
+  static TpDBusPropertiesMixinPropImpl avatar_props[] = {
+      { "SupportedAvatarMIMETypes",
+        GINT_TO_POINTER (PAP_SUPPORTED_AVATAR_MIME_TYPES), NULL },
+      { "MinimumAvatarHeight", GINT_TO_POINTER (PAP_MIN_AVATAR_HEIGHT), NULL },
+      { "MinimumAvatarWidth", GINT_TO_POINTER (PAP_MIN_AVATAR_WIDTH), NULL },
+      { "RecommendedAvatarHeight",
+        GINT_TO_POINTER (PAP_REC_AVATAR_HEIGHT), NULL },
+      { "RecommendedAvatarWidth",
+        GINT_TO_POINTER (PAP_REC_AVATAR_WIDTH), NULL },
+      { "MaximumAvatarHeight", GINT_TO_POINTER (PAP_MAX_AVATAR_HEIGHT), NULL },
+      { "MaximumAvatarWidth", GINT_TO_POINTER (PAP_MAX_AVATAR_WIDTH), NULL },
+      { "MaximumAvatarBytes", GINT_TO_POINTER (PAP_MAX_AVATAR_BYTES), NULL },
+      { NULL }
+  };
+
   static TpDBusPropertiesMixinIfaceImpl prop_interfaces[] = {
       { TP_IFACE_PROTOCOL, protocol_properties_getter, NULL, channel_props },
+      { TP_IFACE_PROTOCOL_INTERFACE_PRESENCE, protocol_prop_presence_getter,
+        NULL, presence_props },
+      { TP_IFACE_PROTOCOL_INTERFACE_AVATARS, protocol_prop_avatar_getter,
+        NULL, avatar_props },
       { NULL }
   };
+
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   g_type_class_add_private (klass, sizeof (TpBaseProtocolPrivate));
@@ -820,6 +1067,37 @@ tp_base_protocol_init (TpBaseProtocol *self)
 }
 
 /**
+ * tp_base_protocol_get_statuses:
+ * @self: a Protocol object
+ *
+ * Get the statuses supported by this object. Subclasses implement this via
+ * the #TpBaseProtocolClass.get_statuses virtual method.
+ *
+ * If the object does not implement the Protocol.Interface.Presences
+ * interface, it need not implement this virtual method.
+ *
+ * Returns: an array of #TpPresenceStatusSpec structs describing the
+ *  standard statuses supported by this protocol, with a final element
+ *  whose name element is guaranteed to be %NULL. The array must remain
+ *  valid at least as long as @self does.
+ *
+ * Since: 0.13.5
+ */
+const TpPresenceStatusSpec *
+tp_base_protocol_get_statuses (TpBaseProtocol *self)
+{
+  static const TpPresenceStatusSpec none[] = { { NULL } };
+  TpBaseProtocolClass *cls = TP_BASE_PROTOCOL_GET_CLASS (self);
+
+  g_return_val_if_fail (cls != NULL, NULL);
+
+  if (cls->get_statuses != NULL)
+    return cls->get_statuses (self);
+
+  return none;
+}
+
+/**
  * tp_base_protocol_get_parameters:
  * @self: a Protocol object
  *
@@ -850,6 +1128,7 @@ _tp_cm_param_spec_check_all_allowed (const TpCMParamSpec *parameters,
 {
   GHashTable *tmp = g_hash_table_new (g_str_hash, g_str_equal);
   const TpCMParamSpec *iter;
+  gboolean ret = TRUE;
 
   tp_g_hash_table_update (tmp, asv, NULL, NULL);
 
@@ -879,10 +1158,12 @@ _tp_cm_param_spec_check_all_allowed (const TpCMParamSpec *parameters,
       g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
           "%s", error_txt);
       g_free (error_txt);
-      return FALSE;
+      ret = FALSE;
     }
 
-  return TRUE;
+  g_hash_table_unref (tmp);
+
+  return ret;
 }
 
 static GValue *
@@ -1103,10 +1384,14 @@ tp_base_protocol_sanitize_parameters (TpBaseProtocol *self,
 
           if (parameters[i].filter != NULL)
             {
-              if (!(parameters[i].filter (parameters + i, coerced, error)))
+              GError *error2 = NULL;
+
+              if (!(parameters[i].filter (parameters + i, coerced, &error2)))
                 {
-                  DEBUG ("parameter %s rejected by filter function", name);
+                  DEBUG ("parameter %s rejected by filter: %s", name,
+                      error2->message);
                   tp_g_value_slice_free (coerced);
+                  g_propagate_error (error, error2);
                   goto except;
                 }
             }
@@ -1118,7 +1403,18 @@ tp_base_protocol_sanitize_parameters (TpBaseProtocol *self,
                     G_VALUE_TYPE_NAME (coerced));
             }
 
-          DEBUG ("using specified value for %s", name);
+          if (DEBUGGING)
+            {
+              gchar *to_free = NULL;
+              const gchar *contents = "<secret>";
+
+              if (!(parameters[i].flags & TP_CONN_MGR_PARAM_FLAG_SECRET))
+                contents = to_free = g_strdup_value_contents (coerced);
+
+              DEBUG ("using specified value for %s: %s", name, contents);
+              g_free (to_free);
+            }
+
           g_hash_table_insert (combined, g_strdup (name), coerced);
         }
       else if ((parameters[i].flags & mandatory_flag) != 0)
@@ -1279,4 +1575,9 @@ protocol_iface_init (TpSvcProtocolClass *cls)
   IMPLEMENT (normalize_contact);
   IMPLEMENT (identify_account);
 #undef IMPLEMENT
+}
+
+static void
+presence_iface_init (TpSvcProtocolInterfacePresenceClass *cls)
+{
 }

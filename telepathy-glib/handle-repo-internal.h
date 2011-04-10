@@ -57,7 +57,7 @@ struct _TpHandleRepoIfaceClass {
     gboolean (*handles_are_valid) (TpHandleRepoIface *self,
         const GArray *handles, gboolean allow_zero, GError **error);
 
-    void (*ref_handle) (TpHandleRepoIface *self, TpHandle handle);
+    TpHandle (*ref_handle) (TpHandleRepoIface *self, TpHandle handle);
     void (*unref_handle) (TpHandleRepoIface *self, TpHandle handle);
     gboolean (*client_hold_handle) (TpHandleRepoIface *self,
         const gchar *client, TpHandle handle, GError **error);
@@ -75,6 +75,12 @@ struct _TpHandleRepoIfaceClass {
     gpointer (*get_qdata) (TpHandleRepoIface *repo, TpHandle handle,
         GQuark key_id);
 };
+
+gpointer _tp_dynamic_handle_repo_get_normalization_data (
+    TpHandleRepoIface *irepo);
+void _tp_dynamic_handle_repo_set_normalization_data (TpHandleRepoIface *irepo,
+    gpointer data,
+    GDestroyNotify destroy);
 
 G_END_DECLS
 

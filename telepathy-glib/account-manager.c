@@ -110,7 +110,7 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-G_DEFINE_TYPE (TpAccountManager, tp_account_manager, TP_TYPE_PROXY);
+G_DEFINE_TYPE (TpAccountManager, tp_account_manager, TP_TYPE_PROXY)
 
 /**
  * TP_ACCOUNT_MANAGER_FEATURE_CORE:
@@ -120,6 +120,15 @@ G_DEFINE_TYPE (TpAccountManager, tp_account_manager, TP_TYPE_PROXY);
  *
  * When this feature is prepared, the list of accounts have been retrieved and
  * are available for use, and change-notification has been set up.
+ * Additionally, the #TpAccount objects for accounts which existed at the time
+ * this feature was prepared will have #TP_ACCOUNT_FEATURE_CORE prepared, but
+ * #TpAccount objects subsequently announced by
+ * #TpAccountManager::account-validity-changed are <emphasis>not</emphasis>
+ * guaranteed to have this feature prepared. In practice, this means that
+ * the accounts returned by calling tp_account_manager_get_valid_accounts()
+ * immediately after successfully calling tp_proxy_prepare_finish() on the
+ * #TpAccountManager will have #TP_ACCOUNT_FEATURE_CORE prepared, but later
+ * calls to that function do not have the same guarantee.
  *
  * One can ask for a feature to be prepared using the
  * tp_proxy_prepare_async() function, and waiting for it to callback.
@@ -700,9 +709,9 @@ static gpointer starter_account_manager_proxy = NULL;
  * reference exists. Note that the returned #TpAccountManager is not guaranteed
  * to be ready on return.
  *
- * Returns: an account manager proxy on the starter or session bus, or %NULL
- *          if it wasn't possible to get a dbus daemon proxy for the
- *          appropriate bus
+ * Returns: (transfer full): an account manager proxy on the starter or session
+ *          bus, or %NULL if it wasn't possible to get a dbus daemon proxy for
+ *          the appropriate bus
  *
  * Since: 0.9.0
  */
@@ -822,8 +831,7 @@ _tp_account_manager_account_ready_cb (GObject *source_object,
       g_signal_emit (manager, signals[ACCOUNT_REMOVED], 0, account);
       g_object_unref (account);
 
-      _tp_account_manager_check_core_ready (manager);
-      return;
+      goto out;
     }
 
   /* see if there's any pending callbacks for this account */
@@ -851,7 +859,10 @@ _tp_account_manager_account_ready_cb (GObject *source_object,
       G_CALLBACK (_tp_account_manager_account_invalidated_cb),
       G_OBJECT (manager), 0);
 
+out:
   _tp_account_manager_check_core_ready (manager);
+
+  g_object_unref (manager);
 }
 
 /**
@@ -869,7 +880,8 @@ _tp_account_manager_account_ready_cb (GObject *source_object,
  * The caller must keep a ref to the returned object using g_object_ref() if
  * it is to be kept.
  *
- * Returns: (transfer none): a new #TpAccount at @path
+ * Returns: (transfer none): a new #TpAccount at @path, or %NULL if @path is
+ *  not a valid account path.
  *
  * Since: 0.9.0
  */
@@ -880,6 +892,7 @@ tp_account_manager_ensure_account (TpAccountManager *manager,
   TpAccountManagerPrivate *priv;
   TpAccount *account;
   GQuark fs[] = { TP_ACCOUNT_FEATURE_CORE, 0 };
+  GError *error = NULL;
 
   g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
   g_return_val_if_fail (path != NULL, NULL);
@@ -890,13 +903,17 @@ tp_account_manager_ensure_account (TpAccountManager *manager,
   if (account != NULL)
     return account;
 
-  account = tp_account_new (tp_proxy_get_dbus_daemon (manager), path, NULL);
-  g_return_val_if_fail (account != NULL, NULL);
+  account = tp_account_new (tp_proxy_get_dbus_daemon (manager), path, &error);
+  if (account == NULL)
+    {
+      DEBUG ("tp_account_new() failed: %s", error->message);
+      g_clear_error (&error);
+      return NULL;
+    }
+
   g_hash_table_insert (priv->accounts, g_strdup (path), account);
-
   tp_account_prepare_async (account, fs, _tp_account_manager_account_ready_cb,
-      manager);
-
+      g_object_ref (manager));
   return account;
 }
 

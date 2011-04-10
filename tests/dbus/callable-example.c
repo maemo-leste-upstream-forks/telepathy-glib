@@ -48,10 +48,10 @@ test_assert_uu_hash_contains (GHashTable *hash,
 
 typedef struct
 {
-  TpIntSet *added;
-  TpIntSet *removed;
-  TpIntSet *local_pending;
-  TpIntSet *remote_pending;
+  TpIntset *added;
+  TpIntset *removed;
+  TpIntset *local_pending;
+  TpIntset *remote_pending;
   GHashTable *details;
 } GroupEvent;
 
@@ -1548,6 +1548,7 @@ int
 main (int argc,
       char **argv)
 {
+  tp_tests_abort_after (10);
   g_test_init (&argc, &argv, NULL);
   g_test_bug_base ("http://bugs.freedesktop.org/show_bug.cgi?id=");
 

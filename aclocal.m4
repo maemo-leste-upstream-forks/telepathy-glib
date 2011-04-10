@@ -13,8 +13,8 @@
 
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.65],,
-[m4_warning([this file was generated for autoconf 2.65.
+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.67],,
+[m4_warning([this file was generated for autoconf 2.67.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically `autoreconf'.])])
@@ -156,7 +156,7 @@ $$1_PKG_ERRORS
 Consider adjusting the PKG_CONFIG_PATH environment variable if you
 installed software in a non-standard prefix.
 
-_PKG_TEXT])dnl
+_PKG_TEXT])[]dnl
         ])
 elif test $pkg_failed = untried; then
      	AC_MSG_RESULT([no])
@@ -167,7 +167,7 @@ path to pkg-config.
 
 _PKG_TEXT
 
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.])dnl
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.])[]dnl
         ])
 else
 	$1[]_CFLAGS=$pkg_cv_[]$1[]_CFLAGS
@@ -1368,6 +1368,36 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+# Autoconf support for the Vala compiler
+
+# Copyright (C) 2008, 2009 Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# serial 4
+
+# Check whether the Vala compiler exists in `PATH'. If it is found, the
+# variable VALAC is set. Optionally a minimum release number of the
+# compiler can be requested.
+#
+# AM_PROG_VALAC([MINIMUM-VERSION])
+# --------------------------------
+AC_DEFUN([AM_PROG_VALAC],
+[AC_PATH_PROG([VALAC], [valac], [])
+ AS_IF([test -z "$VALAC"],
+   [AC_MSG_WARN([No Vala compiler found.  You will not be able to compile .vala source files.])],
+   [AS_IF([test -n "$1"],
+      [AC_MSG_CHECKING([$VALAC is at least version $1])
+       am__vala_version=`$VALAC --version | sed 's/Vala  *//'`
+       AS_VERSION_COMPARE([$1], ["$am__vala_version"],
+         [AC_MSG_RESULT([yes])],
+         [AC_MSG_RESULT([yes])],
+         [AC_MSG_RESULT([no])
+          AC_MSG_ERROR([Vala $1 not found.])])])])
+])
+
 m4_include([m4/compiler.m4])
 m4_include([m4/gtk-doc.m4])
 m4_include([m4/introspection.m4])
@@ -1379,3 +1409,4 @@ m4_include([m4/ltversion.m4])
 m4_include([m4/lt~obsolete.m4])
 m4_include([m4/tp-compiler-flag.m4])
 m4_include([m4/tp-compiler-warnings.m4])
+m4_include([m4/tp-linker-flag.m4])

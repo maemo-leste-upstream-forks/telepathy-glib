@@ -63,7 +63,7 @@
 
 /**
  * SECTION:svc-channel-group
- * @title: Service-side Channel Group interface
+ * @title: Service-side Channel Group and Conference interfaces
  * @short_description: Groups of contacts
  * @see_also: #TpGroupMixin
  *
@@ -89,17 +89,22 @@
  * contacts who've requested permission to join, are remote pending. If the
  * local user has been invited by another contact, they will appear in the
  * local-pending set until they accept or decline the invitation.
+ *
+ * Since 0.11.16, telepathy-glib also includes basic support for the
+ * Conference interface, which represents a Group channel that can be
+ * initiated by merging or upgrading individual 1-1 channels.
  */
 
 /**
  * SECTION:svc-channel-text
  * @title: Text channels
  * @short_description: service-side interfaces for the Text channel type, and
- *  the Chat State and Password interfaces
+ *  the Chat State, Password and SMS interfaces
  * @see_also: #TpTextMixin
  *
  * A major use for instant messaging is obviously to send messages.
- * Channels of type Text represent IM conversations or chat rooms.
+ * Channels of type Text represent conversations or chat rooms using short
+ * real-time messages, including SMS.
  *
  * This section documents the auto-generated GInterfaces used to implement
  * the Text channel type, and some interfaces used in conjunction with it.
@@ -415,8 +420,8 @@
 
 /**
  * SECTION:channel-group
- * @title: Group interface on Channels
- * @short_description: client-side wrappers for the Group interface
+ * @title: Group and Conference interfaces on Channels
+ * @short_description: client-side wrappers for Group and Conference
  * @see_also: #TpChannel
  *
  * Many Telepathy Channel objects can be seen as representing groups or
@@ -441,6 +446,10 @@
  * contacts who've requested permission to join, are remote pending. If the
  * local user has been invited by another contact, they will appear in the
  * local-pending set until they accept or decline the invitation.
+ *
+ * Some Group channels also have the Conference interface, representing a
+ * group which can be initiated by upgrading or merging one or more 1-1
+ * channels.
  */
 
 /**
@@ -587,6 +596,20 @@
  *
  * This section documents the auto-generated C wrappers for the
  * Contacts interface, used with #TpConnection objects.
+ */
+
+/**
+ * SECTION:connection-contact-list
+ * @title: Connection ContactList, ContactGroups interfaces
+ * @short_description: client-side wrappers for the ContactList and
+ *  ContactGroups interfaces
+ * @see_also: #TpConnection
+ *
+ * This interface allows a client to obtain a server-stored contact list
+ * and contacts' groups.
+ *
+ * This section documents the auto-generated C wrappers for the
+ * ContactList and ContactGroups interfaces, used with #TpConnection objects.
  */
 
 /**
@@ -803,4 +826,97 @@
  * channel type.
  *
  * Since: 0.11.11
+ */
+
+/**
+ * SECTION:svc-tls
+ * @title: Service-side TLS interfaces
+ * @short_description: GInterfaces to implement Chan.T.ServerTLSConnection
+ *
+ * Channel.Type.ServerTLSConnection can be handled by clients to check
+ * servers' TLS certificates interactively. The actual certificates are
+ * represented by a separate TLSCertificate object.
+ *
+ * Since: 0.11.16
+ */
+
+/**
+ * SECTION:connection-client-types
+ * @title: Connection ClientTypes interface
+ * @short_description: client-side wrappers for the ClientTypes interface
+ *
+ * On some protocols it's possible to determine the type of client another
+ * user is using, ranging from a simple "phone or not?" indicator to a
+ * classification into several types of user interface. Telepathy represents
+ * these using the client types defined by XMPP.
+ *
+ * This section documents the auto-generated C wrappers for the
+ * ClientTypes interface, used with #TpConnection objects.
+ *
+ * Since: 0.13.1
+ */
+
+/**
+ * SECTION:connection-mail
+ * @title: Connection MailNotification interface
+ * @short_description: client-side wrappers for the MailNotification interface
+ *
+ * Some service providers offer both real-time communications and e-mail, and
+ * integrate them by providing "new mail" notifications over the real-time
+ * communication protocol.
+ *
+ * This section documents the auto-generated C wrappers for the
+ * MailNotification interface, used with #TpConnection objects.
+ *
+ * Since: 0.13.1
+ */
+
+/**
+ * SECTION:connection-powersaving
+ * @title: Connection PowerSaving interface
+ * @short_description: client-side wrappers for the PowerSaving interface
+ *
+ * Some connection manager implementations can be instructed to try to
+ * save power on mobile devices by suppressing non-essential traffic, such
+ * as presence notifications. This section documents auto-generated C
+ * wrappers for the PowerSaving D-Bus interface.
+ *
+ * Since: 0.13.7
+ */
+
+/**
+ * SECTION:channel-auth
+ * @title: Channel Authentication interfaces
+ * @short_description: client-side wrappers for authentication channels
+ *
+ * The ServerAuthentication channel type represents a request for client/UI
+ * processes to carry out authentication with a server.
+ *
+ * Since: 0.13.7
+ */
+
+/**
+ * SECTION:svc-channel-auth
+ * @title: Service-side Channel Authentication interfaces
+ * @short_description: GInterfaces to implement authentication channels
+ *
+ * The ServerAuthentication channel type represents a request for client/UI
+ * processes to carry out authentication with a server.
+ *
+ * The SASLAuthentication interface allows authentication via SASL, and also
+ * allows providing a simple password to the connection manager for it to
+ * use with SASL or non-SASL mechanisms.
+ *
+ * Since: 0.13.7
+ */
+
+/**
+ * SECTION:svc-channel-securable
+ * @title: Service-side Securable interface
+ * @short_description: GInterface to indicate channels' security level
+ *
+ * The Securable channel interface represents a channel that might be
+ * end-to-end encrypted and/or protected from man-in-the-middle attacks.
+ *
+ * Since: 0.13.7
  */

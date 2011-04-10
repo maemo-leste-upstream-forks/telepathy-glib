@@ -91,7 +91,7 @@ typedef struct {
 G_DEFINE_TYPE_WITH_CODE (TpDebugSender, tp_debug_sender, G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
         tp_dbus_properties_mixin_iface_init);
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DEBUG, debug_iface_init));
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DEBUG, debug_iface_init))
 
 /* properties */
 enum
@@ -100,6 +100,7 @@ enum
   NUM_PROPERTIES
 };
 
+/* must be thread-safe */
 static TpDebugLevel
 log_level_flags_to_debug_level (GLogLevelFlags level)
 {
@@ -120,6 +121,7 @@ log_level_flags_to_debug_level (GLogLevelFlags level)
     return TP_DEBUG_LEVEL_DEBUG;
 }
 
+/* must be thread-safe */
 static DebugMessage *
 debug_message_new (GTimeVal *timestamp,
     const gchar *domain,
@@ -350,11 +352,33 @@ tp_debug_sender_dup (void)
   return g_object_new (TP_TYPE_DEBUG_SENDER, NULL);
 }
 
+static void
+_tp_debug_sender_take (TpDebugSender *self,
+    DebugMessage *new_msg)
+{
+#ifdef ENABLE_DEBUG_CACHE
+  if (g_queue_get_length (self->priv->messages) >= DEBUG_MESSAGE_LIMIT)
+    {
+      DebugMessage *old_head =
+        (DebugMessage *) g_queue_pop_head (self->priv->messages);
+
+      debug_message_free (old_head);
+    }
+
+  g_queue_push_tail (self->priv->messages, new_msg);
+#endif
+
+  if (self->priv->enabled)
+    {
+      tp_svc_debug_emit_new_debug_message (self, new_msg->timestamp,
+          new_msg->domain, new_msg->level, new_msg->string);
+    }
+}
 
 /**
  * tp_debug_sender_add_message:
  * @self: A #TpDebugSender instance
- * @timestamp: Time of the message
+ * @timestamp: Time of the message or %NULL for right now
  * @domain: Message domain
  * @level: The message level
  * @string: The message string itself
@@ -372,24 +396,104 @@ tp_debug_sender_add_message (TpDebugSender *self,
     GLogLevelFlags level,
     const gchar *string)
 {
-  DebugMessage *new_msg;
+  GTimeVal now = { 0 };
 
-  if (g_queue_get_length (self->priv->messages) >= DEBUG_MESSAGE_LIMIT)
+  if (timestamp == NULL)
     {
-      DebugMessage *old_head =
-        (DebugMessage *) g_queue_pop_head (self->priv->messages);
-
-      debug_message_free (old_head);
+      g_get_current_time (&now);
+      timestamp = &now;
     }
 
-  new_msg = debug_message_new (timestamp, domain, level, string);
-  g_queue_push_tail (self->priv->messages, new_msg);
+  _tp_debug_sender_take (self,
+      debug_message_new (timestamp, domain, level, string));
+}
 
-  if (self->priv->enabled)
-    {
-      tp_svc_debug_emit_new_debug_message (self, new_msg->timestamp,
-          domain, new_msg->level, string);
-    }
+/**
+ * tp_debug_sender_add_message_vprintf:
+ * @self: A #TpDebugSender instance
+ * @timestamp: Time of the message, or %NULL for right now
+ * @formatted: Place to store the formatted message, or %NULL if not needed
+ * @domain: Message domain
+ * @level: The message level
+ * @format: The printf() format string
+ * @args: the #va_list of parameters to insert into @format
+ *
+ * Formats and adds a new message to the debug sender message queue. If the
+ * #TpDebugSender:enabled property is set to %TRUE, then a NewDebugMessage
+ * signal will be fired too.
+ *
+ * Since: 0.13.13
+ */
+void
+tp_debug_sender_add_message_vprintf (TpDebugSender *self,
+    GTimeVal *timestamp,
+    gchar **formatted,
+    const gchar *domain,
+    GLogLevelFlags level,
+    const gchar *format,
+    va_list args)
+{
+  gchar *message = NULL;
+
+  /* disabled cache? we might have no need to format the message at all */
+#ifndef ENABLE_DEBUG_CACHE
+  if (!self->priv->enabled && formatted == NULL)
+    return;
+#endif
+
+  message = g_strdup_vprintf (format, args);
+
+  tp_debug_sender_add_message (self, timestamp, domain, level, message);
+
+  /* if the caller didn't want a copy, we're done with the message: */
+  if (formatted != NULL)
+    *formatted = message;
+  else
+    g_free (message);
+}
+
+/**
+ * tp_debug_sender_add_message_printf:
+ * @self: A #TpDebugSender instance
+ * @timestamp: Time of the message, or %NULL for right now
+ * @formatted: Place to store the formatted message, or %NULL if not required
+ * @domain: Message domain
+ * @level: The message level
+ * @format: The printf() format string
+ * @Varargs: The parameters to insert into @format
+ *
+ * Formats and adds a new message to the debug sender message queue. If the
+ * #TpDebugSender:enabled property is set to %TRUE, then a NewDebugMessage
+ * signal will be fired too.
+ *
+ * Since: 0.13.13
+ */
+void
+tp_debug_sender_add_message_printf (TpDebugSender *self,
+    GTimeVal *timestamp,
+    gchar **formatted,
+    const gchar *domain,
+    GLogLevelFlags level,
+    const gchar *format,
+    ...)
+{
+  va_list args;
+
+  va_start (args, format);
+  tp_debug_sender_add_message_vprintf (self, timestamp, formatted, domain, level,
+      format, args);
+  va_end (args);
+}
+
+static gboolean
+tp_debug_sender_idle (gpointer data)
+{
+  if (debug_sender == NULL)
+    debug_message_free (data);
+  else
+    _tp_debug_sender_take (debug_sender, data);
+
+  return FALSE;
 }
 
 /**
@@ -439,6 +543,8 @@ tp_debug_sender_add_message (TpDebugSender *self,
  * It can easily be re-implemented in services, and does not need to be
  * used.
  *
+ * Since version 0.11.15, this function can be called from any thread.
+ *
  * Since: 0.7.36
  */
 void
@@ -449,15 +555,13 @@ tp_debug_sender_log_handler (const gchar *log_domain,
 {
   g_log_default_handler (log_domain, log_level, message, NULL);
 
-  if (debug_sender == NULL)
-    return;
-
   if (exclude == NULL || tp_strdiff (log_domain, exclude))
     {
       GTimeVal now;
       g_get_current_time (&now);
 
-      tp_debug_sender_add_message (debug_sender, &now, log_domain, log_level,
-          message);
+      g_idle_add_full (G_PRIORITY_HIGH, tp_debug_sender_idle,
+          debug_message_new (&now, log_domain, log_level, message),
+          NULL);
     }
 }

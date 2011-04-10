@@ -27,8 +27,9 @@
  * implementations. Subclasses should usually pass the filters they
  * want and override the D-Bus methods they implement.
  *
- * See #TpSimpleObserver for a class implementing a simple observer using
- * #TpBaseClient.
+ * For many applications, the provided #TpSimpleObserver, #TpSimpleApprover
+ * and #TpSimpleHandler subclasses can be used instead of deriving from this
+ * class.
  */
 
 /**
@@ -41,8 +42,23 @@
 
 /**
  * TpBaseClientClass:
+ * @parent_class: the parent class
+ * @observe_channels: the function called to observe newly-created channels
+ *  matching this client's observer filter (since 0.11.13)
+ * @add_dispatch_operation: the function called to request user approval of
+ *  unrequested (incoming) channels matching this client's approver filter
+ *  (since 0.11.13)
+ * @handle_channels: the function called to handle channels matching this
+ *  client's handler filter (since 0.11.13)
  *
  * The class of a #TpBaseClient.
+ *
+ * The virtual methods @observe_channels, @add_dispatch_operation and
+ * @handle_channels can be also implemented by calling
+ * tp_base_client_implement_observe_channels(),
+ * tp_base_client_implement_add_dispatch_operation() and
+ * tp_base_client_implement_handle_channels(). This is compatible with
+ * telepathy-glib versions older than 0.11.13.
  *
  * Since: 0.11.5
  */
@@ -50,11 +66,16 @@
 /**
  * TpBaseClientClassObserveChannelsImpl:
  * @client: a #TpBaseClient instance
- * @account: a #TpAccount having %TP_ACCOUNT_FEATURE_CORE prepared if possible
- * @connection: a #TpConnection having %TP_CONNECTION_FEATURE_CORE prepared
- * if possible
+ * @account: a #TpAccount with %TP_ACCOUNT_FEATURE_CORE, and any other
+ *  features added via tp_base_client_add_account_features(), prepared if
+ *  possible
+ * @connection: a #TpConnection with %TP_CONNECTION_FEATURE_CORE,
+ *  and any other features added via tp_base_client_add_connection_features(),
+ *  prepared if possible
  * @channels: (element-type TelepathyGLib.Channel): a #GList of #TpChannel,
- *  all having %TP_CHANNEL_FEATURE_CORE prepared if possible
+ *  each with %TP_CHANNEL_FEATURE_CORE, and any other features added via
+ *  tp_base_client_add_channel_features(),
+ *  prepared if possible
  * @dispatch_operation: (allow-none): a #TpChannelDispatchOperation or %NULL;
  *  the dispatch_operation is not guaranteed to be prepared
  * @requests: (element-type TelepathyGLib.ChannelRequest): a #GList of
@@ -75,11 +96,16 @@
 /**
  * TpBaseClientClassAddDispatchOperationImpl:
  * @client: a #TpBaseClient instance
- * @account: a #TpAccount having %TP_ACCOUNT_FEATURE_CORE prepared if possible
- * @connection: a #TpConnection having %TP_CONNECTION_FEATURE_CORE prepared
- * if possible
+ * @account: a #TpAccount with %TP_ACCOUNT_FEATURE_CORE, and any other
+ *  features added via tp_base_client_add_account_features(), prepared if
+ *  possible
+ * @connection: a #TpConnection with %TP_CONNECTION_FEATURE_CORE,
+ *  and any other features added via tp_base_client_add_connection_features(),
+ *  prepared if possible
  * @channels: (element-type TelepathyGLib.Channel): a #GList of #TpChannel,
- *  all having %TP_CHANNEL_FEATURE_CORE prepared if possible
+ *  each with %TP_CHANNEL_FEATURE_CORE, and any other features added via
+ *  tp_base_client_add_channel_features(),
+ *  prepared if possible
  * @dispatch_operation: a #TpChannelDispatchOperation having
  * %TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE prepared if possible
  * @context: a #TpObserveChannelsContext representing the context of this
@@ -102,16 +128,23 @@
 /**
  * TpBaseClientClassHandleChannelsImpl:
  * @client: a #TpBaseClient instance
- * @account: a #TpAccount having %TP_ACCOUNT_FEATURE_CORE prepared if possible
- * @connection: a #TpConnection having %TP_CONNECTION_FEATURE_CORE prepared
- * if possible
+ * @account: a #TpAccount with %TP_ACCOUNT_FEATURE_CORE, and any other
+ *  features added via tp_base_client_add_account_features(), prepared if
+ *  possible
+ * @connection: a #TpConnection with %TP_CONNECTION_FEATURE_CORE,
+ *  and any other features added via tp_base_client_add_connection_features(),
+ *  prepared if possible
  * @channels: (element-type TelepathyGLib.Channel): a #GList of #TpChannel,
- *  all having %TP_CHANNEL_FEATURE_CORE prepared if possible
+ *  each with %TP_CHANNEL_FEATURE_CORE, and any other features added via
+ *  tp_base_client_add_channel_features(),
+ *  prepared if possible
  * @requests_satisfied: (element-type TelepathyGLib.ChannelRequest): a #GList of
  *  #TpChannelRequest having their object-path defined but are not guaranteed
  *  to be prepared.
- * @user_action_time: the time at which user action occurred, or 0 if this
- * channel is to be handled for some reason not involving user action.
+ * @user_action_time: the time at which user action occurred, or one of the
+ *  special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or
+ *  %TP_USER_ACTION_TIME_CURRENT_TIME
+ *  (see #TpAccountChannelRequest:user-action-time for details)
  * @context: a #TpHandleChannelsContext representing the context of this
  *  D-Bus call
  *
@@ -125,12 +158,16 @@
  */
 
 #include "telepathy-glib/base-client.h"
+#include "telepathy-glib/base-client-internal.h"
+
+#include <stdarg.h>
+#include <string.h>                     /* for G_VA_COPY */
 
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib-lowlevel.h>
 
-#include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/add-dispatch-operation-context-internal.h>
+#include <telepathy-glib/automatic-proxy-factory.h>
 #include <telepathy-glib/channel-dispatch-operation-internal.h>
 #include <telepathy-glib/channel-request.h>
 #include <telepathy-glib/channel.h>
@@ -145,13 +182,7 @@
 #define DEBUG_FLAG TP_DEBUG_CLIENT
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/_gen/signals-marshal.h"
-
-struct _TpBaseClientClassPrivate {
-    /*<private>*/
-    TpBaseClientClassObserveChannelsImpl observe_channels_impl;
-    TpBaseClientClassAddDispatchOperationImpl add_dispatch_operation_impl;
-    TpBaseClientClassHandleChannelsImpl handle_channels_impl;
-};
+#include "telepathy-glib/util-internal.h"
 
 static void observer_iface_init (gpointer, gpointer);
 static void approver_iface_init (gpointer, gpointer);
@@ -166,14 +197,14 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE(TpBaseClient, tp_base_client, G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE(TP_TYPE_SVC_CLIENT_APPROVER, approver_iface_init);
     G_IMPLEMENT_INTERFACE(TP_TYPE_SVC_CLIENT_HANDLER, handler_iface_init);
     G_IMPLEMENT_INTERFACE(TP_TYPE_SVC_CLIENT_INTERFACE_REQUESTS,
-      requests_iface_init);
-    g_type_add_class_private (g_define_type_id, sizeof (
-        TpBaseClientClassPrivate)))
+      requests_iface_init))
 
 enum {
     PROP_DBUS_DAEMON = 1,
+    PROP_ACCOUNT_MANAGER,
     PROP_NAME,
     PROP_UNIQUIFY_NAME,
+    PROP_CHANNEL_FACTORY,
     N_PROPS
 };
 
@@ -194,6 +225,7 @@ typedef enum {
     CLIENT_HANDLER_WANTS_REQUESTS = 1 << 3,
     CLIENT_HANDLER_BYPASSES_APPROVAL = 1 << 4,
     CLIENT_OBSERVER_RECOVER = 1 << 5,
+    CLIENT_OBSERVER_DELAYS_APPROVERS = 1 << 6,
 } ClientFlags;
 
 struct _TpBaseClientPrivate
@@ -224,7 +256,54 @@ struct _TpBaseClientPrivate
   gchar *object_path;
 
   TpAccountManager *account_mgr;
+  TpAccount *only_for_account;
+  TpClientChannelFactory *channel_factory;
+
+  /* array of GQuark or NULL */
+  GArray *account_features;
+  GArray *connection_features;
+  GArray *channel_features;
 };
+
+/*
+ * _tp_base_client_set_only_for_account:
+ *
+ * Set the account to be used for this TpBaseClient. Channels from any other
+ * account will be rejected.
+ *
+ * This is for internal use by TpAccountChannelRequest, which sets up a
+ * temporary Handler solely to be the preferred handler for that request.
+ * See https://bugs.freedesktop.org/show_bug.cgi?id=29614
+ */
+void
+_tp_base_client_set_only_for_account (TpBaseClient *self,
+    TpAccount *account)
+{
+  g_return_if_fail (self->priv->only_for_account == NULL);
+  self->priv->only_for_account = g_object_ref (account);
+}
+
+static TpAccount *
+tp_base_client_get_account (TpBaseClient *self,
+    const gchar *path,
+    GError **error)
+{
+  if (self->priv->only_for_account != NULL)
+    {
+      if (G_UNLIKELY (tp_strdiff (tp_proxy_get_object_path (
+                self->priv->only_for_account), path)))
+        {
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+              "This client only deals with channels from account %s",
+              tp_proxy_get_object_path (self->priv->only_for_account));
+          return NULL;
+        }
+
+      return self->priv->only_for_account;
+    }
+
+  return tp_account_manager_ensure_account (self->priv->account_mgr, path);
+}
 
 static GHashTable *
 _tp_base_client_copy_filter (GHashTable *filter)
@@ -245,13 +324,12 @@ _tp_base_client_copy_filter (GHashTable *filter)
  * a %TP_HASH_TYPE_CHANNEL_CLASS
  *
  * Register a new channel class as Observer.ObserverChannelFilter.
- * The @observe_channels virtual method set up using
- * tp_base_client_implement_observe_channels() will be called whenever
- * a new channel's properties match the ones in @filter.
+ * The #TpBaseClientClass.observe_channels virtual method will be called
+ * whenever a new channel's properties match the ones in @filter.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_observe_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.observe_channels.
  *
  * Since: 0.11.5
  */
@@ -293,7 +371,7 @@ tp_base_client_take_observer_filter (TpBaseClient *self,
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->observe_channels_impl != NULL);
+  g_return_if_fail (cls->observe_channels != NULL);
 
   self->priv->flags |= CLIENT_IS_OBSERVER;
   g_ptr_array_add (self->priv->observer_filters, filter);
@@ -318,8 +396,8 @@ tp_base_client_take_observer_filter (TpBaseClient *self,
  * its filter, it will automatically be restarted by service-activation.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_observe_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.observe_channels.
  *
  * Since: 0.11.5
  */
@@ -331,9 +409,58 @@ tp_base_client_set_observer_recover (TpBaseClient *self,
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->observe_channels_impl != NULL);
+  g_return_if_fail (cls->observe_channels != NULL);
 
-  self->priv->flags |= (CLIENT_IS_OBSERVER | CLIENT_OBSERVER_RECOVER);
+  if (recover)
+    {
+      self->priv->flags |= (CLIENT_IS_OBSERVER | CLIENT_OBSERVER_RECOVER);
+    }
+  else
+    {
+      self->priv->flags |= CLIENT_IS_OBSERVER;
+      self->priv->flags &= ~CLIENT_OBSERVER_RECOVER;
+    }
+}
+
+/**
+ * tp_base_client_set_observer_delay_approvers:
+ * @self: a #TpBaseClient
+ * @delay: the value of the Observer.DelayApprovers property
+ *
+ * Set whether the channel dispatcher should wait for
+ * tp_observe_channels_context_accept() or tp_observe_channels_context_fail()
+ * to be called before calling
+ * #TpBaseClientClass.add_dispatch_operation on appropriate Approvers.
+ *
+ * This is implemented by setting the value of the DelayApprovers
+ * D-Bus property.
+ *
+ * This method may only be called before tp_base_client_register() is
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.observe_channels.
+ *
+ * Since: 0.13.16
+ */
+void
+tp_base_client_set_observer_delay_approvers (TpBaseClient *self,
+    gboolean delay)
+{
+  TpBaseClientClass *cls = TP_BASE_CLIENT_GET_CLASS (self);
+
+  g_return_if_fail (TP_IS_BASE_CLIENT (self));
+  g_return_if_fail (!self->priv->registered);
+  g_return_if_fail (cls->observe_channels != NULL);
+
+  if (delay)
+    {
+      self->priv->flags |= (CLIENT_IS_OBSERVER |
+          CLIENT_OBSERVER_DELAYS_APPROVERS);
+    }
+  else
+    {
+      self->priv->flags |= CLIENT_IS_OBSERVER;
+      self->priv->flags &= ~CLIENT_OBSERVER_DELAYS_APPROVERS;
+    }
 }
 
 /**
@@ -343,13 +470,12 @@ tp_base_client_set_observer_recover (TpBaseClient *self,
  * a %TP_HASH_TYPE_CHANNEL_CLASS
  *
  * Register a new channel class as Approver.ApproverChannelFilter.
- * The @add_dispatch_operation virtual method set up using
- * tp_base_client_implement_add_dispatch_operation() will be called whenever
- * a new channel's properties match the ones in @filter.
+ * The #TpBaseClientClass.add_dispatch_operation virtual method will be called
+ * whenever a new channel's properties match the ones in @filter.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_add_dispatch_operation().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.add_dispatch_operation.
  *
  * Since: 0.11.5
  */
@@ -391,7 +517,7 @@ tp_base_client_take_approver_filter (TpBaseClient *self,
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->add_dispatch_operation_impl != NULL);
+  g_return_if_fail (cls->add_dispatch_operation != NULL);
 
   self->priv->flags |= CLIENT_IS_APPROVER;
   g_ptr_array_add (self->priv->approver_filters, filter);
@@ -401,13 +527,13 @@ tp_base_client_take_approver_filter (TpBaseClient *self,
  * tp_base_client_be_a_handler:
  * @self: a #TpBaseClient
  *
- * Register @self as a ChannelHandler with an empty list of filter.
+ * Register @self as a Client.Handler with an empty list of filters.
  * This is useful if you want to create a client that only handle channels
  * for which it's the PreferredHandler.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -418,7 +544,7 @@ tp_base_client_be_a_handler (TpBaseClient *self)
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->handle_channels_impl != NULL);
+  g_return_if_fail (cls->handle_channels != NULL);
 
   self->priv->flags |= CLIENT_IS_HANDLER;
 }
@@ -430,13 +556,12 @@ tp_base_client_be_a_handler (TpBaseClient *self)
  * a %TP_HASH_TYPE_CHANNEL_CLASS
  *
  * Register a new channel class as Handler.HandlerChannelFilter.
- * The @handle_channels virtual method set up using
- * tp_base_client_implement_handle_channels() will be called whenever
- * a new channel's properties match the ones in @filter.
+ * The #TpBaseClientClass.handle_channels virtual method will be called
+ * whenever a new channel's properties match the ones in @filter.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -479,7 +604,7 @@ tp_base_client_take_handler_filter (TpBaseClient *self,
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->handle_channels_impl != NULL);
+  g_return_if_fail (cls->handle_channels != NULL);
 
   self->priv->flags |= CLIENT_IS_HANDLER;
   g_ptr_array_add (self->priv->handler_filters, filter);
@@ -496,8 +621,8 @@ tp_base_client_take_handler_filter (TpBaseClient *self,
  * D-Bus property.)
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -509,7 +634,7 @@ tp_base_client_set_handler_bypass_approval (TpBaseClient *self,
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->handle_channels_impl != NULL);
+  g_return_if_fail (cls->handle_channels != NULL);
 
   if (bypass_approval)
     {
@@ -528,14 +653,14 @@ tp_base_client_set_handler_bypass_approval (TpBaseClient *self,
  * @self: a #TpBaseClient
  *
  * Indicate that @self is a Handler willing to be notified about requests for
- * channels that it is likely to be asked to handle.
- * That means the TpBaseClient::request-added and TpBaseClient::request-removed:
- * signals will be fired and tp_base_client_get_pending_requests() will
- * return the list of pending requests.
+ * channels that it is likely to be asked to handle. This means that the
+ * #TpBaseClient::request-added and #TpBaseClient::request-removed signals will
+ * be fired and tp_base_client_get_pending_requests() will return the list of
+ * pending requests.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -546,7 +671,7 @@ tp_base_client_set_handler_request_notification (TpBaseClient *self)
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->handle_channels_impl != NULL);
+  g_return_if_fail (cls->handle_channels != NULL);
 
   self->priv->flags |= (CLIENT_IS_HANDLER | CLIENT_HANDLER_WANTS_REQUESTS);
 }
@@ -557,7 +682,7 @@ _tp_base_client_add_handler_capability (TpBaseClient *self,
 {
   TpBaseClientClass *cls = TP_BASE_CLIENT_GET_CLASS (self);
 
-  g_return_if_fail (cls->priv->handle_channels_impl != NULL);
+  g_return_if_fail (cls->handle_channels != NULL);
 
   self->priv->flags |= CLIENT_IS_HANDLER;
 
@@ -579,8 +704,8 @@ _tp_base_client_add_handler_capability (TpBaseClient *self,
  * tp_base_client_add_handler_capabilities().
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -592,7 +717,7 @@ tp_base_client_add_handler_capability (TpBaseClient *self,
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
-  g_return_if_fail (cls->priv->handle_channels_impl != NULL);
+  g_return_if_fail (cls->handle_channels != NULL);
 
   _tp_base_client_add_handler_capability (self, token);
 }
@@ -610,8 +735,8 @@ tp_base_client_add_handler_capability (TpBaseClient *self,
  * particular streaming protocols and codecs.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -642,8 +767,8 @@ tp_base_client_add_handler_capabilities (TpBaseClient *self,
  * tp_base_client_add_handler_capability() for each capability token.
  *
  * This method may only be called before tp_base_client_register() is
- * called, and may only be called on objects whose class has called
- * tp_base_client_implement_handle_channels().
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
  *
  * Since: 0.11.6
  */
@@ -652,7 +777,7 @@ tp_base_client_add_handler_capabilities_varargs (TpBaseClient *self,
     const gchar *first_token, ...)
 {
   va_list ap;
-  const gchar *token = first_token;
+  const gchar *token;
 
   g_return_if_fail (TP_IS_BASE_CLIENT (self));
   g_return_if_fail (!self->priv->registered);
@@ -821,7 +946,7 @@ tp_base_client_init (TpBaseClient *self)
   g_ptr_array_add (self->priv->handler_caps, NULL);
 
   self->priv->my_chans = g_hash_table_new_full (g_str_hash, g_str_equal,
-      NULL, NULL);
+      NULL, g_object_unref);
 }
 
 static void
@@ -833,27 +958,21 @@ tp_base_client_dispose (GObject *object)
 
   tp_base_client_unregister (self);
 
-  if (self->priv->dbus != NULL)
-    {
-      g_object_unref (self->priv->dbus);
-      self->priv->dbus = NULL;
-    }
-
-  if (self->priv->account_mgr != NULL)
-    {
-      g_object_unref (self->priv->account_mgr);
-      self->priv->account_mgr = NULL;
-    }
+  tp_clear_object (&self->priv->dbus);
+  tp_clear_object (&self->priv->account_mgr);
+  tp_clear_object (&self->priv->only_for_account);
+  tp_clear_object (&self->priv->channel_factory);
 
   g_list_foreach (self->priv->pending_requests, (GFunc) g_object_unref, NULL);
   g_list_free (self->priv->pending_requests);
   self->priv->pending_requests = NULL;
 
-  if (self->priv->my_chans != NULL)
-    {
-      g_hash_table_unref (self->priv->my_chans);
-      self->priv->my_chans = NULL;
-    }
+  if (self->priv->my_chans != NULL &&
+      g_hash_table_size (self->priv->my_chans) > 0)
+    WARNING ("TpBaseClient is still handling %d channels at dispose",
+        g_hash_table_size (self->priv->my_chans));
+
+  tp_clear_pointer (&self->priv->my_chans, g_hash_table_unref);
 
   if (dispose != NULL)
     dispose (object);
@@ -876,6 +995,10 @@ tp_base_client_finalize (GObject *object)
   g_free (self->priv->bus_name);
   g_free (self->priv->object_path);
 
+  tp_clear_pointer (&self->priv->account_features, g_array_unref);
+  tp_clear_pointer (&self->priv->connection_features, g_array_unref);
+  tp_clear_pointer (&self->priv->channel_features, g_array_unref);
+
   if (finalize != NULL)
     finalize (object);
 }
@@ -894,12 +1017,20 @@ tp_base_client_get_property (GObject *object,
         g_value_set_object (value, self->priv->dbus);
         break;
 
+      case PROP_ACCOUNT_MANAGER:
+        g_value_set_object (value, self->priv->account_mgr);
+        break;
+
       case PROP_NAME:
         g_value_set_string (value, self->priv->name);
         break;
 
       case PROP_UNIQUIFY_NAME:
         g_value_set_boolean (value, self->priv->uniquify_name);
+        break;
+
+      case PROP_CHANNEL_FACTORY:
+        g_value_set_object (value, self->priv->channel_factory);
         break;
 
       default:
@@ -923,6 +1054,11 @@ tp_base_client_set_property (GObject *object,
         self->priv->dbus = g_value_dup_object (value);
         break;
 
+      case PROP_ACCOUNT_MANAGER:
+        g_assert (self->priv->account_mgr == NULL); /* construct-only */
+        self->priv->account_mgr = g_value_dup_object (value);
+        break;
+
       case PROP_NAME:
         g_assert (self->priv->name == NULL);    /* construct-only */
         self->priv->name = g_value_dup_string (value);
@@ -930,6 +1066,11 @@ tp_base_client_set_property (GObject *object,
 
       case PROP_UNIQUIFY_NAME:
         self->priv->uniquify_name = g_value_get_boolean (value);
+        break;
+
+      case PROP_CHANNEL_FACTORY:
+        g_assert (self->priv->channel_factory == NULL);    /* construct-only */
+        self->priv->channel_factory = g_value_dup_object (value);
         break;
 
       default:
@@ -950,8 +1091,33 @@ tp_base_client_constructed (GObject *object)
   if (chain_up != NULL)
     chain_up (object);
 
-  g_assert (self->priv->dbus != NULL);
+  g_assert (self->priv->dbus != NULL || self->priv->account_mgr != NULL);
   g_assert (self->priv->name != NULL);
+
+  if (self->priv->account_mgr == NULL)
+    {
+      if (_tp_dbus_daemon_is_the_shared_one (self->priv->dbus))
+        {
+          /* The AM is guaranteed to be the one from
+           * tp_account_manager_dup() */
+          self->priv->account_mgr = tp_account_manager_dup ();
+        }
+      else
+        {
+          /* No guarantee, create a new AM */
+          self->priv->account_mgr = tp_account_manager_new (self->priv->dbus);
+        }
+    }
+  else if (self->priv->dbus == NULL)
+    {
+      self->priv->dbus = g_object_ref (tp_proxy_get_dbus_daemon (
+            self->priv->account_mgr));
+    }
+  else
+    {
+      g_assert (self->priv->dbus ==
+          tp_proxy_get_dbus_daemon (self->priv->account_mgr));
+    }
 
   /* Bus name */
   string = g_string_new (TP_CLIENT_BUS_NAME_BASE);
@@ -974,15 +1140,14 @@ tp_base_client_constructed (GObject *object)
 
   self->priv->bus_name = g_string_free (string, FALSE);
 
-  if (_tp_dbus_daemon_is_the_shared_one (self->priv->dbus))
+  if (self->priv->channel_factory == NULL)
     {
-      /* The AM is guaranteed to be the one from tp_account_manager_dup() */
-      self->priv->account_mgr = tp_account_manager_dup ();
+      self->priv->channel_factory = TP_CLIENT_CHANNEL_FACTORY (
+          tp_automatic_proxy_factory_dup ());
     }
   else
     {
-      /* No guarantee, create a new AM */
-      self->priv->account_mgr = tp_account_manager_new (self->priv->dbus);
+      g_assert (TP_IS_CLIENT_CHANNEL_FACTORY (self->priv->channel_factory));
     }
 }
 
@@ -995,6 +1160,7 @@ typedef enum {
     DP_HANDLED_CHANNELS,
     DP_OBSERVER_CHANNEL_FILTER,
     DP_OBSERVER_RECOVER,
+    DP_OBSERVER_DELAY_APPROVERS,
 } ClientDBusProp;
 
 static void
@@ -1073,6 +1239,11 @@ tp_base_client_get_dbus_properties (GObject *object,
           (self->priv->flags & CLIENT_OBSERVER_RECOVER) != 0);
       break;
 
+    case DP_OBSERVER_DELAY_APPROVERS:
+      g_value_set_boolean (value,
+          (self->priv->flags & CLIENT_OBSERVER_DELAYS_APPROVERS) != 0);
+      break;
+
     default:
       g_assert_not_reached ();
     }
@@ -1107,6 +1278,8 @@ tp_base_client_class_init (TpBaseClientClass *cls)
           GINT_TO_POINTER (DP_OBSERVER_CHANNEL_FILTER) },
         { "Recover",
           GINT_TO_POINTER (DP_OBSERVER_RECOVER) },
+        { "DelayApprovers",
+          GINT_TO_POINTER (DP_OBSERVER_DELAY_APPROVERS) },
         { NULL }
   };
   static TpDBusPropertiesMixinIfaceImpl prop_ifaces[] = {
@@ -1136,7 +1309,12 @@ tp_base_client_class_init (TpBaseClientClass *cls)
    * #TpDBusDaemon object encapsulating this object's connection to D-Bus.
    * Read-only except during construction.
    *
-   * This property can't be %NULL.
+   * This property can't be %NULL after construction.
+   *
+   * Since 0.11.14 this property may be %NULL or unspecified in
+   * g_object_new(), but only if #TpBaseClient:account-manager is provided
+   * instead, in which case its #TpProxy:dbus-daemon property will be
+   * used.
    *
    * Since: 0.11.5
    */
@@ -1145,6 +1323,43 @@ tp_base_client_class_init (TpBaseClientClass *cls)
       TP_TYPE_DBUS_DAEMON,
       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_DBUS_DAEMON, param_spec);
+
+  /**
+   * TpBaseClient:account-manager:
+   *
+   * Account manager for this base client, used to look up or create
+   * #TpAccount objects. This may be specified in the constructor in order
+   * to get existing #TpAccount objects.
+   *
+   * It is not guaranteed that any of its features have been prepared, and
+   * it is not necessary to wait for any features before specifying this
+   * property in the constructor.
+   *
+   * Clients that interact with the #TpAccount should usually
+   * set this property instead of #TpBaseClient:dbus-daemon. Doing this
+   * will ensure that each account, connection or contact is represented by
+   * a single #TpAccount, #TpConnection or #TpContact object, shared between
+   * all the cooperating modules that have the same #TpAccountManager.
+   *
+   * If the #TpBaseClient:dbus-daemon is set to the result of
+   * tp_dbus_daemon_dup(), then this property defaults to
+   * the result of tp_account_manager_dup().
+   *
+   * This property may be %NULL initially, but will always be non-%NULL
+   * after the #TpBaseClient has been constructed.
+   *
+   * It is an error to specify both a non-%NULL account manager, and a
+   * non-%NULL #TpBaseClient:dbus-daemon that is not the same as the
+   * account manager's #TpProxy:dbus-daemon.
+   *
+   * Since: 0.11.14
+   */
+  param_spec = g_param_spec_object ("account-manager", "TpAccountManager",
+      "The TpAccountManager used look up or create TpAccount objects",
+      TP_TYPE_ACCOUNT_MANAGER,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_ACCOUNT_MANAGER,
+      param_spec);
 
   /**
    * TpBaseClient:name:
@@ -1177,11 +1392,31 @@ tp_base_client_class_init (TpBaseClientClass *cls)
   g_object_class_install_property (object_class, PROP_UNIQUIFY_NAME,
       param_spec);
 
+  /**
+   * TpBaseClient:channel-factory:
+   *
+   * The object implementing the #TpClientChannelFactoryInterface interface
+   * that will be used to create channel proxies. While
+   * tp_base_client_register() has not yet been called, this property can be
+   * changed using tp_base_client_set_channel_factory().
+   *
+   * If no channel factory is specified then #TpAutomaticProxyFactory is used.
+   *
+   * Since: 0.13.2
+   */
+  param_spec = g_param_spec_object ("channel-factory", "Channel factory",
+      "Object implementing TpClientChannelFactoryInterface",
+      G_TYPE_OBJECT,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CHANNEL_FACTORY,
+      param_spec);
+
  /**
    * TpBaseClient::request-added:
    * @self: a #TpBaseClient
-   * @account: the #TpAccount on which the request was made
-   * having %TP_ACCOUNT_FEATURE_CORE prepared if possible
+   * @account: the #TpAccount on which the request was made,
+   *  with %TP_ACCOUNT_FEATURE_CORE, and any other features added via
+   *  tp_base_client_add_account_features(), prepared if possible
    * @request: a #TpChannelRequest having its object-path defined but
    * is not guaranteed to be prepared.
    *
@@ -1230,9 +1465,6 @@ tp_base_client_class_init (TpBaseClientClass *cls)
   cls->dbus_properties_class.interfaces = prop_ifaces;
   tp_dbus_properties_mixin_class_init (object_class,
       G_STRUCT_OFFSET (TpBaseClientClass, dbus_properties_class));
-
-  cls->priv = G_TYPE_CLASS_GET_PRIVATE (cls, TP_TYPE_BASE_CLIENT,
-      TpBaseClientClassPrivate);
 }
 
 static GList *
@@ -1269,7 +1501,7 @@ context_prepare_cb (GObject *source,
   channels_list = ptr_array_to_list (ctx->channels);
   requests_list = ptr_array_to_list (ctx->requests);
 
-  cls->priv->observe_channels_impl (self, ctx->account, ctx->connection,
+  cls->observe_channels (self, ctx->account, ctx->connection,
       channels_list, ctx->dispatch_operation, requests_list, ctx);
 
   g_list_free (channels_list);
@@ -1288,6 +1520,37 @@ context_prepare_cb (GObject *source,
       tp_observe_channels_context_fail (ctx, error);
       g_error_free (error);
     }
+}
+
+static inline gpointer
+array_data_or_null (GArray *array)
+{
+  if (array == NULL)
+    return NULL;
+  else
+    return array->data;
+}
+
+static GArray *
+get_features_for_channel (TpBaseClient *self,
+    TpChannel *channel)
+{
+  GArray *features;
+
+  features = tp_client_channel_factory_dup_channel_features (
+      self->priv->channel_factory, channel);
+
+  g_assert (features != NULL);
+
+  /* Add TpBaseClient's own features, if any */
+  if (self->priv->channel_features == NULL)
+    return features;
+
+  _tp_quark_array_merge (features,
+      (GQuark *) self->priv->channel_features->data,
+      self->priv->channel_features->len);
+
+  return features;
 }
 
 static void
@@ -1309,6 +1572,8 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
   GPtrArray *channels = NULL, *requests = NULL;
   TpChannelDispatchOperation *dispatch_operation = NULL;
   guint i;
+  TpChannel *channel = NULL;
+  GArray *channel_features;
 
   if (!(self->priv->flags & CLIENT_IS_OBSERVER))
     {
@@ -1318,7 +1583,7 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
       return;
     }
 
-  if (cls->priv->observe_channels_impl == NULL)
+  if (cls->observe_channels == NULL)
     {
       WARNING ("class %s does not implement ObserveChannels",
           G_OBJECT_TYPE_NAME (self));
@@ -1335,13 +1600,18 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
       goto out;
     }
 
-  account = tp_account_manager_ensure_account (self->priv->account_mgr,
-      account_path);
+  account = tp_base_client_get_account (self, account_path, &error);
+
+  if (account == NULL)
+    goto out;
 
   connection = tp_account_ensure_connection (account, connection_path);
   if (connection == NULL)
     {
-      DEBUG ("Failed to create TpConnection");
+      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          "Connection %s doesn't seem to exist. (Maybe the CM doesn't own "
+          "the corresponding bus name?)", connection_path);
+      DEBUG ("Failed to create TpConnection: %s", error->message);
       goto out;
     }
 
@@ -1351,13 +1621,13 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
     {
       const gchar *chan_path;
       GHashTable *chan_props;
-      TpChannel *channel;
 
       tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
           &chan_path, &chan_props);
 
-      channel = tp_channel_new_from_properties (connection,
-          chan_path, chan_props, &error);
+      channel = tp_client_channel_factory_create_channel (
+          self->priv->channel_factory, connection, chan_path, chan_props,
+          &error);
       if (channel == NULL)
         {
           DEBUG ("Failed to create TpChannel: %s", error->message);
@@ -1404,9 +1674,16 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
   ctx = _tp_observe_channels_context_new (account, connection, channels,
       dispatch_operation, requests, observer_info, context);
 
-  _tp_observe_channels_context_prepare_async (ctx, context_prepare_cb, self);
+  channel_features = get_features_for_channel (self, channel);
+
+  _tp_observe_channels_context_prepare_async (ctx,
+      array_data_or_null (self->priv->account_features),
+      array_data_or_null (self->priv->connection_features),
+      array_data_or_null (channel_features),
+      context_prepare_cb, self);
 
   g_object_unref (ctx);
+  g_array_free (channel_features, TRUE);
 
 out:
   if (channels != NULL)
@@ -1460,7 +1737,7 @@ add_dispatch_context_prepare_cb (GObject *source,
 
   channels_list = ptr_array_to_list (ctx->channels);
 
-  cls->priv->add_dispatch_operation_impl (self, ctx->account, ctx->connection,
+  cls->add_dispatch_operation (self, ctx->account, ctx->connection,
       channels_list, ctx->dispatch_operation, ctx);
 
   g_list_free (channels_list);
@@ -1497,6 +1774,8 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
   TpChannelDispatchOperation *dispatch_operation = NULL;
   guint i;
   const gchar *path;
+  TpChannel *channel = NULL;
+  GArray *channel_features;
 
   if (!(self->priv->flags & CLIENT_IS_APPROVER))
     {
@@ -1506,7 +1785,7 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
       return;
     }
 
-  if (cls->priv->add_dispatch_operation_impl == NULL)
+  if (cls->add_dispatch_operation == NULL)
     {
       WARNING ("class %s does not implement AddDispatchOperation",
           G_OBJECT_TYPE_NAME (self));
@@ -1525,8 +1804,10 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
       goto out;
     }
 
-  account = tp_account_manager_ensure_account (self->priv->account_mgr,
-      path);
+  account = tp_base_client_get_account (self, path, &error);
+
+  if (account == NULL)
+    goto out;
 
   path = tp_asv_get_object_path (properties,
       TP_PROP_CHANNEL_DISPATCH_OPERATION_CONNECTION);
@@ -1559,13 +1840,13 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
     {
       const gchar *chan_path;
       GHashTable *chan_props;
-      TpChannel *channel;
 
       tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
           &chan_path, &chan_props);
 
-      channel = tp_channel_new_from_properties (connection,
-          chan_path, chan_props, &error);
+      channel = tp_client_channel_factory_create_channel (
+          self->priv->channel_factory, connection, chan_path, chan_props,
+          &error);
       if (channel == NULL)
         {
           DEBUG ("Failed to create TpChannel: %s", error->message);
@@ -1587,10 +1868,16 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
   ctx = _tp_add_dispatch_operation_context_new (account, connection, channels,
       dispatch_operation, context);
 
+  channel_features = get_features_for_channel (self, channel);
+
   _tp_add_dispatch_operation_context_prepare_async (ctx,
+      array_data_or_null (self->priv->account_features),
+      array_data_or_null (self->priv->connection_features),
+      array_data_or_null (channel_features),
       add_dispatch_context_prepare_cb, self);
 
   g_object_unref (ctx);
+  g_array_free (channel_features, TRUE);
 
 out:
   if (channels != NULL)
@@ -1624,10 +1911,14 @@ chan_invalidated_cb (TpChannel *channel,
     gchar *message,
     TpBaseClient *self)
 {
-  DEBUG ("Channel %s has been invalidated", tp_proxy_get_object_path (channel));
+  DEBUG ("Channel (%p) %s has been invalidated (%s)",
+      channel, tp_proxy_get_object_path (channel), message);
 
-  g_hash_table_remove (self->priv->my_chans, tp_proxy_get_object_path (
-        channel));
+  if (!(domain == TP_DBUS_ERRORS && code == TP_DBUS_ERROR_PROXY_UNREFERENCED))
+    {
+      g_hash_table_remove (self->priv->my_chans, tp_proxy_get_object_path (
+          channel));
+    }
 }
 
 static void
@@ -1642,7 +1933,9 @@ ctx_done_cb (TpHandleChannelsContext *context,
 
       if (tp_proxy_get_invalidated (channel) == NULL)
         {
-          g_hash_table_insert (self->priv->my_chans,
+          DEBUG ("Inserting Channel (%p) %s",
+            channel, tp_proxy_get_object_path (channel));
+          g_hash_table_replace (self->priv->my_chans,
               (gchar *) tp_proxy_get_object_path (channel),
               g_object_ref (channel));
 
@@ -1677,14 +1970,14 @@ handle_channels_context_prepare_cb (GObject *source,
   tp_g_signal_connect_object (ctx, "done", G_CALLBACK (ctx_done_cb),
       self, 0);
 
-  cls->priv->handle_channels_impl (self, ctx->account, ctx->connection,
+  cls->handle_channels (self, ctx->account, ctx->connection,
       channels_list, requests_list, ctx->user_action_time, ctx);
 
   g_list_free (channels_list);
   g_list_free (requests_list);
 
   if (_tp_handle_channels_context_get_state (ctx) ==
-      TP_OBSERVE_CHANNELS_CONTEXT_STATE_NONE)
+      TP_HANDLE_CHANNELS_CONTEXT_STATE_NONE)
     {
       error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
           "Implementation of HandledChannels in %s didn't call "
@@ -1733,6 +2026,8 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
   TpConnection *connection = NULL;
   GPtrArray *channels = NULL, *requests = NULL;
   guint i;
+  TpChannel *channel = NULL;
+  GArray *channel_features;
 
   if (!(self->priv->flags & CLIENT_IS_HANDLER))
     {
@@ -1742,7 +2037,7 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
       return;
     }
 
-  if (cls->priv->handle_channels_impl == NULL)
+  if (cls->handle_channels == NULL)
     {
       DEBUG ("class %s does not implement HandleChannels",
           G_OBJECT_TYPE_NAME (self));
@@ -1759,8 +2054,10 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
       goto out;
     }
 
-  account = tp_account_manager_ensure_account (self->priv->account_mgr,
-      account_path);
+  account = tp_base_client_get_account (self, account_path, &error);
+
+  if (account == NULL)
+    goto out;
 
   connection = tp_account_ensure_connection (account, connection_path);
   if (connection == NULL)
@@ -1775,13 +2072,13 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
     {
       const gchar *chan_path;
       GHashTable *chan_props;
-      TpChannel *channel;
 
       tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
           &chan_path, &chan_props);
 
-      channel = tp_channel_new_from_properties (connection,
-          chan_path, chan_props, &error);
+      channel = tp_client_channel_factory_create_channel (
+          self->priv->channel_factory, connection, chan_path, chan_props,
+          &error);
       if (channel == NULL)
         {
           DEBUG ("Failed to create TpChannel: %s", error->message);
@@ -1820,10 +2117,16 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
   ctx = _tp_handle_channels_context_new (account, connection, channels,
       requests, user_action_time, handler_info, context);
 
+  channel_features = get_features_for_channel (self, channel);
+
   _tp_handle_channels_context_prepare_async (ctx,
+      array_data_or_null (self->priv->account_features),
+      array_data_or_null (self->priv->connection_features),
+      array_data_or_null (channel_features),
       handle_channels_context_prepare_cb, self);
 
   g_object_unref (ctx);
+  g_array_free (channel_features, TRUE);
 
 out:
   if (channels != NULL)
@@ -1907,17 +2210,13 @@ _tp_base_client_add_request (TpSvcClientInterfaceRequests *iface,
   TpChannelRequest *request;
   TpAccount *account;
   GError *error = NULL;
-  GQuark account_features[] = { TP_ACCOUNT_FEATURE_CORE, 0 };
   channel_request_prepare_account_ctx *ctx;
 
   request = tp_channel_request_new (self->priv->dbus, path, properties, &error);
   if (request == NULL)
     {
       DEBUG ("Failed to create TpChannelRequest: %s", error->message);
-
-      dbus_g_method_return_error (context, error);
-      g_error_free (error);
-      return;
+      goto err;
     }
 
   path = tp_asv_get_object_path (properties, TP_PROP_CHANNEL_REQUEST_ACCOUNT);
@@ -1927,24 +2226,29 @@ _tp_base_client_add_request (TpSvcClientInterfaceRequests *iface,
           "Mandatory 'Account' property is missing");
 
       DEBUG ("%s", error->message);
-
-      dbus_g_method_return_error (context, error);
-      g_error_free (error);
-      return;
+      goto err;
     }
 
-  account = tp_account_manager_ensure_account (self->priv->account_mgr,
-      path);
+  account = tp_base_client_get_account (self, path, &error);
+
+  if (account == NULL)
+    goto err;
 
   self->priv->pending_requests = g_list_append (self->priv->pending_requests,
       request);
 
   ctx = channel_request_prepare_account_ctx_new (self, request);
 
-  tp_proxy_prepare_async (account, account_features,
+  tp_proxy_prepare_async (account,
+      array_data_or_null (self->priv->account_features),
       channel_request_account_prepare_cb, ctx);
 
   tp_svc_client_interface_requests_return_from_add_request (context);
+  return;
+
+err:
+  dbus_g_method_return_error (context, error);
+  g_error_free (error);
 }
 
 static void
@@ -1996,13 +2300,16 @@ requests_iface_init (gpointer g_iface,
  * Called by subclasses to define the actual implementation of the
  * ObserveChannels() D-Bus method.
  *
+ * Since 0.11.13 this is exactly equivalent to setting the
+ * #TpBaseClientClass.observe_channels function pointer.
+ *
  * Since: 0.11.5
  */
 void
 tp_base_client_implement_observe_channels (TpBaseClientClass *cls,
     TpBaseClientClassObserveChannelsImpl impl)
 {
-  cls->priv->observe_channels_impl = impl;
+  cls->observe_channels = impl;
 }
 
 /**
@@ -2099,6 +2406,29 @@ tp_base_client_get_dbus_daemon (TpBaseClient *self)
 }
 
 /**
+ * tp_base_client_get_account_manager: (skip)
+ * @self: a #TpBaseClient
+ *
+ * Return the #TpBaseClient:account-manager construct-only property, which
+ * is the account manager used to look up or create #TpAccount objects.
+ *
+ * The returned object's reference count is not incremented, so it is not
+ * necessarily valid after @self is destroyed.
+ *
+ * It is not guaranteed that any particular features are prepared on this
+ * object; enable and wait for features with tp_proxy_prepare_async().
+ *
+ * Returns: (transfer none): the value of #TpBaseClient:account-manager
+ * Since: 0.11.14
+ */
+TpAccountManager *
+tp_base_client_get_account_manager (TpBaseClient *self)
+{
+  g_return_val_if_fail (TP_IS_BASE_CLIENT (self), NULL);
+  return self->priv->account_mgr;
+}
+
+/**
  * tp_base_client_implement_add_dispatch_operation: (skip)
  * @klass: the #TpBaseClientClass of the object
  * @impl: the #TpBaseClientClassAddDispatchOperationImpl function implementing
@@ -2107,13 +2437,16 @@ tp_base_client_get_dbus_daemon (TpBaseClient *self)
  * Called by subclasses to define the actual implementation of the
  * AddDispatchOperation() D-Bus method.
  *
+ * Since 0.11.13 this is exactly equivalent to setting the
+ * #TpBaseClientClass.add_dispatch_operation function pointer.
+ *
  * Since: 0.11.5
  */
 void
 tp_base_client_implement_add_dispatch_operation (TpBaseClientClass *cls,
     TpBaseClientClassAddDispatchOperationImpl impl)
 {
-  cls->priv->add_dispatch_operation_impl = impl;
+  cls->add_dispatch_operation = impl;
 }
 
 /**
@@ -2125,13 +2458,16 @@ tp_base_client_implement_add_dispatch_operation (TpBaseClientClass *cls,
  * Called by subclasses to define the actual implementation of the
  * HandleChannels() D-Bus method.
  *
+ * Since 0.11.13 this is exactly equivalent to setting the
+ * #TpBaseClientClass.handle_channels function pointer.
+ *
  * Since: 0.11.6
  */
 void
 tp_base_client_implement_handle_channels (TpBaseClientClass *cls,
     TpBaseClientClassHandleChannelsImpl impl)
 {
-  cls->priv->handle_channels_impl = impl;
+  cls->handle_channels = impl;
 }
 
 /**
@@ -2190,4 +2526,228 @@ tp_base_client_unregister (TpBaseClient *self)
     }
 
   self->priv->registered = FALSE;
+}
+
+static void
+varargs_helper (TpBaseClient *self,
+    GQuark feature,
+    va_list ap,
+    void (*method) (TpBaseClient *, const GQuark *, gssize))
+{
+  GQuark f;
+  gsize n = 0;
+  GQuark *features;
+  va_list ap_copy;
+
+  G_VA_COPY (ap_copy, ap);
+
+  for (f = feature; f != 0; f = va_arg (ap, GQuark))
+    n++;
+
+  features = g_malloc_n (n, sizeof (GQuark));
+
+  n = 0;
+
+  for (f = feature; f != 0; f = va_arg (ap_copy, GQuark))
+    features[n++] = f;
+
+  method (self, features, n);
+  g_free (features);
+}
+
+/**
+ * tp_base_client_add_account_features_varargs: (skip)
+ * @self: a client
+ * @feature: the first feature
+ * @...: the second and subsequent features, if any, ending with 0
+ *
+ * The same as tp_base_client_add_account_features(), but with a more
+ * convenient calling convention from C.
+ *
+ * Since: 0.11.14
+ */
+void
+tp_base_client_add_account_features_varargs (TpBaseClient *self,
+    GQuark feature,
+    ...)
+{
+  va_list ap;
+
+  va_start (ap, feature);
+  varargs_helper (self, feature, ap, tp_base_client_add_account_features);
+  va_end (ap);
+}
+
+/**
+ * tp_base_client_add_connection_features_varargs: (skip)
+ * @self: a client
+ * @feature: the first feature
+ * @...: the second and subsequent features, if any, ending with 0
+ *
+ * The same as tp_base_client_add_connection_features(), but with a more
+ * convenient calling convention from C.
+ *
+ * Since: 0.11.14
+ */
+void
+tp_base_client_add_connection_features_varargs (TpBaseClient *self,
+    GQuark feature,
+    ...)
+{
+  va_list ap;
+
+  va_start (ap, feature);
+  varargs_helper (self, feature, ap, tp_base_client_add_connection_features);
+  va_end (ap);
+}
+
+/**
+ * tp_base_client_add_channel_features_varargs: (skip)
+ * @self: a client
+ * @feature: the first feature
+ * @...: the second and subsequent features, if any, ending with 0
+ *
+ * The same as tp_base_client_add_channel_features(), but with a more
+ * convenient calling convention from C.
+ *
+ * Since: 0.11.14
+ */
+void
+tp_base_client_add_channel_features_varargs (TpBaseClient *self,
+    GQuark feature,
+    ...)
+{
+  va_list ap;
+
+  va_start (ap, feature);
+  varargs_helper (self, feature, ap, tp_base_client_add_channel_features);
+  va_end (ap);
+}
+
+/**
+ * tp_base_client_add_account_features:
+ * @self: a client
+ * @features: (array length=n): the features
+ * @n: the number of features, or -1 if @features is 0-terminated
+ *
+ * Request that the given features are prepared on each #TpAccount (in
+ * addition to %TP_ACCOUNT_FEATURE_CORE) before calling
+ * #TpBaseClientClass.observe_channels,
+ * #TpBaseClientClass.add_dispatch_operation or
+ * #TpBaseClientClass.handle_channels, or emitting
+ * #TpBaseClient::request-added.
+ *
+ * Since: 0.11.14
+ */
+void
+tp_base_client_add_account_features (TpBaseClient *self,
+    const GQuark *features,
+    gssize n)
+{
+  g_return_if_fail (TP_IS_BASE_CLIENT (self));
+  g_return_if_fail (!self->priv->registered);
+
+  if (self->priv->account_features == NULL)
+    self->priv->account_features = g_array_new (TRUE, TRUE, sizeof (GQuark));
+
+  _tp_quark_array_merge (self->priv->account_features, features, n);
+}
+
+/**
+ * tp_base_client_add_channel_features:
+ * @self: a client
+ * @features: (array length=n): the features
+ * @n: the number of features, or -1 if @features is 0-terminated
+ *
+ * Request that the given features are prepared on each #TpChannel (in
+ * addition to %TP_CHANNEL_FEATURE_CORE) before calling
+ * #TpBaseClientClass.observe_channels,
+ * #TpBaseClientClass.add_dispatch_operation or
+ * #TpBaseClientClass.handle_channels.
+ *
+ * Since: 0.11.14
+ */
+void
+tp_base_client_add_channel_features (TpBaseClient *self,
+    const GQuark *features,
+    gssize n)
+{
+  g_return_if_fail (TP_IS_BASE_CLIENT (self));
+  g_return_if_fail (!self->priv->registered);
+
+  if (self->priv->channel_features == NULL)
+    self->priv->channel_features = g_array_new (TRUE, TRUE, sizeof (GQuark));
+
+  _tp_quark_array_merge (self->priv->channel_features, features, n);
+}
+
+/**
+ * tp_base_client_add_connection_features:
+ * @self: a client
+ * @features: (array length=n): the features
+ * @n: the number of features, or -1 if @features is 0-terminated
+ *
+ * Request that the given features are prepared on each #TpConnection (in
+ * addition to %TP_CONNECTION_FEATURE_CORE) before calling
+ * #TpBaseClientClass.observe_channels,
+ * #TpBaseClientClass.add_dispatch_operation or
+ * #TpBaseClientClass.handle_channels.
+ *
+ * Since: 0.11.14
+ */
+void
+tp_base_client_add_connection_features (TpBaseClient *self,
+    const GQuark *features,
+    gssize n)
+{
+  g_return_if_fail (TP_IS_BASE_CLIENT (self));
+  g_return_if_fail (!self->priv->registered);
+
+  if (self->priv->connection_features == NULL)
+    self->priv->connection_features = g_array_new (TRUE, TRUE,
+        sizeof (GQuark));
+
+  _tp_quark_array_merge (self->priv->connection_features, features, n);
+}
+
+/**
+ * tp_base_client_set_channel_factory:
+ * @self: a #TpBaseClient
+ * @factory: an object implementing the #TpClientChannelFactoryInterface
+ * interface
+ *
+ * Change the value of the #TpBaseClient:channel-factory property.
+ * It can't be changed once @self has been registered.
+ *
+ * Since: 0.13.2
+ */
+void
+tp_base_client_set_channel_factory (TpBaseClient *self,
+    TpClientChannelFactory *factory)
+{
+  g_return_if_fail (TP_IS_BASE_CLIENT (self));
+  g_return_if_fail (!self->priv->registered);
+  g_return_if_fail (TP_IS_CLIENT_CHANNEL_FACTORY (factory));
+
+  tp_clear_object (&self->priv->channel_factory);
+
+  self->priv->channel_factory = g_object_ref (factory);
+  g_object_notify (G_OBJECT (self), "channel-factory");
+}
+
+/**
+ * tp_base_client_get_channel_factory: (skip)
+ * @self: a #TpBaseClient
+ *
+ * Return the #TpBaseClient:channel-factory property.
+ *
+ * Returns: the value of #TpBaseClient:channel-factory
+ * Since: 0.13.2
+ */
+TpClientChannelFactory *
+tp_base_client_get_channel_factory (TpBaseClient *self)
+{
+  g_return_val_if_fail (TP_IS_BASE_CLIENT (self), NULL);
+
+  return self->priv->channel_factory;
 }

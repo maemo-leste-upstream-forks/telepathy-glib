@@ -64,17 +64,25 @@ CFILE_GLOB=$(top_srcdir)/telepathy-glib/*.c $(top_builddir)/telepathy-glib/_gen/
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 IGNORE_HFILES=\
     add-dispatch-operation-context-internal.h \
+    base-connection-internal.h \
+    base-contact-list-internal.h \
     channel-dispatch-operation-internal.h \
+    client-message-internal.h \
     base-protocol-internal.h \
     channel-internal.h \
+    cm-message-internal.h \
     connection-internal.h \
+    contact-list-channel-internal.h \
     debug-internal.h \
     handle-channels-context-internal.h \
     handle-repo-internal.h \
+    message-internal.h \
     observe-channels-context-internal.h \
     protocol-internal.h \
     proxy-internal.h \
-    proxy-introspectable.h
+    proxy-introspectable.h \
+    signalled-message-internal.h \
+    util-internal.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -83,6 +91,13 @@ HTML_IMAGES=
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
 content_files=tp-svc.xml
+
+html-build.stamp: $(srcdir)/version.xml
+pdf-build.stamp: $(srcdir)/version.xml
+
+$(srcdir)/version.xml: Makefile
+	@-chmod u+w $(srcdir) $(srcdir)/version.xml
+	echo @PACKAGE_VERSION@ > $(srcdir)/version.xml
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
@@ -96,8 +111,8 @@ expand_content_files=
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 INCLUDES=-I$(top_srcdir) -I$(top_builddir) \
 	 @DBUS_CFLAGS@ @GLIB_CFLAGS@
-GTKDOC_LIBS=@DBUS_LIBS@ @GLIB_LIBS@ \
-	    $(top_builddir)/telepathy-glib/libtelepathy-glib.la
+GTKDOC_LIBS=$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+            @DBUS_LIBS@ @GLIB_LIBS@
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

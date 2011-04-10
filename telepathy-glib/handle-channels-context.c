@@ -50,8 +50,11 @@
 #include "telepathy-glib/handle-channels-context-internal.h"
 
 #include <telepathy-glib/channel.h>
+#include <telepathy-glib/channel-request.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/gtypes.h>
+#include <telepathy-glib/interfaces.h>
+#include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
 #include "telepathy-glib/debug-internal.h"
@@ -368,15 +371,12 @@ tp_handle_channels_context_class_init (
   /**
    * TpHandleChannelsContext:user-action-time:
    *
-   * The User_Action_Time that have been passed to HandleChannels.
+   * The time at which user action occurred, or one of the
+   * special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or
+   * %TP_USER_ACTION_TIME_CURRENT_TIME
+   * (see #TpAccountChannelRequest:user-action-time for details)
+   *
    * Read-only except during construction.
-   *
-   * If 0, the action doesn't involve any user action. Clients
-   * SHOULD avoid stealing focus when presenting the channel.
-   *
-   * If #G_MAXINT64: clients SHOULD behave as though the user
-   * action happened at the current time, e.g. a client MAY
-   * request that its window gains focus.
    *
    * Since: 0.11.6
    */
@@ -465,6 +465,9 @@ TpHandleChannelsContext * _tp_handle_channels_context_new (
  *
  * Called by #TpBaseClientClassAddDispatchOperationImpl when it's done so
  * the D-Bus method can return.
+ *
+ * The caller is responsible for closing channels with
+ * tp_cli_channel_call_close() when it has finished handling them.
  *
  * Since: 0.11.6
  */
@@ -605,7 +608,7 @@ out:
 }
 
 static void
-channel_prepare_cb (GObject *source,
+hcc_channel_prepare_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
@@ -630,11 +633,11 @@ out:
 }
 
 static void
-context_prepare (TpHandleChannelsContext *self)
+context_prepare (TpHandleChannelsContext *self,
+    const GQuark *account_features,
+    const GQuark *connection_features,
+    const GQuark *channel_features)
 {
-  GQuark account_features[] = { TP_ACCOUNT_FEATURE_CORE, 0 };
-  GQuark conn_features[] = { TP_CONNECTION_FEATURE_CORE, 0 };
-  GQuark channel_features[] = { TP_CHANNEL_FEATURE_CORE, 0 };
   guint i;
 
   self->priv->num_pending = 2;
@@ -642,7 +645,7 @@ context_prepare (TpHandleChannelsContext *self)
   tp_proxy_prepare_async (self->account, account_features,
       account_prepare_cb, g_object_ref (self));
 
-  tp_proxy_prepare_async (self->connection, conn_features,
+  tp_proxy_prepare_async (self->connection, connection_features,
       conn_prepare_cb, g_object_ref (self));
 
   for (i = 0; i < self->channels->len; i++)
@@ -652,13 +655,16 @@ context_prepare (TpHandleChannelsContext *self)
       self->priv->num_pending++;
 
       tp_proxy_prepare_async (channel, channel_features,
-          channel_prepare_cb, g_object_ref (self));
+          hcc_channel_prepare_cb, g_object_ref (self));
     }
 }
 
 void
 _tp_handle_channels_context_prepare_async (
     TpHandleChannelsContext *self,
+    const GQuark *account_features,
+    const GQuark *connection_features,
+    const GQuark *channel_features,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
@@ -670,7 +676,8 @@ _tp_handle_channels_context_prepare_async (
   self->priv->result = g_simple_async_result_new (G_OBJECT (self),
       callback, user_data, _tp_handle_channels_context_prepare_async);
 
-  context_prepare (self);
+  context_prepare (self, account_features, connection_features,
+      channel_features);
 }
 
 gboolean
@@ -694,4 +701,55 @@ _tp_handle_channels_context_prepare_finish (
       FALSE);
 
   return TRUE;
+}
+
+/**
+ * tp_handle_channels_context_get_handler_info:
+ * @self: a channel-handling context
+ *
+ * Return any extra information that accompanied this request to handle
+ * channels (the Handler_Info argument from the HandleChannels D-Bus method).
+ * Well-known keys for this map will be defined by the Telepathy D-Bus
+ * Interface Specification; at the time of writing, none have been defined.
+ *
+ * The returned hash table is only valid for as long as @self is.
+ *
+ * Returns: (transfer none) (element-type utf8 GObject.Value): extensible
+ *  extra handler information, in a form suitable for use with
+ *  tp_asv_get_string() etc.
+ *
+ * Since: 0.11.14
+ */
+const GHashTable *
+tp_handle_channels_context_get_handler_info (TpHandleChannelsContext *self)
+{
+  g_return_val_if_fail (TP_IS_HANDLE_CHANNELS_CONTEXT (self), NULL);
+  return self->handler_info;
+}
+
+/**
+ * tp_handle_channels_context_get_requests:
+ * @self: a channel-handling context
+ *
+ * Return a list of the #TpChannelRequest which have been satisfied by the
+ * channels associated with #self.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.ChannelRequest):
+ *  a newly allocated #GList of reffed #TpChannelRequest.
+ *
+ * Since: 0.13.14
+ */
+GList *
+tp_handle_channels_context_get_requests (
+    TpHandleChannelsContext *self)
+{
+  GHashTable *request_props;
+
+  request_props = tp_asv_get_boxed (self->handler_info, "request-properties",
+      TP_HASH_TYPE_OBJECT_IMMUTABLE_PROPERTIES_MAP);
+  if (request_props == NULL)
+    return NULL;
+
+  return _tp_create_channel_request_list (
+      tp_proxy_get_dbus_daemon (self->account), request_props);
 }

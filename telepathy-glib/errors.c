@@ -35,7 +35,7 @@
  */
 
 /**
- * TP_ERRORS:
+ * TP_ERROR:
  *
  * The error domain for the D-Bus errors described in the Telepathy
  * specification. Error codes in this domain come from the #TpError
@@ -45,6 +45,11 @@
  * domain. Since 0.7.17, this function automatically registers the domain with
  * dbus-glib for server-side use (using dbus_g_error_domain_register()) when
  * called.
+ *
+ * This used to be called %TP_ERRORS. To be compatible with telepathy-glib
+ * 0.10.x, use %TP_ERRORS.
+ *
+ * Since: 0.11.7
  */
 
 /**
@@ -172,12 +177,65 @@
  *     that raising an error is preferable to disclosing the user's
  *     identity
  *     Since 0.11.7
+ * @TP_ERROR_CERT_REVOKED: org.freedesktop.Telepathy.Error.Cert.Revoked:
+ *     Raised if the server provided an SSL/TLS certificate that has been
+ *     revoked.
+ *     Since: 0.11.12
+ * @TP_ERROR_CERT_INSECURE: org.freedesktop.Telepathy.Error.Cert.Insecure:
+ *     Raised if the server provided an SSL/TLS certificate that uses an
+ *     insecure cipher algorithm or is cryptographically weak.
+ *     Since: 0.11.12
+ * @TP_ERROR_CERT_LIMIT_EXCEEDED: org.freedesktop.Telepathy.Error.Cert.LimitExceeded:
+ *     Raised if the length in bytes of the server certificate, or the depth
+ *     of the server certificate chain, exceed the limits imposed by the
+ *     crypto library.
+ *     Since: 0.11.12
+ * @TP_ERROR_NOT_YET: org.freedesktop.Telepathy.Error.NotYet:
+ *     Raised when the requested functionality is not yet available, but is
+ *     likely to become available after some time has passed.
+ *     Since: 0.11.15
+ * @TP_ERROR_REJECTED: org.freedesktop.Telepathy.Error.Rejected:
+ *     Raised when an incoming or outgoing call is rejected by the receiving
+ *     contact.
+ *     Since: 0.13.2
+ * @TP_ERROR_PICKED_UP_ELSEWHERE: org.freedesktop.Telepathy.Error.PickedUpElsewhere:
+ *     Raised when a call was terminated as a result of the local user
+ *     picking up the call on a different resource.
+ *     Since: 0.13.3
+ * @TP_ERROR_CONFUSED: org.freedesktop.Telepathy.Error.Confused:
+ *     Raised if a server rejects protocol messages from a connection manager
+ *     claiming that they do not make sense, two local processes fail to
+ *     understand each other, or an apparently impossible situation is
+ *     reached. This has a similar meaning to %TP_DBUS_ERROR_INCONSISTENT but
+ *     can be passed between processes via D-Bus.
+ *     Since: 0.13.7
+ * @TP_ERROR_SERVICE_CONFUSED: org.freedesktop.Telepathy.Error.ServiceConfused:
+ *     Raised when a server or other piece of infrastructure indicates an
+ *     internal error, or when a message that makes no sense is received from
+ *     a server or other piece of infrastructure.
+ *     Since: 0.13.7
+ * @TP_ERROR_EMERGENCY_CALLS_NOT_SUPPORTED:
+ *   org.freedesktop.Telepathy.Error.EmergencyCallsNotSupported:
+ *     Raised when a client attempts to dial a number that is recognized as an
+ *     emergency number (e.g. '911' in the USA), but the Connection
+ *     Manager or provider does not support dialling emergency numbers.
+ * @TP_ERROR_SOFTWARE_UPGRADE_REQUIRED:
+ *   org.freedesktop.Telepathy.Error.SoftwareUpgradeRequired:
+ *     Raised when a Connection cannot be established because either the
+ *     Connection Manager or its support library (e.g. wocky, papyon, sofiasip)
+ *     requires upgrading to support a newer protocol version.
+ * @TP_ERROR_INSUFFICIENT_BALANCE:
+ *   <code>org.freedesktop.Telepathy.Error.InsufficientBalance</code>:
+ *     Raised if the user has insufficient balance to place a call.  The key
+ *     'balance-required' MAY be included in CallStateDetails on a Call channel
+ *     (with the same units and scale as AccountBalance) to indicate how much
+ *     credit is required to make this call.
  *
  * Enumerated type representing the Telepathy D-Bus errors.
  */
 
 /**
- * tp_g_set_error_invalid_handle_type:
+ * tp_g_set_error_invalid_handle_type: (skip)
  * @type: An invalid handle type
  * @error: Either %NULL, or used to return an error (as for g_set_error)
  *
@@ -195,7 +253,7 @@ tp_g_set_error_invalid_handle_type (guint type, GError **error)
 }
 
 /**
- * tp_g_set_error_unsupported_handle_type:
+ * tp_g_set_error_unsupported_handle_type: (skip)
  * @type: An unsupported handle type
  * @error: Either %NULL, or used to return an error (as for g_set_error)
  *
@@ -226,13 +284,35 @@ tp_g_set_error_unsupported_handle_type (guint type, GError **error)
  * tools/glib-errors-str-gen.py.
  */
 
+/**
+ * tp_errors_quark: (skip)
+ *
+ * <!-- -->
+ *
+ * Deprecated: Use tp_error_quark() instead.
+ */
 GQuark
 tp_errors_quark (void)
+{
+  return tp_error_quark ();
+}
+
+/**
+ * tp_error_quark:
+ *
+ * Return the error domain quark for #TpError.
+ *
+ * Since: 0.11.13
+ */
+GQuark
+tp_error_quark (void)
 {
   static gsize quark = 0;
 
   if (g_once_init_enter (&quark))
     {
+      /* FIXME: When we next break API, this should be changed to
+       * "tp-error-quark" */
       GQuark domain = g_quark_from_static_string ("tp_errors");
 
       g_type_init ();
