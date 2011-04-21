@@ -1,3 +1,347 @@
+commit 2dcd8f054fa8bd717da553b2455ec394c8d7cc34
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 19:49:01 +0100
+
+    Version 0.14.5
+
+commit 9dc915cb9f1b0acb7666e9a563f8f0bd9d5c6ac6
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 18:25:18 +0100
+
+    Fully update spec to 0.22.2
+
+commit 98646464068863f114a5c3d28e02743a10a5b40d
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 18:12:19 +0100
+
+    Add missing docs for MaxStatusMessageLength stuff
+
+commit 22701518de0d8e4352c29d8a315d1831fa9ba60f
+Merge: 86e7d89 fe09fc0
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 17:46:02 +0100
+
+    Merge branch 'gtk-doc-regressions' into 0.14
+
+commit fe09fc00f7bcec24c082e36d1bdccdfebda0cd3e
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 14:22:45 +0100
+
+    Correct tp_simple_password_manager_prompt_for_channel_async ref.
+
+commit f0b95290ea868a504b11f34dff4ca698d236f5ac
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 13:45:42 +0100
+
+    Move instance struct definitions above classes.
+    
+    This works around a regression in gtk-doc which prevents the fields of
+    these structs being picked up. Moving these three instance structs above
+    their corresponding classes seems to do the job.
+    
+    The issue doesn't seem to affect other headers, and I have no idea why
+    not.
+
+commit 34eda44d389de3804be2d29e5bb90cfead9921c8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 11:28:36 +0100
+
+    Clean up tp_handle_set_foreach()
+    
+    gtk-doc was complaining that it didn't recognise the (closure)
+    annotation. While it is documented to be correct on
+    <https://live.gnome.org/GObjectIntrospection/Annotations>, since the
+    function is (skip)ed anyway I don't see any particular reason to keep it
+    around. Besides, if we call the parameter 'user_data' then GI makes the
+    right assumption.
+    
+    While looking at this I noticed that the implementation inexplicably
+    initializes its iterator closure twice.
+
+commit aecab25a163d7c6f9a5fd41c871e430857712a15
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 11:26:35 +0100
+
+    Annotate tp_errors_quark as deprecated.
+    
+    The docstring says it's deprecated; it's been that way for years; the
+    macro that people actually use has long since expanded to
+    tp_error_quark.
+    
+    This doesn't actually make gtk-doc shut up, as I hoped it would, because
+    it doesn't pay the blindest bit of notice to G_GNUC_DEPRECATED and
+    instead witters on about deprecation guards. Oh well.
+
+commit ef5f302e7ed74bf5e2e33928b3e99e1029885e58
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-20 11:16:01 +0100
+
+    Remove inexplicably duplicated symbols from docs
+
+commit 77958fe8c01a0fac6f32b02d0679a29d615ff4b1
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-19 18:51:31 +0100
+
+    gnio-util: correct typo in “(allown-none)” annotation
+
+commit 51fbfef221470ae0ad94bc26a1e6b016757948b2
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-19 18:51:04 +0100
+
+    Add /*<public>*/ annotations to various structs.
+    
+    For some reason gtk-doc 1.16 and later don't pick these fields up
+    without this annotation.
+
+commit f2ced8f48a6901cd7f5819f153f157778ae6ca93
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-19 17:13:14 +0100
+
+    Make tp_str_empty() a static inline function directly
+    
+    The
+    tp_str_empty()-is-a-macro-which-is-implemented-as-a-static-inline-function
+    thing was a workaround for gtk-doc not supporting static inline
+    functions.
+    
+    As of 1.16, it does.
+
+commit 1d78f4a9fb520ec024d0b2cb7fc9eca5babdb5ce
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-19 17:06:40 +0100
+
+    tp_intset_iter_{init,reset}: demacroify
+    
+    Previously, tp_intset_iter_init (resp. _reset) was a macro, which was
+    implemented using tp_intset_iter_init_inline, which was a static inline
+    function defined in the header.
+    
+    This seems unnecessary, particularly for an iterator type documented to
+    be slow and old and semi-deprecated in favour of the faster variant,
+    which uses a regular function to init.
+
+commit 86e7d89052ef4cd7dd3b47d2f3274b2c16cca06f
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-19 13:39:32 -0300
+
+    Update Connection_Interface_Simple_Presence with spec changes.
+
+commit 58faf040432d6464bad8e90493b8c4d21eaa2822
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-19 13:16:23 -0300
+
+    Add rationale for TpPresenceMixinClass::get_maximum_status_message_length.
+
+commit 56109498391f21aa7b5841ec0291c872ff5db1f0
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-19 13:15:24 -0300
+
+    Properly add <public>/<private> annotations to TpPresenceMixinClass.
+
+commit a7cb0d5be213ea7a142254d96bc2ec77e1754206
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-14 02:52:12 -0300
+
+    self-presence test: Add test for Conn.SimplePresence.MaximumStatusMessageLength.
+
+commit 6ef16c438398db1e219760972a4b33f98f01150b
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-14 02:50:59 -0300
+
+    contacts-conn: Add support for Conn.SimplePresence.MaximumStatusMessageLength.
+
+commit f99d23fb33e5c82132556a1228472a98a2bb2bda
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-14 01:40:55 -0300
+
+    Add support for Conn.SimplePresence.MaximumStatusMessageLength.
+
+commit dd82637259edc5fc20d86d96fb192a77e55210bb
+Author: Andre Moreira Magalhaes (andrunko) <andre.magalhaes@collabora.co.uk>
+Date:   2011-04-14 02:44:32 -0300
+
+    Updated Conn.SimplePresence to support MaximumStatusMessageLength.
+
+commit 1190edcea92ea240b16b19821b394ec5b684321f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-04-05 15:27:06 +0200
+
+    add tp_base_client_is_handling_channel (fdo #35990)
+
+commit fa547f56057dd36ce7b39d1f3963e3bb74cfb37c
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-04-18 11:39:54 +0100
+
+    Tests: include system $XDG_DATA_DIRS
+    
+    The glib-networking proxy resolver uses GSettings. GSettings looks for
+    schemas in XDG_DATA_DIRS. GSettings gets really angry if a schema is
+    missing:
+    
+      GLib-GIO-ERROR **: Settings schema 'org.gnome.system.proxy' is not installed
+    
+    Setting XDG_DATA_DIRS replaces the defaults, rather than adding to them.
+    
+    While in principle it's nice to be isolated from the system, and while
+    it would be better to ensure we don't hit the network by having a dummy
+    proxy resolver, I'd like to be able to run the test suite.
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 1b8046f748bbc63668081a1e5570afda7c079bf3
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-15 13:49:57 +0300
+
+    Bump nano version to 0.14.4.1
+
+commit 226dbf27e1ce46b92550e6401781b9bac94d9d2f
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-15 13:28:07 +0300
+
+    version 0.14.4
+
+commit abfc9014b493106bc76520faf9d54e5c9869e197
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-04-11 15:59:19 +0200
+
+    tp_base_protocol_get_immutable_properties: add Avatars property
+
+commit 8f047aaaf9f0d5bdadb652cbc455d683c449ded3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-04-11 17:23:52 +0200
+
+    TpProtocol: add supported interfaces (fdo #36134)
+
+commit 4fee994638e36662aec5e08b13cd57253fa5c227
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-04-11 17:31:27 +0200
+
+    Use tp_proxy_add_interfaces() more
+
+commit 8780dc7ad37a5ff5b1b234a3351a72227c80b3fa
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-04-12 15:07:52 +0200
+
+    tp_proxy_add_interfaces: interfaces is a 'const gchar * const *'
+
+commit 9bf259aa30cb42f263d2968f4458f00b3420b0d4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-04-12 14:21:50 +0200
+
+    tp_proxy_add_interfaces: improve debug message
+
+commit c7e6750de39024df947b7b4a6ce4c73f92e14198
+Merge: 8ac64f0 1b46c32
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-12 13:34:07 +0300
+
+    Merge branch 'conn-introspection-0.14' into telepathy-glib-0.14
+    
+    Reviewed-by: Will Thompson (wjt) <will.thompson@collabora.co.uk>
+
+commit 1b46c3259567e61c654934334ef0bf00f664b5fb
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-12 13:31:50 +0300
+
+    Add tp_proxy_add_interfaces to gtk-doc
+
+commit a461cde341e1b408bddb5499dd77b740b128d035
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-12 12:46:49 +0300
+
+    tp_proxy_add_interfaces: Early-return with NULL interfaces
+
+commit a9e1a5a8390a2e34e7979b15e973c9b18dacdc01
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-12 12:45:48 +0300
+
+    tp_proxy_add_interfaces: Fix reference to tp_proxy_add_interface_by_id()
+
+commit 5804473cc301bbf1f5104bff6edc913482b1ed6a
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-11 19:46:01 +0300
+
+    Refactor tp_proxy_add_interfaces out from TpConn introspection
+
+commit e5d552f4ef6300c59deda2a501181f7d0e50e8c8
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-11 19:23:36 +0300
+
+    Avoid the goto in _tp_connection_got_properties
+
+commit 54c073f0ccd933f55b906d0ea7f040f6d70b6bb0
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 23:01:55 +0300
+
+    connection.c: Remove stale comment
+
+commit 6c8ec1857f76b776dc18940f61858c56fcfb62b5
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 22:47:31 +0300
+
+    TpConnection: Use fast-path also for CONNECTED reintrospection
+
+commit f0810a01ff3e1c9fceae846cc00d0db1978e6eed
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 18:26:33 +0300
+
+    TpConnection: Use GetAll return for initial introspection
+
+commit be779696b98c227b6f0a8582207fe9779a692188
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 21:52:44 +0300
+
+    TpTestsSimpleConnection: Make it possible to break 0.19.2 props
+    
+    To force slow-path introspection in TpConnection. In particular, the self-handle changing test
+    depends on receiving GetSelfHandle calls, which it doesn't if we're just calling GetAll.
+
+commit f6a169db0c31f64ef5ba953d0e1cabd325ea3e10
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 18:40:07 +0300
+
+    bug16307-conn.c: Intentionally break Connection properties implementation
+    
+    Otherwise the fast-path will be hit, and TpConnection never calls GetStatus which this test is
+    supposed to simulate being returned to at a certain moment.
+
+commit fd5f43f9d76f11593d026bd87396ce6265cc1b99
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 21:02:24 +0300
+
+    Fix crash in contacts_get_attributes with invalidated conn
+    
+    If the connection was invalidated at an inopportune time, contacts_get_attributes could be called
+    with the connection already having been invalidated and dropped its interfaces. This would cause an
+    assert checking for support for the Conn.I.Contacts interface to be hit.
+    
+    This is a simple but safe way to prevent that and related bugs. An invalidated connection never
+    needs to build contacts successfully.
+
+commit 798ddba6d3f37a84a878b20b12ffbce9dd5f7ab5
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 18:26:15 +0300
+
+    connection.c: Update copyright
+
+commit 0eb637466bab96391100070f04b1313e405ded59
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 17:17:15 +0300
+
+    TpConnection: Demote the current introspection path to a slow-path
+
+commit 90095cfbe3803085e74875a542a5d8e37674d8dc
+Author: Olli Salli <ollisal@gmail.com>
+Date:   2011-04-07 16:56:02 +0300
+
+    tp_connection_got_interfaces_cb: Refactor out introspection queuing loop
+
+commit 8ac64f0ed40681f91f507eed139fef1279e4333b
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-03-31 15:11:00 +0100
+
+    Bump nano-version to 0.14.3.1
+
 commit e5314ff0b6b44bbe10ce29a30c446b5dbf919aad
 Author: Will Thompson <will.thompson@collabora.co.uk>
 Date:   2011-03-31 14:13:10 +0100
