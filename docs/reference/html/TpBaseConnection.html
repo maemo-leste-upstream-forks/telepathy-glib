@@ -717,18 +717,28 @@ Change the status of the connection. The allowed state transitions are:
 <p>
 </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">NEW -&gt; CONNECTING</li>
-<li class="listitem">CONNECTING -&gt; CONNECTED</li>
-<li class="listitem">NEW -&gt; CONNECTED (equivalent to both of the above one after the
-other - see below)</li>
-<li class="listitem">(anything except DISCONNECTED) -&gt; DISCONNECTED</li>
+<li class="listitem">
+<a class="link" href="TpBaseConnection.html#TP-INTERNAL-CONNECTION-STATUS-NEW:CAPS" title="TP_INTERNAL_CONNECTION_STATUS_NEW"><span class="type">TP_INTERNAL_CONNECTION_STATUS_NEW</span></a> →
+   <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-CONNECTING:CAPS"><span class="type">TP_CONNECTION_STATUS_CONNECTING</span></a>
+</li>
+<li class="listitem">
+<a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-CONNECTING:CAPS"><span class="type">TP_CONNECTION_STATUS_CONNECTING</span></a> →
+   <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-CONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_CONNECTED</span></a>
+</li>
+<li class="listitem">
+<a class="link" href="TpBaseConnection.html#TP-INTERNAL-CONNECTION-STATUS-NEW:CAPS" title="TP_INTERNAL_CONNECTION_STATUS_NEW"><span class="type">TP_INTERNAL_CONNECTION_STATUS_NEW</span></a> →
+   <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-CONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_CONNECTED</span></a> (exactly equivalent to both of the above
+   one after the other; see below)</li>
+<li class="listitem">anything except <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_DISCONNECTED</span></a> →
+   <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_DISCONNECTED</span></a>
+</li>
 </ul></div>
 <p>
 </p>
 <p>
-Before the transition to CONNECTED, the implementation must have discovered
-the handle for the local user, obtained a reference to that handle and
-stored it in the <em class="parameter"><code>self_handle</code></em> member of <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>.
+Before the transition to <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-CONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_CONNECTED</span></a>, the implementation
+must have discovered the handle for the local user and passed it to
+<a class="link" href="TpBaseConnection.html#tp-base-connection-set-self-handle" title="tp_base_connection_set_self_handle ()"><code class="function">tp_base_connection_set_self_handle()</code></a>.
 </p>
 <p>
 Changing from NEW to CONNECTED is implemented by doing the transition from
@@ -742,17 +752,23 @@ Any other valid transition does the following, in this order:
 <p>
 </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">Update the <em class="parameter"><code>status</code></em> member of <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>
-</li>
-<li class="listitem">If the new state is DISCONNECTED, call the close_all_channels
-callback on all channel factories</li>
-<li class="listitem">Emit the D-Bus StatusChanged signal</li>
-<li class="listitem">Call the subclass' status change callback</li>
-<li class="listitem">Call the channel factories' status change callbacks</li>
-<li class="listitem">If the new state is DISCONNECTED, call the subclass'
-<em class="parameter"><code>shut_down</code></em> callback</li>
+<li class="listitem">Update <span class="type">TpBaseConnection.status</span>;</li>
+<li class="listitem">If the new state is <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_DISCONNECTED</span></a>, call
+   <a class="link" href="TpChannelFactoryIface.html#tp-channel-factory-iface-close-all" title="tp_channel_factory_iface_close_all ()"><code class="function">tp_channel_factory_iface_close_all()</code></a> on all channel factories</li>
+<li class="listitem">Emit the D-Bus StatusChanged signal;</li>
+<li class="listitem">Call <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.connecting"><span class="type">TpBaseConnectionClass.connecting</span></a>,
+   <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.connected"><span class="type">TpBaseConnectionClass.connected</span></a> or <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.disconnected"><span class="type">TpBaseConnectionClass.disconnected</span></a>
+   as appropriate;</li>
+<li class="listitem">Call the channel factories' status change callbacks;</li>
+<li class="listitem">If the new state is <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_DISCONNECTED</span></a>, call the
+   subclass' <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.shut-down"><span class="type">TpBaseConnectionClass.shut_down</span></a> callback.</li>
 </ul></div>
 <p>
+</p>
+<p>
+To provide more details about what happened when moving to <em class="parameter"><code>status</code></em>
+<a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><span class="type">TP_CONNECTION_STATUS_DISCONNECTED</span></a> due to an error, consider calling
+<a class="link" href="TpBaseConnection.html#tp-base-connection-disconnect-with-dbus-error" title="tp_base_connection_disconnect_with_dbus_error ()"><code class="function">tp_base_connection_disconnect_with_dbus_error()</code></a> instead of this function.
 </p>
 <p>
 Changed in 0.7.35: the <em class="parameter"><code>self_handle</code></em> member of <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> was
@@ -789,13 +805,31 @@ is disposed.
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *details</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpConnectionStatusReason" title="enum TpConnectionStatusReason"><span class="type">TpConnectionStatusReason</span></a> reason</code></em>);</pre>
 <p>
-Change the status of the connection to <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><code class="literal">TP_CONNECTION_STATUS_DISCONNECTED</code></a>,
-as if by a call to <a class="link" href="TpBaseConnection.html#tp-base-connection-change-status" title="tp_base_connection_change_status ()"><code class="function">tp_base_connection_change_status()</code></a>. Before doing so,
-emit the ConnectionError D-Bus signal to give more details of the error.
+Changes the <span class="type">TpBaseConnection.status</span> of <em class="parameter"><code>self</code></em> to
+<a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-DISCONNECTED:CAPS"><code class="literal">TP_CONNECTION_STATUS_DISCONNECTED</code></a>, as if by a call to
+<a class="link" href="TpBaseConnection.html#tp-base-connection-change-status" title="tp_base_connection_change_status ()"><code class="function">tp_base_connection_change_status()</code></a>, but additionally emits the
+<code class="code">ConnectionError</code> D-Bus signal to provide more details about the
+error.
 </p>
 <p>
-<em class="parameter"><code>details</code></em> may contain, among other entries, the well-known key
-"debug-message", whose value should have type G_TYPE_STRING.
+Well-known keys for <em class="parameter"><code>details</code></em> are documented in the Telepathy specification's
+<a class="ulink" href="http://telepathy.freedesktop.org/spec/Connection.html#Signal:ConnectionError" target="_top">definition
+of the ConnectionError signal</a>, and include:
+</p>
+<p>
+</p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+<code class="code">"debug-message"</code>, whose value should have type
+   <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-TYPE-STRING:CAPS"><span class="type">G_TYPE_STRING</span></a>, for debugging information about the
+   disconnection which should not be shown to the user</li>
+<li class="listitem">
+<code class="code">"server-message"</code>, whose value should also have type
+   <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-TYPE-STRING:CAPS"><span class="type">G_TYPE_STRING</span></a>, for a human-readable error message from the server (in an
+   unspecified language) explaining why the user was
+   disconnected.</li>
+</ul></div>
+<p>
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -815,7 +849,8 @@ emit the ConnectionError D-Bus signal to give more details of the error.
 <td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
 <td>Further details of the error, as a hash table where the keys
           are strings as defined in the Telepathy specification, and the
-          values are GValues. <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is allowed, and treated as empty.
+          values are <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>s. <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is allowed, and treated as
+          an empty hash table.
 </td>
 </tr>
 <tr>
@@ -1077,8 +1112,22 @@ Initializes an iterator over the <a class="link" href="TpChannelManager.html" ti
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></td>
+        <td class="listing_code"><pre class="programlisting">TpChannelManagerIter iter<span class="symbol">;</span>
+TpChannelManager <span class="symbol">*</span>manager<span class="symbol">;</span>
+
+<span class="function"><a href="TpBaseConnection.html#tp-base-connection-channel-manager-iter-init">tp_base_connection_channel_manager_iter_init</a></span> <span class="symbol">(&amp;</span>iter<span class="symbol">,</span> base_conn<span class="symbol">);</span>
+<span class="keyword">while</span> <span class="symbol">(</span><span class="function"><a href="TpBaseConnection.html#tp-base-connection-channel-manager-iter-next">tp_base_connection_channel_manager_iter_next</a></span> <span class="symbol">(&amp;</span>iter<span class="symbol">, &amp;</span>manager<span class="symbol">))</span>
+  <span class="symbol">{</span>
+    <span class="symbol">...</span><span class="keyword">do</span> something with manager<span class="symbol">...</span>
+  <span class="symbol">}</span></pre></td>
       </tr>
     </tbody>
   </table>

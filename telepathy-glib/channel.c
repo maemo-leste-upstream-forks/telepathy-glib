@@ -686,6 +686,7 @@ tp_channel_get_initial_chat_states_cb (TpProxy *proxy,
     GObject *weak_object)
 {
   TpChannel *self = TP_CHANNEL (proxy);
+  GSimpleAsyncResult *result = user_data;
 
   if (error == NULL && G_VALUE_HOLDS (value, TP_HASH_TYPE_CHAT_STATE_MAP))
     {
@@ -695,31 +696,22 @@ tp_channel_get_initial_chat_states_cb (TpProxy *proxy,
   /* else just ignore it and assume everyone was initially in the default
    * Inactive state, unless we already saw a signal for them */
 
-  _tp_proxy_set_feature_prepared (proxy, TP_CHANNEL_FEATURE_CHAT_STATES, TRUE);
+  g_simple_async_result_complete (result);
 }
 
 static void
-tp_channel_maybe_prepare_chat_states (TpProxy *proxy)
+tp_channel_prepare_chat_states_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   TpChannel *self = (TpChannel *) proxy;
+  GSimpleAsyncResult *result;
 
-  if (self->priv->chat_states != NULL)
-    return;   /* already done */
+  result = g_simple_async_result_new ((GObject *) proxy, callback, user_data,
+      tp_channel_prepare_chat_states_async);
 
-  if (!_tp_proxy_is_preparing (proxy, TP_CHANNEL_FEATURE_CHAT_STATES))
-    return;   /* not interested right now */
-
-  if (!self->priv->ready)
-    return;   /* will try again when ready */
-
-  if (!tp_proxy_has_interface_by_id (proxy,
-        TP_IFACE_QUARK_CHANNEL_INTERFACE_CHAT_STATE))
-    {
-      /* not going to happen */
-      _tp_proxy_set_feature_prepared (proxy, TP_CHANNEL_FEATURE_CHAT_STATES,
-          FALSE);
-      return;
-    }
+  g_assert (self->priv->chat_states == NULL);
 
   /* chat states? yes please! */
   self->priv->chat_states = g_hash_table_new (NULL, NULL);
@@ -730,7 +722,7 @@ tp_channel_maybe_prepare_chat_states (TpProxy *proxy)
   tp_cli_dbus_properties_call_get (self, -1,
       TP_IFACE_CHANNEL_INTERFACE_CHAT_STATE, "ChatStates",
       tp_channel_get_initial_chat_states_cb,
-      NULL, NULL, NULL);
+      result, g_object_unref, NULL);
 }
 
 void
@@ -764,8 +756,6 @@ _tp_channel_continue_introspection (TpChannel *self)
           TP_CHANNEL_FEATURE_GROUP,
           tp_proxy_has_interface_by_id (self,
             TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP));
-
-      tp_channel_maybe_prepare_chat_states ((TpProxy *) self);
     }
   else
     {
@@ -1358,6 +1348,7 @@ static const TpProxyFeature *
 tp_channel_list_features (TpProxyClass *cls G_GNUC_UNUSED)
 {
   static TpProxyFeature features[N_FEAT + 1] = { { 0 } };
+  static GQuark need_chat_states[2] = {0, 0};
 
   if (G_LIKELY (features[0].name != 0))
     return features;
@@ -1368,8 +1359,10 @@ tp_channel_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   features[FEAT_GROUP].name = TP_CHANNEL_FEATURE_GROUP;
 
   features[FEAT_CHAT_STATES].name = TP_CHANNEL_FEATURE_CHAT_STATES;
-  features[FEAT_CHAT_STATES].start_preparing =
-    tp_channel_maybe_prepare_chat_states;
+  features[FEAT_CHAT_STATES].prepare_async =
+    tp_channel_prepare_chat_states_async;
+  need_chat_states[0] = TP_IFACE_QUARK_CHANNEL_INTERFACE_CHAT_STATE;
+  features[FEAT_CHAT_STATES].interfaces_needed = need_chat_states;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);

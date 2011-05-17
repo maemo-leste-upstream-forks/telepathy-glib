@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [14])
-m4_define([tp_glib_micro_version], [5])
+m4_define([tp_glib_minor_version], [15])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [56])
+m4_define([tp_glib_lt_current], [57])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [56])
+m4_define([tp_glib_lt_age], [57])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -183,7 +183,7 @@ AM_CONDITIONAL([OUT_OF_TREE_BUILD], [test "z$ac_srcdir" != z.])
 
 dnl Check for Glib
 PKG_CHECK_MODULES(GLIB,
-  [glib-2.0 >= 2.25.16, gobject-2.0 >= 2.25.16, gio-2.0 >= 2.25.16])
+  [glib-2.0 >= 2.28.0, gobject-2.0 >= 2.28.0, gio-2.0 >= 2.28.0])
 
 dnl Check for GIO-Unix
 PKG_CHECK_MODULES(GIO_UNIX, [gio-unix-2.0],

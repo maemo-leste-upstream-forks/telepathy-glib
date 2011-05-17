@@ -65,11 +65,12 @@ int
 main (int argc,
       char **argv)
 {
-  tp_tests_abort_after (10);
-  g_test_init (&argc, &argv, NULL);
+  tp_tests_init (&argc, &argv);
   g_test_bug_base ("http://bugs.freedesktop.org/show_bug.cgi?id=");
 
   g_test_add ("/cd/new", Test, NULL, setup, test_new, teardown);
+  /* tp_channel_dispatcher_present_channel_async() is tested in
+   * test-base-client */
 
   return g_test_run ();
 }

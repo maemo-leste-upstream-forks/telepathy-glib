@@ -655,6 +655,9 @@ test_claim (Test *test,
   g_main_loop_run (test->mainloop);
 
   g_assert_no_error (test->error);
+
+  /* tp_channel_dispatch_operation_claim_with_async() is tested in
+   * tests/dbus/base-client.c */
 }
 
 static void
@@ -780,8 +783,7 @@ int
 main (int argc,
       char **argv)
 {
-  tp_tests_abort_after (10);
-  g_test_init (&argc, &argv, NULL);
+  tp_tests_init (&argc, &argv);
   g_test_bug_base ("http://bugs.freedesktop.org/show_bug.cgi?id=");
 
   g_test_add ("/cdo/new", Test, NULL, setup, test_new, teardown);

@@ -1170,13 +1170,19 @@ their type.
 <p>
 </p>
 <div class="example">
-<a name="idp94837712"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
+<a name="id1345163"></a><p class="title"><b>Example 2.  using tp_value_array_build</b></p>
 <div class="example-contents">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4</pre></td>
+        <td class="listing_code"><pre class="programlisting">GValueArray <span class="symbol">*</span>array <span class="symbol">=</span> <span class="function"><a href="telepathy-glib-util.html#tp-value-array-build">tp_value_array_build</a></span> <span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span>
+   G_TYPE_STRING<span class="symbol">,</span> host<span class="symbol">,</span>
+   G_TYPE_UINT<span class="symbol">,</span> port<span class="symbol">,</span>
+   G_TYPE_INVALID<span class="symbol">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -1230,13 +1236,23 @@ invalid when <em class="parameter"><code>array</code></em> is freed.
 <p>
 </p>
 <div class="example">
-<a name="idp94859184"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
+<a name="id1345342"></a><p class="title"><b>Example 3. using tp_value_array_unpack</b></p>
 <div class="example-contents">
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">const</span> gchar <span class="symbol">*</span>host<span class="symbol">;</span>
+guint port<span class="symbol">;</span>
+
+<span class="function"><a href="telepathy-glib-util.html#tp-value-array-unpack">tp_value_array_unpack</a></span> <span class="symbol">(</span>array<span class="symbol">,</span> <span class="number">2</span><span class="symbol">,</span>
+   <span class="symbol">&amp;</span>host<span class="symbol">,</span>
+   <span class="symbol">&amp;</span>port<span class="symbol">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -1423,8 +1439,34 @@ Typical usage is something like this:
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwc">typedef</span> <span class="gtkdoc kwb">struct</span> <span class="symbol">{</span>
+  TpConnection <span class="symbol">*</span>conn<span class="symbol">;</span>
+  GError <span class="symbol">*</span>error<span class="symbol">;</span>
+  GHashTable <span class="symbol">*</span>table<span class="symbol">;</span>
+  MyStruct <span class="symbol">*</span>misc<span class="symbol">;</span>
+<span class="symbol">}</span> Foo<span class="symbol">;</span>
+Foo <span class="symbol">*</span>foo<span class="symbol">;</span>
+
+<span class="symbol">...</span>
+
+<span class="function"><a href="telepathy-glib-util.html#tp-clear-object">tp_clear_object</a></span> <span class="symbol">(&amp;</span>foo<span class="symbol">-&gt;</span>conn<span class="symbol">);</span>
+<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#g-clear-error">g_clear_error</a></span> <span class="symbol">(&amp;</span>foo<span class="symbol">-&gt;</span>error<span class="symbol">);</span>
+<span class="function"><a href="telepathy-glib-util.html#tp-clear-boxed">tp_clear_boxed</a></span> <span class="symbol">(</span>G_TYPE_HASH_TABLE<span class="symbol">, &amp;</span>foo<span class="symbol">-&gt;</span>table<span class="symbol">);</span>
+<span class="function"><a href="telepathy-glib-util.html#tp-clear-pointer">tp_clear_pointer</a></span> <span class="symbol">(&amp;</span>foo<span class="symbol">-&gt;</span>misc<span class="symbol">,</span> my_struct_destroy<span class="symbol">);</span></pre></td>
       </tr>
     </tbody>
   </table>

@@ -297,8 +297,7 @@ tp_connection_get_rcc_cb (TpProxy *proxy,
     GObject *weak_object)
 {
   TpConnection *self = (TpConnection *) proxy;
-
-  self->priv->fetching_rcc = FALSE;
+  GSimpleAsyncResult *result = user_data;
 
   if (error != NULL)
     {
@@ -328,46 +327,74 @@ tp_connection_get_rcc_cb (TpProxy *proxy,
       FALSE);
 
 finally:
-  _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_CAPABILITIES,
-      TRUE);
+  g_simple_async_result_complete (result);
 
   g_object_notify ((GObject *) self, "capabilities");
 }
 
 static void
-tp_connection_maybe_prepare_capabilities (TpProxy *proxy)
+tp_connection_prepare_capabilities_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   TpConnection *self = (TpConnection *) proxy;
+  GSimpleAsyncResult *result;
 
-  if (self->priv->capabilities != NULL)
-    return;   /* already done */
+  result = g_simple_async_result_new ((GObject *) proxy, callback, user_data,
+      tp_connection_prepare_capabilities_async);
 
-  if (!_tp_proxy_is_preparing (proxy, TP_CONNECTION_FEATURE_CAPABILITIES))
-    return;   /* not interested right now */
-
-  if (!self->priv->ready)
-    return;   /* will try again when ready */
-
-  if (self->priv->fetching_rcc)
-    return;   /* Another Get operation is running */
-
-  if (!tp_proxy_has_interface_by_id (proxy,
-        TP_IFACE_QUARK_CONNECTION_INTERFACE_REQUESTS))
-    {
-      /* Connection doesn't support Requests; set an empty TpCapabilities
-       * object as all calls to CreateChannel/EnsureChannel will fail. */
-
-      self->priv->capabilities = _tp_capabilities_new (NULL, FALSE);
-      _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_CAPABILITIES,
-          TRUE);
-      return;
-    }
-
-  self->priv->fetching_rcc = TRUE;
+  g_assert (self->priv->capabilities == NULL);
 
   tp_cli_dbus_properties_call_get (self, -1,
       TP_IFACE_CONNECTION_INTERFACE_REQUESTS, "RequestableChannelClasses",
-      tp_connection_get_rcc_cb, NULL, NULL, NULL);
+      tp_connection_get_rcc_cb, result, g_object_unref, NULL);
+}
+
+static void
+signal_connected (TpConnection *self)
+{
+  /* we shouldn't have gone to status CONNECTED for any reason
+   * that isn't REQUESTED :-) */
+  DEBUG ("%p: CORE and CONNECTED ready", self);
+  self->priv->status = TP_CONNECTION_STATUS_CONNECTED;
+  self->priv->status_reason = TP_CONNECTION_STATUS_REASON_REQUESTED;
+  self->priv->ready = TRUE;
+
+  _tp_proxy_set_feature_prepared ((TpProxy *) self,
+      TP_CONNECTION_FEATURE_CONNECTED, TRUE);
+  _tp_proxy_set_feature_prepared ((TpProxy *) self,
+      TP_CONNECTION_FEATURE_CORE, TRUE);
+
+  g_object_notify ((GObject *) self, "status");
+  g_object_notify ((GObject *) self, "status-reason");
+  g_object_notify ((GObject *) self, "connection-ready");
+}
+
+static void
+will_announced_connected_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpConnection *self = (TpConnection *) source;
+  GError *error = NULL;
+
+  if (!_tp_proxy_will_announce_connected_finish ((TpProxy *) self, result,
+        &error))
+    {
+      DEBUG ("_tp_connection_prepare_contact_info_async failed: %s",
+          error->message);
+
+      g_error_free (error);
+    }
+
+  if (tp_proxy_get_invalidated (self) != NULL)
+    {
+      DEBUG ("Connection has been invalidated; we're done");
+      return;
+    }
+
+  signal_connected (self);
 }
 
 static void
@@ -390,25 +417,10 @@ tp_connection_continue_introspection (TpConnection *self)
           return;
         }
 
-      /* signal CONNECTED; we shouldn't have gone to status CONNECTED for any
-       * reason that isn't REQUESTED :-) */
-      DEBUG ("%p: CORE and CONNECTED ready", self);
-      self->priv->status = TP_CONNECTION_STATUS_CONNECTED;
-      self->priv->status_reason = TP_CONNECTION_STATUS_REASON_REQUESTED;
-      self->priv->ready = TRUE;
-
-      _tp_proxy_set_feature_prepared ((TpProxy *) self,
-          TP_CONNECTION_FEATURE_CONNECTED, TRUE);
-      _tp_proxy_set_feature_prepared ((TpProxy *) self,
-          TP_CONNECTION_FEATURE_CORE, TRUE);
-
-      g_object_notify ((GObject *) self, "status");
-      g_object_notify ((GObject *) self, "status-reason");
-      g_object_notify ((GObject *) self, "connection-ready");
-
-      tp_connection_maybe_prepare_capabilities ((TpProxy *) self);
-      _tp_connection_maybe_prepare_avatar_requirements ((TpProxy *) self);
-      _tp_connection_maybe_prepare_contact_info ((TpProxy *) self);
+      /* We'll announce CONNECTED state soon, but first give a chance to
+       * prepared feature to be updated, if needed */
+      _tp_proxy_will_announce_connected_async ((TpProxy *) self,
+          will_announced_connected_cb, NULL);
     }
   else
     {
@@ -1262,6 +1274,9 @@ static const TpProxyFeature *
 tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
 {
   static TpProxyFeature features[N_FEAT + 1] = { { 0 } };
+  static GQuark need_requests[2] = {0, 0};
+  static GQuark need_avatars[2] = {0, 0};
+  static GQuark need_contact_info[2] = {0, 0};
 
   if (G_LIKELY (features[0].name != 0))
     return features;
@@ -1272,16 +1287,22 @@ tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   features[FEAT_CONNECTED].name = TP_CONNECTION_FEATURE_CONNECTED;
 
   features[FEAT_CAPABILITIES].name = TP_CONNECTION_FEATURE_CAPABILITIES;
-  features[FEAT_CAPABILITIES].start_preparing =
-    tp_connection_maybe_prepare_capabilities;
+  features[FEAT_CAPABILITIES].prepare_async =
+      tp_connection_prepare_capabilities_async;
+  need_requests[0] = TP_IFACE_QUARK_CONNECTION_INTERFACE_REQUESTS;
+  features[FEAT_CAPABILITIES].interfaces_needed = need_requests;
 
   features[FEAT_AVATAR_REQUIREMENTS].name = TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS;
-  features[FEAT_AVATAR_REQUIREMENTS].start_preparing =
-    _tp_connection_maybe_prepare_avatar_requirements;
+  features[FEAT_AVATAR_REQUIREMENTS].prepare_async =
+    _tp_connection_prepare_avatar_requirements_async;
+  need_avatars[0] = TP_IFACE_QUARK_CONNECTION_INTERFACE_AVATARS;
+  features[FEAT_AVATAR_REQUIREMENTS].interfaces_needed = need_avatars;
 
   features[FEAT_CONTACT_INFO].name = TP_CONNECTION_FEATURE_CONTACT_INFO;
-  features[FEAT_CONTACT_INFO].start_preparing =
-    _tp_connection_maybe_prepare_contact_info;
+  features[FEAT_CONTACT_INFO].prepare_async =
+    _tp_connection_prepare_contact_info_async;
+  need_contact_info[0] = TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_INFO;
+  features[FEAT_CONTACT_INFO].interfaces_needed = need_contact_info;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);

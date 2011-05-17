@@ -581,6 +581,17 @@ got_pending_senders_contact (TpTextChannel *self,
 }
 
 static void
+free_parts_list (GList *parts_list)
+{
+  GList *l;
+
+  for (l = parts_list; l != NULL; l = g_list_next (l))
+    g_boxed_free (TP_ARRAY_TYPE_MESSAGE_PART_LIST, l->data);
+
+  g_list_free (parts_list);
+}
+
+static void
 got_pending_senders_contact_by_handle_cb (TpConnection *connection,
     guint n_contacts,
     TpContact * const *contacts,
@@ -590,8 +601,10 @@ got_pending_senders_contact_by_handle_cb (TpConnection *connection,
     gpointer user_data,
     GObject *weak_object)
 {
-  TpTextChannel *self = (TpTextChannel *) weak_object;
+  GSimpleAsyncResult *result = (GSimpleAsyncResult *) weak_object;
   GList *parts_list = user_data;
+  TpTextChannel *self = TP_TEXT_CHANNEL (g_async_result_get_source_object (
+        G_ASYNC_RESULT (result)));
 
   if (error != NULL)
     {
@@ -621,8 +634,10 @@ got_pending_senders_contact_by_id_cb (TpConnection *connection,
     gpointer user_data,
     GObject *weak_object)
 {
-  TpTextChannel *self = (TpTextChannel *) weak_object;
+  GSimpleAsyncResult *result = (GSimpleAsyncResult *) weak_object;
   GList *parts_list = user_data;
+  TpTextChannel *self = TP_TEXT_CHANNEL (g_async_result_get_source_object (
+        G_ASYNC_RESULT (result)));
 
   if (error != NULL)
     {
@@ -650,18 +665,6 @@ out:
       TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES, TRUE);
 }
 
-static void
-free_parts_list (gpointer data)
-{
-  GList *parts_list = data;
-  GList *l;
-
-  for (l = parts_list; l != NULL; l = g_list_next (l))
-    g_boxed_free (TP_ARRAY_TYPE_MESSAGE_PART_LIST, l->data);
-
-  g_list_free (parts_list);
-}
-
 /* There is no TP_ARRAY_TYPE_PENDING_TEXT_MESSAGE_LIST_LIST (fdo #32433) */
 #define ARRAY_TYPE_PENDING_TEXT_MESSAGE_LIST_LIST dbus_g_type_get_collection (\
     "GPtrArray", TP_ARRAY_TYPE_MESSAGE_PART_LIST)
@@ -673,7 +676,8 @@ get_pending_messages_cb (TpProxy *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  TpTextChannel *self = user_data;
+  TpTextChannel *self = (TpTextChannel *) proxy;
+  GSimpleAsyncResult *result = user_data;
   guint i;
   GPtrArray *messages;
   TpIntSet *senders;
@@ -686,18 +690,20 @@ get_pending_messages_cb (TpProxy *proxy,
     {
       DEBUG ("Failed to get PendingMessages property: %s", error->message);
 
-      _tp_proxy_set_feature_prepared (proxy,
-          TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES, FALSE);
-      return;
+      g_simple_async_result_set_error (result, error->domain, error->code,
+          "Failed to get PendingMessages property: %s", error->message);
+
+      g_simple_async_result_complete (result);
     }
 
   if (!G_VALUE_HOLDS (value, ARRAY_TYPE_PENDING_TEXT_MESSAGE_LIST_LIST))
     {
       DEBUG ("PendingMessages property is of the wrong type");
 
-      _tp_proxy_set_feature_prepared (proxy,
-          TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES, FALSE);
-      return;
+      g_simple_async_result_set_error (result, TP_ERRORS, TP_ERROR_CONFUSED,
+          "PendingMessages property is of the wrong type");
+
+      g_simple_async_result_complete (result);
     }
 
   senders = tp_intset_new ();
@@ -739,8 +745,7 @@ get_pending_messages_cb (TpProxy *proxy,
 
   if (tp_intset_size (senders) == 0)
     {
-      _tp_proxy_set_feature_prepared (proxy,
-          TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES, TRUE);
+      g_simple_async_result_complete (result);
     }
   else
     {
@@ -753,13 +758,14 @@ get_pending_messages_cb (TpProxy *proxy,
       DEBUG ("Pending messages may be re-ordered, please fix CM (%s)",
           tp_proxy_get_object_path (conn));
 
+      /* Pass ownership of parts_list to the callback */
       if (sender_ids->len == g_list_length (parts_list))
         {
           /* Use the sender ID rather than the handles */
           tp_connection_get_contacts_by_id (conn, sender_ids->len,
               (const gchar * const *) sender_ids->pdata,
               0, NULL, got_pending_senders_contact_by_id_cb, parts_list,
-              free_parts_list, G_OBJECT (self));
+              (GDestroyNotify) free_parts_list, G_OBJECT (result));
         }
       else
         {
@@ -768,7 +774,7 @@ get_pending_messages_cb (TpProxy *proxy,
           tp_connection_get_contacts_by_handle (conn, tmp->len,
               (TpHandle *) tmp->data,
               0, NULL, got_pending_senders_contact_by_handle_cb, parts_list,
-              free_parts_list, G_OBJECT (self));
+              (GDestroyNotify) free_parts_list, G_OBJECT (result));
 
           g_array_unref (tmp);
         }
@@ -779,10 +785,17 @@ get_pending_messages_cb (TpProxy *proxy,
 }
 
 static void
-tp_text_channel_prepare_pending_messages (TpProxy *proxy)
+tp_text_channel_prepare_pending_messages_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   TpChannel *channel = (TpChannel *) proxy;
   GError *error = NULL;
+  GSimpleAsyncResult *result;
+
+  result = g_simple_async_result_new ((GObject *) proxy, callback, user_data,
+      tp_text_channel_prepare_pending_messages_async);
 
   tp_cli_channel_interface_messages_connect_to_message_received (channel,
       message_received_cb, proxy, NULL, G_OBJECT (proxy), &error);
@@ -804,15 +817,15 @@ tp_text_channel_prepare_pending_messages (TpProxy *proxy)
 
   tp_cli_dbus_properties_call_get (proxy, -1,
       TP_IFACE_CHANNEL_INTERFACE_MESSAGES, "PendingMessages",
-      get_pending_messages_cb, proxy, NULL, G_OBJECT (proxy));
+      get_pending_messages_cb, result, g_object_unref, G_OBJECT (proxy));
 
   return;
 
 fail:
-  g_error_free (error);
+  g_simple_async_result_take_error (result, error);
 
-  _tp_proxy_set_feature_prepared (proxy,
-      TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES, FALSE);
+  g_simple_async_result_complete_in_idle (result);
+  g_object_unref (result);
 }
 
 enum {
@@ -830,8 +843,8 @@ tp_text_channel_list_features (TpProxyClass *cls G_GNUC_UNUSED)
 
   features[FEAT_PENDING_MESSAGES].name =
     TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES;
-  features[FEAT_PENDING_MESSAGES].start_preparing =
-    tp_text_channel_prepare_pending_messages;
+  features[FEAT_PENDING_MESSAGES].prepare_async =
+    tp_text_channel_prepare_pending_messages_async;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);
