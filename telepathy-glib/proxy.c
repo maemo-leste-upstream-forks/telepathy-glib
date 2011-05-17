@@ -208,10 +208,36 @@ tp_dbus_errors_quark (void)
  */
 
 /**
- * TpProxyFeature:
+ * TpProxyPrepareAsync:
+ * @proxy: the object on which @feature has to be prepared
+ * @feature: a #GQuark representing the feature to prepare
+ * @callback: called when the feature has been prepared, or the preparation
+ * failed
+ * @user_data: data to pass to @callback
  *
- * Structure representing a feature. This is currently opaque to code outside
- * telepathy-glib itself.
+ * Function called when @feature has to be prepared for @proxy.
+ */
+
+/**
+ * TpProxyFeature:
+ * @name: a #GQuark representing the name of the feature
+ * @core: if %TRUE, every non-core feature of the class depends on this one,
+ * and every feature (core or not) in subclasses depends on this one
+ * @prepare_async: called when the feature has to be prepared
+ * @prepare_before_signalling_connected_async: only relevant for
+ * TpConnection sub-classes; same as @prepare_async but for
+ * features wanting to have a chance to prepare themself before the
+ * TpConnection object announce its %TP_CONNECTION_STATUS_CONNECTED status
+ * @interfaces_needed: an array of #GQuark representing interfaces which have
+ * to be implemented on the object in order to be able to prepare the feature
+ * @depends_on: an array of #GQuark representing other features which have to
+ * be prepared before trying to prepare this feature
+ * @can_retry: If %TRUE, allow retrying preparation of this feature even if it
+ * failed once already; if %FALSE any attempt of preparing the feature after
+ * the preparation already failed once will immediately fail with re-calling
+ * @prepare_async
+ *
+ * Structure representing a feature.
  *
  * Since: 0.11.3
  */
@@ -243,6 +269,11 @@ typedef struct _TpProxyInterfaceAddLink TpProxyInterfaceAddLink;
 struct _TpProxyInterfaceAddLink {
     TpProxyInterfaceAddedCb callback;
     TpProxyInterfaceAddLink *next;
+};
+
+struct _TpProxyFeaturePrivate
+{
+  gpointer unused;
 };
 
 /**
@@ -280,16 +311,25 @@ struct _TpProxyInterfaceAddLink {
  */
 
 typedef enum {
+    /* Not a feature */
     FEATURE_STATE_INVALID = GPOINTER_TO_INT (NULL),
+    /* Nobody cares */
     FEATURE_STATE_UNWANTED,
+    /* Want to prepare, waiting for dependencies to be satisfied (or maybe
+     * just poll_features being called) */
     FEATURE_STATE_WANTED,
+    /* Want to prepare, have called prepare_async */
+    FEATURE_STATE_TRYING,
+    /* Couldn't prepare, gave up */
     FEATURE_STATE_FAILED,
+    /* Prepared */
     FEATURE_STATE_READY
 } FeatureState;
 
 typedef struct {
     GSimpleAsyncResult *result;
     GArray *features;
+    gboolean core;
 } TpProxyPrepareRequest;
 
 static TpProxyPrepareRequest *
@@ -302,6 +342,7 @@ tp_proxy_prepare_request_new (GSimpleAsyncResult *result,
     req->result = g_object_ref (result);
 
   req->features = _tp_quark_array_copy (features);
+  g_assert (req->features != NULL);
   return req;
 }
 
@@ -333,12 +374,16 @@ struct _TpProxyPrivate {
     /* feature => FeatureState */
     GData *features;
 
-    /* List of TpProxyPrepareRequest */
-    GList *prepare_requests;
-    /* A request containing all core features, borrowed from the head of
-     * prepare_requests, or NULL if prepared; nothing else is allowed
-     * to become prepared until this one does.*/
-    TpProxyPrepareRequest *prepare_core;
+    /* Queue of TpProxyPrepareRequest. The first requests are the core one,
+     * sorted from the most upper super class to the subclass core features.
+     * This is needed to guarantee than subclass features are not prepared
+     * until the super class features have been prepared. */
+    GQueue *prepare_requests;
+
+    GSimpleAsyncResult *will_announce_connected_result;
+    /* Number of pending calls blocking will_announce_connected_result to be
+     * completed */
+    guint pending_will_announce_calls;
 
     gboolean dispose_has_run;
 };
@@ -524,7 +569,7 @@ tp_proxy_emit_invalidated (gpointer p)
 
   /* make all pending tp_proxy_prepare_async calls fail */
   tp_proxy_poll_features (self, NULL);
-  g_assert (self->priv->prepare_requests == NULL);
+  g_assert_cmpuint (g_queue_get_length (self->priv->prepare_requests), ==, 0);
 
   /* Don't clear the datalist until after we've emitted the signal, so
    * the pending call and signal connection friend classes can still get
@@ -907,6 +952,8 @@ tp_proxy_init (TpProxy *self)
 {
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, TP_TYPE_PROXY,
       TpProxyPrivate);
+
+  self->priv->prepare_requests = g_queue_new ();
 }
 
 static GQuark
@@ -939,6 +986,22 @@ tp_proxy_set_feature_state (TpProxy *self,
       GINT_TO_POINTER (state));
 }
 
+static void
+assert_feature_validity (TpProxy *self,
+    const TpProxyFeature *feature)
+{
+  g_assert (feature != NULL);
+
+  /* Core features can't have depends, their depends are implicit */
+  if (feature->core)
+    g_assert (feature->depends_on == NULL || feature->depends_on[0] == 0);
+
+  /* prepare_before_signalling_connected_async only make sense for
+   * TpConnection subclasses */
+  if (feature->prepare_before_signalling_connected_async != NULL)
+    g_assert (TP_IS_CONNECTION (self));
+}
+
 static GObject *
 tp_proxy_constructor (GType type,
                       guint n_params,
@@ -951,11 +1014,8 @@ tp_proxy_constructor (GType type,
   TpProxyInterfaceAddLink *iter;
   GType proxy_parent_type = G_TYPE_FROM_CLASS (tp_proxy_parent_class);
   GType ancestor_type;
-  GArray *core_features;
 
   _tp_register_dbus_glib_marshallers ();
-
-  core_features = g_array_new (TRUE, FALSE, sizeof (GQuark));
 
   for (ancestor_type = type;
        ancestor_type != proxy_parent_type && ancestor_type != 0;
@@ -964,6 +1024,7 @@ tp_proxy_constructor (GType type,
       TpProxyClass *ancestor = g_type_class_peek (ancestor_type);
       const TpProxyFeature *features;
       guint i;
+      GArray *core_features;
 
       for (iter = g_type_get_qdata (ancestor_type,
               interface_added_cb_quark ());
@@ -980,8 +1041,12 @@ tp_proxy_constructor (GType type,
       if (features == NULL)
         continue;
 
+      core_features = g_array_new (TRUE, FALSE, sizeof (GQuark));
+
       for (i = 0; features[i].name != 0; i++)
         {
+          assert_feature_validity (self, &features[i]);
+
           tp_proxy_set_feature_state (self, features[i].name,
               FEATURE_STATE_UNWANTED);
 
@@ -990,6 +1055,22 @@ tp_proxy_constructor (GType type,
               g_array_append_val (core_features, features[i].name);
             }
         }
+
+      if (core_features->len > 0)
+        {
+          TpProxyPrepareRequest *req;
+
+          req = tp_proxy_prepare_request_new (NULL,
+              (const GQuark *) core_features->data);
+          req->core = TRUE;
+
+          g_queue_push_head (self->priv->prepare_requests, req);
+
+          DEBUG ("%p: request %p represents core features on %s", self, req,
+              g_type_name (ancestor_type));
+        }
+
+      g_array_free (core_features, TRUE);
     }
 
   g_return_val_if_fail (self->dbus_connection != NULL, NULL);
@@ -1016,19 +1097,6 @@ tp_proxy_constructor (GType type,
     {
       g_return_val_if_fail (self->bus_name[0] == ':', NULL);
     }
-
-  if (core_features->len > 0)
-    {
-      self->priv->prepare_core = tp_proxy_prepare_request_new (NULL,
-          (const GQuark *) core_features->data);
-      self->priv->prepare_requests = g_list_prepend (
-          self->priv->prepare_requests,
-          self->priv->prepare_core);
-      DEBUG ("%p: request %p represents core features", self,
-          self->priv->prepare_core);
-    }
-
-  g_array_free (core_features, TRUE);
 
   return (GObject *) self;
 }
@@ -1069,8 +1137,8 @@ tp_proxy_finalize (GObject *object)
   g_error_free (self->invalidated);
 
   /* invalidation ensures that these have gone away */
-  g_assert (self->priv->prepare_requests == NULL);
-  g_assert (self->priv->prepare_core == NULL);
+  g_assert_cmpuint (g_queue_get_length (self->priv->prepare_requests), ==, 0);
+  tp_clear_pointer (&self->priv->prepare_requests, g_queue_free);
 
   g_free (self->bus_name);
   g_free (self->object_path);
@@ -1580,7 +1648,126 @@ _tp_proxy_is_preparing (gpointer self,
 
   state = tp_proxy_get_feature_state (self, feature);
   g_return_val_if_fail (state != FEATURE_STATE_INVALID, FALSE);
-  return (state == FEATURE_STATE_WANTED);
+  return (state == FEATURE_STATE_WANTED || state == FEATURE_STATE_TRYING);
+}
+
+static gboolean
+check_feature_interfaces (TpProxy *self,
+    GQuark name)
+{
+  const TpProxyFeature *feature = tp_proxy_subclass_get_feature (
+      G_OBJECT_TYPE (self), name);
+  guint i;
+
+  if (feature->interfaces_needed == NULL)
+    return TRUE;
+
+  for (i = 0; feature->interfaces_needed[i] != 0; i++)
+    {
+      if (!tp_proxy_has_interface_by_id (self, feature->interfaces_needed[i]))
+        {
+          DEBUG ("Proxy doesn't implement %s, can't prepare feature %s",
+              g_quark_to_string (feature->interfaces_needed[i]),
+              g_quark_to_string (name));
+
+          return FALSE;
+        }
+    }
+
+  return TRUE;
+}
+
+/* Returns %TRUE if all the deps of @name are ready
+ * @can_retry: if %TRUE dependencies which have failed but have
+ * TpProxyFeature.can_retry won't be considered as having failed so we'll
+ * still have a change to retry preparing those.
+ * @failed: (out): %TRUE if one of @name's dep can't be prepared and so
+ * @name can't be either
+ */
+static gboolean
+check_depends_ready (TpProxy *self,
+    GQuark name,
+    gboolean can_retry,
+    gboolean *failed)
+{
+  const TpProxyFeature *feature = tp_proxy_subclass_get_feature (
+      G_OBJECT_TYPE (self), name);
+  guint i;
+  gboolean ready = TRUE;
+
+  g_assert (failed != NULL);
+  *failed = FALSE;
+
+  if (feature->depends_on == NULL)
+    return TRUE;
+
+  for (i = 0; feature->depends_on[i] != 0; i++)
+    {
+      GQuark dep = feature->depends_on[i];
+      const TpProxyFeature *dep_feature = tp_proxy_subclass_get_feature (
+          G_OBJECT_TYPE (self), dep);
+      FeatureState dep_state;
+
+      dep_state = tp_proxy_get_feature_state (self, dep);
+      switch (dep_state)
+        {
+          case FEATURE_STATE_INVALID:
+            DEBUG ("Can't prepare %s, because %s (a dependency) is "
+                "invalid", g_quark_to_string (name), g_quark_to_string (dep));
+
+            *failed = TRUE;
+            return FALSE;
+
+          case FEATURE_STATE_FAILED:
+            if (!can_retry || !dep_feature->can_retry)
+              {
+                DEBUG ("Can't prepare %s, because %s (a dependency) is "
+                    "failed to prepare",
+                    g_quark_to_string (name), g_quark_to_string (dep));
+
+                *failed = TRUE;
+                return FALSE;
+              }
+
+            DEBUG ("retry preparing dep: %s", g_quark_to_string (dep));
+            tp_proxy_set_feature_state (self, dep, FEATURE_STATE_WANTED);
+            ready = FALSE;
+            break;
+
+          case FEATURE_STATE_UNWANTED:
+          case FEATURE_STATE_WANTED:
+          case FEATURE_STATE_TRYING:
+            ready = FALSE;
+            break;
+
+          case FEATURE_STATE_READY:
+            break;
+        }
+    }
+
+  return ready;
+}
+
+static void
+depends_prepare_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpProxy *self = (TpProxy *) source;
+
+  tp_proxy_poll_features (self, NULL);
+}
+
+static void
+prepare_depends (TpProxy *self,
+    GQuark name)
+{
+  const TpProxyFeature *feature;
+
+  feature = tp_proxy_subclass_get_feature (G_OBJECT_TYPE (self), name);
+  g_assert (feature->depends_on != NULL);
+
+  tp_proxy_prepare_async (self, feature->depends_on, depends_prepare_cb, NULL);
 }
 
 /**
@@ -1649,7 +1836,6 @@ tp_proxy_prepare_async (gpointer self,
 {
   TpProxy *proxy = self;
   GSimpleAsyncResult *result = NULL;
-  const GError *error;
   guint i;
 
   g_return_if_fail (TP_IS_PROXY (self));
@@ -1660,26 +1846,39 @@ tp_proxy_prepare_async (gpointer self,
   for (i = 0; features[i] != 0; i++)
     {
       FeatureState state = tp_proxy_get_feature_state (self, features[i]);
+      const TpProxyFeature *feature = tp_proxy_subclass_get_feature (
+          G_OBJECT_TYPE (self), features[i]);
 
+      /* We just skip unknown features, which have state FEATURE_STATE_INVALID
+       * (this doesn't seem ideal, but is
+       * consistent with TpAccountManager's existing behaviour) */
       if (state == FEATURE_STATE_INVALID)
         {
-          /* just skip unknown features (this doesn't seem ideal, but is
-           * consistent with TpAccountManager's existing behaviour) */
           continue;
         }
-
-      if (state == FEATURE_STATE_UNWANTED)
+      else if (state == FEATURE_STATE_UNWANTED ||
+          (state == FEATURE_STATE_FAILED && feature->can_retry))
         {
-          const TpProxyFeature *feat_struct = tp_proxy_subclass_get_feature (
-              G_OBJECT_TYPE (self), features[i]);
+          gboolean failed;
 
-          g_return_if_fail (feat_struct != NULL);
+          /* Check deps. We only offer there the chance to retry a previously
+           * failed dependency. Doing it in tp_proxy_poll_features() could
+           * result in an infinite loop if we'd depends on 2 features which
+           * are constantly failing. */
+          if (!check_depends_ready (self, features[i], TRUE, &failed))
+            {
+              if (failed)
+                {
+                  /* We can't prepare the feature because of its deps */
+                  tp_proxy_set_feature_state (self, features[i],
+                      FEATURE_STATE_FAILED);
+                  continue;
+                }
 
-          DEBUG ("%p: %s newly wanted", self, g_quark_to_string (features[i]));
+              prepare_depends (self, features[i]);
+            }
+
           tp_proxy_set_feature_state (self, features[i], FEATURE_STATE_WANTED);
-
-          if (feat_struct->start_preparing != NULL)
-            feat_struct->start_preparing (self);
         }
     }
 
@@ -1687,21 +1886,18 @@ tp_proxy_prepare_async (gpointer self,
     result = g_simple_async_result_new (self, callback, user_data,
         tp_proxy_prepare_async);
 
-  error = tp_proxy_get_invalidated (self);
-
-  if (error != NULL)
+  if (proxy->invalidated != NULL)
     {
       if (result != NULL)
         {
-          g_simple_async_result_set_from_error (result, error);
+          g_simple_async_result_set_from_error (result, proxy->invalidated);
           g_simple_async_result_complete_in_idle (result);
         }
 
       goto finally;
     }
 
-  proxy->priv->prepare_requests = g_list_append (
-      proxy->priv->prepare_requests,
+  g_queue_push_tail (proxy->priv->prepare_requests,
       tp_proxy_prepare_request_new (result, features));
   tp_proxy_poll_features (proxy, NULL);
 
@@ -1745,10 +1941,166 @@ tp_proxy_prepare_finish (gpointer self,
   return TRUE;
 }
 
+static gboolean
+prepare_finish (TpProxy *self,
+    GAsyncResult *result,
+    gpointer source,
+    GError **error)
+{
+  _tp_implement_finish_void (self, source);
+}
+
+static void
+feature_prepared_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpProxy *self = (TpProxy *) source;
+  TpProxyFeature *feature = user_data;
+  GError *error = NULL;
+  gboolean prepared = TRUE;
+
+  if (!prepare_finish (self, result, feature->prepare_async, &error))
+    {
+      DEBUG ("Failed to prepare %s: %s", g_quark_to_string (feature->name),
+          error->message);
+
+      prepared = FALSE;
+      g_error_free (error);
+    }
+
+  _tp_proxy_set_feature_prepared (self, feature->name, prepared);
+}
+
+static void
+prepare_feature (TpProxy *self,
+    const TpProxyFeature *feature)
+{
+  if (feature->prepare_async == NULL)
+    return;
+
+  feature->prepare_async (self, feature, feature_prepared_cb,
+      (gpointer) feature);
+}
+
+static gboolean
+core_prepared (TpProxy *self)
+{
+  /* All the core features have been prepared if the head of the
+   * prepare_requests queue is NOT a core feature */
+  TpProxyPrepareRequest *req = g_queue_peek_head (self->priv->prepare_requests);
+
+  if (req == NULL)
+    return TRUE;
+
+  return !req->core;
+}
+
+/* Returns %TRUE if all the features requested in @req have complete their
+ * preparation */
+static gboolean
+request_is_complete (TpProxy *self,
+    TpProxyPrepareRequest *req)
+{
+  guint i;
+  gboolean complete = TRUE;
+
+  for (i = 0; i < req->features->len; i++)
+    {
+      GQuark feature = g_array_index (req->features, GQuark, i);
+      FeatureState state = tp_proxy_get_feature_state (self, feature);
+      const TpProxyFeature *feat_struct = tp_proxy_subclass_get_feature (
+          G_OBJECT_TYPE (self), feature);
+
+      switch (state)
+        {
+          case FEATURE_STATE_UNWANTED:
+            /* this can only happen in the special pseudo-request for the
+             * core features, which blocks everything */
+            g_assert (req->core);
+            complete = FALSE;
+
+            /* fall through to treat it as WANTED */
+          case FEATURE_STATE_WANTED:
+            if (core_prepared (self) ||
+                req->core)
+              {
+                gboolean failed;
+
+                /* Check if we have the required interfaces. We can't do that
+                 * in tp_proxy_prepare_async() as CORE have to be prepared */
+                if (!check_feature_interfaces (self, feature))
+                  {
+                    tp_proxy_set_feature_state (self, feature,
+                        FEATURE_STATE_FAILED);
+                    continue;
+                  }
+
+                if (check_depends_ready (self, feature, FALSE, &failed))
+                  {
+                    /* We can prepare it now */
+                    DEBUG ("%p: calling callback for %s", self,
+                        g_quark_to_string (feature));
+
+                    tp_proxy_set_feature_state (self, feature,
+                        FEATURE_STATE_TRYING);
+
+                    prepare_feature (self, feat_struct);
+                    complete = FALSE;
+                  }
+                else if (failed)
+                  {
+                    tp_proxy_set_feature_state (self, feature,
+                        FEATURE_STATE_FAILED);
+                  }
+                else
+                  {
+                    /* We have to wait until the deps finish their
+                     * preparation. */
+                    complete = FALSE;
+                  }
+              }
+            break;
+
+          case FEATURE_STATE_TRYING:
+            complete = FALSE;
+            break;
+
+          case FEATURE_STATE_INVALID:
+          case FEATURE_STATE_FAILED:
+          case FEATURE_STATE_READY:
+            /* nothing more to do */
+            break;
+        }
+    }
+
+  return complete;
+}
+
+static void
+finish_all_requests (TpProxy *self,
+    const GError *error)
+{
+  GList *iter;
+  GQueue *tmp = g_queue_copy (self->priv->prepare_requests);
+
+  g_queue_clear (self->priv->prepare_requests);
+
+  for (iter = tmp->head; iter != NULL; iter = g_list_next (iter))
+    {
+      tp_proxy_prepare_request_finish (iter->data, error);
+    }
+
+  g_queue_clear (tmp);
+}
+
 /*
  * tp_proxy_poll_features:
  * @self: a proxy
  * @error: if not %NULL, fail all feature requests with this error
+ *
+ * For each feature in state WANTED, if its dependencies have been satisfied,
+ * call the callback and advance it to state TRYING.
  *
  * For each feature request, see if it's finished yet.
  *
@@ -1766,71 +2118,53 @@ tp_proxy_poll_features (TpProxy *self,
   GList *iter;
   GList *next;
 
-  if (self->priv->prepare_requests == NULL)
+  if (g_queue_get_length (self->priv->prepare_requests) == 0)
     return;
 
-  if (error == NULL)
-    {
-      error_source = "invalidated";
-      error = self->invalidated;
-    }
+  g_object_ref (self);
 
-  if (error != NULL)
-    {
-      DEBUG ("%p: %s, ending all requests", self, error_source);
-      iter = self->priv->prepare_requests;
-      self->priv->prepare_core = NULL;
-      self->priv->prepare_requests = NULL;
-
-      for ( ; iter != NULL; iter = g_list_delete_link (iter, iter))
-        {
-          tp_proxy_prepare_request_finish (iter->data, error);
-        }
-    }
-
-  for (iter = self->priv->prepare_requests; iter != NULL; iter = next)
+  for (iter = self->priv->prepare_requests->head; iter != NULL; iter = next)
     {
       TpProxyPrepareRequest *req = iter->data;
-      gboolean wait = FALSE;
-      guint i;
+      TpProxyPrepareRequest *head = g_queue_peek_head (
+          self->priv->prepare_requests);
+
+      if (error == NULL)
+        {
+          error_source = "invalidated";
+          error = self->invalidated;
+        }
+
+      if (error != NULL)
+        {
+          DEBUG ("%p: %s, ending all requests", self, error_source);
+
+          finish_all_requests (self, error);
+          break;
+        }
 
       next = iter->next;
 
-      /* prepare_core is always the first in the list (if present), so it
-       * will always have been checked by the time we reach any later one */
-      if (self->priv->prepare_core != NULL && req != self->priv->prepare_core)
+      /* Core features have to be prepared first, in superclass-to-subclass
+       * order. The next core feature to be prepared, if any, is always at the
+       * head of prepare_requests. */
+      if (!core_prepared (self) &&
+          req != head)
         {
           DEBUG ("%p: core features not ready yet, nothing prepared", self);
           continue;
         }
 
-      for (i = 0; i < req->features->len; i++)
-        {
-          FeatureState state = tp_proxy_get_feature_state (self,
-              g_array_index (req->features, GQuark, i));
-
-          if (state == FEATURE_STATE_UNWANTED || state == FEATURE_STATE_WANTED)
-            {
-              wait = TRUE;
-              break;
-            }
-        }
-
-      if (!wait)
+      if (request_is_complete (self, req))
         {
           DEBUG ("%p: request %p prepared", self, req);
-          self->priv->prepare_requests = g_list_delete_link (
-              self->priv->prepare_requests, iter);
-
-          if (req == self->priv->prepare_core)
-            {
-              DEBUG ("%p: core features ready", self);
-              self->priv->prepare_core = NULL;
-            }
+          g_queue_delete_link (self->priv->prepare_requests, iter);
 
           tp_proxy_prepare_request_finish (req, NULL);
         }
     }
+
+  g_object_unref (self);
 }
 
 /*
@@ -1884,4 +2218,92 @@ _tp_proxy_set_features_failed (TpProxy *self,
   g_return_if_fail (TP_IS_PROXY (self));
   g_return_if_fail (error != NULL);
   tp_proxy_poll_features (self, error);
+}
+
+static void
+check_announce_connected (TpProxy *self,
+    gboolean in_idle)
+{
+  if (self->priv->pending_will_announce_calls != 0)
+    return;
+
+  if (in_idle)
+    {
+      g_simple_async_result_complete_in_idle (
+          self->priv->will_announce_connected_result);
+    }
+  else
+    {
+      g_simple_async_result_complete (
+          self->priv->will_announce_connected_result);
+    }
+
+  tp_clear_object (&self->priv->will_announce_connected_result);
+}
+
+static void
+prepare_before_signalling_connected_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpProxy *self = user_data;
+
+  /* We don't care if the call succeeded or not as it was already prepared */
+  self->priv->pending_will_announce_calls--;
+
+  check_announce_connected (self, FALSE);
+}
+
+static void foreach_feature (GQuark name,
+    gpointer data,
+    gpointer user_data)
+{
+  FeatureState state = GPOINTER_TO_INT (data);
+  TpProxy *self = user_data;
+  const TpProxyFeature *feature;
+
+  if (state != FEATURE_STATE_READY)
+    return;
+
+  feature = tp_proxy_subclass_get_feature (G_OBJECT_TYPE (self), name);
+
+  if (feature->prepare_before_signalling_connected_async == NULL)
+    return;
+
+  self->priv->pending_will_announce_calls++;
+
+  feature->prepare_before_signalling_connected_async (self, feature,
+      prepare_before_signalling_connected_cb, self);
+}
+
+/*
+ * _tp_proxy_will_announce_connected_async:
+ *
+ * Called by connection.c when the connection became connected and we're about
+ * to announce it. But before we have to wait for all the prepared features to
+ * process their prepare_before_signalling_connected_async, if any.
+ */
+void
+_tp_proxy_will_announce_connected_async (TpProxy *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  g_assert (TP_IS_CONNECTION (self));
+  g_assert (self->priv->will_announce_connected_result == NULL);
+
+  self->priv->will_announce_connected_result = g_simple_async_result_new (
+      (GObject *) self, callback, user_data,
+      _tp_proxy_will_announce_connected_async);
+
+  g_datalist_foreach (&self->priv->features, foreach_feature, self);
+
+  check_announce_connected (self, TRUE);
+}
+
+gboolean
+_tp_proxy_will_announce_connected_finish (TpProxy *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (self, _tp_proxy_will_announce_connected_async)
 }

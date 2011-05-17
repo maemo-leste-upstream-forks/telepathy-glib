@@ -66,9 +66,6 @@ struct _TpConnectionPrivate {
     GList *contact_info_supported_fields;
 
     TpProxyPendingCall *introspection_call;
-    unsigned fetching_rcc:1;
-    unsigned fetching_avatar_requirements:1;
-    unsigned contact_info_fetched:1;
 
     unsigned ready:1;
     unsigned has_immortal_handles:1;
@@ -103,12 +100,19 @@ TpContact *_tp_connection_lookup_contact (TpConnection *self, TpHandle handle);
 void _tp_contact_connection_invalidated (TpContact *contact);
 
 /* connection-contact-info.c */
-void _tp_connection_maybe_prepare_contact_info (TpProxy *proxy);
+void _tp_connection_prepare_contact_info_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
 TpContactInfoFieldSpec *_tp_contact_info_field_spec_new (const gchar *name,
     GStrv parameters, TpContactInfoFieldFlags flags, guint max);
 
 /* connection-avatars.c */
-void _tp_connection_maybe_prepare_avatar_requirements (TpProxy *proxy);
+void _tp_connection_prepare_avatar_requirements_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
 
 G_END_DECLS
 

@@ -22,6 +22,7 @@
 #include "telepathy-glib/channel-dispatch-operation.h"
 #include "telepathy-glib/channel-dispatch-operation-internal.h"
 
+#include <telepathy-glib/base-client-internal.h>
 #include <telepathy-glib/channel.h>
 #include <telepathy-glib/defs.h>
 #include <telepathy-glib/errors.h>
@@ -30,6 +31,7 @@
 #include <telepathy-glib/proxy-internal.h>
 #include <telepathy-glib/proxy-subclass.h>
 #include <telepathy-glib/util.h>
+#include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_DISPATCHER
 #include "telepathy-glib/dbus-internal.h"
@@ -114,8 +116,6 @@ struct _TpChannelDispatchOperationPrivate {
   GPtrArray *channels;
   GStrv possible_handlers;
   GHashTable *immutable_properties;
-
-  gboolean preparing_core;
 };
 
 enum
@@ -587,11 +587,10 @@ get_dispatch_operation_prop_cb (TpProxy *proxy,
     GObject *weak_object)
 {
   TpChannelDispatchOperation *self = (TpChannelDispatchOperation *) proxy;
+  GSimpleAsyncResult *result = user_data;
   gboolean prepared = TRUE;
   GPtrArray *channels;
   GError *e = NULL;
-
-  self->priv->preparing_core = FALSE;
 
   if (error != NULL)
     {
@@ -667,8 +666,10 @@ get_dispatch_operation_prop_cb (TpProxy *proxy,
   g_object_notify ((GObject *) self, "cdo-properties");
 
 out:
-  _tp_proxy_set_feature_prepared (proxy,
-      TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE, prepared);
+  if (e != NULL)
+    g_simple_async_result_set_from_error (result, e);
+
+  g_simple_async_result_complete (result);
 
   if (!prepared)
     {
@@ -678,26 +679,21 @@ out:
 }
 
 static void
-maybe_prepare_core (TpProxy *proxy)
+prepare_core_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   TpChannelDispatchOperation *self = (TpChannelDispatchOperation *) proxy;
+  GSimpleAsyncResult *result;
 
-  if (tp_proxy_is_prepared (proxy, TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE))
-    return;   /* already done */
-
-  if (self->priv->preparing_core)
-    return;   /* already running */
-
-  if (!_tp_proxy_is_preparing (proxy,
-        TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE))
-    return;   /* not interested right now */
-
-  self->priv->preparing_core = TRUE;
+  result = g_simple_async_result_new ((GObject *) proxy, callback, user_data,
+      prepare_core_async);
 
   tp_cli_dbus_properties_call_get_all (self, -1,
       TP_IFACE_CHANNEL_DISPATCH_OPERATION,
       get_dispatch_operation_prop_cb,
-      NULL, NULL, NULL);
+      result, g_object_unref, NULL);
 }
 
 enum {
@@ -715,7 +711,7 @@ tp_channel_dispatch_operation_list_features (TpProxyClass *cls G_GNUC_UNUSED)
 
   features[FEAT_CORE].name = TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE;
   features[FEAT_CORE].core = TRUE;
-  features[FEAT_CORE].start_preparing = maybe_prepare_core;
+  features[FEAT_CORE].prepare_async = prepare_core_async;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);
@@ -1207,15 +1203,17 @@ claim_cb (TpChannelDispatchOperation *self,
  * method becomes the handler for the channel.
  *
  * If successful, this method will cause the #TpProxy::invalidated signal
- * to be emitted, in the same wayas for
+ * to be emitted, in the same way as for
  * tp_channel_dispatch_operation_handle_with_async().
  *
  * This method may fail because the dispatch operation has already
- * been completed. Again, see tp_channel_dispatch_operation_claim_async()
+ * been completed. Again, see tp_channel_dispatch_operation_handle_with_async()
  * for more details. The approver MUST NOT attempt to interact with
  * the channels further in this case.
  *
  * Since: 0.11.5
+ * Deprecated: since 0.15.0. Use
+ * tp_channel_dispatch_operation_claim_with_async()
  */
 void
 tp_channel_dispatch_operation_claim_async (
@@ -1245,6 +1243,8 @@ tp_channel_dispatch_operation_claim_async (
  * Returns: %TRUE if the Claim() call was successful, otherwise %FALSE
  *
  * Since: 0.11.5
+ * Deprecated: since 0.15.0. Use
+ * tp_channel_dispatch_operation_claim_with_finish()
  */
 gboolean
 tp_channel_dispatch_operation_claim_finish (
@@ -1391,4 +1391,122 @@ gboolean
     return FALSE;
 
   return TRUE;
+}
+
+static void
+claim_with_prepare_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpChannelDispatchOperation *self = (TpChannelDispatchOperation *) source;
+  GSimpleAsyncResult *main_result = user_data;
+  GError *error = NULL;
+  TpBaseClient *client;
+
+  if (!tp_proxy_prepare_finish (self, result, &error))
+    {
+      g_simple_async_result_take_error (main_result, error);
+      goto out;
+    }
+
+  client = g_simple_async_result_get_op_res_gpointer (main_result);
+
+  _tp_base_client_now_handling_channels (client, self->priv->channels);
+
+out:
+  g_simple_async_result_complete (main_result);
+  g_object_unref (main_result);
+}
+
+static void
+claim_with_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpChannelDispatchOperation *self = (TpChannelDispatchOperation *) source;
+  GSimpleAsyncResult *main_result = user_data;
+  GError *error = NULL;
+  GQuark features[] = { TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE, 0 };
+
+  if (!tp_channel_dispatch_operation_claim_finish (self, result, &error))
+    {
+      g_simple_async_result_take_error (main_result, error);
+      g_simple_async_result_complete (main_result);
+      g_object_unref (main_result);
+      return;
+    }
+
+  /* We have to prepare the CDO to be able to get the list of its channels */
+  tp_proxy_prepare_async (self, features, claim_with_prepare_cb,
+      main_result);
+}
+
+/**
+ * tp_channel_dispatch_operation_claim_with_async:
+ * @self: a #TpChannelDispatchOperation
+ * @client: the #TpBaseClient claiming @self
+ * @callback: a callback to call when the call returns
+ * @user_data: data to pass to @callback
+ *
+ * Called by an approver to claim channels for handling internally.
+ * If this method is called successfully, the process calling this
+ * method becomes the handler for the channel.
+ *
+ * If successful, this method will cause the #TpProxy::invalidated signal
+ * to be emitted, in the same way as for
+ * tp_channel_dispatch_operation_handle_with_async().
+ *
+ * This method may fail because the dispatch operation has already
+ * been completed. Again, see tp_channel_dispatch_operation_handle_with_async()
+ * for more details. The approver MUST NOT attempt to interact with
+ * the channels further in this case.
+ *
+ * This is an improved version of tp_channel_dispatch_operation_claim_async()
+ * as it tells @client about the new channels being handled.
+ *
+ * Since: 0.15.0
+ */
+void
+tp_channel_dispatch_operation_claim_with_async (
+    TpChannelDispatchOperation *self,
+    TpBaseClient *client,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+
+  g_return_if_fail (TP_IS_CHANNEL_DISPATCH_OPERATION (self));
+
+  result = g_simple_async_result_new (G_OBJECT (self),
+      callback, user_data,
+      tp_channel_dispatch_operation_claim_with_async);
+
+  g_simple_async_result_set_op_res_gpointer (result, g_object_ref (client),
+      g_object_unref);
+
+  tp_channel_dispatch_operation_claim_async (self, claim_with_cb,
+      result);
+}
+
+/**
+ * tp_channel_dispatch_operation_claim_with_finish:
+ * @self: a #TpChannelDispatchOperation
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes an async call to Claim() initiated using
+ * tp_channel_dispatch_operation_claim_with_async().
+ *
+ * Returns: %TRUE if the Claim() call was successful, otherwise %FALSE
+ *
+ * Since: 0.15.0
+ */
+gboolean
+tp_channel_dispatch_operation_claim_with_finish (
+    TpChannelDispatchOperation *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (self, \
+      tp_channel_dispatch_operation_claim_with_async)
 }

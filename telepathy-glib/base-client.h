@@ -30,13 +30,16 @@
 #include <telepathy-glib/client-channel-factory.h>
 #include <telepathy-glib/handle-channels-context.h>
 #include <telepathy-glib/observe-channels-context.h>
-#include <telepathy-glib/channel-dispatch-operation.h>
 #include <telepathy-glib/connection.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/defs.h>
 #include <telepathy-glib/dbus-properties-mixin.h>
 
 G_BEGIN_DECLS
+
+/* forward declaration, see channel-dispatch-operation.h for the rest */
+typedef struct _TpChannelDispatchOperation
+    TpChannelDispatchOperation;
 
 typedef struct _TpBaseClient TpBaseClient;
 typedef struct _TpBaseClientClass TpBaseClientClass;
@@ -172,6 +175,19 @@ GList *tp_base_client_get_handled_channels (TpBaseClient *self);
 
 gboolean tp_base_client_is_handling_channel (TpBaseClient *self,
     TpChannel *channel);
+
+void tp_base_client_delegate_channels_async (TpBaseClient *self,
+    GList *channels,
+    gint64 user_action_time,
+    const gchar *preferred_handler,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean tp_base_client_delegate_channels_finish (TpBaseClient *self,
+    GAsyncResult *result,
+    GPtrArray **delegated,
+    GHashTable **not_delegated,
+    GError **error);
 
 const gchar *tp_base_client_get_name (TpBaseClient *self);
 gboolean tp_base_client_get_uniquify_name (TpBaseClient *self);

@@ -63,12 +63,12 @@ noinst_PROGRAMS = test-account$(EXEEXT) \
 	test-invalidated-while-invoking-signals$(EXEEXT) \
 	test-long-connection-name$(EXEEXT) test-message-mixin$(EXEEXT) \
 	test-params-cm$(EXEEXT) test-properties$(EXEEXT) \
-	test-protocol-objects$(EXEEXT) test-self-handle$(EXEEXT) \
-	test-self-presence$(EXEEXT) test-simple-approver$(EXEEXT) \
-	test-simple-handler$(EXEEXT) test-simple-observer$(EXEEXT) \
-	test-stream-tube$(EXEEXT) test-text-channel$(EXEEXT) \
-	test-text-mixin$(EXEEXT) test-text-respawn$(EXEEXT) \
-	test-unsupported-interface$(EXEEXT)
+	test-protocol-objects$(EXEEXT) test-proxy-preparation$(EXEEXT) \
+	test-self-handle$(EXEEXT) test-self-presence$(EXEEXT) \
+	test-simple-approver$(EXEEXT) test-simple-handler$(EXEEXT) \
+	test-simple-observer$(EXEEXT) test-stream-tube$(EXEEXT) \
+	test-text-channel$(EXEEXT) test-text-mixin$(EXEEXT) \
+	test-text-respawn$(EXEEXT) test-unsupported-interface$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/tools/check-coding-style.mk \
 	$(top_srcdir)/tools/valgrind.mk
@@ -416,6 +416,13 @@ am_test_protocol_objects_OBJECTS = protocol-objects.$(OBJEXT)
 test_protocol_objects_OBJECTS = $(am_test_protocol_objects_OBJECTS)
 test_protocol_objects_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	$(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
+am_test_proxy_preparation_OBJECTS = proxy-preparation.$(OBJEXT)
+test_proxy_preparation_OBJECTS = $(am_test_proxy_preparation_OBJECTS)
+test_proxy_preparation_LDADD = $(LDADD)
+test_proxy_preparation_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_self_handle_OBJECTS = self-handle.$(OBJEXT)
 test_self_handle_OBJECTS = $(am_test_self_handle_OBJECTS)
 test_self_handle_LDADD = $(LDADD)
@@ -544,7 +551,8 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(nodist_test_properties_SOURCES) \
-	$(test_protocol_objects_SOURCES) $(test_self_handle_SOURCES) \
+	$(test_protocol_objects_SOURCES) \
+	$(test_proxy_preparation_SOURCES) $(test_self_handle_SOURCES) \
 	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
 	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
 	$(test_stream_tube_SOURCES) $(test_text_channel_SOURCES) \
@@ -582,11 +590,11 @@ DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_long_connection_name_SOURCES) \
 	$(test_message_mixin_SOURCES) $(test_params_cm_SOURCES) \
 	$(test_properties_SOURCES) $(test_protocol_objects_SOURCES) \
-	$(test_self_handle_SOURCES) $(test_self_presence_SOURCES) \
-	$(test_simple_approver_SOURCES) $(test_simple_handler_SOURCES) \
-	$(test_simple_observer_SOURCES) $(test_stream_tube_SOURCES) \
-	$(test_text_channel_SOURCES) $(test_text_mixin_SOURCES) \
-	$(test_text_respawn_SOURCES) \
+	$(test_proxy_preparation_SOURCES) $(test_self_handle_SOURCES) \
+	$(test_self_presence_SOURCES) $(test_simple_approver_SOURCES) \
+	$(test_simple_handler_SOURCES) $(test_simple_observer_SOURCES) \
+	$(test_stream_tube_SOURCES) $(test_text_channel_SOURCES) \
+	$(test_text_mixin_SOURCES) $(test_text_respawn_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -616,7 +624,6 @@ DBUS_CFLAGS = @DBUS_CFLAGS@
 DBUS_LIBS = @DBUS_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -662,7 +669,6 @@ LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
-MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -702,7 +708,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -736,6 +741,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -852,6 +858,7 @@ test_simple_approver_SOURCES = simple-approver.c
 test_simple_handler_SOURCES = simple-handler.c
 test_stream_tube_SOURCES = stream-tube.c
 test_client_channel_factory_SOURCES = client-channel-factory.c
+test_proxy_preparation_SOURCES = proxy-preparation.c
 
 # this one uses internal ABI
 test_cm_message_SOURCES = \
@@ -1100,6 +1107,9 @@ test-properties$(EXEEXT): $(test_properties_OBJECTS) $(test_properties_DEPENDENC
 test-protocol-objects$(EXEEXT): $(test_protocol_objects_OBJECTS) $(test_protocol_objects_DEPENDENCIES) 
 	@rm -f test-protocol-objects$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_protocol_objects_OBJECTS) $(test_protocol_objects_LDADD) $(LIBS)
+test-proxy-preparation$(EXEEXT): $(test_proxy_preparation_OBJECTS) $(test_proxy_preparation_DEPENDENCIES) 
+	@rm -f test-proxy-preparation$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_proxy_preparation_OBJECTS) $(test_proxy_preparation_LDADD) $(LIBS)
 test-self-handle$(EXEEXT): $(test_self_handle_OBJECTS) $(test_self_handle_DEPENDENCIES) 
 	@rm -f test-self-handle$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_self_handle_OBJECTS) $(test_self_handle_LDADD) $(LIBS)
@@ -1181,6 +1191,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/params-cm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/properties.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol-objects.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxy-preparation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/self-presence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Po@am__quote@

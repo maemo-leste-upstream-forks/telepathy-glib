@@ -59,12 +59,12 @@ tp_connection_get_avatar_requirements_cb (TpProxy *proxy,
     GObject *weak_object)
 {
   TpConnection *self = (TpConnection *) proxy;
-
-  self->priv->fetching_avatar_requirements = FALSE;
+  GSimpleAsyncResult *result = user_data;
 
   if (error != NULL)
     {
       DEBUG ("Failed to get avatar requirements properties: %s", error->message);
+      g_simple_async_result_set_from_error (result, error);
       goto finally;
     }
 
@@ -83,40 +83,26 @@ tp_connection_get_avatar_requirements_cb (TpProxy *proxy,
       tp_asv_get_uint32 (properties, "MaximumAvatarBytes", NULL));
 
 finally:
-  _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS,
-      self->priv->avatar_requirements != NULL);
+  g_simple_async_result_complete (result);
 }
 
 void
-_tp_connection_maybe_prepare_avatar_requirements (TpProxy *proxy)
+_tp_connection_prepare_avatar_requirements_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   TpConnection *self = (TpConnection *) proxy;
+  GSimpleAsyncResult *result;
 
-  if (self->priv->avatar_requirements != NULL)
-    return;   /* already done */
+  g_assert (self->priv->avatar_requirements == NULL);
 
-  if (!_tp_proxy_is_preparing (proxy, TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS))
-    return;   /* not interested right now */
-
-  if (!self->priv->ready)
-    return;   /* will try again when ready */
-
-  if (self->priv->fetching_avatar_requirements)
-    return;   /* Another Get operation is running */
-
-  if (!tp_proxy_has_interface_by_id (proxy,
-        TP_IFACE_QUARK_CONNECTION_INTERFACE_AVATARS))
-    {
-      _tp_proxy_set_feature_prepared (proxy, TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS,
-          FALSE);
-      return;
-    }
-
-  self->priv->fetching_avatar_requirements = TRUE;
+  result = g_simple_async_result_new ((GObject *) proxy, callback, user_data,
+      _tp_connection_prepare_avatar_requirements_async);
 
   tp_cli_dbus_properties_call_get_all (self, -1,
       TP_IFACE_CONNECTION_INTERFACE_AVATARS,
-      tp_connection_get_avatar_requirements_cb, NULL, NULL, NULL);
+      tp_connection_get_avatar_requirements_cb, result, g_object_unref, NULL);
 }
 
 /**

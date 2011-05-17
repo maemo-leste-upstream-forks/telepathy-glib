@@ -365,28 +365,88 @@ D-Bus interface on the Connection.
 Connections that use <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> must also have the <a class="link" href="telepathy-glib-TpContactsMixin.html#TpContactsMixin" title="TpContactsMixin"><span class="type">TpContactsMixin</span></a>.
 </p>
 <p>
-To use the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> subclass as a mixin, call
-<a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init" title="tp_base_contact_list_mixin_class_init ()"><code class="function">tp_base_contact_list_mixin_class_init()</code></a> after <a class="link" href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init" title="tp_contacts_mixin_class_init ()"><code class="function">tp_contacts_mixin_class_init()</code></a>
-in the <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>'s <span class="type">GTypeClass.class_init</span> method, create a
-<a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> in the <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.create-channel-managers"><span class="type">TpBaseConnectionClass.create_channel_managers</span></a>
-method, then call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-register-with-contacts-mixin" title="tp_base_contact_list_mixin_register_with_contacts_mixin ()"><code class="function">tp_base_contact_list_mixin_register_with_contacts_mixin()</code></a>
-after <a class="link" href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-init" title="tp_contacts_mixin_init ()"><code class="function">tp_contacts_mixin_init()</code></a> in the <span class="type">GObjectClass.constructor</span> or
-<span class="type">GObjectClass.constructed</span> method.
+Connection managers should subclass <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a>, implementing the
+virtual methods for core functionality in <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactListClass" title="TpBaseContactListClass"><span class="type">TpBaseContactListClass</span></a>.
+Then, in the connection manager's <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> subclass:
 </p>
 <p>
-Also add the <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-LIST:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST</code></a>
-interface to the <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.interfaces-always-present"><span class="type">TpBaseConnectionClass.interfaces_always_present</span></a>,
-and implement the <code class="literal">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST</code> <span class="type">GInterface</span>
-by passing <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-list-iface-init" title="tp_base_contact_list_mixin_list_iface_init ()"><code class="function">tp_base_contact_list_mixin_list_iface_init()</code></a> to
-<a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a>.
+</p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+<p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
+  <span class="type">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST</span> using
+  <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-list-iface-init" title="tp_base_contact_list_mixin_list_iface_init ()"><code class="function">tp_base_contact_list_mixin_list_iface_init()</code></a>:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="symbol">(</span>MyConnection<span class="symbol">,</span> my_connection<span class="symbol">,</span>
+    TP_TYPE_BASE_CONNECTION<span class="symbol">,</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="symbol">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST<span class="symbol">,</span>
+        tp_base_contact_list_mixin_list_iface_init<span class="symbol">);</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="symbol">)</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</li>
+<li class="listitem">
+<p>in the <code class="function">class_init</code> method, call
+   <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init" title="tp_base_contact_list_mixin_class_init ()"><code class="function">tp_base_contact_list_mixin_class_init()</code></a> after
+   <a class="link" href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init" title="tp_contacts_mixin_class_init ()"><code class="function">tp_contacts_mixin_class_init()</code></a>:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc slc">// ...</span>
+<span class="function"><a href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init">tp_contacts_mixin_class_init</a></span> <span class="symbol">(</span>object_class<span class="symbol">,</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="symbol">(</span>MyConnectionClass<span class="symbol">,</span> contacts_mixin<span class="symbol">));</span>
+<span class="function"><a href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init">tp_base_contact_list_mixin_class_init</a></span> <span class="symbol">(</span>base_connection_class<span class="symbol">);</span>
+<span class="gtkdoc slc">// ...</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>and include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-LIST:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST</code></a> in
+   <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.interfaces-always-present"><span class="type">TpBaseConnectionClass.interfaces_always_present</span></a>;</p>
+</li>
+<li class="listitem"><p>in the <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.create-channel-managers"><span class="type">TpBaseConnectionClass.create_channel_managers</span></a>
+   implementation, create an instance of the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a>
+   subclass, and include it in the returned <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a>;</p></li>
+<li class="listitem"><p>in the <code class="function">constructed</code> method, call
+   <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-register-with-contacts-mixin" title="tp_base_contact_list_mixin_register_with_contacts_mixin ()"><code class="function">tp_base_contact_list_mixin_register_with_contacts_mixin()</code></a> on the
+   <span class="emphasis"><em>connection</em></span>.</p></li>
+</ul></div>
+<p>
 </p>
 <p>
-To support user-defined contact groups too, do the same, but additionally
-implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a> in the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a>,
-add the <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-GROUPS:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS</code></a>
-interface to the <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.interfaces-always-present"><span class="type">TpBaseConnectionClass.interfaces_always_present</span></a>,
-and implement <code class="literal">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_GROUPS</code> using
-<a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-groups-iface-init" title="tp_base_contact_list_mixin_groups_iface_init ()"><code class="function">tp_base_contact_list_mixin_groups_iface_init()</code></a>.
+To support user-defined contact groups too, additionally implement
+<a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a> in the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> subclass, add the
+<a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-GROUPS:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS</code></a> interface to
+<a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.interfaces-always-present"><span class="type">TpBaseConnectionClass.interfaces_always_present</span></a>, and implement the
+<code class="literal">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_GROUPS</code> in the <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a>
+subclass using <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-groups-iface-init" title="tp_base_contact_list_mixin_groups_iface_init ()"><code class="function">tp_base_contact_list_mixin_groups_iface_init()</code></a>.
+</p>
+<p>
+Optionally, one or more of the <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-MUTABLE-CONTACT-LIST:CAPS" title="TP_TYPE_MUTABLE_CONTACT_LIST"><span class="type">TP_TYPE_MUTABLE_CONTACT_LIST</span></a>,
+<a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-MUTABLE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_MUTABLE_CONTACT_GROUP_LIST"><span class="type">TP_TYPE_MUTABLE_CONTACT_GROUP_LIST</span></a>, and <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-BLOCKABLE-CONTACT-LIST:CAPS" title="TP_TYPE_BLOCKABLE_CONTACT_LIST"><span class="type">TP_TYPE_BLOCKABLE_CONTACT_LIST</span></a>
+GObject interfaces may also be implemented, as appropriate to the protocol.
 </p>
 <p>
 In versions of the Telepathy D-Bus Interface Specification prior to

@@ -193,6 +193,18 @@
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-sms-emit-sms-channel-changed" title="tp_svc_channel_interface_sms_emit_sms_channel_changed ()">tp_svc_channel_interface_sms_emit_sms_channel_changed</a>
                                                         (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> instance</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> arg_SMSChannel</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-sms-get-sms-length-impl" title="tp_svc_channel_interface_sms_get_sms_length_impl ()">*tp_svc_channel_interface_sms_get_sms_length_impl</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfaceSMS"><span class="type">TpSvcChannelInterfaceSMS</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *in_Message</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-sms-implement-get-sms-length" title="tp_svc_channel_interface_sms_implement_get_sms_length ()">tp_svc_channel_interface_sms_implement_get_sms_length</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfaceSMSClass" title="TpSvcChannelInterfaceSMSClass"><span class="type">TpSvcChannelInterfaceSMSClass</span></a> *klass</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-sms-get-sms-length-impl" title="tp_svc_channel_interface_sms_get_sms_length_impl ()"><span class="type">tp_svc_channel_interface_sms_get_sms_length_impl</span></a> impl</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-sms-return-from-get-sms-length" title="tp_svc_channel_interface_sms_return_from_get_sms_length ()">tp_svc_channel_interface_sms_return_from_get_sms_length</a>
+                                                        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> out_Chunks_Required</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> out_Remaining_Characters</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> out_Estimated_Cost</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Object Hierarchy">
@@ -1469,10 +1481,27 @@ Dummy typedef representing any implementation of this interface.
 <pre class="programlisting">typedef struct _TpSvcChannelInterfaceSMSClass TpSvcChannelInterfaceSMSClass;</pre>
 <p>
 The class of TpSvcChannelInterfaceSMS.
-This interface has no D-Bus methods, so an
-implementation can typically pass <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to
-<a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a> as the interface
-initialization function.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_channel_interface_sms (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_channel_interface_sms_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (get_sms_length);
+#undef IMPLEMENT
+}
+</pre>
+<p>
 </p>
 </div>
 <hr>
@@ -1496,6 +1525,103 @@ SMSChannelChanged signal on interface org.freedesktop.Telepathy.Channel.Interfac
 <tr>
 <td><p><span class="term"><em class="parameter"><code>arg_SMSChannel</code></em> :</span></p></td>
 <td>gboolean  (FIXME, generate documentation)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_svc_channel_interface_sms_get_sms_length_impl ()">
+<a name="tp-svc-channel-interface-sms-get-sms-length-impl"></a><h3>tp_svc_channel_interface_sms_get_sms_length_impl ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*tp_svc_channel_interface_sms_get_sms_length_impl)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfaceSMS"><span class="type">TpSvcChannelInterfaceSMS</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> *in_Message</code></em>,
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);</pre>
+<p>
+The signature of an implementation of the D-Bus method
+GetSMSLength on interface org.freedesktop.Telepathy.Channel.Interface.SMS.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>The object implementing this interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_Message</code></em> :</span></p></td>
+<td>const GPtrArray * (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td>Used to return values or throw an error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_svc_channel_interface_sms_implement_get_sms_length ()">
+<a name="tp-svc-channel-interface-sms-implement-get-sms-length"></a><h3>tp_svc_channel_interface_sms_implement_get_sms_length ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_svc_channel_interface_sms_implement_get_sms_length
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-text.html#TpSvcChannelInterfaceSMSClass" title="TpSvcChannelInterfaceSMSClass"><span class="type">TpSvcChannelInterfaceSMSClass</span></a> *klass</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-svc-channel-text.html#tp-svc-channel-interface-sms-get-sms-length-impl" title="tp_svc_channel_interface_sms_get_sms_length_impl ()"><span class="type">tp_svc_channel_interface_sms_get_sms_length_impl</span></a> impl</code></em>);</pre>
+<p>
+Register an implementation for the GetSMSLength method in the vtable
+of an implementation of this interface. To be called from
+the interface init function.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>klass</code></em> :</span></p></td>
+<td>A class whose instances implement this interface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>impl</code></em> :</span></p></td>
+<td>A callback used to implement the GetSMSLength D-Bus method
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="tp_svc_channel_interface_sms_return_from_get_sms_length ()">
+<a name="tp-svc-channel-interface-sms-return-from-get-sms-length"></a><h3>tp_svc_channel_interface_sms_return_from_get_sms_length ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_svc_channel_interface_sms_return_from_get_sms_length
+                                                        (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> out_Chunks_Required</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> out_Remaining_Characters</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> out_Estimated_Cost</code></em>);</pre>
+<p>
+Return successfully by calling <a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#dbus-g-method-return"><code class="function">dbus_g_method_return()</code></a>.
+This inline function exists only to provide type-safety.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td>The D-Bus method invocation context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out_Chunks_Required</code></em> :</span></p></td>
+<td>guint  (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out_Remaining_Characters</code></em> :</span></p></td>
+<td>gint  (FIXME, generate documentation)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out_Estimated_Cost</code></em> :</span></p></td>
+<td>gint  (FIXME, generate documentation)
 </td>
 </tr>
 </tbody>

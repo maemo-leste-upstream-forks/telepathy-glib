@@ -108,7 +108,7 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
 </p>
 <div class="section" title="Implementing SimplePresence">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp84761168"></a>Implementing SimplePresence</h2></div></div></div>
+<a name="id1259449"></a>Implementing SimplePresence</h2></div></div></div>
 <p>
   Since 0.7.13 this mixin supports the entire SimplePresence interface.
   You can implement <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceSimplePresence"><span class="type">TpSvcConnectionInterfaceSimplePresence</span></a> as follows:
@@ -124,8 +124,20 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="symbol">(</span>MyConnection<span class="symbol">,</span> my_connection<span class="symbol">,</span>
+    TP_TYPE_BASE_CONNECTION<span class="symbol">,</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="symbol">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_SIMPLE_PRESENCE<span class="symbol">,</span>
+        tp_presence_mixin_simple_presence_iface_init<span class="symbol">);</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="symbol">)</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -148,7 +160,7 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
 </p>
 <div class="section" title="Implementing old-style Presence">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp84776832"></a>Implementing old-style Presence</h2></div></div></div>
+<a name="id1259578"></a>Implementing old-style Presence</h2></div></div></div>
 <p>
   This mixin also supports a large subset of the deprecated Presence
   interface. It does not support protocols where it is possible to set
@@ -166,8 +178,20 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="symbol">(</span>MyConnection<span class="symbol">,</span> my_connection<span class="symbol">,</span>
+    TP_TYPE_BASE_CONNECTION<span class="symbol">,</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="symbol">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE<span class="symbol">,</span>
+        tp_presence_mixin_iface_init<span class="symbol">);</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="symbol">)</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -559,8 +583,20 @@ should be set after calling <a class="link" href="telepathy-glib-TpPresenceMixin
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting">TpPresenceMixinClass <span class="symbol">*</span>mixin_class<span class="symbol">;</span>
+
+<span class="function"><a href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-class-init">tp_presence_mixin_class_init</a></span> <span class="symbol">((</span>GObjectClass <span class="symbol">*)</span> klass<span class="symbol">,</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="symbol">(</span>SomeObjectClass<span class="symbol">,</span> presence_mixin<span class="symbol">));</span>
+mixin_class <span class="symbol">=</span> <span class="function">TP_PRESENCE_MIXIN_CLASS</span> <span class="symbol">(</span>klass<span class="symbol">);</span>
+mixin_class<span class="symbol">-&gt;</span>get_maximum_status_message_length <span class="symbol">=</span>
+    some_object_get_maximum_status_message_length<span class="symbol">;</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -626,8 +662,12 @@ class_init function like so:
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2
+3</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-class-init">tp_presence_mixin_class_init</a></span> <span class="symbol">((</span>GObjectClass <span class="symbol">*)</span> klass<span class="symbol">,</span>
+                              <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="symbol">(</span>SomeObjectClass<span class="symbol">,</span>
+                                               presence_mixin<span class="symbol">));</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -695,8 +735,10 @@ instance init function like so:
   <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting"></pre></td>
+        <td class="listing_lines" align="right"><pre>1
+2</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-init">tp_presence_mixin_init</a></span> <span class="symbol">((</span>GObject <span class="symbol">*)</span> self<span class="symbol">,</span>
+                        <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="symbol">(</span>SomeObject<span class="symbol">,</span> presence_mixin<span class="symbol">));</span></pre></td>
       </tr>
     </tbody>
   </table>
