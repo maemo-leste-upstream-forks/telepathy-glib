@@ -20,6 +20,7 @@ G_BEGIN_DECLS
 
 typedef struct _ExampleEcho2Channel ExampleEcho2Channel;
 typedef struct _ExampleEcho2ChannelClass ExampleEcho2ChannelClass;
+typedef struct _ExampleEcho2ChannelPrivate ExampleEcho2ChannelPrivate;
 
 GType example_echo_2_channel_get_type (void);
 
@@ -46,7 +47,13 @@ struct _ExampleEcho2ChannelClass {
 struct _ExampleEcho2Channel {
     TpBaseChannel parent;
     TpMessageMixin text;
+    ExampleEcho2ChannelPrivate *priv;
 };
+
+#define EXAMPLE_ECHO_2_CHANNEL_MAX_SMS_LENGTH 100
+
+void example_echo_2_channel_set_sms (ExampleEcho2Channel *self,
+    gboolean sms);
 
 G_END_DECLS
 
