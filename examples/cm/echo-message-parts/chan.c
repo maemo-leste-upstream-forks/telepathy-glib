@@ -13,21 +13,26 @@
 
 #include "chan.h"
 
+#include <string.h>
+
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/channel-iface.h>
+#include <telepathy-glib/message-internal.h>
 #include <telepathy-glib/svc-channel.h>
 
 static void destroyable_iface_init (gpointer iface, gpointer data);
+static void sms_iface_init (gpointer iface, gpointer data);
 
 G_DEFINE_TYPE_WITH_CODE (ExampleEcho2Channel,
     example_echo_2_channel,
     TP_TYPE_BASE_CHANNEL,
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_TYPE_TEXT,
-      tp_message_mixin_text_iface_init);
+      tp_message_mixin_text_iface_init)
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_MESSAGES,
-      tp_message_mixin_messages_iface_init);
+      tp_message_mixin_messages_iface_init)
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_DESTROYABLE,
       destroyable_iface_init)
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_SMS, sms_iface_init)
     )
 
 /* type definition stuff */
@@ -35,18 +40,33 @@ G_DEFINE_TYPE_WITH_CODE (ExampleEcho2Channel,
 static const char * example_echo_2_channel_interfaces[] = {
     TP_IFACE_CHANNEL_INTERFACE_MESSAGES,
     TP_IFACE_CHANNEL_INTERFACE_DESTROYABLE,
+    TP_IFACE_CHANNEL_INTERFACE_SMS,
     NULL };
+
+enum
+{
+  PROP_SMS = 1,
+  PROP_SMS_FLASH,
+  N_PROPS
+};
+
+struct _ExampleEcho2ChannelPrivate
+{
+  gboolean sms;
+};
 
 static void
 example_echo_2_channel_init (ExampleEcho2Channel *self)
 {
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+      EXAMPLE_TYPE_ECHO_2_CHANNEL, ExampleEcho2ChannelPrivate);
 }
 
 
 static void
 send_message (GObject *object,
-              TpMessage *message,
-              TpMessageSendingFlags flags)
+    TpMessage *message,
+    TpMessageSendingFlags flags)
 {
   ExampleEcho2Channel *self = EXAMPLE_ECHO_2_CHANNEL (object);
   TpBaseChannel *base = TP_BASE_CHANNEL (self);
@@ -150,8 +170,8 @@ finally:
 
 static GObject *
 constructor (GType type,
-             guint n_props,
-             GObjectConstructParam *props)
+    guint n_props,
+    GObjectConstructParam *props)
 {
   GObject *object =
       G_OBJECT_CLASS (example_echo_2_channel_parent_class)->constructor (type,
@@ -229,7 +249,49 @@ example_echo_2_channel_fill_immutable_properties (TpBaseChannel *chan,
       TP_IFACE_CHANNEL_INTERFACE_MESSAGES, "DeliveryReportingSupport",
       TP_IFACE_CHANNEL_INTERFACE_MESSAGES, "SupportedContentTypes",
       TP_IFACE_CHANNEL_INTERFACE_MESSAGES, "MessageTypes",
+      TP_IFACE_CHANNEL_INTERFACE_SMS, "Flash",
       NULL);
+}
+
+static void
+set_property (GObject *object,
+    guint property_id,
+    const GValue *value,
+    GParamSpec *pspec)
+{
+  ExampleEcho2Channel *self = (ExampleEcho2Channel *) object;
+
+  switch (property_id)
+    {
+      case PROP_SMS:
+        self->priv->sms = g_value_get_boolean (value);
+        break;
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+        break;
+    }
+}
+
+static void
+get_property (GObject *object,
+    guint property_id,
+    GValue *value,
+    GParamSpec *pspec)
+{
+  ExampleEcho2Channel *self = (ExampleEcho2Channel *) object;
+
+  switch (property_id)
+    {
+      case PROP_SMS:
+        g_value_set_boolean (value, self->priv->sms);
+        break;
+      case PROP_SMS_FLASH:
+        g_value_set_boolean (value, TRUE);
+        break;
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+        break;
+    }
 }
 
 static void
@@ -237,8 +299,18 @@ example_echo_2_channel_class_init (ExampleEcho2ChannelClass *klass)
 {
   GObjectClass *object_class = (GObjectClass *) klass;
   TpBaseChannelClass *base_class = (TpBaseChannelClass *) klass;
+  GParamSpec *param_spec;
+  static TpDBusPropertiesMixinPropImpl sms_props[] = {
+      { "SMSChannel", "sms", NULL },
+      { "Flash", "sms-flash", NULL },
+      { NULL }
+  };
+
+  g_type_class_add_private (klass, sizeof (ExampleEcho2ChannelPrivate));
 
   object_class->constructor = constructor;
+  object_class->set_property = set_property;
+  object_class->get_property = get_property;
   object_class->finalize = finalize;
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_TEXT;
@@ -248,12 +320,29 @@ example_echo_2_channel_class_init (ExampleEcho2ChannelClass *klass)
   base_class->fill_immutable_properties =
     example_echo_2_channel_fill_immutable_properties;
 
+  param_spec = g_param_spec_boolean ("sms", "SMS",
+      "SMS.SMSChannel",
+      FALSE,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_SMS, param_spec);
+
+  param_spec = g_param_spec_boolean ("sms-flash", "SMS Flash",
+      "SMS.Flash",
+      FALSE,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_SMS_FLASH, param_spec);
+
+  tp_dbus_properties_mixin_implement_interface (object_class,
+      TP_IFACE_QUARK_CHANNEL_INTERFACE_SMS,
+      tp_dbus_properties_mixin_getter_gobject_properties, NULL,
+      sms_props);
+
   tp_message_mixin_init_dbus_properties (object_class);
 }
 
 static void
 destroyable_destroy (TpSvcChannelInterfaceDestroyable *iface,
-                     DBusGMethodInvocation *context)
+    DBusGMethodInvocation *context)
 {
   TpBaseChannel *self = TP_BASE_CHANNEL (iface);
 
@@ -265,12 +354,68 @@ destroyable_destroy (TpSvcChannelInterfaceDestroyable *iface,
 
 static void
 destroyable_iface_init (gpointer iface,
-                        gpointer data)
+    gpointer data)
 {
   TpSvcChannelInterfaceDestroyableClass *klass = iface;
 
 #define IMPLEMENT(x) \
   tp_svc_channel_interface_destroyable_implement_##x (klass, destroyable_##x)
   IMPLEMENT (destroy);
+#undef IMPLEMENT
+}
+
+
+void
+example_echo_2_channel_set_sms (ExampleEcho2Channel *self,
+    gboolean sms)
+{
+  if (self->priv->sms == sms)
+    return;
+
+  self->priv->sms = sms;
+
+  tp_svc_channel_interface_sms_emit_sms_channel_changed (self, sms);
+}
+
+static void
+sms_get_sms_length (TpSvcChannelInterfaceSMS *self,
+    const GPtrArray *parts,
+    DBusGMethodInvocation *context)
+{
+  TpMessage *message;
+  guint i;
+  gchar *txt;
+  size_t len;
+
+  message = tp_cm_message_new (
+      tp_base_channel_get_connection (TP_BASE_CHANNEL (self)), parts->len);
+
+  for (i = 0; i < parts->len; i++)
+    {
+      tp_g_hash_table_update (g_ptr_array_index (message->parts, i),
+          g_ptr_array_index (parts, i),
+          (GBoxedCopyFunc) g_strdup,
+          (GBoxedCopyFunc) tp_g_value_slice_dup);
+    }
+
+  txt = tp_message_to_text (message, NULL);
+  len = strlen (txt);
+
+  tp_svc_channel_interface_sms_return_from_get_sms_length (context, len,
+      EXAMPLE_ECHO_2_CHANNEL_MAX_SMS_LENGTH - len, -1);
+
+  g_object_unref (message);
+  g_free (txt);
+}
+
+static void
+sms_iface_init (gpointer iface,
+    gpointer data)
+{
+  TpSvcChannelInterfaceSMSClass *klass = iface;
+
+#define IMPLEMENT(x) \
+  tp_svc_channel_interface_sms_implement_##x (klass, sms_##x)
+  IMPLEMENT (get_sms_length);
 #undef IMPLEMENT
 }
