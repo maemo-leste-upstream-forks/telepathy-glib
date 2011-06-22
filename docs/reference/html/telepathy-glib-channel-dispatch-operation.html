@@ -176,6 +176,24 @@ struct              <a class="link" href="telepathy-glib-channel-dispatch-operat
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
                                                          <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
                                                          <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-leave-channels-async" title="tp_channel_dispatch_operation_leave_channels_async ()">tp_channel_dispatch_operation_leave_channels_async</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpChannelGroupChangeReason" title="enum TpChannelGroupChangeReason"><span class="type">TpChannelGroupChangeReason</span></a> reason</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">gchar</span> *message</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);
+<span class="returnvalue">gboolean</span>            <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-leave-channels-finish" title="tp_channel_dispatch_operation_leave_channels_finish ()">tp_channel_dispatch_operation_leave_channels_finish</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-destroy-channels-async" title="tp_channel_dispatch_operation_destroy_channels_async ()">tp_channel_dispatch_operation_destroy_channels_async</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);
+<span class="returnvalue">gboolean</span>            <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-destroy-channels-finish" title="tp_channel_dispatch_operation_destroy_channels_finish ()">tp_channel_dispatch_operation_destroy_channels_finish</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Object Hierarchy">
@@ -1510,7 +1528,7 @@ for more details.
                                                          <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
 <p>
 Finishes an async operation initiated using
-<a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-close-channels-finish" title="tp_channel_dispatch_operation_close_channels_finish ()"><code class="function">tp_channel_dispatch_operation_close_channels_finish()</code></a>.
+<a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-close-channels-async" title="tp_channel_dispatch_operation_close_channels_async ()"><code class="function">tp_channel_dispatch_operation_close_channels_async()</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -1540,6 +1558,188 @@ Finishes an async operation initiated using
 </tbody>
 </table></div>
 <p class="since">Since 0.15.1</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_dispatch_operation_leave_channels_async ()">
+<a name="tp-channel-dispatch-operation-leave-channels-async"></a><h3>tp_channel_dispatch_operation_leave_channels_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_channel_dispatch_operation_leave_channels_async
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpChannelGroupChangeReason" title="enum TpChannelGroupChangeReason"><span class="type">TpChannelGroupChangeReason</span></a> reason</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">gchar</span> *message</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<p>
+Called by an approver to claim channels and leave them all right away.
+If this method is called successfully, <em class="parameter"><code>self</code></em> has been claimed and
+<a class="link" href="telepathy-glib-channel.html#tp-channel-leave-async" title="tp_channel_leave_async ()"><code class="function">tp_channel_leave_async()</code></a> has been called on all of its channels.
+</p>
+<p>
+If successful, this method will cause the <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a> signal
+to be emitted, in the same way as for
+<a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-handle-with-async" title="tp_channel_dispatch_operation_handle_with_async ()"><code class="function">tp_channel_dispatch_operation_handle_with_async()</code></a>.
+</p>
+<p>
+This method may fail because the dispatch operation has already
+been completed. Again, see <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-handle-with-async" title="tp_channel_dispatch_operation_handle_with_async ()"><code class="function">tp_channel_dispatch_operation_handle_with_async()</code></a>
+for more details.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>reason</code></em> :</span></p></td>
+<td>the leave reason
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>message</code></em> :</span></p></td>
+<td>the leave message
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>a callback to call when the request has been satisfied
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>data to pass to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.2</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_dispatch_operation_leave_channels_finish ()">
+<a name="tp-channel-dispatch-operation-leave-channels-finish"></a><h3>tp_channel_dispatch_operation_leave_channels_finish ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>            tp_channel_dispatch_operation_leave_channels_finish
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>
+Finishes an async operation initiated using
+<a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-leave-channels-async" title="tp_channel_dispatch_operation_leave_channels_async ()"><code class="function">tp_channel_dispatch_operation_leave_channels_async()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>result</code></em> :</span></p></td>
+<td>a <span class="type">GAsyncResult</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>a <span class="type">GError</span> to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <code class="literal">TRUE</code> if the <code class="function">Claim()</code> call was successful and
+<a class="link" href="telepathy-glib-channel.html#tp-channel-leave-async" title="tp_channel_leave_async ()"><code class="function">tp_channel_leave_async()</code></a> has at least been attempted on all the
+channels, otherwise <code class="literal">FALSE</code>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.2</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_dispatch_operation_destroy_channels_async ()">
+<a name="tp-channel-dispatch-operation-destroy-channels-async"></a><h3>tp_channel_dispatch_operation_destroy_channels_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_channel_dispatch_operation_destroy_channels_async
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<p>
+Called by an approver to claim channels and destroy them all right away.
+If this method is called successfully, <em class="parameter"><code>self</code></em> has been claimed and
+<a class="link" href="telepathy-glib-channel.html#tp-channel-destroy-async" title="tp_channel_destroy_async ()"><code class="function">tp_channel_destroy_async()</code></a> has been called on all of its channels.
+</p>
+<p>
+If successful, this method will cause the <a class="link" href="telepathy-glib-proxy.html#TpProxy-invalidated" title='The "invalidated" signal'><span class="type">"invalidated"</span></a> signal
+to be emitted, in the same way as for
+<a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-handle-with-async" title="tp_channel_dispatch_operation_handle_with_async ()"><code class="function">tp_channel_dispatch_operation_handle_with_async()</code></a>.
+</p>
+<p>
+This method may fail because the dispatch operation has already
+been completed. Again, see <a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-handle-with-async" title="tp_channel_dispatch_operation_handle_with_async ()"><code class="function">tp_channel_dispatch_operation_handle_with_async()</code></a>
+for more details.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>a callback to call when the request has been satisfied
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>data to pass to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.2</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_channel_dispatch_operation_destroy_channels_finish ()">
+<a name="tp-channel-dispatch-operation-destroy-channels-finish"></a><h3>tp_channel_dispatch_operation_destroy_channels_finish ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>            tp_channel_dispatch_operation_destroy_channels_finish
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>
+Finishes an async operation initiated using
+<a class="link" href="telepathy-glib-channel-dispatch-operation.html#tp-channel-dispatch-operation-destroy-channels-async" title="tp_channel_dispatch_operation_destroy_channels_async ()"><code class="function">tp_channel_dispatch_operation_destroy_channels_async()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel-dispatch-operation.html#TpChannelDispatchOperation"><span class="type">TpChannelDispatchOperation</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>result</code></em> :</span></p></td>
+<td>a <span class="type">GAsyncResult</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>a <span class="type">GError</span> to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <code class="literal">TRUE</code> if the <code class="function">Claim()</code> call was successful and
+<a class="link" href="telepathy-glib-channel.html#tp-channel-destroy-async" title="tp_channel_destroy_async ()"><code class="function">tp_channel_destroy_async()</code></a> has at least been attempted on all the
+channels, otherwise <code class="literal">FALSE</code>
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.2</p>
 </div>
 </div>
 <div class="refsect1" title="Property Details">
