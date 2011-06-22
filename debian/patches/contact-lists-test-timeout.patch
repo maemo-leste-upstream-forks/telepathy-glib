@@ -1,0 +1,20 @@
+From: Adam Conrad <adconrad@0c3.net>
+Description: Bump the timeout of the contact-lists test for slower arches
+Origin: upstream, http://cgit.freedesktop.org/telepathy/telepathy-glib/patch/?id=6152cfdcbd35509c5207ef337acca2f47a807c5b
+diff --git a/tests/dbus/contact-lists.c b/tests/dbus/contact-lists.c
+index 0284467..6dce762 100644
+--- a/tests/dbus/contact-lists.c
++++ b/tests/dbus/contact-lists.c
+@@ -2624,7 +2624,11 @@ int
+ main (int argc,
+       char **argv)
+ {
+-  tp_tests_init (&argc, &argv);
++  g_type_init ();
++  tp_tests_abort_after (30);
++  tp_debug_set_flags ("all");
++
++  g_test_init (&argc, &argv, NULL);
+ 
+   g_test_add ("/contact-lists/nothing",
+       Test, NULL, setup, test_nothing, teardown);
