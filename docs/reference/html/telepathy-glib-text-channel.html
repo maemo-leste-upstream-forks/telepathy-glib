@@ -87,6 +87,14 @@ const <span class="returnvalue">gchar</span> * const * <a class="link" href="tel
 <span class="returnvalue">gboolean</span>            <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-message-finish" title="tp_text_channel_ack_message_finish ()">tp_text_channel_ack_message_finish</a>  (<em class="parameter"><code><a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a> *self</code></em>,
                                                          <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
                                                          <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-all-pending-messages-async" title="tp_text_channel_ack_all_pending_messages_async ()">tp_text_channel_ack_all_pending_messages_async</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);
+<span class="returnvalue">gboolean</span>            <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-all-pending-messages-finish" title="tp_text_channel_ack_all_pending_messages_finish ()">tp_text_channel_ack_all_pending_messages_finish</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-set-chat-state-async" title="tp_text_channel_set_chat_state_async ()">tp_text_channel_set_chat_state_async</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-enums.html#TpChannelChatState" title="enum TpChannelChatState"><span class="type">TpChannelChatState</span></a> state</code></em>,
@@ -485,6 +493,11 @@ You can then call <a class="link" href="telepathy-glib-text-channel.html#tp-text
 result of the operation.
 </p>
 <p>
+You should use the <a class="link" href="TpSignalledMessage.html" title="TpSignalledMessage"><span class="type">TpSignalledMessage</span></a> received from
+<a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-get-pending-messages" title="tp_text_channel_get_pending_messages ()"><code class="function">tp_text_channel_get_pending_messages()</code></a> or the
+<a class="link" href="telepathy-glib-text-channel.html#TpTextChannel-message-received" title='The "message-received" signal'><span class="type">"message-received"</span></a> signal.
+</p>
+<p>
 See <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-message-async" title="tp_text_channel_ack_message_async ()"><code class="function">tp_text_channel_ack_message_async()</code></a> about acknowledging messages.
 </p>
 <div class="variablelist"><table border="0">
@@ -572,6 +585,11 @@ Once a message has been acknowledged, it is removed from the
 pending-message queue and so the <a class="link" href="telepathy-glib-text-channel.html#TpTextChannel-pending-message-removed" title='The "pending-message-removed" signal'><span class="type">"pending-message-removed"</span></a>
 signal is fired.
 </p>
+<p>
+You should use the <a class="link" href="TpSignalledMessage.html" title="TpSignalledMessage"><span class="type">TpSignalledMessage</span></a> received from
+<a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-get-pending-messages" title="tp_text_channel_get_pending_messages ()"><code class="function">tp_text_channel_get_pending_messages()</code></a> or the
+<a class="link" href="telepathy-glib-text-channel.html#TpTextChannel-message-received" title='The "message-received" signal'><span class="type">"message-received"</span></a> signal.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -635,6 +653,86 @@ Finishes to ack a message.
 </tbody>
 </table></div>
 <p class="since">Since 0.13.10</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_text_channel_ack_all_pending_messages_async ()">
+<a name="tp-text-channel-ack-all-pending-messages-async"></a><h3>tp_text_channel_ack_all_pending_messages_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_text_channel_ack_all_pending_messages_async
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<p>
+Acknowledge all the pending messages. This is equivalent of calling
+<a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-messages-async" title="tp_text_channel_ack_messages_async ()"><code class="function">tp_text_channel_ack_messages_async()</code></a> with the list of <a class="link" href="TpSignalledMessage.html" title="TpSignalledMessage"><span class="type">TpSignalledMessage</span></a>
+returned by <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-get-pending-messages" title="tp_text_channel_get_pending_messages ()"><code class="function">tp_text_channel_get_pending_messages()</code></a>.
+</p>
+<p>
+Once the messages have been acked, <em class="parameter"><code>callback</code></em> will be called.
+You can then call <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-all-pending-messages-finish" title="tp_text_channel_ack_all_pending_messages_finish ()"><code class="function">tp_text_channel_ack_all_pending_messages_finish()</code></a> to get
+the result of the operation.
+</p>
+<p>
+See <a class="link" href="telepathy-glib-text-channel.html#tp-text-channel-ack-message-async" title="tp_text_channel_ack_message_async ()"><code class="function">tp_text_channel_ack_message_async()</code></a> about acknowledging messages.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>a callback to call when the messages have been acked
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>data to pass to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_text_channel_ack_all_pending_messages_finish ()">
+<a name="tp-text-channel-ack-all-pending-messages-finish"></a><h3>tp_text_channel_ack_all_pending_messages_finish ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>            tp_text_channel_ack_all_pending_messages_finish
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *result</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>
+Finish an asynchronous acknowledgement operation of all messages.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-text-channel.html#TpTextChannel"><span class="type">TpTextChannel</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>result</code></em> :</span></p></td>
+<td>a <span class="type">GAsyncResult</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>a <span class="type">GError</span> to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <code class="literal">TRUE</code> if the messages have been acked, <code class="literal">FALSE</code> otherwise.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_text_channel_set_chat_state_async ()">
@@ -1013,6 +1111,11 @@ preferred MIME types appearing earlier in the array.
 <p>
 The ::message-received signal is emitted when a new message has been
 received on <em class="parameter"><code>self</code></em>.
+</p>
+<p>
+The same <em class="parameter"><code>message</code></em> object will be used by the
+<a class="link" href="telepathy-glib-text-channel.html#TpTextChannel-pending-message-removed" title='The "pending-message-removed" signal'><span class="type">"pending-message-removed"</span></a> signal once <em class="parameter"><code>message</code></em> has been
+acked so you can simply compare pointers to identify the message.
 </p>
 <p>
 Note that this signal is only fired once the

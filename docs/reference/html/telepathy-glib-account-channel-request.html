@@ -125,6 +125,18 @@
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-hints" title="tp_account_channel_request_set_hints ()">tp_account_channel_request_set_hints</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *self</code></em>,
                                                          <em class="parameter"><code><span class="type">GHashTable</span> *hints</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-delegate-to-preferred-handler" title="tp_account_channel_request_set_delegate_to_preferred_handler ()">tp_account_channel_request_set_delegate_to_preferred_handler</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">gboolean</span> delegate</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequestDelegatedChannelCb" title="TpAccountChannelRequestDelegatedChannelCb ()">*TpAccountChannelRequestDelegatedChannelCb</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *request</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *channel</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-delegated-channel-callback" title="tp_account_channel_request_set_delegated_channel_callback ()">tp_account_channel_request_set_delegated_channel_callback</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequestDelegatedChannelCb" title="TpAccountChannelRequestDelegatedChannelCb ()"><span class="type">TpAccountChannelRequestDelegatedChannelCb</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>);
 </pre>
 </div>
 <div class="refsect1" title="Object Hierarchy">
@@ -1000,6 +1012,128 @@ channel.
 </tbody>
 </table></div>
 <p class="since">Since 0.13.14</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_account_channel_request_set_delegate_to_preferred_handler ()">
+<a name="tp-account-channel-request-set-delegate-to-preferred-handler"></a><h3>tp_account_channel_request_set_delegate_to_preferred_handler ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_account_channel_request_set_delegate_to_preferred_handler
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><span class="type">gboolean</span> delegate</code></em>);</pre>
+<p>
+If <em class="parameter"><code>delegate</code></em> is <code class="literal">TRUE</code>, asks to the client currently handling the channels to
+delegate them to the preferred handler (passed when calling
+<a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-ensure-channel-async" title="tp_account_channel_request_ensure_channel_async ()"><code class="function">tp_account_channel_request_ensure_channel_async()</code></a> for example).
+</p>
+<p>
+This function can't be called once <em class="parameter"><code>self</code></em> has been used to request a
+channel.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>delegate</code></em> :</span></p></td>
+<td>
+<code class="literal">TRUE</code> to request to delegate channels
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
+</div>
+<hr>
+<div class="refsect2" title="TpAccountChannelRequestDelegatedChannelCb ()">
+<a name="TpAccountChannelRequestDelegatedChannelCb"></a><h3>TpAccountChannelRequestDelegatedChannelCb ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*TpAccountChannelRequestDelegatedChannelCb)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *request</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *channel</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<p>
+Called when a client asked us to delegate <em class="parameter"><code>channel</code></em> to another Handler.
+When this function is called you are no longer handling <em class="parameter"><code>channel</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>request</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> instance
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channel</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>arbitrary user-supplied data passed to
+<a class="link" href="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-delegated-channel-callback" title="tp_account_channel_request_set_delegated_channel_callback ()"><code class="function">tp_account_channel_request_set_delegated_channel_callback()</code></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_account_channel_request_set_delegated_channel_callback ()">
+<a name="tp-account-channel-request-set-delegated-channel-callback"></a><h3>tp_account_channel_request_set_delegated_channel_callback ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_account_channel_request_set_delegated_channel_callback
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequestDelegatedChannelCb" title="TpAccountChannelRequestDelegatedChannelCb ()"><span class="type">TpAccountChannelRequestDelegatedChannelCb</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>);</pre>
+<p>
+Turn on support for
+the org.freedesktop.Telepathy.ChannelRequest.DelegateToPreferredHandler
+hint.
+</p>
+<p>
+When receiving a request containing this hint, <em class="parameter"><code>self</code></em> will automatically
+delegate the channel to the preferred handler of the request and then call
+<em class="parameter"><code>callback</code></em> to inform the client that it is no longer handling this channel.
+</p>
+<p>
+<em class="parameter"><code>callback</code></em> may be called any time after (and only after) requesting and
+handling the channel (i.e. you have called create_and_handle or
+ensure_and_handle).
+</p>
+<p>
+This function can't be called once <em class="parameter"><code>self</code></em> has been used to request a
+channel.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>function called the channel requested using <em class="parameter"><code>self</code></em> is
+delegated, may not be <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>arbitrary user-supplied data passed to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>called with the <em class="parameter"><code>user_data</code></em> as argument, when <em class="parameter"><code>self</code></em> is destroyed
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
 </div>
 </div>
 <div class="refsect1" title="Property Details">
