@@ -244,6 +244,7 @@
 
 #define DEBUG_FLAG TP_DEBUG_CONTACT_LISTS
 #include "telepathy-glib/debug-internal.h"
+#include "telepathy-glib/util-internal.h"
 
 struct _TpBaseContactListPrivate
 {
@@ -1972,7 +1973,6 @@ tp_base_contact_list_set_list_received (TpBaseContactList *self)
       self->priv->conn, self->priv->state);
 }
 
-#ifdef ENABLE_DEBUG
 static char
 presence_state_to_letter (TpSubscriptionState ps)
 {
@@ -1997,7 +1997,6 @@ presence_state_to_letter (TpSubscriptionState ps)
       return '!';
     }
 }
-#endif
 
 /**
  * tp_base_contact_list_contacts_changed:
@@ -3635,8 +3634,8 @@ tp_base_contact_list_groups_removed (TpBaseContactList *self,
     return;
 
   old_members = tp_handle_set_new (self->priv->contact_repo);
-  actually_removed = g_ptr_array_sized_new (n_removed + 1);
-  g_ptr_array_set_free_func (actually_removed, g_free);
+  actually_removed = _tp_g_ptr_array_sized_new_with_free_func (n_removed + 1,
+      g_free);
 
   for (i = 0; i < n_removed; i++)
     {

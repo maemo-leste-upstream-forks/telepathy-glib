@@ -1,3 +1,175 @@
+commit 26e2815291d7d1fc27ec10c46c9bef41041ea0b1
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:52:34 +0100
+
+    Version 0.15.4
+
+commit e4e75f300766b3e019b29f80b624f225168d3f97
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:51:53 +0100
+
+    NEWS for 0.15.4
+
+commit f09170ae457acd3eb638979d500f54421eca2a5a
+Merge: 99458a6 f34329f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:44:37 +0100
+
+    Merge branch 'fd.o-39172-TpTextChannel-pending-message-queue'
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit f34329fed56539cad3dd63cee46d620c25200692
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:37:56 +0100
+
+    TextChannel: clarify choice of _by_handle vs _by_id
+    
+    These comments' positioning confused me.
+
+commit 20a7d3ff395b2934cc8e0f207955820104d3620f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:30:44 +0100
+
+    TextChannel: use a GQueue while processing pending messages
+
+commit d485129ddd30936589b8ee190043425cf6f9346b
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:19:40 +0100
+
+    TextChannel: don't leak self pointer in contacts cbs
+    
+    In got_pending_senders_contact_by_handle_cb and
+    got_pending_senders_contact_by_id_cb, we get a pointer to ourself using
+    g_async_result_get_source_object, which returns a new reference rather
+    than borrowing one. So we need to unref.
+
+commit 6ab2ef14112276f43196d98a8c51f4fea149f874
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:17:35 +0100
+
+    TextChannel: fail IncomingMessages if contacts can't prepare
+    
+    If we can't prepare *any* contacts (as opposed to just some contacts
+    failing to prepare) then the channel is pretty broken. In the past, in
+    this case we would mark the IncomingMessages features as prepared
+    without failure, but silently drop the messages!
+    
+    In practice this can only fail if the CM crashes or the connection goes
+    away behind our back. But it seems safer to mark the operation as
+    failed.
+    
+    (Relatedly, if we just _complete() the GSimpleAsyncResult then TpProxy's
+    machinery marks the features as prepared or failed as appropriate.)
+
+commit a3e2e0cbeddb96a943dfe3f2cc1eabc24f25cda4
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:11:57 +0100
+
+    TextChannel: return on GetPendingMessages errors
+
+commit 8e12523d99a495f562066a124536e1287aeeb1c8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 16:00:38 +0100
+
+    TpTextChannel: fix preparing when message-sender-id is missing
+    
+    6fe8293 introduced a regression where, if a CM does not include
+    message-sender-id in received messages, preparing a TpTextChannel for a
+    proxy which has pending messages will never complete.
+    
+    As of that commit, the only reference to 'result' is owned by the call
+    to Get(..., 'PendingMessages'), which is released once
+    get_pending_messages_cb() returns. So the callback for
+    tp_connection_get_contacts_by_handle/tp_connection_get_contacts_by_id
+    never fires, because 'result' is specified as the weak object for the
+    call: the result dies immediately, and hence the get_contacts operation
+    is cancelled.
+    
+    This patch makes the calls to get_contacts_by_* hold a reference to the
+    result which they pass as a weak object. This is an abuse of the
+    weak_object field to pass both an object and another pointer to the
+    callback. Arguably it would be clearer to use a context struct, and my
+    advocating the removal of exactly such a context struct triggered this
+    bug…
+    
+    Fixes: <https://bugs.freedesktop.org/show_bug.cgi?id=39172>
+
+commit c92f25b3b3ffacf4cd2b516e46148f2b4a5f40b8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 15:53:08 +0100
+
+    text-channel test: store bob's handle.
+    
+    While we're there, remove unused references to 'alf'!
+
+commit 99458a6274936fb6207131705cbedc6eedc63334
+Merge: 3ea87ba 1d72e2d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-12 16:14:07 +0200
+
+    Merge branch 'telepathy-glib-0.14'
+
+commit 1d72e2d85ba9d2e1c2d883bc8e472e332d476d11
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-12 15:18:40 +0200
+
+    test-stream-tube: pass if UNIX sockets are not implemented
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=38997
+
+commit 8805d05c1b2d6fd3e287dbd286fde215e47d5bd0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-12 15:09:36 +0200
+
+    gnio-util: properly set the GError if UNIX sockets are not implemented
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=38997
+
+commit ae7aa32899863e0aed03c56c3e853ca0c3ffe167
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-12 14:55:37 +0200
+
+    tests/lib/stream-tube-chan: don't try to use UNIX socket if not supported
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=38997
+
+commit 3ea87ba10095c0e02a2ce2ac9777bd95be8d2768
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-12 12:47:02 +0200
+
+    Fix build error in unit tests
+
+commit ebf70605418bd424e32973d49b6e3d86e053524c
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-12 12:31:31 +0200
+
+    Factor out _tp_g_ptr_array_sized_new_with_free_func()
+
+commit 83858d2f09064fa00011ffca1608b4619c941f7a
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-12 11:21:37 +0200
+
+    Set initial value to user_action_time to make compiler happy
+    
+    Actually if that var did not receive a value, it already does a goto out anyway
+
+commit 9112203599b94092566a05cdc94908568d3ee483
+Merge: 81a5583 b39713c
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-11 17:42:31 +0100
+
+    Merge branch 'debug-stubs'
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=39046
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 81a558320db6a4250172c5647c34ebd3d3aac5ba
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-08 13:10:41 +0200
+
+    set nano flag
+
 commit ae5e66f5c51bfdfc058010cb6f679af86732cd48
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2011-07-08 12:40:53 +0200
@@ -71,6 +243,22 @@ Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2011-06-24 10:27:48 +0200
 
     simple-channel-request: export tp_tests_simple_channel_request_dup_immutable_props()
+
+commit b39713ce49bf3411b6557a7636e6fc2e4cd46024
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-07 17:54:04 +0100
+
+    BaseConnection: remove repeated includes of debug-internal
+    
+    This used to be done to change the debug flag used for
+    handle-reference-related code. But because handles are immortal now,
+    these functions have no DEBUG() statements at all.
+
+commit 3e2df72ead78c9f96beb0cefb77e766733a390f1
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-07 17:45:31 +0100
+
+    Make DEBUG a no-op static inline with --disable-debug.
 
 commit 22db42544e3390e3685956c07d5c1ed15309141d
 Author: Debarshi Ray <rishi@gnu.org>
