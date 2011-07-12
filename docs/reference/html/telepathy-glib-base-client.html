@@ -148,6 +148,14 @@
                                                          <em class="parameter"><code><span class="type">GPtrArray</span> **delegated</code></em>,
                                                          <em class="parameter"><code><span class="type">GHashTable</span> **not_delegated</code></em>,
                                                          <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-base-client.html#TpBaseClientDelegatedChannelsCb" title="TpBaseClientDelegatedChannelsCb ()">*TpBaseClientDelegatedChannelsCb</a>)  (<em class="parameter"><code><a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code><span class="type">GPtrArray</span> *channels</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-base-client.html#tp-base-client-set-delegated-channels-callback" title="tp_base_client_set_delegated_channels_callback ()">tp_base_client_set_delegated_channels_callback</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-base-client.html#TpBaseClientDelegatedChannelsCb" title="TpBaseClientDelegatedChannelsCb ()"><span class="type">TpBaseClientDelegatedChannelsCb</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-base-client.html#tp-channel-dispatcher-present-channel-async" title="tp_channel_dispatcher_present_channel_async ()">tp_channel_dispatcher_present_channel_async</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-channel-dispatcher.html#TpChannelDispatcher"><span class="type">TpChannelDispatcher</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> *channel</code></em>,
@@ -1451,6 +1459,86 @@ otherwise <code class="literal">FALSE</code>.
 </tbody>
 </table></div>
 <p class="since">Since 0.15.0</p>
+</div>
+<hr>
+<div class="refsect2" title="TpBaseClientDelegatedChannelsCb ()">
+<a name="TpBaseClientDelegatedChannelsCb"></a><h3>TpBaseClientDelegatedChannelsCb ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*TpBaseClientDelegatedChannelsCb)  (<em class="parameter"><code><a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code><span class="type">GPtrArray</span> *channels</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<p>
+Called when a client asked us to delegate <em class="parameter"><code>channels</code></em> to another Handler.
+When this function is called <em class="parameter"><code>client</code></em> is not longer handling <em class="parameter"><code>channels</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> instance
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>channels</code></em> :</span></p></td>
+<td> a <span class="type">GPtrArray</span> of <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Channel]</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>arbitrary user-supplied data passed to
+<a class="link" href="telepathy-glib-base-client.html#tp-base-client-set-delegated-channels-callback" title="tp_base_client_set_delegated_channels_callback ()"><code class="function">tp_base_client_set_delegated_channels_callback()</code></a>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
+</div>
+<hr>
+<div class="refsect2" title="tp_base_client_set_delegated_channels_callback ()">
+<a name="tp-base-client-set-delegated-channels-callback"></a><h3>tp_base_client_set_delegated_channels_callback ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                tp_base_client_set_delegated_channels_callback
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-base-client.html#TpBaseClientDelegatedChannelsCb" title="TpBaseClientDelegatedChannelsCb ()"><span class="type">TpBaseClientDelegatedChannelsCb</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>);</pre>
+<p>
+Turn on support for
+the org.freedesktop.Telepathy.ChannelRequest.DelegateToPreferredHandler
+hint.
+</p>
+<p>
+When receiving a request containing this hint, <em class="parameter"><code>self</code></em> will automatically
+delegate the channels to the preferred handler of the request and then call
+<em class="parameter"><code>callback</code></em> to inform the client that it is no longer handling those
+channels.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> implementing Handler
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>function called when channels currently handled by <em class="parameter"><code>self</code></em> are
+delegated, may not be <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>arbitrary user-supplied data passed to <em class="parameter"><code>callback</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>called with the <em class="parameter"><code>user_data</code></em> as argument, when <em class="parameter"><code>self</code></em> is destroyed
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.15.3</p>
 </div>
 <hr>
 <div class="refsect2" title="tp_channel_dispatcher_present_channel_async ()">

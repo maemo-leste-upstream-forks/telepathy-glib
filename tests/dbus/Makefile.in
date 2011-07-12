@@ -105,11 +105,10 @@ am_test_account_channel_request_OBJECTS =  \
 	account-channel-request.$(OBJEXT)
 test_account_channel_request_OBJECTS =  \
 	$(am_test_account_channel_request_OBJECTS)
-test_account_channel_request_LDADD = $(LDADD)
 test_account_channel_request_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
-	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+	$(am__DEPENDENCIES_1)
 am_test_account_manager_OBJECTS = account-manager.$(OBJEXT)
 test_account_manager_OBJECTS = $(am_test_account_manager_OBJECTS)
 test_account_manager_LDADD = $(LDADD)
@@ -779,7 +778,14 @@ LDADD = \
     $(NULL)
 
 test_account_SOURCES = account.c
+
+# this one uses internal ABI
 test_account_channel_request_SOURCES = account-channel-request.c
+test_account_channel_request_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS)
+
 test_account_manager_SOURCES = account-manager.c
 test_base_client_SOURCES = base-client.c
 test_call_cancellation_SOURCES = call-cancellation.c
