@@ -47,7 +47,7 @@
 <a name="TpAccount"></a><pre class="synopsis">
 #include &lt;telepathy-glib/account.h&gt;
 
-struct              <a class="link" href="telepathy-glib-account.html#TpAccount-struct" title="struct TpAccount">TpAccount</a>;
+                    <a class="link" href="telepathy-glib-account.html#TpAccount-struct" title="TpAccount">TpAccount</a>;
 struct              <a class="link" href="telepathy-glib-account.html#TpAccountClass" title="struct TpAccountClass">TpAccountClass</a>;
 <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="returnvalue">TpAccount</span></a> *         <a class="link" href="telepathy-glib-account.html#tp-account-new" title="tp_account_new ()">tp_account_new</a>                      (<em class="parameter"><code><a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> *bus_daemon</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *object_path</code></em>,
@@ -199,6 +199,7 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Arrays.html#GAr
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> invert</code></em>);
 
 #define             <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CORE:CAPS" title="TP_ACCOUNT_FEATURE_CORE">TP_ACCOUNT_FEATURE_CORE</a>
+#define             <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CONNECTION:CAPS" title="TP_ACCOUNT_FEATURE_CONNECTION">TP_ACCOUNT_FEATURE_CONNECTION</a>
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-account.html#tp-account-is-prepared" title="tp_account_is_prepared ()">tp_account_is_prepared</a>              (<em class="parameter"><code><a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> *account</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> feature</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-account.html#tp-account-prepare-async" title="tp_account_prepare_async ()">tp_account_prepare_async</a>            (<em class="parameter"><code><a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> *account</code></em>,
@@ -388,8 +389,8 @@ communication accounts. The <a class="link" href="telepathy-glib-account.html#Tp
 <div class="refsect1">
 <a name="telepathy-glib-account.details"></a><h2>Details</h2>
 <div class="refsect2">
-<a name="TpAccount-struct"></a><h3>struct TpAccount</h3>
-<pre class="programlisting">struct TpAccount;</pre>
+<a name="TpAccount-struct"></a><h3>TpAccount</h3>
+<pre class="programlisting">typedef struct _TpAccount TpAccount;</pre>
 <p>
 The Telepathy Account Manager stores the user's configured real-time
 communication accounts. This object represents a stored account.
@@ -2204,6 +2205,30 @@ One can ask for a feature to be prepared using the
 </div>
 <hr>
 <div class="refsect2">
+<a name="TP-ACCOUNT-FEATURE-CONNECTION:CAPS"></a><h3>TP_ACCOUNT_FEATURE_CONNECTION</h3>
+<pre class="programlisting">#define             TP_ACCOUNT_FEATURE_CONNECTION</pre>
+<p>
+Expands to a call to a function that returns a quark for the "connection"
+feature on a <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>.
+</p>
+<p>
+When this feature is prepared, it is guaranteed that <a class="link" href="telepathy-glib-account.html#TpAccount--connection" title='The "connection" property'><span class="type">"connection"</span></a>
+will always be either <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> or prepared. If the account was created using a
+<a class="link" href="telepathy-glib-simple-client-factory.html#TpSimpleClientFactory"><span class="type">TpSimpleClientFactory</span></a>, the same factory will be used to create <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>
+object and to determine desired connection features. Change notification of
+<a class="link" href="telepathy-glib-account.html#TpAccount--connection" title='The "connection" property'><span class="type">"connection"</span></a> property will be delayed until all features (at least
+<a class="link" href="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CORE:CAPS" title="TP_CONNECTION_FEATURE_CORE"><code class="literal">TP_CONNECTION_FEATURE_CORE</code></a>) are prepared. See
+<a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features" title="tp_simple_client_factory_add_account_features ()"><code class="function">tp_simple_client_factory_add_account_features()</code></a> to define which features
+needs to be prepared.
+</p>
+<p>
+One can ask for a feature to be prepared using the
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> function, and waiting for it to callback.
+</p>
+<p class="since">Since 0.15.5</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="tp-account-is-prepared"></a><h3>tp_account_is_prepared ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_account_is_prepared              (<em class="parameter"><code><a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> *account</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> feature</code></em>);</pre>
@@ -3487,12 +3512,15 @@ This is not guaranteed to have been retrieved until
 <pre class="programlisting">  "connection"               <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>*         : Read</pre>
 <p>
 The connection of the account, or NULL if account is offline.
-It is not guaranteed that the returned <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> object is ready.
+Note that the returned <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> is not guaranteed to have any
+features pre-prepared (not even <a class="link" href="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CORE:CAPS" title="TP_CONNECTION_FEATURE_CORE"><code class="literal">TP_CONNECTION_FEATURE_CORE</code></a>) unless
+<code class="literal">TP_ACCOUNT_FEATURE_ACCOUNT</code> has been prepared on the account
 </p>
 <p>
 One can receive change notifications on this property by connecting
 to the <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject-notify"><span class="type">"notify"</span></a> signal and using this property as the signal
-detail.
+detail. If <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CONNECTION:CAPS" title="TP_ACCOUNT_FEATURE_CONNECTION"><code class="literal">TP_ACCOUNT_FEATURE_CONNECTION</code></a> has been prepared, this signal
+will be delayed until the connection is ready.
 </p>
 <p>
 This is not guaranteed to have been retrieved until

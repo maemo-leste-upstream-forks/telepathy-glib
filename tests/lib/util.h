@@ -40,6 +40,12 @@ void _tp_tests_assert_strv_equals (const char *file, int line,
   const char *actual_desc, gconstpointer actual_strv,
   const char *expected_desc, gconstpointer expected_strv);
 
+void tp_tests_create_conn (GType conn_type,
+    const gchar *account,
+    gboolean connect,
+    TpBaseConnection **service_conn,
+    TpConnection **client_conn);
+
 void tp_tests_create_and_connect_conn (GType conn_type,
     const gchar *account,
     TpBaseConnection **service_conn,
@@ -56,5 +62,13 @@ void tp_tests_abort_after (guint sec);
 
 void tp_tests_init (int *argc,
     char ***argv);
+
+GValue *_tp_create_local_socket (TpSocketAddressType address_type,
+    TpSocketAccessControl access_control,
+    GSocketService **service,
+    gchar **unix_address,
+    GError **error);
+
+void _tp_destroy_socket_control_list (gpointer data);
 
 #endif /* #ifndef __TP_TESTS_LIB_UTIL_H__ */

@@ -83,6 +83,8 @@
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
 #include "telepathy-glib/debug-internal.h"
+#include "telepathy-glib/deprecated-internal.h"
+#include "telepathy-glib/simple-client-factory-internal.h"
 #include "telepathy-glib/_gen/signals-marshal.h"
 
 struct _TpAccountChannelRequestClass {
@@ -158,9 +160,6 @@ tp_account_channel_request_init (TpAccountChannelRequest *self)
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       TP_TYPE_ACCOUNT_CHANNEL_REQUEST,
       TpAccountChannelRequestPrivate);
-
-  self->priv->factory = TP_CLIENT_CHANNEL_FACTORY (
-      tp_automatic_proxy_factory_dup ());
 }
 
 static void
@@ -723,8 +722,12 @@ acr_channel_request_succeeded_with_channel (TpChannelRequest *chan_req,
         }
 
       /* Operation will be complete once the channel have been prepared */
-      features = tp_client_channel_factory_dup_channel_features (
-          self->priv->factory, self->priv->channel);
+      if (self->priv->factory != NULL)
+        features = tp_client_channel_factory_dup_channel_features (
+            self->priv->factory, self->priv->channel);
+      else
+        features = tp_simple_client_factory_dup_channel_features (
+            tp_proxy_get_factory (self->priv->account), self->priv->channel);
       g_assert (features != NULL);
 
       tp_proxy_prepare_async (self->priv->channel, (GQuark *) features->data,
@@ -794,16 +797,16 @@ acr_request_cb (TpChannelDispatcher *cd,
 
   DEBUG ("Got ChannelRequest: %s", channel_request_path);
 
-  self->priv->chan_request = tp_channel_request_new (
-      self->priv->dbus, channel_request_path, NULL, &err);
-
+  self->priv->chan_request = _tp_simple_client_factory_ensure_channel_request (
+      tp_proxy_get_factory (self->priv->account), channel_request_path, NULL,
+      &err);
   if (self->priv->chan_request == NULL)
     {
       DEBUG ("Failed to create ChannelRequest: %s", err->message);
       goto fail;
     }
 
-  tp_channel_request_set_channel_factory (self->priv->chan_request,
+  _tp_channel_request_set_channel_factory (self->priv->chan_request,
       self->priv->factory);
 
   self->priv->invalidated_sig = g_signal_connect (self->priv->chan_request,
@@ -885,12 +888,13 @@ request_and_handle_channel_async (TpAccountChannelRequest *self,
   self->priv->ensure = ensure;
 
   /* Create a temp handler */
-  self->priv->handler = tp_simple_handler_new (self->priv->dbus, TRUE, FALSE,
+  self->priv->handler = tp_simple_handler_new_with_factory (
+      tp_proxy_get_factory (self->priv->account), TRUE, FALSE,
       "TpGLibRequestAndHandle", TRUE, handle_channels, self, NULL);
   _tp_base_client_set_only_for_account (self->priv->handler,
       self->priv->account);
 
-  tp_base_client_set_channel_factory (self->priv->handler,
+  _tp_base_client_set_channel_factory (self->priv->handler,
       self->priv->factory);
 
   if (self->priv->delegated_channel_cb != NULL)
@@ -1379,15 +1383,26 @@ tp_account_channel_request_ensure_channel_finish (
  * channel.
  *
  * Since: 0.13.2
+ * Deprecated: since 0.15.5. The factory is taken from
+ *  #TpAccountChannelRequest:account.
  */
 void
 tp_account_channel_request_set_channel_factory (TpAccountChannelRequest *self,
     TpClientChannelFactory *factory)
 {
+  _tp_account_channel_request_set_channel_factory (self, factory);
+}
+
+void
+_tp_account_channel_request_set_channel_factory (TpAccountChannelRequest *self,
+    TpClientChannelFactory *factory)
+{
   g_return_if_fail (!self->priv->requested);
 
   tp_clear_object (&self->priv->factory);
-  self->priv->factory = g_object_ref (factory);
+
+  if (factory != NULL)
+    self->priv->factory = g_object_ref (factory);
 }
 
 
@@ -1678,8 +1693,9 @@ tp_account_channel_request_set_delegate_to_preferred_handler (
  * This function can't be called once @self has been used to request a
  * channel.
  *
+ * See also: tp_base_client_set_delegated_channels_callback()
+ *
  * Since: 0.15.3
- * @see_also: tp_base_client_set_delegated_channels_callback ()
  */
 void
 tp_account_channel_request_set_delegated_channel_callback (

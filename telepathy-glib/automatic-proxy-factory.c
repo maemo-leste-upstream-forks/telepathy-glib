@@ -41,6 +41,10 @@
  *     %TP_IFACE_CHANNEL_INTERFACE_MESSAGES;</para>
  *   </listitem>
  *   <listitem>
+ *     <para>a #TpFileTransferChannel, if the channel is of type
+ *     %TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER;</para>
+ *   </listitem>
+ *   <listitem>
  *     <para>a plain #TpChannel, otherwise</para>
  *   </listitem>
  * </itemizedlist>
@@ -60,6 +64,10 @@
  *   <listitem>
  *     <para>%TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES and
  *     TP_TEXT_CHANNEL_FEATURE_SMS for #TpTextChannel</para>
+ *   </listitem>
+ *   <listitem>
+ *     <para>%TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE
+ *     for #TpFileTransferChannel</para>
  *   </listitem>
  * </itemizedlist>
  *
@@ -92,6 +100,7 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/stream-tube-channel.h>
 #include <telepathy-glib/text-channel.h>
+#include <telepathy-glib/file-transfer-channel.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
@@ -143,6 +152,11 @@ tp_automatic_proxy_factory_create_channel_impl (
 
       DEBUG ("channel %s doesn't implement Messages so we can't create "
           "a TpTextChannel", path);
+    }
+  else if (!tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER))
+    {
+      return TP_CHANNEL (tp_file_transfer_channel_new (conn, path, properties,
+            error));
     }
 
   return tp_channel_new_from_properties (conn, path, properties, error);
@@ -197,6 +211,11 @@ tp_automatic_proxy_factory_dup_channel_features_impl (TpChannel *channel)
       feature = TP_TEXT_CHANNEL_FEATURE_SMS;
       g_array_append_val (features, feature);
     }
+  else if (TP_IS_FILE_TRANSFER_CHANNEL (channel))
+    {
+      feature = TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE;
+      g_array_append_val (features, feature);
+    }
 
   return features;
 }
@@ -237,12 +256,19 @@ client_proxy_factory_iface_init (gpointer g_iface,
  * Returns: a new #TpAutomaticProxyFactory
  *
  * Since: 0.13.2
+ * Deprecated: New code should use #TpAutomaticClientFactory instead
  */
-TpAutomaticProxyFactory *
-tp_automatic_proxy_factory_new (void)
+static TpAutomaticProxyFactory *
+_tp_automatic_proxy_factory_new (void)
 {
   return g_object_new (TP_TYPE_AUTOMATIC_PROXY_FACTORY,
       NULL);
+}
+
+TpAutomaticProxyFactory *
+tp_automatic_proxy_factory_new (void)
+{
+  return _tp_automatic_proxy_factory_new ();
 }
 
 /**
@@ -255,6 +281,7 @@ tp_automatic_proxy_factory_new (void)
  * Returns: (transfer full): a #TpAutomaticProxyFactory
  *
  * Since: 0.13.2
+ * Deprecated: New code should use #TpAutomaticClientFactory instead
  */
 TpAutomaticProxyFactory *
 tp_automatic_proxy_factory_dup (void)
@@ -264,7 +291,7 @@ tp_automatic_proxy_factory_dup (void)
   if (singleton != NULL)
     return g_object_ref (singleton);
 
-  singleton = tp_automatic_proxy_factory_new ();
+  singleton = _tp_automatic_proxy_factory_new ();
 
   g_object_add_weak_pointer (G_OBJECT (singleton), (gpointer) &singleton);
 

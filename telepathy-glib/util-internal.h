@@ -27,16 +27,21 @@
 #include <gio/gio.h>
 
 #include <telepathy-glib/channel-request.h>
+#include <telepathy-glib/connection.h>
+#include <telepathy-glib/contact.h>
 
 GArray *_tp_quark_array_copy (const GQuark *quarks) G_GNUC_WARN_UNUSED_RESULT;
 void _tp_quark_array_merge (GArray *array, const GQuark *quarks, gssize n);
+void _tp_quark_array_merge_valist (GArray *array,
+    GQuark feature,
+    va_list var_args);
 
 #ifdef HAVE_GIO_UNIX
 GSocketAddress * _tp_create_temp_unix_socket (GSocketService *service,
     GError **error);
 #endif /* HAVE_GIO_UNIX */
 
-GList * _tp_create_channel_request_list (TpDBusDaemon *dbus,
+GList * _tp_create_channel_request_list (TpSimpleClientFactory *factory,
     GHashTable *request_props);
 
 /* Copied from wocky/wocky-utils.h */
@@ -77,8 +82,24 @@ GList * _tp_create_channel_request_list (TpDBusDaemon *dbus,
 gboolean _tp_bind_connection_status_to_boolean (GBinding *binding,
     const GValue *src_value, GValue *dest_value, gpointer user_data);
 
-/* Suggested to include in GLib: bug #654450 */
-GPtrArray *_tp_g_ptr_array_sized_new_with_free_func (guint reserved_size,
+/* Included in GLib >=2.29.15: bug #654450 */
+GPtrArray *_tp_g_ptr_array_new_full (guint reserved_size,
     GDestroyNotify element_free_func);
+
+gboolean _tp_set_socket_address_type_and_access_control_type (
+    GHashTable *supported_sockets,
+    TpSocketAddressType *address_type,
+    TpSocketAccessControl *access_control,
+    GError **error);
+
+GSocket * _tp_create_client_socket (TpSocketAddressType socket_type,
+    GError **error);
+
+gboolean _tp_contacts_to_handles (TpConnection *connection,
+    guint n_contacts,
+    TpContact * const *contacts,
+    GArray **handles);
+
+GPtrArray *_tp_contacts_from_values (GHashTable *table);
 
 #endif /* __TP_UTIL_INTERNAL_H__ */

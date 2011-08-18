@@ -104,32 +104,34 @@ am__DEPENDENCIES_1 =
 libtelepathy_glib_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	account-channel-request.lo account-manager.lo \
-	automatic-proxy-factory.lo add-dispatch-operation-context.lo \
-	base-channel.lo base-client.lo base-connection.lo \
-	base-connection-manager.lo base-password-channel.lo \
-	base-protocol.lo basic-proxy-factory.lo capabilities.lo \
-	channel.lo channel-group.lo channel-dispatcher.lo \
+	automatic-client-factory.lo automatic-proxy-factory.lo \
+	add-dispatch-operation-context.lo base-channel.lo \
+	base-client.lo base-connection.lo base-connection-manager.lo \
+	base-password-channel.lo base-protocol.lo \
+	basic-proxy-factory.lo capabilities.lo channel.lo \
+	channel-group.lo channel-dispatcher.lo \
 	channel-dispatch-operation.lo channel-manager.lo \
 	channel-request.lo client.lo client-channel-factory.lo \
 	client-message.lo connection.lo connection-avatars.lo \
-	connection-contact-info.lo connection-handles.lo \
-	connection-manager.lo contact.lo contact-list-channel.lo \
+	connection-contact-info.lo connection-contact-list.lo \
+	connection-handles.lo connection-manager.lo contact.lo \
+	contact-list-channel.lo contact-operations.lo \
 	contact-search.lo contact-search-result.lo \
 	base-contact-list.lo cm-message.lo contacts-mixin.lo dbus.lo \
 	dbus-daemon.lo dbus-properties-mixin.lo debug.lo \
 	debug-sender.lo dtmf.lo interfaces.lo errors.lo \
-	exportable-channel.lo gnio-util.lo group-mixin.lo gtypes.lo \
-	handle.lo handle-channels-context.lo handle-repo.lo \
-	handle-repo-dynamic.lo handle-repo-static.lo handle-set.lo \
-	heap.lo intset.lo channel-iface.lo channel-factory-iface.lo \
-	media-interfaces.lo message.lo message-mixin.lo \
-	observe-channels-context.lo presence-mixin.lo \
+	exportable-channel.lo file-transfer-channel.lo gnio-util.lo \
+	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
+	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
+	handle-set.lo heap.lo intset.lo channel-iface.lo \
+	channel-factory-iface.lo media-interfaces.lo message.lo \
+	message-mixin.lo observe-channels-context.lo presence-mixin.lo \
 	properties-mixin.lo protocol.lo proxy.lo proxy-methods.lo \
 	proxy-signals.lo run.lo signalled-message.lo \
-	simple-approver.lo simple-handler.lo simple-observer.lo \
-	simple-password-manager.lo stream-tube-channel.lo \
-	stream-tube-connection.lo text-channel.lo text-mixin.lo \
-	util.lo
+	simple-approver.lo simple-client-factory.lo simple-handler.lo \
+	simple-observer.lo simple-password-manager.lo \
+	stream-tube-channel.lo stream-tube-connection.lo \
+	text-channel.lo text-mixin.lo util.lo
 nodist_libtelepathy_glib_internal_la_OBJECTS = error-str.lo \
 	signals-marshal.lo genums.lo tp-svc-account.lo \
 	tp-svc-account-manager.lo tp-svc-channel.lo \
@@ -373,6 +375,7 @@ our_headers = \
     account.h \
     account-channel-request.h \
     account-manager.h \
+    automatic-client-factory.h \
     automatic-proxy-factory.h \
     add-dispatch-operation-context.h \
     base-client.h \
@@ -394,11 +397,13 @@ our_headers = \
     client-message.h \
     cm-message.h \
     connection.h \
+    connection-contact-list.h \
     connection-manager.h \
     contact-search.h \
     contact-search-result.h \
     capabilities.h \
     contact.h \
+    contact-operations.h \
     base-contact-list.h \
     contacts-mixin.h \
     dbus.h \
@@ -412,6 +417,7 @@ our_headers = \
     enums.h \
     errors.h \
     exportable-channel.h \
+    file-transfer-channel.h \
     gnio-util.h \
     group-mixin.h \
     gtypes.h \
@@ -435,6 +441,7 @@ our_headers = \
     run.h \
     signalled-message.h \
     simple-approver.h \
+    simple-client-factory.h \
     simple-handler.h \
     simple-observer.h \
     simple-password-manager.h \
@@ -478,6 +485,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     account-internal.h \
     account-manager.c \
     account-manager-internal.h \
+    automatic-client-factory-internal.h \
+    automatic-client-factory.c \
     automatic-proxy-factory.c \
     add-dispatch-operation-context-internal.h \
     add-dispatch-operation-context.c \
@@ -508,12 +517,15 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection.c \
     connection-avatars.c \
     connection-contact-info.c \
+    connection-contact-list.c \
     connection-internal.h \
     connection-handles.c \
     connection-manager.c \
     contact.c \
+    contact-internal.h \
     contact-list-channel-internal.h \
     contact-list-channel.c \
+    contact-operations.c \
     contact-search.c \
     contact-search-internal.h \
     contact-search-result.c \
@@ -528,11 +540,13 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-properties-mixin.c \
     debug.c \
     debug-sender.c \
+    deprecated-internal.h \
     dtmf.c \
     interfaces.c \
     debug-internal.h \
     errors.c \
     exportable-channel.c \
+    file-transfer-channel.c \
     gnio-util.c \
     group-mixin.c \
     gtypes.c \
@@ -567,6 +581,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     signalled-message.c \
     signalled-message-internal.h \
     simple-approver.c \
+    simple-client-factory.c \
+    simple-client-factory-internal.h \
     simple-handler.c \
     simple-observer.c \
     simple-password-manager.c \
@@ -668,6 +684,7 @@ ABI_LISTS = \
     versions/0.15.1.abi \
     versions/0.15.2.abi \
     versions/0.15.3.abi \
+    versions/0.15.5.abi \
     $(NULL)
 
 
@@ -810,10 +827,12 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-channel-request.c $(srcdir)/account-channel-request.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-manager.c $(srcdir)/account-manager.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/automatic-client-factory.c $(srcdir)/automatic-client-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/automatic-proxy-factory.c $(srcdir)/automatic-proxy-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/basic-proxy-factory.c $(srcdir)/basic-proxy-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/client-channel-factory.c $(srcdir)/client-channel-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection.c $(srcdir)/connection.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-contact-list.c $(srcdir)/connection-contact-list.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-handles.c $(srcdir)/connection-contact-info.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-avatars.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/protocol.c $(srcdir)/protocol.h \
@@ -828,12 +847,14 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus.c $(srcdir)/dbus.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/capabilities.c $(srcdir)/capabilities.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact.c $(srcdir)/contact.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact-operations.c $(srcdir)/contact-operations.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact-search.c $(srcdir)/contact-search.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/contact-search-result.c $(srcdir)/contact-search-result.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/defs.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/debug.c $(srcdir)/debug.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-client.c $(srcdir)/base-client.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-approver.c $(srcdir)/simple-approver.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-client-factory.c $(srcdir)/simple-client-factory.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-handler.c $(srcdir)/simple-handler.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/simple-observer.c $(srcdir)/simple-observer.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-properties-mixin.c $(srcdir)/dbus-properties-mixin.h \
@@ -850,12 +871,13 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-channel.c $(srcdir)/stream-tube-channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-connection.c $(srcdir)/stream-tube-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/text-channel.c $(srcdir)/text-channel.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/file-transfer-channel.c $(srcdir)/file-transfer-channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/client-message.c $(srcdir)/client-message.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/message.c $(srcdir)/message.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/signalled-message.c $(srcdir)/signalled-message.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-dispatcher.c $(srcdir)/channel-dispatcher.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/errors.c $(srcdir)/errors.h \
-@HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h \
+@HAVE_INTROSPECTION_TRUE@	_gen/telepathy-enums.h _gen/telepathy-enums-gtk-doc.h \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h \
 @HAVE_INTROSPECTION_TRUE@	$(NULL)
 
@@ -957,6 +979,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/add-dispatch-operation-context.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/automatic-client-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/automatic-proxy-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Plo@am__quote@
@@ -981,10 +1004,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm-message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-avatars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-info.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-handles.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-list-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-operations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-search-result.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact-search.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contact.Plo@am__quote@
@@ -998,6 +1023,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-str.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exportable-channel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file-transfer-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/genums.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnio-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group-mixin.Plo@am__quote@
@@ -1025,6 +1051,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalled-message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-approver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-client-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-observer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple-password-manager.Plo@am__quote@

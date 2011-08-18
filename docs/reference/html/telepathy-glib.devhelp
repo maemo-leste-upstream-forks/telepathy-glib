@@ -67,9 +67,12 @@
       <sub name="TpClientChannelFactoryInterface" link="telepathy-glib-client-channel-factory.html"/>
       <sub name="TpBasicProxyFactory" link="telepathy-glib-basic-proxy-factory.html"/>
       <sub name="TpAutomaticProxyFactory" link="telepathy-glib-automatic-proxy-factory.html"/>
+      <sub name="TpSimpleClientFactory" link="telepathy-glib-simple-client-factory.html"/>
+      <sub name="TpAutomaticClientFactory" link="telepathy-glib-automatic-client-factory.html"/>
       <sub name="TpClientMessage" link="TpClientMessage.html"/>
       <sub name="TpSignalledMessage" link="TpSignalledMessage.html"/>
       <sub name="TpTextChannel" link="telepathy-glib-text-channel.html"/>
+      <sub name="TpFileTransferChannel" link="telepathy-glib-file-transfer-channel.html"/>
     </sub>
     <sub name="Service-side D-Bus interfaces" link="ch-service-dbus.html">
       <sub name="&#10;      The TpSvc* interfaces&#10;    " link="telepathy-glib-svc.html"/>
@@ -164,6 +167,7 @@
     <function name="tp_proxy_pending_call_cancel ()" link="telepathy-glib-proxy.html#tp-proxy-pending-call-cancel"/>
     <function name="TpProxySignalConnection" link="telepathy-glib-proxy.html#TpProxySignalConnection"/>
     <function name="tp_proxy_signal_connection_disconnect ()" link="telepathy-glib-proxy.html#tp-proxy-signal-connection-disconnect"/>
+    <function name="tp_proxy_get_factory ()" link="telepathy-glib-proxy.html#tp-proxy-get-factory"/>
     <function name="tp_proxy_get_dbus_daemon ()" link="telepathy-glib-proxy.html#tp-proxy-get-dbus-daemon"/>
     <function name="tp_proxy_get_dbus_connection ()" link="telepathy-glib-proxy.html#tp-proxy-get-dbus-connection"/>
     <function name="tp_proxy_get_bus_name ()" link="telepathy-glib-proxy.html#tp-proxy-get-bus-name"/>
@@ -177,6 +181,7 @@
     <function name="The &quot;bus-name&quot; property" link="telepathy-glib-proxy.html#TpProxy--bus-name"/>
     <function name="The &quot;dbus-connection&quot; property" link="telepathy-glib-proxy.html#TpProxy--dbus-connection"/>
     <function name="The &quot;dbus-daemon&quot; property" link="telepathy-glib-proxy.html#TpProxy--dbus-daemon"/>
+    <function name="The &quot;factory&quot; property" link="telepathy-glib-proxy.html#TpProxy--factory"/>
     <function name="The &quot;interfaces&quot; property" link="telepathy-glib-proxy.html#TpProxy--interfaces"/>
     <function name="The &quot;object-path&quot; property" link="telepathy-glib-proxy.html#TpProxy--object-path"/>
     <function name="The &quot;interface-added&quot; signal" link="telepathy-glib-proxy.html#TpProxy-interface-added"/>
@@ -1131,10 +1136,13 @@
     <function name="TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-AVATAR-REQUIREMENTS:CAPS"/>
     <function name="TP_CONNECTION_FEATURE_CONTACT_INFO" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONTACT-INFO:CAPS"/>
     <function name="TP_CONNECTION_FEATURE_BALANCE" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-BALANCE:CAPS"/>
+    <function name="TP_CONNECTION_FEATURE_CONTACT_LIST" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONTACT-LIST:CAPS"/>
+    <function name="TP_CONNECTION_FEATURE_CONTACT_GROUPS" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONTACT-GROUPS:CAPS"/>
     <function name="tp_connection_run_until_ready ()" link="telepathy-glib-connection.html#tp-connection-run-until-ready"/>
     <function name="TpConnectionWhenReadyCb ()" link="telepathy-glib-connection.html#TpConnectionWhenReadyCb"/>
     <function name="tp_connection_call_when_ready ()" link="telepathy-glib-connection.html#tp-connection-call-when-ready"/>
     <function name="tp_connection_is_ready ()" link="telepathy-glib-connection.html#tp-connection-is-ready"/>
+    <function name="tp_connection_get_account ()" link="telepathy-glib-connection.html#tp-connection-get-account"/>
     <function name="tp_connection_get_status ()" link="telepathy-glib-connection.html#tp-connection-get-status"/>
     <function name="tp_connection_get_connection_manager_name ()" link="telepathy-glib-connection.html#tp-connection-get-connection-manager-name"/>
     <function name="tp_connection_get_protocol_name ()" link="telepathy-glib-connection.html#tp-connection-get-protocol-name"/>
@@ -1185,6 +1193,34 @@
     <function name="TP_TYPE_CONTACT_INFO_LIST" link="telepathy-glib-connection.html#TP-TYPE-CONTACT-INFO-LIST:CAPS"/>
     <function name="tp_contact_info_list_copy ()" link="telepathy-glib-connection.html#tp-contact-info-list-copy"/>
     <function name="tp_contact_info_list_free ()" link="telepathy-glib-connection.html#tp-contact-info-list-free"/>
+    <function name="tp_connection_get_contact_list_state ()" link="telepathy-glib-connection.html#tp-connection-get-contact-list-state"/>
+    <function name="tp_connection_get_contact_list_persists ()" link="telepathy-glib-connection.html#tp-connection-get-contact-list-persists"/>
+    <function name="tp_connection_get_can_change_contact_list ()" link="telepathy-glib-connection.html#tp-connection-get-can-change-contact-list"/>
+    <function name="tp_connection_get_request_uses_message ()" link="telepathy-glib-connection.html#tp-connection-get-request-uses-message"/>
+    <function name="tp_connection_dup_contact_list ()" link="telepathy-glib-connection.html#tp-connection-dup-contact-list"/>
+    <function name="tp_connection_request_subscription_async ()" link="telepathy-glib-connection.html#tp-connection-request-subscription-async"/>
+    <function name="tp_connection_request_subscription_finish ()" link="telepathy-glib-connection.html#tp-connection-request-subscription-finish"/>
+    <function name="tp_connection_authorize_publication_async ()" link="telepathy-glib-connection.html#tp-connection-authorize-publication-async"/>
+    <function name="tp_connection_authorize_publication_finish ()" link="telepathy-glib-connection.html#tp-connection-authorize-publication-finish"/>
+    <function name="tp_connection_remove_contacts_async ()" link="telepathy-glib-connection.html#tp-connection-remove-contacts-async"/>
+    <function name="tp_connection_remove_contacts_finish ()" link="telepathy-glib-connection.html#tp-connection-remove-contacts-finish"/>
+    <function name="tp_connection_unsubscribe_async ()" link="telepathy-glib-connection.html#tp-connection-unsubscribe-async"/>
+    <function name="tp_connection_unsubscribe_finish ()" link="telepathy-glib-connection.html#tp-connection-unsubscribe-finish"/>
+    <function name="tp_connection_unpublish_async ()" link="telepathy-glib-connection.html#tp-connection-unpublish-async"/>
+    <function name="tp_connection_unpublish_finish ()" link="telepathy-glib-connection.html#tp-connection-unpublish-finish"/>
+    <function name="tp_connection_get_disjoint_groups ()" link="telepathy-glib-connection.html#tp-connection-get-disjoint-groups"/>
+    <function name="tp_connection_get_group_storage ()" link="telepathy-glib-connection.html#tp-connection-get-group-storage"/>
+    <function name="tp_connection_get_contact_groups ()" link="telepathy-glib-connection.html#tp-connection-get-contact-groups"/>
+    <function name="tp_connection_set_group_members_async ()" link="telepathy-glib-connection.html#tp-connection-set-group-members-async"/>
+    <function name="tp_connection_set_group_members_finish ()" link="telepathy-glib-connection.html#tp-connection-set-group-members-finish"/>
+    <function name="tp_connection_add_to_group_async ()" link="telepathy-glib-connection.html#tp-connection-add-to-group-async"/>
+    <function name="tp_connection_add_to_group_finish ()" link="telepathy-glib-connection.html#tp-connection-add-to-group-finish"/>
+    <function name="tp_connection_remove_from_group_async ()" link="telepathy-glib-connection.html#tp-connection-remove-from-group-async"/>
+    <function name="tp_connection_remove_from_group_finish ()" link="telepathy-glib-connection.html#tp-connection-remove-from-group-finish"/>
+    <function name="tp_connection_remove_group_async ()" link="telepathy-glib-connection.html#tp-connection-remove-group-async"/>
+    <function name="tp_connection_remove_group_finish ()" link="telepathy-glib-connection.html#tp-connection-remove-group-finish"/>
+    <function name="tp_connection_rename_group_async ()" link="telepathy-glib-connection.html#tp-connection-rename-group-async"/>
+    <function name="tp_connection_rename_group_finish ()" link="telepathy-glib-connection.html#tp-connection-rename-group-finish"/>
     <function name="tp_cli_connection_callback_for_connect ()" link="telepathy-glib-connection.html#tp-cli-connection-callback-for-connect"/>
     <function name="tp_cli_connection_call_connect ()" link="telepathy-glib-connection.html#tp-cli-connection-call-connect"/>
     <function name="tp_cli_connection_run_connect ()" link="telepathy-glib-connection.html#tp-cli-connection-run-connect"/>
@@ -1237,17 +1273,29 @@
     <function name="The &quot;balance-currency&quot; property" link="telepathy-glib-connection.html#TpConnection--balance-currency"/>
     <function name="The &quot;balance-scale&quot; property" link="telepathy-glib-connection.html#TpConnection--balance-scale"/>
     <function name="The &quot;balance-uri&quot; property" link="telepathy-glib-connection.html#TpConnection--balance-uri"/>
+    <function name="The &quot;can-change-contact-list&quot; property" link="telepathy-glib-connection.html#TpConnection--can-change-contact-list"/>
     <function name="The &quot;capabilities&quot; property" link="telepathy-glib-connection.html#TpConnection--capabilities"/>
     <function name="The &quot;connection-manager-name&quot; property" link="telepathy-glib-connection.html#TpConnection--connection-manager-name"/>
     <function name="The &quot;connection-ready&quot; property" link="telepathy-glib-connection.html#TpConnection--connection-ready"/>
+    <function name="The &quot;contact-groups&quot; property" link="telepathy-glib-connection.html#TpConnection--contact-groups"/>
+    <function name="The &quot;contact-list-persists&quot; property" link="telepathy-glib-connection.html#TpConnection--contact-list-persists"/>
+    <function name="The &quot;contact-list-state&quot; property" link="telepathy-glib-connection.html#TpConnection--contact-list-state"/>
+    <function name="The &quot;disjoint-groups&quot; property" link="telepathy-glib-connection.html#TpConnection--disjoint-groups"/>
+    <function name="The &quot;group-storage&quot; property" link="telepathy-glib-connection.html#TpConnection--group-storage"/>
     <function name="The &quot;protocol-name&quot; property" link="telepathy-glib-connection.html#TpConnection--protocol-name"/>
+    <function name="The &quot;request-uses-message&quot; property" link="telepathy-glib-connection.html#TpConnection--request-uses-message"/>
     <function name="The &quot;self-contact&quot; property" link="telepathy-glib-connection.html#TpConnection--self-contact"/>
     <function name="The &quot;self-handle&quot; property" link="telepathy-glib-connection.html#TpConnection--self-handle"/>
     <function name="The &quot;status&quot; property" link="telepathy-glib-connection.html#TpConnection--status"/>
     <function name="The &quot;status-reason&quot; property" link="telepathy-glib-connection.html#TpConnection--status-reason"/>
     <function name="The &quot;balance-changed&quot; signal" link="telepathy-glib-connection.html#TpConnection-balance-changed"/>
+    <function name="The &quot;contact-list-changed&quot; signal" link="telepathy-glib-connection.html#TpConnection-contact-list-changed"/>
+    <function name="The &quot;group-renamed&quot; signal" link="telepathy-glib-connection.html#TpConnection-group-renamed"/>
+    <function name="The &quot;groups-created&quot; signal" link="telepathy-glib-connection.html#TpConnection-groups-created"/>
+    <function name="The &quot;groups-removed&quot; signal" link="telepathy-glib-connection.html#TpConnection-groups-removed"/>
     <function name="TpContact" link="telepathy-glib-contact.html#TpContact-struct"/>
     <function name="enum TpContactFeature" link="telepathy-glib-contact.html#TpContactFeature"/>
+    <function name="TP_CONTACT_FEATURE_INVALID" link="telepathy-glib-contact.html#TP-CONTACT-FEATURE-INVALID:CAPS"/>
     <function name="NUM_TP_CONTACT_FEATURES" link="telepathy-glib-contact.html#NUM-TP-CONTACT-FEATURES:CAPS"/>
     <function name="TP_TYPE_CONTACT_FEATURE" link="telepathy-glib-contact.html#TP-TYPE-CONTACT-FEATURE:CAPS"/>
     <function name="TpConnectionContactsByHandleCb ()" link="telepathy-glib-contact.html#TpConnectionContactsByHandleCb"/>
@@ -1281,6 +1329,20 @@
     <function name="tp_contact_set_contact_groups_async ()" link="telepathy-glib-contact.html#tp-contact-set-contact-groups-async"/>
     <function name="tp_contact_set_contact_groups_finish ()" link="telepathy-glib-contact.html#tp-contact-set-contact-groups-finish"/>
     <function name="tp_contact_has_feature ()" link="telepathy-glib-contact.html#tp-contact-has-feature"/>
+    <function name="tp_contact_request_subscription_async ()" link="telepathy-glib-contact.html#tp-contact-request-subscription-async"/>
+    <function name="tp_contact_request_subscription_finish ()" link="telepathy-glib-contact.html#tp-contact-request-subscription-finish"/>
+    <function name="tp_contact_authorize_publication_async ()" link="telepathy-glib-contact.html#tp-contact-authorize-publication-async"/>
+    <function name="tp_contact_authorize_publication_finish ()" link="telepathy-glib-contact.html#tp-contact-authorize-publication-finish"/>
+    <function name="tp_contact_remove_async ()" link="telepathy-glib-contact.html#tp-contact-remove-async"/>
+    <function name="tp_contact_remove_finish ()" link="telepathy-glib-contact.html#tp-contact-remove-finish"/>
+    <function name="tp_contact_unsubscribe_async ()" link="telepathy-glib-contact.html#tp-contact-unsubscribe-async"/>
+    <function name="tp_contact_unsubscribe_finish ()" link="telepathy-glib-contact.html#tp-contact-unsubscribe-finish"/>
+    <function name="tp_contact_unpublish_async ()" link="telepathy-glib-contact.html#tp-contact-unpublish-async"/>
+    <function name="tp_contact_unpublish_finish ()" link="telepathy-glib-contact.html#tp-contact-unpublish-finish"/>
+    <function name="tp_contact_add_to_group_async ()" link="telepathy-glib-contact.html#tp-contact-add-to-group-async"/>
+    <function name="tp_contact_add_to_group_finish ()" link="telepathy-glib-contact.html#tp-contact-add-to-group-finish"/>
+    <function name="tp_contact_remove_from_group_async ()" link="telepathy-glib-contact.html#tp-contact-remove-from-group-async"/>
+    <function name="tp_contact_remove_from_group_finish ()" link="telepathy-glib-contact.html#tp-contact-remove-from-group-finish"/>
     <function name="The &quot;alias&quot; property" link="telepathy-glib-contact.html#TpContact--alias"/>
     <function name="The &quot;avatar-file&quot; property" link="telepathy-glib-contact.html#TpContact--avatar-file"/>
     <function name="The &quot;avatar-mime-type&quot; property" link="telepathy-glib-contact.html#TpContact--avatar-mime-type"/>
@@ -1543,6 +1605,8 @@
     <function name="tp_channel_get_requested ()" link="telepathy-glib-channel.html#tp-channel-get-requested"/>
     <function name="tp_channel_get_initiator_handle ()" link="telepathy-glib-channel.html#tp-channel-get-initiator-handle"/>
     <function name="tp_channel_get_initiator_identifier ()" link="telepathy-glib-channel.html#tp-channel-get-initiator-identifier"/>
+    <function name="tp_channel_join_async ()" link="telepathy-glib-channel.html#tp-channel-join-async"/>
+    <function name="tp_channel_join_finish ()" link="telepathy-glib-channel.html#tp-channel-join-finish"/>
     <function name="tp_channel_leave_async ()" link="telepathy-glib-channel.html#tp-channel-leave-async"/>
     <function name="tp_channel_leave_finish ()" link="telepathy-glib-channel.html#tp-channel-leave-finish"/>
     <function name="tp_channel_close_async ()" link="telepathy-glib-channel.html#tp-channel-close-async"/>
@@ -1963,7 +2027,9 @@
     <function name="struct TpAccountManager" link="telepathy-glib-account-manager.html#TpAccountManager-struct"/>
     <function name="struct TpAccountManagerClass" link="telepathy-glib-account-manager.html#TpAccountManagerClass"/>
     <function name="tp_account_manager_new ()" link="telepathy-glib-account-manager.html#tp-account-manager-new"/>
+    <function name="tp_account_manager_new_with_factory ()" link="telepathy-glib-account-manager.html#tp-account-manager-new-with-factory"/>
     <function name="tp_account_manager_init_known_interfaces ()" link="telepathy-glib-account-manager.html#tp-account-manager-init-known-interfaces"/>
+    <function name="tp_account_manager_set_default ()" link="telepathy-glib-account-manager.html#tp-account-manager-set-default"/>
     <function name="tp_account_manager_dup ()" link="telepathy-glib-account-manager.html#tp-account-manager-dup"/>
     <function name="tp_account_manager_create_account_async ()" link="telepathy-glib-account-manager.html#tp-account-manager-create-account-async"/>
     <function name="tp_account_manager_create_account_finish ()" link="telepathy-glib-account-manager.html#tp-account-manager-create-account-finish"/>
@@ -1987,7 +2053,7 @@
     <function name="The &quot;account-removed&quot; signal" link="telepathy-glib-account-manager.html#TpAccountManager-account-removed"/>
     <function name="The &quot;account-validity-changed&quot; signal" link="telepathy-glib-account-manager.html#TpAccountManager-account-validity-changed"/>
     <function name="The &quot;most-available-presence-changed&quot; signal" link="telepathy-glib-account-manager.html#TpAccountManager-most-available-presence-changed"/>
-    <function name="struct TpAccount" link="telepathy-glib-account.html#TpAccount-struct"/>
+    <function name="TpAccount" link="telepathy-glib-account.html#TpAccount-struct"/>
     <function name="struct TpAccountClass" link="telepathy-glib-account.html#TpAccountClass"/>
     <function name="tp_account_new ()" link="telepathy-glib-account.html#tp-account-new"/>
     <function name="tp_account_init_known_interfaces ()" link="telepathy-glib-account.html#tp-account-init-known-interfaces"/>
@@ -2041,6 +2107,7 @@
     <function name="tp_account_set_avatar_finish ()" link="telepathy-glib-account.html#tp-account-set-avatar-finish"/>
     <function name="tp_account_bind_connection_status_to_property ()" link="telepathy-glib-account.html#tp-account-bind-connection-status-to-property"/>
     <function name="TP_ACCOUNT_FEATURE_CORE" link="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CORE:CAPS"/>
+    <function name="TP_ACCOUNT_FEATURE_CONNECTION" link="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CONNECTION:CAPS"/>
     <function name="tp_account_is_prepared ()" link="telepathy-glib-account.html#tp-account-is-prepared"/>
     <function name="tp_account_prepare_async ()" link="telepathy-glib-account.html#tp-account-prepare-async"/>
     <function name="tp_account_prepare_finish ()" link="telepathy-glib-account.html#tp-account-prepare-finish"/>
@@ -2262,6 +2329,30 @@
     <function name="struct TpAutomaticProxyFactoryClass" link="telepathy-glib-automatic-proxy-factory.html#TpAutomaticProxyFactoryClass"/>
     <function name="tp_automatic_proxy_factory_new ()" link="telepathy-glib-automatic-proxy-factory.html#tp-automatic-proxy-factory-new"/>
     <function name="tp_automatic_proxy_factory_dup ()" link="telepathy-glib-automatic-proxy-factory.html#tp-automatic-proxy-factory-dup"/>
+    <function name="TpSimpleClientFactory" link="telepathy-glib-simple-client-factory.html#TpSimpleClientFactory-struct"/>
+    <function name="struct TpSimpleClientFactoryClass" link="telepathy-glib-simple-client-factory.html#TpSimpleClientFactoryClass"/>
+    <function name="tp_simple_client_factory_new ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-new"/>
+    <function name="tp_simple_client_factory_get_dbus_daemon ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-get-dbus-daemon"/>
+    <function name="tp_simple_client_factory_ensure_account ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-account"/>
+    <function name="tp_simple_client_factory_dup_account_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-account-features"/>
+    <function name="tp_simple_client_factory_add_account_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features"/>
+    <function name="tp_simple_client_factory_add_account_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features-varargs"/>
+    <function name="tp_simple_client_factory_ensure_connection ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-connection"/>
+    <function name="tp_simple_client_factory_dup_connection_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-connection-features"/>
+    <function name="tp_simple_client_factory_add_connection_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-connection-features"/>
+    <function name="tp_simple_client_factory_add_connection_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-connection-features-varargs"/>
+    <function name="tp_simple_client_factory_ensure_channel ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-channel"/>
+    <function name="tp_simple_client_factory_dup_channel_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-channel-features"/>
+    <function name="tp_simple_client_factory_add_channel_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-channel-features"/>
+    <function name="tp_simple_client_factory_add_channel_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-channel-features-varargs"/>
+    <function name="tp_simple_client_factory_ensure_contact ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-contact"/>
+    <function name="tp_simple_client_factory_dup_contact_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-contact-features"/>
+    <function name="tp_simple_client_factory_add_contact_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-contact-features"/>
+    <function name="tp_simple_client_factory_add_contact_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-contact-features-varargs"/>
+    <function name="The &quot;dbus-daemon&quot; property" link="telepathy-glib-simple-client-factory.html#TpSimpleClientFactory--dbus-daemon"/>
+    <function name="TpAutomaticClientFactory" link="telepathy-glib-automatic-client-factory.html#TpAutomaticClientFactory-struct"/>
+    <function name="struct TpAutomaticClientFactoryClass" link="telepathy-glib-automatic-client-factory.html#TpAutomaticClientFactoryClass"/>
+    <function name="tp_automatic_client_factory_new ()" link="telepathy-glib-automatic-client-factory.html#tp-automatic-client-factory-new"/>
     <function name="TpClientMessage" link="TpClientMessage.html#TpClientMessage-struct"/>
     <function name="tp_client_message_new ()" link="TpClientMessage.html#tp-client-message-new"/>
     <function name="tp_client_message_new_text ()" link="TpClientMessage.html#tp-client-message-new-text"/>
@@ -2302,6 +2393,22 @@
     <function name="The &quot;message-received&quot; signal" link="telepathy-glib-text-channel.html#TpTextChannel-message-received"/>
     <function name="The &quot;message-sent&quot; signal" link="telepathy-glib-text-channel.html#TpTextChannel-message-sent"/>
     <function name="The &quot;pending-message-removed&quot; signal" link="telepathy-glib-text-channel.html#TpTextChannel-pending-message-removed"/>
+    <function name="struct TpFileTransferChannel" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel-struct"/>
+    <function name="struct TpFileTransferChannelClass" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannelClass"/>
+    <function name="tp_file_transfer_channel_new ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-new"/>
+    <function name="TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE" link="telepathy-glib-file-transfer-channel.html#TP-FILE-TRANSFER-CHANNEL-FEATURE-CORE:CAPS"/>
+    <function name="tp_file_transfer_channel_get_mime_type ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-mime-type"/>
+    <function name="tp_file_transfer_channel_get_date ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-date"/>
+    <function name="tp_file_transfer_channel_get_description ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-description"/>
+    <function name="tp_file_transfer_channel_get_filename ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-filename"/>
+    <function name="tp_file_transfer_channel_get_size ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-size"/>
+    <function name="tp_file_transfer_channel_get_transferred_bytes ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-transferred-bytes"/>
+    <function name="The &quot;date&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--date"/>
+    <function name="The &quot;description&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--description"/>
+    <function name="The &quot;filename&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--filename"/>
+    <function name="The &quot;mime-type&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--mime-type"/>
+    <function name="The &quot;size&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--size"/>
+    <function name="The &quot;transferred-bytes&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--transferred-bytes"/>
     <function name="TpSvcDBusIntrospectable" link="telepathy-glib-svc-generic.html#TpSvcDBusIntrospectable-struct"/>
     <function name="TpSvcDBusIntrospectableClass" link="telepathy-glib-svc-generic.html#TpSvcDBusIntrospectableClass"/>
     <function name="TpSvcDBusProperties" link="telepathy-glib-svc-generic.html#TpSvcDBusProperties-struct"/>
@@ -3626,6 +3733,7 @@
     <function name="TpCMMessage" link="TpCMMessage.html#TpCMMessage-struct"/>
     <function name="tp_cm_message_new ()" link="TpCMMessage.html#tp-cm-message-new"/>
     <function name="tp_cm_message_new_text ()" link="TpCMMessage.html#tp-cm-message-new-text"/>
+    <function name="tp_cm_message_set_message ()" link="TpCMMessage.html#tp-cm-message-set-message"/>
     <function name="tp_cm_message_take_message ()" link="TpCMMessage.html#tp-cm-message-take-message"/>
     <function name="tp_cm_message_get_sender ()" link="TpCMMessage.html#tp-cm-message-get-sender"/>
     <function name="tp_cm_message_set_sender ()" link="TpCMMessage.html#tp-cm-message-set-sender"/>
@@ -3699,6 +3807,7 @@
     <function name="The &quot;account-manager&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--account-manager"/>
     <function name="The &quot;channel-factory&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--channel-factory"/>
     <function name="The &quot;dbus-daemon&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--dbus-daemon"/>
+    <function name="The &quot;factory&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--factory"/>
     <function name="The &quot;name&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--name"/>
     <function name="The &quot;uniquify-name&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--uniquify-name"/>
     <function name="The &quot;request-added&quot; signal" link="telepathy-glib-base-client.html#TpBaseClient-request-added"/>
@@ -3743,6 +3852,7 @@
     <function name="TpSimpleObserverObserveChannelsImpl ()" link="telepathy-glib-simple-observer.html#TpSimpleObserverObserveChannelsImpl"/>
     <function name="tp_simple_observer_new ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new"/>
     <function name="tp_simple_observer_new_with_am ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new-with-am"/>
+    <function name="tp_simple_observer_new_with_factory ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new-with-factory"/>
     <function name="The &quot;callback&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--callback"/>
     <function name="The &quot;destroy&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--destroy"/>
     <function name="The &quot;recover&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--recover"/>
@@ -3751,6 +3861,7 @@
     <function name="TpSimpleApproverAddDispatchOperationImpl ()" link="telepathy-glib-simple-approver.html#TpSimpleApproverAddDispatchOperationImpl"/>
     <function name="tp_simple_approver_new ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new"/>
     <function name="tp_simple_approver_new_with_am ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new-with-am"/>
+    <function name="tp_simple_approver_new_with_factory ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new-with-factory"/>
     <function name="The &quot;callback&quot; property" link="telepathy-glib-simple-approver.html#TpSimpleApprover--callback"/>
     <function name="The &quot;destroy&quot; property" link="telepathy-glib-simple-approver.html#TpSimpleApprover--destroy"/>
     <function name="The &quot;user-data&quot; property" link="telepathy-glib-simple-approver.html#TpSimpleApprover--user-data"/>
@@ -3758,6 +3869,7 @@
     <function name="TpSimpleHandlerHandleChannelsImpl ()" link="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl"/>
     <function name="tp_simple_handler_new ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new"/>
     <function name="tp_simple_handler_new_with_am ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new-with-am"/>
+    <function name="tp_simple_handler_new_with_factory ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new-with-factory"/>
     <function name="The &quot;bypass-approval&quot; property" link="telepathy-glib-simple-handler.html#TpSimpleHandler--bypass-approval"/>
     <function name="The &quot;callback&quot; property" link="telepathy-glib-simple-handler.html#TpSimpleHandler--callback"/>
     <function name="The &quot;destroy&quot; property" link="telepathy-glib-simple-handler.html#TpSimpleHandler--destroy"/>
@@ -3887,6 +3999,7 @@
     <function name="tp_debug_sender_add_message_vprintf ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-add-message-vprintf"/>
     <function name="tp_debug_sender_add_message_printf ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-add-message-printf"/>
     <function name="tp_debug_sender_log_handler ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-log-handler"/>
+    <function name="tp_debug_sender_set_timestamps ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-set-timestamps"/>
     <function name="The &quot;enabled&quot; property" link="telepathy-glib-debug-sender.html#TpDebugSender--enabled"/>
     <function name="TpIntset" link="TpIntset.html#TpIntset-struct"/>
     <function name="TP_TYPE_INTSET" link="TpIntset.html#TP-TYPE-INTSET:CAPS"/>

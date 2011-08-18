@@ -32,6 +32,8 @@ G_BEGIN_DECLS
 typedef void (*TpConnectionProc) (TpConnection *self);
 
 struct _TpConnectionPrivate {
+    TpAccount *account;
+
     /* list of TpConnectionProc */
     GList *introspect_needed;
 
@@ -70,6 +72,24 @@ struct _TpConnectionPrivate {
     gchar *balance_currency;
     gchar *balance_uri;
 
+    /* ContactList properties */
+    TpContactListState contact_list_state;
+    gboolean contact_list_persists;
+    gboolean can_change_contact_list;
+    gboolean request_uses_message;
+    /* TpHandle => ref to TpContact */
+    GHashTable *roster;
+    /* Queue of owned ContactsChangedItem */
+    GQueue *contacts_changed_queue;
+    gboolean roster_fetched;
+    gboolean contact_list_properties_fetched;
+
+    /* ContactGroups properties */
+    gboolean disjoint_groups;
+    TpContactMetadataStorageType group_storage;
+    GPtrArray *contact_groups;
+    gboolean groups_fetched;
+
     TpProxyPendingCall *introspection_call;
 
     unsigned ready:1;
@@ -104,6 +124,8 @@ TpContact *_tp_connection_lookup_contact (TpConnection *self, TpHandle handle);
  * just for this would be overkill */
 void _tp_contact_connection_invalidated (TpContact *contact);
 
+void _tp_connection_set_account (TpConnection *self, TpAccount *account);
+
 /* connection-contact-info.c */
 void _tp_connection_prepare_contact_info_async (TpProxy *proxy,
     const TpProxyFeature *feature,
@@ -118,6 +140,17 @@ void _tp_connection_prepare_avatar_requirements_async (TpProxy *proxy,
     const TpProxyFeature *feature,
     GAsyncReadyCallback callback,
     gpointer user_data);
+
+/* connection-contact-list.c */
+void _tp_connection_prepare_contact_list_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+void _tp_connection_prepare_contact_groups_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+void _tp_connection_contacts_changed_queue_free (GQueue *queue);
 
 G_END_DECLS
 
