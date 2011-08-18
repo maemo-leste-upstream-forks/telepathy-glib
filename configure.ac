@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [15])
-m4_define([tp_glib_micro_version], [4])
+m4_define([tp_glib_micro_version], [5])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [60])
-m4_define([tp_glib_lt_revision], [1])
-m4_define([tp_glib_lt_age], [60])
+m4_define([tp_glib_lt_current], [61])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [61])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -57,7 +57,7 @@ AM_PROG_MKDIR_P
 # pkg-config 0.21 adds CFLAGS from Requires.private, which we need
 PKG_PROG_PKG_CONFIG([0.21])
 
-GTK_DOC_CHECK([1.15])
+GTK_DOC_CHECK([1.17])
 
 GOBJECT_INTROSPECTION_CHECK([0.9.6])
 
@@ -222,7 +222,7 @@ if test x$enable_vala_bindings = xyes; then
     AC_MSG_ERROR([GObject-Introspection must be enabled for Vala bindings])
   fi
 
-  AM_PROG_VALAC([0.10.0])
+  AM_PROG_VALAC([0.11.2])
   have_vala=yes
 
   AC_PATH_PROG(VALAC, valac, valac)
@@ -295,6 +295,7 @@ AM_CONDITIONAL([HAVE_CXX], [test $tp_cxx_works = yes])
 AC_OUTPUT( Makefile \
 	   docs/Makefile \
 	   docs/reference/Makefile \
+	   docs/reference/version.xml \
 	   examples/Makefile \
 	   examples/client/Makefile \
 	   examples/client/python/Makefile \

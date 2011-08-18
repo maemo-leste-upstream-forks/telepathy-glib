@@ -31,7 +31,7 @@
 
 G_BEGIN_DECLS
 
-typedef struct _TpAccount TpAccount;
+/* TpAccount is forward-declared in connection.h */
 typedef struct _TpAccountClass TpAccountClass;
 typedef struct _TpAccountPrivate TpAccountPrivate;
 typedef struct _TpAccountClassPrivate TpAccountClassPrivate;
@@ -69,12 +69,15 @@ GType tp_account_get_type (void);
 
 #define TP_ACCOUNT_FEATURE_CORE \
   tp_account_get_feature_quark_core ()
+#define TP_ACCOUNT_FEATURE_CONNECTION \
+  tp_account_get_feature_quark_connection ()
 #define TP_ACCOUNT_FEATURE_STORAGE \
   tp_account_get_feature_quark_storage ()
 #define TP_ACCOUNT_FEATURE_ADDRESSING \
   tp_account_get_feature_quark_addressing ()
 
 GQuark tp_account_get_feature_quark_core (void) G_GNUC_CONST;
+GQuark tp_account_get_feature_quark_connection (void) G_GNUC_CONST;
 GQuark tp_account_get_feature_quark_storage (void) G_GNUC_CONST;
 GQuark tp_account_get_feature_quark_addressing (void) G_GNUC_CONST;
 

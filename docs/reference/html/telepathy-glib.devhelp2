@@ -67,9 +67,12 @@
       <sub name="TpClientChannelFactoryInterface" link="telepathy-glib-client-channel-factory.html"/>
       <sub name="TpBasicProxyFactory" link="telepathy-glib-basic-proxy-factory.html"/>
       <sub name="TpAutomaticProxyFactory" link="telepathy-glib-automatic-proxy-factory.html"/>
+      <sub name="TpSimpleClientFactory" link="telepathy-glib-simple-client-factory.html"/>
+      <sub name="TpAutomaticClientFactory" link="telepathy-glib-automatic-client-factory.html"/>
       <sub name="TpClientMessage" link="TpClientMessage.html"/>
       <sub name="TpSignalledMessage" link="TpSignalledMessage.html"/>
       <sub name="TpTextChannel" link="telepathy-glib-text-channel.html"/>
+      <sub name="TpFileTransferChannel" link="telepathy-glib-file-transfer-channel.html"/>
     </sub>
     <sub name="Service-side D-Bus interfaces" link="ch-service-dbus.html">
       <sub name="&#10;      The TpSvc* interfaces&#10;    " link="telepathy-glib-svc.html"/>
@@ -164,6 +167,7 @@
     <keyword type="function" name="tp_proxy_pending_call_cancel ()" link="telepathy-glib-proxy.html#tp-proxy-pending-call-cancel" since="0.7.1"/>
     <keyword type="struct" name="TpProxySignalConnection" link="telepathy-glib-proxy.html#TpProxySignalConnection" since="0.7.1"/>
     <keyword type="function" name="tp_proxy_signal_connection_disconnect ()" link="telepathy-glib-proxy.html#tp-proxy-signal-connection-disconnect" since="0.7.1"/>
+    <keyword type="function" name="tp_proxy_get_factory ()" link="telepathy-glib-proxy.html#tp-proxy-get-factory" since="0.15.5"/>
     <keyword type="function" name="tp_proxy_get_dbus_daemon ()" link="telepathy-glib-proxy.html#tp-proxy-get-dbus-daemon" since="0.7.17"/>
     <keyword type="function" name="tp_proxy_get_dbus_connection ()" link="telepathy-glib-proxy.html#tp-proxy-get-dbus-connection" since="0.7.17"/>
     <keyword type="function" name="tp_proxy_get_bus_name ()" link="telepathy-glib-proxy.html#tp-proxy-get-bus-name" since="0.7.17"/>
@@ -177,6 +181,7 @@
     <keyword type="property" name="The &quot;bus-name&quot; property" link="telepathy-glib-proxy.html#TpProxy--bus-name"/>
     <keyword type="property" name="The &quot;dbus-connection&quot; property" link="telepathy-glib-proxy.html#TpProxy--dbus-connection"/>
     <keyword type="property" name="The &quot;dbus-daemon&quot; property" link="telepathy-glib-proxy.html#TpProxy--dbus-daemon"/>
+    <keyword type="property" name="The &quot;factory&quot; property" link="telepathy-glib-proxy.html#TpProxy--factory"/>
     <keyword type="property" name="The &quot;interfaces&quot; property" link="telepathy-glib-proxy.html#TpProxy--interfaces"/>
     <keyword type="property" name="The &quot;object-path&quot; property" link="telepathy-glib-proxy.html#TpProxy--object-path"/>
     <keyword type="signal" name="The &quot;interface-added&quot; signal" link="telepathy-glib-proxy.html#TpProxy-interface-added"/>
@@ -1131,10 +1136,13 @@
     <keyword type="macro" name="TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-AVATAR-REQUIREMENTS:CAPS" since="0.11.4"/>
     <keyword type="macro" name="TP_CONNECTION_FEATURE_CONTACT_INFO" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONTACT-INFO:CAPS" since="0.11.7"/>
     <keyword type="macro" name="TP_CONNECTION_FEATURE_BALANCE" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-BALANCE:CAPS" since="0.15.1"/>
+    <keyword type="macro" name="TP_CONNECTION_FEATURE_CONTACT_LIST" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONTACT-LIST:CAPS" since="0.15.5"/>
+    <keyword type="macro" name="TP_CONNECTION_FEATURE_CONTACT_GROUPS" link="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-CONTACT-GROUPS:CAPS" since="0.15.5"/>
     <keyword type="function" name="tp_connection_run_until_ready ()" link="telepathy-glib-connection.html#tp-connection-run-until-ready" deprecated="" since="0.7.1"/>
     <keyword type="function" name="TpConnectionWhenReadyCb ()" link="telepathy-glib-connection.html#TpConnectionWhenReadyCb"/>
     <keyword type="function" name="tp_connection_call_when_ready ()" link="telepathy-glib-connection.html#tp-connection-call-when-ready" since="0.7.7"/>
     <keyword type="function" name="tp_connection_is_ready ()" link="telepathy-glib-connection.html#tp-connection-is-ready" since="0.7.17"/>
+    <keyword type="function" name="tp_connection_get_account ()" link="telepathy-glib-connection.html#tp-connection-get-account" since="0.15.5"/>
     <keyword type="function" name="tp_connection_get_status ()" link="telepathy-glib-connection.html#tp-connection-get-status" since="0.7.14"/>
     <keyword type="function" name="tp_connection_get_connection_manager_name ()" link="telepathy-glib-connection.html#tp-connection-get-connection-manager-name" since="0.13.16"/>
     <keyword type="function" name="tp_connection_get_protocol_name ()" link="telepathy-glib-connection.html#tp-connection-get-protocol-name" since="0.13.16"/>
@@ -1185,6 +1193,34 @@
     <keyword type="macro" name="TP_TYPE_CONTACT_INFO_LIST" link="telepathy-glib-connection.html#TP-TYPE-CONTACT-INFO-LIST:CAPS" since="0.11.7"/>
     <keyword type="function" name="tp_contact_info_list_copy ()" link="telepathy-glib-connection.html#tp-contact-info-list-copy" since="0.11.7"/>
     <keyword type="function" name="tp_contact_info_list_free ()" link="telepathy-glib-connection.html#tp-contact-info-list-free" since="0.11.7"/>
+    <keyword type="function" name="tp_connection_get_contact_list_state ()" link="telepathy-glib-connection.html#tp-connection-get-contact-list-state" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_get_contact_list_persists ()" link="telepathy-glib-connection.html#tp-connection-get-contact-list-persists" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_get_can_change_contact_list ()" link="telepathy-glib-connection.html#tp-connection-get-can-change-contact-list" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_get_request_uses_message ()" link="telepathy-glib-connection.html#tp-connection-get-request-uses-message" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_dup_contact_list ()" link="telepathy-glib-connection.html#tp-connection-dup-contact-list" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_request_subscription_async ()" link="telepathy-glib-connection.html#tp-connection-request-subscription-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_request_subscription_finish ()" link="telepathy-glib-connection.html#tp-connection-request-subscription-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_authorize_publication_async ()" link="telepathy-glib-connection.html#tp-connection-authorize-publication-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_authorize_publication_finish ()" link="telepathy-glib-connection.html#tp-connection-authorize-publication-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_remove_contacts_async ()" link="telepathy-glib-connection.html#tp-connection-remove-contacts-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_remove_contacts_finish ()" link="telepathy-glib-connection.html#tp-connection-remove-contacts-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_unsubscribe_async ()" link="telepathy-glib-connection.html#tp-connection-unsubscribe-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_unsubscribe_finish ()" link="telepathy-glib-connection.html#tp-connection-unsubscribe-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_unpublish_async ()" link="telepathy-glib-connection.html#tp-connection-unpublish-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_unpublish_finish ()" link="telepathy-glib-connection.html#tp-connection-unpublish-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_get_disjoint_groups ()" link="telepathy-glib-connection.html#tp-connection-get-disjoint-groups" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_get_group_storage ()" link="telepathy-glib-connection.html#tp-connection-get-group-storage" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_get_contact_groups ()" link="telepathy-glib-connection.html#tp-connection-get-contact-groups" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_set_group_members_async ()" link="telepathy-glib-connection.html#tp-connection-set-group-members-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_set_group_members_finish ()" link="telepathy-glib-connection.html#tp-connection-set-group-members-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_add_to_group_async ()" link="telepathy-glib-connection.html#tp-connection-add-to-group-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_add_to_group_finish ()" link="telepathy-glib-connection.html#tp-connection-add-to-group-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_remove_from_group_async ()" link="telepathy-glib-connection.html#tp-connection-remove-from-group-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_remove_from_group_finish ()" link="telepathy-glib-connection.html#tp-connection-remove-from-group-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_remove_group_async ()" link="telepathy-glib-connection.html#tp-connection-remove-group-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_remove_group_finish ()" link="telepathy-glib-connection.html#tp-connection-remove-group-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_rename_group_async ()" link="telepathy-glib-connection.html#tp-connection-rename-group-async" since="0.15.5"/>
+    <keyword type="function" name="tp_connection_rename_group_finish ()" link="telepathy-glib-connection.html#tp-connection-rename-group-finish" since="0.15.5"/>
     <keyword type="function" name="tp_cli_connection_callback_for_connect ()" link="telepathy-glib-connection.html#tp-cli-connection-callback-for-connect"/>
     <keyword type="function" name="tp_cli_connection_call_connect ()" link="telepathy-glib-connection.html#tp-cli-connection-call-connect"/>
     <keyword type="function" name="tp_cli_connection_run_connect ()" link="telepathy-glib-connection.html#tp-cli-connection-run-connect" deprecated=""/>
@@ -1237,17 +1273,29 @@
     <keyword type="property" name="The &quot;balance-currency&quot; property" link="telepathy-glib-connection.html#TpConnection--balance-currency"/>
     <keyword type="property" name="The &quot;balance-scale&quot; property" link="telepathy-glib-connection.html#TpConnection--balance-scale"/>
     <keyword type="property" name="The &quot;balance-uri&quot; property" link="telepathy-glib-connection.html#TpConnection--balance-uri"/>
+    <keyword type="property" name="The &quot;can-change-contact-list&quot; property" link="telepathy-glib-connection.html#TpConnection--can-change-contact-list"/>
     <keyword type="property" name="The &quot;capabilities&quot; property" link="telepathy-glib-connection.html#TpConnection--capabilities"/>
     <keyword type="property" name="The &quot;connection-manager-name&quot; property" link="telepathy-glib-connection.html#TpConnection--connection-manager-name"/>
     <keyword type="property" name="The &quot;connection-ready&quot; property" link="telepathy-glib-connection.html#TpConnection--connection-ready"/>
+    <keyword type="property" name="The &quot;contact-groups&quot; property" link="telepathy-glib-connection.html#TpConnection--contact-groups"/>
+    <keyword type="property" name="The &quot;contact-list-persists&quot; property" link="telepathy-glib-connection.html#TpConnection--contact-list-persists"/>
+    <keyword type="property" name="The &quot;contact-list-state&quot; property" link="telepathy-glib-connection.html#TpConnection--contact-list-state"/>
+    <keyword type="property" name="The &quot;disjoint-groups&quot; property" link="telepathy-glib-connection.html#TpConnection--disjoint-groups"/>
+    <keyword type="property" name="The &quot;group-storage&quot; property" link="telepathy-glib-connection.html#TpConnection--group-storage"/>
     <keyword type="property" name="The &quot;protocol-name&quot; property" link="telepathy-glib-connection.html#TpConnection--protocol-name"/>
+    <keyword type="property" name="The &quot;request-uses-message&quot; property" link="telepathy-glib-connection.html#TpConnection--request-uses-message"/>
     <keyword type="property" name="The &quot;self-contact&quot; property" link="telepathy-glib-connection.html#TpConnection--self-contact"/>
     <keyword type="property" name="The &quot;self-handle&quot; property" link="telepathy-glib-connection.html#TpConnection--self-handle"/>
     <keyword type="property" name="The &quot;status&quot; property" link="telepathy-glib-connection.html#TpConnection--status"/>
     <keyword type="property" name="The &quot;status-reason&quot; property" link="telepathy-glib-connection.html#TpConnection--status-reason"/>
     <keyword type="signal" name="The &quot;balance-changed&quot; signal" link="telepathy-glib-connection.html#TpConnection-balance-changed"/>
+    <keyword type="signal" name="The &quot;contact-list-changed&quot; signal" link="telepathy-glib-connection.html#TpConnection-contact-list-changed"/>
+    <keyword type="signal" name="The &quot;group-renamed&quot; signal" link="telepathy-glib-connection.html#TpConnection-group-renamed"/>
+    <keyword type="signal" name="The &quot;groups-created&quot; signal" link="telepathy-glib-connection.html#TpConnection-groups-created"/>
+    <keyword type="signal" name="The &quot;groups-removed&quot; signal" link="telepathy-glib-connection.html#TpConnection-groups-removed"/>
     <keyword type="struct" name="TpContact" link="telepathy-glib-contact.html#TpContact-struct"/>
     <keyword type="enum" name="enum TpContactFeature" link="telepathy-glib-contact.html#TpContactFeature" since="0.7.18"/>
+    <keyword type="macro" name="TP_CONTACT_FEATURE_INVALID" link="telepathy-glib-contact.html#TP-CONTACT-FEATURE-INVALID:CAPS" since="0.15.5"/>
     <keyword type="macro" name="NUM_TP_CONTACT_FEATURES" link="telepathy-glib-contact.html#NUM-TP-CONTACT-FEATURES:CAPS" since="0.7.18"/>
     <keyword type="macro" name="TP_TYPE_CONTACT_FEATURE" link="telepathy-glib-contact.html#TP-TYPE-CONTACT-FEATURE:CAPS" since="0.11.5"/>
     <keyword type="function" name="TpConnectionContactsByHandleCb ()" link="telepathy-glib-contact.html#TpConnectionContactsByHandleCb" since="0.7.18"/>
@@ -1281,6 +1329,20 @@
     <keyword type="function" name="tp_contact_set_contact_groups_async ()" link="telepathy-glib-contact.html#tp-contact-set-contact-groups-async" since="0.13.14"/>
     <keyword type="function" name="tp_contact_set_contact_groups_finish ()" link="telepathy-glib-contact.html#tp-contact-set-contact-groups-finish" since="0.13.14"/>
     <keyword type="function" name="tp_contact_has_feature ()" link="telepathy-glib-contact.html#tp-contact-has-feature" since="0.7.18"/>
+    <keyword type="function" name="tp_contact_request_subscription_async ()" link="telepathy-glib-contact.html#tp-contact-request-subscription-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_request_subscription_finish ()" link="telepathy-glib-contact.html#tp-contact-request-subscription-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_authorize_publication_async ()" link="telepathy-glib-contact.html#tp-contact-authorize-publication-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_authorize_publication_finish ()" link="telepathy-glib-contact.html#tp-contact-authorize-publication-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_remove_async ()" link="telepathy-glib-contact.html#tp-contact-remove-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_remove_finish ()" link="telepathy-glib-contact.html#tp-contact-remove-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_unsubscribe_async ()" link="telepathy-glib-contact.html#tp-contact-unsubscribe-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_unsubscribe_finish ()" link="telepathy-glib-contact.html#tp-contact-unsubscribe-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_unpublish_async ()" link="telepathy-glib-contact.html#tp-contact-unpublish-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_unpublish_finish ()" link="telepathy-glib-contact.html#tp-contact-unpublish-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_add_to_group_async ()" link="telepathy-glib-contact.html#tp-contact-add-to-group-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_add_to_group_finish ()" link="telepathy-glib-contact.html#tp-contact-add-to-group-finish" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_remove_from_group_async ()" link="telepathy-glib-contact.html#tp-contact-remove-from-group-async" since="0.15.5"/>
+    <keyword type="function" name="tp_contact_remove_from_group_finish ()" link="telepathy-glib-contact.html#tp-contact-remove-from-group-finish" since="0.15.5"/>
     <keyword type="property" name="The &quot;alias&quot; property" link="telepathy-glib-contact.html#TpContact--alias"/>
     <keyword type="property" name="The &quot;avatar-file&quot; property" link="telepathy-glib-contact.html#TpContact--avatar-file"/>
     <keyword type="property" name="The &quot;avatar-mime-type&quot; property" link="telepathy-glib-contact.html#TpContact--avatar-mime-type"/>
@@ -1543,6 +1605,8 @@
     <keyword type="function" name="tp_channel_get_requested ()" link="telepathy-glib-channel.html#tp-channel-get-requested" since="0.11.15"/>
     <keyword type="function" name="tp_channel_get_initiator_handle ()" link="telepathy-glib-channel.html#tp-channel-get-initiator-handle" since="0.11.15"/>
     <keyword type="function" name="tp_channel_get_initiator_identifier ()" link="telepathy-glib-channel.html#tp-channel-get-initiator-identifier" since="0.11.15"/>
+    <keyword type="function" name="tp_channel_join_async ()" link="telepathy-glib-channel.html#tp-channel-join-async" since="0.15.5"/>
+    <keyword type="function" name="tp_channel_join_finish ()" link="telepathy-glib-channel.html#tp-channel-join-finish" since="0.15.5"/>
     <keyword type="function" name="tp_channel_leave_async ()" link="telepathy-glib-channel.html#tp-channel-leave-async" since="0.13.10"/>
     <keyword type="function" name="tp_channel_leave_finish ()" link="telepathy-glib-channel.html#tp-channel-leave-finish" since="0.13.10"/>
     <keyword type="function" name="tp_channel_close_async ()" link="telepathy-glib-channel.html#tp-channel-close-async" since="0.13.10"/>
@@ -1963,11 +2027,13 @@
     <keyword type="struct" name="struct TpAccountManager" link="telepathy-glib-account-manager.html#TpAccountManager-struct"/>
     <keyword type="struct" name="struct TpAccountManagerClass" link="telepathy-glib-account-manager.html#TpAccountManagerClass"/>
     <keyword type="function" name="tp_account_manager_new ()" link="telepathy-glib-account-manager.html#tp-account-manager-new"/>
+    <keyword type="function" name="tp_account_manager_new_with_factory ()" link="telepathy-glib-account-manager.html#tp-account-manager-new-with-factory"/>
     <keyword type="function" name="tp_account_manager_init_known_interfaces ()" link="telepathy-glib-account-manager.html#tp-account-manager-init-known-interfaces" since="0.7.32"/>
+    <keyword type="function" name="tp_account_manager_set_default ()" link="telepathy-glib-account-manager.html#tp-account-manager-set-default" since="0.15.5"/>
     <keyword type="function" name="tp_account_manager_dup ()" link="telepathy-glib-account-manager.html#tp-account-manager-dup" since="0.9.0"/>
     <keyword type="function" name="tp_account_manager_create_account_async ()" link="telepathy-glib-account-manager.html#tp-account-manager-create-account-async" since="0.9.0"/>
     <keyword type="function" name="tp_account_manager_create_account_finish ()" link="telepathy-glib-account-manager.html#tp-account-manager-create-account-finish" since="0.9.0"/>
-    <keyword type="function" name="tp_account_manager_ensure_account ()" link="telepathy-glib-account-manager.html#tp-account-manager-ensure-account" since="0.9.0"/>
+    <keyword type="function" name="tp_account_manager_ensure_account ()" link="telepathy-glib-account-manager.html#tp-account-manager-ensure-account" deprecated="" since="0.9.0"/>
     <keyword type="function" name="tp_account_manager_get_valid_accounts ()" link="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts" since="0.9.0"/>
     <keyword type="function" name="tp_account_manager_get_most_available_presence ()" link="telepathy-glib-account-manager.html#tp-account-manager-get-most-available-presence" since="0.9.0"/>
     <keyword type="function" name="tp_account_manager_set_all_requested_presences ()" link="telepathy-glib-account-manager.html#tp-account-manager-set-all-requested-presences" since="0.9.0"/>
@@ -1987,7 +2053,7 @@
     <keyword type="signal" name="The &quot;account-removed&quot; signal" link="telepathy-glib-account-manager.html#TpAccountManager-account-removed"/>
     <keyword type="signal" name="The &quot;account-validity-changed&quot; signal" link="telepathy-glib-account-manager.html#TpAccountManager-account-validity-changed"/>
     <keyword type="signal" name="The &quot;most-available-presence-changed&quot; signal" link="telepathy-glib-account-manager.html#TpAccountManager-most-available-presence-changed"/>
-    <keyword type="struct" name="struct TpAccount" link="telepathy-glib-account.html#TpAccount-struct"/>
+    <keyword type="struct" name="TpAccount" link="telepathy-glib-account.html#TpAccount-struct"/>
     <keyword type="struct" name="struct TpAccountClass" link="telepathy-glib-account.html#TpAccountClass"/>
     <keyword type="function" name="tp_account_new ()" link="telepathy-glib-account.html#tp-account-new"/>
     <keyword type="function" name="tp_account_init_known_interfaces ()" link="telepathy-glib-account.html#tp-account-init-known-interfaces" since="0.7.32"/>
@@ -2041,6 +2107,7 @@
     <keyword type="function" name="tp_account_set_avatar_finish ()" link="telepathy-glib-account.html#tp-account-set-avatar-finish" since="0.11.1"/>
     <keyword type="function" name="tp_account_bind_connection_status_to_property ()" link="telepathy-glib-account.html#tp-account-bind-connection-status-to-property" since="0.13.16"/>
     <keyword type="macro" name="TP_ACCOUNT_FEATURE_CORE" link="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CORE:CAPS" since="0.9.0"/>
+    <keyword type="macro" name="TP_ACCOUNT_FEATURE_CONNECTION" link="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CONNECTION:CAPS" since="0.15.5"/>
     <keyword type="function" name="tp_account_is_prepared ()" link="telepathy-glib-account.html#tp-account-is-prepared" since="0.9.0"/>
     <keyword type="function" name="tp_account_prepare_async ()" link="telepathy-glib-account.html#tp-account-prepare-async" since="0.9.0"/>
     <keyword type="function" name="tp_account_prepare_finish ()" link="telepathy-glib-account.html#tp-account-prepare-finish" since="0.9.0"/>
@@ -2164,7 +2231,7 @@
     <keyword type="struct" name="struct TpChannelRequestClass" link="telepathy-glib-channel-request.html#TpChannelRequestClass"/>
     <keyword type="function" name="tp_channel_request_new ()" link="telepathy-glib-channel-request.html#tp-channel-request-new"/>
     <keyword type="function" name="tp_channel_request_init_known_interfaces ()" link="telepathy-glib-channel-request.html#tp-channel-request-init-known-interfaces" since="0.7.32"/>
-    <keyword type="function" name="tp_channel_request_set_channel_factory ()" link="telepathy-glib-channel-request.html#tp-channel-request-set-channel-factory" since="0.13.14"/>
+    <keyword type="function" name="tp_channel_request_set_channel_factory ()" link="telepathy-glib-channel-request.html#tp-channel-request-set-channel-factory" deprecated="since 0.15.5. Use #TpProxy:factory instead." since="0.13.14"/>
     <keyword type="function" name="tp_channel_request_get_immutable_properties ()" link="telepathy-glib-channel-request.html#tp-channel-request-get-immutable-properties" since="0.13.14"/>
     <keyword type="function" name="tp_channel_request_get_account ()" link="telepathy-glib-channel-request.html#tp-channel-request-get-account" since="0.15.3"/>
     <keyword type="function" name="tp_channel_request_get_user_action_time ()" link="telepathy-glib-channel-request.html#tp-channel-request-get-user-action-time" since="0.15.3"/>
@@ -2218,7 +2285,7 @@
     <keyword type="function" name="tp_account_channel_request_create_and_observe_channel_finish ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-and-observe-channel-finish" since="0.13.14"/>
     <keyword type="function" name="tp_account_channel_request_ensure_and_observe_channel_async ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-ensure-and-observe-channel-async" since="0.13.14"/>
     <keyword type="function" name="tp_account_channel_request_ensure_and_observe_channel_finish ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-ensure-and-observe-channel-finish" since="0.13.14"/>
-    <keyword type="function" name="tp_account_channel_request_set_channel_factory ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-channel-factory" since="0.13.2"/>
+    <keyword type="function" name="tp_account_channel_request_set_channel_factory ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-channel-factory" deprecated="" since="0.13.2"/>
     <keyword type="function" name="tp_account_channel_request_get_channel_request ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-get-channel-request" since="0.13.13"/>
     <keyword type="function" name="tp_account_channel_request_set_hints ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-hints" since="0.13.14"/>
     <keyword type="function" name="tp_account_channel_request_set_delegate_to_preferred_handler ()" link="telepathy-glib-account-channel-request.html#tp-account-channel-request-set-delegate-to-preferred-handler" since="0.15.3"/>
@@ -2256,12 +2323,36 @@
     <keyword type="function" name="tp_client_channel_factory_dup_channel_features ()" link="telepathy-glib-client-channel-factory.html#tp-client-channel-factory-dup-channel-features" since="0.13.3"/>
     <keyword type="struct" name="TpBasicProxyFactory" link="telepathy-glib-basic-proxy-factory.html#TpBasicProxyFactory-struct"/>
     <keyword type="struct" name="struct TpBasicProxyFactoryClass" link="telepathy-glib-basic-proxy-factory.html#TpBasicProxyFactoryClass" since="0.13.2"/>
-    <keyword type="function" name="tp_basic_proxy_factory_new ()" link="telepathy-glib-basic-proxy-factory.html#tp-basic-proxy-factory-new" since="0.13.2"/>
-    <keyword type="function" name="tp_basic_proxy_factory_dup ()" link="telepathy-glib-basic-proxy-factory.html#tp-basic-proxy-factory-dup" since="0.13.2"/>
+    <keyword type="function" name="tp_basic_proxy_factory_new ()" link="telepathy-glib-basic-proxy-factory.html#tp-basic-proxy-factory-new" deprecated="New code should use #TpSimpleClientFactory instead" since="0.13.2"/>
+    <keyword type="function" name="tp_basic_proxy_factory_dup ()" link="telepathy-glib-basic-proxy-factory.html#tp-basic-proxy-factory-dup" deprecated="New code should use #TpSimpleClientFactory instead" since="0.13.2"/>
     <keyword type="struct" name="TpAutomaticProxyFactory" link="telepathy-glib-automatic-proxy-factory.html#TpAutomaticProxyFactory-struct"/>
     <keyword type="struct" name="struct TpAutomaticProxyFactoryClass" link="telepathy-glib-automatic-proxy-factory.html#TpAutomaticProxyFactoryClass" since="0.13.2"/>
-    <keyword type="function" name="tp_automatic_proxy_factory_new ()" link="telepathy-glib-automatic-proxy-factory.html#tp-automatic-proxy-factory-new" since="0.13.2"/>
-    <keyword type="function" name="tp_automatic_proxy_factory_dup ()" link="telepathy-glib-automatic-proxy-factory.html#tp-automatic-proxy-factory-dup" since="0.13.2"/>
+    <keyword type="function" name="tp_automatic_proxy_factory_new ()" link="telepathy-glib-automatic-proxy-factory.html#tp-automatic-proxy-factory-new" deprecated="New code should use #TpAutomaticClientFactory instead" since="0.13.2"/>
+    <keyword type="function" name="tp_automatic_proxy_factory_dup ()" link="telepathy-glib-automatic-proxy-factory.html#tp-automatic-proxy-factory-dup" deprecated="New code should use #TpAutomaticClientFactory instead" since="0.13.2"/>
+    <keyword type="struct" name="TpSimpleClientFactory" link="telepathy-glib-simple-client-factory.html#TpSimpleClientFactory-struct"/>
+    <keyword type="struct" name="struct TpSimpleClientFactoryClass" link="telepathy-glib-simple-client-factory.html#TpSimpleClientFactoryClass" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_new ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-new" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_get_dbus_daemon ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-get-dbus-daemon" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_ensure_account ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-account" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_dup_account_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-account-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_account_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_account_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features-varargs" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_ensure_connection ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-connection" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_dup_connection_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-connection-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_connection_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-connection-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_connection_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-connection-features-varargs" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_ensure_channel ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-channel" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_dup_channel_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-channel-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_channel_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-channel-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_channel_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-channel-features-varargs" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_ensure_contact ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-ensure-contact" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_dup_contact_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-contact-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_contact_features ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-contact-features" since="0.15.5"/>
+    <keyword type="function" name="tp_simple_client_factory_add_contact_features_varargs ()" link="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-contact-features-varargs" since="0.15.5"/>
+    <keyword type="property" name="The &quot;dbus-daemon&quot; property" link="telepathy-glib-simple-client-factory.html#TpSimpleClientFactory--dbus-daemon"/>
+    <keyword type="struct" name="TpAutomaticClientFactory" link="telepathy-glib-automatic-client-factory.html#TpAutomaticClientFactory-struct"/>
+    <keyword type="struct" name="struct TpAutomaticClientFactoryClass" link="telepathy-glib-automatic-client-factory.html#TpAutomaticClientFactoryClass" since="0.15.5"/>
+    <keyword type="function" name="tp_automatic_client_factory_new ()" link="telepathy-glib-automatic-client-factory.html#tp-automatic-client-factory-new" since="0.15.5"/>
     <keyword type="struct" name="TpClientMessage" link="TpClientMessage.html#TpClientMessage-struct"/>
     <keyword type="function" name="tp_client_message_new ()" link="TpClientMessage.html#tp-client-message-new" since="0.13.9"/>
     <keyword type="function" name="tp_client_message_new_text ()" link="TpClientMessage.html#tp-client-message-new-text" since="0.13.9"/>
@@ -2302,6 +2393,22 @@
     <keyword type="signal" name="The &quot;message-received&quot; signal" link="telepathy-glib-text-channel.html#TpTextChannel-message-received"/>
     <keyword type="signal" name="The &quot;message-sent&quot; signal" link="telepathy-glib-text-channel.html#TpTextChannel-message-sent"/>
     <keyword type="signal" name="The &quot;pending-message-removed&quot; signal" link="telepathy-glib-text-channel.html#TpTextChannel-pending-message-removed"/>
+    <keyword type="struct" name="struct TpFileTransferChannel" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel-struct"/>
+    <keyword type="struct" name="struct TpFileTransferChannelClass" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannelClass" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_new ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-new" since="0.15.5"/>
+    <keyword type="macro" name="TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE" link="telepathy-glib-file-transfer-channel.html#TP-FILE-TRANSFER-CHANNEL-FEATURE-CORE:CAPS" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_get_mime_type ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-mime-type" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_get_date ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-date" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_get_description ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-description" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_get_filename ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-filename" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_get_size ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-size" since="0.15.5"/>
+    <keyword type="function" name="tp_file_transfer_channel_get_transferred_bytes ()" link="telepathy-glib-file-transfer-channel.html#tp-file-transfer-channel-get-transferred-bytes" since="0.15.5"/>
+    <keyword type="property" name="The &quot;date&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--date"/>
+    <keyword type="property" name="The &quot;description&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--description"/>
+    <keyword type="property" name="The &quot;filename&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--filename"/>
+    <keyword type="property" name="The &quot;mime-type&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--mime-type"/>
+    <keyword type="property" name="The &quot;size&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--size"/>
+    <keyword type="property" name="The &quot;transferred-bytes&quot; property" link="telepathy-glib-file-transfer-channel.html#TpFileTransferChannel--transferred-bytes"/>
     <keyword type="struct" name="TpSvcDBusIntrospectable" link="telepathy-glib-svc-generic.html#TpSvcDBusIntrospectable-struct"/>
     <keyword type="struct" name="TpSvcDBusIntrospectableClass" link="telepathy-glib-svc-generic.html#TpSvcDBusIntrospectableClass"/>
     <keyword type="struct" name="TpSvcDBusProperties" link="telepathy-glib-svc-generic.html#TpSvcDBusProperties-struct"/>
@@ -3626,6 +3733,7 @@
     <keyword type="struct" name="TpCMMessage" link="TpCMMessage.html#TpCMMessage-struct"/>
     <keyword type="function" name="tp_cm_message_new ()" link="TpCMMessage.html#tp-cm-message-new" since="0.13.9"/>
     <keyword type="function" name="tp_cm_message_new_text ()" link="TpCMMessage.html#tp-cm-message-new-text" since="0.13.10"/>
+    <keyword type="function" name="tp_cm_message_set_message ()" link="TpCMMessage.html#tp-cm-message-set-message" since="0.15.5"/>
     <keyword type="function" name="tp_cm_message_take_message ()" link="TpCMMessage.html#tp-cm-message-take-message" since="0.13.9"/>
     <keyword type="function" name="tp_cm_message_get_sender ()" link="TpCMMessage.html#tp-cm-message-get-sender" since="0.13.9"/>
     <keyword type="function" name="tp_cm_message_set_sender ()" link="TpCMMessage.html#tp-cm-message-set-sender" since="0.13.9"/>
@@ -3669,12 +3777,12 @@
     <keyword type="function" name="tp_base_client_be_a_handler ()" link="telepathy-glib-base-client.html#tp-base-client-be-a-handler" since="0.11.6"/>
     <keyword type="function" name="TpBaseClientClassHandleChannelsImpl ()" link="telepathy-glib-base-client.html#TpBaseClientClassHandleChannelsImpl" since="0.11.6"/>
     <keyword type="function" name="tp_base_client_implement_handle_channels ()" link="telepathy-glib-base-client.html#tp-base-client-implement-handle-channels" since="0.11.6"/>
-    <keyword type="function" name="tp_base_client_add_account_features ()" link="telepathy-glib-base-client.html#tp-base-client-add-account-features" since="0.11.14"/>
-    <keyword type="function" name="tp_base_client_add_account_features_varargs ()" link="telepathy-glib-base-client.html#tp-base-client-add-account-features-varargs" since="0.11.14"/>
-    <keyword type="function" name="tp_base_client_add_connection_features ()" link="telepathy-glib-base-client.html#tp-base-client-add-connection-features" since="0.11.14"/>
-    <keyword type="function" name="tp_base_client_add_connection_features_varargs ()" link="telepathy-glib-base-client.html#tp-base-client-add-connection-features-varargs" since="0.11.14"/>
-    <keyword type="function" name="tp_base_client_add_channel_features ()" link="telepathy-glib-base-client.html#tp-base-client-add-channel-features" since="0.11.14"/>
-    <keyword type="function" name="tp_base_client_add_channel_features_varargs ()" link="telepathy-glib-base-client.html#tp-base-client-add-channel-features-varargs" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_add_account_features ()" link="telepathy-glib-base-client.html#tp-base-client-add-account-features" deprecated="" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_add_account_features_varargs ()" link="telepathy-glib-base-client.html#tp-base-client-add-account-features-varargs" deprecated="" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_add_connection_features ()" link="telepathy-glib-base-client.html#tp-base-client-add-connection-features" deprecated="" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_add_connection_features_varargs ()" link="telepathy-glib-base-client.html#tp-base-client-add-connection-features-varargs" deprecated="" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_add_channel_features ()" link="telepathy-glib-base-client.html#tp-base-client-add-channel-features" deprecated="" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_add_channel_features_varargs ()" link="telepathy-glib-base-client.html#tp-base-client-add-channel-features-varargs" deprecated="" since="0.11.14"/>
     <keyword type="function" name="tp_base_client_get_handled_channels ()" link="telepathy-glib-base-client.html#tp-base-client-get-handled-channels" since="0.11.6"/>
     <keyword type="function" name="tp_base_client_is_handling_channel ()" link="telepathy-glib-base-client.html#tp-base-client-is-handling-channel" since="0.14.5"/>
     <keyword type="function" name="tp_base_client_delegate_channels_async ()" link="telepathy-glib-base-client.html#tp-base-client-delegate-channels-async" since="0.15.0"/>
@@ -3693,12 +3801,13 @@
     <keyword type="function" name="tp_base_client_get_dbus_daemon ()" link="telepathy-glib-base-client.html#tp-base-client-get-dbus-daemon" since="0.11.11"/>
     <keyword type="function" name="tp_base_client_get_name ()" link="telepathy-glib-base-client.html#tp-base-client-get-name" since="0.11.11"/>
     <keyword type="function" name="tp_base_client_get_uniquify_name ()" link="telepathy-glib-base-client.html#tp-base-client-get-uniquify-name" since="0.11.11"/>
-    <keyword type="function" name="tp_base_client_get_account_manager ()" link="telepathy-glib-base-client.html#tp-base-client-get-account-manager" since="0.11.14"/>
-    <keyword type="function" name="tp_base_client_set_channel_factory ()" link="telepathy-glib-base-client.html#tp-base-client-set-channel-factory" since="0.13.2"/>
-    <keyword type="function" name="tp_base_client_get_channel_factory ()" link="telepathy-glib-base-client.html#tp-base-client-get-channel-factory" since="0.13.2"/>
+    <keyword type="function" name="tp_base_client_get_account_manager ()" link="telepathy-glib-base-client.html#tp-base-client-get-account-manager" deprecated="" since="0.11.14"/>
+    <keyword type="function" name="tp_base_client_set_channel_factory ()" link="telepathy-glib-base-client.html#tp-base-client-set-channel-factory" deprecated="" since="0.13.2"/>
+    <keyword type="function" name="tp_base_client_get_channel_factory ()" link="telepathy-glib-base-client.html#tp-base-client-get-channel-factory" deprecated="" since="0.13.2"/>
     <keyword type="property" name="The &quot;account-manager&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--account-manager"/>
     <keyword type="property" name="The &quot;channel-factory&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--channel-factory"/>
     <keyword type="property" name="The &quot;dbus-daemon&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--dbus-daemon"/>
+    <keyword type="property" name="The &quot;factory&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--factory"/>
     <keyword type="property" name="The &quot;name&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--name"/>
     <keyword type="property" name="The &quot;uniquify-name&quot; property" link="telepathy-glib-base-client.html#TpBaseClient--uniquify-name"/>
     <keyword type="signal" name="The &quot;request-added&quot; signal" link="telepathy-glib-base-client.html#TpBaseClient-request-added"/>
@@ -3741,23 +3850,26 @@
     <keyword type="signal" name="The &quot;done&quot; signal" link="telepathy-glib-handle-channels-context.html#TpHandleChannelsContext-done"/>
     <keyword type="struct" name="TpSimpleObserver" link="telepathy-glib-simple-observer.html#TpSimpleObserver-struct"/>
     <keyword type="function" name="TpSimpleObserverObserveChannelsImpl ()" link="telepathy-glib-simple-observer.html#TpSimpleObserverObserveChannelsImpl" since="0.11.5"/>
-    <keyword type="function" name="tp_simple_observer_new ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new" since="0.11.5"/>
+    <keyword type="function" name="tp_simple_observer_new ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new" deprecated="New code should use tp_simple_observer_new_with_am() instead." since="0.11.5"/>
     <keyword type="function" name="tp_simple_observer_new_with_am ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new-with-am" since="0.11.14"/>
+    <keyword type="function" name="tp_simple_observer_new_with_factory ()" link="telepathy-glib-simple-observer.html#tp-simple-observer-new-with-factory" since="0.15.5"/>
     <keyword type="property" name="The &quot;callback&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--callback"/>
     <keyword type="property" name="The &quot;destroy&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--destroy"/>
     <keyword type="property" name="The &quot;recover&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--recover"/>
     <keyword type="property" name="The &quot;user-data&quot; property" link="telepathy-glib-simple-observer.html#TpSimpleObserver--user-data"/>
     <keyword type="struct" name="TpSimpleApprover" link="telepathy-glib-simple-approver.html#TpSimpleApprover-struct"/>
     <keyword type="function" name="TpSimpleApproverAddDispatchOperationImpl ()" link="telepathy-glib-simple-approver.html#TpSimpleApproverAddDispatchOperationImpl" since="0.11.5"/>
-    <keyword type="function" name="tp_simple_approver_new ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new" since="0.11.5"/>
+    <keyword type="function" name="tp_simple_approver_new ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new" deprecated="New code should use tp_simple_approver_new_with_am() instead." since="0.11.5"/>
     <keyword type="function" name="tp_simple_approver_new_with_am ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new-with-am" since="0.11.14"/>
+    <keyword type="function" name="tp_simple_approver_new_with_factory ()" link="telepathy-glib-simple-approver.html#tp-simple-approver-new-with-factory" since="0.15.5"/>
     <keyword type="property" name="The &quot;callback&quot; property" link="telepathy-glib-simple-approver.html#TpSimpleApprover--callback"/>
     <keyword type="property" name="The &quot;destroy&quot; property" link="telepathy-glib-simple-approver.html#TpSimpleApprover--destroy"/>
     <keyword type="property" name="The &quot;user-data&quot; property" link="telepathy-glib-simple-approver.html#TpSimpleApprover--user-data"/>
     <keyword type="struct" name="TpSimpleHandler" link="telepathy-glib-simple-handler.html#TpSimpleHandler-struct"/>
     <keyword type="function" name="TpSimpleHandlerHandleChannelsImpl ()" link="telepathy-glib-simple-handler.html#TpSimpleHandlerHandleChannelsImpl" since="0.11.6"/>
-    <keyword type="function" name="tp_simple_handler_new ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new" since="0.11.6"/>
+    <keyword type="function" name="tp_simple_handler_new ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new" deprecated="New code should use tp_simple_handler_new_with_am() instead." since="0.11.6"/>
     <keyword type="function" name="tp_simple_handler_new_with_am ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new-with-am" since="0.11.14"/>
+    <keyword type="function" name="tp_simple_handler_new_with_factory ()" link="telepathy-glib-simple-handler.html#tp-simple-handler-new-with-factory" since="0.15.5"/>
     <keyword type="property" name="The &quot;bypass-approval&quot; property" link="telepathy-glib-simple-handler.html#TpSimpleHandler--bypass-approval"/>
     <keyword type="property" name="The &quot;callback&quot; property" link="telepathy-glib-simple-handler.html#TpSimpleHandler--callback"/>
     <keyword type="property" name="The &quot;destroy&quot; property" link="telepathy-glib-simple-handler.html#TpSimpleHandler--destroy"/>
@@ -3887,6 +3999,7 @@
     <keyword type="function" name="tp_debug_sender_add_message_vprintf ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-add-message-vprintf" since="0.13.13"/>
     <keyword type="function" name="tp_debug_sender_add_message_printf ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-add-message-printf" since="0.13.13"/>
     <keyword type="function" name="tp_debug_sender_log_handler ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-log-handler" since="0.7.36"/>
+    <keyword type="function" name="tp_debug_sender_set_timestamps ()" link="telepathy-glib-debug-sender.html#tp-debug-sender-set-timestamps" since="0.15.5"/>
     <keyword type="property" name="The &quot;enabled&quot; property" link="telepathy-glib-debug-sender.html#TpDebugSender--enabled"/>
     <keyword type="struct" name="TpIntset" link="TpIntset.html#TpIntset-struct"/>
     <keyword type="macro" name="TP_TYPE_INTSET" link="TpIntset.html#TP-TYPE-INTSET:CAPS" since="0.11.3"/>

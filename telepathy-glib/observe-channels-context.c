@@ -129,7 +129,6 @@ tp_observe_channels_context_dispose (GObject *object)
 
   if (self->channels != NULL)
     {
-      g_ptr_array_foreach (self->channels, (GFunc) g_object_unref, NULL);
       g_ptr_array_unref (self->channels);
       self->channels = NULL;
     }
@@ -215,7 +214,6 @@ tp_observe_channels_context_set_property (GObject *object,
         break;
       case PROP_CHANNELS:
         self->channels = g_value_dup_boxed (value);
-        g_ptr_array_foreach (self->channels, (GFunc) g_object_ref, NULL);
         break;
       case PROP_DISPATCH_OPERATION:
         self->dispatch_operation = g_value_dup_object (value);
@@ -694,5 +692,5 @@ tp_observe_channels_context_get_requests (TpObserveChannelsContext *self)
     return NULL;
 
   return _tp_create_channel_request_list (
-      tp_proxy_get_dbus_daemon (self->account), request_props);
+      tp_proxy_get_factory (self->account), request_props);
 }

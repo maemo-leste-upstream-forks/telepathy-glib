@@ -1,3 +1,1171 @@
+commit cf56f52d3202cb4227d6eb4d990da246d1160013
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-08-17 16:02:19 +0100
+
+    Version 0.15.5
+
+commit 51171b4f6b0508a6d3ae41b2b54c25d6bbf24415
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-08-17 15:55:58 +0100
+
+    NEWS for 0.15.5
+
+commit 56e8200aed0fc34bd79750a639a4ae7d2e3ddf46
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-17 15:01:10 +0200
+
+    Add skip annotation for NUM_FOO
+    
+    g-i now understands it (GNOME bug #652712)
+
+commit a6e979f50ce33b835c4dca8ca274caf2610bc7f8
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-17 14:17:57 +0200
+
+    Remove useless ; line
+
+commit e420e6ced47dcde7288c380846391ee374b2042a
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 13:08:49 +0200
+
+    Print useful warning in case tp_account_manager_set_default() fails
+
+commit 5c198ce94a977f430b898543ce8b8dc53cf74067
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 12:46:26 +0200
+
+    Define _TP_GNUC_DEPRECATED_FOR() and use it where appropriate
+
+commit 798a3651a1549433290d1c1d7c9163cfafa912ec
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 12:05:02 +0200
+
+    Improve documentation a bit
+
+commit 93e3044b253278a576a4a885ef5b85a86d9f61c0
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 11:26:54 +0200
+
+    TpSimpleClientFactory: add code example of typical app's main() when using custom factory
+
+commit 6fede7551062e147cec9ea6bb518df90b3a9bda4
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-03 17:46:48 +0200
+
+    TpAccountManager is the "toplevel" object, do not create it through a factory
+    
+    Instead of creating a TpAccountManager through a factory, it is more natural
+    to create it directly. If no custom factory is provided at constructor,
+    a default one is created internally anyway.
+    
+    This is also what tp-qt4 does.
+    
+    Note this is break of unreleased API/ABI.
+
+commit 01fca3925803eb704f403ac77790263915070ec9
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-03 22:16:52 +0200
+
+    TpAccountChannelRequest: do not create a TpAccountManager for tmp handler
+    
+    We can now create TpSimpleHandler with account's factory. This avoid
+    introspection of other accounts if app does not need them.
+
+commit 9fbb9a58ed465a85b382c970e0b546f118eb81cd
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-03 18:24:28 +0200
+
+    TpBaseClient: add constructors with factory instead of AM
+    
+    A factory is what we really need, forcing to create a TpAccountManager
+    also means that a simple channel handler will always introspect
+    all accounts even if it needs only one.
+    
+    With a factory, TpBaseClient can create only needed accounts and still
+    share them with a TpAccountManager if one exists.
+
+commit e896dac5070c46b1ac566dd5fa646be9ebe55ee9
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-02 17:40:14 +0200
+
+    Add tp_account_manager_set_default()
+    
+    This defines the TpAccountManager returned by tp_account_manager_dup()
+
+commit b730034fd48b523b0ad562c07e7fe8cb572de99d
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-01 19:59:53 +0200
+
+    Deprecate tp_base_client_add_*_features()
+    
+    features are set on TpSimpleClientFactory now
+
+commit 02044fd6ef0b093794542b849b55520b0560da04
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 09:49:52 +0200
+
+    TpBaseClient: prepare TpAccount, TpConnection and TpChannels with factory desired features
+    
+    There are lots of code duplication for those proxy creation and preparation,
+    this will be fixed later.
+
+commit d1574f96efab380fff38e336deddc8291d710fae
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-27 13:55:42 +0200
+
+    Deprecate tp_account_manager_ensure_account()
+    
+    Use instead tp_simple_client_factory_ensure_account()
+
+commit 9b093ea38bde5cc7c1ac118b9f48108774241c6f
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 23:20:11 +0200
+
+    TpAccountManager: Fix doc now that TpAccount objects are guaranteed to be prepared
+
+commit 7fe582085139e7bb563eee8c37baa72649a9c1b8
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 23:19:42 +0200
+
+    TpAccountManager: trivial code simplification
+
+commit e297364453f319f19b93a9f025573882dc9d2699
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 23:19:11 +0200
+
+    TpAccountManager: Stop tp_a_m_ensure_account() from inserting non prepared accounts
+    
+    For compatibility we still need to return a TpAccount and no ref,
+    so added a legacy table to keep them.
+
+commit b80d04412a1a9dbea414fc8dcb6ca365186fe0f4
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 23:06:14 +0200
+
+    TpAccountManager: Delay preparing CORE featur until all TpAccounts are ready
+
+commit 7db021e92ad36b1f62e143ac29cea506e10df353
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 22:57:13 +0200
+
+    TpAccountManager: delay account-validity-changed until TpAccount is ready
+
+commit 2c4d52b0a4269c9b7b6169b09941b72a528cc50a
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 22:13:52 +0200
+
+    TpAccountManager: Delay create_account_async() reply until TpAccount is ready
+
+commit 7da2779fd1b6d4da62a7d92efed4321e1078b612
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-17 11:30:08 +0200
+
+    Correctly free a GQueue from dispose
+    
+    If dispose is run twice, first run would free the queue and 2nd would
+    still do a g_queue_foreach() on it... I can't beleive GLib still does
+    not have free_func and refcount on GQueue...
+
+commit 236aa055896672319ede0ee5f3f672a77c0dea97
+Merge: a7dd01e 60f6b3e
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 15:14:22 +0200
+
+    Merge branch 'contact-list-rebase'
+
+commit 60f6b3edf2e3ee79191d782fbfe8895ad47d113e
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 14:53:02 +0200
+
+    reword tp_connection_get_contact_list() doc
+
+commit ad457b1e77c7e5e8fcad020eae5493da35db61d2
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 14:24:37 +0200
+
+    Add comment in example explaining what state SUCCESS means
+
+commit a7dd01e283f79f4a6e739a3e074dfcf23f39fe85
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 12:49:38 +0200
+
+    Print warning if tp_account_manager_dup() fails
+
+commit 37e03deab2c76f4c94c8808835c16cc782b41b53
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 11:19:56 +0200
+
+    contact-list.py: rename TelepathyGLib namespace as Tp
+
+commit 06acc6e3ff8a391bb99607716271b499f41b27f5
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 11:04:58 +0200
+
+    contact-list examples: verify state is SUCCESS before getting the contact list
+
+commit 319f8960b8969df0251671a7433dbc0689ebd0fd
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 11:03:56 +0200
+
+    Doc fix: Make clear in TpAccountManager doc that propagating the factory also means its features will be prepared on proxies
+
+commit 9d6e53029bdeb2d4ae3c59e1674f4558d6340758
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-05 11:03:34 +0200
+
+    Doc fix: preparing TP_CONNECTION_FEATURE_CONTACT_LIST is not enough to get contacts
+    
+    contact-list-state must also be SUCCESS
+
+commit dc26a80ed9bad3e565dea605ca60661e757de64e
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-28 11:02:53 +0200
+
+    Tests: verify TP_CONNECTION_FEATURE_CONTACT_LIST also prepare TpContact
+
+commit 8e65b2c1f006923e63925367c603d808fbdb78ed
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-18 12:06:51 +0200
+
+    Include contact-list.c example into TpAccountManager's doc
+
+commit 5c71b0d607786524637e5d23ed898319c75bb5fc
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-13 11:46:32 +0200
+
+    add contact-list.{c,py} example
+    
+    It demonstrate how to get all prepared contacts using a factory.
+
+commit 4834baa40d6270b12270d2ee7fa49230318db4e3
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-13 20:14:14 +0200
+
+    Prepare TpContact objects for the ContactList
+    
+    If TpConnection has TP_CONNECTION_FEATURE_CONTACT_LIST, also create TpContact
+    objects for the roster. Add tp_connection_dup_contact_list() to get them.
+
+commit 3c45ff1964d34ebd48cb0ca46d0b4ea06767f585
+Merge: 9880797 606b841
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-08-04 18:10:25 +0100
+
+    Merge branch 'qed'
+    
+    Fixes: <https://bugs.freedesktop.org/show_bug.cgi?id=26516>
+    Reviewed-by: Xavier Claessens <xclaesse@gmail.com>
+
+commit 98807970a4c2710cd529459562a1e9f68ae6f5ab
+Merge: 2b39014 8370b72
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-08-04 17:26:08 +0100
+
+    Merge branch 'target-id-in-channel-manager'
+    
+    Fixes: <https://bugs.freedesktop.org/show_bug.cgi?id=27855>
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+    Reviewed-by: Xavier Claessens <xclaesse@gmail.com>
+
+commit 2b3901490c8ad0e50b0cdc1e0dab35025e7588b0
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 15:50:06 +0200
+
+    Add TP_CONTACT_FEATURE_INVALID into doc
+    
+    fix make check
+
+commit e4677ed33842a2deeffd5e119833c74571485d0e
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 15:10:45 +0200
+
+    Add TP_CONTACT_FEATURE_INVALID because 0 is a valid TpContactFeature
+
+commit 24d358dfc94c8872e2931e1290e7de94cd6e4f3c
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-04 14:06:07 +0200
+
+    Add tp_simple_client_factory_add_*_features_varargs()
+    
+    This is much nicer C API, and TpBaseClient had those helpers too.
+
+commit 026d5c3c6a1f678c50cb763ecc1d597329be3c58
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-17 12:26:47 +0200
+
+    Add _tp_contacts_from_values
+
+commit cb60818446aa2ada02be888c0bb99b42777f5594
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-13 20:32:09 +0200
+
+    export some internal functions of contact.c
+
+commit a26e5896246996113c22ce7979bb14efe138fb99
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-08-04 11:57:55 +0200
+
+    annotate TpConnectionUpgradeContactsCb
+
+commit 95435cdb202d5c85de5bddf5d0e376737aeca5c5
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-05 18:11:33 +0200
+
+    Add TP_CONNECTION_FEATURE_CONTACT_GROUPS to prepare the list of groups on the connection
+
+commit ef8fe8be1a8a631fa406a03fa2db3c54146b0bd5
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-02 14:34:57 +0200
+
+    Deprecate constructors of TpBaseClient subclasses which do not take a TpAccountManager
+    
+    Those are misleading, if app created its own TpSimpleClientFactory and is
+    using a TpAccountManager from it, they must pass their AM instead otherwise
+    the default one will be used.
+
+commit 98568941339b7f177c790036fdd20a813398dbc8
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-08-01 14:26:04 +0200
+
+    TpChannel: prepare CORE on its connection before doing anything else
+
+commit 9bd9e89432eee838986ee9e1ab84631892170be4
+Merge: f882f8c 54c187e
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 18:39:07 +0100
+
+    Merge branch 'fix-gtkdoc-out-of-tree-builds'
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Fixes: https://bugs.freedesktop.org/show_bug.cgi?id=39666
+
+commit 54c187e5fffaa36cba6065c6992318f4fe882423
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 18:33:47 +0100
+
+    Depend on gtk-doc ≥ 1.17
+    
+    I can't find a Debian package of 1.16, and the docs don't build at all
+    with 1.15 with this branch.
+    
+    Debian Testing and Ubuntu Natty both have 1.17 so I think this is fine.
+
+commit 01fc098d7ca7e72f5d2e41c362a3f504f877a151
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 16:05:57 +0100
+
+    Add automatic-client-factory-internal.h to makefile.
+
+commit 3ab0d7678cb15cb33b7042c8a8b69c1b3ac5e93f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 15:54:22 +0100
+
+    docs: fix out-of-tree doc checks with gtk-doc 1.17
+    
+    gtk-doc 1.17 runs in the builddir, not the sourcedir. So these files end
+    up in the builddir, which is where we're running.
+    
+    Unfortunately this breaks doc checks with gtk-doc ≤ 1.16, which I can't
+    find the strength to care about.
+
+commit 07cccde224118ebd852c41b7849bc9690ff2dc78
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 15:42:52 +0100
+
+    docs: sync Makefile with gtk-doc's example one
+    
+    This does not change any behaviour; it just adds some defaults and
+    comments from the sample file to make diffing the two easier.
+
+commit 019e84e641e01b30732bcd4313620faaf15c371b
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 15:23:49 +0100
+
+    docs: use GTKDOC_CFLAGS not INCLUDES
+    
+    Going by the examples provided by gtk-doc, this is preferred. It's
+    been supported approximately forever.
+
+commit e3dcc31f9134f9307da478a5fa4881907cd8e13f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-29 15:04:44 +0100
+
+    docs: correctly scan source dir
+
+commit b736d5036954996dbaef25cb545df5c1d6535f13
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-28 18:46:32 +0100
+
+    docs: generate version.xml from configure
+
+commit 6317c33a6e44146cd6fccc9c1ad25976d7d4d6e8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-05-18 15:24:17 +0100
+
+    docs: add version.xml to content_files
+    
+    In the past, gtk-doc always build documentation in the source tree, even
+    if you were building out of tree. gtk-doc 1.17 corrects this; but it
+    means that we now have to tell it that this file exists.
+
+commit f882f8c5b8f38251c151ff4cd0463cf3cd8af3e1
+Author: Travis Reitter <travis.reitter@collabora.co.uk>
+Date:   2010-11-04 11:19:15 -0700
+
+    Cut unnecessary sed hacks for Vala bindings.
+    
+    Fixes fdo#31387.
+
+commit 8370b72c49621d0882e3f88058cfe1e3ad75fea1
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-28 14:25:03 +0100
+
+    echo-conn: simplify normalize func
+
+commit 65f3c4057f5ffb3bac8766fce96a751e8aa1c808
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-28 14:24:45 +0100
+
+    request-properties test: mention bug #
+
+commit 0d61cf38abce53d9694f18d659435d5b62522f6c
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-28 13:01:57 +0100
+
+    Requests: update comment about synthesized properties
+    
+    We have a couple more synthesized properties these days.
+
+commit a93e97a9ea768b6885864ff8094efb6ad6408133
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-28 12:59:53 +0100
+
+    RequestChannel: avoid re-fetching handle repo
+    
+    It is indeed guaranteed to be non-NULL because of the above: in fact,
+    the above set it to a non-NULL value in the handle != 0 case.
+
+commit 829c73575a6afaf54edcca59857d462813ad4462
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-10 11:55:13 +0000
+
+    gitignore: updated
+    
+    Cheers, emacs.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 55771f1a309cce65ee6a540a047df54cf835a778
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-10 11:54:50 +0000
+
+    channel-manager-request-properties: add test for remaining TargetID
+    
+    Tests fd.o#27855
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 6d7396ac8066d44c14e6573163f8d02f97d37e5d
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-10 11:53:44 +0000
+
+    simple-channel-manager: add object with emits ::request on a channel request
+    
+    The TpBaseConnection is in the public struct so it can be created
+    without the connection at first and then added later.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit dece3d5667673858017ec0bbf922d1ab67062d28
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-10 11:52:38 +0000
+
+    echo-channel-manager-conn: add base connection subclass
+    
+    This simple connection lets a test add one channel manager of its
+    choosing.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit f18c7e73aa3a495062feba7402474ea218991bcb
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-10 11:51:13 +0000
+
+    echo-conn: change behaviour of contact normalize function slightly
+    
+    Look, documentation too!
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 9badb5ab35b1091f571201e3713f80303b4c7771
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-06 14:38:40 +0000
+
+    base-connection: ensure TargetID is untouched and present in requests
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 960abaf4481ed35308e40ca83d886bff6fd79858
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-21 12:24:44 +0200
+
+    Add unit test for ContactList properties
+
+commit acc0d08619a108ec774ca9d3057e15b86d851467
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-06 12:09:57 +0200
+
+    Add new feature TP_CONNECTION_FEATURE_CONTACT_LIST
+    
+    It introspects Connection.ContactList properties
+
+commit 68017d35d57e8947a02a742eadf09653e76720e0
+Merge: aed3c37 cbffbb6
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 18:34:04 +0100
+
+    Merge branch 'fd.o-39377-repeated-location-requests-moar'
+    
+    Fixes: <https://bugs.freedesktop.org/show_bug.cgi?id=39377>
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+    Reviewed-by: Xavier Claessens <xclaesse@gmail.com>
+
+commit cbffbb62cb6ec9a3cc0474472a0dc2713587ca40
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 18:27:15 +0100
+
+    test-contacts: ensure all features are tested for idempotency
+
+commit be50c6d0ea626e9b6041d12d7487beda5b0a6b1b
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 18:26:51 +0100
+
+    test-contacts: test AVATAR_DATA idempotency
+    
+    This was fixed by Xavier's commit
+    ea9c94140f985e1940f027346aefbcd2b472f48e.
+
+commit e0d5749573d310b94b132d685bb953c1dc7c98fe
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 19:16:40 +0100
+
+    test-contacts: check idempotency of CAPABILITIES
+    
+    I'm bending the rules a little here...
+
+commit 897ed19a5382ff1961d94c45add39ee51f955334
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 19:15:38 +0100
+
+    Contact: don't wrongly mark Capabilities prepared
+    
+    This is the same hypothetical issue as fixed (and tested to be fixed)
+    for SimplePresence.
+
+commit ac25fbae2e234704d6ea698362ec737066a9cbec
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 18:16:21 +0100
+
+    test-contacts: add fd.o#27686 ref to its test
+
+commit 93c9b19671c812c4e527b9ad44bc6d60698642a0
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 17:52:20 +0100
+
+    Contact: avoid stupid prepend-and-reverse pattern
+    
+    Normally I'd say “use GQueue” but we can just as easily iterate
+    backwards.
+
+commit ff475baddbc251a5cbae057aa0bb1cd74dfe1cef
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 17:50:10 +0100
+
+    Contact: mark CONTACT_INFO prepared if info is unknown
+    
+    You can't distinguish between “This contact has no information” and
+    “This contact's information is unknown” from the tp-glib API *anyway*.
+
+commit bf9e1017ed8ab024587cf158b2e5286cc17369b9
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 18:20:29 +0100
+
+    Contacts: warn if CM's Aliasing impl is buggy
+
+commit 09e8f5d53472331c6fe73e44b129f5c9ae431b0f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 17:18:16 +0100
+
+    PresenceMixin: expunge g_hash_table_foreach
+    
+    I was checking this code out and these scared me.
+    
+    The one in tp_presence_mixin_set_status is particularly weird because
+    the callback was only called once because g_hash_table_foreach() only
+    got called if g_hash_table_size() returned 1!
+
+commit b216c95f9d184deb9bf5c7a1e2eacc048ed676b8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 17:11:37 +0100
+
+    Contacts: don't wrongly mark SimplePresence prepared
+    
+    Previously, if a broken CM included the SimplePresence/presence
+    attribute when TpContact didn't ask for it,
+    CONTACT_FEATURE_FLAG_PRESENCE would still be set, even if we weren't
+    listening to PresencesChanged. So this is broken.
+    
+    This fix makes TpContact ignore unsolicited presence information in
+    GetContactAttributes replies. The other option was to bind to the signal
+    in that event, which seems … surprising.
+
+commit 0fa6d8c766622c8310cc746a4575f22fb2c42dc3
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-21 15:47:35 +0100
+
+    Contacts: avoid re-introspecting client types
+    
+    My reading of the spec says that it's okay to leave /client-types out of
+    the result of GetContactAttributes().
+    
+    My reading of the tp-glib documentation is that it's valid for
+    tp_contact_get_client_types() to return NULL even if
+    TP_CONTACT_FEATURE_CLIENT_TYPES is prepared. TpContact:client-types is
+    documented a little differently, so I'm changing it to match.
+
+commit 2dfeab6378ca0fc57a9060c873f2c2db6ff29682
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 19:46:23 +0100
+
+    Contacts: avoid repeatedly re-introspecting avatar tokens
+    
+    The definition of the token attribute says it should be “omitted from
+    the result if the contact's avatar token is not known”.
+
+commit 4379cadab2b89cfbd86366e96b2bbab2fb02cf2d
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 19:29:52 +0100
+
+    test-contacts/by_handle_again: prepare many more features
+    
+    In theory this test should be able to prepare *every* feature and not
+    make redundant GetContactAttributes(). Until recently, this was broken
+    for LOCATION.
+    
+    Some features are currently commented out because TpContact is buggy;
+    others are commented out because TpTestContactsConnection is buggy.
+
+commit a69d04ea3a6482e227138ff2dbabe26072615233
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 18:45:16 +0100
+
+    Contacts: remove slow path for Location
+    
+    The only CM that implements Location is Gabble. It implements Contacts.
+    Also Contacts has been around forever. Bye bye dead code.
+
+commit cc017585dee87eb3f34442b98a487136a87cb510
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 18:32:44 +0100
+
+    Contacts: mark LOCATION prepared if contact has none
+    
+    Previously, if a contact had no published location, the internal flag
+    for “LOCATION is prepared” would not be set, and so repeated calls to
+    tp_connection_get_contacts_by_{id,handle} would repeatedly call
+    GetContactAttributes().
+
+commit 11ff0856d23ee0cc87f1a05793dec3f581e3b450
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 17:49:58 +0100
+
+    test-contacts/by_handle_again: don't SEGV on failure
+    
+    If this test regresses (perhaps because some nefarious developer finds
+    that it fails for many features other than ALIAS, and systematically
+    tries them all), it should fail with a reasonable assertion, rather than
+    a segmentation fault. Thus, our first assertion should be that the
+    second call to tp_connection_get_contacts_by_handle() did not return an
+    error, rather than trying to make assertions which will dereference NULL
+    pointers if the call fails.
+
+commit d2a9b72b823fcad5a43cd8c60fd7229bb560d83e
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 16:56:19 +0100
+
+    test-contacts: extract TpBaseConnection-disappearing
+    
+    This is a neat trick. I'm gonna use it in my own tests.
+
+commit 1fc67d18306a581979ca776ecdb2b29fecd13880
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 16:49:22 +0100
+
+    test-contacts: correct names of British Isles states
+    
+    http://en.wikipedia.org/wiki/Terminology_of_the_British_Isles
+
+commit 40820f53c074ef21e75b4aab7a081f30f700de58
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 18:12:15 +0100
+
+    Contact: pass all wanted features to set_attributes
+
+commit aed3c378de59e1b28ffb4fe370f1ddd981c9e163
+Merge: 15838f7 f3719c0
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 18:00:29 +0100
+
+    Merge branch 'disable-test-timeouts-in-gdb'
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit f3719c040b7e12cc7c10da981a9a688e01eb56d8
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-19 16:35:06 +0100
+
+    Tests: disable timeouts if we're being debugged
+    
+    This is pretty evil, but I got sick of my gdb sessions being destroyed
+    because I forgot to set TP_TESTS_NO_TIMEOUT to prevent the SIGALRM going
+    off after 10 seconds or whatever. So this checks /proc/self/status to
+    see whether another process is tracing us. If a "TracerPid:" line is
+    present, and is followed by a non-zero pid, the timeout is disabled. If
+    the line is present but with a zero pid, if the line is missing, or if
+    the file is missing or reading it fails, we set the timeout as usual.
+
+commit 15838f798a31540fdb919c8ba8bdbc164a9dda35
+Merge: 1fd9b08 77efcf3
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-27 17:58:00 +0100
+
+    Merge remote-tracking branch 'xclaesse/contact-refactor'
+    
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit 77efcf363bf3546d41d330e66cecdc79ab7c0a84
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-06 13:12:29 +0200
+
+    Factor out contacts_bind_to_signals()
+
+commit 8288a109594c1ebb84ad82545c906276287f758b
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-06 13:19:43 +0200
+
+    Factor out tp_contact_set_attributes()
+
+commit ea9c94140f985e1940f027346aefbcd2b472f48e
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-06 11:30:15 +0200
+
+    Stop depending on slow path for avatar data
+
+commit 1fd9b082ee7d7e96aea2905e0749482a49e5c345
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-25 11:23:25 +0200
+
+    Deprecate Tp{Basic,Automatic}ProxyFactory in favor of Tp{Simple,Automatic}ClientFactory
+    
+    Add internal wrappers for deprecated functions so we can still use them for compatibility
+
+commit d69d8d8e20dd2061e1bb892534ab338c608eb47a
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-25 11:05:25 +0200
+
+    Use TpSimpleClientFactory to create TpChannel objects
+    
+    For compatibility, still use TpAutomaticProxyFactory if one is explicitely set,
+    but use TpAutomaticClientFactory otherwise.
+
+commit a2076276e910b910c73a0538cf7ad9bde9164263
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-08 23:14:28 +0200
+
+    Add new feature TP_ACCOUNT_FEATURE_CONNECTION
+    
+    It delays "connection" property change notification until the TpConnection
+    is prepared with factory's desired features.
+
+commit 6738187d265dfc0987dd52a31ef0ae94534dbc23
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-08 21:56:36 +0200
+
+    Add tp_connection_get_account to get a TpAccount from a TpConnection
+    
+    This works only if the connection was created using a factory that has
+    the corresponding account
+
+commit c490a898d4d97a0521fb72a4e5759b5aa71e34a5
+Merge: 6d07832 2e4ee37
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 19:05:29 +0100
+
+    Merge remote-tracking branch 'danni/set_message-38061'
+
+commit 6d07832b73f29c943b7aceb8bc27228ed545406d
+Merge: a85dba4 bd771a6
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 18:43:26 +0100
+
+    Merge branch 'misc'
+    
+    Reviewed-by: Robert McQueen <robert.mcqueen@collabora.co.uk>
+
+commit bd771a61262c9be1de928da144777fc0d2de4003
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 18:37:40 +0100
+
+    Connection: replace constructor with constructed
+    
+    In theory someone might have subclassed this and depended on this work
+    being done in constructor. But it seems unlikely.
+
+commit ce1c7e7f3e52a1db223e7ad5ad3836debabdb6ff
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 18:35:34 +0100
+
+    Connection: remove useless debug from constructor
+
+commit a85dba4eab8b8e12e72eedbdc584feb65b40cbc8
+Merge: 7551732 771cd88
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 18:33:24 +0100
+
+    Merge branch 'telepathy-glib-0.14'
+
+commit 771cd883be1e889fb56c1fed0fe4360f55d123f5
+Merge: 1d72e2d 563c7de
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 18:33:19 +0100
+
+    Merge remote-tracking branch 'danni/crash-38060' into telepathy-glib-0.14
+
+commit f782b74f3a1d24a8d5493b492b609380f1245b51
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-25 17:29:47 +0100
+
+    Connection: remove an obsolete and redundant comment
+    
+    We use more than just HasImmortalHandles from the connection's
+    properties.
+
+commit 7551732815526391f15f6e1ab94bfee7a310c199
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-25 11:30:13 +0200
+
+    Fix inconsistency in #include
+
+commit 8f2263089e92543d62e40d6b6eb7bb01cd725deb
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-25 11:30:01 +0200
+
+    Fix alphabetic order
+
+commit 66b946b1380c8c68dbf7416e6e268d82409ce2dc
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-22 10:34:27 +0200
+
+    Rename _tp_g_ptr_array_sized_new_with_free_func() to _tp_g_ptr_array_new_full()
+    
+    To match the name of the function that will be included in GLib 2.30
+
+commit 036e5009ded107700ce4812b064cb5c8c572ce5f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 18:16:27 +0100
+
+    SimpleClientFactory: refer to channel_new_from_properties
+    
+    tp_channel_new_with_properties() doesn't exist.
+
+commit 9c753743b18d9a72b910b15e3beb6b6d1b84b8f9
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 18:00:11 +0100
+
+    Document TpSimpleClientFactoryClass
+    
+    The previous documentation had a lot of words but no facts.
+    
+    (While I was here I reworded the introduction.)
+
+commit 0c34686824c44b99b4c10e488887cba3da059f9d
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 17:36:12 +0100
+
+    TpSimpleClientFactoryClass: correct copy-pasta error
+    
+    dup_account_manager_features' documentation referred to
+    tp_simple_client_factory_dup_account_features() rather than to
+    tp_simple_client_factory_dup_account_manager_features().
+
+commit 1e09067808be91a56dd42fdce32631ea11130091
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 17:23:02 +0100
+
+    SimpleClientFactory: group methods into subsections
+    
+    This helps break up the huge wall o' prototypes in the synopsis by
+    grouping the functions into the type of proxy they relate to.
+
+commit 8c4f2beb0865db6728aa7fc32391a28d5509b513
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 17:15:00 +0100
+
+    *ClientFactory: add better one-line summaries
+
+commit ccb35268821cdca7cdad25c2f83c958a51b19235
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 16:22:52 +0100
+
+    automatic-client-factory-internal.h: more useful summary
+
+commit f9577eb481f02aceb8b01c1240d0bd656ef23ff3
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 15:31:35 +0100
+
+    AutomaticClientFactory: linkify FEATURE_SMS
+
+commit 939d28020d4d83c3f9752e353b7fb976f4f54392
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-15 17:46:29 +0100
+
+    *ClientFactory, Proxy: Documentation nits.
+
+commit 7c87f9389ed05ca6755125d0aa674d4f8e022868
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-15 16:24:38 +0100
+
+    AutomaticClientFactory: improve short description
+
+commit e4ec2336b5270ec76cf362d252518e08e705a9de
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:56:46 +0200
+
+    Add a comment explaining why we cannot let make TpContact subclasses yet
+
+commit dede71ff8ff450a8137f37ba2cad8063deb203d8
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:54:41 +0200
+
+    Always create TpChannelDispatchOperation through a factory
+
+commit 3b61b734df953582fe48cb7626709dca35d3a128
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:52:25 +0200
+
+    Always create TpChannelRequest objects through a factory
+
+commit 34dd2ad3f2aaa2a5a8167c3af1829ec4ad064787
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:47:17 +0200
+
+    Ensure TpChannelRequest always has a factory and use it to create its TpConnection and TpAccount
+
+commit b65a8a0c7ca7dc38c8f992a129f583cc12cfe13b
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:44:03 +0200
+
+    Ensure TpConnection always has a factory
+
+commit 0d616c29b663e475e2e4e2105693f2212b7715b6
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:42:54 +0200
+
+    Ensure TpAccount always has a factory and use it to create its TpConnection
+
+commit e2e02013a3f848ee9103c7f34909402931648b1a
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:42:08 +0200
+
+    Ensure TpAccountManager always has a factory and use it to create its TpAccount
+
+commit 06b2551cd230f4778389654b04750cdd0d8ce485
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:40:05 +0200
+
+    Add _tp_proxy_ensure_factory
+
+commit b74a3c1288b5e871fd2d231beb4cf692b0b42d9e
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:36:02 +0200
+
+    Add TpAutomaticClientFactory
+    
+    This is a subclass of TpSimpleClientFactory that creates specialized
+    TpChannel objects, like TpTextChannel and TpStreamTubeChannel
+
+commit ebe0c53202e216cd049e4b59e4d49d5b5e7f67db
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 16:30:59 +0200
+
+    Add TpSimpleClientFactory
+    
+    This is a new object replacing TpBasicProxyFactory but can construct
+    any known TpProxy subclasses, guarantee their uniqueness per object-path
+    and keep a user-defined set of features to prepare on them.
+
+commit f35ecbc1b9dcc50f79c895e806854938244a37f7
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-13 16:50:34 +0200
+
+    Expose internally a TpContact constructor
+
+commit 1c6215a7f12108dcd240eaa541df7a4be296bd17
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 18:17:04 +0100
+
+    AccountChannelRequest: remove invalid @see_also tag
+    
+    Previously, gtk-doc complained of an illegal multi-line “Since:”
+    annotation, and omitted the cross-reference from the generated
+    documentation. @see_also is only legal in section headers, not in
+    function documentation.
+
+commit 3b4124174abb5ac7dfa6898ed3b4a4d7c9810ac9
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-18 15:24:07 +0100
+
+    Tweak TpFileTransferChannel docs.
+    
+    Previously, TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE was documented, but
+    missing from the generated documentation because it was under
+    <SUBSECTION Standard> in -sections.txt which is gtk-doc-ese for “omit
+    this”.
+    
+    Fixing this revealed a nit in its docstring. While I was here I fixed up
+    some other docs too.
+
+commit 416612c8733377fd648062a25970f8d2194c8ad7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2011-07-18 11:43:31 +0100
+
+    Link a second static library for libtp-glib-tests, against libtelepathy-glib-internal.la
+    
+    Linking with -Bsymbolic (as done by default on recent Ubuntu) ends up
+    linking different parts of the executable against the copy of
+    libtelepathy-glib-internal in the shared library, and the copy in the
+    static library. This leads to mysterious GLib assertion failures.
+    
+    Tests that need to access internal symbols (and thus link against
+    libtelepathy-glib-internal.la) must now use libtp-glib-tests-internal.la
+    instead of libtp-glib-tests.la.
+    
+    There's currently no difference between the two except their dependencies,
+    but in principle, we could add test glue that also requires internal
+    symbols to libtp-glib-tests-internal while avoiding including it in
+    libtp-glib-tests.
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=39183
+    Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+
+commit e050432941d160f64a79311159728b921598df8d
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-15 16:14:36 +0100
+
+    ChannelRequest: unref connection, not NULL channel
+
+commit 4426eb12caa562a69da5b0f63a0ffb888425225f
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2010-12-08 17:10:16 +0100
+
+    It is useless to ref/unref channels in the GPtrArray, it has a free_func anyway
+
+commit dedcd5b114c17ff7593a7a01d9a85ed373c34af3
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 14:15:03 +0200
+
+    add convenient wrappers for single-contact operations
+
+commit c95c1684ab9def8baa55f05a04578de31aa44408
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-15 14:12:54 +0200
+
+    Add async wrapper for RequestSubscription, AuthorizePublication, RemoveContacts,
+    Unsubscribe, Unpublish, SetGroupMembers, AddToGroup, RemoveFromGroup,
+    RemoveGroup and RenameGroup
+
+commit 476db658257a9024ee6204dbc9b801ab38ad2fdd
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-06-30 13:09:11 +0200
+
+    Add _tp_contacts_to_handles()
+    
+    Help implementing _async(guint n_contacts, TpContact **contacts) methods
+
+commit fca869ff377775bdf7abc5a5a3d69ad006b18467
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-14 10:13:37 +0200
+
+    telepathy-glib-docs.sgml: add TpFileTransferChannel
+
+commit 36978eed7bec4ce5622f04fa46a3e034aaadc278
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-07-14 09:54:29 +0200
+
+    automatic-proxy-factory: document that we ask to prepare TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE
+
+commit 2e2a28f8864b0f592f1e6229517d9b4e4f48b0c1
+Author: Morten Mjelva <morten.mjelva@gmail.com>
+Date:   2011-02-16 23:37:14 +0100
+
+    Add TpFileTransferChannel (fdo #31376)
+    
+    Only support basic properties for now.
+
+commit 4bb8d5f8aad41a5d89db289de1cad6e969efd0bb
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-13 14:21:08 +0200
+
+    Use tp_clear_pointer() in tp_channel_finalize()
+
+commit 6b6703a8f068fb4e2e49d833d2f3467888e10321
+Author: Morten Mjelva <morten.mjelva@gmail.com>
+Date:   2011-06-17 14:29:22 +0100
+
+    Factor out _tp_destroy_socket_control_list() to tests/lib/util
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=38997
+
+commit a2ae63f0c84f866567b85c271e7be279580580c2
+Author: Morten Mjelva <morten.mjelva@gmail.com>
+Date:   2011-06-17 14:28:58 +0100
+
+    Factor out _tp_create_local_socket() to tests/lib/util
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=38997
+
+commit 9426b05a03dcc35f3e6b3fe6edf1a7316005b282
+Author: Morten Mjelva <morten.mjelva@gmail.com>
+Date:   2011-06-17 14:32:35 +0100
+
+    Factor out _tp_set_socket_address_type_and_access_control_type() and _tp_create_client_socket to util-internal
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=38997
+
+commit 63d1b120b041155b29e3d12167025a0cf453fea8
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-13 13:11:10 +0200
+
+    Trivial coding style fix
+
+commit e6c5a04375b755cbf41f9eab2c0461b29dd55f84
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-13 12:47:24 +0200
+
+    Drop useless leave_channel_async() static function
+
+commit b25437e2942a08f590b14c5c889274cb79819cb2
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-07-13 12:25:44 +0200
+
+    Add tp_channel_join_async()
+
+commit c027544e5f5479a92dab00434195e68fac4138c3
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-07-12 17:07:00 +0100
+
+    Bump nano version to 0.15.4.1
+
 commit 26e2815291d7d1fc27ec10c46c9bef41041ea0b1
 Author: Will Thompson <will.thompson@collabora.co.uk>
 Date:   2011-07-12 16:52:34 +0100
@@ -349,6 +1517,34 @@ Date:   2011-06-29 14:31:17 +0200
 
     annotate tp_channe_group_ methods
 
+commit 606b8413c766a0f2c216df3d5a5030b905979906
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-06-29 11:01:54 +0100
+
+    DebugSender: wrap a long line.
+
+commit 1d109553c612497279f1fdfae7db24435bab02ba
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-06-29 11:00:51 +0100
+
+    DebugSender: avoid calling g_get_current_time() twice.
+
+commit 4f07a1d165861a9ef8a81674505b3707d0f5b14f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-06-29 11:00:04 +0100
+
+    DebugSender: fix a reference to _set_timestamps()
+
+commit f67ad8165a1f03f304bb823e5161b18d3a8d9c35
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2011-01-10 14:00:49 +0000
+
+    debug-sender: add tp_debug_sender_set_timestamps
+    
+    Fixes: fd.o#26516
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
 commit 285aa26d6c222c9d91f8cc770cd4bfdab5854bab
 Author: Colin Walters <walters@verbum.org>
 Date:   2011-06-24 11:07:55 -0400
@@ -473,6 +1669,63 @@ Author: Xavier Claessens <xclaesse@gmail.com>
 Date:   2011-06-15 22:38:23 +0200
 
     Add missing files to introspection
+
+commit 2e4ee37892fd271f5d6cea0157bfdbe1e5724e92
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-09 15:37:01 +1000
+
+    Test tp_cm_message_take_message()
+
+commit 876e49a961c23ee28dac9ccd0bf164ade08d9158
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-09 15:24:03 +1000
+
+    Add tests for tp_cm_message_set_message()
+    
+    The first test destroys the delivery-echo message early. The second test
+    changes the delivery-echo.
+
+commit ef1ae465aeb17a28f9348c88302ca136c92a4179
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-09 15:21:16 +1000
+
+    Copy the message more deeply so it may be unreffed or changed
+    
+    Create a new array and maps and keys but 'dup' the values. This should be safe
+    because people should be using tp_message_set_* which replaces the GValue,
+    rather than fiddling with its contents.
+
+commit 563c7de5b47b837690fa5deee3507d3ec0d6888a
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-09 10:17:18 +1000
+
+    Warn if there is not at least one part
+
+commit a6d52df4a22c71093354ef2522d6a5c3ab6392f0
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-08 14:49:53 +1000
+
+    Add a new method tp_cm_message_set_message()
+    
+    Compliments tp_cm_message_take_message().
+    
+    Fixes: https://bugs.freedesktop.org/show_bug.cgi?id=38061
+
+commit 3a1e587720b6b37eb43fa332d5c8376a1dafb206
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-08 14:09:51 +1000
+
+    Ensure there is at least 1 part in the delivery-echo
+
+commit d6bf0589bfc84fcef1be61b3f7ef1dbb836adc6f
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-06-08 14:09:07 +1000
+
+    Fix off-by-one error
+    
+    Header is part 0, not part 1
+    
+    Fixes: https://bugs.freedesktop.org/show_bug.cgi?id=38060
 
 commit ae747652aefbbc5169870af41ab6929244001a55
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>

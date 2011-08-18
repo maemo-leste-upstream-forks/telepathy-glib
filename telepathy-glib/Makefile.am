@@ -26,6 +26,7 @@ our_headers = \
     account.h \
     account-channel-request.h \
     account-manager.h \
+    automatic-client-factory.h \
     automatic-proxy-factory.h \
     add-dispatch-operation-context.h \
     base-client.h \
@@ -47,11 +48,13 @@ our_headers = \
     client-message.h \
     cm-message.h \
     connection.h \
+    connection-contact-list.h \
     connection-manager.h \
     contact-search.h \
     contact-search-result.h \
     capabilities.h \
     contact.h \
+    contact-operations.h \
     base-contact-list.h \
     contacts-mixin.h \
     dbus.h \
@@ -65,6 +68,7 @@ our_headers = \
     enums.h \
     errors.h \
     exportable-channel.h \
+    file-transfer-channel.h \
     gnio-util.h \
     group-mixin.h \
     gtypes.h \
@@ -88,6 +92,7 @@ our_headers = \
     run.h \
     signalled-message.h \
     simple-approver.h \
+    simple-client-factory.h \
     simple-handler.h \
     simple-observer.h \
     simple-password-manager.h \
@@ -143,6 +148,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     account-internal.h \
     account-manager.c \
     account-manager-internal.h \
+    automatic-client-factory-internal.h \
+    automatic-client-factory.c \
     automatic-proxy-factory.c \
     add-dispatch-operation-context-internal.h \
     add-dispatch-operation-context.c \
@@ -173,12 +180,15 @@ libtelepathy_glib_internal_la_SOURCES = \
     connection.c \
     connection-avatars.c \
     connection-contact-info.c \
+    connection-contact-list.c \
     connection-internal.h \
     connection-handles.c \
     connection-manager.c \
     contact.c \
+    contact-internal.h \
     contact-list-channel-internal.h \
     contact-list-channel.c \
+    contact-operations.c \
     contact-search.c \
     contact-search-internal.h \
     contact-search-result.c \
@@ -193,11 +203,13 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-properties-mixin.c \
     debug.c \
     debug-sender.c \
+    deprecated-internal.h \
     dtmf.c \
     interfaces.c \
     debug-internal.h \
     errors.c \
     exportable-channel.c \
+    file-transfer-channel.c \
     gnio-util.c \
     group-mixin.c \
     gtypes.c \
@@ -232,6 +244,8 @@ libtelepathy_glib_internal_la_SOURCES = \
     signalled-message.c \
     signalled-message-internal.h \
     simple-approver.c \
+    simple-client-factory.c \
+    simple-client-factory-internal.h \
     simple-handler.c \
     simple-observer.c \
     simple-password-manager.c \
