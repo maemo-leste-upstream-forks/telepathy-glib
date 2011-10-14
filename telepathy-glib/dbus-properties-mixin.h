@@ -31,7 +31,9 @@ G_BEGIN_DECLS
 
 typedef enum { /*< flags >*/
     TP_DBUS_PROPERTIES_MIXIN_FLAG_READ = 1,
-    TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE = 2
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE = 2,
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_EMITS_CHANGED = 4,
+    TP_DBUS_PROPERTIES_MIXIN_FLAG_EMITS_INVALIDATED = 8
 } TpDBusPropertiesMixinFlags;
 
 typedef struct {
@@ -54,6 +56,8 @@ typedef struct {
 
 void tp_svc_interface_set_dbus_properties_info (GType g_interface,
     TpDBusPropertiesMixinIfaceInfo *info);
+TpDBusPropertiesMixinIfaceInfo *tp_svc_interface_get_dbus_properties_info (
+    GType g_interface);
 
 /* ---- Concrete implementation (in GObject subclasses) ------------- */
 
@@ -120,6 +124,12 @@ void tp_dbus_properties_mixin_iface_init (gpointer g_iface,
 gboolean tp_dbus_properties_mixin_get (GObject *self,
     const gchar *interface_name, const gchar *property_name,
     GValue *value, GError **error);
+gboolean tp_dbus_properties_mixin_set (
+    GObject *self,
+    const gchar *interface_name,
+    const gchar *property_name,
+    const GValue *value,
+    GError **error);
 
 GHashTable *tp_dbus_properties_mixin_make_properties_hash (
     GObject *object, const gchar *first_interface,
@@ -130,6 +140,17 @@ void tp_dbus_properties_mixin_fill_properties_hash (GObject *object,
     GHashTable *table,
     const gchar *first_interface,
     const gchar *first_property,
+    ...)
+  G_GNUC_NULL_TERMINATED;
+
+void tp_dbus_properties_mixin_emit_properties_changed (
+    GObject *object,
+    const gchar *interface_name,
+    const gchar * const *properties);
+
+void tp_dbus_properties_mixin_emit_properties_changed_varargs (
+    GObject *object,
+    const gchar *interface_name,
     ...)
   G_GNUC_NULL_TERMINATED;
 

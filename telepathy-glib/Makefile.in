@@ -107,9 +107,9 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	automatic-client-factory.lo automatic-proxy-factory.lo \
 	add-dispatch-operation-context.lo base-channel.lo \
 	base-client.lo base-connection.lo base-connection-manager.lo \
-	base-password-channel.lo base-protocol.lo \
+	base-password-channel.lo base-protocol.lo base-room-config.lo \
 	basic-proxy-factory.lo capabilities.lo channel.lo \
-	channel-group.lo channel-dispatcher.lo \
+	channel-contacts.lo channel-group.lo channel-dispatcher.lo \
 	channel-dispatch-operation.lo channel-manager.lo \
 	channel-request.lo client.lo client-channel-factory.lo \
 	client-message.lo connection.lo connection-avatars.lo \
@@ -118,8 +118,8 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	contact-list-channel.lo contact-operations.lo \
 	contact-search.lo contact-search-result.lo \
 	base-contact-list.lo cm-message.lo contacts-mixin.lo dbus.lo \
-	dbus-daemon.lo dbus-properties-mixin.lo debug.lo \
-	debug-sender.lo dtmf.lo interfaces.lo errors.lo \
+	dbus-daemon.lo dbus-properties-mixin.lo dbus-tube-channel.lo \
+	debug.lo debug-sender.lo dtmf.lo interfaces.lo errors.lo \
 	exportable-channel.lo file-transfer-channel.lo gnio-util.lo \
 	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
 	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
@@ -232,6 +232,8 @@ GLIB_LIBS = @GLIB_LIBS@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
+GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
 HAVE_VALA = @HAVE_VALA@
@@ -384,6 +386,7 @@ our_headers = \
     base-connection-manager.h \
     base-password-channel.h \
     base-protocol.h \
+    base-room-config.h \
     basic-proxy-factory.h \
     channel.h \
     channel-iface.h \
@@ -409,6 +412,7 @@ our_headers = \
     dbus.h \
     dbus-daemon.h \
     dbus-properties-mixin.h \
+    dbus-tube-channel.h \
     defs.h \
     debug.h \
     debug-sender.h \
@@ -499,10 +503,12 @@ libtelepathy_glib_internal_la_SOURCES = \
     base-password-channel.c \
     base-protocol-internal.h \
     base-protocol.c \
+    base-room-config.c \
     basic-proxy-factory.c \
     capabilities.c \
     capabilities-internal.h \
     channel.c \
+    channel-contacts.c \
     channel-group.c \
     channel-internal.h \
     channel-dispatcher.c \
@@ -538,6 +544,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-daemon.c \
     dbus-internal.h \
     dbus-properties-mixin.c \
+    dbus-tube-channel.c \
     debug.c \
     debug-sender.c \
     deprecated-internal.h \
@@ -685,6 +692,8 @@ ABI_LISTS = \
     versions/0.15.2.abi \
     versions/0.15.3.abi \
     versions/0.15.5.abi \
+    versions/0.15.6.abi \
+    versions/0.15.8.abi \
     $(NULL)
 
 
@@ -735,7 +744,8 @@ codegen_sources = \
     $(nodist_geninclude_HEADERS) \
     _gen/stable-spec.xml \
     _gen/spec-stamp \
-    _gen/stable-stamp
+    _gen/stable-stamp \
+    _gen/reentrant-methods.list
 
 nodist_geninclude_HEADERS = \
     _gen/error-str.h \
@@ -822,6 +832,8 @@ introspection_extra_dist = \
 	kludge.xsl \
 	$(NULL)
 
+
+# /!\ Order matters, see https://bugzilla.gnome.org/show_bug.cgi?id=660629
 @HAVE_INTROSPECTION_TRUE@INTROSPECTION_FILES = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
@@ -839,6 +851,7 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/connection-manager.c $(srcdir)/connection-manager.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel.c $(srcdir)/channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-group.c \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/channel-contacts.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle.c $(srcdir)/handle.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-channels-context.c $(srcdir)/handle-channels-context.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-daemon.c $(srcdir)/dbus-daemon.h \
@@ -869,6 +882,7 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/base-connection.c $(srcdir)/base-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/handle-repo.c $(srcdir)/handle-repo.h $(srcdir)/handle-set.c \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-channel.c $(srcdir)/stream-tube-channel.h \
+@HAVE_INTROSPECTION_TRUE@	$(srcdir)/dbus-tube-channel.c $(srcdir)/dbus-tube-channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/stream-tube-connection.c $(srcdir)/stream-tube-connection.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/text-channel.c $(srcdir)/text-channel.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/file-transfer-channel.c $(srcdir)/file-transfer-channel.h \
@@ -988,8 +1002,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-contact-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-password-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-protocol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-room-config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic-proxy-factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capabilities.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-contacts.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatch-operation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-dispatcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-factory-iface.Plo@am__quote@
@@ -1016,6 +1032,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-daemon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-properties-mixin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-tube-channel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-sender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
@@ -1632,6 +1649,11 @@ _gen/stable-stamp: $(wildcard $(abs_srcdir)/*.xml) _gen/spec-stamp
 _gen/stable-spec.xml: stable-interfaces.xml _gen/stable-stamp $(tools_dir)/xincludator.py
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/xincludator.py $< > $@
 
+# Grab a list of re-entrant tp_cli_*_run_* methods we are committed to
+# generating for backwards compatibility.
+_gen/reentrant-methods.list: $(top_srcdir)/docs/reference/telepathy-glib-sections.txt
+	$(AM_V_GEN)$(GREP) 'tp_cli_.*_run_.*' $< > $@
+
 # Things generated from the whole spec at once
 
 _gen/gtypes.h _gen/gtypes-body.h: _gen/stable-spec.xml \
@@ -1701,6 +1723,7 @@ _gen/tp-svc-%.c _gen/tp-svc-%.h: _gen/tp-spec-%.xml \
 		$< Tp_Svc_
 
 _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
+	_gen/reentrant-methods.list \
 	$(tools_dir)/glib-client-gen.py \
 	codegen.am
 	$(AM_V_GEN)set -e; \
@@ -1708,7 +1731,6 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 	subclass_assert= ; \
 	case $* in \
 		generic) \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		account-manager) \
 			subclass=--subclass=TpAccountManager; \
@@ -1721,7 +1743,6 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		channel) \
 			subclass=--subclass=TpChannel; \
 			subclass_assert=--subclass-assert=TP_IS_CHANNEL; \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		channel-dispatcher) \
 			subclass=--subclass=TpChannelDispatcher; \
@@ -1742,27 +1763,22 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		connection-manager) \
 			subclass=--subclass=TpConnectionManager; \
 			subclass_assert=--subclass-assert=TP_IS_CONNECTION_MANAGER \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		connection) \
 			subclass=--subclass=TpConnection; \
 			subclass_assert=--subclass-assert=TP_IS_CONNECTION; \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		media-session-handler) \
 			subclass=--subclass=TpMediaSessionHandler; \
 			subclass_assert=--subclass-assert=TP_IS_MEDIA_SESSION_HANDLER; \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		media-stream-handler) \
 			subclass=--subclass=TpMediaStreamHandler; \
 			subclass_assert=--subclass-assert=TP_IS_MEDIA_STREAM_HANDLER; \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 		dbus-daemon) \
 			subclass=--subclass=TpDBusDaemon; \
 			subclass_assert=--subclass-assert=TP_IS_DBUS_DAEMON; \
-			maybe_reentrant=--deprecate-reentrant=TP_DISABLE_DEPRECATED; \
 			;; \
 	esac; \
 	$(PYTHON) $(tools_dir)/glib-client-gen.py \
@@ -1771,7 +1787,8 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 		--iface-quark-prefix=TP_IFACE_QUARK \
 		--tp-proxy-api=0.7.6 \
 		--deprecation-attribute=_TP_GNUC_DEPRECATED \
-		$$maybe_reentrant \
+		--deprecate-reentrant=TP_DISABLE_DEPRECATED \
+		--generate-reentrant=_gen/reentrant-methods.list \
 		$< Tp_Cli _gen/tp-cli-$*
 
 # vim:set ft=automake:

@@ -374,6 +374,11 @@ _tp_debug_sender_take (TpDebugSender *self,
       tp_svc_debug_emit_new_debug_message (self, new_msg->timestamp,
           new_msg->domain, new_msg->level, new_msg->string);
     }
+
+#ifndef ENABLE_DEBUG_CACHE
+  /* if there's cache, these are freed when they fall of its end instead */
+  debug_message_free (new_msg);
+#endif
 }
 
 /**
@@ -461,7 +466,7 @@ tp_debug_sender_add_message_vprintf (TpDebugSender *self,
  * @domain: Message domain
  * @level: The message level
  * @format: The printf() format string
- * @Varargs: The parameters to insert into @format
+ * @...: The parameters to insert into @format
  *
  * Formats and adds a new message to the debug sender message queue. If the
  * #TpDebugSender:enabled property is set to %TRUE, then a NewDebugMessage

@@ -1364,7 +1364,7 @@ _tp_contact_new (TpConnection *connection,
 
 /* FIXME: Ideally this should be replaced with
  *
- * tp_simple_client_factory_dup_contact (tp_proxy_get_factory (connection),
+ * tp_simple_client_factory_ensure_contact (tp_proxy_get_factory (connection),
  *     handle, identifier);
  *
  * but we cannot assert CM has immortal handles (yet). That means we cannot
@@ -4029,6 +4029,28 @@ get_feature_flags (guint n_features,
   return TRUE;
 }
 
+static void
+contacts_context_remove_common_features (ContactsContext *context)
+{
+  ContactFeatureFlags minimal_feature_flags = 0xFFFFFFFF;
+  guint i;
+
+  context->contacts_have_ids = TRUE;
+
+  for (i = 0; i < context->contacts->len; i++)
+    {
+      TpContact *contact = g_ptr_array_index (context->contacts, i);
+
+      minimal_feature_flags &= contact->priv->has_features;
+
+      if (contact->priv->identifier == NULL)
+        context->contacts_have_ids = FALSE;
+    }
+
+  context->wanted &= (~minimal_feature_flags);
+}
+
+
 /**
  * tp_connection_get_contacts_by_handle:
  * @self: A connection, which must be ready (#TpConnection:connection-ready
@@ -4073,15 +4095,11 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
   ContactFeatureFlags feature_flags = 0;
   ContactsContext *context;
   GPtrArray *contacts;
-  guint i;
 
   /* As an implementation detail, this method actually starts working slightly
-   * before we're officially ready, but only if you don't want any features.
-   * We use this to get the TpContact for the SelfHandle. */
-  if (n_features != 0 || !self->priv->introspecting_after_connected)
-    {
-      g_return_if_fail (tp_connection_is_ready (self));
-    }
+   * before we're officially ready. We use this to get the TpContact for the
+   * SelfHandle. */
+  g_return_if_fail (self->priv->ready_enough_for_contacts);
 
   g_return_if_fail (tp_proxy_get_invalidated (self) == NULL);
   g_return_if_fail (n_handles >= 1);
@@ -4102,27 +4120,13 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
 
   if (contacts != NULL)
     {
-      ContactFeatureFlags minimal_feature_flags = 0xFFFFFFFF;
-
       /* We have already held (and possibly inspected) handles, so we can
        * skip that. */
 
-      context->contacts_have_ids = TRUE;
+      g_ptr_array_foreach (contacts, (GFunc) g_object_ref, NULL);
+      tp_g_ptr_array_extend (context->contacts, contacts);
 
-      for (i = 0; i < n_handles; i++)
-        {
-          TpContact *contact = g_object_ref (g_ptr_array_index (contacts, i));
-
-          minimal_feature_flags &= contact->priv->has_features;
-          g_ptr_array_add (context->contacts, contact);
-
-          if (contact->priv->identifier == NULL)
-            context->contacts_have_ids = FALSE;
-        }
-
-      /* This context won't need to retrieve any features that every
-       * contact in the list already has. */
-      context->wanted &= (~minimal_feature_flags);
+      contacts_context_remove_common_features (context);
 
       /* We do need to retrieve any features that aren't there yet, though. */
       if (tp_proxy_has_interface_by_id (self,
@@ -4239,9 +4243,9 @@ tp_connection_upgrade_contacts (TpConnection *self,
       g_array_append_val (context->handles, contacts[i]->priv->handle);
     }
 
-  context->contacts_have_ids = TRUE;
-
   g_assert (context->handles->len == n_contacts);
+
+  contacts_context_remove_common_features (context);
 
   if (tp_proxy_has_interface_by_id (self,
         TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACTS))
