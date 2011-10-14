@@ -18,6 +18,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib/gstdio.h>
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 #include <telepathy-glib/connection.h>
 #include <telepathy-glib/contact.h>
@@ -29,6 +32,11 @@
 #include "tests/lib/debug.h"
 #include "tests/lib/myassert.h"
 #include "tests/lib/util.h"
+
+#define MEMBERS_CHANGED_MATCH_RULE \
+  "type='signal'," \
+  "interface='" TP_IFACE_CHANNEL_INTERFACE_GROUP "'," \
+  "member='MembersChanged'"
 
 typedef struct {
     GMainLoop *loop;
@@ -50,6 +58,28 @@ typedef struct {
   TpConnection *legacy_client_conn;
   TpConnection *no_requests_client_conn;
 } Fixture;
+
+/* We only really actively test TP_CONTACT_FEATURE_ALIAS, but preparing any
+ * of these once should be enough, assuming that the CM is not broken.
+ */
+static TpContactFeature all_contact_features[] = {
+  TP_CONTACT_FEATURE_ALIAS,
+  TP_CONTACT_FEATURE_AVATAR_TOKEN,
+  TP_CONTACT_FEATURE_PRESENCE,
+  TP_CONTACT_FEATURE_LOCATION,
+  TP_CONTACT_FEATURE_CAPABILITIES,
+  TP_CONTACT_FEATURE_AVATAR_DATA,
+  TP_CONTACT_FEATURE_CONTACT_INFO,
+  TP_CONTACT_FEATURE_CLIENT_TYPES,
+  TP_CONTACT_FEATURE_SUBSCRIPTION_STATES,
+  TP_CONTACT_FEATURE_CONTACT_GROUPS
+};
+
+/* If people add new features, they should add them to this test. We could
+ * generate the list dynamically but this seems less brittle.
+ */
+G_STATIC_ASSERT (G_N_ELEMENTS (all_contact_features) == NUM_TP_CONTACT_FEATURES);
+
 
 static void
 by_handle_cb (TpConnection *connection,
@@ -831,44 +861,16 @@ put_the_connection_back (Fixture *f)
   g_assert (ok);
 }
 
-static void
-test_by_handle_again (Fixture *f,
-    gconstpointer unused G_GNUC_UNUSED)
+static TpHandle
+get_handle_with_no_caps (Fixture *f,
+    const gchar *id)
 {
-  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
   TpHandle handle;
-  TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
-      f->base_connection, TP_HANDLE_TYPE_CONTACT);
-  TpContact *contact;
-  gpointer weak_pointer;
-  const gchar *alias = "Alice in Wonderland";
   GHashTable *capabilities;
-  /* We only really actively test TP_CONTACT_FEATURE_ALIAS, but preparing any
-   * of these once should be enough, assuming that the CM is not broken.
-   */
-  TpContactFeature features[] = {
-      TP_CONTACT_FEATURE_ALIAS,
-      TP_CONTACT_FEATURE_AVATAR_TOKEN,
-      TP_CONTACT_FEATURE_PRESENCE,
-      TP_CONTACT_FEATURE_LOCATION,
-      TP_CONTACT_FEATURE_CAPABILITIES,
-      TP_CONTACT_FEATURE_AVATAR_DATA,
-      TP_CONTACT_FEATURE_CONTACT_INFO,
-      TP_CONTACT_FEATURE_CLIENT_TYPES,
-      TP_CONTACT_FEATURE_SUBSCRIPTION_STATES,
-      TP_CONTACT_FEATURE_CONTACT_GROUPS
-  };
 
-  g_test_bug ("25181");
-  /* If people add new features, they should add them to this test. We could
-   * generate the list dynamically but this seems less brittle.
-   */
-  g_assert_cmpuint (G_N_ELEMENTS (features), ==, NUM_TP_CONTACT_FEATURES);
-
-  handle = tp_handle_ensure (service_repo, "alice", NULL, NULL);
+  handle = tp_handle_ensure (f->service_repo, id, NULL, NULL);
   g_assert_cmpuint (handle, !=, 0);
-  tp_tests_contacts_connection_change_aliases (f->service_conn, 1, &handle,
-      &alias);
+
   /* Unlike almost every other feature, with capabilities “not sure” and “none”
    * are different: you really might care about the difference between “I don't
    * know if blah can do video” versus “I know blah cannot do video”.
@@ -884,9 +886,28 @@ test_by_handle_again (Fixture *f,
       capabilities);
   g_hash_table_unref (capabilities);
 
+  return handle;
+}
+
+static void
+test_by_handle_again (Fixture *f,
+    gconstpointer unused G_GNUC_UNUSED)
+{
+  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
+  TpHandle handle;
+  TpContact *contact;
+  gpointer weak_pointer;
+  const gchar *alias = "Alice in Wonderland";
+
+  g_test_bug ("25181");
+
+  handle = get_handle_with_no_caps (f, "alice");
+  tp_tests_contacts_connection_change_aliases (f->service_conn, 1, &handle,
+      &alias);
+
   tp_connection_get_contacts_by_handle (f->client_conn,
       1, &handle,
-      G_N_ELEMENTS (features), features,
+      G_N_ELEMENTS (all_contact_features), all_contact_features,
       by_handle_cb,
       &result, finish, NULL);
   g_main_loop_run (result.loop);
@@ -908,7 +929,7 @@ test_by_handle_again (Fixture *f,
 
   tp_connection_get_contacts_by_handle (f->client_conn,
       1, &handle,
-      G_N_ELEMENTS (features), features,
+      G_N_ELEMENTS (all_contact_features), all_contact_features,
       by_handle_cb,
       &result, finish, NULL);
   g_main_loop_run (result.loop);
@@ -1377,6 +1398,46 @@ test_upgrade (Fixture *f,
   g_hash_table_unref (location_2);
   g_hash_table_unref (location_3);
   g_main_loop_unref (result.loop);
+}
+
+/* Regression test case for fd.o#41414 */
+static void
+test_upgrade_noop (Fixture *f,
+    gconstpointer unused G_GNUC_UNUSED)
+{
+  Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
+  TpHandle handle;
+  TpContact *contact;
+
+  g_test_bug ("41414");
+
+  /* Get a contact by handle */
+  handle = get_handle_with_no_caps (f, "test-upgrade-noop");
+  tp_connection_get_contacts_by_handle (f->client_conn,
+      1, &handle,
+      G_N_ELEMENTS (all_contact_features), all_contact_features,
+      by_handle_cb,
+      &result, finish, NULL);
+  g_main_loop_run (result.loop);
+  g_assert_no_error (result.error);
+
+  contact = g_object_ref (g_ptr_array_index (result.contacts, 0));
+  reset_result (&result);
+
+  /* Upgrade it, but it should already have all features */
+  make_the_connection_disappear (f);
+  tp_connection_upgrade_contacts (f->client_conn,
+      1, &contact,
+      G_N_ELEMENTS (all_contact_features), all_contact_features,
+      upgrade_cb,
+      &result, finish, NULL);
+  g_main_loop_run (result.loop);
+  g_assert_no_error (result.error);
+  reset_result (&f->result);
+
+  put_the_connection_back (f);
+
+  g_object_unref (contact);
 }
 
 typedef struct
@@ -2527,6 +2588,20 @@ test_superfluous_attributes (Fixture *f,
 }
 
 static void
+contact_list_changed_cb (TpConnection *connection,
+    GPtrArray *added,
+    GPtrArray *removed,
+    gpointer user_data)
+{
+  gboolean *received = user_data;
+
+  g_assert (added != NULL);
+  g_assert (removed != NULL);
+
+  *received = TRUE;
+}
+
+static void
 test_contact_list (Fixture *f,
     gconstpointer unused G_GNUC_UNUSED)
 {
@@ -2540,6 +2615,7 @@ test_contact_list (Fixture *f,
   TpHandle handle;
   GPtrArray *contacts;
   TpContact *contact;
+  gboolean got_contact_list_changed = FALSE;
 
   manager = tp_tests_contacts_connection_get_contact_list_manager (
       f->service_conn);
@@ -2565,17 +2641,20 @@ test_contact_list (Fixture *f,
       TP_CONTACT_FEATURE_INVALID);
 
   /* Now put it online and wait for contact list state move to success */
+  g_signal_connect (f->client_conn, "contact-list-changed",
+      G_CALLBACK (contact_list_changed_cb), &got_contact_list_changed);
   g_signal_connect_swapped (f->client_conn, "notify::contact-list-state",
       G_CALLBACK (finish), &result);
-  tp_cli_connection_call_connect (f->client_conn, -1,
-      NULL, NULL, NULL, NULL);
+  tp_cli_connection_call_connect (f->client_conn, -1, NULL, NULL, NULL, NULL);
   g_main_loop_run (result.loop);
   g_assert_no_error (result.error);
 
   g_assert_cmpint (tp_connection_get_contact_list_state (f->client_conn), ==,
       TP_CONTACT_LIST_STATE_SUCCESS);
 
-  /* SUCCESS state must have been delayed until TpContact is prepared */
+  /* SUCCESS state must have been delayed until TpContact is prepared,
+     and contact-list-changed must have been emitted just before */
+  g_assert (got_contact_list_changed);
   contacts = tp_connection_dup_contact_list (f->client_conn);
   g_assert (contacts != NULL);
   g_assert_cmpint (contacts->len, ==, 1);
@@ -2587,6 +2666,178 @@ test_contact_list (Fixture *f,
   g_assert (tp_contact_has_feature (contact, TP_CONTACT_FEATURE_SUBSCRIPTION_STATES));
   g_assert_cmpint (tp_contact_get_subscribe_state (contact), ==, TP_SUBSCRIPTION_STATE_ASK);
   g_ptr_array_unref (contacts);
+}
+
+typedef struct
+{
+  Fixture *f;
+  GMainLoop *loop;
+  gboolean expecting_signal;
+  gboolean got_stored;
+  gboolean got_publish;
+  gboolean got_subscribe;
+} MembersChangedClosure;
+
+static void
+channel_prepared_cb (GObject *source_object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  TpChannel *channel = TP_CHANNEL (source_object);
+  MembersChangedClosure *closure = user_data;
+  const gchar *identifier;
+  GError *error = NULL;
+
+  tp_proxy_prepare_finish (channel, res, &error);
+  g_assert_no_error (error);
+
+  g_assert (closure->expecting_signal);
+
+  /* We expect to just get the stored, publish and subscribe lists exactly
+   * once */
+  identifier = tp_channel_get_identifier (channel);
+  if (g_strcmp0 (identifier, "stored") == 0)
+    {
+      g_assert (!closure->got_stored);
+      closure->got_stored = TRUE;
+    }
+  else if (g_strcmp0 (identifier, "publish") == 0)
+    {
+      g_assert (!closure->got_publish);
+      closure->got_publish = TRUE;
+    }
+  else if (g_strcmp0 (identifier, "subscribe") == 0)
+    {
+      g_assert (!closure->got_subscribe);
+      closure->got_subscribe = TRUE;
+    }
+  else
+    {
+      g_assert_not_reached ();
+    }
+
+  if (closure->got_stored && closure->got_publish && closure->got_subscribe)
+    g_main_loop_quit (closure->loop);
+}
+
+static DBusHandlerResult
+message_filter (DBusConnection *connection,
+    DBusMessage *msg,
+    gpointer user_data)
+{
+  MembersChangedClosure *closure = user_data;
+
+  if (dbus_message_is_signal (msg, TP_IFACE_CHANNEL_INTERFACE_GROUP,
+      "MembersChanged"))
+    {
+      TpChannel *channel;
+      DBusMessageIter iter, sub_iter;
+      gint type;
+      dbus_int32_t *added;
+      gint n_added;
+
+      channel = tp_channel_new (closure->f->client_conn,
+          dbus_message_get_path (msg), TP_IFACE_CHANNEL_INTERFACE_GROUP,
+          TP_HANDLE_TYPE_LIST, 0, NULL);
+      tp_proxy_prepare_async (channel, NULL, channel_prepared_cb, closure);
+
+      /* Extract the number of added handles */
+      dbus_message_iter_init (msg, &iter);
+      dbus_message_iter_next (&iter); /* Skipe the message */
+      type = dbus_message_iter_get_arg_type (&iter);
+      g_assert_cmpint (type, ==, DBUS_TYPE_ARRAY);
+      dbus_message_iter_recurse (&iter, &sub_iter);
+      type = dbus_message_iter_get_arg_type (&sub_iter);
+      g_assert_cmpint (type, ==, DBUS_TYPE_UINT32);
+      dbus_message_iter_get_fixed_array (&sub_iter, &added, &n_added);
+
+      /* Bob, Alice and Carol == 3 */
+      g_assert_cmpint (n_added, ==, 3);
+    }
+
+  return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+}
+
+static void
+test_initial_contact_list (Fixture *f,
+    gconstpointer unused G_GNUC_UNUSED)
+{
+  const GQuark conn_features[] = { TP_CONNECTION_FEATURE_CONTACT_LIST, 0 };
+  TestContactListManager *manager;
+  MembersChangedClosure closure;
+  DBusConnection *dbus_connection;
+  TpHandle alice;
+  const gchar *alice_id = "alice";
+  TpHandle bob_carol[2];
+  const gchar *bob_id = "bob";
+  const gchar *carol_id = "carol";
+
+  manager = tp_tests_contacts_connection_get_contact_list_manager (
+      f->service_conn);
+
+  /* We use a filter to be sure not to miss the initial MembersChanged
+   * signals */
+  closure.f = f;
+  closure.loop = g_main_loop_new (NULL, FALSE);
+  closure.got_stored = FALSE;
+  closure.got_publish = FALSE;
+  closure.got_subscribe = FALSE;
+  /* No signal is expected until after we connect */
+  closure.expecting_signal = FALSE;
+
+  dbus_connection = dbus_g_connection_get_connection (
+      tp_proxy_get_dbus_connection (TP_PROXY (f->client_conn)));
+  dbus_connection_ref (dbus_connection);
+  dbus_connection_add_filter (dbus_connection, message_filter, &closure, NULL);
+  dbus_bus_add_match (dbus_connection, MEMBERS_CHANGED_MATCH_RULE, NULL);
+
+  /* Connection is OFFLINE initially */
+  tp_tests_proxy_run_until_prepared (f->client_conn, conn_features);
+  g_assert_cmpint (tp_connection_get_contact_list_state (f->client_conn), ==,
+      TP_CONTACT_LIST_STATE_NONE);
+
+  /* Add contacts in our initial roster CM-side */
+  alice = tp_handle_ensure (f->service_repo, alice_id, NULL, NULL);
+  test_contact_list_manager_add_initial_contacts (manager, 1, &alice);
+
+  bob_carol[0] = tp_handle_ensure (f->service_repo, bob_id, NULL, NULL);
+  bob_carol[1] = tp_handle_ensure (f->service_repo, carol_id, NULL, NULL);
+  test_contact_list_manager_add_initial_contacts (manager, 2, bob_carol);
+
+  /* Now put it online and wait for the contact list state to move to
+   * success */
+  closure.expecting_signal = TRUE;
+  tp_cli_connection_call_connect (f->client_conn, -1,
+      NULL, NULL, NULL, NULL);
+
+  g_main_loop_run (closure.loop);
+
+  dbus_bus_remove_match (dbus_connection, MEMBERS_CHANGED_MATCH_RULE, NULL);
+  dbus_connection_remove_filter (dbus_connection, message_filter, &closure);
+  dbus_connection_unref (dbus_connection);
+
+  g_main_loop_unref (closure.loop);
+}
+
+static void
+test_self_contact (Fixture *f,
+    gconstpointer unused G_GNUC_UNUSED)
+{
+  const GQuark conn_features[] = { TP_CONNECTION_FEATURE_CONNECTED, 0 };
+  TpSimpleClientFactory *factory;
+  TpContact *contact;
+
+  factory = tp_proxy_get_factory (f->client_conn);
+  tp_simple_client_factory_add_contact_features_varargs (factory,
+      TP_CONTACT_FEATURE_ALIAS,
+      TP_CONTACT_FEATURE_INVALID);
+
+  tp_cli_connection_call_connect (f->client_conn, -1, NULL, NULL, NULL, NULL);
+  tp_tests_proxy_run_until_prepared (f->client_conn, conn_features);
+
+  contact = tp_connection_get_self_contact (f->client_conn);
+  g_assert (contact != NULL);
+  g_assert (tp_contact_has_feature (contact, TP_CONTACT_FEATURE_ALIAS));
 }
 
 static void
@@ -2686,6 +2937,7 @@ main (int argc,
   ADD (no_features);
   ADD (features);
   ADD (upgrade);
+  ADD (upgrade_noop);
   ADD (by_id);
   ADD (avatar_requirements);
   ADD (avatar_data);
@@ -2711,6 +2963,12 @@ main (int argc,
 
   g_test_add ("/contacts/contact-list", Fixture, NULL,
       setup_no_connect, test_contact_list, teardown);
+
+  g_test_add ("/contacts/initial-contact-list", Fixture, NULL,
+      setup_no_connect, test_initial_contact_list, teardown);
+
+  g_test_add ("/contacts/self-contact", Fixture, NULL,
+      setup_no_connect, test_self_contact, teardown);
 
   return g_test_run ();
 }

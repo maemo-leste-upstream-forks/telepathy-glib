@@ -1676,6 +1676,74 @@ tp_utf8_make_valid (const gchar *name)
   return g_string_free (string, FALSE);
 }
 
+/*
+ * _tp_enum_from_nick:
+ * @enum_type: the GType of a subtype of GEnum
+ * @nick: a non-%NULL string purporting to be the nickname of a value of
+ *        @enum_type
+ * @value: the address at which to store the value of @enum_type corresponding
+ *         to @nick if this functions returns %TRUE; if this function returns
+ *         %FALSE, this variable will be left untouched.
+ *
+ * <!-- -->
+ *
+ * Returns: %TRUE if @nick is a member of @enum_type, or %FALSE otherwise
+ */
+gboolean
+_tp_enum_from_nick (
+    GType enum_type,
+    const gchar *nick,
+    gint *value)
+{
+  GEnumClass *klass = g_type_class_ref (enum_type);
+  GEnumValue *enum_value;
+
+  g_return_val_if_fail (klass != NULL, FALSE);
+  g_return_val_if_fail (value != NULL, FALSE);
+
+  enum_value = g_enum_get_value_by_nick (klass, nick);
+  g_type_class_unref (klass);
+
+  if (enum_value != NULL)
+    {
+      *value = enum_value->value;
+      return TRUE;
+    }
+  else
+    {
+      return FALSE;
+    }
+}
+
+/*
+ * _tp_enum_to_nick:
+ * @enum_type: the GType of a subtype of GEnum
+ * @value: a value of @enum_type
+ *
+ * <!-- -->
+ *
+ * Returns: the nickname of @value, or %NULL if it is not, in fact, a value of
+ * @enum_type
+ */
+const gchar *
+_tp_enum_to_nick (
+    GType enum_type,
+    gint value)
+{
+  GEnumClass *klass = g_type_class_ref (enum_type);
+  GEnumValue *enum_value;
+
+  g_return_val_if_fail (klass != NULL, NULL);
+
+  enum_value = g_enum_get_value (klass, value);
+  g_type_class_unref (klass);
+
+  if (enum_value != NULL)
+    return enum_value->value_nick;
+  else
+    return NULL;
+}
+
 gboolean
 _tp_bind_connection_status_to_boolean (GBinding *binding,
     const GValue *src_value,
@@ -1941,7 +2009,7 @@ _tp_contacts_to_handles (TpConnection *connection,
 }
 
 /* table's key can be anything (usually TpHandle) but value must be a
- * GObject (usually TpContact) */
+ * TpContact */
 GPtrArray *
 _tp_contacts_from_values (GHashTable *table)
 {
@@ -1949,13 +2017,19 @@ _tp_contacts_from_values (GHashTable *table)
   GHashTableIter iter;
   gpointer value;
 
+  if (table == NULL)
+      return NULL;
+
   contacts = _tp_g_ptr_array_new_full (g_hash_table_size (table),
       g_object_unref);
 
   g_hash_table_iter_init (&iter, table);
   while (g_hash_table_iter_next (&iter, NULL, &value))
     {
-      g_assert (G_IS_OBJECT (value));
+      if (value == NULL)
+        continue;
+      g_assert (TP_IS_CONTACT (value));
+
       g_ptr_array_add (contacts, g_object_ref (value));
     }
 

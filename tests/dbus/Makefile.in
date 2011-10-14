@@ -56,8 +56,8 @@ noinst_PROGRAMS = test-account$(EXEEXT) \
 	test-contact-lists$(EXEEXT) test-contacts$(EXEEXT) \
 	test-contacts-bug-19101$(EXEEXT) test-contacts-mixin$(EXEEXT) \
 	test-contacts-slow-path$(EXEEXT) test-dbus$(EXEEXT) \
-	test-disconnection$(EXEEXT) test-error-enum$(EXEEXT) \
-	test-example-no-protocols$(EXEEXT) \
+	test-dbus-tube$(EXEEXT) test-disconnection$(EXEEXT) \
+	test-error-enum$(EXEEXT) test-example-no-protocols$(EXEEXT) \
 	test-file-transfer-channel$(EXEEXT) \
 	test-finalized-in-invalidated-handler$(EXEEXT) \
 	test-get-interface-after-invalidate$(EXEEXT) \
@@ -331,6 +331,13 @@ test_dbus_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_dbus_tube_OBJECTS = dbus-tube.$(OBJEXT)
+test_dbus_tube_OBJECTS = $(am_test_dbus_tube_OBJECTS)
+test_dbus_tube_LDADD = $(LDADD)
+test_dbus_tube_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_test_disconnection_OBJECTS = disconnection.$(OBJEXT)
 test_disconnection_OBJECTS = $(am_test_disconnection_OBJECTS)
 test_disconnection_LDADD = $(LDADD)
@@ -569,8 +576,8 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_contacts_bug_19101_SOURCES) \
 	$(test_contacts_mixin_SOURCES) \
 	$(test_contacts_slow_path_SOURCES) $(test_dbus_SOURCES) \
-	$(test_disconnection_SOURCES) $(test_error_enum_SOURCES) \
-	$(nodist_test_error_enum_SOURCES) \
+	$(test_dbus_tube_SOURCES) $(test_disconnection_SOURCES) \
+	$(test_error_enum_SOURCES) $(nodist_test_error_enum_SOURCES) \
 	$(test_example_no_protocols_SOURCES) \
 	$(test_file_transfer_channel_SOURCES) \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
@@ -611,7 +618,8 @@ DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_contacts_bug_19101_SOURCES) \
 	$(test_contacts_mixin_SOURCES) \
 	$(test_contacts_slow_path_SOURCES) $(test_dbus_SOURCES) \
-	$(test_disconnection_SOURCES) $(test_error_enum_SOURCES) \
+	$(test_dbus_tube_SOURCES) $(test_disconnection_SOURCES) \
+	$(test_error_enum_SOURCES) \
 	$(test_example_no_protocols_SOURCES) \
 	$(test_file_transfer_channel_SOURCES) \
 	$(test_finalized_in_invalidated_handler_SOURCES) \
@@ -676,6 +684,8 @@ GLIB_LIBS = @GLIB_LIBS@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
+GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
 HAVE_VALA = @HAVE_VALA@
@@ -903,6 +913,7 @@ test_stream_tube_SOURCES = stream-tube.c
 test_client_channel_factory_SOURCES = client-channel-factory.c
 test_proxy_preparation_SOURCES = proxy-preparation.c
 test_channel_manager_request_properties_SOURCES = channel-manager-request-properties.c
+test_dbus_tube_SOURCES = dbus-tube.c
 
 # this one uses internal ABI
 test_cm_message_SOURCES = \
@@ -1115,6 +1126,9 @@ test-contacts-slow-path$(EXEEXT): $(test_contacts_slow_path_OBJECTS) $(test_cont
 test-dbus$(EXEEXT): $(test_dbus_OBJECTS) $(test_dbus_DEPENDENCIES) 
 	@rm -f test-dbus$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_dbus_OBJECTS) $(test_dbus_LDADD) $(LIBS)
+test-dbus-tube$(EXEEXT): $(test_dbus_tube_OBJECTS) $(test_dbus_tube_DEPENDENCIES) 
+	@rm -f test-dbus-tube$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_dbus_tube_OBJECTS) $(test_dbus_tube_LDADD) $(LIBS)
 test-disconnection$(EXEEXT): $(test_disconnection_OBJECTS) $(test_disconnection_DEPENDENCIES) 
 	@rm -f test-disconnection$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_disconnection_OBJECTS) $(test_disconnection_LDADD) $(LIBS)
@@ -1231,6 +1245,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-mixin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts-slow-path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/contacts.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-tube.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disconnection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-enum.Po@am__quote@

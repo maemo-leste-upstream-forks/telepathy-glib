@@ -35,6 +35,7 @@ our_headers = \
     base-connection-manager.h \
     base-password-channel.h \
     base-protocol.h \
+    base-room-config.h \
     basic-proxy-factory.h \
     channel.h \
     channel-iface.h \
@@ -60,6 +61,7 @@ our_headers = \
     dbus.h \
     dbus-daemon.h \
     dbus-properties-mixin.h \
+    dbus-tube-channel.h \
     defs.h \
     debug.h \
     debug-sender.h \
@@ -162,10 +164,12 @@ libtelepathy_glib_internal_la_SOURCES = \
     base-password-channel.c \
     base-protocol-internal.h \
     base-protocol.c \
+    base-room-config.c \
     basic-proxy-factory.c \
     capabilities.c \
     capabilities-internal.h \
     channel.c \
+    channel-contacts.c \
     channel-group.c \
     channel-internal.h \
     channel-dispatcher.c \
@@ -201,6 +205,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-daemon.c \
     dbus-internal.h \
     dbus-properties-mixin.c \
+    dbus-tube-channel.c \
     debug.c \
     debug-sender.c \
     deprecated-internal.h \

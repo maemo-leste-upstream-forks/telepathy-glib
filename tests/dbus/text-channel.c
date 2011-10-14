@@ -10,10 +10,11 @@
 #include <string.h>
 
 #include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/message-mixin.h>
 
 #include "examples/cm/echo-message-parts/chan.h"
-#include "examples/cm/echo-message-parts/conn.h"
 
+#include "tests/lib/contacts-conn.h"
 #include "tests/lib/util.h"
 
 typedef struct {
@@ -116,7 +117,7 @@ setup (Test *test,
   test->error = NULL;
 
   /* Create (service and client sides) connection objects */
-  tp_tests_create_and_connect_conn (EXAMPLE_TYPE_ECHO_2_CONNECTION,
+  tp_tests_create_and_connect_conn (TP_TESTS_TYPE_CONTACTS_CONNECTION,
       "me@test.com", &test->base_connection, &test->connection);
 
   create_contact_chan (test);
@@ -835,6 +836,93 @@ test_pending_messages_with_no_sender_id (Test *test,
   g_list_free (messages);
 }
 
+static void
+test_sender_prepared (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GQuark features[] = { TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES, 0 };
+  TpSimpleClientFactory *factory;
+  TpHandle admin;
+  TpContact *sender;
+  TpMessage *msg;
+
+  tp_tests_proxy_run_until_prepared (test->channel, features);
+
+  /* Simulate a message received from a new contact */
+  admin = tp_handle_ensure (test->contact_repo, "admin", NULL, NULL);
+  msg = tp_cm_message_new_text (test->base_connection, admin,
+      TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+      "Service interuption in 1h");
+  tp_message_mixin_take_received ((GObject *) test->chan_service, msg);
+
+  g_signal_connect (test->channel, "message-received",
+      G_CALLBACK (message_received_cb), test);
+
+  g_main_loop_run (test->mainloop);
+  g_assert_no_error (test->error);
+
+  /* No feature was set on the factory */
+  sender = tp_signalled_message_get_sender (test->received_msg);
+  g_assert (!tp_contact_has_feature (sender, TP_CONTACT_FEATURE_ALIAS));
+
+  /* Now ask to prepare ALIAS, on next msg it will be prepared */
+  factory = tp_proxy_get_factory (test->connection);
+  tp_simple_client_factory_add_contact_features_varargs (factory,
+      TP_CONTACT_FEATURE_ALIAS,
+      TP_CONTACT_FEATURE_INVALID);
+
+  msg = tp_cm_message_new_text (test->base_connection, admin,
+      TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+      "Service interuption in 30min");
+  tp_message_mixin_take_received ((GObject *) test->chan_service, msg);
+
+  g_signal_connect (test->channel, "message-received",
+      G_CALLBACK (message_received_cb), test);
+
+  g_main_loop_run (test->mainloop);
+  g_assert_no_error (test->error);
+
+  sender = tp_signalled_message_get_sender (test->received_msg);
+  g_assert (tp_contact_has_feature (sender, TP_CONTACT_FEATURE_ALIAS));
+}
+
+static void
+test_sent_with_no_sender (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GPtrArray *parts;
+  TpContact *sender;
+
+  tp_tests_proxy_run_until_prepared (test->channel, NULL);
+
+  /* Simulate a message sent with no sender, it must fallback to
+   * connection's self-contact. Unfortunately we cannot use the message mixin
+   * because it force setting a sender, and we can't use TpCMMessage to create
+   * parts because it's kept private. So back to old school. */
+  parts = g_ptr_array_new_with_free_func ((GDestroyNotify) g_hash_table_unref);
+  g_ptr_array_add (parts, tp_asv_new (
+      "message-type", G_TYPE_UINT, TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+      NULL));
+  g_ptr_array_add (parts, tp_asv_new (
+      "content-type", G_TYPE_STRING, "text/plain",
+      "content", G_TYPE_STRING, "bla bla bla",
+      NULL));
+
+  g_signal_connect (test->channel, "message-sent",
+      G_CALLBACK (message_sent_cb), test);
+
+  tp_svc_channel_interface_messages_emit_message_sent (test->chan_service,
+      parts, 0, "this-is-a-token");
+
+  g_main_loop_run (test->mainloop);
+  g_assert_no_error (test->error);
+
+  sender = tp_signalled_message_get_sender (test->sent_msg);
+  g_assert (sender == tp_connection_get_self_contact (test->connection));
+
+  g_ptr_array_unref (parts);
+}
+
 int
 main (int argc,
       char **argv)
@@ -862,9 +950,12 @@ main (int argc,
       test_get_sms_length, teardown);
   g_test_add ("/text-channel/ack-all-pending-messages", Test, NULL, setup,
       test_ack_all_pending_messages, teardown);
-
   g_test_add ("/text-channel/pending-messages-with-no-sender-id", Test, NULL,
       setup, test_pending_messages_with_no_sender_id, teardown);
+  g_test_add ("/text-channel/sender-prepared", Test, NULL, setup,
+      test_sender_prepared, teardown);
+  g_test_add ("/text-channel/sent-with-no-sender", Test, NULL, setup,
+      test_sent_with_no_sender, teardown);
 
   return g_test_run ();
 }
