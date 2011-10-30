@@ -8,7 +8,7 @@
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="TpChannelManager.html" title="TpChannelManager">
 <link rel="next" href="telepathy-glib-TpContactsMixin.html" title="TpContactsMixin">
-<meta name="generator" content="GTK-Doc V1.17.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.17 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -306,7 +306,7 @@ struct              <a class="link" href="telepathy-glib-base-contact-list.html#
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gio/unstable/GAsyncResult.html"><span class="type">GAsyncResult</span></a> *result</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
-<a class="link" href="telepathy-glib-enums.html#TpContactMetadataStorageType" title="enum TpContactMetadataStorageType"><span class="returnvalue">TpContactMetadataStorageType</span></a> <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-get-group-storage" title="tp_base_contact_list_get_group_storage ()">tp_base_contact_list_get_group_storage</a>
+<a class="link" href="telepathy-glib-enums.html#TpContactMetadataStorageType" title="enum TpContactMetadataStorageType"><span class="returnvalue">TpContactMetadataStorageType</span></a>  <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-get-group-storage" title="tp_base_contact_list_get_group_storage ()">tp_base_contact_list_get_group_storage</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> *self</code></em>);
 
 #define             <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-BLOCKABLE-CONTACT-LIST:CAPS" title="TP_TYPE_BLOCKABLE_CONTACT_LIST">TP_TYPE_BLOCKABLE_CONTACT_LIST</a>
@@ -394,53 +394,27 @@ Then, in the connection manager's <a class="link" href="TpBaseConnection.html" t
 <p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
   <span class="type">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST</span> using
   <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-list-iface-init" title="tp_base_contact_list_mixin_list_iface_init ()"><code class="function">tp_base_contact_list_mixin_list_iface_init()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MyConnection</span><span class="symbol">,</span><span class="normal"> my_connection</span><span class="symbol">,</span>
-<span class="normal">    TP_TYPE_BASE_CONNECTION</span><span class="symbol">,</span>
-<span class="normal">    </span><span class="comment">// ...</span>
-<span class="normal">    </span><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST</span><span class="symbol">,</span>
-<span class="normal">        <a href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-list-iface-init">tp_base_contact_list_mixin_list_iface_init</a></span><span class="symbol">);</span>
-<span class="normal">    </span><span class="comment">// ...</span>
-<span class="normal">    </span><span class="symbol">)</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
+    TP_TYPE_BASE_CONNECTION,
+    // ...
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST,
+        tp_base_contact_list_mixin_list_iface_init);
+    // ...
+    )
+</pre></div>
 </li>
 <li class="listitem">
 <p>in the <code class="function">class_init</code> method, call
    <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init" title="tp_base_contact_list_mixin_class_init ()"><code class="function">tp_base_contact_list_mixin_class_init()</code></a> after
    <a class="link" href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init" title="tp_contacts_mixin_class_init ()"><code class="function">tp_contacts_mixin_class_init()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="comment">// ...</span>
-<span class="function"><a href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init">tp_contacts_mixin_class_init</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">object_class</span><span class="symbol">,</span>
-<span class="normal">    </span><span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MyConnectionClass</span><span class="symbol">,</span><span class="normal"> contacts_mixin</span><span class="symbol">));</span>
-<span class="function"><a href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init">tp_base_contact_list_mixin_class_init</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">base_connection_class</span><span class="symbol">);</span>
-<span class="comment">// ...</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+// ...
+tp_contacts_mixin_class_init (object_class,
+    G_STRUCT_OFFSET (MyConnectionClass, contacts_mixin));
+tp_base_contact_list_mixin_class_init (base_connection_class);
+// ...
+</pre></div>
 <p>and include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-LIST:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST</code></a> in
    <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.interfaces-always-present"><span class="type">TpBaseConnectionClass.interfaces_always_present</span></a>;</p>
 </li>
@@ -3668,7 +3642,7 @@ will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResul
 <hr>
 <div class="refsect2">
 <a name="tp-base-contact-list-get-group-storage"></a><h3>tp_base_contact_list_get_group_storage ()</h3>
-<pre class="programlisting"><a class="link" href="telepathy-glib-enums.html#TpContactMetadataStorageType" title="enum TpContactMetadataStorageType"><span class="returnvalue">TpContactMetadataStorageType</span></a> tp_base_contact_list_get_group_storage
+<pre class="programlisting"><a class="link" href="telepathy-glib-enums.html#TpContactMetadataStorageType" title="enum TpContactMetadataStorageType"><span class="returnvalue">TpContactMetadataStorageType</span></a>  tp_base_contact_list_get_group_storage
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> *self</code></em>);</pre>
 <p>
 Return the extent to which user-defined groups can be set in this protocol.
@@ -4271,6 +4245,6 @@ Read-only except during construction.
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.17.1</div>
+          Generated by GTK-Doc V1.17</div>
 </body>
 </html>
