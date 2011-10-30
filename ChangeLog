@@ -1,3 +1,103 @@
+commit b7fb9d6dba3f64d68ce635e312d5d742b59ae8aa
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-24 17:45:05 +0200
+
+    prepare 0.16.1
+
+commit 60615777a80c190a270e270b1b3972e367ad7dfd
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-24 16:37:03 +0200
+
+    document capabilities_queue
+
+commit 81c9de86431c1c6fc2968b862ab8645e2804f448
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2011-10-20 15:30:17 +0200
+
+    Prevent circular introspection dependency
+    
+    As part of preparing a Connection the self contact will be retrieved. If
+    the contacts requested features include _CAPABILITIES _and_ the
+    connection doesn't support ContactCapabilities then the Capabilties of
+    the connection get use. But if we wait for this feature to be prepared
+    then the introspection stalls.
+    
+    So instead use internal API to force getting the capabilities of the
+    connection regardless of the state of the various features and break the
+    circular dependency.
+
+commit f1f4e8bc7f58bb8e4c551bbc0c98674cfa0dc1c7
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2011-10-20 15:23:50 +0200
+
+    Add internal API to get connection capabilities without having core prepared
+
+commit 6bf59dec6b50af267f56eeb7980476919a1dd92d
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2011-10-20 15:04:24 +0200
+
+    Let TpTestsNoRequestsConnection return an empty RCC
+    
+    If we don't implement Requests we shouldn't respond to the retrieval of
+    RCC properties. Unfortunately that's tricky to do, so do a quick hack
+    which means we will have an empty RCC property, which is at least
+    somewhat more useful for our tests.
+
+commit df26d5592ec8fc2ff026f30c562f3e5102263c65
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2011-10-20 05:37:35 +0100
+
+    Make it easier to debug connection preparation by printing object paths in some cases
+
+commit e6536da10f3bca2d3d73d0c190f43224e9603c25
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2011-10-20 05:34:30 +0100
+
+    Add some extra debugging to make it easier to follow AccountManager preparation
+
+commit dd159a5d6e737106f0966f2c121953079731f716
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-20 14:43:47 +0200
+
+    base-contact-list: implement TP_TOKEN_CONNECTION_INTERFACE_CONTACT_BLOCKING_BLOCKED
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=42049
+
+commit ba3cfa861786ba3c18f4759aa331b0a25a511b50
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-18 16:44:38 +0200
+
+    deal with self->priv->group_contact_owners may containing NULL contact
+    
+    If the owner is unknown self->priv->group_contact_owners may contain NULL
+    TpContact. g_object_unref() not being NULL safe we have to use our own
+    value_destroy_func to avoid warnings.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41928
+
+commit b67a85de59ecf73ef80a7da81fa45e00287e8669
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-18 16:06:33 +0200
+
+    test_receive_muc_delivery: use g_test_bug()
+
+commit a35dadc4069721ffee181123ef379f60a9055716
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-18 15:46:11 +0200
+
+    _tp_channel_contacts_queue_prepare_finish: don't assume item->contacts is not NULL
+    
+    For example, when receiving a MUC delivery report we end up with a message
+    having no sender and so no contact to prepare.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41929
+
+commit 1a01d5f17d259491211320b67036ab1bdfc1c134
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-10-14 15:12:27 +0100
+
+    Bump nano-version to 0.16.1.1
+
 commit 81947d9ec85ff9e4068a985f915b6fb349ca5390
 Author: Will Thompson <will.thompson@collabora.co.uk>
 Date:   2011-10-14 14:50:33 +0100
