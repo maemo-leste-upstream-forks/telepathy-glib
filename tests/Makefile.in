@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -34,19 +35,15 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = test-asv$(EXEEXT) test-capabilities$(EXEEXT) \
-	test-availability-cmp$(EXEEXT) test-dtmf-player$(EXEEXT) \
-	test-enums$(EXEEXT) test-gnio-util$(EXEEXT) test-heap$(EXEEXT) \
-	test-internal-debug$(EXEEXT) test-intset$(EXEEXT) \
-	test-signal-connect-object$(EXEEXT) test-util$(EXEEXT) \
-	test-debug-domain$(EXEEXT) test-contact-search-result$(EXEEXT) \
-	$(am__EXEEXT_1)
-DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/tools/check-coding-style.mk \
-	$(top_srcdir)/tools/valgrind.mk
 @HAVE_CXX_TRUE@am__append_1 = \
 @HAVE_CXX_TRUE@    test-util-cxx
 
+@ENABLE_INSTALLED_TESTS_TRUE@tests_PROGRAMS = $(am__EXEEXT_2)
+@ENABLE_INSTALLED_TESTS_FALSE@noinst_PROGRAMS = $(am__EXEEXT_2)
+TESTS = $(am__EXEEXT_2) all-errors-documented.py
+DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/tools/check-coding-style.mk \
+	$(top_srcdir)/tools/valgrind.mk
 subdir = tests
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
@@ -64,7 +61,15 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_CXX_TRUE@am__EXEEXT_1 = test-util-cxx$(EXEEXT)
-PROGRAMS = $(noinst_PROGRAMS)
+am__EXEEXT_2 = test-asv$(EXEEXT) test-capabilities$(EXEEXT) \
+	test-availability-cmp$(EXEEXT) test-dtmf-player$(EXEEXT) \
+	test-enums$(EXEEXT) test-gnio-util$(EXEEXT) test-heap$(EXEEXT) \
+	test-internal-debug$(EXEEXT) test-intset$(EXEEXT) \
+	test-signal-connect-object$(EXEEXT) test-util$(EXEEXT) \
+	test-debug-domain$(EXEEXT) test-contact-search-result$(EXEEXT) \
+	$(am__EXEEXT_1)
+am__installdirs = "$(DESTDIR)$(testsdir)" "$(DESTDIR)$(testsdir)"
+PROGRAMS = $(noinst_PROGRAMS) $(tests_PROGRAMS)
 am_test_asv_OBJECTS = asv.$(OBJEXT)
 test_asv_OBJECTS = $(am_test_asv_OBJECTS)
 test_asv_LDADD = $(LDADD)
@@ -220,6 +225,28 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+DATA = $(tests_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -307,9 +334,12 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
 INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
 INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
 INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
 INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
 INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LD = @LD@
@@ -416,15 +446,20 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+tpglibtestsdir = @tpglibtestsdir@
 SUBDIRS = \
     lib \
     . \
     dbus \
     tools
 
-TESTS = $(noinst_PROGRAMS) \
-    all-errors-documented.py
-
+programs_list = test-asv test-capabilities test-availability-cmp \
+	test-dtmf-player test-enums test-gnio-util test-heap \
+	test-internal-debug test-intset test-signal-connect-object \
+	test-util test-debug-domain test-contact-search-result $(NULL) \
+	$(am__append_1)
+@ENABLE_INSTALLED_TESTS_TRUE@testsdir = @tpglibtestsdir@
+@ENABLE_INSTALLED_TESTS_TRUE@tests_DATA = tpglib-tests.list
 TESTS_ENVIRONMENT = \
     abs_top_builddir=@abs_top_builddir@ \
     abs_top_srcdir=@abs_top_srcdir@ \
@@ -586,6 +621,49 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+install-testsPROGRAMS: $(tests_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(testsdir)" || $(MKDIR_P) "$(DESTDIR)$(testsdir)"
+	@list='$(tests_PROGRAMS)'; test -n "$(testsdir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(testsdir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(testsdir)$$dir" || exit $$?; \
+	    } \
+	; done
+
+uninstall-testsPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(tests_PROGRAMS)'; test -n "$(testsdir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(testsdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(testsdir)" && rm -f $$files
+
+clean-testsPROGRAMS:
+	@list='$(tests_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
 test-asv$(EXEEXT): $(test_asv_OBJECTS) $(test_asv_DEPENDENCIES) 
 	@rm -f test-asv$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_asv_OBJECTS) $(test_asv_LDADD) $(LIBS)
@@ -703,6 +781,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-testsDATA: $(tests_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(testsdir)" || $(MKDIR_P) "$(DESTDIR)$(testsdir)"
+	@list='$(tests_DATA)'; test -n "$(testsdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(testsdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(testsdir)" || exit $$?; \
+	done
+
+uninstall-testsDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(tests_DATA)'; test -n "$(testsdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(testsdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(testsdir)" && rm -f $$files
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -992,9 +1090,12 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS check-local
 check: check-recursive
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
+	for dir in "$(DESTDIR)$(testsdir)" "$(DESTDIR)$(testsdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -1023,7 +1124,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
-	mostlyclean-am
+	clean-testsPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -1043,7 +1144,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am:
+install-data-am: install-testsDATA install-testsPROGRAMS
 
 install-dvi: install-dvi-recursive
 
@@ -1089,26 +1190,31 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-testsDATA uninstall-testsPROGRAMS
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) check-am \
 	ctags-recursive install-am install-strip tags-recursive
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-TESTS check-am check-local clean \
-	clean-generic clean-libtool clean-noinstPROGRAMS ctags \
-	ctags-recursive distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am
+	clean-generic clean-libtool clean-noinstPROGRAMS \
+	clean-testsPROGRAMS ctags ctags-recursive distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip install-testsDATA install-testsPROGRAMS \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-testsDATA uninstall-testsPROGRAMS
 
+
+tpglib-tests.list:
+	$(AM_V_GEN)echo $(programs_list) > $@
 
 # other potentially interesting options:
 # --show-reachable=yes   reachable objects (many!)
@@ -1118,7 +1224,7 @@ uninstall-am:
 check-valgrind:
 	$(MAKE) check-TESTS \
 		maybe_gc_friendly=,gc-friendly \
-		TESTS='$$(noinst_PROGRAMS)' \
+		TESTS='$$(programs_list)' \
 		TESTS_ENVIRONMENT="$(VALGRIND_TESTS_ENVIRONMENT)"
 	$(MAKE) -C dbus check-valgrind
 check-coding-style:

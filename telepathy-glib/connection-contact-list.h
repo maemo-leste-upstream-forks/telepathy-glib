@@ -31,6 +31,10 @@ G_BEGIN_DECLS
   (tp_connection_get_feature_quark_contact_list ())
 GQuark tp_connection_get_feature_quark_contact_list (void) G_GNUC_CONST;
 
+#define TP_CONNECTION_FEATURE_CONTACT_LIST_PROPERTIES \
+  (tp_connection_get_feature_quark_contact_list_properties ())
+GQuark tp_connection_get_feature_quark_contact_list_properties (void) G_GNUC_CONST;
+
 TpContactListState tp_connection_get_contact_list_state (TpConnection *self);
 gboolean tp_connection_get_contact_list_persists (TpConnection *self);
 gboolean tp_connection_get_can_change_contact_list (TpConnection *self);
@@ -137,6 +141,35 @@ void tp_connection_rename_group_async (TpConnection *self,
 gboolean tp_connection_rename_group_finish (TpConnection *self,
     GAsyncResult *result,
     GError **error);
+
+/* ContactBlocking */
+
+void tp_connection_block_contacts_async (TpConnection *self,
+    guint n_contacts,
+    TpContact * const *contacts,
+    gboolean report_abusive,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+gboolean tp_connection_block_contacts_finish (TpConnection *self,
+    GAsyncResult *result,
+    GError **error);
+
+void tp_connection_unblock_contacts_async (TpConnection *self,
+    guint n_contacts,
+    TpContact * const *contacts,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+gboolean tp_connection_unblock_contacts_finish (TpConnection *self,
+    GAsyncResult *result,
+    GError **error);
+
+#define TP_CONNECTION_FEATURE_CONTACT_BLOCKING \
+  (tp_connection_get_feature_quark_contact_blocking ())
+GQuark tp_connection_get_feature_quark_contact_blocking (void) G_GNUC_CONST;
+
+gboolean tp_connection_can_report_abusive (TpConnection *self);
+
+GPtrArray * tp_connection_get_blocked_contacts (TpConnection *self);
 
 G_END_DECLS
 

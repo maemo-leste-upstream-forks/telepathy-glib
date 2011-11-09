@@ -371,3 +371,124 @@ tp_contact_remove_from_group_finish (TpContact *self,
 {
   generic_finish (remove_from_group);
 }
+
+/* ContactBlocking */
+
+/**
+ * tp_contact_block_async:
+ * @self: a #TpContact
+ * @report_abusive: If %TRUE, report this contact as abusive to the
+ * server administrators as well as blocking him. See
+ * #TpConnection:can-report-abusive to discover whether reporting abuse is
+ * supported. If #TpConnection:can-report-abusive is %FALSE, this parameter will
+ * be ignored.
+ * @callback: a callback to call when the operation finishes
+ * @user_data: data to pass to @callback
+ *
+ * Block communications with a contact, optionally reporting the contact as
+ * abusive to the server administrators. To block more than one contact at once,
+ * see tp_connection_block_contacts_async().
+ *
+ * Since: 0.17.0
+ */
+void
+tp_contact_block_async (TpContact *self,
+    gboolean report_abusive,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+  TpHandle handle;
+  GArray *handles;
+
+  g_return_if_fail (TP_IS_CONTACT (self));
+
+  handle = tp_contact_get_handle (self);
+  handles = g_array_new (FALSE, FALSE, sizeof (TpHandle));
+  g_array_append_val (handles, handle);
+
+  result = g_simple_async_result_new ((GObject *) self, callback, user_data,
+      tp_contact_block_async);
+
+  tp_cli_connection_interface_contact_blocking_call_block_contacts (
+      tp_contact_get_connection (self), -1,
+      handles, report_abusive, generic_callback, result, g_object_unref, NULL);
+
+  g_array_unref (handles);
+}
+
+/**
+ * tp_contact_block_finish:
+ * @self: a #TpContact
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes tp_contact_block_async()
+ *
+ * Returns: %TRUE if the operation was successful, otherwise %FALSE.
+ *
+ * Since: 0.17.0
+ */
+gboolean
+tp_contact_block_finish (TpContact *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  generic_finish (block);
+}
+
+/**
+ * tp_contact_unblock_async:
+ * @self: a #TpContact
+ * @callback: a callback to call when the operation finishes
+ * @user_data: data to pass to @callback
+ *
+ * Unblock communications with a contact. To unblock more than one contact
+ * at once, see tp_connection_unblock_contacts_async().
+ *
+ * Since: 0.17.0
+ */
+void
+tp_contact_unblock_async (TpContact *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+  TpHandle handle;
+  GArray *handles;
+
+  g_return_if_fail (TP_IS_CONTACT (self));
+
+  handle = tp_contact_get_handle (self);
+  handles = g_array_new (FALSE, FALSE, sizeof (TpHandle));
+  g_array_append_val (handles, handle);
+
+  result = g_simple_async_result_new ((GObject *) self, callback, user_data,
+      tp_contact_unblock_async);
+
+  tp_cli_connection_interface_contact_blocking_call_unblock_contacts (
+      tp_contact_get_connection (self), -1,
+      handles, generic_callback, result, g_object_unref, NULL);
+
+  g_array_unref (handles);
+}
+
+/**
+ * tp_contact_unblock_finish:
+ * @self: a #TpContact
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes tp_contact_unblock_async()
+ *
+ * Returns: %TRUE if the operation was successful, otherwise %FALSE.
+ *
+ * Since: 0.17.0
+ */
+gboolean
+tp_contact_unblock_finish (TpContact *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  generic_finish (unblock);
+}

@@ -335,7 +335,8 @@ contact_list_state_changed_cb (TpConnection *self,
   DEBUG ("contact list state changed: %d", state);
 
   /* If state goes to success, delay notification until roster is ready */
-  if (state == TP_CONTACT_LIST_STATE_SUCCESS)
+  if (state == TP_CONTACT_LIST_STATE_SUCCESS &&
+      tp_proxy_is_prepared (self, TP_CONNECTION_FEATURE_CONTACT_LIST))
     {
       prepare_roster (self, NULL);
       return;
@@ -346,7 +347,7 @@ contact_list_state_changed_cb (TpConnection *self,
 }
 
 static void
-prepare_contact_list_cb (TpProxy *proxy,
+prepare_contact_list_props_cb (TpProxy *proxy,
     GHashTable *properties,
     const GError *error,
     gpointer user_data,
@@ -400,13 +401,6 @@ prepare_contact_list_cb (TpProxy *proxy,
   DEBUG ("Got contact list properties; state=%d",
       self->priv->contact_list_state);
 
-  /* If the CM has the contact list, prepare it right away */
-  if (self->priv->contact_list_state == TP_CONTACT_LIST_STATE_SUCCESS)
-    {
-      prepare_roster (self, result);
-      return;
-    }
-
 OUT:
   g_simple_async_result_complete (result);
 }
@@ -419,15 +413,41 @@ void _tp_connection_prepare_contact_list_async (TpProxy *proxy,
   TpConnection *self = (TpConnection *) proxy;
   GSimpleAsyncResult *result;
 
+  result = g_simple_async_result_new ((GObject *) self, callback, user_data,
+      _tp_connection_prepare_contact_list_async);
+
+  /* If the CM has the contact list, prepare it right away */
+  if (self->priv->contact_list_state == TP_CONTACT_LIST_STATE_SUCCESS)
+    {
+      prepare_roster (self, result);
+      return;
+    }
+
+  /* Contacts will be prepared once the CM has fetched the contact list from
+   * the server.
+   * Complete the preparation as it's not supposed to wait for the contact
+   * list. */
+  g_simple_async_result_complete_in_idle (result);
+  g_object_unref (result);
+}
+
+void _tp_connection_prepare_contact_list_props_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  TpConnection *self = (TpConnection *) proxy;
+  GSimpleAsyncResult *result;
+
   tp_cli_connection_interface_contact_list_connect_to_contact_list_state_changed
       (self, contact_list_state_changed_cb, NULL, NULL, NULL, NULL);
 
   result = g_simple_async_result_new ((GObject *) self, callback, user_data,
-      _tp_connection_prepare_contact_list_async);
+      _tp_connection_prepare_contact_list_props_async);
 
   tp_cli_dbus_properties_call_get_all (self, -1,
       TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST,
-      prepare_contact_list_cb, result, g_object_unref, NULL);
+      prepare_contact_list_props_cb, result, g_object_unref, NULL);
 }
 
 static void
@@ -625,8 +645,10 @@ _tp_connection_prepare_contact_groups_async (TpProxy *proxy,
  * Expands to a call to a function that returns a #GQuark representing the
  * "contact-list" feature.
  *
- * When this feature is prepared, the contact list properties of the Connection
- * has been retrieved. If #TpConnection:contact-list-state is
+ * When this feature is prepared, the
+ * %TP_CONNECTION_FEATURE_CONTACT_LIST_PROPERTIES has been prepared, so the
+ * contact list properties of the Connection has been retrieved.
+ * If #TpConnection:contact-list-state is
  * %TP_CONTACT_LIST_STATE_SUCCESS, all #TpContact objects will also be created
  * and prepared with the desired features. See tp_connection_dup_contact_list()
  * to get the list of contacts, and
@@ -772,6 +794,7 @@ generic_callback (TpConnection *self,
     gboolean supplied_contacts_are_valid; \
     \
     g_return_if_fail (TP_IS_CONNECTION (self)); \
+    g_return_if_fail (n_contacts > 0); \
     \
     supplied_contacts_are_valid = _tp_contacts_to_handles (self, n_contacts, \
         contacts, &handles); \
@@ -1116,6 +1139,7 @@ tp_connection_get_contact_groups (TpConnection *self)
     \
     g_return_if_fail (TP_IS_CONNECTION (self)); \
     g_return_if_fail (group != NULL); \
+    g_return_if_fail (n_contacts > 0); \
     \
     supplied_contacts_are_valid = _tp_contacts_to_handles (self, n_contacts, \
         contacts, &handles); \
@@ -1384,4 +1408,557 @@ tp_connection_rename_group_finish (TpConnection *self,
     GError **error)
 {
   generic_finish (rename_group);
+}
+
+/* ContactBlocking */
+
+/**
+ * tp_connection_block_contacts_async:
+ * @self: a #TpConnection
+ * @n_contacts: the number of contacts in @contacts (must be at least 1)
+ * @contacts: (array length=n_contacts): An array of #TpContact objects to
+ *  block
+ * @report_abusive: If %TRUE, report these contacts as abusive to the
+ * server administrators as well as blocking them. See
+ * #TpConnection:can-report-abusive to discover whether reporting abuse is
+ * supported. If #TpConnection:can-report-abusive is %FALSE, this parameter will
+ * be ignored.
+ * @callback: a callback to call when the operation finishes
+ * @user_data: data to pass to @callback
+ *
+ * Direct the server to block @contacts.
+ *
+ * Since: 0.17.0
+ */
+void
+tp_connection_block_contacts_async (TpConnection *self,
+    guint n_contacts,
+    TpContact * const *contacts,
+    gboolean report_abusive,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+  GArray *handles;
+  gboolean supplied_contacts_are_valid;
+
+  g_return_if_fail (TP_IS_CONNECTION (self));
+  g_return_if_fail (n_contacts > 0);
+
+  supplied_contacts_are_valid = _tp_contacts_to_handles (self, n_contacts,
+      contacts, &handles);
+  g_return_if_fail (supplied_contacts_are_valid);
+
+  result = g_simple_async_result_new ((GObject *) self, callback, user_data,
+      tp_connection_block_contacts_async);
+
+  tp_cli_connection_interface_contact_blocking_call_block_contacts (self, -1,
+      handles, report_abusive, generic_callback, result, g_object_unref, NULL);
+  g_array_unref (handles);
+}
+
+/**
+ * tp_connection_block_contacts_finish:
+ * @self: a #TpConnection
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes tp_connection_block_contacts_async()
+ *
+ * Returns: %TRUE if the operation was successful, otherwise %FALSE.
+ *
+ * Since: 0.17.0
+ */
+gboolean
+tp_connection_block_contacts_finish (TpConnection *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  generic_finish (block_contacts);
+}
+
+/**
+ * tp_connection_unblock_contacts_async:
+ * @self: a #TpConnection
+ * @n_contacts: the number of contacts in @contacts (must be at least 1)
+ * @contacts: (array length=n_contacts): An array of #TpContact objects to
+ *  block
+ * @callback: a callback to call when the operation finishes
+ * @user_data: data to pass to @callback
+ *
+ * Direct the server to unblock @contacts.
+ *
+ * Since: 0.17.0
+ */
+void
+tp_connection_unblock_contacts_async (TpConnection *self,
+    guint n_contacts,
+    TpContact * const *contacts,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+  GArray *handles;
+  gboolean supplied_contacts_are_valid;
+
+  g_return_if_fail (TP_IS_CONNECTION (self));
+  g_return_if_fail (n_contacts > 0);
+
+  supplied_contacts_are_valid = _tp_contacts_to_handles (self, n_contacts,
+      contacts, &handles);
+  g_return_if_fail (supplied_contacts_are_valid);
+
+  result = g_simple_async_result_new ((GObject *) self, callback, user_data,
+      tp_connection_unblock_contacts_async);
+
+  tp_cli_connection_interface_contact_blocking_call_unblock_contacts (self, -1,
+      handles, generic_callback, result, g_object_unref, NULL);
+  g_array_unref (handles);
+}
+
+/**
+ * tp_connection_unblock_contacts_finish:
+ * @self: a #TpConnection
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes tp_connection_unblock_contacts_async()
+ *
+ * Returns: %TRUE if the operation was successful, otherwise %FALSE.
+ *
+ * Since: 0.17.0
+ */
+gboolean
+tp_connection_unblock_contacts_finish (TpConnection *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  generic_finish (unblock_contacts);
+}
+
+/**
+ * TP_CONNECTION_FEATURE_CONTACT_BLOCKING:
+ *
+ * Expands to a call to a function that returns a #GQuark representing the
+ * "contact-blocking" feature.
+ *
+ * When this feature is prepared, #TpConnection:blocked-contacts will contain an
+ * up-to-date list of #TpContact<!-- -->s the user has blocked, and
+ * #TpConnection:can-report-abusive will indicate whether abusive contacts can
+ * be reported to the server administrator.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.17.0
+ */
+
+GQuark
+tp_connection_get_feature_quark_contact_blocking (void)
+{
+  return g_quark_from_static_string ("tp-connection-feature-contact-blocking");
+}
+
+typedef struct
+{
+  /* TpHandle -> (const gchar *) identifier */
+  GHashTable *added;
+  /* TpHandle -> (const gchar *) identifier */
+  GHashTable *removed;
+
+  /* array of reffed TpContact */
+  GPtrArray *added_contacts;
+  /* array of reffed TpContact */
+  GPtrArray *removed_contacts;
+
+  GSimpleAsyncResult *result;
+} BlockedChangedItem;
+
+static BlockedChangedItem *
+blocked_changed_item_new (TpConnection *conn,
+    GHashTable *added,
+    GHashTable *removed,
+    GSimpleAsyncResult *result)
+{
+  BlockedChangedItem *item = g_slice_new0 (BlockedChangedItem);
+
+  item->added = g_hash_table_ref (added);
+
+  if (removed != NULL)
+    item->removed = g_hash_table_ref (removed);
+  else
+    item->removed = g_hash_table_new (NULL, NULL);
+
+  item->added_contacts = g_ptr_array_new_with_free_func (g_object_unref);
+  item->removed_contacts = g_ptr_array_new_with_free_func (g_object_unref);
+
+  if (result != NULL)
+    item->result = g_object_ref (result);
+
+  return item;
+}
+
+static void
+blocked_changed_item_free (BlockedChangedItem *item)
+{
+  g_hash_table_unref (item->added);
+  g_hash_table_unref (item->removed);
+  g_ptr_array_unref (item->added_contacts);
+  g_ptr_array_unref (item->removed_contacts);
+  g_clear_object (&item->result);
+
+  g_slice_free (BlockedChangedItem, item);
+}
+
+static void process_queued_blocked_changed (TpConnection *self);
+
+void
+_tp_connection_set_contact_blocked (TpConnection *self,
+    TpContact *contact)
+{
+  gboolean blocked;
+
+  blocked = tp_g_ptr_array_contains (self->priv->blocked_contacts,
+      contact);
+
+  _tp_contact_set_is_blocked (contact, blocked);
+}
+
+static void
+blocked_changed_head_ready (TpConnection *self)
+{
+  BlockedChangedItem *item;
+
+  item = g_queue_pop_head (self->priv->blocked_changed_queue);
+
+  if (item->result != NULL)
+    {
+      /* Finish preparing TP_CONNECTION_FEATURE_CONTACT_BLOCKING; we can
+       * prepare TP_CONTACT_FEATURE_CONTACT_BLOCKING on all contacts as we
+       * have now the list of blocked contacts. */
+      GHashTableIter iter;
+      gpointer contact;
+
+      g_hash_table_iter_init (&iter, self->priv->contacts);
+      while (g_hash_table_iter_next (&iter, NULL, &contact))
+        {
+          _tp_connection_set_contact_blocked (self, contact);
+        }
+
+      g_simple_async_result_complete (item->result);
+    }
+
+  blocked_changed_item_free (item);
+  process_queued_blocked_changed (self);
+}
+
+static void
+blocked_contacts_upgraded_cb (TpConnection *self,
+    guint n_contacts,
+    TpContact * const *contacts,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  BlockedChangedItem *item;
+  guint i;
+  GPtrArray *added, *removed;
+
+  item = g_queue_peek_head (self->priv->blocked_changed_queue);
+
+  if (error != NULL)
+    {
+      DEBUG ("Error upgrading blocked contacts: %s", error->message);
+      goto out;
+    }
+
+  added = g_ptr_array_new ();
+  removed = g_ptr_array_new_with_free_func (g_object_unref);
+
+  for (i = 0; i < n_contacts; i++)
+    {
+      TpContact *contact = contacts[i];
+      TpHandle handle;
+
+      handle = tp_contact_get_handle (contact);
+
+      if (g_hash_table_lookup (item->added, GUINT_TO_POINTER (handle)) != NULL)
+        {
+          DEBUG ("Contact %s is blocked",
+              tp_contact_get_identifier (contact));
+
+          g_ptr_array_add (self->priv->blocked_contacts,
+              g_object_ref (contact));
+
+          g_ptr_array_add (added, contact);
+        }
+      else if (g_hash_table_lookup (item->removed,
+            GUINT_TO_POINTER (handle)) != NULL)
+        {
+          DEBUG ("Contact %s is no longer blocked",
+              tp_contact_get_identifier (contact));
+
+          /* Ref the contact as removing it from blocked_contacts may drop its
+           * last ref. */
+          g_ptr_array_add (removed, g_object_ref (contact));
+
+          g_ptr_array_remove (self->priv->blocked_contacts, contact);
+        }
+      else
+        {
+          g_assert_not_reached ();
+        }
+    }
+
+  g_object_notify (G_OBJECT (self), "blocked-contacts");
+
+  g_signal_emit_by_name (self, "blocked-contacts-changed", added, removed);
+
+  g_ptr_array_unref (added);
+  g_ptr_array_unref (removed);
+
+out:
+  blocked_changed_head_ready (self);
+}
+
+static void
+process_queued_blocked_changed (TpConnection *self)
+{
+  BlockedChangedItem *item;
+  GHashTableIter iter;
+  gpointer key, value;
+  GArray *features;
+  GPtrArray *contacts;
+
+  item = g_queue_peek_head (self->priv->blocked_changed_queue);
+  if (item == NULL)
+    return;
+
+  /* contacts will contain the union of item->added_contacts and
+   * item->removed_contacts */
+  contacts = g_ptr_array_new ();
+
+  g_hash_table_iter_init (&iter, item->added);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      TpHandle handle = GPOINTER_TO_UINT (key);
+      const gchar *identifier = value;
+      TpContact *contact;
+
+      contact = tp_simple_client_factory_ensure_contact (
+          tp_proxy_get_factory (self), self, handle, identifier);
+
+      g_ptr_array_add (item->added_contacts, contact);
+      g_ptr_array_add (contacts, contact);
+
+      _tp_contact_set_is_blocked (contact, TRUE);
+    }
+
+  g_hash_table_iter_init (&iter, item->removed);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      TpHandle handle = GPOINTER_TO_UINT (key);
+      const gchar *identifier = value;
+      TpContact *contact;
+
+      contact = tp_simple_client_factory_ensure_contact (
+          tp_proxy_get_factory (self), self, handle, identifier);
+
+      g_ptr_array_add (item->removed_contacts, contact);
+      g_ptr_array_add (contacts, contact);
+
+      _tp_contact_set_is_blocked (contact, FALSE);
+    }
+
+  if (contacts->len == 0)
+    {
+      blocked_changed_head_ready (self);
+      g_ptr_array_unref (contacts);
+      return;
+    }
+
+  features = tp_simple_client_factory_dup_contact_features (
+      tp_proxy_get_factory (self), self);
+
+  tp_connection_upgrade_contacts (self,
+      contacts->len, (TpContact **) contacts->pdata,
+      features->len, (TpContactFeature *) features->data,
+      blocked_contacts_upgraded_cb, NULL, NULL, NULL);
+
+  g_array_unref (features);
+  g_ptr_array_unref (contacts);
+}
+
+static void
+add_to_blocked_changed_queue (TpConnection *self,
+    GHashTable *added,
+    GHashTable *removed,
+    GSimpleAsyncResult *result)
+{
+  BlockedChangedItem *item;
+
+  item = blocked_changed_item_new (self, added, removed, result);
+  g_queue_push_tail (self->priv->blocked_changed_queue, item);
+
+  if (self->priv->blocked_changed_queue->length == 1)
+    process_queued_blocked_changed (self);
+}
+
+static void
+request_blocked_contacts_cb (TpConnection *self,
+    GHashTable *contacts,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  GSimpleAsyncResult *result = user_data;
+
+  self->priv->blocked_contacts_fetched = TRUE;
+
+  if (error != NULL)
+    {
+      DEBUG ("Error calling RequestBlockedContacts: %s", error->message);
+      g_simple_async_result_set_from_error (result, error);
+      g_simple_async_result_complete (result);
+      return;
+    }
+
+  /* We are not supposed to add items to this queue until the blocked contacts
+   * have been fetched. */
+  g_assert_cmpuint (self->priv->blocked_changed_queue->length, ==, 0);
+
+  add_to_blocked_changed_queue (self, contacts, NULL, result);
+}
+
+static void
+prepare_contact_blocking_cb (TpProxy *proxy,
+    GHashTable *properties,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  TpConnection *self = (TpConnection *) proxy;
+  GSimpleAsyncResult *result = user_data;
+  gboolean valid;
+
+  if (error != NULL)
+    {
+      DEBUG ("Error preparing ContactBlocking properties: %s", error->message);
+    }
+  else
+    {
+      self->priv->contact_blocking_capabilities = tp_asv_get_uint32 (properties,
+          "ContactBlockingCapabilities", &valid);
+      if (!valid)
+        {
+          DEBUG ("Connection %s doesn't have ContactBlockingCapabilities "
+              "property", tp_proxy_get_object_path (self));
+        }
+    }
+
+  tp_cli_connection_interface_contact_blocking_call_request_blocked_contacts (
+      self, -1, request_blocked_contacts_cb, g_object_ref (result),
+      g_object_unref, G_OBJECT (self));
+}
+
+static void
+blocked_contacts_changed_cb (TpConnection *self,
+    GHashTable *blocked,
+    GHashTable *unblocked,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  if (!self->priv->blocked_contacts_fetched)
+    return;
+
+  add_to_blocked_changed_queue (self, blocked, unblocked, NULL);
+}
+
+void
+_tp_connection_prepare_contact_blocking_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  TpConnection *self = (TpConnection *) proxy;
+  GSimpleAsyncResult *result;
+  GError *error = NULL;
+
+  result = g_simple_async_result_new ((GObject *) self, callback, user_data,
+      _tp_connection_prepare_contact_blocking_async);
+
+  tp_cli_dbus_properties_call_get_all (self, -1,
+      TP_IFACE_CONNECTION_INTERFACE_CONTACT_BLOCKING,
+      prepare_contact_blocking_cb, result, g_object_unref, NULL);
+
+  if (tp_cli_connection_interface_contact_blocking_connect_to_blocked_contacts_changed (self,
+        blocked_contacts_changed_cb, NULL, NULL, NULL, &error) == NULL)
+    {
+      DEBUG ("Failed to connect to BlockedContactsChanged: %s", error->message);
+      g_error_free (error);
+    }
+}
+
+/**
+ * tp_connection_can_report_abusive:
+ * @self: a #TpConnection
+ *
+ * <!-- -->
+ *
+ * Returns: the value of #TpConnection:can-report-abusive
+ *
+ * Since: 0.17.0
+ */
+gboolean
+tp_connection_can_report_abusive (TpConnection *self)
+{
+  return (self->priv->contact_blocking_capabilities &
+    TP_CONTACT_BLOCKING_CAPABILITY_CAN_REPORT_ABUSIVE) != 0;
+}
+
+/**
+ * tp_connection_get_blocked_contacts:
+ * @self: a #TpConnection
+ *
+ * <!-- -->
+ *
+ * Returns: (transfer none) (element-type TelepathyGLib.Contact): the value of
+ * #TpConnection:blocked-contacts
+ *
+ * Since: 0.17.0
+ */
+GPtrArray *
+tp_connection_get_blocked_contacts (TpConnection *self)
+{
+  return self->priv->blocked_contacts;
+}
+
+void
+_tp_connection_blocked_changed_queue_free (GQueue *queue)
+{
+  g_queue_foreach (queue, (GFunc) blocked_changed_item_free, NULL);
+  g_queue_free (queue);
+}
+
+/**
+ * TP_CONNECTION_FEATURE_CONTACT_LIST_PROPERTIES:
+ *
+ * Expands to a call to a function that returns a #GQuark representing the
+ * "contact-list-properties" feature.
+ *
+ * When this feature is prepared, the contact list properties of the Connection
+ * has been retrieved.
+ * This feature will fail to prepare when using obsolete Telepathy connection
+ * managers which do not implement the ContactList interface.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.17.0
+ */
+GQuark
+tp_connection_get_feature_quark_contact_list_properties (void)
+{
+  return g_quark_from_static_string (
+      "tp-connection-feature-contact-list-properties");
 }

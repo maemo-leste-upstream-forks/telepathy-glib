@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [16])
-m4_define([tp_glib_micro_version], [2])
+m4_define([tp_glib_minor_version], [17])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [63])
-m4_define([tp_glib_lt_revision], [3])
-m4_define([tp_glib_lt_age], [63])
+m4_define([tp_glib_lt_current], [64])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [64])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -59,7 +59,7 @@ PKG_PROG_PKG_CONFIG([0.21])
 
 GTK_DOC_CHECK([1.17],[--flavour no-tmpl])
 
-GOBJECT_INTROSPECTION_CHECK([0.9.6])
+GOBJECT_INTROSPECTION_CHECK([0.10.8])
 
 LT_CURRENT=tp_glib_lt_current
 LT_REVISION=tp_glib_lt_revision
@@ -170,16 +170,34 @@ fi
 
 AC_SUBST(COVERAGE_CFLAGS)
 
+AC_ARG_ENABLE([installed-tests],
+ AC_HELP_STRING([--enable-installed-tests],
+ [make tests installable]),
+ [installed_tests=$enableval], [installed_tests=no])
+
+if test x$installed_tests = xyes; then
+ AC_DEFINE(ENABLE_INSTALLED_TESTS, [],
+ [Make tests installable])
+fi
+AM_CONDITIONAL([ENABLE_INSTALLED_TESTS], [test "x$installed_tests" = xyes])
+
 AC_ARG_ENABLE([installed-examples],
   AC_HELP_STRING([--enable-installed-examples],
     [install examples as well as the library]),
     [enable_installed_examples="$enableval"],
-    [enable_installed_examples=no])
+    [enable_installed_examples=$installed_tests])
 AM_CONDITIONAL([INSTALL_EXAMPLES], [test "$enable_installed_examples" = yes])
+
+if test x$installed_tests = xyes -a x$enable_installed_examples != xyes; then
+  AC_MSG_ERROR([examples must be installed when tests are installed.])
+fi
 
 dnl docs/Makefile.am needs to know whether it's an out of tree build
 dnl (srcdir != builddir)
 AM_CONDITIONAL([OUT_OF_TREE_BUILD], [test "z$ac_srcdir" != z.])
+
+tpglibtestsdir=${libdir}/telepathy-glib-tests
+AC_SUBST(tpglibtestsdir)
 
 dnl Check for Glib
 PKG_CHECK_MODULES(GLIB,
