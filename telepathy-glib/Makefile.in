@@ -42,8 +42,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/abi.am $(srcdir)/codegen.am \
+DIST_COMMON = $(am__dist_gir_DATA_DIST) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/abi.am $(srcdir)/codegen.am \
 	$(srcdir)/introspection.am \
 	$(srcdir)/telepathy-glib-uninstalled.pc.in \
 	$(srcdir)/telepathy-glib.pc.in \
@@ -56,7 +56,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 
 @HAVE_LD_VERSION_SCRIPT_FALSE@am__append_4 = -export-symbols-regex '^tp'
 @HAVE_INTROSPECTION_TRUE@am__append_5 = \
-@HAVE_INTROSPECTION_TRUE@    $(gir_DATA) \
+@HAVE_INTROSPECTION_TRUE@    $(dist_gir_DATA) \
 @HAVE_INTROSPECTION_TRUE@    $(typelibs_DATA)
 
 subdir = telepathy-glib
@@ -184,7 +184,8 @@ SOURCES = $(libtelepathy_glib_internal_la_SOURCES) \
 	$(nodist_libtelepathy_glib_internal_la_SOURCES) \
 	$(nodist_libtelepathy_glib_la_SOURCES)
 DIST_SOURCES = $(libtelepathy_glib_internal_la_SOURCES)
-DATA = $(gir_DATA) $(pkgconfig_DATA) $(typelibs_DATA)
+am__dist_gir_DATA_DIST = TelepathyGLib-0.12.gir
+DATA = $(dist_gir_DATA) $(pkgconfig_DATA) $(typelibs_DATA)
 HEADERS = $(nodist_geninclude_HEADERS) $(tpginclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -240,9 +241,12 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
 INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
 INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
 INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
 INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
 INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LD = @LD@
@@ -349,6 +353,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+tpglibtestsdir = @tpglibtestsdir@
 tpgincludedir = $(includedir)/telepathy-1.0/telepathy-glib
 genincludedir = $(tpgincludedir)/_gen
 pkgconfigdir = ${libdir}/pkgconfig
@@ -690,6 +695,7 @@ ABI_LISTS = \
     versions/0.15.5.abi \
     versions/0.15.6.abi \
     versions/0.15.8.abi \
+    versions/0.17.0.abi \
     $(NULL)
 
 
@@ -825,12 +831,12 @@ DROP_NAMESPACE = sed -e 's@xmlns:tp="http://telepathy\.freedesktop\.org/wiki/Dbu
 tools_dir = $(top_srcdir)/tools
 introspection_extra_dist = \
 	TelepathyGLib-0.12.metadata \
-	kludge.xsl \
 	$(NULL)
 
+@HAVE_INTROSPECTION_TRUE@INTROSPECTION_GIRS = TelepathyGLib-0.12.gir
 
 # /!\ Order matters, see https://bugzilla.gnome.org/show_bug.cgi?id=660629
-@HAVE_INTROSPECTION_TRUE@INTROSPECTION_FILES = \
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_FILES = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account.c $(srcdir)/account.h \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/account-channel-request.c $(srcdir)/account-channel-request.h \
@@ -891,10 +897,32 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h \
 @HAVE_INTROSPECTION_TRUE@	$(NULL)
 
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_NAMESPACE = TelepathyGLib
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_VERSION = 0.12
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_LIBS = libtelepathy-glib.la
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_EXPORT_PACKAGES = telepathy-glib
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_SCANNERFLAGS = \
+@HAVE_INTROSPECTION_TRUE@	--identifier-prefix=Tp \
+@HAVE_INTROSPECTION_TRUE@	-I$(top_builddir) \
+@HAVE_INTROSPECTION_TRUE@	-I$(top_srcdir) \
+@HAVE_INTROSPECTION_TRUE@	--c-include="telepathy-glib/telepathy-glib.h" \
+@HAVE_INTROSPECTION_TRUE@	--warn-all \
+@HAVE_INTROSPECTION_TRUE@	$(NULL)
+
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_INCLUDES = \
+@HAVE_INTROSPECTION_TRUE@	GLib-2.0 \
+@HAVE_INTROSPECTION_TRUE@	Gio-2.0 \
+@HAVE_INTROSPECTION_TRUE@	$(NULL)
+
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_PACKAGES = \
+@HAVE_INTROSPECTION_TRUE@	gio-2.0	\
+@HAVE_INTROSPECTION_TRUE@	dbus-glib-1 \
+@HAVE_INTROSPECTION_TRUE@	$(NULL)
+
 @HAVE_INTROSPECTION_TRUE@girdir = $(datadir)/gir-1.0
-@HAVE_INTROSPECTION_TRUE@gir_DATA = TelepathyGLib-0.12.gir
+@HAVE_INTROSPECTION_TRUE@dist_gir_DATA = TelepathyGLib-0.12.gir
 @HAVE_INTROSPECTION_TRUE@typelibsdir = $(libdir)/girepository-1.0/
-@HAVE_INTROSPECTION_TRUE@typelibs_DATA = $(gir_DATA:.gir=.typelib)
+@HAVE_INTROSPECTION_TRUE@typelibs_DATA = $(dist_gir_DATA:.gir=.typelib)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1262,10 +1290,10 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-girDATA: $(gir_DATA)
+install-dist_girDATA: $(dist_gir_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(girdir)" || $(MKDIR_P) "$(DESTDIR)$(girdir)"
-	@list='$(gir_DATA)'; test -n "$(girdir)" || list=; \
+	@list='$(dist_gir_DATA)'; test -n "$(girdir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
@@ -1275,9 +1303,9 @@ install-girDATA: $(gir_DATA)
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(girdir)" || exit $$?; \
 	done
 
-uninstall-girDATA:
+uninstall-dist_girDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(gir_DATA)'; test -n "$(girdir)" || list=; \
+	@list='$(dist_gir_DATA)'; test -n "$(girdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(girdir)' && rm -f" $$files ")"; \
@@ -1505,7 +1533,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-girDATA install-nodist_genincludeHEADERS \
+install-data-am: install-dist_girDATA install-nodist_genincludeHEADERS \
 	install-pkgconfigDATA install-tpgincludeHEADERS \
 	install-typelibsDATA
 
@@ -1553,7 +1581,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-girDATA uninstall-libLTLIBRARIES \
+uninstall-am: uninstall-dist_girDATA uninstall-libLTLIBRARIES \
 	uninstall-nodist_genincludeHEADERS uninstall-pkgconfigDATA \
 	uninstall-tpgincludeHEADERS uninstall-typelibsDATA
 
@@ -1564,17 +1592,17 @@ uninstall-am: uninstall-girDATA uninstall-libLTLIBRARIES \
 	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-local \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-girDATA \
-	install-html install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man \
+	install install-am install-data install-data-am \
+	install-dist_girDATA install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLTLIBRARIES install-man \
 	install-nodist_genincludeHEADERS install-pdf install-pdf-am \
 	install-pkgconfigDATA install-ps install-ps-am install-strip \
 	install-tpgincludeHEADERS install-typelibsDATA installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-girDATA \
+	tags uninstall uninstall-am uninstall-dist_girDATA \
 	uninstall-libLTLIBRARIES uninstall-nodist_genincludeHEADERS \
 	uninstall-pkgconfigDATA uninstall-tpgincludeHEADERS \
 	uninstall-typelibsDATA
@@ -1647,7 +1675,9 @@ _gen/stable-spec.xml: stable-interfaces.xml _gen/stable-stamp $(tools_dir)/xincl
 
 # Grab a list of re-entrant tp_cli_*_run_* methods we are committed to
 # generating for backwards compatibility.
-_gen/reentrant-methods.list: $(top_srcdir)/docs/reference/telepathy-glib-sections.txt
+_gen/reentrant-methods.list: \
+	$(top_srcdir)/docs/reference/telepathy-glib-sections.txt \
+	_gen/spec-stamp
 	$(AM_V_GEN)$(GREP) 'tp_cli_.*_run_.*' $< > $@
 
 # Things generated from the whole spec at once
@@ -1789,40 +1819,11 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 
 # vim:set ft=automake:
 
+@HAVE_INTROSPECTION_TRUE@include $(INTROSPECTION_MAKEFILE)
+
 @HAVE_INTROSPECTION_TRUE@_gen/proxy-introspectable.h: proxy.h introspection.am
 @HAVE_INTROSPECTION_TRUE@	@$(mkdir_p) _gen
 @HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)sed -e 's/gpointer self/TpProxy *self/' < $< > $@
-
-@HAVE_INTROSPECTION_TRUE@TelepathyGLib-0.12.gir: $(INTROSPECTION_SCANNER) \
-@HAVE_INTROSPECTION_TRUE@		libtelepathy-glib.la \
-@HAVE_INTROSPECTION_TRUE@		$(srcdir)/kludge.xsl \
-@HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
-@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
-@HAVE_INTROSPECTION_TRUE@		--namespace TelepathyGLib \
-@HAVE_INTROSPECTION_TRUE@		--nsversion=0.12 \
-@HAVE_INTROSPECTION_TRUE@		--identifier-prefix=Tp \
-@HAVE_INTROSPECTION_TRUE@		-I$(top_builddir) \
-@HAVE_INTROSPECTION_TRUE@		-I$(top_srcdir) \
-@HAVE_INTROSPECTION_TRUE@		--include=GLib-2.0 \
-@HAVE_INTROSPECTION_TRUE@		--include=Gio-2.0 \
-@HAVE_INTROSPECTION_TRUE@		--libtool="$(top_builddir)/libtool" \
-@HAVE_INTROSPECTION_TRUE@		--library=libtelepathy-glib.la \
-@HAVE_INTROSPECTION_TRUE@		--pkg gio-2.0 \
-@HAVE_INTROSPECTION_TRUE@		--pkg dbus-glib-1 \
-@HAVE_INTROSPECTION_TRUE@		--pkg-export telepathy-glib \
-@HAVE_INTROSPECTION_TRUE@		--c-include="telepathy-glib/telepathy-glib.h" \
-@HAVE_INTROSPECTION_TRUE@		--warn-all \
-@HAVE_INTROSPECTION_TRUE@		--output _gen/$@.tmp \
-@HAVE_INTROSPECTION_TRUE@		$(INTROSPECTION_FILES)
-@HAVE_INTROSPECTION_TRUE@	@xsltproc $(srcdir)/kludge.xsl _gen/$@.tmp > $@
-@HAVE_INTROSPECTION_TRUE@	@rm -f _gen/$@.tmp
-
-@HAVE_INTROSPECTION_TRUE@%.typelib: %.gir $(INTROSPECTION_COMPILER)
-@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(top_builddir)/libtool --mode=execute \
-@HAVE_INTROSPECTION_TRUE@	    $(INTROSPECTION_COMPILER) \
-@HAVE_INTROSPECTION_TRUE@	        --includedir=$(srcdir) \
-@HAVE_INTROSPECTION_TRUE@	        --includedir=. \
-@HAVE_INTROSPECTION_TRUE@	        $(INTROSPECTION_COMPILER_OPTS) $< -o $(@F)
 
 # vim:set ft=automake:
 

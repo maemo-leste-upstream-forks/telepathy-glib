@@ -1,8 +1,38 @@
+commit c090f34baea89267739f5f1c923ab678088f3f47
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-08 12:53:20 +0100
+
+    prepare 0.17.0
+
+commit 3e0d6d15c1c053a40031d41912700a10130e9243
+Merge: e4d7e1e 664556d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-08 12:46:29 +0100
+
+    Merge branch 'telepathy-glib-0.16' into release
+    
+    Conflicts:
+    	NEWS
+    	configure.ac
+
+commit 664556d27223a9d1916e981368a21e8aba6d526a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-08 12:44:05 +0100
+
+    set nano flag
+
 commit cc199941231165935e99c04613873dfa4bc077e4
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2011-11-08 12:09:58 +0100
 
     prepare 0.16.2
+
+commit e4d7e1e653892eb802ec9301f22bb4cc49c29a85
+Merge: 4de1cf7 c561542
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-07 17:54:32 +0100
+
+    Merge branch 'telepathy-glib-0.16'
 
 commit c5615423317f2604498fb4bd2d7d3be02d06d31e
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
@@ -15,6 +45,223 @@ Date:   2011-11-07 17:15:39 +0100
     
     https://bugs.freedesktop.org/show_bug.cgi?id=42670
 
+commit 4de1cf73eaa89f75e540387be8c57e8fc34b343d
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-11-02 12:44:08 +0100
+
+    Fix race condition when an observer calls claim_with then accept the context
+    
+    tp_channel_dispatch_operation_claim_with_async() were preparing itself as first
+    step, which means the dbus call is not made directly, and the tp_observer_context_accept()
+    dbus message could get to MC first, making MC dispatch the channel to any capable handler.
+    
+    There is no reason to prepare self in _async calls, caller is responsible for that.
+    
+    Fixes fd.o#42503
+
+commit dedce116cc8b592743cb599bda3e6aa32c5be730
+Author: Xavier Claessens <xclaesse@gmail.com>
+Date:   2011-11-02 13:30:24 +0100
+
+    TpObserverChannelsContext: prepare the CDO
+    
+    Observers doing tp_cdo_claim_with_async() will need it to be prepared
+
+commit d2e6b77f34cf74cbaa8ec8f352ff7b7d9be117d4
+Author: Alban Crequy <alban.crequy@collabora.co.uk>
+Date:   2011-11-01 11:24:56 +0000
+
+    test example-no-protocols: fix the test when it is installed
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41455
+
+commit e745c29573950efcb7ffd7c0b6184582c4365c05
+Author: Alban Crequy <alban.crequy@collabora.co.uk>
+Date:   2011-10-04 16:57:03 +0100
+
+    tests: add --enable-installed-tests
+    
+    This configure option makes it possible to install the tests in
+    /usr/lib/telepathy-glib-tests and run them without the sources.
+    
+    The dbus configuration moved to tests/dbus/dbus-installed for the installed
+    tests and is duplicated into tests/dbus/dbus-uninstalled for the uninstalled
+    tests.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41455
+
+commit 45b8e51b72b95646ad855807d0b0f9d89737edf1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-03 12:48:10 +0100
+
+    Add TP_CONNECTION_FEATURE_CONTACT_LIST_PROPERTIES
+    
+    This feature is now a dependency on TP_CONNECTION_FEATURE_CONTACT_LIST so it
+    will be automatically prepared when preparing
+    TP_CONNECTION_FEATURE_CONTACT_LIST (so we don't break existing code)
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=42546
+
+commit 252e1801e2f781a0ec8f3732a878fa87cef8402f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-03 11:48:17 +0100
+
+    test that contact list properties are set
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=42546
+
+commit 3b40037ad760793c912c1cf391f69f9cc2c4cda3
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-03 11:38:59 +0100
+
+    contact-list-client: make test path clearer
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=42546
+
+commit 02e5923e69638efe7dcea50df48e186356fa8d0a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 12:13:50 +0100
+
+    check if we pass at least one contacts directly in the API call
+    
+    The error message will be more useful to users than the one in tp-glib's
+    internals.
+
+commit 48d50aacbde935e0f390922e422d4b846cc55c3b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:57:00 +0100
+
+    coding style tweak
+
+commit 941c288870f433c6dc6ed173156f1f7f80f0708a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:56:08 +0100
+
+    fix typo in comments
+
+commit 0526488eb0291d94540931cc6e6a4e5dd22a318d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:55:36 +0100
+
+    process_queued_blocked_changed: don't leak contacts
+
+commit 2ea9b904fc951506d3d0f95f99b3ad142391dd86
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:47:23 +0100
+
+    improve TpConnection:can-report-abusive doc
+
+commit 9cd28dd74b4d5e544cf66938ac66c0156d125de0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:45:31 +0100
+
+    prepare_contact_blocking_cb: remove useless goto
+
+commit ebeeb38ed7c800a4b3fa34a3c9e4363580bc833d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:44:04 +0100
+
+    improve TP_CONNECTION_FEATURE_CONTACT_BLOCKING
+
+commit 6a0e61e8d7fdda7fb6d30ae02de34f7638c3100d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:37:51 +0100
+
+    improve @@report_abusive doc
+
+commit 7a9b6ac95634eb32b651f3280514c7310944c422
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-11-01 10:33:20 +0100
+
+    _tp_contacts_to_handles: check we pass at least one contact
+    
+    All the functions using this were already documenting that we should pass at
+    least one contact.
+
+commit 7e48f9876b7505b8a74222f9efc669e8fcbe56fa
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-31 16:41:38 +0100
+
+    rename contact-list-clt.c to contact-list-client
+
+commit 70df467659e59c11a54245a57dba50eb53f6a8e5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-20 17:49:57 +0200
+
+    Automatically prepare TP_CONTACT_FEATURE_CONTACT_BLOCKING when possible
+    
+    Once TP_CONNECTION_FEATURE_CONTACT_BLOCKING has been prepared we can easily
+    prepare TP_CONTACT_FEATURE_CONTACT_BLOCKING on all contacts as we have all
+    the information needed. Extra contact feature for free!
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit 293c43f3c7d9359d7c03a150dbc348fbeaf14ca6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-20 16:23:59 +0200
+
+    TpContact: add is-blocked property
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit c712fb46c5ed09a461a86d52a712a03d33beae2d
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-19 17:14:27 +0200
+
+    add contact operations for blocking API
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit 1b48e12c7ce5104d4266c6917f32add72aba427b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-19 16:40:29 +0200
+
+    add TpConnection::blocked-contacts-changed: signal
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit 99faf245247dfd32ac21460b6e063655cdae2e60
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-19 13:41:15 +0200
+
+    add TpConnection:blocked-contacts property
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit b6b7882ef113588583d32bd0a201e00d80ff3f6a
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-17 11:37:29 +0200
+
+    add can-report-abusive property and TP_CONNECTION_FEATURE_CONTACT_BLOCKING
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit dd3f97cc9ae7f2770f10164f1ad2c8d4a3a04123
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-19 12:23:52 +0200
+
+    ExampleContactList: implement block_contacts_with_abuse_async
+    
+    That doesn't change much for existing tests but will be handy to test the
+    client side part of this property.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit 726e4173951c47757adaaf97368af862bdd3e2e8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-17 10:31:42 +0200
+
+    add high level API to block/unblock contacts
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=41801
+
+commit dfe6f80cf4e73d60d06fbe67b1f9c6ef0af4d545
+Merge: fa115d8 6e9c139
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-31 17:05:39 +0100
+
+    Merge branch 'telepathy-glib-0.16'
+
 commit 6e9c139d4a3b84e368d8f45592189d244fc59e32
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2011-10-31 16:48:06 +0100
@@ -23,6 +270,13 @@ Date:   2011-10-31 16:48:06 +0100
     
     g_return_if_fail() can be compiled as noop, so we shouldn't rely on it to get
     the handles.
+
+commit fa115d82e775075a9c9dbc7923ff5c375947378b
+Merge: e93e888 7fd5cd6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-31 15:55:21 +0100
+
+    Merge branch 'telepathy-glib-0.16'
 
 commit 7fd5cd6f113df88f5282486c86c0491f83b74919
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
@@ -35,6 +289,13 @@ Date:   2011-10-27 12:03:19 +0200
     
     https://bugs.freedesktop.org/show_bug.cgi?id=42305
 
+commit e93e8889e7b75fa25911419a757e24ae23bcd4d6
+Merge: fdfaade 3f095ac
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-10-31 22:36:51 +1100
+
+    Merge branch 'telepathy-glib-0.16'
+
 commit 3f095ac75873015fc6758f1da7c21f955d5b5ab4
 Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
 Date:   2011-10-31 22:33:38 +1100
@@ -43,6 +304,54 @@ Date:   2011-10-31 22:33:38 +1100
     
     It turns out that when we talked about invalidation, people didn't actually
     know what this meant.
+
+commit fdfaadecfe8ae955c3c227eb58e43c4161b5009e
+Merge: 9a7d919 751e72f
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-10-30 23:04:15 +1100
+
+    Merge branch 'introspection'
+
+commit 751e72fecfdf83c0290676eabb9253c2f7b215dc
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-10-29 11:30:30 +1100
+
+    introspection.am: Use correct variable name
+    
+    Fixes distcheck.
+
+commit 9a7d9195dab1035ffe2da0d7cd28c4a06b484881
+Author: Travis Reitter <travis.reitter@collabora.co.uk>
+Date:   2011-10-25 09:27:42 -0700
+
+    Replace deprecated g_unix_socket_* functions.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=42233
+
+commit 7ead77a13870e4ae7ed435e7cd695a81f7065470
+Author: Alban Crequy <alban.crequy@collabora.co.uk>
+Date:   2011-10-28 17:33:51 +0100
+
+    Removes reference to kludge.xsl
+    
+    kludge.xsl no longer exists with this commit:
+    
+    |commit 7728cd8d8fa224838f2081dce2e852ec418c61ef
+    |Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+    |Date:   Tue Oct 18 17:46:16 2011 +1100
+    |
+    |    Use g-i makefile rules to simplify building the introspection files
+    |
+    |    It turns out we can now remove the kludges which made the introspection rules
+    |    so complicated.
+
+commit 2c30c3b8f7a7df8ae78aead13a84e39614471fba
+Author: Mikhail Zabaluev <mikhail.zabaluev@nokia.com>
+Date:   2011-10-25 17:08:20 +0300
+
+    Fix a race condition in codegen make rules
+    
+    It occurs in parallel builds when your mkdir is not fast enough.
 
 commit f36aabfa69cb2fca1aa8cc21e75fa40ad5a4e48d
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
@@ -55,6 +364,13 @@ Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2011-10-24 17:45:05 +0200
 
     prepare 0.16.1
+
+commit 54ac9a23387546370652f5c81d2f735d1e294596
+Merge: de32456 6061577
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-24 16:42:51 +0200
+
+    Merge branch 'telepathy-glib-0.16'
 
 commit 60615777a80c190a270e270b1b3972e367ad7dfd
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
@@ -107,6 +423,13 @@ Date:   2011-10-20 05:34:30 +0100
 
     Add some extra debugging to make it easier to follow AccountManager preparation
 
+commit de32456d8d460b427ab26c489c142a41319d2023
+Merge: cb67f9f dd159a5
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-24 12:35:14 +0200
+
+    Merge branch 'telepathy-glib-0.16'
+
 commit dd159a5d6e737106f0966f2c121953079731f716
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2011-10-20 14:43:47 +0200
@@ -114,6 +437,13 @@ Date:   2011-10-20 14:43:47 +0200
     base-contact-list: implement TP_TOKEN_CONNECTION_INTERFACE_CONTACT_BLOCKING_BLOCKED
     
     https://bugs.freedesktop.org/show_bug.cgi?id=42049
+
+commit cb67f9f357769b6a6132d4e260e5885f7cdd2bfa
+Merge: 06519d2 ba3cfa8
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2011-10-18 17:14:28 +0200
+
+    Merge branch 'telepathy-glib-0.16'
 
 commit ba3cfa861786ba3c18f4759aa331b0a25a511b50
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
@@ -143,6 +473,33 @@ Date:   2011-10-18 15:46:11 +0200
     having no sender and so no contact to prepare.
     
     https://bugs.freedesktop.org/show_bug.cgi?id=41929
+
+commit 06519d20a42026638999a88a7efbe57457f86c6f
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-10-18 18:02:06 +1100
+
+    Bump g-i requirement to something that definitely supports the new makefile rules
+
+commit 7728cd8d8fa224838f2081dce2e852ec418c61ef
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-10-18 17:46:16 +1100
+
+    Use g-i makefile rules to simplify building the introspection files
+    
+    It turns out we can now remove the kludges which made the introspection rules
+    so complicated.
+
+commit d2fa46eb5e86d38db4033b62c5c352911f1746bb
+Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+Date:   2011-10-18 17:39:26 +1100
+
+    Update introspection.m4
+
+commit 93c41a465e78d7a8d9a1998bdb14edcc643ade33
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2011-10-14 15:13:17 +0100
+
+    And bump again to 0.16.999.1
 
 commit 1a01d5f17d259491211320b67036ab1bdfc1c134
 Author: Will Thompson <will.thompson@collabora.co.uk>
