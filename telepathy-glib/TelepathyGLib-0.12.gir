@@ -8209,9 +8209,12 @@ tp_base_connection_channel_manager_iter_next() to continue.</doc>
               c:identifier="TP_CHANNEL_MEDIA_CAPABILITY_IMMUTABLE_STREAMS"/>
     </bitfield>
     <bitfield name="ChannelPasswordFlags" c:type="TpChannelPasswordFlags">
-      <member name="channel_password_flag_provide"
+      <member name="provide"
               value="8"
               c:identifier="TP_CHANNEL_PASSWORD_FLAG_PROVIDE"/>
+      <member name="hint"
+              value="4"
+              c:identifier="TP_CHANNEL_PASSWORD_FLAG_HINT"/>
     </bitfield>
     <record name="ChannelPrivate" c:type="TpChannelPrivate" disguised="1">
     </record>
@@ -15219,6 +15222,56 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
           <type name="GLib.Quark" c:type="GQuark"/>
         </return-value>
       </function>
+      <method name="accept_file_async"
+              c:identifier="tp_file_transfer_channel_accept_file_async"
+              version="0.17.1">
+        <doc xml:whitespace="preserve">Accept an incoming file transfer in the
+%TP_FILE_TRANSFER_STATE_PENDING state. Once the accept has been
+processed, @callback will be called. You can then call
+tp_file_transfer_channel_accept_file_finish() to get the result of
+the operation.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="file" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GFile where the file should be saved</doc>
+            <type name="Gio.File" c:type="GFile*"/>
+          </parameter>
+          <parameter name="offset" transfer-ownership="none">
+            <doc xml:whitespace="preserve">Offset from the start of @file where transfer begins</doc>
+            <type name="guint64" c:type="guint64"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the transfer has been accepted</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="accept_file_finish"
+              c:identifier="tp_file_transfer_channel_accept_file_finish"
+              version="0.17.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes a call to tp_file_transfer_channel_accept_file_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if the accept operation was a success, or %FALSE</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="get_date"
               c:identifier="tp_file_transfer_channel_get_date"
               version="0.15.5">
@@ -15235,9 +15288,9 @@ property</doc>
               version="0.15.5">
         <doc xml:whitespace="preserve">Return the #TpFileTransferChannel:description property
 
-property</doc>
+#TpFileTransferChannel:description property</doc>
         <return-value transfer-ownership="none">
-          <doc xml:whitespace="preserve">the value of the #TpFileTransferChannel:description</doc>
+          <doc xml:whitespace="preserve">the value of the</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
       </method>
@@ -15246,10 +15299,25 @@ property</doc>
               version="0.15.5">
         <doc xml:whitespace="preserve">Return the #TpFileTransferChannel:filename property
 
-property</doc>
+#TpFileTransferChannel:filename property</doc>
         <return-value transfer-ownership="none">
-          <doc xml:whitespace="preserve">the value of the #TpFileTransferChannel:filename</doc>
+          <doc xml:whitespace="preserve">the value of the</doc>
           <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_metadata"
+              c:identifier="tp_file_transfer_channel_get_metadata"
+              version="0.17.1"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Return the #TpFileTransferChannel:metadata property
+
+value of the #TpFileTransferChannel:metadata property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the</doc>
+          <type name="GLib.HashTable" c:type="GHashTable*">
+            <type name="utf8"/>
+            <type name="GObject.Strv"/>
+          </type>
         </return-value>
       </method>
       <method name="get_mime_type"
@@ -15263,6 +15331,15 @@ property</doc>
           <type name="utf8" c:type="char*"/>
         </return-value>
       </method>
+      <method name="get_service_name"
+              c:identifier="tp_file_transfer_channel_get_service_name"
+              version="0.17.1">
+        <doc xml:whitespace="preserve">Return the #TpFileTransferChannel:service-name property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of the #TpFileTransferChannel:service-name property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
       <method name="get_size"
               c:identifier="tp_file_transfer_channel_get_size"
               version="0.15.5">
@@ -15271,6 +15348,28 @@ property</doc>
           <doc xml:whitespace="preserve">the value of the #TpFileTransferChannel:size property</doc>
           <type name="guint64" c:type="guint64"/>
         </return-value>
+      </method>
+      <method name="get_state"
+              c:identifier="tp_file_transfer_channel_get_state"
+              version="0.17.1">
+        <doc xml:whitespace="preserve">Returns the #TpFileTransferChannel:state property.
+
+If @reason is not %NULL it is set to the reason why
+#TpFileTransferChannel:state changed to its current value.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of the #TpFileTransferChannel:state property</doc>
+          <type name="FileTransferState" c:type="TpFileTransferState"/>
+        </return-value>
+        <parameters>
+          <parameter name="reason"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="full">
+            <doc xml:whitespace="preserve">a #TpFileTransferStateChangeReason, or %NULL</doc>
+            <type name="FileTransferStateChangeReason"
+                  c:type="TpFileTransferStateChangeReason*"/>
+          </parameter>
+        </parameters>
       </method>
       <method name="get_transferred_bytes"
               c:identifier="tp_file_transfer_channel_get_transferred_bytes"
@@ -15281,6 +15380,65 @@ property</doc>
           <type name="guint64" c:type="guint64"/>
         </return-value>
       </method>
+      <method name="provide_file_async"
+              c:identifier="tp_file_transfer_channel_provide_file_async"
+              version="0.17.1">
+        <doc xml:whitespace="preserve">Provide a file transfer. This should be called when the file
+transfer state changes (tp_file_transfer_channel_get_state() and
+the "notify::state" signal) to
+%TP_FILE_TRANSFER_STATE_ACCEPTED or
+%TP_FILE_TRANSFER_STATE_PENDING. Once the file has been provided,
+the channel #TpFileTransferChannel:state will change to
+%TP_FILE_TRANSFER_STATE_OPEN.
+
+Once the file has been provided, @callback will be called. You
+should then call tp_file_transfer_channel_provide_file_finish() to
+get the result of the operation.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="file" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GFile to send to the remote contact</doc>
+            <type name="Gio.File" c:type="GFile*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="2">
+            <doc xml:whitespace="preserve">a callback to call when the transfer has been accepted</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="provide_file_finish"
+              c:identifier="tp_file_transfer_channel_provide_file_finish"
+              version="0.17.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes a call to tp_file_transfer_channel_provide_file_async().
+
+
+Successful return from this function does not mean that the file
+transfer has completed or has even started at all. The state of the
+file transfer should be monitored with the "notify::state" signal.
+
+%FALSE.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if the file has been successfully provided, or</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
       <property name="date" transfer-ownership="none">
         <doc xml:whitespace="preserve">A #GDateTime representing the last modification time of the file to be
 transferred.
@@ -15289,11 +15447,27 @@ Since 0.15.5</doc>
         <type name="GLib.DateTime"/>
       </property>
       <property name="description" transfer-ownership="none">
-        <doc xml:whitespace="preserve">The description of the file transfer, defined by the sender when offering
-the file.
+        <doc xml:whitespace="preserve">The description of the file transfer, defined by the sender when
+sending the file transfer offer.
 
 Since 0.15.5</doc>
         <type name="utf8"/>
+      </property>
+      <property name="file" version="0.17.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">For incoming file transfers, this property will be set to a
+#GFile for the location where the file will be saved (given by
+tp_file_transfer_channel_accept_file_async()) when the transfer
+starts. The feature %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE must
+already be prepared for this property to have a meaningful
+value, and to receive change notification.  Once the initial
+value is set, this property will not be changed.
+
+For outgoing file transfers, this property is a #GFile for the
+location of the file being sent (given by
+tp_file_transfer_provide_file_async()). The feature
+%TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE does not have to be
+prepared and there is no change notification.</doc>
+        <type name="Gio.File"/>
       </property>
       <property name="filename" transfer-ownership="none">
         <doc xml:whitespace="preserve">The name of the file on the sender's side. This is therefore given as a
@@ -15302,8 +15476,83 @@ suggested filename for the receiver.
 Since 0.15.5</doc>
         <type name="utf8"/>
       </property>
+      <property name="initial-offset"
+                version="0.17.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The offset in bytes from where the file should be sent.
+
+The %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE feature has to be
+prepared for this property to be meaningful and kept up to date.</doc>
+        <type name="guint64"/>
+      </property>
+      <property name="metadata"
+                version="0.17.1"
+                introspectable="0"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Additional information about the file transfer set by the channel
+initiator, or an empty #GHashTable if the initiator did not
+provide any additional information.
+
+To provide metadata along with a file offer, include
+%TP_PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_METADATA in the
+channel request. For example:
+
+|[
+GHashTable *request;
+GHashTable *metadata = g_hash_table_new (g_str_hash, g_str_equal);
+const gchar * const values[] = { "Jason Derulo", "Tinie Tempah", NULL };
+
+g_hash_table_insert (metadata, "best buds", values);
+
+request = tp_asv_new (
+TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER,
+TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING, "foo@bar.com",
+TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_CONTENT_TYPE, G_TYPE_STRING, "text/plain",
+TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_DATE, G_TYPE_INT64, 1320925992,
+TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_DESCRIPTION, G_TYPE_STRING, "",
+TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_FILENAME, G_TYPE_STRING, "test.pdf",
+TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_INITIAL_OFFSET, G_TYPE_UINT64, 0,
+TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_SIZE, G_TYPE_UINT64, 165710,
+TP_PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_METADATA, TP_TYPE_METADATA, metadata,
+NULL);
+
+...
+]|
+
+The %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE feature has to be
+prepared for this property to be meaningful.</doc>
+        <type/>
+      </property>
       <property name="mime-type" version="0.15.5" transfer-ownership="none">
         <doc xml:whitespace="preserve">The MIME type of the file to be transferred.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="service-name" version="0.17.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A string representing the name of the service suggested to handle
+this file transfer channel, or %NULL if the initiator did not
+provide one.
+
+This is a useful way of requesting file transfer channels with a
+hint of what handler they should be handled by on the remote
+side. If a channel request is made with this property set (to a
+contact who also supports the metadata extension; see the
+requestable channel classes for said contact), this property will
+be set to the same value on the remote incoming channel and
+handlers can match on this in their handler filter. For example,
+a remote handler could call the following:
+
+|[
+tp_base_client_take_handler_filter (handler, tp_asv_new (
+TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER,
+TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+TP_PROP_CHANNEL_REQUESTED, G_TYPE_BOOLEAN, FALSE,
+TP_PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_SERVICE_NAME, G_TYPE_STRING, "service.name",
+NULL));
+]|
+
+The %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE feature has to be
+prepared for this property to be meaningful.</doc>
         <type name="utf8"/>
       </property>
       <property name="size" transfer-ownership="none">
@@ -15313,14 +15562,23 @@ or %G_MAXUINT64 if not known.
 Since 0.15.5</doc>
         <type name="guint64"/>
       </property>
+      <property name="state" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A TpFileTransferState holding the state of the file transfer.
+
+The %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE feature has to be
+prepared for this property to be meaningful and kept up to date.
+
+Since 0.17.1</doc>
+        <type name="guint"/>
+      </property>
       <property name="transferred-bytes"
                 version="0.15.5"
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">The number of bytes transferred so far in this
 file transfer.
 
-The %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE feature has to be prepared for
-this property to be meaningful and kept up to date.</doc>
+The %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE feature has to be
+prepared for this property to be meaningful and kept up to date.</doc>
         <type name="guint64"/>
       </property>
       <field name="parent" readable="0" private="1">
@@ -16904,6 +17162,11 @@ tp_handle_set_foreach().</doc>
     <constant name="IFACE_CHANNEL_INTERFACE_DTMF"
               value="org.freedesktop.Telepathy.Channel.Interface.DTMF"
               c:type="TP_IFACE_CHANNEL_INTERFACE_DTMF">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA"
+              value="org.freedesktop.Telepathy.Channel.Interface.FileTransfer.Metadata"
+              c:type="TP_IFACE_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="IFACE_CHANNEL_INTERFACE_GROUP"
@@ -18822,6 +19085,16 @@ This property can't be %NULL.</doc>
               c:type="TP_PROP_CHANNEL_INTERFACE_DTMF_INITIAL_TONES">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_METADATA"
+              value="org.freedesktop.Telepathy.Channel.Interface.FileTransfer.Metadata.Metadata"
+              c:type="TP_PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_METADATA">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_SERVICE_NAME"
+              value="org.freedesktop.Telepathy.Channel.Interface.FileTransfer.Metadata.ServiceName"
+              c:type="TP_PROP_CHANNEL_INTERFACE_FILE_TRANSFER_METADATA_SERVICE_NAME">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="PROP_CHANNEL_INTERFACE_GROUP_GROUP_FLAGS"
               value="org.freedesktop.Telepathy.Channel.Interface.Group.GroupFlags"
               c:type="TP_PROP_CHANNEL_INTERFACE_GROUP_GROUP_FLAGS">
@@ -18927,6 +19200,11 @@ This property can't be %NULL.</doc>
               c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CONFIG_PASSWORD">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_ROOM_CONFIG_PASSWORD_HINT"
+              value="org.freedesktop.Telepathy.Channel.Interface.RoomConfig1.PasswordHint"
+              c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CONFIG_PASSWORD_HINT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="PROP_CHANNEL_INTERFACE_ROOM_CONFIG_PASSWORD_PROTECTED"
               value="org.freedesktop.Telepathy.Channel.Interface.RoomConfig1.PasswordProtected"
               c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CONFIG_PASSWORD_PROTECTED">
@@ -18945,6 +19223,21 @@ This property can't be %NULL.</doc>
     <constant name="PROP_CHANNEL_INTERFACE_ROOM_CONFIG_TITLE"
               value="org.freedesktop.Telepathy.Channel.Interface.RoomConfig1.Title"
               c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CONFIG_TITLE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_ROOM_CREATION_TIMESTAMP"
+              value="org.freedesktop.Telepathy.Channel.Interface.Room2.CreationTimestamp"
+              c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CREATION_TIMESTAMP">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_ROOM_CREATOR"
+              value="org.freedesktop.Telepathy.Channel.Interface.Room2.Creator"
+              c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CREATOR">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_ROOM_CREATOR_HANDLE"
+              value="org.freedesktop.Telepathy.Channel.Interface.Room2.CreatorHandle"
+              c:type="TP_PROP_CHANNEL_INTERFACE_ROOM_CREATOR_HANDLE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="PROP_CHANNEL_INTERFACE_ROOM_ROOM_NAME"
@@ -27326,6 +27619,12 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="iface_quark_channel_interface_dtmf"
               c:identifier="tp_iface_quark_channel_interface_dtmf">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_channel_interface_file_transfer_metadata"
+              c:identifier="tp_iface_quark_channel_interface_file_transfer_metadata">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>

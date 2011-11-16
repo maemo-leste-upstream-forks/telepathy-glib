@@ -103,11 +103,13 @@
  * This collection of interfaces is used to expose various aspects of the
  * configuration of chat rooms.
  *
- * #TpSvcChannelInterfaceRoom consists only of a pair of requestable, immutable
- * properties: <code>"RoomName"</code> and <code>"Server"</code>. It has no
- * methods or signals. It should be implemented on channels representing a chat
- * room (whether it be a text chat, a multi-user call, or some other media
- * type).
+ * #TpSvcChannelInterfaceRoom consists of a pair of requestable,
+ * immutable properties: <code>"RoomName"</code> and
+ * <code>"Server"</code>; and a pair of immutable properties:
+ * <code>"Creator"</code>, <code>"CreatorHandle"</code>, and
+ * <code>"CreationTimestamp"</code>. It has no methods or signals. It
+ * should be implemented on channels representing a chat room (whether
+ * it be a text chat, a multi-user call, or some other media type).
  *
  * #TpSvcChannelInterfaceSubject may be implemented by channels which have a
  * subject (or topic, depending on your protocol's terminology of choice). This
@@ -978,4 +980,18 @@
  * end-to-end encrypted and/or protected from man-in-the-middle attacks.
  *
  * Since: 0.13.7
+ */
+
+/**
+ * SECTION:svc-channel-ft-metadata
+ * @title: File transfer Metadata interface
+ * @short_description: GInterface to implement metadata file transfer interface
+ *
+ * The Metadata file transfer channel interface exists to provide a
+ * mechanism to include arbitrary additional information in file
+ * transfers. For example, one might want to send a document and
+ * include the number of times the character P appeared in the file,
+ * so would add NumberOfPs=42 to the Metadata property.
+ *
+ * Since: 0.17.1
  */
