@@ -112,14 +112,15 @@ am_libtelepathy_glib_internal_la_OBJECTS = account.lo \
 	channel-contacts.lo channel-group.lo channel-dispatcher.lo \
 	channel-dispatch-operation.lo channel-manager.lo \
 	channel-request.lo client.lo client-channel-factory.lo \
-	client-message.lo connection.lo connection-avatars.lo \
-	connection-contact-info.lo connection-contact-list.lo \
-	connection-handles.lo connection-manager.lo contact.lo \
-	contact-list-channel.lo contact-operations.lo \
-	contact-search.lo contact-search-result.lo \
-	base-contact-list.lo cm-message.lo contacts-mixin.lo dbus.lo \
-	dbus-daemon.lo dbus-properties-mixin.lo dbus-tube-channel.lo \
-	debug.lo debug-sender.lo dtmf.lo interfaces.lo errors.lo \
+	client-message.lo connection.lo connection-aliasing.lo \
+	connection-avatars.lo connection-contact-info.lo \
+	connection-contact-list.lo connection-handles.lo \
+	connection-manager.lo contact.lo contact-list-channel.lo \
+	contact-operations.lo contact-search.lo \
+	contact-search-result.lo base-contact-list.lo cm-message.lo \
+	contacts-mixin.lo dbus.lo dbus-daemon.lo \
+	dbus-properties-mixin.lo dbus-tube-channel.lo debug.lo \
+	debug-sender.lo dtmf.lo interfaces.lo errors.lo \
 	exportable-channel.lo file-transfer-channel.lo gnio-util.lo \
 	group-mixin.lo gtypes.lo handle.lo handle-channels-context.lo \
 	handle-repo.lo handle-repo-dynamic.lo handle-repo-static.lo \
@@ -526,6 +527,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     client-message.c \
     client-message-internal.h \
     connection.c \
+    connection-aliasing.c \
     connection-avatars.c \
     connection-contact-info.c \
     connection-contact-list.c \
@@ -701,6 +703,8 @@ ABI_LISTS = \
     versions/0.15.8.abi \
     versions/0.17.0.abi \
     versions/0.17.1.abi \
+    versions/0.17.2.abi \
+    versions/0.17.3.abi \
     $(NULL)
 
 
@@ -839,7 +843,6 @@ introspection_extra_dist = \
 	$(NULL)
 
 @HAVE_INTROSPECTION_TRUE@INTROSPECTION_GIRS = TelepathyGLib-0.12.gir
-
 # /!\ Order matters, see https://bugzilla.gnome.org/show_bug.cgi?id=660629
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_FILES = \
 @HAVE_INTROSPECTION_TRUE@	$(srcdir)/proxy.c _gen/proxy-introspectable.h \
@@ -1047,6 +1050,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client-message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm-message.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-aliasing.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-avatars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-contact-list.Plo@am__quote@
@@ -1826,11 +1830,24 @@ _gen/tp-cli-%-body.h _gen/tp-cli-%.h: _gen/tp-spec-%.xml \
 
 @HAVE_INTROSPECTION_TRUE@include $(INTROSPECTION_MAKEFILE)
 
+@HAVE_INTROSPECTION_TRUE@TelepathyGLib-0.12.gir: libtelepathy-glib.la
+
 @HAVE_INTROSPECTION_TRUE@_gen/proxy-introspectable.h: proxy.h introspection.am
 @HAVE_INTROSPECTION_TRUE@	@$(mkdir_p) _gen
 @HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)sed -e 's/gpointer self/TpProxy *self/' < $< > $@
 
 # vim:set ft=automake:
+
+Android.mk: Makefile.am
+	androgenizer -:PROJECT telepathy-glib -:SHARED libtelepathy-glib -:TAGS eng debug \
+	 -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir) \
+	 -:SOURCES $(libtelepathy_glib_internal_la_SOURCES) \
+	  $(nodist_libtelepathy_glib_internal_la_SOURCES) \
+	 -:CFLAGS $(DEFAULT_INCLUDES) $(DEFS) $(CFLAGS) $(GIO_UNIX_CFLAGS) $(DBUS_CFLAGS) $(AM_CFLAGS) \
+	 -:CPPFLAGS $(CPPFLAGS) $(AM_CPPFLAGS) $(INCLUDES) \
+	 -:LDFLAGS $(libtelepathy_glib_internal_la_LIBADD) \
+	  $(libtelepathy_glib_internal_la_LDFLAGS) \
+	> $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
