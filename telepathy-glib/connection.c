@@ -1488,7 +1488,7 @@ tp_connection_finalize (GObject *object)
 
   if (self->priv->contact_attribute_interfaces != NULL)
     {
-      g_array_free (self->priv->contact_attribute_interfaces, TRUE);
+      g_array_unref (self->priv->contact_attribute_interfaces);
       self->priv->contact_attribute_interfaces = NULL;
     }
 
@@ -1503,7 +1503,7 @@ tp_connection_finalize (GObject *object)
 
   if (self->priv->avatar_request_queue != NULL)
     {
-      g_array_free (self->priv->avatar_request_queue, TRUE);
+      g_array_unref (self->priv->avatar_request_queue);
       self->priv->avatar_request_queue = NULL;
     }
 
@@ -1558,7 +1558,7 @@ tp_connection_dispose (GObject *object)
     {
       g_hash_table_foreach (self->priv->contacts, contact_notify_invalidated,
           NULL);
-      tp_clear_pointer (&self->priv->contacts, g_hash_table_destroy);
+      tp_clear_pointer (&self->priv->contacts, g_hash_table_unref);
     }
 
   tp_clear_object (&self->priv->capabilities);
@@ -1611,6 +1611,7 @@ enum {
     FEAT_CONTACT_LIST_PROPS,
     FEAT_CONTACT_GROUPS,
     FEAT_CONTACT_BLOCKING,
+    FEAT_ALIASING,
     N_FEAT
 };
 
@@ -1626,6 +1627,7 @@ tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   static GQuark need_contact_groups[2] = {0, 0};
   static GQuark need_contact_blocking[2] = {0, 0};
   static GQuark depends_contact_list[2] = {0, 0};
+  static GQuark need_aliasing[2] = {0, 0};
 
   if (G_LIKELY (features[0].name != 0))
     return features;
@@ -1679,6 +1681,11 @@ tp_connection_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   features[FEAT_CONTACT_BLOCKING].prepare_async = _tp_connection_prepare_contact_blocking_async;
   need_contact_blocking[0] = TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING;
   features[FEAT_CONTACT_BLOCKING].interfaces_needed = need_contact_blocking;
+
+  features[FEAT_ALIASING].name = TP_CONNECTION_FEATURE_ALIASING;
+  features[FEAT_ALIASING].prepare_async = _tp_connection_prepare_aliasing_async;
+  need_aliasing[0] = TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING;
+  features[FEAT_ALIASING].interfaces_needed = need_aliasing;
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);
@@ -2823,7 +2830,7 @@ tp_list_connection_names_helper (TpDBusDaemon *bus_daemon,
       (const gchar * const *) protocols->pdata,
       NULL, list_context->user_data, user_object);
 
-  g_ptr_array_free (bus_names, TRUE);
+  g_ptr_array_unref (bus_names);
   g_strfreev ((char **) g_ptr_array_free (cms, FALSE));
   g_strfreev ((char **) g_ptr_array_free (protocols, FALSE));
 }

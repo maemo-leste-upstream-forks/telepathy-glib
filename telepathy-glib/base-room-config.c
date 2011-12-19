@@ -50,7 +50,7 @@
  *     TP_TYPE_BASE_CHANNEL,
  *     // ...
  *     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG,
- *         tp_base_room_config_iface_init);
+ *         tp_base_room_config_iface_init)
  *     // ...
  *     )
  * ]|
@@ -330,7 +330,7 @@ tp_base_room_config_get_property (
         g_ptr_array_add (property_names, NULL);
         g_value_take_boxed (value,
             g_strdupv ((gchar **) property_names->pdata));
-        g_ptr_array_free (property_names, TRUE);
+        g_ptr_array_unref (property_names);
         break;
       }
       case PROP_CONFIGURATION_RETRIEVED:
@@ -1030,7 +1030,7 @@ tp_base_room_config_iface_init (
  *
  * Returns the channel to which @self is attached.
  *
- * Returns: (transfer full): the #TpBaseChannel:channel property.
+ * Returns: (transfer full): the #TpBaseRoomConfig:channel property.
  */
 TpBaseChannel *
 tp_base_room_config_dup_channel (

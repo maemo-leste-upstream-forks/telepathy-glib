@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [17])
-m4_define([tp_glib_micro_version], [1])
+m4_define([tp_glib_micro_version], [4])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [65])
-m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [65])
+m4_define([tp_glib_lt_current], [66])
+m4_define([tp_glib_lt_revision], [1])
+m4_define([tp_glib_lt_age], [66])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -126,10 +126,6 @@ if test x"$enable_debug_cache" != xno
 then
   AC_DEFINE([ENABLE_DEBUG_CACHE], [1], [Define to enable debug message cache])
 fi
-
-AC_ARG_ENABLE(handle-leak-debug,
-  AC_HELP_STRING([--enable-handle-leak-debug],[compile with handle leak debugging code (the CM should be built with -rdynamic)]),
-    enable_handle_leak_debug=$enableval, enable_handle_leak_debug=no )
 
 AC_ARG_ENABLE(backtrace,
   AC_HELP_STRING([--enable-backtrace],[enable printing out the backtrace in case of crash (in most GLib connection managers)]),

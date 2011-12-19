@@ -531,7 +531,7 @@ _tp_account_manager_dispose (GObject *object)
 
   priv->dispose_run = TRUE;
 
-  g_hash_table_destroy (priv->accounts);
+  g_hash_table_unref (priv->accounts);
 
   g_hash_table_iter_init (&iter, self->priv->legacy_accounts);
   while (g_hash_table_iter_next (&iter, NULL, &value))
@@ -1292,18 +1292,8 @@ tp_account_manager_create_account_finish (TpAccountManager *manager,
     GAsyncResult *result,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (manager), tp_account_manager_create_account_finish), NULL);
-
-  simple = (GSimpleAsyncResult *) result;
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return NULL;
-
-  return TP_ACCOUNT (g_simple_async_result_get_op_res_gpointer (simple));
+  _tp_implement_finish_return_copy_pointer (manager,
+      tp_account_manager_create_account_finish, /* do not copy */);
 }
 
 /**

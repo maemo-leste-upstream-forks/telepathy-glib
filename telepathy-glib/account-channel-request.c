@@ -733,7 +733,7 @@ acr_channel_request_succeeded_with_channel (TpChannelRequest *chan_req,
       tp_proxy_prepare_async (self->priv->channel, (GQuark *) features->data,
           channel_prepare_cb, self);
 
-      g_array_free (features, TRUE);
+      g_array_unref (features);
     }
   else
     {
@@ -1264,21 +1264,7 @@ request_channel_finish (TpAccountChannelRequest *self,
     gpointer source_tag,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT_CHANNEL_REQUEST (self), FALSE);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
-
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return FALSE;
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (self), source_tag),
-      FALSE);
-
-  return TRUE;
+  _tp_implement_finish_void (self, source_tag);
 }
 
 /**

@@ -182,6 +182,7 @@ libtelepathy_glib_internal_la_SOURCES = \
     client-message.c \
     client-message-internal.h \
     connection.c \
+    connection-aliasing.c \
     connection-avatars.c \
     connection-contact-info.c \
     connection-contact-list.c \
@@ -280,3 +281,14 @@ ALL_LIBS = \
 include abi.am
 include codegen.am
 include introspection.am
+
+Android.mk: Makefile.am
+	androgenizer -:PROJECT telepathy-glib -:SHARED libtelepathy-glib -:TAGS eng debug \
+	 -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir) \
+	 -:SOURCES $(libtelepathy_glib_internal_la_SOURCES) \
+	  $(nodist_libtelepathy_glib_internal_la_SOURCES) \
+	 -:CFLAGS $(DEFAULT_INCLUDES) $(DEFS) $(CFLAGS) $(GIO_UNIX_CFLAGS) $(DBUS_CFLAGS) $(AM_CFLAGS) \
+	 -:CPPFLAGS $(CPPFLAGS) $(AM_CPPFLAGS) $(INCLUDES) \
+	 -:LDFLAGS $(libtelepathy_glib_internal_la_LIBADD) \
+	  $(libtelepathy_glib_internal_la_LDFLAGS) \
+	> $@
