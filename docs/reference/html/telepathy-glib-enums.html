@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Telepathy protocol enumerations</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-protocol.html" title="The Telepathy protocol">
 <link rel="prev" href="telepathy-glib-interfaces.html" title="Telepathy protocol interface and property names">
@@ -1741,12 +1741,12 @@ Bitfield/set of flags generated from the Telepathy specification.
 <tbody>
 <tr>
 <td><p><a name="TP-SOCKET-ACCESS-CONTROL-LOCALHOST:CAPS"></a><span class="term"><code class="literal">TP_SOCKET_ACCESS_CONTROL_LOCALHOST</code></span></p></td>
-<td>           The IP or Unix socket can be accessed by any local user (e.g.           a Unix socket that accepts all local connections, or an IP socket           listening on 127.0.0.1 (or ::1) or rejecting connections not from           that address). The associated variant must be ignored.         
+<td>           The IP or Unix socket can be accessed by any local user (e.g.             a Unix socket that accepts all local connections, or an IP socket             listening on 127.0.0.1 (or ::1) or rejecting connections not from             that address). The associated variant must be ignored.            For a D-Bus tube, this means that the "same user" access             control typically provided by default in D-Bus implementations             SHOULD be disabled. If the socket is only available to local users             (e.g. a Unix socket, an IPv4 socket bound to 127.0.0.1, or an             IPv6 socket bound to ::1), the ANONYMOUS             authentication mechanism MAY be enabled.         
 </td>
 </tr>
 <tr>
 <td><p><a name="TP-SOCKET-ACCESS-CONTROL-PORT:CAPS"></a><span class="term"><code class="literal">TP_SOCKET_ACCESS_CONTROL_PORT</code></span></p></td>
-<td>           May only be used on IP sockets. The associated variant must contain           a struct Socket_Address_IPv4 (or Socket_Address_IPv6)           containing the string form of an IP address of the appropriate           version, and a port number. The socket can only be accessed if the           connecting process has that address and port number; all other           connections will be rejected.         
+<td>           May only be used on IP sockets, and only for Stream tubes.                      The associated variant must contain           a struct Socket_Address_IPv4 (or Socket_Address_IPv6)           containing the string form of an IP address of the appropriate           version, and a port number. The socket can only be accessed if the           connecting process has that address and port number; all other           connections will be rejected.         
 </td>
 </tr>
 <tr>
@@ -1756,7 +1756,7 @@ Bitfield/set of flags generated from the Telepathy specification.
 </tr>
 <tr>
 <td><p><a name="TP-SOCKET-ACCESS-CONTROL-CREDENTIALS:CAPS"></a><span class="term"><code class="literal">TP_SOCKET_ACCESS_CONTROL_CREDENTIALS</code></span></p></td>
-<td>           May only be used on UNIX sockets.             The connecting process must send a byte when             it first connects, which is not considered to be part of the data             stream. If the operating system uses sendmsg() with SCM_CREDS or             SCM_CREDENTIALS to pass credentials over sockets, the connecting             process must do so if possible; if not, it must still send the             byte.            The listening process will disconnect the connection unless it             can determine by OS-specific means that the connecting process             has the same user ID as the listening process.            The associated variant must be ignored.         
+<td>           The high-level meaning of this access control type is that             only the same user (e.g. same numeric Unix uid) is allowed to             interact with the tube. Exactly how this is achieved varies by             channel type.            For StreamTube channels, this access control type             may only be used on UNIX sockets.             The connecting process must send a byte when             it first connects, which is not considered to be part of the data             stream. If the operating system uses sendmsg() with SCM_CREDS or             SCM_CREDENTIALS to pass credentials over sockets, the connecting             process must do so if possible; if not, it must still send the             byte, without any attached credentials. (This mechanism is             very similar to the first byte of a D-Bus connection, except that             in D-Bus the byte is always zero, whereas in Tubes it can be             nonzero.)            For DBusTube channels, this access control type             may be used on any type of socket, and there is no extra byte             added by Telepathy at the beginning of the stream: all bytes in             the stream are part of the D-Bus tube connection. The connecting             process should prove its identity via any of the SASL             authentication mechanisms usually used for D-Bus (in typical             D-Bus implementations this involves either sending and receiving             credentials as above, or demonstrating the ability to write to a             file in the user's home directory).            In either case, the listening process will disconnect the             connection unless it can determine by OS-specific means that             the connecting process has the same user ID as the listening             process.            In either tube type, the associated variant must be ignored.         
 </td>
 </tr>
 </tbody>

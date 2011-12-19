@@ -70,6 +70,7 @@ am__EXEEXT_1 = test-account$(EXEEXT) \
 	test-cli-group$(EXEEXT) test-client$(EXEEXT) \
 	test-client-channel-factory$(EXEEXT) test-cm$(EXEEXT) \
 	test-cm-message$(EXEEXT) test-connection$(EXEEXT) \
+	test-connection-aliasing$(EXEEXT) \
 	test-connection-balance$(EXEEXT) \
 	test-connection-bug-18845$(EXEEXT) \
 	test-connection-error$(EXEEXT) \
@@ -242,6 +243,11 @@ test_connection_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_connection_aliasing_OBJECTS = connection-aliasing.$(OBJEXT)
+test_connection_aliasing_OBJECTS =  \
+	$(am_test_connection_aliasing_OBJECTS)
+test_connection_aliasing_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/examples/cm/contactlist/libexample-cm-contactlist.la
 am_test_connection_balance_OBJECTS = connection-balance.$(OBJEXT)
 test_connection_balance_OBJECTS =  \
 	$(am_test_connection_balance_OBJECTS)
@@ -601,7 +607,8 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_channel_request_SOURCES) $(test_cli_group_SOURCES) \
 	$(test_client_SOURCES) $(test_client_channel_factory_SOURCES) \
 	$(test_cm_SOURCES) $(test_cm_message_SOURCES) \
-	$(test_connection_SOURCES) $(test_connection_balance_SOURCES) \
+	$(test_connection_SOURCES) $(test_connection_aliasing_SOURCES) \
+	$(test_connection_balance_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
@@ -644,7 +651,8 @@ DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_channel_request_SOURCES) $(test_cli_group_SOURCES) \
 	$(test_client_SOURCES) $(test_client_channel_factory_SOURCES) \
 	$(test_cm_SOURCES) $(test_cm_message_SOURCES) \
-	$(test_connection_SOURCES) $(test_connection_balance_SOURCES) \
+	$(test_connection_SOURCES) $(test_connection_aliasing_SOURCES) \
+	$(test_connection_balance_SOURCES) \
 	$(test_connection_bug_18845_SOURCES) \
 	$(test_connection_error_SOURCES) \
 	$(test_connection_getinterfaces_failure_SOURCES) \
@@ -869,6 +877,7 @@ tests_list = \
     test-cm \
     test-cm-message \
     test-connection \
+    test-connection-aliasing \
     test-connection-balance \
     test-connection-bug-18845 \
     test-connection-error \
@@ -966,6 +975,11 @@ test_contact_lists_LDADD = \
 
 test_contact_list_client_SOURCES = contact-list-client.c
 test_contact_list_client_LDADD = \
+    $(LDADD) \
+    $(top_builddir)/examples/cm/contactlist/libexample-cm-contactlist.la
+
+test_connection_aliasing_SOURCES = connection-aliasing.c
+test_connection_aliasing_LDADD = \
     $(LDADD) \
     $(top_builddir)/examples/cm/contactlist/libexample-cm-contactlist.la
 
@@ -1264,6 +1278,9 @@ test-cm-message$(EXEEXT): $(test_cm_message_OBJECTS) $(test_cm_message_DEPENDENC
 test-connection$(EXEEXT): $(test_connection_OBJECTS) $(test_connection_DEPENDENCIES) 
 	@rm -f test-connection$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_connection_OBJECTS) $(test_connection_LDADD) $(LIBS)
+test-connection-aliasing$(EXEEXT): $(test_connection_aliasing_OBJECTS) $(test_connection_aliasing_DEPENDENCIES) 
+	@rm -f test-connection-aliasing$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_connection_aliasing_OBJECTS) $(test_connection_aliasing_LDADD) $(LIBS)
 test-connection-balance$(EXEEXT): $(test_connection_balance_OBJECTS) $(test_connection_balance_DEPENDENCIES) 
 	@rm -f test-connection-balance$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_connection_balance_OBJECTS) $(test_connection_balance_LDADD) $(LIBS)
@@ -1446,6 +1463,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm-message.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-aliasing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-balance.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-bug-18845.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection-error.Po@am__quote@

@@ -1524,10 +1524,10 @@ tp_proxy_prepare_async() has finished; until then, the value is
         <type name="gboolean"/>
       </property>
       <property name="connection" version="0.9.0" transfer-ownership="none">
-        <doc xml:whitespace="preserve">The connection of the account, or NULL if account is offline.
+        <doc xml:whitespace="preserve">The connection of the account, or %NULL if account is offline.
 Note that the returned #TpConnection is not guaranteed to have any
 features pre-prepared (not even %TP_CONNECTION_FEATURE_CORE) unless
-%TP_ACCOUNT_FEATURE_ACCOUNT has been prepared on the account
+%TP_ACCOUNT_FEATURE_CONNECTION has been prepared on the account
 
 One can receive change notifications on this property by connecting
 to the #GObject::notify signal and using this property as the signal
@@ -1567,7 +1567,7 @@ The keys for this map are defined by
 &lt;ulink url="http://telepathy.freedesktop.org/spec/"&gt;the Telepathy D-Bus
 Interface Specification&lt;/ulink&gt;. They will typically include
 &lt;literal&gt;debug-message&lt;/literal&gt;, which is a debugging message in the C
-locale, analogous to #GError.message.
+locale, analogous to #GError&lt;!-- --&gt;.message.
 
 One can receive change notifications on this property by connecting
 to the #TpAccount::status-changed signal, or by connecting
@@ -4929,9 +4929,9 @@ interfaces always present (@interfaces_always_present in
 #TpBaseConnection::clients-interested and
 #TpBaseConnection::clients-uninterested.
 
-This method must be called from the #GObjectClass.constructed or
-#GObjectClass.constructor callback (otherwise, it will run too late to be
-useful).</doc>
+This method must be called from the #GObjectClass&lt;!--
+--&gt;.constructed or #GObjectClass&lt;!-- --&gt;.constructor callback
+(otherwise, it will run too late to be useful).</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -4970,7 +4970,7 @@ those two transitions one after the other.
 Any other valid transition does the following, in this order:
 
 &lt;itemizedlist&gt;
-&lt;listitem&gt;Update #TpBaseConnection.status;&lt;/listitem&gt;
+&lt;listitem&gt;Update #TpBaseConnection&lt;!-- --&gt;.status;&lt;/listitem&gt;
 &lt;listitem&gt;If the new state is #TP_CONNECTION_STATUS_DISCONNECTED, call
 tp_channel_factory_iface_close_all() on all channel factories&lt;/listitem&gt;
 &lt;listitem&gt;Emit the D-Bus StatusChanged signal;&lt;/listitem&gt;
@@ -5008,7 +5008,7 @@ is disposed.</doc>
               c:identifier="tp_base_connection_disconnect_with_dbus_error"
               version="0.7.24"
               introspectable="0">
-        <doc xml:whitespace="preserve">Changes the #TpBaseConnection.status of @self to
+        <doc xml:whitespace="preserve">Changes the #TpBaseConnection&lt;!-- --&gt;.status of @self to
 %TP_CONNECTION_STATUS_DISCONNECTED, as if by a call to
 tp_base_connection_change_status(), but additionally emits the
 &lt;code&gt;ConnectionError&lt;/code&gt; D-Bus signal to provide more details about the
@@ -5176,8 +5176,9 @@ property will remain %NULL, and tp_base_connection_register() will fail.</doc>
                 introspectable="0"
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">The Connection.Status as visible on D-Bus, which is the same as
-#TpBaseConnection.status except that %TP_INTERNAL_CONNECTION_STATUS_NEW
-is replaced by %TP_CONNECTION_STATUS_DISCONNECTED.
+#TpBaseConnection&lt;!-- --&gt;.status except that
+%TP_INTERNAL_CONNECTION_STATUS_NEW is replaced by
+%TP_CONNECTION_STATUS_DISCONNECTED.
 
 The #GObject::notify signal is not currently emitted for this property.</doc>
         <type name="guint"/>
@@ -6160,7 +6161,7 @@ This is the same as the #TpChannelIface:handle property. It isn't
 guaranteed to have its final value until the %TP_CHANNEL_FEATURE_CORE
 feature is ready.
 
-If %handle_type is not %NULL, the type of handle is written into it.
+If @handle_type is not %NULL, the type of handle is written into it.
 This will be %TP_UNKNOWN_HANDLE_TYPE if the handle has not yet been
 discovered, or %TP_HANDLE_TYPE_NONE if there is no handle with which this
 channel will always communicate. This is the same as the
@@ -8882,6 +8883,12 @@ fails or on invalid arguments</doc>
           </parameter>
         </parameters>
       </constructor>
+      <function name="get_feature_quark_aliasing"
+                c:identifier="tp_connection_get_feature_quark_aliasing">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
       <function name="get_feature_quark_avatar_requirements"
                 c:identifier="tp_connection_get_feature_quark_avatar_requirements">
         <return-value transfer-ownership="none">
@@ -9021,7 +9028,7 @@ tp_connection_add_client_interest() for the string value of @interested_in.</doc
         <doc xml:whitespace="preserve">Add the given @contacts to the given @group, creating it if necessary.
 
 For this to work properly @self must have interface
-%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUP.</doc>
+%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -9246,6 +9253,12 @@ Call tp_cli_connection_call_connect() too, if you want to do that.</doc>
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpConnection:can-report-abusive</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="can_set_contact_alias"
+              c:identifier="tp_connection_can_set_contact_alias">
+        <return-value transfer-ownership="none">
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
@@ -10053,7 +10066,7 @@ For this to work properly @self must have interface
 left in the group afterwards, the group MAY itself be removed.
 
 For this to work properly @self must have interface
-%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUP.</doc>
+%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -10108,7 +10121,7 @@ For this to work properly @self must have interface
         <doc xml:whitespace="preserve">Remove all members from the given group, then remove the group itself.
 
 For this to work properly @self must have interface
-%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUP.</doc>
+%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -10157,7 +10170,7 @@ adding all of the group's members to a group with the new name, then removing
 the old group.
 
 For this to work properly @self must have interface
-%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUP.</doc>
+%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -10397,7 +10410,7 @@ tp_connection_get_contact_info_flags() does not include
 remove all other members.
 
 For this to work properly @self must have interface
-%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUP.</doc>
+%TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -12906,7 +12919,7 @@ operation.
 If the operation is successful and %TP_CONTACT_FEATURE_CONTACT_GROUPS is
 prepared, the #TpContact:contact-groups property will be
 updated (emitting "notify::contact-groups" signal) and
-#TpContact:contact-groups-changed signal will be emitted before @callback
+#TpContact::contact-groups-changed signal will be emitted before @callback
 is called. That means you can call tp_contact_get_contact_groups() to get the
 new contact groups inside @callback.</doc>
         <return-value transfer-ownership="none">
@@ -15464,7 +15477,7 @@ value is set, this property will not be changed.
 
 For outgoing file transfers, this property is a #GFile for the
 location of the file being sent (given by
-tp_file_transfer_provide_file_async()). The feature
+tp_file_transfer_channel_provide_file_async()). The feature
 %TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE does not have to be
 prepared and there is no change notification.</doc>
         <type name="Gio.File"/>
@@ -17472,6 +17485,11 @@ tp_handle_set_foreach().</doc>
     <constant name="IFACE_PROTOCOL"
               value="org.freedesktop.Telepathy.Protocol"
               c:type="TP_IFACE_PROTOCOL">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_PROTOCOL_INTERFACE_ADDRESSING"
+              value="org.freedesktop.Telepathy.Protocol.Interface.Addressing"
+              c:type="TP_IFACE_PROTOCOL_INTERFACE_ADDRESSING">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="IFACE_PROTOCOL_INTERFACE_AVATARS"
@@ -19900,6 +19918,16 @@ This property can't be %NULL.</doc>
               c:type="TP_PROP_PROTOCOL_INTERFACES">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="PROP_PROTOCOL_INTERFACE_ADDRESSING_ADDRESSABLE_URI_SCHEMES"
+              value="org.freedesktop.Telepathy.Protocol.Interface.Addressing.AddressableURISchemes"
+              c:type="TP_PROP_PROTOCOL_INTERFACE_ADDRESSING_ADDRESSABLE_URI_SCHEMES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_PROTOCOL_INTERFACE_ADDRESSING_ADDRESSABLE_VCARD_FIELDS"
+              value="org.freedesktop.Telepathy.Protocol.Interface.Addressing.AddressableVCardFields"
+              c:type="TP_PROP_PROTOCOL_INTERFACE_ADDRESSING_ADDRESSABLE_VCARD_FIELDS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="PROP_PROTOCOL_INTERFACE_AVATARS_MAXIMUM_AVATAR_BYTES"
               value="org.freedesktop.Telepathy.Protocol.Interface.Avatars.MaximumAvatarBytes"
               c:type="TP_PROP_PROTOCOL_INTERFACE_AVATARS_MAXIMUM_AVATAR_BYTES">
@@ -20254,7 +20282,7 @@ presence_mixin));
 contacts. The returned hash table should have contact handles mapped to
 their respective presence statuses in #TpPresenceStatus structs.
 
-The returned hash table will be freed with g_hash_table_destroy. The
+The returned hash table will be freed with g_hash_table_unref. The
 callback is responsible for ensuring that this does any cleanup that
 may be necessary.
 
@@ -24564,9 +24592,9 @@ NULL);&lt;/programlisting&gt;
 &lt;/example&gt;
 
 Allocated values will be automatically free'd when overwritten, removed or
-the hash table destroyed with g_hash_table_destroy().
+the hash table destroyed with g_hash_table_unref().
 
-g_hash_table_destroy().</doc>
+g_hash_table_unref().</doc>
       <return-value>
         <doc xml:whitespace="preserve">a newly created #GHashTable for storing a{sv} maps, free with</doc>
         <type name="GLib.HashTable" c:type="GHashTable*">
@@ -27989,6 +28017,12 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="iface_quark_protocol"
               c:identifier="tp_iface_quark_protocol">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_protocol_interface_addressing"
+              c:identifier="tp_iface_quark_protocol_interface_addressing">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>

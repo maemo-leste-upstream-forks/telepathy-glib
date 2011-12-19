@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Service-side Protocol interface</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-service-dbus.html" title="Service-side D-Bus interfaces">
 <link rel="prev" href="telepathy-glib-svc-connection-manager.html" title="Service-side Connection Manager interface">
@@ -41,7 +41,7 @@
 </tr></table></div>
 <div class="refsynopsisdiv">
 <a name="telepathy-glib-svc-protocol.synopsis"></a><h2>Synopsis</h2>
-<a name="TpSvcProtocol"></a><a name="TpSvcProtocolInterfacePresence"></a><a name="TpSvcProtocolInterfaceAvatars"></a><pre class="synopsis">
+<a name="TpSvcProtocol"></a><a name="TpSvcProtocolInterfaceAddressing"></a><a name="TpSvcProtocolInterfacePresence"></a><a name="TpSvcProtocolInterfaceAvatars"></a><pre class="synopsis">
 #include &lt;telepathy-glib/svc-protocol.h&gt;
 
                     <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocol-struct" title="TpSvcProtocol">TpSvcProtocol</a>;
@@ -68,6 +68,9 @@
                                                         (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *out_Normalized_Contact_ID</code></em>);
 
+                    <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocolInterfaceAddressing-struct" title="TpSvcProtocolInterfaceAddressing">TpSvcProtocolInterfaceAddressing</a>;
+                    <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocolInterfaceAddressingClass" title="TpSvcProtocolInterfaceAddressingClass">TpSvcProtocolInterfaceAddressingClass</a>;
+
                     <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocolInterfacePresence-struct" title="TpSvcProtocolInterfacePresence">TpSvcProtocolInterfacePresence</a>;
                     <a class="link" href="telepathy-glib-svc-protocol.html#TpSvcProtocolInterfacePresenceClass" title="TpSvcProtocolInterfacePresenceClass">TpSvcProtocolInterfacePresenceClass</a>;
 
@@ -83,6 +86,10 @@
 </pre>
 <pre class="synopsis">
   GInterface
+   +----TpSvcProtocolInterfaceAddressing
+</pre>
+<pre class="synopsis">
+  GInterface
    +----TpSvcProtocolInterfacePresence
 </pre>
 <pre class="synopsis">
@@ -94,6 +101,9 @@
 <a name="telepathy-glib-svc-protocol.implementations"></a><h2>Known Implementations</h2>
 <p>
 TpSvcProtocol is implemented by
+ <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol">TpBaseProtocol</a>.</p>
+<p>
+TpSvcProtocolInterfaceAddressing is implemented by
  <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol">TpBaseProtocol</a>.</p>
 <p>
 TpSvcProtocolInterfacePresence is implemented by
@@ -304,6 +314,44 @@ This inline function exists only to provide type-safety.
 </tr>
 </tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TpSvcProtocolInterfaceAddressing-struct"></a><h3>TpSvcProtocolInterfaceAddressing</h3>
+<pre class="programlisting">typedef struct _TpSvcProtocolInterfaceAddressing TpSvcProtocolInterfaceAddressing;</pre>
+<p>
+Dummy typedef representing any implementation of this interface.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TpSvcProtocolInterfaceAddressingClass"></a><h3>TpSvcProtocolInterfaceAddressingClass</h3>
+<pre class="programlisting">typedef struct _TpSvcProtocolInterfaceAddressingClass TpSvcProtocolInterfaceAddressingClass;</pre>
+<p>
+The class of TpSvcProtocolInterfaceAddressing.
+</p>
+<p>
+In a full implementation of this interface (i.e. all
+methods implemented), the interface initialization
+function used in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a> would
+typically look like this:
+</p>
+<p>
+</p>
+<pre class="programlisting">
+static void
+implement_protocol_interface_addressing (gpointer klass,
+    gpointer unused G_GNUC_UNUSED)
+{
+#define IMPLEMENT(x) tp_svc_protocol_interface_addressing_implement_##x (\
+  klass, my_object_##x)
+  IMPLEMENT (normalize_vcard_address);
+  IMPLEMENT (normalize_contact_uri);
+#undef IMPLEMENT
+}
+</pre>
+<p>
+</p>
 </div>
 <hr>
 <div class="refsect2">
