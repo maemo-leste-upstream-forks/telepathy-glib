@@ -9,6 +9,8 @@
  * notice and this notice are preserved.
  */
 
+#include "config.h"
+
 #include "file-transfer-chan.h"
 #include "util.h"
 #include "debug.h"
@@ -17,9 +19,6 @@
 #include <telepathy-glib/channel-iface.h>
 #include <telepathy-glib/svc-channel.h>
 #include <telepathy-glib/gnio-util.h>
-
-#include <gio/gunixsocketaddress.h>
-#include <gio/gunixconnection.h>
 
 #include <glib/gstdio.h>
 

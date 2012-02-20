@@ -52,6 +52,8 @@
  * The class of a #TpBasePasswordChannel.
  */
 
+#include "config.h"
+
 #include "telepathy-glib/base-password-channel.h"
 
 #include <telepathy-glib/dbus.h>
@@ -73,11 +75,6 @@ G_DEFINE_TYPE_WITH_CODE (TpBasePasswordChannel, tp_base_password_channel,
         NULL);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
         sasl_auth_iface_init));
-
-static const gchar *tp_base_password_channel_interfaces[] = {
-  TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
-  NULL
-};
 
 static const gchar *tp_base_password_channel_available_mechanisms[] = {
   "X-TELEPATHY-PASSWORD",
@@ -127,6 +124,19 @@ struct _TpBasePasswordChannelPrivate
 
   gboolean may_save_response;
 };
+
+static GPtrArray *
+tp_base_password_channel_get_interfaces (TpBaseChannel *base)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (
+      tp_base_password_channel_parent_class)->get_interfaces (base);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION);
+
+  return interfaces;
+}
 
 static void
 tp_base_password_channel_init (TpBasePasswordChannel *self)
@@ -283,7 +293,7 @@ tp_base_password_channel_class_init (TpBasePasswordChannelClass *tp_base_passwor
 
   chan_class->channel_type = TP_IFACE_CHANNEL_TYPE_SERVER_AUTHENTICATION;
   chan_class->target_handle_type = TP_HANDLE_TYPE_NONE;
-  chan_class->interfaces = tp_base_password_channel_interfaces;
+  chan_class->get_interfaces = tp_base_password_channel_get_interfaces;
   chan_class->close = tp_base_password_channel_close;
   chan_class->fill_immutable_properties =
     tp_base_password_channel_fill_immutable_properties;

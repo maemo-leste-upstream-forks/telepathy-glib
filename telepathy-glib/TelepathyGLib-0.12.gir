@@ -350,6 +350,9 @@ tp_account_get_avatar_finish() to get the result of the operation.</doc>
               throws="1">
         <doc xml:whitespace="preserve">Finishes an async get operation of @account's avatar.
 
+Beware that the returned value is only valid until @result is freed.
+Copy it with g_array_ref() if you need to keep it for longer.
+
 containing the bytes of the account's avatar, or %NULL on failure</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">a #GArray of #guchar</doc>
@@ -682,6 +685,9 @@ result of the request.</doc>
         <doc xml:whitespace="preserve">Retrieve the value of the request begun with
 tp_account_get_storage_specific_information_async().
 
+Beware that the returned value is only valid until @result is freed.
+Copy it with g_hash_table_ref() if you need to keep it for longer.
+
 of strings to GValues representing the D-Bus type a{sv}.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">a #GHashTable</doc>
@@ -696,6 +702,21 @@ of strings to GValues representing the D-Bus type a{sv}.</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="get_supersedes"
+              c:identifier="tp_account_get_supersedes"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Return the same thing as the #TpAccount:supersedes property, in a way
+that may be more convenient for C code.
+
+The returned pointers are not guaranteed to remain valid after the
+main loop has been re-entered.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the same as the #TpAccount:supersedes property</doc>
+          <array c:type="gchar**">
+            <type name="utf8"/>
+          </array>
+        </return-value>
       </method>
       <method name="get_uri_schemes"
               c:identifier="tp_account_get_uri_schemes"
@@ -1867,6 +1888,18 @@ This is not guaranteed to have been retrieved until the
 the value is 0.</doc>
         <type name="guint"/>
       </property>
+      <property name="supersedes" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The object paths of previously-active accounts superseded by this one.
+For instance, this can be used in a logger to read old logs for an
+account that has been migrated from one connection manager to another.
+
+This is not guaranteed to have been retrieved until the
+%TP_ACCOUNT_FEATURE_CORE feature has been prepared; until then,
+the value is NULL.</doc>
+        <array>
+          <type name="utf8"/>
+        </array>
+      </property>
       <property name="valid" version="0.9.0" transfer-ownership="none">
         <doc xml:whitespace="preserve">Whether this account is valid.
 
@@ -2862,7 +2895,7 @@ will be ready.</doc>
 object, with the %TP_ACCOUNT_FEATURE_CORE feature ready on it.
 
 The caller must keep a ref to the returned object using g_object_ref() if
-it is to be kept.
+it is to be kept beyond the lifetime of @result.
 
 success, otherwise %NULL</doc>
         <return-value transfer-ownership="none">
@@ -2924,6 +2957,10 @@ presence.
 
 If no accounts are enabled or valid the output will be
 (%TP_CONNECTION_PRESENCE_TYPE_OFFLINE, "offline", "").
+
+Since 0.17.5, if the only connected accounts does not implement
+%TP_IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE, the output will be
+(%TP_CONNECTION_PRESENCE_TYPE_AVAILABLE, "available", "").
 
 The return value of this function is not guaranteed to have been retrieved
 until tp_proxy_prepare_async() has finished; until then, the
@@ -5582,6 +5619,1282 @@ Since 0.11.5, there is a corresponding #GEnumClass type,
               c:type="TP_CONN_OBJECT_PATH_BASE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <class name="CallChannel"
+           c:symbol-prefix="call_channel"
+           c:type="TpCallChannel"
+           version="0.17.5"
+           parent="Channel"
+           glib:type-name="TpCallChannel"
+           glib:get-type="tp_call_channel_get_type"
+           glib:type-struct="CallChannelClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpCallChannel.</doc>
+      <function name="get_feature_quark_core"
+                c:identifier="tp_call_channel_get_feature_quark_core">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <method name="accept_async"
+              c:identifier="tp_call_channel_accept_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">For incoming calls with #TpCallChannel:state set to
+%TP_CALL_STATE_INITIALISED, accept the incoming call. This changes
+#TpCallChannel:state to %TP_CALL_STATE_ACCEPTED.
+
+For outgoing calls with #TpCallChannel:state set to
+%TP_CALL_STATE_PENDING_INITIATOR, actually call the remote contact; this
+changes #TpCallChannel:state to
+%TP_CALL_STATE_INITIALISING.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="accept_finish"
+              c:identifier="tp_call_channel_accept_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_accept_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="add_content_async"
+              c:identifier="tp_call_channel_add_content_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Request that a new Content of type @type is added to @self. Callers should
+check the value of the #TpCallChannel:mutable-contents property before trying
+to add another content as it might not be allowed.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the suggested name of the content to add</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="type" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the media stream type of the content to be added to the call, from #TpMediaStreamType</doc>
+            <type name="MediaStreamType" c:type="TpMediaStreamType"/>
+          </parameter>
+          <parameter name="initial_direction" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The initial direction of the content</doc>
+            <type name="MediaStreamDirection" c:type="TpMediaStreamDirection"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="4">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="add_content_finish"
+              c:identifier="tp_call_channel_add_content_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_add_content_async().
+
+The returned #TpCallContent is NOT guaranteed to have
+%TP_CALL_CONTENT_FEATURE_CORE prepared.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">reference to the new #TpCallContent.</doc>
+          <type name="CallContent" c:type="TpCallContent*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_contents"
+              c:identifier="tp_call_channel_get_contents"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+the value of #TpCallChannel:contents</doc>
+        <return-value transfer-ownership="none">
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="CallContent"/>
+          </array>
+        </return-value>
+      </method>
+      <method name="get_members"
+              c:identifier="tp_call_channel_get_members"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Get the members of this call.
+
+The #TpContact objects are guaranteed to have all of the features
+previously passed to tp_simple_client_factory_add_contact_features()
+prepared.
+
+#GHashTable mapping #TpContact to its new #TpCallMemberFlags</doc>
+        <return-value transfer-ownership="none">
+          <type name="GLib.HashTable" c:type="GHashTable*">
+            <type name="Contact"/>
+            <type name="guint"/>
+          </type>
+        </return-value>
+      </method>
+      <method name="get_state"
+              c:identifier="tp_call_channel_get_state"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallChannel:state</doc>
+          <type name="CallState" c:type="TpCallState"/>
+        </return-value>
+        <parameters>
+          <parameter name="flags"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">a place to set the value of #TpCallChannel:flags</doc>
+            <type name="CallFlags" c:type="TpCallFlags*"/>
+          </parameter>
+          <parameter name="details"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">a place to set the value of #TpCallChannel:state-details</doc>
+            <type name="GLib.HashTable" c:type="GHashTable**">
+              <type name="gpointer" c:type="gpointer"/>
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+          <parameter name="reason"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">a place to set the value of #TpCallChannel:state-reason</doc>
+            <type name="CallStateReason" c:type="TpCallStateReason**"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="hangup_async"
+              c:identifier="tp_call_channel_hangup_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Request that the call is ended. All contents will be removed from @self so
+that the #TpCallChannel:contents property will be the empty list.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a TpCallStateChangeReason</doc>
+            <type name="CallStateChangeReason"
+                  c:type="TpCallStateChangeReason"/>
+          </parameter>
+          <parameter name="detailed_reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a more specific reason for the call hangup, if one is available, or an empty or %NULL string otherwise</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="message" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a human-readable message to be sent to the remote contact(s)</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="4">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="hangup_finish"
+              c:identifier="tp_call_channel_hangup_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_hangup_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="has_dtmf"
+              c:identifier="tp_call_channel_has_dtmf"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_DTMF
+interfaces</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">whether or not @self supports DTMF</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="has_hardware_streaming"
+              c:identifier="tp_call_channel_has_hardware_streaming"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallChannel:hardware-streaming</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="has_initial_audio"
+              c:identifier="tp_call_channel_has_initial_audio"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallChannel:initial-audio</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="initial_audio_name"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">a place to set the value of #TpCallChannel:initial-audio-name</doc>
+            <type name="utf8" c:type="gchar**"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="has_initial_video"
+              c:identifier="tp_call_channel_has_initial_video"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallChannel:initial-video</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="initial_video_name"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">a place to set the value of #TpCallChannel:initial-video-name</doc>
+            <type name="utf8" c:type="gchar**"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="has_mutable_contents"
+              c:identifier="tp_call_channel_has_mutable_contents"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallChannel:mutable-contents</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="send_tones_async"
+              c:identifier="tp_call_channel_send_tones_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Send @tones on every of @self's contents which have the
+%TP_IFACE_CALL_CONTENT_INTERFACE_DTMF interface.
+
+For more details, see tp_call_content_send_tones_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="tones" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a string representation of one or more DTMF events.</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="cancellable"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">optional #GCancellable object, %NULL to ignore</doc>
+            <type name="Gio.Cancellable" c:type="GCancellable*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="send_tones_finish"
+              c:identifier="tp_call_channel_send_tones_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_send_tones_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE on success, %FALSE otherwise.</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_queued_async"
+              c:identifier="tp_call_channel_set_queued_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Notifies the CM that the local user is already in a call, so this call has
+been put in a call-waiting style queue.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_queued_finish"
+              c:identifier="tp_call_channel_set_queued_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_set_queued_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_ringing_async"
+              c:identifier="tp_call_channel_set_ringing_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Indicate that the local user has been alerted about the incoming call.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_ringing_finish"
+              c:identifier="tp_call_channel_set_ringing_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_set_ringing_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="contents" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">#GPtrArray of #TpCallContent objects. The list of content objects that are
+part of this call.
+
+It is NOT guaranteed that %TP_CALL_CONTENT_FEATURE_CORE is prepared on
+those objects.</doc>
+        <array name="GLib.PtrArray">
+          <type name="gpointer" c:type="gpointer"/>
+        </array>
+      </property>
+      <property name="flags" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #TpCallFlags specifying the flags of the call state.</doc>
+        <type name="guint"/>
+      </property>
+      <property name="hardware-streaming"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Whether or not the streaming is done by dedicated hardware.</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="initial-audio"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Whether or not the Call was started with audio.</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="initial-audio-name"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">If #TpCallChannel:initial-audio is set to %TRUE, then this property will
+is the name of the intial audio content, %NULL otherwise.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="initial-video"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Whether or not the Call was started with video.</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="initial-video-name"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">If #TpCallChannel:initial-video is set to %TRUE, then this property will
+is the name of the intial video content, %NULL otherwise.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="mutable-contents"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Whether or not call contents can be added or removed.</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="state" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #TpChannelCallState specifying the state of the call.</doc>
+        <type name="guint"/>
+      </property>
+      <property name="state-details"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Detailed information about #TpCallChannel:state.</doc>
+        <type name="GLib.HashTable">
+          <type name="gpointer" c:type="gpointer"/>
+          <type name="gpointer" c:type="gpointer"/>
+        </type>
+      </property>
+      <property name="state-reason" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">Reason why #TpCallChannel:state last changed.</doc>
+        <type name="CallStateReason"/>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="Channel" c:type="TpChannel"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="CallChannelPrivate" c:type="TpCallChannelPrivate*"/>
+      </field>
+      <glib:signal name="content-added" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::content-added signal is emitted whenever a
+#TpCallContent is added to @self.
+
+It is NOT guaranteed that %TP_CALL_CONTENT_FEATURE_CORE is prepared on
+@content.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="content" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the newly added #TpCallContent</doc>
+            <type name="GObject.Object"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+      <glib:signal name="content-removed" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::content-removed signal is emitted whenever a
+#TpCallContent is removed from @self.
+
+It is NOT guaranteed that %TP_CALL_CONTENT_FEATURE_CORE is prepared on
+@content.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="content" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the newly removed #TpCallContent</doc>
+            <type name="GObject.Object"/>
+          </parameter>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpCallStateReason</doc>
+            <type name="CallStateReason"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+      <glib:signal name="members-changed" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::members-changed signal is emitted whenever the call's members
+changes.
+
+The #TpContact objects are guaranteed to have all of the features
+previously passed to tp_simple_client_factory_add_contact_features()
+prepared.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="updates" transfer-ownership="none">
+            <doc xml:whitespace="preserve"> #GHashTable mapping #TpContact to its new #TpCallMemberFlags</doc>
+            <type name="GLib.HashTable">
+              <type name="Contact"/>
+              <type name="guint"/>
+            </type>
+          </parameter>
+          <parameter name="removed" transfer-ownership="none">
+            <doc xml:whitespace="preserve"> #GPtrArray of #TpContact removed from the call members</doc>
+            <array name="GLib.PtrArray">
+              <type name="Contact"/>
+            </array>
+          </parameter>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #TpCallStateReason for the change</doc>
+            <type name="CallStateReason"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+      <glib:signal name="state-changed" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::state-changed signal is emitted whenever the
+call state changes.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="state" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the new #TpCallState</doc>
+            <type name="guint"/>
+          </parameter>
+          <parameter name="flags" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the new #TpCallFlags</doc>
+            <type name="guint"/>
+          </parameter>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #TpCallStateReason for the change</doc>
+            <type name="CallStateReason"/>
+          </parameter>
+          <parameter name="details" transfer-ownership="none">
+            <doc xml:whitespace="preserve">additional details</doc>
+            <type name="GLib.HashTable">
+              <type name="gpointer" c:type="gpointer"/>
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </glib:signal>
+    </class>
+    <record name="CallChannelClass"
+            c:type="TpCallChannelClass"
+            glib:is-gtype-struct-for="CallChannel"
+            version="0.17.5">
+      <doc xml:whitespace="preserve">The class of a #TpCallChannel.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="ChannelClass" c:type="TpChannelClass"/>
+      </field>
+      <field name="_padding" readable="0" private="1">
+        <array zero-terminated="0" c:type="GCallback" fixed-size="7">
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </array>
+      </field>
+    </record>
+    <record name="CallChannelPrivate"
+            c:type="TpCallChannelPrivate"
+            disguised="1">
+    </record>
+    <class name="CallContent"
+           c:symbol-prefix="call_content"
+           c:type="TpCallContent"
+           version="0.17.5"
+           parent="Proxy"
+           glib:type-name="TpCallContent"
+           glib:get-type="tp_call_content_get_type"
+           glib:type-struct="CallContentClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpCallContent.</doc>
+      <function name="get_feature_quark_core"
+                c:identifier="tp_call_content_get_feature_quark_core">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <function name="init_known_interfaces"
+                c:identifier="tp_call_content_init_known_interfaces"
+                version="0.17.5">
+        <doc xml:whitespace="preserve">Ensure that the known interfaces for #TpCallContent have been set up.
+This is done automatically when necessary, but for correct
+overriding of library interfaces by local extensions, you should
+call this function before calling
+tp_proxy_or_subclass_hook_on_interface_add() with first argument
+%TP_TYPE_CALL_CONTENT.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </function>
+      <method name="get_disposition"
+              c:identifier="tp_call_content_get_disposition"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallContent:disposition</doc>
+          <type name="CallContentDisposition"
+                c:type="TpCallContentDisposition"/>
+        </return-value>
+      </method>
+      <method name="get_media_type"
+              c:identifier="tp_call_content_get_media_type"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallContent:name</doc>
+          <type name="MediaStreamType" c:type="TpMediaStreamType"/>
+        </return-value>
+      </method>
+      <method name="get_name"
+              c:identifier="tp_call_content_get_name"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallContent:name</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_streams"
+              c:identifier="tp_call_content_get_streams"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+the value of #TpCallContent:streams</doc>
+        <return-value transfer-ownership="none">
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="CallStream"/>
+          </array>
+        </return-value>
+      </method>
+      <method name="remove_async"
+              c:identifier="tp_call_content_remove_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Remove the content from the call. This will cause #TpCallContent::removed
+to be emitted.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="remove_finish"
+              c:identifier="tp_call_content_remove_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_content_remove_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="send_tones_async"
+              c:identifier="tp_call_content_send_tones_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Send @tones DTMF code on @self content. @self must have the
+%TP_IFACE_CALL_CONTENT_INTERFACE_DTMF interface.
+
+If DTMF tones are already being played, this request is queued.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="tones" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a string representation of one or more DTMF events.</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="cancellable"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">optional #GCancellable object, %NULL to ignore</doc>
+            <type name="Gio.Cancellable" c:type="GCancellable*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="send_tones_finish"
+              c:identifier="tp_call_content_send_tones_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_content_send_tones_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE on success, %FALSE otherwise.</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="connection"
+                version="0.17.5"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The #TpConnection of the call.</doc>
+        <type name="Connection"/>
+      </property>
+      <property name="disposition" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The disposition of this content, from #TpCallContentDisposition.</doc>
+        <type name="guint"/>
+      </property>
+      <property name="media-type" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The media type of this content, from #TpMediaStreamType.</doc>
+        <type name="guint"/>
+      </property>
+      <property name="name" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The name of this content.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="streams" version="0.17.5" transfer-ownership="none">
+        <doc xml:whitespace="preserve">#GPtrArray of #TpCallStream objects. The list of stream objects that are
+part of this content.
+
+It is NOT guaranteed that %TP_CALL_STREAM_FEATURE_CORE is prepared on
+those objects.</doc>
+        <array name="GLib.PtrArray">
+          <type name="gpointer" c:type="gpointer"/>
+        </array>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="Proxy" c:type="TpProxy"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="CallContentPrivate" c:type="TpCallContentPrivate*"/>
+      </field>
+      <glib:signal name="removed" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::removed signal is emitted when @self is removed from
+a #TpCallChannel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+      </glib:signal>
+      <glib:signal name="streams-added" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::streams-added signal is emitted whenever
+#TpCallStream are added to @self.
+
+It is NOT guaranteed that %TP_CALL_STREAM_FEATURE_CORE is prepared on
+stream objects.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="streams" transfer-ownership="none">
+            <doc xml:whitespace="preserve"> a #GPtrArray of newly added #TpCallStream</doc>
+            <array name="GLib.PtrArray">
+              <type name="CallStream"/>
+            </array>
+          </parameter>
+        </parameters>
+      </glib:signal>
+      <glib:signal name="streams-removed" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::streams-removed signal is emitted whenever
+#TpCallStreams are removed from @self.
+
+It is NOT guaranteed that %TP_CALL_STREAM_FEATURE_CORE is prepared on
+stream objects.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="streams" transfer-ownership="none">
+            <doc xml:whitespace="preserve"> a #GPtrArray of newly removed #TpCallStream</doc>
+            <array name="GLib.PtrArray">
+              <type name="CallStream"/>
+            </array>
+          </parameter>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpCallStateReason</doc>
+            <type name="CallStateReason"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+    </class>
+    <record name="CallContentClass"
+            c:type="TpCallContentClass"
+            glib:is-gtype-struct-for="CallContent"
+            version="0.17.5">
+      <doc xml:whitespace="preserve">The class of a #TpCallContent.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="ProxyClass" c:type="TpProxyClass"/>
+      </field>
+      <field name="_padding" readable="0" private="1">
+        <array zero-terminated="0" c:type="GCallback" fixed-size="7">
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </array>
+      </field>
+    </record>
+    <enumeration name="CallContentDisposition"
+                 c:type="TpCallContentDisposition">
+      <member name="none"
+              value="0"
+              c:identifier="TP_CALL_CONTENT_DISPOSITION_NONE"/>
+      <member name="initial"
+              value="1"
+              c:identifier="TP_CALL_CONTENT_DISPOSITION_INITIAL"/>
+    </enumeration>
+    <enumeration name="CallContentPacketizationType"
+                 c:type="TpCallContentPacketizationType">
+      <member name="rtp"
+              value="0"
+              c:identifier="TP_CALL_CONTENT_PACKETIZATION_TYPE_RTP"/>
+      <member name="raw"
+              value="1"
+              c:identifier="TP_CALL_CONTENT_PACKETIZATION_TYPE_RAW"/>
+      <member name="msn_webcam"
+              value="2"
+              c:identifier="TP_CALL_CONTENT_PACKETIZATION_TYPE_MSN_WEBCAM"/>
+    </enumeration>
+    <record name="CallContentPrivate"
+            c:type="TpCallContentPrivate"
+            disguised="1">
+    </record>
+    <bitfield name="CallFlags" c:type="TpCallFlags">
+      <member name="locally_held"
+              value="1"
+              c:identifier="TP_CALL_FLAG_LOCALLY_HELD"/>
+      <member name="locally_ringing"
+              value="2"
+              c:identifier="TP_CALL_FLAG_LOCALLY_RINGING"/>
+      <member name="locally_queued"
+              value="4"
+              c:identifier="TP_CALL_FLAG_LOCALLY_QUEUED"/>
+      <member name="forwarded"
+              value="8"
+              c:identifier="TP_CALL_FLAG_FORWARDED"/>
+      <member name="clearing" value="16" c:identifier="TP_CALL_FLAG_CLEARING"/>
+    </bitfield>
+    <bitfield name="CallMemberFlags" c:type="TpCallMemberFlags">
+      <member name="ringing"
+              value="1"
+              c:identifier="TP_CALL_MEMBER_FLAG_RINGING"/>
+      <member name="held" value="2" c:identifier="TP_CALL_MEMBER_FLAG_HELD"/>
+      <member name="conference_host"
+              value="4"
+              c:identifier="TP_CALL_MEMBER_FLAG_CONFERENCE_HOST"/>
+    </bitfield>
+    <enumeration name="CallState" c:type="TpCallState">
+      <member name="unknown" value="0" c:identifier="TP_CALL_STATE_UNKNOWN"/>
+      <member name="pending_initiator"
+              value="1"
+              c:identifier="TP_CALL_STATE_PENDING_INITIATOR"/>
+      <member name="initialising"
+              value="2"
+              c:identifier="TP_CALL_STATE_INITIALISING"/>
+      <member name="initialised"
+              value="3"
+              c:identifier="TP_CALL_STATE_INITIALISED"/>
+      <member name="accepted" value="4" c:identifier="TP_CALL_STATE_ACCEPTED"/>
+      <member name="active" value="5" c:identifier="TP_CALL_STATE_ACTIVE"/>
+      <member name="ended" value="6" c:identifier="TP_CALL_STATE_ENDED"/>
+    </enumeration>
+    <enumeration name="CallStateChangeReason" c:type="TpCallStateChangeReason">
+      <member name="unknown"
+              value="0"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_UNKNOWN"/>
+      <member name="progress_made"
+              value="1"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_PROGRESS_MADE"/>
+      <member name="user_requested"
+              value="2"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_USER_REQUESTED"/>
+      <member name="forwarded"
+              value="3"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_FORWARDED"/>
+      <member name="rejected"
+              value="4"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_REJECTED"/>
+      <member name="no_answer"
+              value="5"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_NO_ANSWER"/>
+      <member name="invalid_contact"
+              value="6"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_INVALID_CONTACT"/>
+      <member name="permission_denied"
+              value="7"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_PERMISSION_DENIED"/>
+      <member name="busy"
+              value="8"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_BUSY"/>
+      <member name="internal_error"
+              value="9"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_INTERNAL_ERROR"/>
+      <member name="service_error"
+              value="10"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_SERVICE_ERROR"/>
+      <member name="network_error"
+              value="11"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_NETWORK_ERROR"/>
+      <member name="media_error"
+              value="12"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_MEDIA_ERROR"/>
+      <member name="connectivity_error"
+              value="13"
+              c:identifier="TP_CALL_STATE_CHANGE_REASON_CONNECTIVITY_ERROR"/>
+    </enumeration>
+    <record name="CallStateReason"
+            c:type="TpCallStateReason"
+            version="0.17.5"
+            glib:type-name="TpCallStateReason"
+            glib:get-type="tp_call_state_reason_get_type"
+            c:symbol-prefix="call_state_reason">
+      <doc xml:whitespace="preserve">Data structure representing the reason for a call state change.</doc>
+      <field name="actor" writable="1">
+        <type name="Handle" c:type="TpHandle"/>
+      </field>
+      <field name="reason" writable="1">
+        <type name="CallStateChangeReason" c:type="TpCallStateChangeReason"/>
+      </field>
+      <field name="dbus_reason" writable="1">
+        <type name="utf8" c:type="gchar*"/>
+      </field>
+      <field name="ref_count" readable="0" private="1">
+        <type name="guint" c:type="guint"/>
+      </field>
+    </record>
+    <class name="CallStream"
+           c:symbol-prefix="call_stream"
+           c:type="TpCallStream"
+           version="0.17.5"
+           parent="Proxy"
+           glib:type-name="TpCallStream"
+           glib:get-type="tp_call_stream_get_type"
+           glib:type-struct="CallStreamClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpCallStream.</doc>
+      <function name="get_feature_quark_core"
+                c:identifier="tp_call_stream_get_feature_quark_core">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <function name="init_known_interfaces"
+                c:identifier="tp_call_stream_init_known_interfaces"
+                version="0.17.5">
+        <doc xml:whitespace="preserve">Ensure that the known interfaces for #TpCallStream have been set up.
+This is done automatically when necessary, but for correct
+overriding of library interfaces by local extensions, you should
+call this function before calling
+tp_proxy_or_subclass_hook_on_interface_add() with first argument
+%TP_TYPE_CALL_STREAM.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </function>
+      <method name="can_request_receiving"
+              c:identifier="tp_call_stream_can_request_receiving"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallStream:can-request-receiving</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="get_local_sending_state"
+              c:identifier="tp_call_stream_get_local_sending_state"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpCallStream:local-seding-state</doc>
+          <type name="SendingState" c:type="TpSendingState"/>
+        </return-value>
+      </method>
+      <method name="get_remote_members"
+              c:identifier="tp_call_stream_get_remote_members"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Get the remote contacts to who this stream is connected, mapped to their
+sending state.
+
+It is NOT guaranteed that #TpContact objects have any feature prepared.
+
+#GHashTable mapping #TpContact to its new #TpSendingState</doc>
+        <return-value transfer-ownership="none">
+          <type name="GLib.HashTable" c:type="GHashTable*">
+            <type name="Contact"/>
+            <type name="guint"/>
+          </type>
+        </return-value>
+      </method>
+      <method name="request_receiving_async"
+              c:identifier="tp_call_stream_request_receiving_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Request that a remote contact stops or starts sending on this stream.
+
+The #TpCallStream:can-request-receiving property defines whether the protocol
+allows the local user to request the other side start sending on this stream.
+
+If @receive is %TRUE, request that the given contact starts to send media.
+If @receive is %FALSE, request that the given contact stops sending media.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="contact" transfer-ownership="none">
+            <doc xml:whitespace="preserve">contact from which sending is requested</doc>
+            <type name="Contact" c:type="TpContact*"/>
+          </parameter>
+          <parameter name="receive" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the requested receiving state</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="request_receiving_finish"
+              c:identifier="tp_call_stream_request_receiving_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_stream_request_receiving_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_sending_async"
+              c:identifier="tp_call_stream_set_sending_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Set the stream to start or stop sending media from the local user to other
+contacts.
+
+If @send is %TRUE, #TpCallStream:local-sending-state should change to
+%TP_SENDING_STATE_SENDING, if it isn't already.
+If @send is %FALSE, #TpCallStream:local-sending-state should change to
+%TP_SENDING_STATE_NONE, if it isn't already.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="send" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the requested sending state</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="2">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_sending_finish"
+              c:identifier="tp_call_stream_set_sending_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_stream_set_sending_async().</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="can-request-receiving"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">If %TRUE, the user can request that a remote contact starts sending on this
+stream.</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="connection"
+                version="0.17.5"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The #TpConnection of the call.</doc>
+        <type name="Connection"/>
+      </property>
+      <property name="local-sending-state"
+                version="0.17.5"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The local user's sending state, from #TpSendingState.</doc>
+        <type name="guint"/>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="Proxy" c:type="TpProxy"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="CallStreamPrivate" c:type="TpCallStreamPrivate*"/>
+      </field>
+      <glib:signal name="local-sending-state-changed"
+                   when="last"
+                   version="0.17.5">
+        <doc xml:whitespace="preserve">The ::local-sending-state-changed signal is emitted whenever the
+stream sending state changes.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="object" transfer-ownership="none">
+            <type name="guint"/>
+          </parameter>
+          <parameter name="p0" transfer-ownership="none">
+            <type name="guint"/>
+          </parameter>
+          <parameter name="p1" transfer-ownership="none">
+            <type name="CallStateReason"/>
+          </parameter>
+          <parameter name="p2" transfer-ownership="none">
+            <type name="GLib.HashTable">
+              <type name="gpointer" c:type="gpointer"/>
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </glib:signal>
+      <glib:signal name="remote-members-changed" when="last" version="0.17.5">
+        <doc xml:whitespace="preserve">The ::remote-members-changed signal is emitted whenever the
+stream's remote members changes.
+
+It is NOT guaranteed that #TpContact objects have any feature prepared.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="updates" transfer-ownership="none">
+            <doc xml:whitespace="preserve"> #GHashTable mapping #TpContact to its new #TpSendingState</doc>
+            <type name="GLib.HashTable">
+              <type name="Contact"/>
+              <type name="guint"/>
+            </type>
+          </parameter>
+          <parameter name="removed" transfer-ownership="none">
+            <doc xml:whitespace="preserve"> #GPtrArray of #TpContact removed from remote contacts</doc>
+            <array name="GLib.PtrArray">
+              <type name="Contact"/>
+            </array>
+          </parameter>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #TpCallStateReason for the change</doc>
+            <type name="CallStateReason"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+    </class>
+    <enumeration name="CallStreamCandidateType"
+                 c:type="TpCallStreamCandidateType">
+      <member name="none"
+              value="0"
+              c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_NONE"/>
+      <member name="host"
+              value="1"
+              c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_HOST"/>
+      <member name="server_reflexive"
+              value="2"
+              c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_SERVER_REFLEXIVE"/>
+      <member name="peer_reflexive"
+              value="3"
+              c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_PEER_REFLEXIVE"/>
+      <member name="relay"
+              value="4"
+              c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_RELAY"/>
+      <member name="multicast"
+              value="5"
+              c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_MULTICAST"/>
+    </enumeration>
+    <record name="CallStreamClass"
+            c:type="TpCallStreamClass"
+            glib:is-gtype-struct-for="CallStream"
+            version="0.17.5">
+      <doc xml:whitespace="preserve">The class of a #TpCallStream.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="ProxyClass" c:type="TpProxyClass"/>
+      </field>
+      <field name="_padding" readable="0" private="1">
+        <array zero-terminated="0" c:type="GCallback" fixed-size="7">
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </array>
+      </field>
+    </record>
+    <record name="CallStreamPrivate"
+            c:type="TpCallStreamPrivate"
+            disguised="1">
+    </record>
     <class name="Capabilities"
            c:symbol-prefix="capabilities"
            c:type="TpCapabilities"
@@ -5831,6 +7144,37 @@ underlying connection.</doc>
             c:type="TpCapabilitiesPrivate"
             disguised="1">
     </record>
+    <enumeration name="CaptchaCancelReason" c:type="TpCaptchaCancelReason">
+      <member name="user_cancelled"
+              value="0"
+              c:identifier="TP_CAPTCHA_CANCEL_REASON_USER_CANCELLED"/>
+      <member name="not_supported"
+              value="1"
+              c:identifier="TP_CAPTCHA_CANCEL_REASON_NOT_SUPPORTED"/>
+      <member name="service_confused"
+              value="2"
+              c:identifier="TP_CAPTCHA_CANCEL_REASON_SERVICE_CONFUSED"/>
+    </enumeration>
+    <bitfield name="CaptchaFlags" c:type="TpCaptchaFlags">
+      <member name="captcha_flags_required"
+              value="1"
+              c:identifier="TP_CAPTCHA_FLAGS_REQUIRED"/>
+    </bitfield>
+    <enumeration name="CaptchaStatus" c:type="TpCaptchaStatus">
+      <member name="local_pending"
+              value="0"
+              c:identifier="TP_CAPTCHA_STATUS_LOCAL_PENDING"/>
+      <member name="remote_pending"
+              value="1"
+              c:identifier="TP_CAPTCHA_STATUS_REMOTE_PENDING"/>
+      <member name="succeeded"
+              value="2"
+              c:identifier="TP_CAPTCHA_STATUS_SUCCEEDED"/>
+      <member name="try_again"
+              value="3"
+              c:identifier="TP_CAPTCHA_STATUS_TRY_AGAIN"/>
+      <member name="failed" value="4" c:identifier="TP_CAPTCHA_STATUS_FAILED"/>
+    </enumeration>
     <class name="Channel"
            c:symbol-prefix="channel"
            c:type="TpChannel"
@@ -9261,6 +10605,50 @@ Call tp_cli_connection_call_connect() too, if you want to do that.</doc>
         <return-value transfer-ownership="none">
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
+      </method>
+      <method name="disconnect_async"
+              c:identifier="tp_connection_disconnect_async"
+              version="0.17.5">
+        <doc xml:whitespace="preserve">Disconnect the connection.
+
+This method is intended for use by AccountManager implementations,
+such as Mission Control. To disconnect a connection managed by an
+AccountManager, either use tp_account_request_presence_async()
+or tp_account_set_enabled_async(), depending whether the intention is
+to put the account offline temporarily, or disable it longer-term.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="disconnect_finish"
+              c:identifier="tp_connection_disconnect_finish"
+              version="0.17.5"
+              throws="1">
+        <doc xml:whitespace="preserve">Interpret the result of tp_connection_disconnect_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if the call was successful, otherwise %FALSE</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
       </method>
       <method name="dup_contact_if_possible"
               c:identifier="tp_connection_dup_contact_if_possible"
@@ -15186,6 +16574,9 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
       <member name="media_streaming_error"
               value="52"
               c:identifier="TP_ERROR_MEDIA_STREAMING_ERROR"/>
+      <member name="captcha_not_supported"
+              value="53"
+              c:identifier="TP_ERROR_CAPTCHA_NOT_SUPPORTED"/>
     </enumeration>
     <enumeration name="FileHashType" c:type="TpFileHashType">
       <member name="none" value="0" c:identifier="TP_FILE_HASH_TYPE_NONE"/>
@@ -17127,6 +18518,66 @@ tp_handle_set_foreach().</doc>
               c:type="TP_IFACE_AUTHENTICATION_TLS_CERTIFICATE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="IFACE_CALL_CONTENT"
+              value="org.freedesktop.Telepathy.Call1.Content"
+              c:type="TP_IFACE_CALL_CONTENT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_INTERFACE_AUDIO_CONTROL"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.AudioControl"
+              c:type="TP_IFACE_CALL_CONTENT_INTERFACE_AUDIO_CONTROL">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_INTERFACE_DTMF"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.DTMF"
+              c:type="TP_IFACE_CALL_CONTENT_INTERFACE_DTMF">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_INTERFACE_MEDIA"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media"
+              c:type="TP_IFACE_CALL_CONTENT_INTERFACE_MEDIA">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_INTERFACE_VIDEO_CONTROL"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.VideoControl"
+              c:type="TP_IFACE_CALL_CONTENT_INTERFACE_VIDEO_CONTROL">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_MEDIA_DESCRIPTION"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription"
+              c:type="TP_IFACE_CALL_CONTENT_MEDIA_DESCRIPTION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports"
+              c:type="TP_IFACE_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_FEEDBACK"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPFeedback"
+              c:type="TP_IFACE_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_FEEDBACK">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTP_HEADER_EXTENSIONS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTPHeaderExtensions"
+              c:type="TP_IFACE_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTP_HEADER_EXTENSIONS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_STREAM"
+              value="org.freedesktop.Telepathy.Call1.Stream"
+              c:type="TP_IFACE_CALL_STREAM">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_STREAM_ENDPOINT"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint"
+              c:type="TP_IFACE_CALL_STREAM_ENDPOINT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CALL_STREAM_INTERFACE_MEDIA"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media"
+              c:type="TP_IFACE_CALL_STREAM_INTERFACE_MEDIA">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="IFACE_CHANNEL"
               value="org.freedesktop.Telepathy.Channel"
               c:type="TP_IFACE_CHANNEL">
@@ -17155,6 +18606,11 @@ tp_handle_set_foreach().</doc>
     <constant name="IFACE_CHANNEL_INTERFACE_CALL_STATE"
               value="org.freedesktop.Telepathy.Channel.Interface.CallState"
               c:type="TP_IFACE_CHANNEL_INTERFACE_CALL_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION"
+              value="org.freedesktop.Telepathy.Channel.Interface.CaptchaAuthentication1"
+              c:type="TP_IFACE_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="IFACE_CHANNEL_INTERFACE_CHAT_STATE"
@@ -17252,6 +18708,11 @@ tp_handle_set_foreach().</doc>
               c:type="TP_IFACE_CHANNEL_REQUEST">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="IFACE_CHANNEL_TYPE_CALL"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1"
+              c:type="TP_IFACE_CHANNEL_TYPE_CALL">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="IFACE_CHANNEL_TYPE_CONTACT_LIST"
               value="org.freedesktop.Telepathy.Channel.Type.ContactList"
               c:type="TP_IFACE_CHANNEL_TYPE_CONTACT_LIST">
@@ -17335,6 +18796,11 @@ tp_handle_set_foreach().</doc>
     <constant name="IFACE_CONNECTION"
               value="org.freedesktop.Telepathy.Connection"
               c:type="TP_IFACE_CONNECTION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CONNECTION_INTERFACE_ADDRESSING"
+              value="org.freedesktop.Telepathy.Connection.Interface.Addressing1"
+              c:type="TP_IFACE_CONNECTION_INTERFACE_ADDRESSING">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="IFACE_CONNECTION_INTERFACE_ALIASING"
@@ -18953,6 +20419,11 @@ This property can't be %NULL.</doc>
               c:type="TP_PROP_ACCOUNT_SERVICE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="PROP_ACCOUNT_SUPERSEDES"
+              value="org.freedesktop.Telepathy.Account.Supersedes"
+              c:type="TP_PROP_ACCOUNT_SUPERSEDES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="PROP_ACCOUNT_VALID"
               value="org.freedesktop.Telepathy.Account.Valid"
               c:type="TP_PROP_ACCOUNT_VALID">
@@ -18976,6 +20447,296 @@ This property can't be %NULL.</doc>
     <constant name="PROP_AUTHENTICATION_TLS_CERTIFICATE_STATE"
               value="org.freedesktop.Telepathy.Authentication.TLSCertificate.State"
               c:type="TP_PROP_AUTHENTICATION_TLS_CERTIFICATE_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_DISPOSITION"
+              value="org.freedesktop.Telepathy.Call1.Content.Disposition"
+              c:type="TP_PROP_CALL_CONTENT_DISPOSITION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACES"
+              value="org.freedesktop.Telepathy.Call1.Content.Interfaces"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_AUDIO_CONTROL_REQUESTED_INPUT_VOLUME"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.AudioControl.RequestedInputVolume"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_AUDIO_CONTROL_REQUESTED_INPUT_VOLUME">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_AUDIO_CONTROL_REQUESTED_OUTPUT_VOLUME"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.AudioControl.RequestedOutputVolume"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_AUDIO_CONTROL_REQUESTED_OUTPUT_VOLUME">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_DTMF_CURRENTLY_SENDING_TONES"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.DTMF.CurrentlySendingTones"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_DTMF_CURRENTLY_SENDING_TONES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_DTMF_DEFERRED_TONES"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.DTMF.DeferredTones"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_DTMF_DEFERRED_TONES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_MEDIA_CURRENT_DTMF_EVENT"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media.CurrentDTMFEvent"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_MEDIA_CURRENT_DTMF_EVENT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_MEDIA_CURRENT_DTMF_STATE"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media.CurrentDTMFState"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_MEDIA_CURRENT_DTMF_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_MEDIA_LOCAL_MEDIA_DESCRIPTIONS"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media.LocalMediaDescriptions"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_MEDIA_LOCAL_MEDIA_DESCRIPTIONS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_MEDIA_MEDIA_DESCRIPTION_OFFER"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media.MediaDescriptionOffer"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_MEDIA_MEDIA_DESCRIPTION_OFFER">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_MEDIA_PACKETIZATION"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media.Packetization"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_MEDIA_PACKETIZATION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_MEDIA_REMOTE_MEDIA_DESCRIPTIONS"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.Media.RemoteMediaDescriptions"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_MEDIA_REMOTE_MEDIA_DESCRIPTIONS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_BITRATE"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.VideoControl.Bitrate"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_BITRATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_FRAMERATE"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.VideoControl.Framerate"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_FRAMERATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_MANUAL_KEY_FRAMES"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.VideoControl.ManualKeyFrames"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_MANUAL_KEY_FRAMES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_MTU"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.VideoControl.MTU"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_MTU">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_VIDEO_RESOLUTION"
+              value="org.freedesktop.Telepathy.Call1.Content.Interface.VideoControl.VideoResolution"
+              c:type="TP_PROP_CALL_CONTENT_INTERFACE_VIDEO_CONTROL_VIDEO_RESOLUTION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_CODECS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Codecs"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_CODECS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_FURTHER_NEGOTIATION_REQUIRED"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.FurtherNegotiationRequired"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_FURTHER_NEGOTIATION_REQUIRED">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_HAS_REMOTE_INFORMATION"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.HasRemoteInformation"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_HAS_REMOTE_INFORMATION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACES"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interfaces"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_DLRR_MAX_SIZE"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.DLRRMaxSize"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_DLRR_MAX_SIZE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_DUPLICATE_RLE_MAX_SIZE"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.DuplicateRLEMaxSize"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_DUPLICATE_RLE_MAX_SIZE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_ENABLE_METRICS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.EnableMetrics"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_ENABLE_METRICS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_LOSS_RLE_MAX_SIZE"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.LossRLEMaxSize"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_LOSS_RLE_MAX_SIZE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_PACKET_RECEIPT_TIMES_MAX_SIZE"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.PacketReceiptTimesMaxSize"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_PACKET_RECEIPT_TIMES_MAX_SIZE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_RTT_MODE"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.RTTMode"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_RTT_MODE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_STATISTICS_FLAGS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPExtendedReports.StatisticsFlags"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_EXTENDED_REPORTS_STATISTICS_FLAGS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_FEEDBACK_DOES_AVPF"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPFeedback.DoesAVPF"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_FEEDBACK_DOES_AVPF">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_FEEDBACK_FEEDBACK_MESSAGES"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTCPFeedback.FeedbackMessages"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTCP_FEEDBACK_FEEDBACK_MESSAGES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTP_HEADER_EXTENSIONS_HEADER_EXTENSIONS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.Interface.RTPHeaderExtensions.HeaderExtensions"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_INTERFACE_RTP_HEADER_EXTENSIONS_HEADER_EXTENSIONS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_REMOTE_CONTACT"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.RemoteContact"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_REMOTE_CONTACT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_MEDIA_DESCRIPTION_SSRCS"
+              value="org.freedesktop.Telepathy.Call1.Content.MediaDescription.SSRCs"
+              c:type="TP_PROP_CALL_CONTENT_MEDIA_DESCRIPTION_SSRCS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_NAME"
+              value="org.freedesktop.Telepathy.Call1.Content.Name"
+              c:type="TP_PROP_CALL_CONTENT_NAME">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_STREAMS"
+              value="org.freedesktop.Telepathy.Call1.Content.Streams"
+              c:type="TP_PROP_CALL_CONTENT_STREAMS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_CONTENT_TYPE"
+              value="org.freedesktop.Telepathy.Call1.Content.Type"
+              c:type="TP_PROP_CALL_CONTENT_TYPE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_CAN_REQUEST_RECEIVING"
+              value="org.freedesktop.Telepathy.Call1.Stream.CanRequestReceiving"
+              c:type="TP_PROP_CALL_STREAM_CAN_REQUEST_RECEIVING">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_CONTROLLING"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.Controlling"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_CONTROLLING">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_ENDPOINT_STATE"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.EndpointState"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_ENDPOINT_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_IS_ICE_LITE"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.IsICELite"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_IS_ICE_LITE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_REMOTE_CANDIDATES"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.RemoteCandidates"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_REMOTE_CANDIDATES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_REMOTE_CREDENTIALS"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.RemoteCredentials"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_REMOTE_CREDENTIALS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_SELECTED_CANDIDATE_PAIRS"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.SelectedCandidatePairs"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_SELECTED_CANDIDATE_PAIRS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_ENDPOINT_TRANSPORT"
+              value="org.freedesktop.Telepathy.Call1.Stream.Endpoint.Transport"
+              c:type="TP_PROP_CALL_STREAM_ENDPOINT_TRANSPORT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACES"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interfaces"
+              c:type="TP_PROP_CALL_STREAM_INTERFACES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_ENDPOINTS"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.Endpoints"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_ENDPOINTS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_HAS_SERVER_INFO"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.HasServerInfo"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_HAS_SERVER_INFO">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_ICE_RESTART_PENDING"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.ICERestartPending"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_ICE_RESTART_PENDING">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_LOCAL_CANDIDATES"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.LocalCandidates"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_LOCAL_CANDIDATES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_LOCAL_CREDENTIALS"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.LocalCredentials"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_LOCAL_CREDENTIALS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_RECEIVING_STATE"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.ReceivingState"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_RECEIVING_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_RELAY_INFO"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.RelayInfo"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_RELAY_INFO">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_SENDING_STATE"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.SendingState"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_SENDING_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_STUN_SERVERS"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.STUNServers"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_STUN_SERVERS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_INTERFACE_MEDIA_TRANSPORT"
+              value="org.freedesktop.Telepathy.Call1.Stream.Interface.Media.Transport"
+              c:type="TP_PROP_CALL_STREAM_INTERFACE_MEDIA_TRANSPORT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_LOCAL_SENDING_STATE"
+              value="org.freedesktop.Telepathy.Call1.Stream.LocalSendingState"
+              c:type="TP_PROP_CALL_STREAM_LOCAL_SENDING_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_REMOTE_MEMBERS"
+              value="org.freedesktop.Telepathy.Call1.Stream.RemoteMembers"
+              c:type="TP_PROP_CALL_STREAM_REMOTE_MEMBERS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CALL_STREAM_REMOTE_MEMBER_IDENTIFIERS"
+              value="org.freedesktop.Telepathy.Call1.Stream.RemoteMemberIdentifiers"
+              c:type="TP_PROP_CALL_STREAM_REMOTE_MEMBER_IDENTIFIERS">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="PROP_CHANNEL_CHANNEL_TYPE"
@@ -19051,6 +20812,26 @@ This property can't be %NULL.</doc>
     <constant name="PROP_CHANNEL_INTERFACE_ANONYMITY_ANONYMOUS_ID"
               value="org.freedesktop.Telepathy.Channel.Interface.Anonymity.AnonymousID"
               c:type="TP_PROP_CHANNEL_INTERFACE_ANONYMITY_ANONYMOUS_ID">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAN_RETRY_CAPTCHA"
+              value="org.freedesktop.Telepathy.Channel.Interface.CaptchaAuthentication1.CanRetryCaptcha"
+              c:type="TP_PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAN_RETRY_CAPTCHA">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAPTCHA_ERROR"
+              value="org.freedesktop.Telepathy.Channel.Interface.CaptchaAuthentication1.CaptchaError"
+              c:type="TP_PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAPTCHA_ERROR">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAPTCHA_ERROR_DETAILS"
+              value="org.freedesktop.Telepathy.Channel.Interface.CaptchaAuthentication1.CaptchaErrorDetails"
+              c:type="TP_PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAPTCHA_ERROR_DETAILS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAPTCHA_STATUS"
+              value="org.freedesktop.Telepathy.Channel.Interface.CaptchaAuthentication1.CaptchaStatus"
+              c:type="TP_PROP_CHANNEL_INTERFACE_CAPTCHA_AUTHENTICATION_CAPTCHA_STATUS">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="PROP_CHANNEL_INTERFACE_CHAT_STATE_CHAT_STATES"
@@ -19433,6 +21214,76 @@ This property can't be %NULL.</doc>
               c:type="TP_PROP_CHANNEL_TARGET_ID">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_CALL_FLAGS"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.CallFlags"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_CALL_FLAGS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_CALL_MEMBERS"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.CallMembers"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_CALL_MEMBERS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_CALL_STATE"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.CallState"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_CALL_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_CALL_STATE_DETAILS"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.CallStateDetails"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_CALL_STATE_DETAILS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_CALL_STATE_REASON"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.CallStateReason"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_CALL_STATE_REASON">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_CONTENTS"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.Contents"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_CONTENTS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_HARDWARE_STREAMING"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.HardwareStreaming"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_HARDWARE_STREAMING">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.InitialAudio"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO_NAME"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.InitialAudioName"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO_NAME">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_INITIAL_TRANSPORT"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.InitialTransport"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_INITIAL_TRANSPORT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.InitialVideo"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO_NAME"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.InitialVideoName"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO_NAME">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_MEMBER_IDENTIFIERS"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.MemberIdentifiers"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_MEMBER_IDENTIFIERS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CHANNEL_TYPE_CALL_MUTABLE_CONTENTS"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1.MutableContents"
+              c:type="TP_PROP_CHANNEL_TYPE_CALL_MUTABLE_CONTENTS">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="PROP_CHANNEL_TYPE_CONTACT_SEARCH_AVAILABLE_SEARCH_KEYS"
               value="org.freedesktop.Telepathy.Channel.Type.ContactSearch.AvailableSearchKeys"
               c:type="TP_PROP_CHANNEL_TYPE_CONTACT_SEARCH_AVAILABLE_SEARCH_KEYS">
@@ -19776,6 +21627,11 @@ This property can't be %NULL.</doc>
     <constant name="PROP_CONNECTION_INTERFACE_CONTACT_LIST_CONTACT_LIST_STATE"
               value="org.freedesktop.Telepathy.Connection.Interface.ContactList.ContactListState"
               c:type="TP_PROP_CONNECTION_INTERFACE_CONTACT_LIST_CONTACT_LIST_STATE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="PROP_CONNECTION_INTERFACE_CONTACT_LIST_DOWNLOAD_AT_CONNECTION"
+              value="org.freedesktop.Telepathy.Connection.Interface.ContactList.DownloadAtConnection"
+              c:type="TP_PROP_CONNECTION_INTERFACE_CONTACT_LIST_DOWNLOAD_AT_CONNECTION">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="PROP_CONNECTION_INTERFACE_CONTACT_LIST_REQUEST_USES_MESSAGE"
@@ -21288,6 +23144,29 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
         </return-value>
       </method>
     </record>
+    <enumeration name="RCPTXRRTTMode" c:type="TpRCPTXRRTTMode">
+      <member name="all" value="0" c:identifier="TP_RCPT_XR_RTT_MODE_ALL"/>
+      <member name="sender"
+              value="1"
+              c:identifier="TP_RCPT_XR_RTT_MODE_SENDER"/>
+    </enumeration>
+    <bitfield name="RTCPXRStatisticsFlags" c:type="TpRTCPXRStatisticsFlags">
+      <member name="loss"
+              value="1"
+              c:identifier="TP_RTCP_XR_STATISTICS_FLAGS_LOSS"/>
+      <member name="duplicate"
+              value="2"
+              c:identifier="TP_RTCP_XR_STATISTICS_FLAGS_DUPLICATE"/>
+      <member name="jitter"
+              value="4"
+              c:identifier="TP_RTCP_XR_STATISTICS_FLAGS_JITTER"/>
+      <member name="ttl"
+              value="8"
+              c:identifier="TP_RTCP_XR_STATISTICS_FLAGS_TTL"/>
+      <member name="hl"
+              value="16"
+              c:identifier="TP_RTCP_XR_STATISTICS_FLAGS_HL"/>
+    </bitfield>
     <enumeration name="RichPresenceAccessControlType"
                  c:type="TpRichPresenceAccessControlType">
       <member name="whitelist"
@@ -21333,6 +23212,18 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
       <member name="client_failed"
               value="6"
               c:identifier="TP_SASL_STATUS_CLIENT_FAILED"/>
+    </enumeration>
+    <enumeration name="SendingState" c:type="TpSendingState">
+      <member name="none" value="0" c:identifier="TP_SENDING_STATE_NONE"/>
+      <member name="pending_send"
+              value="1"
+              c:identifier="TP_SENDING_STATE_PENDING_SEND"/>
+      <member name="sending"
+              value="2"
+              c:identifier="TP_SENDING_STATE_SENDING"/>
+      <member name="pending_stop_sending"
+              value="3"
+              c:identifier="TP_SENDING_STATE_PENDING_STOP_SENDING"/>
     </enumeration>
     <enumeration name="ServicePointType" c:type="TpServicePointType">
       <member name="none" value="0" c:identifier="TP_SERVICE_POINT_TYPE_NONE"/>
@@ -23019,6 +24910,69 @@ on @context before it returns.</doc>
               value="8"
               c:identifier="TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_SERVICE"/>
     </bitfield>
+    <enumeration name="StreamComponent" c:type="TpStreamComponent">
+      <member name="unknown"
+              value="0"
+              c:identifier="TP_STREAM_COMPONENT_UNKNOWN"/>
+      <member name="data" value="1" c:identifier="TP_STREAM_COMPONENT_DATA"/>
+      <member name="control"
+              value="2"
+              c:identifier="TP_STREAM_COMPONENT_CONTROL"/>
+    </enumeration>
+    <enumeration name="StreamEndpointState" c:type="TpStreamEndpointState">
+      <member name="connecting"
+              value="0"
+              c:identifier="TP_STREAM_ENDPOINT_STATE_CONNECTING"/>
+      <member name="provisionally_connected"
+              value="1"
+              c:identifier="TP_STREAM_ENDPOINT_STATE_PROVISIONALLY_CONNECTED"/>
+      <member name="fully_connected"
+              value="2"
+              c:identifier="TP_STREAM_ENDPOINT_STATE_FULLY_CONNECTED"/>
+      <member name="exhausted_candidates"
+              value="3"
+              c:identifier="TP_STREAM_ENDPOINT_STATE_EXHAUSTED_CANDIDATES"/>
+      <member name="failed"
+              value="4"
+              c:identifier="TP_STREAM_ENDPOINT_STATE_FAILED"/>
+    </enumeration>
+    <enumeration name="StreamFlowState" c:type="TpStreamFlowState">
+      <member name="stopped"
+              value="0"
+              c:identifier="TP_STREAM_FLOW_STATE_STOPPED"/>
+      <member name="pending_start"
+              value="1"
+              c:identifier="TP_STREAM_FLOW_STATE_PENDING_START"/>
+      <member name="pending_stop"
+              value="2"
+              c:identifier="TP_STREAM_FLOW_STATE_PENDING_STOP"/>
+      <member name="started"
+              value="3"
+              c:identifier="TP_STREAM_FLOW_STATE_STARTED"/>
+    </enumeration>
+    <enumeration name="StreamTransportType" c:type="TpStreamTransportType">
+      <member name="unknown"
+              value="0"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_UNKNOWN"/>
+      <member name="raw_udp"
+              value="1"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_RAW_UDP"/>
+      <member name="ice"
+              value="2"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_ICE"/>
+      <member name="gtalk_p2p"
+              value="3"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_GTALK_P2P"/>
+      <member name="wlm_2009"
+              value="4"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_WLM_2009"/>
+      <member name="shm"
+              value="5"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_SHM"/>
+      <member name="multicast"
+              value="6"
+              c:identifier="TP_STREAM_TRANSPORT_TYPE_MULTICAST"/>
+    </enumeration>
     <class name="StreamTubeChannel"
            c:symbol-prefix="stream_tube_channel"
            c:type="TpStreamTubeChannel"
@@ -23399,9 +25353,49 @@ a tube connection has been closed.</doc>
               c:type="TP_TOKEN_CHANNEL_INTERFACE_MEDIA_SIGNALLING_WLM_8_5">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="TOKEN_CHANNEL_TYPE_CALL_AUDIO"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1/audio"
+              c:type="TP_TOKEN_CHANNEL_TYPE_CALL_AUDIO">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CHANNEL_TYPE_CALL_GTALK_P2P"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1/gtalk-p2p"
+              c:type="TP_TOKEN_CHANNEL_TYPE_CALL_GTALK_P2P">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CHANNEL_TYPE_CALL_ICE"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1/ice"
+              c:type="TP_TOKEN_CHANNEL_TYPE_CALL_ICE">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CHANNEL_TYPE_CALL_SHM"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1/shm"
+              c:type="TP_TOKEN_CHANNEL_TYPE_CALL_SHM">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CHANNEL_TYPE_CALL_VIDEO"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1/video"
+              c:type="TP_TOKEN_CHANNEL_TYPE_CALL_VIDEO">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CHANNEL_TYPE_CALL_WLM_2009"
+              value="org.freedesktop.Telepathy.Channel.Type.Call1/wlm-2009"
+              c:type="TP_TOKEN_CHANNEL_TYPE_CALL_WLM_2009">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="TOKEN_CONNECTION_CONTACT_ID"
               value="org.freedesktop.Telepathy.Connection/contact-id"
               c:type="TP_TOKEN_CONNECTION_CONTACT_ID">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CONNECTION_INTERFACE_ADDRESSING_ADDRESSES"
+              value="org.freedesktop.Telepathy.Connection.Interface.Addressing1/addresses"
+              c:type="TP_TOKEN_CONNECTION_INTERFACE_ADDRESSING_ADDRESSES">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="TOKEN_CONNECTION_INTERFACE_ADDRESSING_URIS"
+              value="org.freedesktop.Telepathy.Connection.Interface.Addressing1/uris"
+              c:type="TP_TOKEN_CONNECTION_INTERFACE_ADDRESSING_URIS">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="TOKEN_CONNECTION_INTERFACE_ALIASING_ALIAS"
@@ -27592,6 +29586,78 @@ the connection; previously, this function provided refcounting for handles.</doc
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
     </function>
+    <function name="iface_quark_call_content"
+              c:identifier="tp_iface_quark_call_content">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_interface_audio_control"
+              c:identifier="tp_iface_quark_call_content_interface_audio_control">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_interface_dtmf"
+              c:identifier="tp_iface_quark_call_content_interface_dtmf">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_interface_media"
+              c:identifier="tp_iface_quark_call_content_interface_media">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_interface_video_control"
+              c:identifier="tp_iface_quark_call_content_interface_video_control">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_media_description"
+              c:identifier="tp_iface_quark_call_content_media_description">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_media_description_interface_rtcp_extended_reports"
+              c:identifier="tp_iface_quark_call_content_media_description_interface_rtcp_extended_reports">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_media_description_interface_rtcp_feedback"
+              c:identifier="tp_iface_quark_call_content_media_description_interface_rtcp_feedback">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_content_media_description_interface_rtp_header_extensions"
+              c:identifier="tp_iface_quark_call_content_media_description_interface_rtp_header_extensions">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_stream"
+              c:identifier="tp_iface_quark_call_stream">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_stream_endpoint"
+              c:identifier="tp_iface_quark_call_stream_endpoint">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_call_stream_interface_media"
+              c:identifier="tp_iface_quark_call_stream_interface_media">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
     <function name="iface_quark_channel" c:identifier="tp_iface_quark_channel">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
@@ -27623,6 +29689,12 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="iface_quark_channel_interface_call_state"
               c:identifier="tp_iface_quark_channel_interface_call_state">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_channel_interface_captcha_authentication"
+              c:identifier="tp_iface_quark_channel_interface_captcha_authentication">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
@@ -27741,6 +29813,12 @@ the connection; previously, this function provided refcounting for handles.</doc
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
     </function>
+    <function name="iface_quark_channel_type_call"
+              c:identifier="tp_iface_quark_channel_type_call">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
     <function name="iface_quark_channel_type_contact_list"
               c:identifier="tp_iface_quark_channel_type_contact_list">
       <return-value transfer-ownership="none">
@@ -27838,6 +29916,12 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="iface_quark_connection"
               c:identifier="tp_iface_quark_connection">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_connection_interface_addressing"
+              c:identifier="tp_iface_quark_connection_interface_addressing">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>

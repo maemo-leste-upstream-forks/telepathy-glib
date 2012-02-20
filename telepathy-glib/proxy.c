@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "config.h"
+
 #include "telepathy-glib/proxy-subclass.h"
 #include "telepathy-glib/proxy-internal.h"
 
@@ -1282,8 +1284,7 @@ tp_proxy_class_init (TpProxyClass *klass)
   param_spec = g_param_spec_object ("dbus-daemon", "D-Bus daemon",
       "The D-Bus daemon used by this object, or this object itself if it's "
       "a TpDBusDaemon", TP_TYPE_DBUS_DAEMON,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
-      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_DBUS_DAEMON,
       param_spec);
 
@@ -1295,8 +1296,7 @@ tp_proxy_class_init (TpProxyClass *klass)
    */
   param_spec = g_param_spec_boxed ("dbus-connection", "D-Bus connection",
       "The D-Bus connection used by this object", DBUS_TYPE_G_CONNECTION,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
-      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_DBUS_CONNECTION,
       param_spec);
 
@@ -1307,8 +1307,7 @@ tp_proxy_class_init (TpProxyClass *klass)
    */
   param_spec = g_param_spec_string ("bus-name", "D-Bus bus name",
       "The D-Bus bus name for this object", NULL,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
-      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_BUS_NAME,
       param_spec);
 
@@ -1320,8 +1319,7 @@ tp_proxy_class_init (TpProxyClass *klass)
    */
   param_spec = g_param_spec_string ("object-path", "D-Bus object path",
       "The D-Bus object path for this object", NULL,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
-      G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_OBJECT_PATH,
       param_spec);
 
@@ -1332,8 +1330,7 @@ tp_proxy_class_init (TpProxyClass *klass)
    */
   param_spec = g_param_spec_boxed ("interfaces", "D-Bus interfaces",
       "Known D-Bus interface names for this object", G_TYPE_STRV,
-      G_PARAM_READABLE | G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK
-      | G_PARAM_STATIC_BLURB);
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_INTERFACES,
       param_spec);
 
@@ -1346,8 +1343,7 @@ tp_proxy_class_init (TpProxyClass *klass)
   param_spec = g_param_spec_object ("factory", "Simple Client Factory",
       "The TpSimpleClientFactory used to create this proxy",
       TP_TYPE_SIMPLE_CLIENT_FACTORY,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_NAME |
-      G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_FACTORY,
       param_spec);
 

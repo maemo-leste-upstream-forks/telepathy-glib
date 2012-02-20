@@ -39,6 +39,7 @@ typedef void (*TpBaseChannelCloseFunc) (TpBaseChannel *chan);
 typedef void (*TpBaseChannelFillPropertiesFunc) (TpBaseChannel *chan,
     GHashTable *properties);
 typedef gchar *(*TpBaseChannelGetPathFunc) (TpBaseChannel *chan);
+typedef GPtrArray *(*TpBaseChannelGetInterfacesFunc) (TpBaseChannel *chan);
 
 struct _TpBaseChannelClass
 {
@@ -55,9 +56,10 @@ struct _TpBaseChannelClass
   TpBaseChannelCloseFunc close;
   TpBaseChannelFillPropertiesFunc fill_immutable_properties;
   TpBaseChannelGetPathFunc get_object_path_suffix;
+  TpBaseChannelGetInterfacesFunc get_interfaces;
 
   /*< private >*/
-  GCallback _reserved[10];
+  GCallback _reserved[9];
 };
 
 struct _TpBaseChannel
@@ -75,6 +77,7 @@ void tp_base_channel_reopened (TpBaseChannel *chan, TpHandle initiator);
 
 const gchar *tp_base_channel_get_object_path (TpBaseChannel *chan);
 TpBaseConnection *tp_base_channel_get_connection (TpBaseChannel *chan);
+TpHandle tp_base_channel_get_self_handle (TpBaseChannel *chan);
 TpHandle tp_base_channel_get_target_handle (TpBaseChannel *chan);
 TpHandle tp_base_channel_get_initiator (TpBaseChannel *chan);
 gboolean tp_base_channel_is_requested (TpBaseChannel *chan);
