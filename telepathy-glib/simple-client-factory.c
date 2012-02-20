@@ -123,6 +123,8 @@
  * Since: 0.15.5
  */
 
+#include "config.h"
+
 #include "telepathy-glib/simple-client-factory.h"
 
 #include <telepathy-glib/util.h>
@@ -398,8 +400,7 @@ tp_simple_client_factory_class_init (TpSimpleClientFactoryClass *klass)
   param_spec = g_param_spec_object ("dbus-daemon", "D-Bus daemon",
       "The D-Bus daemon used by this object",
       TP_TYPE_DBUS_DAEMON,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_NAME |
-      G_PARAM_STATIC_BLURB | G_PARAM_STATIC_NICK);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_DBUS_DAEMON,
       param_spec);
 }

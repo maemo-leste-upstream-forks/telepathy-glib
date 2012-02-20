@@ -1,7 +1,7 @@
 /*
  * account.c - proxy for an account in the Telepathy account manager
  *
- * Copyright © 2009–2010 Collabora Ltd. <http://www.collabora.co.uk/>
+ * Copyright © 2009–2012 Collabora Ltd. <http://www.collabora.co.uk/>
  * Copyright © 2009–2010 Nokia Corporation
  *
  * This library is free software; you can redistribute it and/or
@@ -18,6 +18,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include "config.h"
 
 #include <string.h>
 
@@ -119,6 +121,7 @@ struct _TpAccountPrivate {
   gchar *service;
 
   gchar *display_name;
+  GStrv supersedes;
 
   GHashTable *parameters;
 
@@ -172,7 +175,9 @@ enum {
   PROP_NORMALIZED_NAME,
   PROP_STORAGE_PROVIDER,
   PROP_STORAGE_IDENTIFIER,
-  PROP_STORAGE_RESTRICTIONS
+  PROP_STORAGE_RESTRICTIONS,
+  PROP_SUPERSEDES,
+  N_PROPS
 };
 
 static void tp_account_prepare_connection_async (TpProxy *proxy,
@@ -368,6 +373,7 @@ tp_account_init (TpAccount *self)
   self->priv->error = g_strdup (TP_ERROR_STR_DISCONNECTED);
   self->priv->error_details = g_hash_table_new_full (g_str_hash, g_str_equal,
       g_free, (GDestroyNotify) tp_g_value_slice_free);
+  self->priv->supersedes = g_new0 (gchar *, 1);
 }
 
 static void
@@ -758,6 +764,53 @@ _tp_account_update (TpAccount *account,
       g_free (old);
     }
 
+  if (g_hash_table_lookup (properties, "Supersedes") != NULL)
+    {
+      GStrv old = priv->supersedes;
+      GPtrArray *new_arr = tp_asv_get_boxed (properties, "Supersedes",
+          TP_ARRAY_TYPE_OBJECT_PATH_LIST);
+      gboolean changed = FALSE;
+      guint i;
+
+      if (new_arr == NULL)
+        {
+          priv->supersedes = g_new0 (gchar *, 1);
+        }
+      else
+        {
+          priv->supersedes = g_new0 (gchar *, new_arr->len + 1);
+
+          for (i = 0; i < new_arr->len; i++)
+            priv->supersedes[i] = g_strdup (g_ptr_array_index (new_arr, i));
+        }
+
+      if (new_arr == NULL || new_arr->len == 0)
+        {
+          changed = (old != NULL && *old != NULL);
+        }
+      else if (old == NULL || *old == NULL ||
+          g_strv_length (old) != new_arr->len)
+        {
+          changed = TRUE;
+        }
+      else
+        {
+          for (i = 0; i < new_arr->len; i++)
+            {
+              if (tp_strdiff (old[i], priv->supersedes[i]))
+                {
+                  changed = TRUE;
+                  break;
+                }
+            }
+        }
+
+      if (changed)
+        g_object_notify (G_OBJECT (account), "supersedes");
+
+      g_strfreev (old);
+    }
+
   if (g_hash_table_lookup (properties, "NormalizedName") != NULL)
     {
       gchar *old = priv->normalized_name;
@@ -1063,6 +1116,9 @@ _tp_account_get_property (GObject *object,
     case PROP_NICKNAME:
       g_value_set_string (value, self->priv->nickname);
       break;
+    case PROP_SUPERSEDES:
+      g_value_set_boxed (value, self->priv->supersedes);
+      break;
     case PROP_AUTOMATIC_PRESENCE_TYPE:
       g_value_set_uint (value, self->priv->auto_presence);
       break;
@@ -1126,6 +1182,7 @@ _tp_account_finalize (GObject *object)
   g_free (priv->normalized_name);
 
   g_free (priv->nickname);
+  g_strfreev (priv->supersedes);
 
   g_free (priv->cm_name);
   g_free (priv->proto_name);
@@ -1859,6 +1916,26 @@ tp_account_class_init (TpAccountClass *klass)
         G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
   /**
+   * TpAccount:supersedes:
+   *
+   * The object paths of previously-active accounts superseded by this one.
+   * For instance, this can be used in a logger to read old logs for an
+   * account that has been migrated from one connection manager to another.
+   *
+   * This is not guaranteed to have been retrieved until the
+   * %TP_ACCOUNT_FEATURE_CORE feature has been prepared; until then,
+   * the value is NULL.
+   *
+   * Since: 0.17.5
+   */
+  g_object_class_install_property (object_class, PROP_SUPERSEDES,
+      g_param_spec_boxed ("supersedes",
+        "Supersedes",
+        "Accounts superseded by this one",
+        G_TYPE_STRV,
+        G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
    * TpAccount::status-changed:
    * @account: the #TpAccount
    * @old_status: old #TpAccount:connection-status
@@ -2547,7 +2624,8 @@ _tp_account_updated_cb (TpAccount *proxy,
   if (error != NULL)
     g_simple_async_result_set_from_error (result, error);
   else
-    g_simple_async_result_set_op_res_gpointer (result, reconnect_required, NULL);
+    g_simple_async_result_set_op_res_gpointer (result,
+        g_strdupv ((GStrv) reconnect_required), (GDestroyNotify) g_strfreev);
 
   g_simple_async_result_complete (result);
   g_object_unref (G_OBJECT (result));
@@ -3152,6 +3230,28 @@ tp_account_set_nickname_async (TpAccount *account,
   g_value_unset (&value);
 }
 
+/**
+ * tp_account_get_supersedes:
+ * @self: a #TpAccount
+ *
+ * Return the same thing as the #TpAccount:supersedes property, in a way
+ * that may be more convenient for C code.
+ *
+ * The returned pointers are not guaranteed to remain valid after the
+ * main loop has been re-entered.
+ *
+ * Returns: (transfer none): the same as the #TpAccount:supersedes property
+ *
+ * Since: 0.17.5
+ */
+const gchar * const *
+tp_account_get_supersedes (TpAccount *self)
+{
+  g_return_val_if_fail (TP_IS_ACCOUNT (self), NULL);
+
+  return (const gchar * const *) self->priv->supersedes;
+}
+
 static void
 _tp_account_got_avatar_cb (TpProxy *proxy,
     const GValue *out_Value,
@@ -3171,8 +3271,9 @@ _tp_account_got_avatar_cb (TpProxy *proxy,
   else
     {
       avatar = g_value_get_boxed (out_Value);
-      res = g_value_get_boxed (g_value_array_get_nth (avatar, 0));
-      g_simple_async_result_set_op_res_gpointer (result, res, NULL);
+      res = g_value_dup_boxed (g_value_array_get_nth (avatar, 0));
+      g_simple_async_result_set_op_res_gpointer (result, res,
+          (GDestroyNotify) g_array_unref);
     }
 
   g_simple_async_result_complete (result);
@@ -3216,7 +3317,10 @@ tp_account_get_avatar_async (TpAccount *account,
  *
  * Finishes an async get operation of @account's avatar.
  *
- * Returns: (element-type guchar): a #GArray of #guchar
+ * Beware that the returned value is only valid until @result is freed.
+ * Copy it with g_array_ref() if you need to keep it for longer.
+ *
+ * Returns: (element-type guchar) (transfer none): a #GArray of #guchar
  *  containing the bytes of the account's avatar, or %NULL on failure
  *
  * Since: 0.9.0
@@ -3617,10 +3721,9 @@ _tp_account_get_storage_specific_information_cb (TpProxy *self,
     }
   else
     {
-      GHashTable *info;
-
-      info = g_value_get_boxed (value);
-      g_simple_async_result_set_op_res_gpointer (result, info, NULL);
+      g_simple_async_result_set_op_res_gpointer (result,
+          g_value_dup_boxed (value),
+          (GDestroyNotify) g_hash_table_unref);
     }
 
   g_simple_async_result_complete (result);
@@ -3667,6 +3770,9 @@ tp_account_get_storage_specific_information_async (TpAccount *self,
  *
  * Retrieve the value of the request begun with
  * tp_account_get_storage_specific_information_async().
+ *
+ * Beware that the returned value is only valid until @result is freed.
+ * Copy it with g_hash_table_ref() if you need to keep it for longer.
  *
  * Returns: (element-type utf8 GObject.Value) (transfer none): a #GHashTable
  *  of strings to GValues representing the D-Bus type a{sv}.

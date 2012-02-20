@@ -8,16 +8,14 @@
  * notice and this notice are preserved.
  */
 
+#include "config.h"
+
 #include "dbus-tube-chan.h"
 
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/channel-iface.h>
 #include <telepathy-glib/svc-channel.h>
 #include <telepathy-glib/gnio-util.h>
-
-#include <gio/gunixsocketaddress.h>
-#include <gio/gunixconnection.h>
-
 #include <glib/gstdio.h>
 
 enum

@@ -8,6 +8,8 @@
  * notice and this notice are preserved.
  */
 
+#include "config.h"
+
 #include "echo-channel-manager-conn.h"
 #include "simple-channel-manager.h"
 
@@ -98,7 +100,6 @@ tp_tests_echo_channel_manager_connection_class_init (TpTestsEchoChannelManagerCo
 
   param_spec = g_param_spec_object ("channel-manager", "Channel manager",
       "The channel manager", TP_TESTS_TYPE_SIMPLE_CHANNEL_MANAGER,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE |
-      G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB);
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_CHANNEL_MANAGER, param_spec);
 }

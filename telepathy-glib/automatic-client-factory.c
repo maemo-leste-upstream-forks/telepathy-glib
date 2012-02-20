@@ -49,6 +49,10 @@
  *     %TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER;</para>
  *   </listitem>
  *   <listitem>
+ *     <para>a #TpCallChannel, if the channel is of type
+ *     %TP_IFACE_CHANNEL_TYPE_CALL;</para>
+ *   </listitem>
+ *   <listitem>
  *     <para>a plain #TpChannel, otherwise</para>
  *   </listitem>
  * </itemizedlist>
@@ -73,6 +77,10 @@
  *     <para>%TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE
  *     for #TpFileTransferChannel</para>
  *   </listitem>
+ *   <listitem>
+ *     <para>%TP_CALL_CHANNEL_FEATURE_CORE
+ *     for #TpCallChannel</para>
+ *   </listitem>
  * </itemizedlist>
  *
  * Since: 0.15.5
@@ -94,6 +102,8 @@
  *
  * Since: 0.15.5
  */
+
+#include "config.h"
 
 #include "telepathy-glib/automatic-client-factory.h"
 
@@ -152,6 +162,11 @@ create_channel_impl (TpSimpleClientFactory *self,
       return (TpChannel *) _tp_file_transfer_channel_new_with_factory (self,
           conn, object_path, properties, error);
     }
+  else if (!tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_CALL))
+    {
+      return (TpChannel *) _tp_call_channel_new_with_factory (self,
+          conn, object_path, properties, error);
+    }
 
   /* Chainup on parent implementation as fallback */
   return chainup->create_channel (self, conn, object_path, properties, error);
@@ -184,6 +199,11 @@ dup_channel_features_impl (TpSimpleClientFactory *self,
   else if (TP_IS_FILE_TRANSFER_CHANNEL (channel))
     {
       feature = TP_FILE_TRANSFER_CHANNEL_FEATURE_CORE;
+      g_array_append_val (features, feature);
+    }
+  else if (TP_IS_CALL_CHANNEL (channel))
+    {
+      feature = TP_CALL_CHANNEL_FEATURE_CORE;
       g_array_append_val (features, feature);
     }
 
