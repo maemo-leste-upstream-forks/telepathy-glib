@@ -22,19 +22,17 @@
 #ifndef __TP_BASE_CALL_INTERNAL_H__
 #define __TP_BASE_CALL_INTERNAL_H__
 
+#include <telepathy-glib/base-call-channel.h>
+#include <telepathy-glib/base-call-content.h>
+#include <telepathy-glib/base-call-stream.h>
 #include <telepathy-glib/base-connection.h>
+#include <telepathy-glib/base-media-call-channel.h>
+#include <telepathy-glib/base-media-call-content.h>
+#include <telepathy-glib/base-media-call-stream.h>
+#include <telepathy-glib/call-content-media-description.h>
+#include <telepathy-glib/call-stream-endpoint.h>
 
 G_BEGIN_DECLS
-
-/* Forward declaration */
-typedef struct _TpBaseCallChannel TpBaseCallChannel;
-typedef struct _TpBaseCallContent TpBaseCallContent;
-typedef struct _TpBaseCallStream  TpBaseCallStream;
-typedef struct _TpCallContentMediaDescription  TpCallContentMediaDescription;
-typedef struct _TpBaseMediaCallChannel TpBaseMediaCallChannel;
-typedef struct _TpBaseMediaCallContent TpBaseMediaCallContent;
-typedef struct _TpBaseMediaCallStream TpBaseMediaCallStream;
-typedef struct _TpCallStreamEndpoint TpCallStreamEndpoint;
 
 /* Implemented in base-call-content.c */
 void _tp_base_call_content_set_channel (TpBaseCallContent *self,
@@ -88,10 +86,10 @@ const gchar *_tp_base_call_channel_get_initial_tones (TpBaseCallChannel *self);
 void _tp_base_media_call_channel_endpoint_state_changed (
     TpBaseMediaCallChannel *self);
 gboolean _tp_base_media_channel_is_held (TpBaseMediaCallChannel *self);
-void _tp_base_media_call_channel_streams_sending_state_changed (
+gboolean _tp_base_media_call_channel_streams_sending_state_changed (
     TpBaseMediaCallChannel *self,
     gboolean success);
-void _tp_base_media_call_channel_streams_receiving_state_changed (
+gboolean _tp_base_media_call_channel_streams_receiving_state_changed (
     TpBaseMediaCallChannel *self,
     gboolean success);
 

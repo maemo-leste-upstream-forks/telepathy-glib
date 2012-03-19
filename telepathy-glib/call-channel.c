@@ -65,7 +65,6 @@
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/util-internal.h"
-#include "telepathy-glib/_gen/signals-marshal.h"
 
 G_DEFINE_TYPE (TpCallChannel, tp_call_channel, TP_TYPE_CHANNEL)
 
@@ -85,10 +84,13 @@ struct _TpCallChannelPrivate
   gchar *initial_audio_name;
   gchar *initial_video_name;
   gboolean mutable_contents;
+  TpLocalHoldState hold_state;
+  TpLocalHoldStateReason hold_state_reason;
 
   GSimpleAsyncResult *core_result;
   gboolean properties_retrieved;
   gboolean initial_members_retrieved;
+  gboolean hold_state_retrieved;
 };
 
 enum /* props */
@@ -104,6 +106,8 @@ enum /* props */
   PROP_INITIAL_AUDIO_NAME,
   PROP_INITIAL_VIDEO_NAME,
   PROP_MUTABLE_CONTENTS,
+  PROP_HOLD_STATE,
+  PROP_HOLD_STATE_REASON,
 };
 
 enum /* signals */
@@ -127,6 +131,7 @@ _tp_call_content_new (TpCallChannel *self,
       "dbus-connection", tp_proxy_get_dbus_connection (self),
       "object-path", object_path,
       "connection", tp_channel_borrow_connection ((TpChannel *) self),
+      "channel", self,
       NULL);
 }
 
@@ -390,6 +395,22 @@ typedef struct
   TpCallStateReason *reason;
 } UpdateCallMembersData;
 
+
+static void
+channel_maybe_core_prepared (TpCallChannel *self)
+{
+  if (self->priv->core_result == NULL)
+    return;
+
+  if (self->priv->initial_members_retrieved &&
+      self->priv->properties_retrieved &&
+      self->priv->hold_state_retrieved)
+    {
+      g_simple_async_result_complete (self->priv->core_result);
+      g_clear_object (&self->priv->core_result);
+    }
+}
+
 static void
 update_call_members_prepared_cb (GObject *object,
     GAsyncResult *result,
@@ -424,9 +445,7 @@ update_call_members_prepared_cb (GObject *object,
     {
       self->priv->initial_members_retrieved = TRUE;
 
-      g_assert (self->priv->core_result != NULL);
-      g_simple_async_result_complete (self->priv->core_result);
-      g_clear_object (&self->priv->core_result);
+      channel_maybe_core_prepared (self);
     }
   else
     {
@@ -566,7 +585,47 @@ got_all_properties_cb (TpProxy *proxy,
     }
 
   /* core_result will be complete in update_call_members_prepared_cb() when
-   * the initial members are prepared. */
+   * the initial members are prepared or when the hold state is retrived. */
+}
+
+static void
+hold_state_changed_cb (TpChannel *proxy,
+    guint arg_HoldState,
+    guint arg_Reason,
+    gpointer user_data, GObject *weak_object)
+{
+  TpCallChannel *self = TP_CALL_CHANNEL (proxy);
+
+  if (!self->priv->hold_state_retrieved)
+    return;
+
+  self->priv->hold_state = arg_HoldState;
+  self->priv->hold_state_reason = arg_Reason;
+
+  g_object_notify (G_OBJECT (proxy), "hold-state");
+  g_object_notify (G_OBJECT (proxy), "hold-state-reason");
+}
+
+static void
+got_hold_state_cb (TpChannel *proxy, guint arg_HoldState, guint arg_Reason,
+    const GError *error, gpointer user_data, GObject *weak_object)
+{
+  TpCallChannel *self = TP_CALL_CHANNEL (proxy);
+
+  if (error != NULL)
+    {
+      DEBUG ("Could not get the call channel hold state: %s", error->message);
+      g_simple_async_result_set_from_error (self->priv->core_result, error);
+      g_simple_async_result_complete (self->priv->core_result);
+      g_clear_object (&self->priv->core_result);
+      return;
+    }
+
+  self->priv->hold_state = arg_HoldState;
+  self->priv->hold_state_reason = arg_Reason;
+  self->priv->hold_state_retrieved = TRUE;
+
+  channel_maybe_core_prepared (self);
 }
 
 static void
@@ -594,6 +653,16 @@ _tp_call_channel_prepare_core_async (TpProxy *proxy,
   tp_cli_dbus_properties_call_get_all (self, -1,
       TP_IFACE_CHANNEL_TYPE_CALL,
       got_all_properties_cb, NULL, NULL, NULL);
+
+  if (tp_proxy_has_interface_by_id (proxy,
+          TP_IFACE_QUARK_CHANNEL_INTERFACE_HOLD))
+    {
+      tp_cli_channel_interface_hold_connect_to_hold_state_changed (channel,
+          hold_state_changed_cb, NULL, NULL, NULL, NULL);
+
+      tp_cli_channel_interface_hold_call_get_hold_state (channel, -1,
+          got_hold_state_cb, NULL, NULL, NULL);
+    }
 }
 
 static void
@@ -696,7 +765,15 @@ tp_call_channel_get_property (GObject *object,
         g_value_set_boolean (value, self->priv->mutable_contents);
         break;
 
-      default:
+      case PROP_HOLD_STATE:
+        g_value_set_uint (value, self->priv->hold_state);
+        break;
+
+      case PROP_HOLD_STATE_REASON:
+        g_value_set_uint (value, self->priv->hold_state_reason);
+        break;
+
+     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
         break;
     }
@@ -795,7 +872,8 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   /**
    * TpCallChannel:state-details:
    *
-   * Detailed information about #TpCallChannel:state.
+   * Detailed infoermation about #TpCallChannel:state. It is a #GHashTable
+   * mapping gchar*->GValue, it can be accessed using the tp_asv_* functions.
    *
    * Since: 0.17.5
    */
@@ -906,6 +984,36 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   g_object_class_install_property (gobject_class,
       PROP_MUTABLE_CONTENTS, param_spec);
 
+
+  /**
+   * TpCallChannel:hold-state:
+   *
+   * A #TpLocalHoldState specifying if the Call is currently held
+   *
+   * Since: 0.17.6
+   */
+  param_spec = g_param_spec_uint ("hold-state", "Hold State",
+      "The Hold state of the call",
+      0, G_MAXUINT, TP_LOCAL_HOLD_STATE_UNHELD,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (gobject_class, PROP_HOLD_STATE, param_spec);
+
+
+  /**
+   * TpCallChannel:hold-state-reason:
+   *
+   * A #TpLocalHoldStateReason specifying why the Call is currently held.
+   *
+   * Since: 0.17.6
+   */
+  param_spec = g_param_spec_uint ("hold-state-reason", "Hold State Reason",
+      "The reason for the current hold state",
+      0, G_MAXUINT, TP_LOCAL_HOLD_STATE_REASON_NONE,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (gobject_class, PROP_HOLD_STATE_REASON,
+      param_spec);
+
+
   /**
    * TpCallChannel::content-added
    * @self: the #TpCallChannel
@@ -922,8 +1030,7 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   _signals[CONTENT_ADDED] = g_signal_new ("content-added",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      g_cclosure_marshal_VOID__OBJECT,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       1, G_TYPE_OBJECT);
 
@@ -944,8 +1051,7 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   _signals[CONTENT_REMOVED] = g_signal_new ("content-removed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      _tp_marshal_VOID__OBJECT_BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       2, G_TYPE_OBJECT, TP_TYPE_CALL_STATE_REASON);
 
@@ -955,7 +1061,8 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
    * @state: the new #TpCallState
    * @flags: the new #TpCallFlags
    * @reason: the #TpCallStateReason for the change
-   * @details: additional details
+   * @details: (element-type utf8 GObject.Value): additional details as a
+   *   #GHashTable readable using the tp_asv_* functions.
    *
    * The ::state-changed signal is emitted whenever the
    * call state changes.
@@ -965,8 +1072,7 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   _signals[STATE_CHANGED] = g_signal_new ("state-changed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      _tp_marshal_VOID__UINT_UINT_BOXED_BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       4, G_TYPE_UINT, G_TYPE_UINT, TP_TYPE_CALL_STATE_REASON,
       G_TYPE_HASH_TABLE);
@@ -992,8 +1098,7 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   _signals[MEMBERS_CHANGED] = g_signal_new ("members-changed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      _tp_marshal_VOID__BOXED_BOXED_BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       3, G_TYPE_HASH_TABLE, G_TYPE_PTR_ARRAY, TP_TYPE_CALL_STATE_REASON);
 }
@@ -1208,19 +1313,53 @@ tp_call_channel_get_members (TpCallChannel *self)
  * tp_call_channel_has_dtmf:
  * @self: a #TpCallChannel
  *
- * Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_DTMF
- * interfaces
+ * Whether or not %self can send DTMF tones using
+ * tp_call_channel_send_tones_async(). To be able to send DTMF tones, at least
+ * one of @self's #TpCallChannel:contents must implement
+ * %TP_IFACE_CALL_CONTENT_INTERFACE_DTMF interface.
  *
- * Returns: whether or not @self supports DTMF
+ * Returns: whether or not @self can send DTMF tones.
  * Since: 0.17.5
  */
 gboolean
 tp_call_channel_has_dtmf (TpCallChannel *self)
 {
+  guint i;
+
   g_return_val_if_fail (TP_IS_CALL_CHANNEL (self), FALSE);
 
+  for (i = 0; i < self->priv->contents->len; i++)
+    {
+      TpCallContent *content = g_ptr_array_index (self->priv->contents, i);
+
+      if (tp_proxy_has_interface_by_id (content,
+              TP_IFACE_QUARK_CALL_CONTENT_INTERFACE_DTMF))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+
+/**
+ * tp_call_channel_has_hold:
+ * @self: a #TpCallChannel
+ *
+ * Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_HOLD
+ * interfaces
+ *
+ * Returns: whether or not @self supports Hold
+ * Since: 0.17.6
+ */
+gboolean
+tp_call_channel_has_hold (TpCallChannel *self)
+{
+  g_return_val_if_fail (TP_IS_CALL_CHANNEL (self), FALSE);
+  g_return_val_if_fail (
+      tp_proxy_is_prepared (self, TP_CALL_CHANNEL_FEATURE_CORE), FALSE);
+
   return tp_proxy_has_interface_by_id (self,
-      TP_IFACE_QUARK_CHANNEL_INTERFACE_DTMF);
+      TP_IFACE_QUARK_CHANNEL_INTERFACE_HOLD);
 }
 
 static void
@@ -1398,8 +1537,8 @@ tp_call_channel_accept_finish (TpCallChannel *self,
 void
 tp_call_channel_hangup_async (TpCallChannel *self,
     TpCallStateChangeReason reason,
-    gchar *detailed_reason,
-    gchar *message,
+    const gchar *detailed_reason,
+    const gchar *message,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
@@ -1476,7 +1615,7 @@ add_content_cb (TpChannel *channel,
  */
 void
 tp_call_channel_add_content_async (TpCallChannel *self,
-    gchar *name,
+    const gchar *name,
     TpMediaStreamType type,
     TpMediaStreamDirection initial_direction,
     GAsyncReadyCallback callback,
@@ -1568,6 +1707,7 @@ tp_call_channel_send_tones_async (TpCallChannel *self,
   guint count = 0;
 
   g_return_if_fail (TP_IS_CALL_CHANNEL (self));
+  g_return_if_fail (tp_call_channel_has_dtmf (self));
 
   result = g_simple_async_result_new (G_OBJECT (self), callback, user_data,
       tp_call_channel_send_tones_async);
@@ -1585,18 +1725,9 @@ tp_call_channel_send_tones_async (TpCallChannel *self,
           send_tones_cb, g_object_ref (result));
     }
 
-  if (count == 0)
-    {
-      g_simple_async_result_set_error (result,
-          TP_ERRORS, TP_ERROR_NOT_CAPABLE,
-          "Channel has no content implementing DTMF interface");
-      g_simple_async_result_complete_in_idle (result);
-    }
-  else
-    {
-      g_simple_async_result_set_op_res_gpointer (result,
-          GUINT_TO_POINTER (count), NULL);
-    }
+  g_assert (count > 0);
+  g_simple_async_result_set_op_res_gpointer (result,
+      GUINT_TO_POINTER (count), NULL);
 
   g_object_unref (result);
 }
@@ -1618,4 +1749,68 @@ tp_call_channel_send_tones_finish (TpCallChannel *self,
     GError **error)
 {
   _tp_implement_finish_void (self, tp_call_channel_send_tones_async)
+}
+
+/**
+ * tp_call_channel_request_hold_async:
+ * @self: a #TpCallChannel
+ * @hold: Whether to request a hold or a unhold
+ * @callback: a callback to call when the operation finishes
+ * @user_data: data to pass to @callback
+ *
+ * Requests that the connection manager holds or unholds the call. Watch
+ * #TpCallChannel::hold-state property to know when the channel goes on
+ * hold or is unheld. Unholding may fail if the streaming implementation
+ * can not obtain all the resources needed to restart the call.
+ *
+ * Since: 0.17.6
+ */
+
+void
+tp_call_channel_request_hold_async (TpCallChannel *self,
+    gboolean hold,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+    GSimpleAsyncResult *result;
+
+    g_return_if_fail (TP_IS_CALL_CHANNEL (self));
+
+    result = g_simple_async_result_new (G_OBJECT (self), callback, user_data,
+        tp_call_channel_request_hold_async);
+
+    if (tp_call_channel_has_hold (self))
+      {
+        tp_cli_channel_interface_hold_call_request_hold (TP_CHANNEL (self), -1,
+            hold, generic_async_cb, g_object_ref (result), g_object_unref,
+            G_OBJECT (self));
+      }
+    else
+      {
+        g_simple_async_result_set_error (result,
+            TP_ERRORS, TP_ERROR_NOT_CAPABLE,
+            "Channel does NOT implement the Hold interface");
+        g_simple_async_result_complete_in_idle (result);
+      }
+
+    g_object_unref (result);
+}
+
+
+/**
+ * tp_call_channel_request_hold_finish:
+ * @self: a #TpCallChannel
+ * @result: a #GAsyncResult
+ * @error: a #GError to fill
+ *
+ * Finishes tp_call_channel_request_hold_async
+ *
+ * Since: 0.17.6
+ */
+gboolean
+tp_call_channel_request_hold_finish (TpCallChannel *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  _tp_implement_finish_void (self, tp_call_channel_request_hold_async);
 }

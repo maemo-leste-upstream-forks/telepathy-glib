@@ -32,7 +32,6 @@ EXTRA_DIST = \
     glib-ginterface-gen.py \
     glib-gtypes-generator.py \
     glib-interfaces-gen.py \
-    glib-signals-marshal-gen.py \
     gobject-foo.py \
     lcov.am \
     libtpcodegen.py \
@@ -53,23 +52,21 @@ CLEANFILES = libtpcodegen.pyc libtpcodegen.pyo libglibcodegen.pyc libglibcodegen
 all: $(EXTRA_DIST)
 
 libglibcodegen.py: libtpcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 c-constants-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 glib-client-marshaller-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 glib-errors-enum-body-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 glib-errors-enum-header-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 glib-ginterface-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 glib-gtypes-generator.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 glib-interfaces-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
-glib-signals-marshal-gen.py: libglibcodegen.py
-	$(AM_V_GEN)touch $@
+	$(AM_V_GEN)test -e ${srcdir}/$@ && touch ${srcdir}/$@
 
 TELEPATHY_SPEC_SRCDIR = $(top_srcdir)/../telepathy-spec
 maintainer-update-from-telepathy-spec:

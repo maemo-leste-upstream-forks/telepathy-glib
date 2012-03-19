@@ -48,6 +48,7 @@
 #include "telepathy-glib/call-stream.h"
 
 #include <telepathy-glib/call-misc.h>
+#include <telepathy-glib/call-content.h>
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/enums.h>
 #include <telepathy-glib/errors.h>
@@ -61,7 +62,6 @@
 #include "telepathy-glib/call-internal.h"
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/util-internal.h"
-#include "telepathy-glib/_gen/signals-marshal.h"
 
 #include "_gen/tp-cli-call-stream-body.h"
 
@@ -70,6 +70,8 @@ G_DEFINE_TYPE (TpCallStream, tp_call_stream, TP_TYPE_PROXY)
 struct _TpCallStreamPrivate
 {
   TpConnection *connection;
+
+  TpCallContent *content;
 
   /* TpContact -> TpSendingState */
   GHashTable *remote_members;
@@ -84,6 +86,7 @@ enum
   PROP_CONNECTION = 1,
   PROP_LOCAL_SENDING_STATE,
   PROP_CAN_REQUEST_RECEIVING,
+  PROP_CONTENT
 };
 
 enum /* signals */
@@ -241,6 +244,7 @@ tp_call_stream_dispose (GObject *object)
 {
   TpCallStream *self = (TpCallStream *) object;
 
+  g_clear_object (&self->priv->content);
   g_clear_object (&self->priv->connection);
   tp_clear_pointer (&self->priv->remote_members, g_hash_table_unref);
 
@@ -267,6 +271,9 @@ tp_call_stream_get_property (GObject *object,
       case PROP_CAN_REQUEST_RECEIVING:
         g_value_set_boolean (value, priv->can_request_receiving);
         break;
+      case PROP_CONTENT:
+        g_value_set_object (value, self->priv->content);
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
         break;
@@ -286,6 +293,10 @@ tp_call_stream_set_property (GObject *object,
       case PROP_CONNECTION:
         g_assert (self->priv->connection == NULL); /* construct-only */
         self->priv->connection = g_value_dup_object (value);
+        break;
+      case PROP_CONTENT:
+        g_assert (self->priv->content == NULL); /* construct-only */
+        self->priv->content = g_value_dup_object (value);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -342,7 +353,7 @@ tp_call_stream_class_init (TpCallStreamClass *klass)
    * Since: 0.17.5
    */
   param_spec = g_param_spec_object ("connection", "Connection",
-      "The connection of this content",
+      "The connection of this stream",
       TP_TYPE_CONNECTION,
       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (gobject_class, PROP_CONNECTION,
@@ -380,6 +391,21 @@ tp_call_stream_class_init (TpCallStreamClass *klass)
       param_spec);
 
   /**
+   * TpCallStream:content:
+   *
+   * The Content that this streams belongs to
+   *
+   * Since: 0.17.6
+   */
+  param_spec = g_param_spec_object ("content",
+      "Content",
+      "The content that this Stream belongs to",
+      TP_TYPE_CALL_CONTENT,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (gobject_class, PROP_CONTENT,
+      param_spec);
+
+  /**
    * TpCallStream::local-sending-state-changed
    * @self: the #TpCallStream
    * @state: the new #TpSendingState
@@ -393,8 +419,7 @@ tp_call_stream_class_init (TpCallStreamClass *klass)
   _signals[LOCAL_SENDING_STATE_CHANGED] = g_signal_new ("local-sending-state-changed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      _tp_marshal_VOID__UINT_BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       4, G_TYPE_UINT, G_TYPE_UINT, TP_TYPE_CALL_STATE_REASON,
       G_TYPE_HASH_TABLE);
@@ -418,8 +443,7 @@ tp_call_stream_class_init (TpCallStreamClass *klass)
   _signals[REMOTE_MEMBERS_CHANGED] = g_signal_new ("remote-members-changed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      _tp_marshal_VOID__BOXED_BOXED_BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       3, G_TYPE_HASH_TABLE, G_TYPE_PTR_ARRAY, TP_TYPE_CALL_STATE_REASON);
 }

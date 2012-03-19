@@ -35,7 +35,6 @@
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/simple-client-factory-internal.h"
-#include "telepathy-glib/_gen/signals-marshal.h"
 
 #include "_gen/tp-cli-channel-body.h"
 
@@ -373,6 +372,8 @@ tp_channel_get_identifier (TpChannel *self)
  *
  * Returns: %TRUE if introspection has completed
  * Since: 0.7.12
+ * Deprecated: 0.17.6: use tp_proxy_is_prepared() with
+ *  %TP_CHANNEL_FEATURE_CORE
  */
 gboolean
 tp_channel_is_ready (TpChannel *self)
@@ -1606,10 +1607,14 @@ tp_channel_class_init (TpChannelClass *klass)
    * invalidated - but tp_proxy_is_prepared() returns %FALSE for all features.
    *
    * Change notification is via notify::channel-ready.
+   *
+   * Deprecated: 0.17.6: use tp_proxy_is_prepared() with
+   *  %TP_CHANNEL_FEATURE_CORE for checks, or tp_proxy_prepare_async() for
+   *  notification
    */
   param_spec = g_param_spec_boolean ("channel-ready", "Channel ready?",
       "Initially FALSE; changes to TRUE when introspection finishes", FALSE,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_DEPRECATED);
   g_object_class_install_property (object_class, PROP_CHANNEL_READY,
       param_spec);
 
@@ -1779,8 +1784,7 @@ tp_channel_class_init (TpChannelClass *klass)
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__UINT_UINT,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_UINT);
 
   /**
@@ -1805,8 +1809,7 @@ tp_channel_class_init (TpChannelClass *klass)
       "group-members-changed", G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__STRING_BOXED_BOXED_BOXED_BOXED_UINT_UINT,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 7,
       G_TYPE_STRING, au_type, au_type, au_type, au_type, G_TYPE_UINT,
       G_TYPE_UINT);
@@ -1838,8 +1841,7 @@ tp_channel_class_init (TpChannelClass *klass)
       "group-members-changed-detailed", G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__BOXED_BOXED_BOXED_BOXED_BOXED,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 5,
       au_type, au_type, au_type, au_type, TP_HASH_TYPE_STRING_VARIANT_MAP);
 
@@ -1858,8 +1860,7 @@ tp_channel_class_init (TpChannelClass *klass)
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__UINT_UINT,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_UINT);
 
   /**
@@ -1962,8 +1963,7 @@ tp_channel_class_init (TpChannelClass *klass)
       "group-contacts-changed", G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__BOXED_BOXED_BOXED_BOXED_OBJECT_BOXED,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 6,
       G_TYPE_PTR_ARRAY, G_TYPE_PTR_ARRAY, G_TYPE_PTR_ARRAY, G_TYPE_PTR_ARRAY,
       TP_TYPE_CONTACT, TP_HASH_TYPE_STRING_VARIANT_MAP);
@@ -2124,9 +2124,9 @@ finally:
  *  %FALSE if the channel has become invalid.
  *
  * Since: 0.7.1
- * Deprecated: 0.11.0: Use tp_connection_call_when_ready,
- *  or restructure your program in such a way as to avoid re-entering the
- *  main loop.
+ * Deprecated: 0.11.0: Use tp_proxy_prepare_async() and re-enter the main
+ *  loop yourself, or restructure your program in such a way as to avoid
+ *  re-entering the main loop.
  */
 gboolean
 tp_channel_run_until_ready (TpChannel *self,
@@ -2241,6 +2241,8 @@ cwr_ready (TpChannel *self,
  * Signature of a callback passed to tp_channel_call_when_ready(), which
  * will be called exactly once, when the channel becomes ready or
  * invalid (whichever happens first)
+ *
+ * Deprecated: 0.17.6
  */
 
 /**
@@ -2261,6 +2263,7 @@ cwr_ready (TpChannel *self,
  * calls @callback from the main loop.)
  *
  * Since: 0.7.7
+ * Deprecated: 0.17.6: Use tp_proxy_prepare_async()
  */
 void
 tp_channel_call_when_ready (TpChannel *self,
