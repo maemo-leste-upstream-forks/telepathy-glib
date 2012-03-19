@@ -552,24 +552,59 @@ _tp_base_media_channel_is_held (TpBaseMediaCallChannel *self)
     }
 }
 
-void
+gboolean
 _tp_base_media_call_channel_streams_sending_state_changed (
     TpBaseMediaCallChannel *self,
     gboolean success)
 {
+  gboolean was_unholding =
+      (self->priv->hold_state == TP_LOCAL_HOLD_STATE_PENDING_UNHOLD);
+
   if (success)
     update_hold_state (self);
   else
     hold_change_failed (self);
+
+  return was_unholding;
 }
 
-void
+gboolean
 _tp_base_media_call_channel_streams_receiving_state_changed (
     TpBaseMediaCallChannel *self,
     gboolean success)
 {
+  gboolean was_unholding =
+      (self->priv->hold_state == TP_LOCAL_HOLD_STATE_PENDING_UNHOLD);
+
   if (success)
     update_hold_state (self);
   else
     hold_change_failed (self);
+
+  return was_unholding;
+}
+
+/**
+ * tp_base_media_call_channel_get_local_hold_state:
+ * @channel: a #TpBaseMediaCallChannel
+ * @reason: pointer to a location where to store the @reason, or %NULL
+ *
+ * <!-- -->
+ *
+ * Returns: The current hold state
+ *
+ * Since: 0.17.6
+ */
+
+TpLocalHoldState
+tp_base_media_call_channel_get_local_hold_state (
+    TpBaseMediaCallChannel *channel, TpLocalHoldStateReason *reason)
+{
+  g_return_val_if_fail (TP_IS_BASE_MEDIA_CALL_CHANNEL (channel),
+      TP_LOCAL_HOLD_STATE_UNHELD);
+
+  if (reason)
+    *reason = channel->priv->hold_state_reason;
+
+  return channel->priv->hold_state;
 }

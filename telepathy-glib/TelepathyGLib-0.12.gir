@@ -267,6 +267,119 @@ between the @self and the @target. The binding is released whenever the
           </parameter>
         </parameters>
       </method>
+      <method name="dup_detailed_error_vardict"
+              c:identifier="tp_account_dup_detailed_error_vardict"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">If the account's connection is not connected, return the D-Bus error name
+with which it last disconnected or failed to connect (in particular, this
+is %TP_ERROR_STR_CANCELLED if it was disconnected by a user request).
+This is the same as #TpAccount:connection-error.
+
+If @details is not %NULL, it will be used to return additional details about
+the error (the same as #TpAccount:connection-error-details).
+
+Otherwise, return %NULL, without altering @details.
+
+The returned string and @details may become invalid when the main loop is
+re-entered or the account is destroyed.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a D-Bus error name, or %NULL.</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <parameter name="details"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="full"
+                     allow-none="1">
+            <doc xml:whitespace="preserve"> optionally used to return a variant of type %G_VARIANT_TYPE_VARDICT, which must be unreffed by the caller with g_variant_unref()</doc>
+            <type name="GLib.Variant" c:type="GVariant**"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="dup_parameters_vardict"
+              c:identifier="tp_account_dup_parameters_vardict"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Returns the parameters of the account, in a variant of type
+%G_VARIANT_TYPE_VARDICT where the keys
+are parameter names (account, password, require-encryption etc.).
+Use g_variant_lookup() or g_variant_lookup_value() for convenient
+access to the values.
+
+The allowed parameters depend on the connection manager, and can be found
+via tp_connection_manager_get_protocol() and
+tp_connection_manager_protocol_get_param(). Well-known parameters are
+listed
+&lt;ulink url="http://telepathy.freedesktop.org/spec/org.freedesktop.Telepathy.ConnectionManager.html#org.freedesktop.Telepathy.ConnectionManager.RequestConnection"&gt;in
+the Telepathy D-Bus Interface Specification&lt;/ulink&gt;.
+
+parameters on @account, of type %G_VARIANT_TYPE_VARDICT</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the dictionary of</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
+      <method name="dup_storage_identifier_variant"
+              c:identifier="tp_account_dup_storage_identifier_variant"
+              version="0.13.2">
+        <doc xml:whitespace="preserve">Return provider-specific information used to identify this
+account. Use g_variant_get_type() to check that the type
+is what you expect; for instance, if the
+#TpAccount:storage-provider has string-based user identifiers,
+this variant should have type %G_VARIANT_TYPE_STRING.
+
+#TpAccount:storage-identifier-variant property</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the same as the</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
+      <method name="dup_storage_specific_information_vardict_async"
+              c:identifier="tp_account_dup_storage_specific_information_vardict_async"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Makes an asynchronous request of @self's StorageSpecificInformation
+property (part of the Account.Interface.Storage interface).
+
+When the operation is finished, @callback will be called. You must then
+call tp_account_dup_storage_specific_information_vardict_finish() to get the
+result of the request.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="dup_storage_specific_information_vardict_finish"
+              c:identifier="tp_account_dup_storage_specific_information_vardict_finish"
+              version="0.13.2"
+              throws="1">
+        <doc xml:whitespace="preserve">Retrieve the value of the request begun with
+tp_account_dup_storage_specific_information_vardict_async().
+
+of type %G_VARIANT_TYPE_VARDICT</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a map from strings to variants,</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="ensure_connection"
               c:identifier="tp_account_ensure_connection"
               version="0.9.0">
@@ -1456,6 +1569,67 @@ tp_account_update_parameters_finish() to get the result of the operation.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="update_parameters_vardict_async"
+              c:identifier="tp_account_update_parameters_vardict_async"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Requests an asynchronous update of parameters of @account. When the
+operation is finished, @callback will be called. You can then call
+tp_account_update_parameters_finish() to get the result of the operation.
+
+If @parameters is a floating reference (see g_variant_ref_sink()),
+ownership of @parameters is taken by this function. This means
+you can pass the result of g_variant_new() or g_variant_new_parsed()
+directly to this function without additional reference-count management.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="parameters" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a variant of type %G_VARIANT_TYPE_VARDICT containing new parameters to set on @account</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+          <parameter name="unset_parameters" transfer-ownership="none">
+            <doc xml:whitespace="preserve">list of parameters to unset on @account</doc>
+            <type name="utf8" c:type="gchar**"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="update_parameters_vardict_finish"
+              c:identifier="tp_account_update_parameters_vardict_finish"
+              version="0.17.6"
+              introspectable="0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes an async update of the parameters on @account.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if the request succeeded, otherwise %FALSE</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+          <parameter name="reconnect_required"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="full">
+            <doc xml:whitespace="preserve">a #GStrv to fill with properties that need a reconnect to take effect</doc>
+            <type name="GObject.Strv" c:type="gchar***"/>
+          </parameter>
+        </parameters>
+      </method>
       <property name="automatic-presence-type"
                 version="0.13.8"
                 transfer-ownership="none">
@@ -1856,6 +2030,24 @@ This is not guaranteed to have been retrieved until the
 %TP_ACCOUNT_FEATURE_STORAGE feature has been prepared; until then,
 the value is %NULL.</doc>
         <type name="GObject.Value"/>
+      </property>
+      <property name="storage-identifier-variant"
+                version="0.13.2"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Provider-specific information used to identify this
+account. Use g_variant_get_type() to check that the type
+is what you expect. For instance, if you use a
+#TpAccount:storage-provider with numeric identifiers for accounts,
+this variant might have type %G_VARIANT_TYPE_UINT32;
+if the storage provider has string-based identifiers, it should
+have type %G_VARIANT_TYPE_STRING.
+
+This property cannot change once an Account has been created.
+
+This is not guaranteed to have been retrieved until the
+%TP_ACCOUNT_FEATURE_STORAGE feature has been prepared; until then,
+the value is %NULL.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="storage-provider"
                 version="0.13.2"
@@ -5854,10 +6046,12 @@ that the #TpCallChannel:contents property will be the empty list.</doc>
       <method name="has_dtmf"
               c:identifier="tp_call_channel_has_dtmf"
               version="0.17.5">
-        <doc xml:whitespace="preserve">Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_DTMF
-interfaces</doc>
+        <doc xml:whitespace="preserve">Whether or not %self can send DTMF tones using
+tp_call_channel_send_tones_async(). To be able to send DTMF tones, at least
+one of @self's #TpCallChannel:contents must implement
+%TP_IFACE_CALL_CONTENT_INTERFACE_DTMF interface.</doc>
         <return-value transfer-ownership="none">
-          <doc xml:whitespace="preserve">whether or not @self supports DTMF</doc>
+          <doc xml:whitespace="preserve">whether or not @self can send DTMF tones.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
@@ -5867,6 +6061,16 @@ interfaces</doc>
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpCallChannel:hardware-streaming</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="has_hold"
+              c:identifier="tp_call_channel_has_hold"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_HOLD
+interfaces</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">whether or not @self supports Hold</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
@@ -5916,6 +6120,50 @@ interfaces</doc>
           <doc xml:whitespace="preserve">the value of #TpCallChannel:mutable-contents</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
+      </method>
+      <method name="request_hold_async"
+              c:identifier="tp_call_channel_request_hold_async"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Requests that the connection manager holds or unholds the call. Watch
+#TpCallChannel::hold-state property to know when the channel goes on
+hold or is unheld. Unholding may fail if the streaming implementation
+can not obtain all the resources needed to restart the call.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="hold" transfer-ownership="none">
+            <doc xml:whitespace="preserve">Whether to request a hold or a unhold</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="2">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="request_hold_finish"
+              c:identifier="tp_call_channel_request_hold_finish"
+              version="0.17.6"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_call_channel_request_hold_async</doc>
+        <return-value transfer-ownership="none">
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
       </method>
       <method name="send_tones_async"
               c:identifier="tp_call_channel_send_tones_async"
@@ -6063,6 +6311,16 @@ those objects.</doc>
         <doc xml:whitespace="preserve">Whether or not the streaming is done by dedicated hardware.</doc>
         <type name="gboolean"/>
       </property>
+      <property name="hold-state" version="0.17.6" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #TpLocalHoldState specifying if the Call is currently held</doc>
+        <type name="guint"/>
+      </property>
+      <property name="hold-state-reason"
+                version="0.17.6"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #TpLocalHoldStateReason specifying why the Call is currently held.</doc>
+        <type name="guint"/>
+      </property>
       <property name="initial-audio"
                 version="0.17.5"
                 transfer-ownership="none">
@@ -6102,7 +6360,8 @@ is the name of the intial video content, %NULL otherwise.</doc>
       <property name="state-details"
                 version="0.17.5"
                 transfer-ownership="none">
-        <doc xml:whitespace="preserve">Detailed information about #TpCallChannel:state.</doc>
+        <doc xml:whitespace="preserve">Detailed infoermation about #TpCallChannel:state. It is a #GHashTable
+mapping gchar*-&gt;GValue, it can be accessed using the tp_asv_* functions.</doc>
         <type name="GLib.HashTable">
           <type name="gpointer" c:type="gpointer"/>
           <type name="gpointer" c:type="gpointer"/>
@@ -6204,10 +6463,10 @@ call state changes.</doc>
             <type name="CallStateReason"/>
           </parameter>
           <parameter name="details" transfer-ownership="none">
-            <doc xml:whitespace="preserve">additional details</doc>
+            <doc xml:whitespace="preserve">additional details as a #GHashTable readable using the tp_asv_* functions.</doc>
             <type name="GLib.HashTable">
-              <type name="gpointer" c:type="gpointer"/>
-              <type name="gpointer" c:type="gpointer"/>
+              <type name="utf8"/>
+              <type name="GObject.Value"/>
             </type>
           </parameter>
         </parameters>
@@ -6388,6 +6647,14 @@ If DTMF tones are already being played, this request is queued.</doc>
           </parameter>
         </parameters>
       </method>
+      <property name="channel"
+                version="0.17.6"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The parent #TpCallChannel of the content.</doc>
+        <type name="CallChannel"/>
+      </property>
       <property name="connection"
                 version="0.17.5"
                 writable="1"
@@ -6789,6 +7056,14 @@ stream.</doc>
         <doc xml:whitespace="preserve">The #TpConnection of the call.</doc>
         <type name="Connection"/>
       </property>
+      <property name="content"
+                version="0.17.6"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The Content that this streams belongs to</doc>
+        <type name="CallContent"/>
+      </property>
       <property name="local-sending-state"
                 version="0.17.5"
                 transfer-ownership="none">
@@ -6926,6 +7201,44 @@ It is NOT guaranteed that #TpContact objects have any feature prepared.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
+      <method name="supports_audio_call"
+              c:identifier="tp_capabilities_supports_audio_call"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Return whether audio call can be established.
+
+@handle_type as TargetHandleType, a True value for InitialAudio and an
+identifier of the appropriate type can be expected to work, %FALSE otherwise.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if a channel request containing Call as ChannelType,</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="handle_type" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the handle type of the call; #TP_HANDLE_TYPE_CONTACT for private, #TP_HANDLE_TYPE_ROOM or #TP_HANDLE_TYPE_NONE for conference (depending on the protocol)</doc>
+            <type name="HandleType" c:type="TpHandleType"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="supports_audio_video_call"
+              c:identifier="tp_capabilities_supports_audio_video_call"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Return whether audio/video call can be established.
+
+@handle_type as TargetHandleType, a True value for
+InitialAudio/InitialVideo and an identifier of the appropriate type can be
+expected to work,
+%FALSE otherwise.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if a channel request containing Call as ChannelType,</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="handle_type" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the handle type of the call; #TP_HANDLE_TYPE_CONTACT for private, #TP_HANDLE_TYPE_ROOM or #TP_HANDLE_TYPE_NONE for conference (depending on the protocol)</doc>
+            <type name="HandleType" c:type="TpHandleType"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="supports_contact_search"
               c:identifier="tp_capabilities_supports_contact_search"
               version="0.13.11">
@@ -6983,6 +7296,19 @@ tubes.</doc>
             <type name="utf8" c:type="gchar*"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="supports_file_transfer"
+              c:identifier="tp_capabilities_supports_file_transfer"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Return whether private file transfer can be established by providing
+a contact identifier.
+
+HandleTypeContact as TargetHandleType and a contact identifier can be
+expected to work, %FALSE otherwise.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if a channel request containing FileTransfer as ChannelType,</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
       </method>
       <method name="supports_room_list"
               c:identifier="tp_capabilities_supports_room_list"
@@ -7332,7 +7658,9 @@ instances</doc>
       <method name="call_when_ready"
               c:identifier="tp_channel_call_when_ready"
               version="0.7.7"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Use tp_proxy_prepare_async()"
+              deprecated-version="0.17.6">
         <doc xml:whitespace="preserve">If @self is ready for use or has been invalidated, call @callback
 immediately, then return. Otherwise, arrange
 for @callback to be called when @self either becomes ready for use
@@ -7914,7 +8242,9 @@ of that property for notes on validity).</doc>
       <method name="is_ready"
               c:identifier="tp_channel_is_ready"
               version="0.7.12"
-              introspectable="0">
+              introspectable="0"
+              deprecated="use tp_proxy_is_prepared() with"
+              deprecated-version="0.17.6">
         <doc xml:whitespace="preserve">Returns the same thing as the #TpChannel:channel-ready property.
 
 New code should use tp_proxy_is_prepared(), which is a more general form of
@@ -7928,7 +8258,9 @@ non-group channels, it's equivalent to checking for
 One important difference is that after #TpProxy::invalidated is
 signalled, #TpChannel:channel-ready keeps its current value - which might
 be %TRUE, if the channel was successfully prepared before it became
-invalidated - but tp_proxy_is_prepared() returns %FALSE for all features.</doc>
+invalidated - but tp_proxy_is_prepared() returns %FALSE for all features.
+
+%TP_CHANNEL_FEATURE_CORE</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if introspection has completed</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -8105,7 +8437,7 @@ fails with #TP_ERROR_AUTHENTICATION_FAILED.
               c:identifier="tp_channel_run_until_ready"
               version="0.7.1"
               introspectable="0"
-              deprecated="Use tp_connection_call_when_ready,"
+              deprecated="Use tp_proxy_prepare_async() and re-enter the main"
               deprecated-version="0.11.0">
         <doc xml:whitespace="preserve">If @self is ready for use (introspection has finished, etc.), return
 immediately. Otherwise, re-enter the main loop until the channel either
@@ -8114,8 +8446,8 @@ via @loop is cancelled.
 
 %FALSE if the channel has become invalid.
 
-or restructure your program in such a way as to avoid re-entering the
-main loop.</doc>
+loop yourself, or restructure your program in such a way as to avoid
+re-entering the main loop.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the channel has been introspected and is ready for use,</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -8147,7 +8479,10 @@ property repeatedly may yield progressively more complete values until
 tp_proxy_prepare_async() has finished preparing %TP_CHANNEL_FEATURE_CORE.</doc>
         <type/>
       </property>
-      <property name="channel-ready" transfer-ownership="none">
+      <property name="channel-ready"
+                deprecated="use tp_proxy_is_prepared() with"
+                deprecated-version="0.17.6"
+                transfer-ownership="none">
         <doc xml:whitespace="preserve">Initially %FALSE; changes to %TRUE when tp_proxy_prepare_async() has
 finished preparing %TP_CHANNEL_FEATURE_CORE, and if the channel is a
 group, %TP_CHANNEL_FEATURE_GROUP.
@@ -8160,7 +8495,10 @@ signalled, #TpChannel:channel-ready keeps its current value - which might
 be %TRUE, if the channel was successfully prepared before it became
 invalidated - but tp_proxy_is_prepared() returns %FALSE for all features.
 
-Change notification is via notify::channel-ready.</doc>
+Change notification is via notify::channel-ready.
+
+%TP_CHANNEL_FEATURE_CORE for checks, or tp_proxy_prepare_async() for
+notification</doc>
         <type name="gboolean"/>
       </property>
       <property name="connection"
@@ -9908,7 +10246,9 @@ tp_simple_client_factory_dup_channel_features() himself.</doc>
               value="5"
               c:identifier="TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED"/>
     </enumeration>
-    <callback name="ChannelWhenReadyCb" c:type="TpChannelWhenReadyCb">
+    <callback name="ChannelWhenReadyCb"
+              c:type="TpChannelWhenReadyCb"
+              deprecated="0.17.6">
       <doc xml:whitespace="preserve">Signature of a callback passed to tp_channel_call_when_ready(), which
 will be called exactly once, when the channel becomes ready or
 invalid (whichever happens first)</doc>
@@ -10565,7 +10905,9 @@ between the @self and the @target. The binding is released whenever the
       <method name="call_when_ready"
               c:identifier="tp_connection_call_when_ready"
               version="0.7.7"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Use tp_proxy_prepare_async()"
+              deprecated-version="0.17.6">
         <doc xml:whitespace="preserve">If @self is ready for use or has been invalidated, call @callback
 immediately, then return. Otherwise, arrange
 for @callback to be called when @self either becomes ready for use
@@ -11335,8 +11677,12 @@ functions.</doc>
       <method name="is_ready"
               c:identifier="tp_connection_is_ready"
               version="0.7.17"
-              introspectable="0">
-        <doc xml:whitespace="preserve">Returns the same thing as the #TpConnection:connection-ready property.</doc>
+              introspectable="0"
+              deprecated="use tp_proxy_is_prepared() with"
+              deprecated-version="0.17.6">
+        <doc xml:whitespace="preserve">Returns the same thing as the #TpConnection:connection-ready property.
+
+%TP_CONNECTION_FEATURE_CONNECTED</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if introspection has completed</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -11711,7 +12057,7 @@ For this to work properly @self must have interface
               c:identifier="tp_connection_run_until_ready"
               version="0.7.1"
               introspectable="0"
-              deprecated="Use tp_connection_call_when_ready,"
+              deprecated="Use tp_proxy_prepare_async() and re-enter the main"
               deprecated-version="0.11.0">
         <doc xml:whitespace="preserve">If @self is connected and ready for use, return immediately. Otherwise,
 call Connect() (unless @connect is %FALSE) and re-enter the main loop
@@ -11720,8 +12066,8 @@ and is introspected, or the main loop stored via @loop is cancelled.
 
 %FALSE if the connection has become invalid.
 
-or restructure your program in such a way as to avoid re-entering the
-main loop.</doc>
+loop yourself, or restructure your program in such a way as to avoid
+re-entering the main loop.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the connection is now connected and ready for use,</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -12174,7 +12520,10 @@ with the feature %TP_CONNECTION_FEATURE_CAPABILITIES.</doc>
         <doc xml:whitespace="preserve">This connection's connection manager name.</doc>
         <type name="utf8"/>
       </property>
-      <property name="connection-ready" transfer-ownership="none">
+      <property name="connection-ready"
+                deprecated="use tp_proxy_is_prepared() with"
+                deprecated-version="0.17.6"
+                transfer-ownership="none">
         <doc xml:whitespace="preserve">Initially %FALSE; changes to %TRUE when the connection has gone to
 CONNECTED status, introspection has finished and it's ready for use.
 
@@ -12184,7 +12533,10 @@ populated.
 
 This is similar to %TP_CONNECTION_FEATURE_CONNECTED, except that once
 it has changed to %TRUE, it remains %TRUE even if the connection has
-been invalidated.</doc>
+been invalidated.
+
+%TP_CHANNEL_FEATURE_CONNECTED for checks, or tp_proxy_prepare_async() for
+notification</doc>
         <type name="gboolean"/>
       </property>
       <property name="contact-groups"
@@ -12749,7 +13101,7 @@ private copy is needed.</doc>
                    throws="1">
         <doc xml:whitespace="preserve">Convenience function to create a new connection manager proxy. If
 its protocol and parameter information are required, you should call
-tp_connection_manager_call_when_ready() on the result.
+tp_proxy_prepare_async() on the result.
 
 is set.</doc>
         <return-value transfer-ownership="full">
@@ -12855,7 +13207,8 @@ will be emitted.</doc>
       <method name="call_when_ready"
               c:identifier="tp_connection_manager_call_when_ready"
               version="0.7.26"
-              introspectable="0">
+              introspectable="0"
+              deprecated="since 0.17.6, use tp_proxy_prepare_async() instead">
         <doc xml:whitespace="preserve">Call the @callback from the main loop when information about @cm's
 supported protocols and parameters has been retrieved.</doc>
         <return-value transfer-ownership="none">
@@ -12896,13 +13249,35 @@ locale.
 
 If this function is called before the connection manager information has
 been obtained, the result is always %NULL. Use
-tp_connection_manager_call_when_ready() to wait for this.
+tp_proxy_prepare_async() to wait for this.
 
 The result is copied and must be freed by the caller, but it is not
 necessarily still true after the main loop is re-entered.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a #GStrv of protocol names</doc>
           <type name="GObject.Strv" c:type="gchar**"/>
+        </return-value>
+      </method>
+      <method name="dup_protocols"
+              c:identifier="tp_connection_manager_dup_protocols"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Return objects representing all protocols supported by this connection
+manager.
+
+If this function is called before the connection manager information has
+been obtained, the result is always %NULL. Use tp_proxy_prepare_async()
+to wait for this.
+
+The caller must free the list, for instance with
+&lt;literal&gt;g_list_free_full (l, g_object_unref)&lt;/literal&gt;.
+
+of #TpProtocol objects representing the protocols supported by @self,
+owned by the caller</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a list</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="Protocol"/>
+          </type>
         </return-value>
       </method>
       <method name="get_info_source"
@@ -12946,7 +13321,7 @@ functionality by calling tp_connection_manager_get_protocol_object().
 
 If this function is called before the connection manager information has
 been obtained, the result is always %NULL. Use
-tp_connection_manager_call_when_ready() to wait for this.
+tp_proxy_prepare_async() to wait for this.
 
 The result is not necessarily valid after the main loop is re-entered.
 Since 0.11.3, it can be copied with tp_connection_manager_protocol_copy()
@@ -12991,8 +13366,8 @@ The result should be referenced with g_object_ref() if it will be kept.</doc>
         <doc xml:whitespace="preserve">Return whether @protocol is supported by this connection manager.
 
 If this function is called before the connection manager information has
-been obtained, the result is always %FALSE. Use
-tp_connection_manager_call_when_ready() to wait for this.</doc>
+been obtained, the result is always %FALSE. Use tp_proxy_prepare_async()
+to wait for this.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if this connection manager supports @protocol</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -13007,7 +13382,8 @@ tp_connection_manager_call_when_ready() to wait for this.</doc>
       <method name="is_ready"
               c:identifier="tp_connection_manager_is_ready"
               version="0.7.26"
-              introspectable="0">
+              introspectable="0"
+              deprecated="since 0.17.6, use tp_proxy_is_prepared()">
         <doc xml:whitespace="preserve">If protocol and parameter information has been obtained from the connection
 manager or the cache in the .manager file, return %TRUE. Otherwise,
 return %FALSE.
@@ -13016,7 +13392,8 @@ This may change from %FALSE to %TRUE at any time that the main loop is
 running; the #GObject::notify signal is emitted for the
 #TpConnectionManager:info-source property.
 
-%TP_CM_INFO_SOURCE_NONE</doc>
+%TP_CM_INFO_SOURCE_NONE
+with %TP_CONNECTION_MANAGER_FEATURE_CORE instead</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE, unless the #TpConnectionManager:info-source property is</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -13109,8 +13486,8 @@ the bus or when activation fails.</doc>
       <glib:signal name="got-info" when="last" detailed="1">
         <doc xml:whitespace="preserve">Emitted when the connection manager's capabilities have been discovered.
 
-This signal is not very helpful. Since 0.7.26, using
-tp_connection_manager_call_when_ready() instead is recommended.</doc>
+This signal is not very helpful. Using
+tp_proxy_prepare_async() instead is recommended.</doc>
         <return-value transfer-ownership="none">
           <type name="none"/>
         </return-value>
@@ -13387,7 +13764,8 @@ supported</doc>
       </method>
     </record>
     <callback name="ConnectionManagerWhenReadyCb"
-              c:type="TpConnectionManagerWhenReadyCb">
+              c:type="TpConnectionManagerWhenReadyCb"
+              deprecated="since 0.17.6, use tp_proxy_prepare_async() instead">
       <doc xml:whitespace="preserve">Called as the result of tp_connection_manager_call_when_ready(). If the
 connection manager's protocol and parameter information could be retrieved,
 @error is %NULL and @cm is considered to be ready. Otherwise, @error is
@@ -13655,7 +14033,9 @@ are still provided.</doc>
         </parameter>
       </parameters>
     </callback>
-    <callback name="ConnectionWhenReadyCb" c:type="TpConnectionWhenReadyCb">
+    <callback name="ConnectionWhenReadyCb"
+              c:type="TpConnectionWhenReadyCb"
+              deprecated="0.17.6">
       <doc xml:whitespace="preserve">Signature of a callback passed to tp_connection_call_when_ready(), which
 will be called exactly once, when the connection becomes ready or
 invalid (whichever happens first)</doc>
@@ -22417,6 +22797,21 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
           <type name="none" c:type="void"/>
         </return-value>
       </function>
+      <method name="borrow_params"
+              c:identifier="tp_protocol_borrow_params"
+              version="0.17.6"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Returns an array of parameters supported by this connection manager,
+without additional memory allocations. The returned array is owned by
+@self, and must not be used after @self has been freed.
+
+terminated by one whose @name is %NULL</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">an array of #TpConnectionManagerParam structures,</doc>
+          <type name="ConnectionManagerParam"
+                c:type="TpConnectionManagerParam*"/>
+        </return-value>
+      </method>
       <method name="can_register"
               c:identifier="tp_protocol_can_register"
               version="0.11.11">
@@ -22426,6 +22821,24 @@ the special "register" parameter to %TRUE.</doc>
           <doc xml:whitespace="preserve">%TRUE if @protocol supports the parameter "register"</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
+      </method>
+      <method name="dup_param"
+              c:identifier="tp_protocol_dup_param"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">&lt;!-- no more to say --&gt;
+
+or %NULL if not supported. Free with tp_connection_manager_param_free()</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a structure representing the parameter @param,</doc>
+          <type name="ConnectionManagerParam"
+                c:type="TpConnectionManagerParam*"/>
+        </return-value>
+        <parameters>
+          <parameter name="param" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a parameter name</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
       </method>
       <method name="dup_param_names"
               c:identifier="tp_protocol_dup_param_names"
@@ -22440,6 +22853,22 @@ The result is copied and must be freed by the caller with g_strfreev().
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a copy of</doc>
           <type name="GObject.Strv" c:type="GStrv"/>
+        </return-value>
+      </method>
+      <method name="dup_params"
+              c:identifier="tp_protocol_dup_params"
+              version="0.17.6">
+        <doc xml:whitespace="preserve">Returns a list of parameters supported by this connection manager.
+
+The returned list must be freed by the caller, for instance with
+&lt;literal&gt;g_list_free_full (l,
+(GDestroyNotify) tp_connection_manager_param_free)&lt;/literal&gt;.
+
+a list of #TpConnectionManagerParam structures, owned by the caller</doc>
+        <return-value transfer-ownership="full">
+          <type name="GLib.List" c:type="GList*">
+            <type name="ConnectionManagerParam"/>
+          </type>
         </return-value>
       </method>
       <method name="get_authentication_types"
@@ -30147,8 +30576,8 @@ the connection; previously, this function provided refcounting for handles.</doc
 callback when done.
 
 Since 0.7.26, this function will wait for each #TpConnectionManager
-to be ready, so all connection managers passed to @callback will be ready
-(tp_connection_manager_is_ready() will return %TRUE) unless an error
+to be ready, so all connection managers passed to @callback will have
+their %TP_CONNECTION_MANAGER_FEATURE_CORE feature prepared, unless an error
 occurred while launching that connection manager.</doc>
       <return-value transfer-ownership="none">
         <type name="none" c:type="void"/>
@@ -30178,6 +30607,57 @@ occurred while launching that connection manager.</doc>
         <parameter name="weak_object" transfer-ownership="none" allow-none="1">
           <doc xml:whitespace="preserve">if not %NULL, will be weakly referenced; the callback will not be called, and the call will be cancelled, if the object has vanished</doc>
           <type name="GObject.Object" c:type="GObject*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="list_connection_managers_async"
+              c:identifier="tp_list_connection_managers_async"
+              version="0.17.6">
+      <doc xml:whitespace="preserve">List the available (running or installed) connection managers,
+asynchronously, and wait for their %TP_CONNECTION_MANAGER_FEATURE_CORE
+feature to be ready.</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="dbus_daemon" transfer-ownership="none" allow-none="1">
+          <doc xml:whitespace="preserve">a #TpDBusDaemon, or %NULL to use tp_dbus_daemon_dup()</doc>
+          <type name="DBusDaemon" c:type="TpDBusDaemon*"/>
+        </parameter>
+        <parameter name="callback"
+                   transfer-ownership="none"
+                   allow-none="1"
+                   scope="async"
+                   closure="2">
+          <doc xml:whitespace="preserve">a callback to call with a list of CMs</doc>
+          <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+        </parameter>
+        <parameter name="user_data" transfer-ownership="none">
+          <doc xml:whitespace="preserve">data to pass to @callback</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="list_connection_managers_finish"
+              c:identifier="tp_list_connection_managers_finish"
+              version="0.17.6"
+              throws="1">
+      <doc xml:whitespace="preserve">Finish listing the available connection managers.
+
+Free the list after use, for instance with
+&lt;literal&gt;g_list_free_full (list, g_object_unref)&lt;/literal&gt;.
+
+newly allocated list of references to #TpConnectionManager objects</doc>
+      <return-value transfer-ownership="full">
+        <doc xml:whitespace="preserve">a</doc>
+        <type name="GLib.List" c:type="GList*">
+          <type name="ConnectionManager"/>
+        </type>
+      </return-value>
+      <parameters>
+        <parameter name="result" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the result of tp_list_connection_managers_async()</doc>
+          <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
         </parameter>
       </parameters>
     </function>

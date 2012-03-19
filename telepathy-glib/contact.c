@@ -38,8 +38,6 @@
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/util-internal.h"
 
-#include "telepathy-glib/_gen/signals-marshal.h"
-
 /**
  * SECTION:contact
  * @title: TpContact
@@ -1337,8 +1335,7 @@ tp_contact_class_init (TpContactClass *klass)
       G_TYPE_FROM_CLASS (object_class),
       G_SIGNAL_RUN_LAST,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__BOXED_BOXED,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 2, G_TYPE_STRV, G_TYPE_STRV);
 
   /**
@@ -1357,8 +1354,7 @@ tp_contact_class_init (TpContactClass *klass)
       G_TYPE_FROM_CLASS (object_class),
       G_SIGNAL_RUN_LAST,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__UINT_UINT_STRING,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING);
 
   /**
@@ -1376,8 +1372,7 @@ tp_contact_class_init (TpContactClass *klass)
       G_TYPE_FROM_CLASS (object_class),
       G_SIGNAL_RUN_LAST,
       0,
-      NULL, NULL,
-      _tp_marshal_VOID__UINT_STRING_STRING,
+      NULL, NULL, NULL,
       G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
 }
 
@@ -4106,8 +4101,8 @@ contacts_context_remove_common_features (ContactsContext *context)
 
 /**
  * tp_connection_get_contacts_by_handle:
- * @self: A connection, which must be ready (#TpConnection:connection-ready
- *  must be %TRUE)
+ * @self: A connection, which must have the %TP_CONNECTION_FEATURE_CONNECTED
+ *  feature prepared
  * @n_handles: The number of handles in @handles (must be at least 1)
  * @handles: (array length=n_handles) (element-type uint): An array of handles
  *  of type %TP_HANDLE_TYPE_CONTACT representing the desired contacts
@@ -4228,8 +4223,8 @@ tp_connection_get_contacts_by_handle (TpConnection *self,
 
 /**
  * tp_connection_upgrade_contacts:
- * @self: A connection, which must be ready (#TpConnection:connection-ready
- *  must be %TRUE)
+ * @self: A connection, which must have the %TP_CONNECTION_FEATURE_CONNECTED
+ *  feature prepared
  * @n_contacts: The number of contacts in @contacts (must be at least 1)
  * @contacts: (array length=n_contacts): An array of #TpContact objects
  *  associated with @self
@@ -4270,8 +4265,8 @@ tp_connection_upgrade_contacts (TpConnection *self,
   ContactsContext *context;
   guint i;
 
-  g_return_if_fail (tp_connection_is_ready (self));
-  g_return_if_fail (tp_proxy_get_invalidated (self) == NULL);
+  g_return_if_fail (tp_proxy_is_prepared (self,
+        TP_CONNECTION_FEATURE_CONNECTED));
   g_return_if_fail (n_contacts >= 1);
   g_return_if_fail (contacts != NULL);
   g_return_if_fail (n_features == 0 || features != NULL);
@@ -4441,8 +4436,8 @@ contacts_requested_handles (TpConnection *connection,
 
 /**
  * tp_connection_get_contacts_by_id:
- * @self: A connection, which must be ready (#TpConnection:connection-ready
- *  must be %TRUE)
+ * @self: A connection, which must have the %TP_CONNECTION_FEATURE_CONNECTED
+ *  feature prepared
  * @n_ids: The number of IDs in @ids (must be at least 1)
  * @ids: (array length=n_ids) (transfer none): An array of strings representing
  *  the desired contacts by their
@@ -4486,8 +4481,8 @@ tp_connection_get_contacts_by_id (TpConnection *self,
   ContactsContext *context;
   guint i;
 
-  g_return_if_fail (tp_connection_is_ready (self));
-  g_return_if_fail (tp_proxy_get_invalidated (self) == NULL);
+  g_return_if_fail (tp_proxy_is_prepared (self,
+        TP_CONNECTION_FEATURE_CONNECTED));
   g_return_if_fail (n_ids >= 1);
   g_return_if_fail (ids != NULL);
   g_return_if_fail (ids[0] != NULL);

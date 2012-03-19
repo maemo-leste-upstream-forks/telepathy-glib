@@ -47,6 +47,7 @@
 
 #include "telepathy-glib/call-content.h"
 
+#include <telepathy-glib/call-channel.h>
 #include <telepathy-glib/call-misc.h>
 #include <telepathy-glib/call-stream.h>
 #include <telepathy-glib/dbus.h>
@@ -63,7 +64,6 @@
 #include "telepathy-glib/call-internal.h"
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/util-internal.h"
-#include "telepathy-glib/_gen/signals-marshal.h"
 
 #include "_gen/tp-cli-call-content-body.h"
 
@@ -74,6 +74,7 @@ typedef struct _SendTonesData SendTonesData;
 struct _TpCallContentPrivate
 {
   TpConnection *connection;
+  TpCallChannel *channel;
 
   gchar *name;
   TpMediaStreamType media_type;
@@ -92,7 +93,8 @@ enum
   PROP_NAME,
   PROP_MEDIA_TYPE,
   PROP_DISPOSITION,
-  PROP_STREAMS
+  PROP_STREAMS,
+  PROP_CHANNEL
 };
 
 enum
@@ -115,6 +117,7 @@ _tp_call_stream_new (TpCallContent *self,
       "dbus-connection", tp_proxy_get_dbus_connection (self),
       "object-path", object_path,
       "connection", self->priv->connection,
+      "content", self,
       NULL);
 }
 
@@ -480,6 +483,9 @@ tp_call_content_get_property (GObject *object,
       case PROP_STREAMS:
         g_value_set_boxed (value, self->priv->streams);
         break;
+      case PROP_CHANNEL:
+        g_value_set_object (value, self->priv->channel);
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
         break;
@@ -499,6 +505,10 @@ tp_call_content_set_property (GObject *object,
       case PROP_CONNECTION:
         g_assert (self->priv->connection == NULL); /* construct-only */
         self->priv->connection = g_value_dup_object (value);
+        break;
+      case PROP_CHANNEL:
+        g_assert (self->priv->channel == NULL); /* construct-only */
+        self->priv->channel = g_value_dup_object (value);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -628,6 +638,21 @@ tp_call_content_class_init (TpCallContentClass *klass)
       param_spec);
 
   /**
+   * TpCallContent:channel:
+   *
+   * The parent #TpCallChannel of the content.
+   *
+   * Since: 0.17.6
+   */
+  param_spec = g_param_spec_object ("channel", "Channel",
+      "The channel of this content",
+      TP_TYPE_CALL_CHANNEL,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (gobject_class, PROP_CHANNEL,
+      param_spec);
+
+
+  /**
    * TpCallContent::removed
    * @self: the #TpCallContent
    *
@@ -639,8 +664,7 @@ tp_call_content_class_init (TpCallContentClass *klass)
   _signals[REMOVED] = g_signal_new ("removed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      g_cclosure_marshal_VOID__VOID,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       0);
 
@@ -661,8 +685,7 @@ tp_call_content_class_init (TpCallContentClass *klass)
   _signals[STREAMS_ADDED] = g_signal_new ("streams-added",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      g_cclosure_marshal_VOID__BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       1, G_TYPE_PTR_ARRAY);
 
@@ -684,8 +707,7 @@ tp_call_content_class_init (TpCallContentClass *klass)
   _signals[STREAMS_REMOVED] = g_signal_new ("streams-removed",
       G_OBJECT_CLASS_TYPE (klass),
       G_SIGNAL_RUN_LAST,
-      0, NULL, NULL,
-      _tp_marshal_VOID__BOXED_BOXED,
+      0, NULL, NULL, NULL,
       G_TYPE_NONE,
       2, G_TYPE_PTR_ARRAY, TP_TYPE_CALL_STATE_REASON);
 
