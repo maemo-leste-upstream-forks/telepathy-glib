@@ -747,6 +747,7 @@ ABI_LISTS = \
     versions/0.17.5.abi \
     versions/0.17.6.abi \
     versions/0.17.7.abi \
+    versions/0.18.0.abi \
     $(NULL)
 
 
@@ -966,6 +967,8 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	_gen/telepathy-interfaces.h \
 @HAVE_INTROSPECTION_TRUE@	$(NULL)
 
+@HAVE_INTROSPECTION_TRUE@@OFFICIAL_RELEASE_FALSE@SCANNER_WARN_ERROR = --warn-error
+@HAVE_INTROSPECTION_TRUE@@OFFICIAL_RELEASE_TRUE@SCANNER_WARN_ERROR = 
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_NAMESPACE = TelepathyGLib
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_VERSION = 0.12
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_LIBS = libtelepathy-glib.la
@@ -976,6 +979,7 @@ introspection_extra_dist = \
 @HAVE_INTROSPECTION_TRUE@	-I$(top_srcdir) \
 @HAVE_INTROSPECTION_TRUE@	--c-include="telepathy-glib/telepathy-glib.h" \
 @HAVE_INTROSPECTION_TRUE@	--warn-all \
+@HAVE_INTROSPECTION_TRUE@	$(SCANNER_WARN_ERROR) \
 @HAVE_INTROSPECTION_TRUE@	$(NULL)
 
 @HAVE_INTROSPECTION_TRUE@TelepathyGLib_0_12_gir_INCLUDES = \
@@ -1924,7 +1928,7 @@ _gen/tp-cli-%-body.h: _gen/tp-spec-%.xml \
 
 # vim:set ft=automake:
 
-Android.mk: Makefile.am
+Android.mk: Makefile.am $(codegen_sources)
 	androgenizer -:PROJECT telepathy-glib -:SHARED libtelepathy-glib -:TAGS eng debug \
 	 -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir) \
 	 -:SOURCES $(libtelepathy_glib_internal_la_SOURCES) \

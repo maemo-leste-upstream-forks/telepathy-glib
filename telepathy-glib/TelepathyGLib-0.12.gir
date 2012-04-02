@@ -7718,14 +7718,14 @@ the operation.</doc>
               c:identifier="tp_channel_close_finish"
               version="0.13.10"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to close a channel.</doc>
+        <doc xml:whitespace="preserve">Finishes a call to tp_channel_leave_async().</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the channel has been closed; %FALSE otherwise</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_channel_close_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -7762,14 +7762,14 @@ the operation.</doc>
               c:identifier="tp_channel_destroy_finish"
               version="0.15.2"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to leave a channel.</doc>
+        <doc xml:whitespace="preserve">Completes a call to tp_channel_destroy_async().</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the channel has been destroyed or closed; %FALSE otherwise</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_channel_destroy_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -8306,14 +8306,14 @@ must be prepared before calling this function.</doc>
               c:identifier="tp_channel_join_finish"
               version="0.15.5"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to join a channel.</doc>
+        <doc xml:whitespace="preserve">Completes a call to tp_channel_join_async().</doc>
         <return-value transfer-ownership="none">
-          <doc xml:whitespace="preserve">%TRUE if the channel has been joined; %FALSE otherwise</doc>
+          <doc xml:whitespace="preserve">%TRUE if the channel was successfully joined; %FALSE otherwise</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_channel_join_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -8363,14 +8363,14 @@ deprecated behaviour.</doc>
               c:identifier="tp_channel_leave_finish"
               version="0.13.10"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to leave a channel.</doc>
+        <doc xml:whitespace="preserve">Completes a call to tp_channel_leave_async().</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the channel has been left; %FALSE otherwise</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_channel_leave_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -8421,7 +8421,8 @@ to get the result of the operation.</doc>
               c:identifier="tp_channel_provide_password_finish"
               version="0.15.2"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to provide a password. If the password was rejected, the operation
+        <doc xml:whitespace="preserve">Completes a call to tp_channel_provide_password_async().
+If the password was rejected, the operation
 fails with #TP_ERROR_AUTHENTICATION_FAILED.
 
 %FALSE otherwise.</doc>
@@ -8431,7 +8432,7 @@ fails with #TP_ERROR_AUTHENTICATION_FAILED.
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_channel_provide_password_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -16672,6 +16673,56 @@ for future expansion, which must always be initialized to %NULL.</doc>
            glib:get-type="tp_dbus_tube_channel_get_type"
            glib:type-struct="DBusTubeChannelClass">
       <doc xml:whitespace="preserve">Data structure representing a #TpDBusTubeChannel.</doc>
+      <function name="feature_quark_core"
+                c:identifier="tp_dbus_tube_channel_feature_quark_core">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <method name="accept_async"
+              c:identifier="tp_dbus_tube_channel_accept_async"
+              version="0.18.0">
+        <doc xml:whitespace="preserve">Accept an incoming D-Bus tube. When the tube has been accepted
+@callback will be called. You can then call
+tp_dbus_tube_channel_accept_finish() to get the #GDBusConnection that will
+be used to communicate through the tube.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a callback to call when the tube has been offered</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="accept_finish"
+              c:identifier="tp_dbus_tube_channel_accept_finish"
+              version="0.18.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes to accept an incoming D-Bus tube. The returned #GDBusConnection
+is ready to be used to exchange data through the tube.
+
+has been successfully accepted and opened; %NULL otherwise.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a reference on a #GDBusConnection if the tube</doc>
+          <type name="Gio.DBusConnection" c:type="GDBusConnection*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="get_parameters"
               c:identifier="tp_dbus_tube_channel_get_parameters"
               version="0.15.6"
@@ -16695,6 +16746,57 @@ the value of #TpDBusTubeChannel:parameters</doc>
           <doc xml:whitespace="preserve">the value of #TpDBusTubeChannel:service-name</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
+      </method>
+      <method name="offer_async"
+              c:identifier="tp_dbus_tube_channel_offer_async"
+              version="0.18.0">
+        <doc xml:whitespace="preserve">Offer an outgoing D-Bus tube. When the tube has been offered and accepted
+@callback will be called. You can then call
+tp_dbus_tube_channel_offer_finish() to get the #GDBusConnection that will
+be used to communicate through the tube.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="params" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">parameters of the tube, or %NULL</doc>
+            <type name="GLib.HashTable" c:type="GHashTable*">
+              <type name="gpointer" c:type="gpointer"/>
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="2">
+            <doc xml:whitespace="preserve">a callback to call when the tube has been offered</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="offer_finish"
+              c:identifier="tp_dbus_tube_channel_offer_finish"
+              version="0.18.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes offering an outgoing D-Bus tube. The returned #GDBusConnection
+is ready to be used to exchange data through the tube.
+
+has been successfully offered and opened; %NULL otherwise.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a reference on a #GDBusConnection if the tube</doc>
+          <type name="Gio.DBusConnection" c:type="GDBusConnection*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
       </method>
       <property name="parameters"
                 version="0.15.6"
@@ -25418,9 +25520,12 @@ on @context before it returns.</doc>
                    c:identifier="tp_stream_tube_channel_new"
                    version="0.13.2"
                    throws="1">
-        <doc xml:whitespace="preserve">Convenient function to create a new #TpStreamTubeChannel</doc>
+        <doc xml:whitespace="preserve">Creates a new #TpStreamTubeChannel proxy object from the provided path and
+properties. Most developers will not need to use this function; use
+#TpAutomaticProxyFactory to automatically create #TpStreamTubeChannel proxy
+objects.</doc>
         <return-value transfer-ownership="full">
-          <doc xml:whitespace="preserve">a newly created #TpStreamTubeChannel</doc>
+          <doc xml:whitespace="preserve">a newly-created #TpStreamTubeChannel proxy</doc>
           <type name="StreamTubeChannel" c:type="TpStreamTubeChannel*"/>
         </return-value>
         <parameters>
@@ -25469,7 +25574,7 @@ to get a #TpStreamTubeConnection connected to the tube.</doc>
               c:identifier="tp_stream_tube_channel_accept_finish"
               version="0.13.2"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to accept an incoming stream tube. The returned
+        <doc xml:whitespace="preserve">Finishes accepting an incoming stream tube. The returned
 #TpStreamTubeConnection can then be used to exchange data through the tube.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a newly created #TpStreamTubeConnection</doc>
@@ -25545,7 +25650,7 @@ the tube.</doc>
               c:identifier="tp_stream_tube_channel_offer_finish"
               version="0.13.2"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to offer an outgoing stream tube.</doc>
+        <doc xml:whitespace="preserve">Finishes offering an outgoing stream tube.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE when a Tube has been successfully offered; %FALSE otherwise</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -26032,14 +26137,14 @@ tp_text_channel_get_pending_messages() or the
               c:identifier="tp_text_channel_ack_message_finish"
               version="0.13.10"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to ack a message.</doc>
+        <doc xml:whitespace="preserve">Finishes acknowledging a message.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the message has been acked, %FALSE otherwise.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_text_channel_ack_message_async()</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -26085,14 +26190,14 @@ See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
               c:identifier="tp_text_channel_ack_messages_finish"
               version="0.13.10"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to ack a list of messages.</doc>
+        <doc xml:whitespace="preserve">Finishes acknowledging a list of messages.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the messages have been acked, %FALSE otherwise.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_text_channel_ack_messages_async()</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
@@ -26288,11 +26393,12 @@ tp_text_channel_send_message_finish() to get the result of the operation.</doc>
               c:identifier="tp_text_channel_send_message_finish"
               version="0.13.10"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to send a message.
+        <doc xml:whitespace="preserve">Completes a call to tp_text_channel_send_message_async().
 
 @token can be used to match any incoming delivery or failure reports
-against the sent message. If the returned token is %NULL the
-message is not readily identifiable.
+against the sent message. If this function returns true but the returned
+token is %NULL, the message was sent successfully but the protocol does not
+provide a way to identify it later.
 
 otherwise.</doc>
         <return-value transfer-ownership="none">
@@ -26301,7 +26407,7 @@ otherwise.</doc>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_text_channel_send_message_async()</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
           <parameter name="token"
@@ -26346,14 +26452,14 @@ result of the operation.</doc>
               c:identifier="tp_text_channel_set_chat_state_finish"
               version="0.13.10"
               throws="1">
-        <doc xml:whitespace="preserve">Finishes to set chat state.</doc>
+        <doc xml:whitespace="preserve">Completes a call to tp_text_channel_set_chat_state_async().</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the chat state has been changed, %FALSE otherwise.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
         <parameters>
           <parameter name="result" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_text_channel_set_chat_state_async()</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>

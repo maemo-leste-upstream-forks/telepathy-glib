@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [17])
-m4_define([tp_glib_micro_version], [7])
+m4_define([tp_glib_minor_version], [18])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [69])
+m4_define([tp_glib_lt_current], [70])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [69])
+m4_define([tp_glib_lt_age], [70])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -318,6 +318,7 @@ AC_OUTPUT( Makefile \
 	   examples/client/js/Makefile \
 	   examples/client/python/Makefile \
 	   examples/client/stream-tubes/Makefile \
+	   examples/client/dbus-tubes/Makefile \
 	   examples/cm/Makefile \
 	   examples/cm/call/Makefile \
 	   examples/cm/channelspecific/Makefile \
