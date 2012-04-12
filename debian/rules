@@ -23,6 +23,12 @@ override_dh_auto_configure:
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 
+# The tests try to exit after a reasonable time, but some architectures
+# are unreasonably slow, and Ubuntu buildds have output buffering issues.
+# Debian buildds know how to abort a stalled build after a while anyway,
+# so the individual tests don't need to worry about it.
+export TP_TESTS_NO_TIMEOUT = 1
+
 override_dh_install:
 	dh_install --list-missing
 
