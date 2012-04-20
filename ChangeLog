@@ -1,3 +1,210 @@
+commit 629bea3bfcf0c6698055b5bf6811485b330d335b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-20 17:07:25 +0100
+
+    Prepare 0.18.1
+
+commit bab960e0f3f63a52850e76b80b3dae77ea9c174d
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-04-03 11:50:15 +0200
+
+    TpAM: Document that _set_default() keeps an internal reference
+
+commit 57e23d6d7788498061349649e9b4bccf9ea7bf7b
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-04-16 17:42:33 +0200
+
+    Do not use _tp_connection_lookup_contact() outside contact.c
+    
+    That function is dangerous because it does not guarantee that the returned TpContact
+    has an identifier set.
+    
+    In the case a TpContact is being created with tp_connection_get_contacts_by_id(),
+    the first step is to inspect its handle and then create the TpContact object
+    *without* giving its ID. The id will be set later once we got the contact attributes.
+    
+    If _tp_connection_lookup_contact() is called for the same handle/id between
+    the moment the TpContact is created and the moment it sets its attributes, then
+    a contact with no identifier is returned.
+
+commit 66d1a078e9d52791ad53db2ce7a94e817e86d12e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-13 12:38:26 +0100
+
+    NEWS
+
+commit 892174994149b1266f266833f90e73e6a727945c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-12 16:55:47 +0100
+
+    Don't make g-ir-scanner warnings fatal on this stable branch
+    
+    Reviewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit c992c64af097576d1023dc793a6d4752360ff564
+Author: Alban Browaeys <prahal@yahoo.com>
+Date:   2012-04-10 00:48:08 +0200
+
+    Codegen: fix comment line start leftover.
+    
+    Generated telepathy-glib/_gen/telepathy-enums-gtk-doc.h from:
+     /usr/bin/python ../tools/c-constants-gen.py         Tp
+    _gen/stable-spec.xml _gen/telepathy-enums
+    has incorrect comment. Fix it with the same remedy as
+    in 5c58330c32f39a9dd6aaaef37f54461922cf6124
+    "many fixes to documentation comments"
+    ie remove the newline between '*' and identifier.
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=48363
+
+commit 0065a23ce403becdaf86139b5bb29d0d9fe2f3cc
+Author: Stef Walter <stefw@gnome.org>
+Date:   2012-04-12 16:30:13 +0200
+
+    Fix gtk-doc comments for auto-generated constants headers
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=48592
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit a769d111600b58452622279128f040f50ebe48f6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-12 14:01:40 +0100
+
+    dbus-tube-chan test: listen on a random address appropriate for the OS
+    
+    Instead of hard-coding the abstract Unix socket '\000dbus-tube-test',
+    listen on a random (abstract or real) Unix socket in /tmp if on Unix,
+    or a random port on 127.0.0.1 if not. These are the same listening
+    addresses I used in test/loopback.c in libdbus. The Unix version also
+    matches what the session bus normally uses.
+    
+    This fixes the test on non-Linux Unix (not insisting on
+    abstract-namespace sockets working), when run twice in parallel on Linux
+    (not insisting on using a particular hard-coded name), and in theory
+    also on Windows (not trying to use Unix sockets).
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=48600
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 3302343b9dbe8246e1fda0d75db2145d8a9520bd
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-12 13:27:04 +0100
+
+    Upload documentation to the 0.18.x location
+
+commit e0329bd9ccc05b095c38fde993289db4912c09d5
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-09-20 12:07:15 +0100
+
+    Don't check documentation completeness in this stable branch
+
+commit 07d4cb30fa07bf3dca05bc77aa28170ba062c77e
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2010-04-06 12:33:21 +0100
+
+    Disable warnings about deprecated functions for stable branch
+    
+    Since this is a stable branch, we're unlikely to fix uses of
+    deprecated functions, so we shouldn't warn about them.
+
+commit abacdfed03e8e0247e29d760a138400f3868e95b
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-12 12:53:00 +0100
+
+    NEWS
+
+commit 114a16ba3f91dfa700770ec817ff3f8b4061e0a7
+Author: Stef Walter <stefw@gnome.org>
+Date:   2012-04-12 11:46:52 +0200
+
+    Fix doc comments for recent stricter gtk-doc
+    
+     * Build fails with new gtk-doc (1.18.1) which seems to
+       be stricter than previous versions.
+    
+    [Also fixes g-ir-scanner warnings, which were what was actually fatal. -smcv]
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=48592
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit e2b5e25a33edc03682b61b307d640dfbf3b72e6c
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-04-12 11:51:35 +0100
+
+    0.18 NEWS
+
+commit 76b0d3cc3f6dd10f1f88a7e7b1d57a88ac531a08
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-04 11:04:41 +0200
+
+    the right GLib macro is GLIB_VERSION_MAX_ALLOWED
+
+commit 08f4a05e33f8a3fa2fe0e326014dbaccc7c55be6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-03 15:54:12 +0200
+
+    add stream-tubes.py/accepter.py
+
+commit 8c31202992b37f0e387f67ca0100df2e1643c889
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-03 15:54:12 +0200
+
+    add stream-tubes.py/offerer.py
+
+commit cf0e9d8b366792a9df8303778fcda2dec21217ea
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-03 15:48:42 +0200
+
+    Fix the type of the TpStreamTubeConnection::closed signal
+    
+    python-gobject can't bind G_TYPE_POINTER.
+    
+    This seems to be save from an API/ABI pov according to GLib gurus,
+    we'll just copy the GError instead of passing the same pointer:
+
+commit e17cd19f2341eeafa666301580fed1f0a77c83a6
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-03 14:43:50 +0200
+
+    stream tube examples: send \n with data
+    
+    This will allow us to use g_data_input_stream_read_line_utf8() in Python as
+    g_input_stream_read() is not bindable.
+
+commit b985cb3474132a802df647e0438a2872c02c71fa
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-03 14:43:50 +0200
+
+    stream tube examples: use tp_channel_close_async()
+
+commit 55582d8af3627adf09ebf6ac586753ad4f6abe59
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-04-03 14:43:50 +0200
+
+    stream tube examples: split sending/receiving data debug messages
+    
+    Make it easier to understand/debug what's going on.
+
+commit c93cd8f2bbb9c8888ba3a4ad153a485e33568a4c
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-04-03 14:11:34 +0200
+
+    Introspect a few getters
+    
+    It is not always a good idea for bindings to always rely on GObject::get_property(),
+    it can be slow to access properties that way everytime instead of keeping
+    a proxy object in native language.
+
+commit 0dfebb47ded9af7128e641ac90a032e13c2be7f4
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-04-02 16:43:12 -0400
+
+    start on version 0.18.1
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
 commit 95b3336d2d43fdbfe61692144dca8700e0ad0071
 Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
 Date:   2012-04-02 16:31:18 -0400

@@ -55,6 +55,9 @@ it's now just a backwards compatibility typedef.</doc>
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <enumeration name="AccessControlType" c:type="TpAccessControlType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A type for communication access control. These control           policies are used in           CommunicationPolicy.DRAFT           as well as most rich presence interfaces.          New interfaces should use this type, and NOT           Rich_Presence_Access_Control_Type.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="whitelist"
               value="0"
               c:identifier="TP_ACCESS_CONTROL_TYPE_WHITELIST"/>
@@ -3327,6 +3330,9 @@ which use a custom #TpSimpleClientFactory and want the default
 #TpAccountManager to use that factory should call this after calling
 tp_account_manager_new_with_factory().
 
+Unlike tp_account_manager_dup(), this function will keep an internal
+reference to @manager, so it will never be destroyed.
+
 Note that @manager must use the default #TpDBusDaemon as returned by
 tp_dbus_daemon_dup()</doc>
         <return-value transfer-ownership="none">
@@ -3570,6 +3576,9 @@ This property can't be %NULL.</doc>
             disguised="1">
     </record>
     <bitfield name="AnonymityModeFlags" c:type="TpAnonymityModeFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags for the various types of anonymity modes.  These modes are solely to         inform the CM of the desired anonymous settings.  It is up to the         CM to determine whether the anonymity modes should be handled within         the CM itself, or whether the network that a CM might be talking to         should be enforcing anonymity.          CMs MAY support only a subset of these modes, and specific         connections MAY support none at all.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="client_info"
               value="1"
               c:identifier="TP_ANONYMITY_MODE_CLIENT_INFO"/>
@@ -4286,8 +4295,7 @@ has not been called yet or failed.</doc>
       </method>
       <method name="get_dbus_daemon"
               c:identifier="tp_base_client_get_dbus_daemon"
-              version="0.11.11"
-              introspectable="0">
+              version="0.11.11">
         <doc xml:whitespace="preserve">Return the #TpBaseClient:dbus-daemon construct-only property, which
 represents the D-Bus connection used to export this client object.
 
@@ -4314,8 +4322,7 @@ handled channels</doc>
       </method>
       <method name="get_name"
               c:identifier="tp_base_client_get_name"
-              version="0.11.11"
-              introspectable="0">
+              version="0.11.11">
         <doc xml:whitespace="preserve">Return the #TpBaseClient:name construct-only property, which is used as
 part of the bus name and object path.</doc>
         <return-value transfer-ownership="none">
@@ -4351,8 +4358,7 @@ Returns the list of requests @self is likely be asked to handle.
       </method>
       <method name="get_uniquify_name"
               c:identifier="tp_base_client_get_uniquify_name"
-              version="0.11.11"
-              introspectable="0">
+              version="0.11.11">
         <doc xml:whitespace="preserve">Return the #TpBaseClient:uniquify-name construct-only property; if this
 is true, the bus name and object path will be made unique by appending
 a suffix that includes the D-Bus unique name and a per-process counter.</doc>
@@ -6755,6 +6761,9 @@ stream objects.</doc>
     </record>
     <enumeration name="CallContentDisposition"
                  c:type="TpCallContentDisposition">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The disposition of this content, which defines whether to         automatically start sending data on the streams when         Accept is         called on the channel.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_CALL_CONTENT_DISPOSITION_NONE"/>
@@ -6764,6 +6773,9 @@ stream objects.</doc>
     </enumeration>
     <enumeration name="CallContentPacketizationType"
                  c:type="TpCallContentPacketizationType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A packetization method that can be used for a content.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="rtp"
               value="0"
               c:identifier="TP_CALL_CONTENT_PACKETIZATION_TYPE_RTP"/>
@@ -6779,6 +6791,9 @@ stream objects.</doc>
             disguised="1">
     </record>
     <bitfield name="CallFlags" c:type="TpCallFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A set of flags representing additional information than is available         in CallState. Many of these flags only make         sense in a particular (or may explain why a call is in a specific         state).       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="locally_held"
               value="1"
               c:identifier="TP_CALL_FLAG_LOCALLY_HELD"/>
@@ -6794,6 +6809,9 @@ stream objects.</doc>
       <member name="clearing" value="16" c:identifier="TP_CALL_FLAG_CLEARING"/>
     </bitfield>
     <bitfield name="CallMemberFlags" c:type="TpCallMemberFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A set of flags representing the status of a remote contact in a           call.          It is protocol- and client-specific whether a particular contact           will ever have a particular flag set on them, and Telepathy clients           SHOULD NOT assume that a flag will ever be set.                     180 Ringing in SIP, and its equivalent in XMPP, are optional             informational messages, and implementations are not required             to send them. The same applies to the messages used to indicate             hold state.                ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="ringing"
               value="1"
               c:identifier="TP_CALL_MEMBER_FLAG_RINGING"/>
@@ -6803,6 +6821,9 @@ stream objects.</doc>
               c:identifier="TP_CALL_MEMBER_FLAG_CONFERENCE_HOST"/>
     </bitfield>
     <enumeration name="CallState" c:type="TpCallState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The state of a call, as a whole.          The allowed transitions are:                     Pending_Initiator → Initialising (for outgoing calls,             when Accept is called)           Initialising → Initialised (for outgoing calls, when             the remote client indicates that the user has been notified about             the call. If the network is known not to provide feedback about whether             the remote side is ringing, then the call should immediately be             set to Ringing.           Initialising → Initialised (for incoming calls, when e.g. the             implementation has been initialised far enough that it is sensible             to notify the user about the call (to reduce the probability that             the user will pick up the call and have it immediately fail).             The UI should then alert the user about the call, and call             SetRinging)           Initialised → Accepted (for outgoing calls to a contact,             when the remote contact accepts the call; for incoming calls, when             Accept is called.)           Accepted → Active (when the local user successfully             joins the call/conference, and media is known to be flowing             successfully; also, when temporary connection problems are             resolved (See below)). If the network is known not to provide             feedback about when the call is properly connected, the call             should immediately be set to Active.           Active → Accepted (when there are temporary connection problems             that the CM is aware of and able to recover from)           any state → Ended (when the call is terminated             normally, or when an error occurs that the CM is unable to recover             from)                   Clients MAY consider unknown values from this enum to be an           error - additional values will not be defined after the Call           specification is declared to be stable.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown" value="0" c:identifier="TP_CALL_STATE_UNKNOWN"/>
       <member name="pending_initiator"
               value="1"
@@ -6818,6 +6839,9 @@ stream objects.</doc>
       <member name="ended" value="6" c:identifier="TP_CALL_STATE_ENDED"/>
     </enumeration>
     <enumeration name="CallStateChangeReason" c:type="TpCallStateChangeReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A simple representation of the reason for a change in the call's         state, which may be used by simple clients, or used as a fallback         when the DBus_Reason member of a Call_State_Reason         struct is not understood.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_CALL_STATE_CHANGE_REASON_UNKNOWN"/>
@@ -7136,6 +7160,9 @@ It is NOT guaranteed that #TpContact objects have any feature prepared.</doc>
     </class>
     <enumeration name="CallStreamCandidateType"
                  c:type="TpCallStreamCandidateType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The network topology that an IP candidate represents. This can         sometimes be used to infer what kind of performance characteristics         (latency, bandwith, etc) can be expected of connections made to this         candidate.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_CALL_STREAM_CANDIDATE_TYPE_NONE"/>
@@ -7474,6 +7501,9 @@ underlying connection.</doc>
             disguised="1">
     </record>
     <enumeration name="CaptchaCancelReason" c:type="TpCaptchaCancelReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A reason why captcha authentication was aborted by the client.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="user_cancelled"
               value="0"
               c:identifier="TP_CAPTCHA_CANCEL_REASON_USER_CANCELLED"/>
@@ -7485,11 +7515,15 @@ underlying connection.</doc>
               c:identifier="TP_CAPTCHA_CANCEL_REASON_SERVICE_CONFUSED"/>
     </enumeration>
     <bitfield name="CaptchaFlags" c:type="TpCaptchaFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Extra flags to include with Captcha information       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="captcha_flags_required"
               value="1"
               c:identifier="TP_CAPTCHA_FLAGS_REQUIRED"/>
     </bitfield>
     <enumeration name="CaptchaStatus" c:type="TpCaptchaStatus">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="local_pending"
               value="0"
               c:identifier="TP_CAPTCHA_STATUS_LOCAL_PENDING"/>
@@ -7903,8 +7937,7 @@ value. It is now non-%NULL in all cases.</doc>
       </method>
       <method name="get_requested"
               c:identifier="tp_channel_get_requested"
-              version="0.11.15"
-              introspectable="0">
+              version="0.11.15">
         <doc xml:whitespace="preserve">Return the #TpChannel:requested property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpChannel:requested</doc>
@@ -8848,6 +8881,9 @@ applications can connect to this signal and ignore the other.</doc>
       </glib:signal>
     </class>
     <bitfield name="ChannelCallStateFlags" c:type="TpChannelCallStateFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A set of flags representing call states.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="ringing"
               value="1"
               c:identifier="TP_CHANNEL_CALL_STATE_RINGING"/>
@@ -8866,6 +8902,7 @@ applications can connect to this signal and ignore the other.</doc>
               c:identifier="TP_CHANNEL_CALL_STATE_CONFERENCE_HOST"/>
     </bitfield>
     <enumeration name="ChannelChatState" c:type="TpChannelChatState">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="gone" value="0" c:identifier="TP_CHANNEL_CHAT_STATE_GONE"/>
       <member name="inactive"
               value="1"
@@ -8907,6 +8944,7 @@ subclassing.)</doc>
     </record>
     <enumeration name="ChannelContactSearchState"
                  c:type="TpChannelContactSearchState">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="not_started"
               value="0"
               c:identifier="TP_CHANNEL_CONTACT_SEARCH_STATE_NOT_STARTED"/>
@@ -9772,6 +9810,9 @@ tp_channel_dispatcher_present_channel_async().</doc>
     </record>
     <enumeration name="ChannelGroupChangeReason"
                  c:type="TpChannelGroupChangeReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The reason for a set of handles to move to one of           Members,           LocalPendingMembers or           RemotePendingMembers, or to be removed           from the group. A client may supply a reason when attempting to           remove members from a group with           RemoveMembersWithReason, and reasons           are supplied by the CM when emitting           MembersChanged and           MembersChangedDetailed. Some reason           codes have different meanings depending on the Actor in a           MembersChanged signal.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_CHANNEL_GROUP_CHANGE_REASON_NONE"/>
@@ -9810,6 +9851,7 @@ tp_channel_dispatcher_present_channel_async().</doc>
               c:identifier="TP_CHANNEL_GROUP_CHANGE_REASON_SEPARATED"/>
     </enumeration>
     <bitfield name="ChannelGroupFlags" c:type="TpChannelGroupFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="can_add"
               value="1"
               c:identifier="TP_CHANNEL_GROUP_FLAG_CAN_ADD"/>
@@ -9876,6 +9918,9 @@ tp_base_connection_channel_manager_iter_next() to continue.</doc>
     </record>
     <bitfield name="ChannelMediaCapabilities"
               c:type="TpChannelMediaCapabilities">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The channel-type-specific capability flags used for         Channel.Type.StreamedMedia in the Connection.Interface.Capabilities         interface. See the InitialAudio         property for details of the mechanisms that will replace this.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="audio"
               value="1"
               c:identifier="TP_CHANNEL_MEDIA_CAPABILITY_AUDIO"/>
@@ -9896,6 +9941,7 @@ tp_base_connection_channel_manager_iter_next() to continue.</doc>
               c:identifier="TP_CHANNEL_MEDIA_CAPABILITY_IMMUTABLE_STREAMS"/>
     </bitfield>
     <bitfield name="ChannelPasswordFlags" c:type="TpChannelPasswordFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="provide"
               value="8"
               c:identifier="TP_CHANNEL_PASSWORD_FLAG_PROVIDE"/>
@@ -10199,6 +10245,7 @@ tp_simple_client_factory_dup_channel_features() himself.</doc>
     </record>
     <bitfield name="ChannelTextMessageFlags"
               c:type="TpChannelTextMessageFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="truncated"
               value="1"
               c:identifier="TP_CHANNEL_TEXT_MESSAGE_FLAG_TRUNCATED"/>
@@ -10214,6 +10261,9 @@ tp_simple_client_factory_dup_channel_features() himself.</doc>
     </bitfield>
     <enumeration name="ChannelTextMessageType"
                  c:type="TpChannelTextMessageType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The type of message.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="normal"
               value="0"
               c:identifier="TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL"/>
@@ -10231,6 +10281,7 @@ tp_simple_client_factory_dup_channel_features() himself.</doc>
               c:identifier="TP_CHANNEL_TEXT_MESSAGE_TYPE_DELIVERY_REPORT"/>
     </enumeration>
     <enumeration name="ChannelTextSendError" c:type="TpChannelTextSendError">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN"/>
@@ -10514,6 +10565,7 @@ the header part.</doc>
             glib:is-gtype-struct-for="ClientMessage">
     </record>
     <bitfield name="ConnMgrParamFlags" c:type="TpConnMgrParamFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="required"
               value="1"
               c:identifier="TP_CONN_MGR_PARAM_FLAG_REQUIRED"/>
@@ -12861,12 +12913,14 @@ tp_proxy_prepare_async() with the feature
       </glib:signal>
     </class>
     <bitfield name="ConnectionAliasFlags" c:type="TpConnectionAliasFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="connection_alias_flag_user_set"
               value="1"
               c:identifier="TP_CONNECTION_ALIAS_FLAG_USER_SET"/>
     </bitfield>
     <bitfield name="ConnectionCapabilityFlags"
               c:type="TpConnectionCapabilityFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="create"
               value="1"
               c:identifier="TP_CONNECTION_CAPABILITY_FLAG_CREATE"/>
@@ -13842,6 +13896,7 @@ non-%NULL and @cm is not ready.</doc>
     </callback>
     <enumeration name="ConnectionPresenceType"
                  c:type="TpConnectionPresenceType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unset"
               value="0"
               c:identifier="TP_CONNECTION_PRESENCE_TYPE_UNSET"/>
@@ -13932,6 +13987,7 @@ them in @user_data.</doc>
       </parameters>
     </callback>
     <enumeration name="ConnectionStatus" c:type="TpConnectionStatus">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="connected"
               value="0"
               c:identifier="TP_CONNECTION_STATUS_CONNECTED"/>
@@ -13944,6 +14000,9 @@ them in @user_data.</doc>
     </enumeration>
     <enumeration name="ConnectionStatusReason"
                  c:type="TpConnectionStatusReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A reason why the status of the connection changed. Apart from           Requested, the values of this enumeration only make sense as           reasons why the status changed to Disconnected.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none_specified"
               value="0"
               c:identifier="TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED"/>
@@ -15120,6 +15179,7 @@ This is set to %TP_SUBSCRIPTION_STATE_UNKNOWN until
     </class>
     <bitfield name="ContactBlockingCapabilities"
               c:type="TpContactBlockingCapabilities">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="contact_blocking_capability_can_report_abusive"
               value="1"
               c:identifier="TP_CONTACT_BLOCKING_CAPABILITY_CAN_REPORT_ABUSIVE"/>
@@ -15247,6 +15307,9 @@ tp_contact_info_field_free()</doc>
       </method>
     </record>
     <bitfield name="ContactInfoFieldFlags" c:type="TpContactInfoFieldFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags describing the behaviour of a vCard field.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="parameters_exact"
               value="1"
               c:identifier="TP_CONTACT_INFO_FIELD_FLAG_PARAMETERS_EXACT"/>
@@ -15301,6 +15364,9 @@ tp_contact_info_field_spec_free()</doc>
       </method>
     </record>
     <bitfield name="ContactInfoFlags" c:type="TpContactInfoFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags defining the behaviour of contact information on this protocol.         Some protocols provide no information on contacts without an explicit         request; others always push information to the connection manager as         and when it changes.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="can_set"
               value="1"
               c:identifier="TP_CONTACT_INFO_FLAG_CAN_SET"/>
@@ -15395,6 +15461,9 @@ free it with tp_contact_info_spec_list_free()</doc>
       </function>
     </glib:boxed>
     <enumeration name="ContactListState" c:type="TpContactListState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The progress made in retrieving the contact list.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none" value="0" c:identifier="TP_CONTACT_LIST_STATE_NONE"/>
       <member name="waiting"
               value="1"
@@ -15408,6 +15477,9 @@ free it with tp_contact_info_spec_list_free()</doc>
     </enumeration>
     <enumeration name="ContactMetadataStorageType"
                  c:type="TpContactMetadataStorageType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Values of this enumeration indicate the extent to which metadata           such as aliases and group memberships can be stored for the contacts           on a particular connection.          On some protocols, certain metadata (for instance, contact aliases)           can only be stored for contacts on the contact list, or contacts           with a particular contact list state.          To make it easier to deal with such protocols, if clients set           metadata on a contact who is not in the required state, the           Connection MUST cache the metadata for the duration of the session.           If clients request the attributes of that contact after the           appropriate "set" method has returned successfully, the Connection           MUST return the new (cached) value.          If the contact is later placed in the required state to store           metadata (for instance, if subscription to the contact's presence           is requested, on a protocol like MSN where the alias has storage type           Subscribed_Or_Pending), the connection MUST store the cached           metadata at that time.                     If the Connection didn't cache changes in this way, a client             intending to change the alias on MSN would have to wait until             the server acknowledged the subscription request; in the meantime,             other clients would still display the old alias.                   The only exception to that general rule is that if the Connection           cannot store particular metadata at all (i.e. the           storage type is None), it MUST reject attempts to set it.                     If the implementation knows that metadata can't be stored at             all, it's useful to report that, which can be done             synchronously. In general, user interfaces should detect             storage type None and not display editing controls at all.                ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_CONTACT_METADATA_STORAGE_TYPE_NONE"/>
@@ -16739,8 +16811,7 @@ the value of #TpDBusTubeChannel:parameters</doc>
       </method>
       <method name="get_service_name"
               c:identifier="tp_dbus_tube_channel_get_service_name"
-              version="0.15.6"
-              introspectable="0">
+              version="0.15.6">
         <doc xml:whitespace="preserve">Return the #TpDBusTubeChannel:service-name property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpDBusTubeChannel:service-name</doc>
@@ -16838,6 +16909,7 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
             disguised="1">
     </record>
     <enumeration name="DTMFEvent" c:type="TpDTMFEvent">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="digit_0" value="0" c:identifier="TP_DTMF_EVENT_DIGIT_0"/>
       <member name="digit_1" value="1" c:identifier="TP_DTMF_EVENT_DIGIT_1"/>
       <member name="digit_2" value="2" c:identifier="TP_DTMF_EVENT_DIGIT_2"/>
@@ -16866,6 +16938,7 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
               c:identifier="TP_DTMF_EVENT_LETTER_D"/>
     </enumeration>
     <enumeration name="DebugLevel" c:type="TpDebugLevel">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="error" value="0" c:identifier="TP_DEBUG_LEVEL_ERROR"/>
       <member name="critical"
               value="1"
@@ -16877,6 +16950,9 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
     </enumeration>
     <bitfield name="DeliveryReportingSupportFlags"
               c:type="TpDeliveryReportingSupportFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags indicating the level of support for delivery reporting on this         channel, as found on the         DeliveryReportingSupport property. Any         future flags added to this set will conform to the         convention that the presence of an extra flag implies that         more operations will succeed. Note that CMs may always provide more         reports than are requested in the         Message_Sending_Flags passed to         SendMessage.                     If senders want delivery reports, they should ask for them.  If they           don't want delivery reports, they can just ignore them, so there's no           need to have capability discovery for what will happen if a delivery           report isn't requested.                ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="failures"
               value="1"
               c:identifier="TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES"/>
@@ -16891,6 +16967,9 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
               c:identifier="TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_DELETED"/>
     </bitfield>
     <enumeration name="DeliveryStatus" c:type="TpDeliveryStatus">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The status of a message as indicated by a delivery report.          If this enum is extended in future specifications, this should           only be to add new, non-overlapping conditions (i.e. all failures           should still be signalled as either Temporarily_Failed           or Permanently_Failed). If additional detail is required (e.g.           distinguishing between the various types of permanent failure) this           will be done using additional           Delivery_Report_Header_Keys.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_DELIVERY_STATUS_UNKNOWN"/>
@@ -17064,6 +17143,7 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
               c:identifier="TP_ERROR_CAPTCHA_NOT_SUPPORTED"/>
     </enumeration>
     <enumeration name="FileHashType" c:type="TpFileHashType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none" value="0" c:identifier="TP_FILE_HASH_TYPE_NONE"/>
       <member name="md5" value="1" c:identifier="TP_FILE_HASH_TYPE_MD5"/>
       <member name="sha1" value="2" c:identifier="TP_FILE_HASH_TYPE_SHA1"/>
@@ -17497,6 +17577,7 @@ prepared for this property to be meaningful and kept up to date.</doc>
             disguised="1">
     </record>
     <enumeration name="FileTransferState" c:type="TpFileTransferState">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_FILE_TRANSFER_STATE_NONE"/>
@@ -17518,6 +17599,7 @@ prepared for this property to be meaningful and kept up to date.</doc>
     </enumeration>
     <enumeration name="FileTransferStateChangeReason"
                  c:type="TpFileTransferStateChangeReason">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_FILE_TRANSFER_STATE_CHANGE_REASON_NONE"/>
@@ -18412,6 +18494,9 @@ Set this with tp_group_mixin_class_set_remove_with_reason_func(), .</doc>
       </parameters>
     </callback>
     <enumeration name="HTTPMethod" c:type="TpHTTPMethod">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The HTTP Method with which to request a URL.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="get" value="0" c:identifier="TP_HTTP_METHOD_GET"/>
       <member name="post" value="1" c:identifier="TP_HTTP_METHOD_POST"/>
     </enumeration>
@@ -18967,6 +19052,7 @@ tp_handle_set_foreach().</doc>
       </parameters>
     </callback>
     <enumeration name="HandleType" c:type="TpHandleType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none" value="0" c:identifier="TP_HANDLE_TYPE_NONE"/>
       <member name="contact" value="1" c:identifier="TP_HANDLE_TYPE_CONTACT"/>
       <member name="room" value="2" c:identifier="TP_HANDLE_TYPE_ROOM"/>
@@ -19868,6 +19954,9 @@ with a set.</doc>
       </method>
     </record>
     <enumeration name="LocalHoldState" c:type="TpLocalHoldState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The hold state of a channel.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unheld"
               value="0"
               c:identifier="TP_LOCAL_HOLD_STATE_UNHELD"/>
@@ -19880,6 +19969,9 @@ with a set.</doc>
               c:identifier="TP_LOCAL_HOLD_STATE_PENDING_UNHOLD"/>
     </enumeration>
     <enumeration name="LocalHoldStateReason" c:type="TpLocalHoldStateReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The reason for a change to the Local_Hold_State. Clients MUST         treat unknown values as equivalent to Local_Hold_State_Reason_None.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_LOCAL_HOLD_STATE_REASON_NONE"/>
@@ -19891,11 +19983,17 @@ with a set.</doc>
               c:identifier="TP_LOCAL_HOLD_STATE_REASON_RESOURCE_NOT_AVAILABLE"/>
     </enumeration>
     <bitfield name="LocationFeatures" c:type="TpLocationFeatures">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags describing the Location features which may be supported on any         given connection.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="location_feature_can_set"
               value="1"
               c:identifier="TP_LOCATION_FEATURE_CAN_SET"/>
     </bitfield>
     <bitfield name="MailNotificationFlags" c:type="TpMailNotificationFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags representing capabilities provided by a connection manager.           Those values can be used as bitfield. Some flags depend on, or           conflict with, each other.          Connections SHOULD implement as many of these features as the           underlying protocol allows, preferring to implement           Supports_Unread_Mails instead of Emits_Mails_Received if both are           possible.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="supports_unread_mail_count"
               value="1"
               c:identifier="TP_MAIL_NOTIFICATION_FLAG_SUPPORTS_UNREAD_MAIL_COUNT"/>
@@ -19916,6 +20014,7 @@ with a set.</doc>
               c:identifier="TP_MAIL_NOTIFICATION_FLAG_THREAD_BASED"/>
     </bitfield>
     <enumeration name="MediaStreamBaseProto" c:type="TpMediaStreamBaseProto">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="udp"
               value="0"
               c:identifier="TP_MEDIA_STREAM_BASE_PROTO_UDP"/>
@@ -19924,6 +20023,7 @@ with a set.</doc>
               c:identifier="TP_MEDIA_STREAM_BASE_PROTO_TCP"/>
     </enumeration>
     <enumeration name="MediaStreamDirection" c:type="TpMediaStreamDirection">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none"
               value="0"
               c:identifier="TP_MEDIA_STREAM_DIRECTION_NONE"/>
@@ -19938,6 +20038,7 @@ with a set.</doc>
               c:identifier="TP_MEDIA_STREAM_DIRECTION_BIDIRECTIONAL"/>
     </enumeration>
     <enumeration name="MediaStreamError" c:type="TpMediaStreamError">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_MEDIA_STREAM_ERROR_UNKNOWN"/>
@@ -19962,6 +20063,7 @@ with a set.</doc>
               c:identifier="TP_MEDIA_STREAM_ERROR_MEDIA_ERROR"/>
     </enumeration>
     <bitfield name="MediaStreamPendingSend" c:type="TpMediaStreamPendingSend">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="local_send"
               value="1"
               c:identifier="TP_MEDIA_STREAM_PENDING_LOCAL_SEND"/>
@@ -19970,6 +20072,7 @@ with a set.</doc>
               c:identifier="TP_MEDIA_STREAM_PENDING_REMOTE_SEND"/>
     </bitfield>
     <enumeration name="MediaStreamState" c:type="TpMediaStreamState">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="disconnected"
               value="0"
               c:identifier="TP_MEDIA_STREAM_STATE_DISCONNECTED"/>
@@ -19982,6 +20085,7 @@ with a set.</doc>
     </enumeration>
     <enumeration name="MediaStreamTransportType"
                  c:type="TpMediaStreamTransportType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="local"
               value="0"
               c:identifier="TP_MEDIA_STREAM_TRANSPORT_TYPE_LOCAL"/>
@@ -19993,6 +20097,7 @@ with a set.</doc>
               c:identifier="TP_MEDIA_STREAM_TRANSPORT_TYPE_RELAY"/>
     </enumeration>
     <enumeration name="MediaStreamType" c:type="TpMediaStreamType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="audio"
               value="0"
               c:identifier="TP_MEDIA_STREAM_TYPE_AUDIO"/>
@@ -20568,6 +20673,9 @@ text content of #message</doc>
     </record>
     <bitfield name="MessagePartSupportFlags"
               c:type="TpMessagePartSupportFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags indicating the level of support for message parts on this           channel. They are designed such that setting more flags always           implies that the channel has more capabilities.          If no flags are set, this indicates that messages may contain           a single message part whose content-type is any of the types           from SupportedContentTypes, possibly with some alternatives.          There is no flag indicating support for alternatives. This is           because the SendMessage implementation can always accept messages           containing alternatives, even if the underlying protocol does not,           by deleting all alternatives except the first (most preferred)           that is supported.                     Each of the flags so far implies the previous flag, so we could           have used a simple enumeration here; however, we've defined           the message-part support indicator as a flag set for future           expansion.                   See SupportedContentTypes for some           examples.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="one_attachment"
               value="1"
               c:identifier="TP_MESSAGE_PART_SUPPORT_FLAG_ONE_ATTACHMENT"/>
@@ -20576,6 +20684,9 @@ text content of #message</doc>
               c:identifier="TP_MESSAGE_PART_SUPPORT_FLAG_MULTIPLE_ATTACHMENTS"/>
     </bitfield>
     <bitfield name="MessageSendingFlags" c:type="TpMessageSendingFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags altering the way a message is sent. The "most usual" action         should always be to have these flags unset. Some indication of which         flags are supported is provided by the         DeliveryReportingSupport property.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="delivery"
               value="1"
               c:identifier="TP_MESSAGE_SENDING_FLAG_REPORT_DELIVERY"/>
@@ -22834,6 +22945,7 @@ future version of telepathy-glib.</doc>
       </field>
     </record>
     <bitfield name="PropertyFlags" c:type="TpPropertyFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="read" value="1" c:identifier="TP_PROPERTY_FLAG_READ"/>
       <member name="write" value="2" c:identifier="TP_PROPERTY_FLAG_WRITE"/>
     </bitfield>
@@ -23679,12 +23791,14 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
       </method>
     </record>
     <enumeration name="RCPTXRRTTMode" c:type="TpRCPTXRRTTMode">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="all" value="0" c:identifier="TP_RCPT_XR_RTT_MODE_ALL"/>
       <member name="sender"
               value="1"
               c:identifier="TP_RCPT_XR_RTT_MODE_SENDER"/>
     </enumeration>
     <bitfield name="RTCPXRStatisticsFlags" c:type="TpRTCPXRStatisticsFlags">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="loss"
               value="1"
               c:identifier="TP_RTCP_XR_STATISTICS_FLAGS_LOSS"/>
@@ -23703,6 +23817,9 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
     </bitfield>
     <enumeration name="RichPresenceAccessControlType"
                  c:type="TpRichPresenceAccessControlType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A type of access control for Rich_Presence_Access_Control.           For most types, the exact access control is given by an associated           variant.                     These are the access control types from XMPP publish/subscribe           (XEP-0060).                   Location           uses this for historical reasons, new interfaces will use           Access_Control_Type.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="whitelist"
               value="0"
               c:identifier="TP_RICH_PRESENCE_ACCESS_CONTROL_TYPE_WHITELIST"/>
@@ -23717,6 +23834,9 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
               c:identifier="TP_RICH_PRESENCE_ACCESS_CONTROL_TYPE_OPEN"/>
     </enumeration>
     <enumeration name="SASLAbortReason" c:type="TpSASLAbortReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A reason why SASL authentication was aborted by the client.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="invalid_challenge"
               value="0"
               c:identifier="TP_SASL_ABORT_REASON_INVALID_CHALLENGE"/>
@@ -23725,6 +23845,7 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
               c:identifier="TP_SASL_ABORT_REASON_USER_ABORT"/>
     </enumeration>
     <enumeration name="SASLStatus" c:type="TpSASLStatus">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="not_started"
               value="0"
               c:identifier="TP_SASL_STATUS_NOT_STARTED"/>
@@ -23748,6 +23869,9 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
               c:identifier="TP_SASL_STATUS_CLIENT_FAILED"/>
     </enumeration>
     <enumeration name="SendingState" c:type="TpSendingState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Enum indicating whether a contact is sending media.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none" value="0" c:identifier="TP_SENDING_STATE_NONE"/>
       <member name="pending_send"
               value="1"
@@ -23760,6 +23884,9 @@ with the same error as returned by tp_proxy_get_invalidated().</doc>
               c:identifier="TP_SENDING_STATE_PENDING_STOP_SENDING"/>
     </enumeration>
     <enumeration name="ServicePointType" c:type="TpServicePointType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The various types of service points a channel might connect to.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="none" value="0" c:identifier="TP_SERVICE_POINT_TYPE_NONE"/>
       <member name="emergency"
               value="1"
@@ -25402,6 +25529,7 @@ on @context before it returns.</doc>
             disguised="1">
     </record>
     <enumeration name="SocketAccessControl" c:type="TpSocketAccessControl">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="localhost"
               value="0"
               c:identifier="TP_SOCKET_ACCESS_CONTROL_LOCALHOST"/>
@@ -25416,6 +25544,7 @@ on @context before it returns.</doc>
               c:identifier="TP_SOCKET_ACCESS_CONTROL_CREDENTIALS"/>
     </enumeration>
     <enumeration name="SocketAddressType" c:type="TpSocketAddressType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unix"
               value="0"
               c:identifier="TP_SOCKET_ADDRESS_TYPE_UNIX"/>
@@ -25431,6 +25560,9 @@ on @context before it returns.</doc>
     </enumeration>
     <bitfield name="StorageRestrictionFlags"
               c:type="TpStorageRestrictionFlags">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Flags indicating restrictions imposed on an Account by its storage         method.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="parameters"
               value="1"
               c:identifier="TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS"/>
@@ -25445,6 +25577,9 @@ on @context before it returns.</doc>
               c:identifier="TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_SERVICE"/>
     </bitfield>
     <enumeration name="StreamComponent" c:type="TpStreamComponent">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Media streams can use more than one UDP socket: one for RTP (data)         and one for RTCP (control). Most of the time, they are adjacent         to each other, but some protocols (xmpp) signal each port separately.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_STREAM_COMPONENT_UNKNOWN"/>
@@ -25454,6 +25589,9 @@ on @context before it returns.</doc>
               c:identifier="TP_STREAM_COMPONENT_CONTROL"/>
     </enumeration>
     <enumeration name="StreamEndpointState" c:type="TpStreamEndpointState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Represents the state of ICE negotiation for a single component of a         stream to an endpoint.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="connecting"
               value="0"
               c:identifier="TP_STREAM_ENDPOINT_STATE_CONNECTING"/>
@@ -25471,6 +25609,9 @@ on @context before it returns.</doc>
               c:identifier="TP_STREAM_ENDPOINT_STATE_FAILED"/>
     </enumeration>
     <enumeration name="StreamFlowState" c:type="TpStreamFlowState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The type of SendingState         and ReceivingState.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="stopped"
               value="0"
               c:identifier="TP_STREAM_FLOW_STATE_STOPPED"/>
@@ -25485,6 +25626,9 @@ on @context before it returns.</doc>
               c:identifier="TP_STREAM_FLOW_STATE_STARTED"/>
     </enumeration>
     <enumeration name="StreamTransportType" c:type="TpStreamTransportType">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         A transport that can be used for streaming.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_STREAM_TRANSPORT_TYPE_UNKNOWN"/>
@@ -25603,8 +25747,7 @@ the value of #TpStreamTubeChannel:parameters</doc>
       </method>
       <method name="get_service"
               c:identifier="tp_stream_tube_channel_get_service"
-              version="0.13.2"
-              introspectable="0">
+              version="0.13.2">
         <doc xml:whitespace="preserve">Return the #TpStreamTubeChannel:service property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpStreamTubeChannel:service</doc>
@@ -25728,8 +25871,7 @@ Consumers of this signal must take their own references to
       <doc xml:whitespace="preserve">Data structure representing a connection on a #TpStreamTubeChannel.</doc>
       <method name="get_channel"
               c:identifier="tp_stream_tube_connection_get_channel"
-              version="0.13.2"
-              introspectable="0">
+              version="0.13.2">
         <doc xml:whitespace="preserve">Return the #TpStreamTubeConnection:channel property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpStreamTubeConnection:channel</doc>
@@ -25738,8 +25880,7 @@ Consumers of this signal must take their own references to
       </method>
       <method name="get_contact"
               c:identifier="tp_stream_tube_connection_get_contact"
-              version="0.13.2"
-              introspectable="0">
+              version="0.13.2">
         <doc xml:whitespace="preserve">Return the #TpStreamTubeConnection:contact property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpStreamTubeConnection:contact</doc>
@@ -25748,8 +25889,7 @@ Consumers of this signal must take their own references to
       </method>
       <method name="get_socket_connection"
               c:identifier="tp_stream_tube_connection_get_socket_connection"
-              version="0.13.2"
-              introspectable="0">
+              version="0.13.2">
         <doc xml:whitespace="preserve">Return the #TpStreamTubeConnection:socket-connection property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpStreamTubeConnection:socket-connection</doc>
@@ -25799,7 +25939,7 @@ a tube connection has been closed.</doc>
         <parameters>
           <parameter name="error" transfer-ownership="none">
             <doc xml:whitespace="preserve">a #GError representing the error reported by the connection manager</doc>
-            <type name="gpointer"/>
+            <type name="GLib.Error"/>
           </parameter>
         </parameters>
       </glib:signal>
@@ -25816,6 +25956,9 @@ a tube connection has been closed.</doc>
             disguised="1">
     </record>
     <enumeration name="SubscriptionState" c:type="TpSubscriptionState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         An enumeration indicating whether presence subscription is denied,           denied but pending permission, or allowed. The exact semantics           vary according to where this type is used: see the           subscribe and           publish contact attributes for           details.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_SUBSCRIPTION_STATE_UNKNOWN"/>
@@ -25828,6 +25971,9 @@ a tube connection has been closed.</doc>
     </enumeration>
     <enumeration name="TLSCertificateRejectReason"
                  c:type="TpTLSCertificateRejectReason">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         Possible reasons to reject a TLS certificate.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="unknown"
               value="0"
               c:identifier="TP_TLS_CERTIFICATE_REJECT_REASON_UNKNOWN"/>
@@ -25860,6 +26006,9 @@ a tube connection has been closed.</doc>
               c:identifier="TP_TLS_CERTIFICATE_REJECT_REASON_LIMIT_EXCEEDED"/>
     </enumeration>
     <enumeration name="TLSCertificateState" c:type="TpTLSCertificateState">
+      <doc xml:whitespace="preserve">&lt;![CDATA[         The possible states for a TLSCertificate         object.       ]]&gt;
+
+Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="pending"
               value="0"
               c:identifier="TP_TLS_CERTIFICATE_STATE_PENDING"/>
@@ -26204,8 +26353,7 @@ See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
       </method>
       <method name="get_delivery_reporting_support"
               c:identifier="tp_text_channel_get_delivery_reporting_support"
-              version="0.13.10"
-              introspectable="0">
+              version="0.13.10">
         <doc xml:whitespace="preserve">Return the #TpTextChannel:delivery-reporting-support property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpTextChannel:delivery-reporting-support property</doc>
@@ -26215,8 +26363,7 @@ See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
       </method>
       <method name="get_message_part_support_flags"
               c:identifier="tp_text_channel_get_message_part_support_flags"
-              version="0.13.10"
-              introspectable="0">
+              version="0.13.10">
         <doc xml:whitespace="preserve">Return the #TpTextChannel:message-part-support-flags property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpTextChannel:message-part-support-flags</doc>
@@ -26226,8 +26373,7 @@ See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
       </method>
       <method name="get_message_types"
               c:identifier="tp_text_channel_get_message_types"
-              version="0.13.16"
-              introspectable="0">
+              version="0.13.16">
         <doc xml:whitespace="preserve">Return the #TpTextChannel:message-types property
 
 the value of #TpTextChannel:message-types</doc>
@@ -26337,8 +26483,7 @@ the message has been retrieved, %FALSE otherwise.</doc>
       </method>
       <method name="get_supported_content_types"
               c:identifier="tp_text_channel_get_supported_content_types"
-              version="0.13.10"
-              introspectable="0">
+              version="0.13.10">
         <doc xml:whitespace="preserve">Return the #TpTextChannel:supported-content-types property
 
 the value of #TpTextChannel:supported-content-types</doc>
@@ -26627,6 +26772,7 @@ tp_simple_client_factory_add_contact_features() prepared.</doc>
             disguised="1">
     </record>
     <enumeration name="TubeChannelState" c:type="TpTubeChannelState">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="local_pending"
               value="0"
               c:identifier="TP_TUBE_CHANNEL_STATE_LOCAL_PENDING"/>
@@ -26639,6 +26785,7 @@ tp_simple_client_factory_add_contact_features() prepared.</doc>
               c:identifier="TP_TUBE_CHANNEL_STATE_NOT_OFFERED"/>
     </enumeration>
     <enumeration name="TubeState" c:type="TpTubeState">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="local_pending"
               value="0"
               c:identifier="TP_TUBE_STATE_LOCAL_PENDING"/>
@@ -26648,6 +26795,7 @@ tp_simple_client_factory_add_contact_features() prepared.</doc>
       <member name="open" value="2" c:identifier="TP_TUBE_STATE_OPEN"/>
     </enumeration>
     <enumeration name="TubeType" c:type="TpTubeType">
+      <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="dbus" value="0" c:identifier="TP_TUBE_TYPE_DBUS"/>
       <member name="stream" value="1" c:identifier="TP_TUBE_TYPE_STREAM"/>
     </enumeration>

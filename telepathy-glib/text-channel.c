@@ -946,7 +946,7 @@ tp_text_channel_class_init (TpTextChannelClass *klass)
   g_object_class_install_property (gobject_class, PROP_SMS_FLASH, param_spec);
 
   /**
-   * TpTextChannel::message-received
+   * TpTextChannel::message-received:
    * @self: the #TpTextChannel
    * @message: a #TpSignalledMessage
    *
@@ -974,7 +974,7 @@ tp_text_channel_class_init (TpTextChannelClass *klass)
       1, TP_TYPE_SIGNALLED_MESSAGE);
 
   /**
-   * TpTextChannel::pending-message-removed
+   * TpTextChannel::pending-message-removed:
    * @self: the #TpTextChannel
    * @message: a #TpSignalledMessage
    *
@@ -999,7 +999,7 @@ tp_text_channel_class_init (TpTextChannelClass *klass)
       1, TP_TYPE_SIGNALLED_MESSAGE);
 
   /**
-   * TpTextChannel::message-sent
+   * TpTextChannel::message-sent:
    * @self: the #TpTextChannel
    * @message: a #TpSignalledMessage
    * @flags: the #TpMessageSendingFlags affecting how the message was sent
@@ -1093,7 +1093,7 @@ _tp_text_channel_new_with_factory (
 }
 
 /**
- * tp_text_channel_get_supported_content_types: (skip)
+ * tp_text_channel_get_supported_content_types:
  * @self: a #TpTextChannel
  *
  * Return the #TpTextChannel:supported-content-types property
@@ -1112,7 +1112,7 @@ tp_text_channel_get_supported_content_types (TpTextChannel *self)
 }
 
 /**
- * tp_text_channel_get_message_part_support_flags: (skip)
+ * tp_text_channel_get_message_part_support_flags:
  * @self: a #TpTextChannel
  *
  * Return the #TpTextChannel:message-part-support-flags property
@@ -1131,7 +1131,7 @@ tp_text_channel_get_message_part_support_flags (
 }
 
 /**
- * tp_text_channel_get_delivery_reporting_support: (skip)
+ * tp_text_channel_get_delivery_reporting_support:
  * @self: a #TpTextChannel
  *
  * Return the #TpTextChannel:delivery-reporting-support property
@@ -1563,7 +1563,7 @@ tp_text_channel_set_chat_state_finish (TpTextChannel *self,
 }
 
 /**
- * tp_text_channel_get_message_types: (skip)
+ * tp_text_channel_get_message_types:
  * @self: a #TpTextChannel
  *
  * Return the #TpTextChannel:message-types property
@@ -1582,7 +1582,7 @@ tp_text_channel_get_message_types (TpTextChannel *self)
 }
 
 /**
- * tp_text_channel_supports_message_type
+ * tp_text_channel_supports_message_type:
  * @self: a #TpTextChannel
  * @message_type: a #TpChannelTextMessageType
  *
