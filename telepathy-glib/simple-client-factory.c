@@ -79,15 +79,6 @@
 
 /**
  * TpSimpleClientFactoryClass:
- * @parent_class: the parent class
- *
- * The class of a #TpSimpleClientFactory.
- *
- * Since: 0.15.5
- */
-
-/**
- * TpSimpleClientFactoryClass:
  * @parent_class: the parent
  * @create_account: create a #TpAccount;
  *  see tp_simple_client_factory_ensure_account()
@@ -858,9 +849,10 @@ tp_simple_client_factory_ensure_contact (TpSimpleClientFactory *self,
   g_return_val_if_fail (handle != 0, NULL);
   g_return_val_if_fail (identifier != NULL, NULL);
 
-  contact = _tp_connection_lookup_contact (connection, handle);
+  contact = tp_connection_dup_contact_if_possible (connection,
+      handle, identifier);
   if (contact != NULL)
-    return g_object_ref (contact);
+    return contact;
 
   contact = TP_SIMPLE_CLIENT_FACTORY_GET_CLASS (self)->create_contact (self,
       connection, handle, identifier);
