@@ -20,6 +20,16 @@ override_dh_auto_configure:
 	--enable-vala-bindings \
 	--enable-gtk-doc \
 	--with-html-dir=\$${prefix}/share/doc/libtelepathy-glib-doc
+	install -d -m700 $(HOME)
+
+# On kernel/libc combinations where credentials-passing doesn't work, or where
+# it works but either libdbus or GDBus doesn't understand how, D-Bus clients
+# have to write to ~/.dbus-keyrings to prove their identities. Debian packages
+# aren't allowed to write to ${HOME}.
+export HOME = $(CURDIR)/debian/tmp-home
+# GLib doesn't respect $HOME for everything, so we use the Debian-specific
+# G_HOME too.
+export G_HOME = $(HOME)
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 
