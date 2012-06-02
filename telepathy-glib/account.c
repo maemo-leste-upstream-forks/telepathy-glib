@@ -466,6 +466,18 @@ OUT:
   g_object_unref (self);
 }
 
+static void _tp_account_set_connection (TpAccount *account, const gchar *path);
+
+static void
+connection_invalidated_cb (TpConnection *connection,
+    guint domain,
+    gint code,
+    gchar *message,
+    TpAccount *account)
+{
+  _tp_account_set_connection (account, "/");
+}
+
 static void
 _tp_account_set_connection (TpAccount *account,
     const gchar *path)
@@ -475,14 +487,17 @@ _tp_account_set_connection (TpAccount *account,
   gboolean have_public_connection;
   GError *error = NULL;
 
-  /* Do nothing if we already have a connection for the same path */
   if (priv->connection != NULL)
     {
       const gchar *current;
 
+      /* Do nothing if we already have a connection for the same path */
       current = tp_proxy_get_object_path (priv->connection);
       if (!tp_strdiff (current, path))
         return;
+
+      g_signal_handlers_disconnect_by_func (priv->connection,
+          connection_invalidated_cb, account);
     }
 
   had_public_connection = (priv->connection != NULL &&
@@ -515,6 +530,9 @@ _tp_account_set_connection (TpAccount *account,
     }
   else
     {
+      tp_g_signal_connect_object (priv->connection, "invalidated",
+          G_CALLBACK (connection_invalidated_cb), account, 0);
+
       _tp_connection_set_account (priv->connection, account);
       if (tp_proxy_is_prepared (account, TP_ACCOUNT_FEATURE_CONNECTION))
         {
@@ -569,7 +587,7 @@ _tp_account_got_all_storage_cb (TpProxy *proxy,
   if (self->priv->storage_provider == NULL)
     self->priv->storage_provider = g_strdup ("");
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 static void
@@ -1163,7 +1181,7 @@ _tp_account_dispose (GObject *object)
 
   priv->dispose_has_run = TRUE;
 
-  tp_clear_object (&self->priv->connection);
+  _tp_account_set_connection (self, "/");
 
   /* release any references held by the object here */
   if (G_OBJECT_CLASS (tp_account_parent_class)->dispose != NULL)
@@ -1265,7 +1283,7 @@ tp_account_class_init (TpAccountClass *klass)
           "Presence",
           "The account connection's current presence type",
           0,
-          NUM_TP_CONNECTION_PRESENCE_TYPES,
+          TP_NUM_CONNECTION_PRESENCE_TYPES,
           TP_CONNECTION_PRESENCE_TYPE_UNSET,
           G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
@@ -1364,7 +1382,7 @@ tp_account_class_init (TpAccountClass *klass)
           "ConnectionStatus",
           "The account's connection status type",
           0,
-          NUM_TP_CONNECTION_STATUSES,
+          TP_NUM_CONNECTION_STATUSES,
           TP_CONNECTION_STATUS_DISCONNECTED,
           G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
@@ -1389,7 +1407,7 @@ tp_account_class_init (TpAccountClass *klass)
           "ConnectionStatusReason",
           "The account's connection status reason",
           0,
-          NUM_TP_CONNECTION_STATUS_REASONS,
+          TP_NUM_CONNECTION_STATUS_REASONS,
           TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED,
           G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
@@ -1668,7 +1686,7 @@ tp_account_class_init (TpAccountClass *klass)
           "RequestedPresence",
           "The account's requested presence type",
           0,
-          NUM_TP_CONNECTION_PRESENCE_TYPES,
+          TP_NUM_CONNECTION_PRESENCE_TYPES,
           TP_CONNECTION_PRESENCE_TYPE_UNSET,
           G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
@@ -1771,7 +1789,7 @@ tp_account_class_init (TpAccountClass *klass)
           "AutomaticPresence type",
           "Presence type used to put the account online automatically",
           0,
-          NUM_TP_CONNECTION_PRESENCE_TYPES,
+          TP_NUM_CONNECTION_PRESENCE_TYPES,
           TP_CONNECTION_PRESENCE_TYPE_UNSET,
           G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
@@ -2040,7 +2058,7 @@ tp_account_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_account_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -2414,7 +2432,7 @@ _tp_account_property_set_cb (TpProxy *proxy,
       g_simple_async_result_set_from_error (result, error);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -2476,7 +2494,7 @@ tp_account_set_enabled_async (TpAccount *account,
 }
 
 static void
-_tp_account_reconnected_cb (TpAccount *proxy,
+_tp_account_void_cb (TpAccount *proxy,
     const GError *error,
     gpointer user_data,
     GObject *weak_object)
@@ -2486,7 +2504,7 @@ _tp_account_reconnected_cb (TpAccount *proxy,
   if (error != NULL)
     g_simple_async_result_set_from_error (result, error);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -2534,7 +2552,7 @@ tp_account_reconnect_async (TpAccount *account,
   result = g_simple_async_result_new (G_OBJECT (account),
       callback, user_data, tp_account_reconnect_finish);
 
-  tp_cli_account_call_reconnect (account, -1, _tp_account_reconnected_cb,
+  tp_cli_account_call_reconnect (account, -1, _tp_account_void_cb,
       result, NULL, G_OBJECT (account));
 }
 
@@ -2688,7 +2706,7 @@ _tp_account_updated_cb (TpAccount *proxy,
     g_simple_async_result_set_op_res_gpointer (result,
         g_strdupv ((GStrv) reconnect_required), (GDestroyNotify) g_strfreev);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (G_OBJECT (result));
 }
 
@@ -2730,7 +2748,7 @@ tp_account_update_parameters_async (TpAccount *account,
  * tp_account_update_parameters_finish:
  * @account: a #TpAccount
  * @result: a #GAsyncResult
- * @reconnect_required: (out) (type GObject.Strv) (transfer full): a #GStrv to
+ * @reconnect_required: (out) (array zero-terminated=1) (transfer full): a #GStrv to
  *  fill with properties that need a reconnect to take effect
  * @error: a #GError to fill
  *
@@ -2778,20 +2796,16 @@ tp_account_update_parameters_vardict_async (TpAccount *account,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
-  GValue v = G_VALUE_INIT;
+  GHashTable *hash;
 
-  g_return_if_fail (parameters != NULL);
-  g_return_if_fail (g_variant_is_of_type (parameters, G_VARIANT_TYPE_VARDICT));
+  hash = _tp_asv_from_vardict (parameters);
 
   g_variant_ref_sink (parameters);
 
-  dbus_g_value_parse_g_variant (parameters, &v);
-  g_assert (G_VALUE_HOLDS (&v, TP_HASH_TYPE_STRING_VARIANT_MAP));
-
-  tp_account_update_parameters_async (account, g_value_get_boxed (&v),
+  tp_account_update_parameters_async (account, hash,
       unset_parameters, callback, user_data);
-  g_value_unset (&v);
   g_variant_unref (parameters);
+  g_hash_table_unref (hash);
 }
 
 /**
@@ -3006,21 +3020,6 @@ tp_account_set_icon_name_finish (TpAccount *account,
     GError **error)
 {
   _tp_implement_finish_void (account, tp_account_set_icon_name_finish);
-}
-
-static void
-_tp_account_void_cb (TpAccount *proxy,
-    const GError *error,
-    gpointer user_data,
-    GObject *weak_object)
-{
-  GSimpleAsyncResult *result = G_SIMPLE_ASYNC_RESULT (user_data);
-
-  if (error != NULL)
-    g_simple_async_result_set_from_error (result, error);
-
-  g_simple_async_result_complete (result);
-  g_object_unref (G_OBJECT (result));
 }
 
 /**
@@ -3405,7 +3404,7 @@ _tp_account_got_avatar_cb (TpProxy *proxy,
           (GDestroyNotify) g_array_unref);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -3586,7 +3585,7 @@ tp_account_parse_object_path (const gchar *object_path,
 
   if (!g_str_has_prefix (object_path, TP_ACCOUNT_OBJECT_PATH_BASE))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account path does not start with the right prefix: %s",
           object_path);
       return FALSE;
@@ -3598,7 +3597,7 @@ tp_account_parse_object_path (const gchar *object_path,
 
   if (g_strv_length (segments) != 3)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account path '%s' is malformed: should have 3 trailing components, "
           "not %u", object_path, g_strv_length (segments));
       goto free_segments_and_fail;
@@ -3606,7 +3605,7 @@ tp_account_parse_object_path (const gchar *object_path,
 
   if (!g_ascii_isalpha (segments[0][0]))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account path '%s' is malformed: CM name should start with a letter",
           object_path);
       goto free_segments_and_fail;
@@ -3614,7 +3613,7 @@ tp_account_parse_object_path (const gchar *object_path,
 
   if (!g_ascii_isalpha (segments[1][0]))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account path '%s' is malformed: "
           "protocol name should start with a letter",
           object_path);
@@ -3623,7 +3622,7 @@ tp_account_parse_object_path (const gchar *object_path,
 
   if (!g_ascii_isalpha (segments[2][0]) && segments[2][0] != '_')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account path '%s' is malformed: "
           "account ID should start with a letter or underscore",
           object_path);
@@ -3920,7 +3919,7 @@ _tp_account_get_storage_specific_information_cb (TpProxy *self,
           (GDestroyNotify) g_hash_table_unref);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -4023,7 +4022,7 @@ tp_account_get_storage_specific_information_finish (TpAccount *self,
  * Returns: (transfer full): a map from strings to variants,
  *  of type %G_VARIANT_TYPE_VARDICT
  *
- * Since: 0.13.2
+ * Since: 0.17.6
  */
 GVariant *
 tp_account_dup_storage_specific_information_vardict_finish (TpAccount *self,
@@ -4058,7 +4057,7 @@ _tp_account_got_all_addressing_cb (TpProxy *proxy,
   if (self->priv->uri_schemes == NULL)
     self->priv->uri_schemes = g_new0 (gchar *, 1);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 static void

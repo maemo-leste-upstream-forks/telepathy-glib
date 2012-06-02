@@ -16,6 +16,12 @@ and/or use gtk-doc annotations.  -->
              shared-library="libtelepathy-glib.so.0"
              c:identifier-prefixes="Tp"
              c:symbol-prefixes="tp">
+    <alias name="ContactInfoList" c:type="TpContactInfoList">
+      <type name="GLib.List" c:type="GList"/>
+    </alias>
+    <alias name="ContactInfoSpecList" c:type="TpContactInfoSpecList">
+      <type name="GLib.List" c:type="GList"/>
+    </alias>
     <alias name="Handle" c:type="TpHandle">
       <doc xml:whitespace="preserve">Type representing Telepathy handles within telepathy-glib.
 
@@ -29,12 +35,18 @@ in future, telepathy-glib is likely to have a matching ABI change.</doc>
 now just a backwards compatibility typedef.</doc>
       <type name="Intset" c:type="TpIntset"/>
     </alias>
-    <alias name="IntSetFastIter" c:type="TpIntSetFastIter" introspectable="0">
+    <alias name="IntSetFastIter"
+           c:type="TpIntSetFastIter"
+           introspectable="0"
+           deprecated="since 0.19.0. Use #TpIntsetFastIter instead">
       <doc xml:whitespace="preserve">Before 0.11.16, this was the name for &lt;type&gt;TpIntsetFastIter&lt;/type&gt;,
 but it's now just a backwards compatibility typedef.</doc>
       <type name="IntsetFastIter" c:type="TpIntsetFastIter"/>
     </alias>
-    <alias name="IntSetIter" c:type="TpIntSetIter" introspectable="0">
+    <alias name="IntSetIter"
+           c:type="TpIntSetIter"
+           introspectable="0"
+           deprecated="since 0.19.0. Use #TpIntsetFastIter instead">
       <doc xml:whitespace="preserve">Before 0.11.16, this was the name for &lt;type&gt;TpIntsetIter&lt;/type&gt;, but
 it's now just a backwards compatibility typedef.</doc>
       <type name="IntsetIter" c:type="TpIntsetIter"/>
@@ -366,7 +378,7 @@ result of the request.</doc>
       </method>
       <method name="dup_storage_specific_information_vardict_finish"
               c:identifier="tp_account_dup_storage_specific_information_vardict_finish"
-              version="0.13.2"
+              version="0.17.6"
               throws="1">
         <doc xml:whitespace="preserve">Retrieve the value of the request begun with
 tp_account_dup_storage_specific_information_vardict_async().
@@ -1551,7 +1563,6 @@ tp_account_update_parameters_finish() to get the result of the operation.</doc>
       <method name="update_parameters_finish"
               c:identifier="tp_account_update_parameters_finish"
               version="0.9.0"
-              introspectable="0"
               throws="1">
         <doc xml:whitespace="preserve">Finishes an async update of the parameters on @account.</doc>
         <return-value transfer-ownership="none">
@@ -1568,7 +1579,9 @@ tp_account_update_parameters_finish() to get the result of the operation.</doc>
                      caller-allocates="0"
                      transfer-ownership="full">
             <doc xml:whitespace="preserve">a #GStrv to fill with properties that need a reconnect to take effect</doc>
-            <type name="GObject.Strv" c:type="gchar***"/>
+            <array c:type="gchar***">
+              <type name="utf8" c:type="gchar**"/>
+            </array>
           </parameter>
         </parameters>
       </method>
@@ -2207,6 +2220,151 @@ available with their current behaviour since version 0.11.7.</doc>
           </parameter>
         </parameters>
       </constructor>
+      <constructor name="new_audio_call"
+                   c:identifier="tp_account_channel_request_new_audio_call"
+                   version="0.19.0">
+        <doc xml:whitespace="preserve">Convenience function to create a new #TpAccountChannelRequest object
+which will yield a Call channel, initially carrying audio only.
+
+After creating the request, you will usually also need to set the "target"
+of the channel by calling one of the following functions:
+
+- tp_account_channel_request_set_target_contact()
+- tp_account_channel_request_set_target_id()
+
+To call a contact, either use
+tp_account_channel_request_set_target_contact() or one of the generic
+methods that takes a handle type argument. To check whether this
+is possible, use tp_capabilities_supports_audio_call() with
+@handle_type set to %TP_HANDLE_TYPE_CONTACT.
+
+&lt;!-- reinstate this when we have CMs that actually allow it:
+In some protocols it is possible to create a conference call which
+takes place in a named chatroom, by calling
+tp_account_channel_request_set_target_id() with @handle_type
+set to %TP_HANDLE_TYPE_ROOM. To test whether this is possible, use
+tp_capabilities_supports_audio_call() with @handle_type set to
+%TP_HANDLE_TYPE_ROOM.
+--&gt;
+
+In some protocols, it is possible to create a Call channel without
+setting a target at all, which will result in a new, empty
+conference call. To test whether this is possible, use
+tp_capabilities_supports_audio_call() with @handle_type set to
+%TP_HANDLE_TYPE_NONE.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpAccountChannelRequest object</doc>
+          <type name="AccountChannelRequest"
+                c:type="TpAccountChannelRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpAccount</doc>
+            <type name="Account" c:type="TpAccount*"/>
+          </parameter>
+          <parameter name="user_action_time" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the time of the user action that caused this request, or one of the special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or %TP_USER_ACTION_TIME_CURRENT_TIME (see #TpAccountChannelRequest:user-action-time)</doc>
+            <type name="gint64" c:type="gint64"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="new_audio_video_call"
+                   c:identifier="tp_account_channel_request_new_audio_video_call"
+                   version="0.19.0">
+        <doc xml:whitespace="preserve">Convenience function to create a new #TpAccountChannelRequest object
+which will yield a Call channel, initially carrying both audio
+and video.
+
+This is the same as tp_account_channel_request_new_audio_call(),
+except that the channel will initially carry video as well as audio,
+and instead of using tp_capabilities_supports_audio_call()
+you should test capabilities with
+tp_capabilities_supports_audio_video_call().
+
+See the documentation of tp_account_channel_request_new_audio_call()
+for details of how to set the target (contact, chatroom etc.) for the call.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpAccountChannelRequest object</doc>
+          <type name="AccountChannelRequest"
+                c:type="TpAccountChannelRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpAccount</doc>
+            <type name="Account" c:type="TpAccount*"/>
+          </parameter>
+          <parameter name="user_action_time" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the time of the user action that caused this request, or one of the special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or %TP_USER_ACTION_TIME_CURRENT_TIME (see #TpAccountChannelRequest:user-action-time)</doc>
+            <type name="gint64" c:type="gint64"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="new_file_transfer"
+                   c:identifier="tp_account_channel_request_new_file_transfer"
+                   version="0.19.0">
+        <doc xml:whitespace="preserve">Convenience function to create a new #TpAccountChannelRequest object,
+which will yield a FileTransfer channel to send a file to a contact.
+
+After creating the request, you will also need to set the "target"
+of the channel by calling one of the following functions:
+
+- tp_account_channel_request_set_target_contact()
+- tp_account_channel_request_set_target_id()</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpAccountChannelRequest object</doc>
+          <type name="AccountChannelRequest"
+                c:type="TpAccountChannelRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpAccount</doc>
+            <type name="Account" c:type="TpAccount*"/>
+          </parameter>
+          <parameter name="filename" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a suggested name for the file, which should not contain directories or directory separators (for example, if you are sending a file called /home/user/monkey.pdf, set this to monkey.pdf)</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="mime_type" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">the MIME type (content-type) of the file; a %NULL value is allowed, and is treated as "application/octet-stream"</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="size" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the file's size in bytes</doc>
+            <type name="guint64" c:type="guint64"/>
+          </parameter>
+          <parameter name="user_action_time" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the time of the user action that caused this request, or one of the special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or %TP_USER_ACTION_TIME_CURRENT_TIME (see #TpAccountChannelRequest:user-action-time)</doc>
+            <type name="gint64" c:type="gint64"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="new_text"
+                   c:identifier="tp_account_channel_request_new_text"
+                   version="0.19.0">
+        <doc xml:whitespace="preserve">Convenience function to create a new #TpAccountChannelRequest object
+which will yield a Text channel.
+
+After creating the request, you will also need to set the "target"
+of the channel by calling one of the following functions:
+
+- tp_account_channel_request_set_target_contact()
+- tp_account_channel_request_set_target_id()</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpAccountChannelRequest object</doc>
+          <type name="AccountChannelRequest"
+                c:type="TpAccountChannelRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpAccount</doc>
+            <type name="Account" c:type="TpAccount*"/>
+          </parameter>
+          <parameter name="user_action_time" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the time of the user action that caused this request, or one of the special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or %TP_USER_ACTION_TIME_CURRENT_TIME (see #TpAccountChannelRequest:user-action-time)</doc>
+            <type name="gint64" c:type="gint64"/>
+          </parameter>
+        </parameters>
+      </constructor>
       <method name="create_and_handle_channel_async"
               c:identifier="tp_account_channel_request_create_and_handle_channel_async"
               version="0.11.12">
@@ -2743,6 +2901,121 @@ See also: tp_base_client_set_delegated_channels_callback()</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="set_file_transfer_description"
+              c:identifier="tp_account_channel_request_set_file_transfer_description"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this channel request to provide the recipient of the file
+with the given description.
+
+If file descriptions are not supported by the protocol, or if this
+method is used on a request that is not actually a file transfer, the
+channel request will fail. Use
+tp_capabilities_supports_file_transfer_description() to determine
+whether outgoing file transfers can have a description.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="description" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a description of the file</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_file_transfer_initial_offset"
+              c:identifier="tp_account_channel_request_set_file_transfer_initial_offset"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this channel request to inform the recipient of the file
+that this channel will not send the first @offset bytes of the file.
+In some protocols, this can be used to resume an interrupted transfer.
+
+If this method is not called, the default is to start from the
+beginning of the file (equivalent to @offset = 0).
+
+If offsets greater than 0 are not supported by the protocol, or if this
+method is used on a request that is not actually a file transfer, the
+channel request will fail. Use
+tp_capabilities_supports_file_transfer_initial_offset() to determine
+whether offsets greater than 0 are available.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="offset" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the offset into the file at which the transfer will start</doc>
+            <type name="guint64" c:type="guint64"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_file_transfer_timestamp"
+              c:identifier="tp_account_channel_request_set_file_transfer_timestamp"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this channel request to accompany the file transfer with
+the given modification timestamp for the file.
+
+If file timestamps are not supported by the protocol, or if this
+method is used on a request that is not actually a file transfer, the
+channel request will fail. Use
+tp_capabilities_supports_file_transfer_date() to determine
+whether outgoing file transfers can have a timestamp.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="timestamp" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the modification timestamp of the file, in seconds since the Unix epoch (the beginning of 1970 in the UTC time zone), as returned by g_date_time_to_unix()</doc>
+            <type name="guint64" c:type="guint64"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_file_transfer_uri"
+              c:identifier="tp_account_channel_request_set_file_transfer_uri"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this channel request to provide other local Telepathy
+components with the URI of the file being sent. Unlike most
+properties on a file transfer channel, this information is not
+sent to the recipient of the file; instead, it is signalled on
+D-Bus for use by other Telepathy components.
+
+The URI should usually be a &lt;code&gt;file&lt;/code&gt; URI as defined by
+&lt;ulink url="http://www.apps.ietf.org/rfc/rfc1738.html#sec-3.10"&gt;RFC 1738
+§3.10&lt;/ulink&gt; (for instance, &lt;code&gt;file:///path/to/file&lt;/code&gt; or
+&lt;code&gt;file://localhost/path/to/file&lt;/code&gt;). If a remote resource
+is being transferred to a contact, it may have a different scheme,
+such as &lt;code&gt;http&lt;/code&gt;.
+
+Even if this method is used, the connection manager will not read
+the file from disk: the handler for the channel is still
+responsible for streaming the file. However, providing the URI
+allows a local logger to log which file was transferred, for instance.
+
+If this functionality is not supported by the connection manager, or
+if this method is used on a request that is not actually a file transfer,
+the channel request will fail. Use
+tp_capabilities_supports_file_transfer_uri() to determine
+whether outgoing file transfers can have a URI.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="uri" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the source URI for the file</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="set_hints"
               c:identifier="tp_account_channel_request_set_hints"
               version="0.13.14">
@@ -2761,6 +3034,90 @@ channel.</doc>
               <type name="gpointer" c:type="gpointer"/>
               <type name="gpointer" c:type="gpointer"/>
             </type>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_request_property"
+              c:identifier="tp_account_channel_request_set_request_property"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this channel request to include the given property, as
+documented in the Telepathy D-Bus API Specification or an
+implementation-specific extension.
+
+Using this method is not recommended, but it can be necessary for
+experimental or implementation-specific interfaces.
+
+If the property is not supported by the protocol or channel type, the
+channel request will fail. Use #TpCapabilities and the Telepathy
+D-Bus API Specification to determine which properties are available.
+
+If @value is a floating reference, this method takes ownership of it
+by using g_variant_ref_sink(). This allows convenient inline use of
+#GVariant constructors:
+
+|[
+tp_account_channel_request_set_request_property (acr, "com.example.Int",
+g_variant_new_int32 (17));
+tp_account_channel_request_set_request_property (acr, "com.example.String",
+g_variant_new_string ("ferret"));
+]|
+
+It is an error to provide a @value which contains types not supported by
+D-Bus.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a D-Bus property name</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="value" transfer-ownership="none">
+            <doc xml:whitespace="preserve">an arbitrary value for the property</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_target_contact"
+              c:identifier="tp_account_channel_request_set_target_contact"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this request to create a peer-to-peer channel with @contact as
+the other peer.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="contact" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the contact to be contacted</doc>
+            <type name="Contact" c:type="TpContact*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_target_id"
+              c:identifier="tp_account_channel_request_set_target_id"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Configure this request to create a channel with @identifier,
+an identifier of type @handle_type.
+
+This function can't be called once @self has been used to request a
+channel.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="handle_type" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the type of @identifier, typically %TP_HANDLE_TYPE_CONTACT or %TP_HANDLE_TYPE_ROOM</doc>
+            <type name="HandleType" c:type="TpHandleType"/>
+          </parameter>
+          <parameter name="identifier" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the unique identifier of the contact, room etc. to be contacted</doc>
+            <type name="utf8" c:type="gchar*"/>
           </parameter>
         </parameters>
       </method>
@@ -2823,7 +3180,7 @@ If %TP_USER_ACTION_TIME_CURRENT_TIME, clients SHOULD behave as though the
 user action happened at the current time, e.g. a client may
 request that its window gains focus.
 
-On X11-based systems, Gdk 2.x, Clutter 1.0 etc.,
+On X11-based systems, GDK 2, GDK 3, Clutter 1.0 etc.,
 tp_user_action_time_from_x11() can be used to convert an X11 timestamp to
 a Telepathy user action time.
 
@@ -3387,6 +3744,9 @@ tp_simple_client_factory_add_account_features().</doc>
       </glib:signal>
       <glib:signal name="account-validity-changed" when="last" version="0.9.0">
         <doc xml:whitespace="preserve">Emitted when the validity on @account changes.
+
+This signal is also used to indicate a new account that did not
+previously exist has been added (with @valid set to %TRUE).
 
 @account is guaranteed to have %TP_ACCOUNT_FEATURE_CORE prepared, along
 with all features previously passed to
@@ -5087,13 +5447,13 @@ returned.</doc>
       </function>
       <function name="dbus_request_handles"
                 c:identifier="tp_base_connection_dbus_request_handles"
-                introspectable="0">
+                introspectable="0"
+                deprecated="0.19.0">
         <doc xml:whitespace="preserve">Implements D-Bus method RequestHandles on interface
-org.freedesktop.Telepathy.Connection. Exported so subclasses can
-use it as a basis for their own implementations (for instance,
-at the time of writing Gabble's GabbleConnection does its own processing
-for room handles, in order to validate them asynchronously, but delegates
-to this implementation for all other types).</doc>
+org.freedesktop.Telepathy.Connection.
+
+This was exported so subclasses could use it as a basis for their
+reimplementations, but reimplementing the method is now deprecated.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -5276,6 +5636,48 @@ disconnected.&lt;/listitem&gt;
               <type name="gpointer" c:type="gpointer"/>
               <type name="gpointer" c:type="gpointer"/>
             </type>
+          </parameter>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The reason code to use in the StatusChanged signal (a less specific, non-extensible version of @error_name)</doc>
+            <type name="ConnectionStatusReason"
+                  c:type="TpConnectionStatusReason"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="disconnect_with_dbus_error_vardict"
+              c:identifier="tp_base_connection_disconnect_with_dbus_error_vardict"
+              version="0.7.24"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Changes the #TpBaseConnection&lt;!-- --&gt;.status of @self to
+%TP_CONNECTION_STATUS_DISCONNECTED, as if by a call to
+tp_base_connection_change_status(), but additionally emits the
+&lt;code&gt;ConnectionError&lt;/code&gt; D-Bus signal to provide more details about the
+error.
+
+Well-known keys for @details are documented in the Telepathy specification's
+&lt;ulink url='http://telepathy.freedesktop.org/spec/Connection.html#Signal:ConnectionError'&gt;definition
+of the ConnectionError signal&lt;/ulink&gt;, and include:
+
+&lt;itemizedlist&gt;
+&lt;listitem&gt;&lt;code&gt;"debug-message"&lt;/code&gt;, whose value should have type
+#G_TYPE_STRING, for debugging information about the
+disconnection which should not be shown to the user&lt;/listitem&gt;
+&lt;listitem&gt;&lt;code&gt;"server-message"&lt;/code&gt;, whose value should also have type
+#G_TYPE_STRING, for a human-readable error message from the server (in an
+unspecified language) explaining why the user was
+disconnected.&lt;/listitem&gt;
+&lt;/itemizedlist&gt;</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="error_name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The D-Bus error with which the connection changed status to Disconnected</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="details" transfer-ownership="none">
+            <doc xml:whitespace="preserve">Further details of the error, as a variant of type %G_VARIANT_TYPE_VARDICT. The keys are strings as defined in the Telepathy specification, and the values are of type %G_VARIANT_TYPE_VARIANT. %NULL is allowed, and treated as an empty dictionary.</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
           </parameter>
           <parameter name="reason" transfer-ownership="none">
             <doc xml:whitespace="preserve">The reason code to use in the StatusChanged signal (a less specific, non-extensible version of @error_name)</doc>
@@ -6052,7 +6454,7 @@ that the #TpCallChannel:contents property will be the empty list.</doc>
       <method name="has_dtmf"
               c:identifier="tp_call_channel_has_dtmf"
               version="0.17.5">
-        <doc xml:whitespace="preserve">Whether or not %self can send DTMF tones using
+        <doc xml:whitespace="preserve">Whether or not @self can send DTMF tones using
 tp_call_channel_send_tones_async(). To be able to send DTMF tones, at least
 one of @self's #TpCallChannel:contents must implement
 %TP_IFACE_CALL_CONTENT_INTERFACE_DTMF interface.</doc>
@@ -6073,7 +6475,7 @@ one of @self's #TpCallChannel:contents must implement
       <method name="has_hold"
               c:identifier="tp_call_channel_has_hold"
               version="0.17.6">
-        <doc xml:whitespace="preserve">Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_HOLD
+        <doc xml:whitespace="preserve">Whether or not @self has the %TP_IFACE_CHANNEL_INTERFACE_HOLD
 interfaces</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">whether or not @self supports Hold</doc>
@@ -6131,7 +6533,7 @@ interfaces</doc>
               c:identifier="tp_call_channel_request_hold_async"
               version="0.17.6">
         <doc xml:whitespace="preserve">Requests that the connection manager holds or unholds the call. Watch
-#TpCallChannel::hold-state property to know when the channel goes on
+#TpCallChannel:hold-state property to know when the channel goes on
 hold or is unheld. Unholding may fail if the streaming implementation
 can not obtain all the resources needed to restart the call.</doc>
         <return-value transfer-ownership="none">
@@ -6360,7 +6762,7 @@ is the name of the intial video content, %NULL otherwise.</doc>
         <type name="gboolean"/>
       </property>
       <property name="state" version="0.17.5" transfer-ownership="none">
-        <doc xml:whitespace="preserve">A #TpChannelCallState specifying the state of the call.</doc>
+        <doc xml:whitespace="preserve">A #TpCallState specifying the state of the call.</doc>
         <type name="guint"/>
       </property>
       <property name="state-details"
@@ -6950,7 +7352,7 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
               version="0.17.5">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
-          <doc xml:whitespace="preserve">the value of #TpCallStream:local-seding-state</doc>
+          <doc xml:whitespace="preserve">the value of #TpCallStream:local-sending-state</doc>
           <type name="SendingState" c:type="TpSendingState"/>
         </return-value>
       </method>
@@ -7209,6 +7611,17 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
            glib:get-type="tp_capabilities_get_type"
            glib:type-struct="CapabilitiesClass">
       <doc xml:whitespace="preserve">An object representing capabilities a #TpConnection or #TpContact supports.</doc>
+      <method name="dup_channel_classes_variant"
+              c:identifier="tp_capabilities_dup_channel_classes_variant"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpCapabilities:channel-classes-variant property
+
+#TpCapabilities:channel-classes-variant property</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the value of the</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="get_channel_classes"
               c:identifier="tp_capabilities_get_channel_classes"
               version="0.11.3">
@@ -7234,7 +7647,13 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
       <method name="supports_audio_call"
               c:identifier="tp_capabilities_supports_audio_call"
               version="0.17.6">
-        <doc xml:whitespace="preserve">Return whether audio call can be established.
+        <doc xml:whitespace="preserve">Return whether audio calls can be established, for instance by calling
+tp_account_channel_request_new_audio_call(), followed by
+tp_account_channel_request_set_target_id() with @handle_type.
+
+To check whether requests using
+tp_account_channel_request_set_target_contact() would work, set
+@handle_type to %TP_HANDLE_TYPE_CONTACT.
 
 @handle_type as TargetHandleType, a True value for InitialAudio and an
 identifier of the appropriate type can be expected to work, %FALSE otherwise.</doc>
@@ -7252,7 +7671,13 @@ identifier of the appropriate type can be expected to work, %FALSE otherwise.</d
       <method name="supports_audio_video_call"
               c:identifier="tp_capabilities_supports_audio_video_call"
               version="0.17.6">
-        <doc xml:whitespace="preserve">Return whether audio/video call can be established.
+        <doc xml:whitespace="preserve">Return whether audio/video calls can be established, for instance by calling
+tp_account_channel_request_new_audio_video_call(), followed by
+tp_account_channel_request_set_target_id() with @handle_type.
+
+To check whether requests using
+tp_account_channel_request_set_target_contact() would work, set
+@handle_type to %TP_HANDLE_TYPE_CONTACT.
 
 @handle_type as TargetHandleType, a True value for
 InitialAudio/InitialVideo and an identifier of the appropriate type can be
@@ -7340,6 +7765,56 @@ expected to work, %FALSE otherwise.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
+      <method name="supports_file_transfer_description"
+              c:identifier="tp_capabilities_supports_file_transfer_description"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+tp_capabilities_supports_file_transfer() can also specify the outgoing
+file's description</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if requests as described for</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="supports_file_transfer_initial_offset"
+              c:identifier="tp_capabilities_supports_file_transfer_initial_offset"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return whether an initial offset other than 0 can be specified on
+outgoing file transfers. This can be used to resume partial transfers,
+by omitting the part that has already been sent.
+
+tp_capabilities_supports_file_transfer() can also specify an
+initial offset greater than 0</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if requests as described for</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="supports_file_transfer_timestamp"
+              c:identifier="tp_capabilities_supports_file_transfer_timestamp"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+tp_capabilities_supports_file_transfer() can also specify the outgoing
+file's timestamp</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if requests as described for</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="supports_file_transfer_uri"
+              c:identifier="tp_capabilities_supports_file_transfer_uri"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+tp_capabilities_supports_file_transfer() can also specify the outgoing
+file's URI</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if requests as described for</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
       <method name="supports_room_list"
               c:identifier="tp_capabilities_supports_room_list"
               version="0.13.14">
@@ -7395,6 +7870,25 @@ HandleTypeNone as TargetHandleType can be expected to work,
           </parameter>
         </parameters>
       </method>
+      <method name="supports_sms"
+              c:identifier="tp_capabilities_supports_sms"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">If the #TpCapabilities:contact-specific property is %FALSE, this function
+checks if SMS text channels can be requested with the connection associated
+with this #TpCapabilities.
+
+If the #TpCapabilities:contact-specific property is %TRUE, this function
+checks if the contact associated with this #TpCapabilities supports
+SMS text channels.
+
+HandleTypeContact as TargetHandleType, a channel identifier and
+#TP_PROP_CHANNEL_INTERFACE_SMS_SMS_CHANNEL set to %TRUE can be
+expected to work, %FALSE otherwise.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if a channel request containing Text as ChannelType,</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
       <method name="supports_stream_tubes"
               c:identifier="tp_capabilities_supports_stream_tubes"
               version="0.13.0">
@@ -7429,7 +7923,9 @@ tubes.</doc>
               version="0.11.3">
         <doc xml:whitespace="preserve">If the #TpCapabilities:contact-specific property is %FALSE, this function
 checks if named text chatrooms can be joined by providing a chatroom
-identifier.
+identifier, for instance by calling
+tp_account_channel_request_new_text() followed by
+tp_account_channel_request_set_target_id() with %TP_HANDLE_TYPE_ROOM.
 
 If the #TpCapabilities:contact-specific property is %TRUE, this function
 checks if the contact associated with this #TpCapabilities can be invited
@@ -7450,7 +7946,9 @@ expected to work, %FALSE otherwise.</doc>
               c:identifier="tp_capabilities_supports_text_chats"
               version="0.11.3">
         <doc xml:whitespace="preserve">Return whether private text channels can be established by providing
-a contact identifier.
+a contact identifier, for instance by calling
+tp_account_channel_request_new_text() followed by
+tp_account_channel_request_set_target_contact().
 
 If the protocol is such that text chats can be established, but only via a
 more elaborate D-Bus API than normal (because more information is needed),
@@ -7480,6 +7978,22 @@ The higher-level methods like
 tp_capabilities_supports_text_chats() are likely to be more useful to
 the majority of clients.</doc>
         <type/>
+      </property>
+      <property name="channel-classes-variant"
+                version="0.19.0"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The underlying data structure used by Telepathy to represent the
+requests that can succeed.
+
+This can be used by advanced clients to determine whether an unusually
+complex request would succeed. See the Telepathy D-Bus API Specification
+for details of how to interpret the returned #GVariant of type
+a(a{sv}as).
+
+The higher-level methods like
+tp_capabilities_supports_text_chats() are likely to be more useful to
+the majority of clients.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="contact-specific"
                 writable="1"
@@ -7842,7 +8356,8 @@ type or 0, if the channel is not yet ready.</doc>
       </method>
       <method name="get_chat_state"
               c:identifier="tp_channel_get_chat_state"
-              version="0.11.3">
+              version="0.11.3"
+              deprecated="Use tp_text_channel_get_chat_state() instead.">
         <doc xml:whitespace="preserve">Return the chat state for the given contact. If tp_proxy_is_prepared()
 would return %FALSE for the feature %TP_CHANNEL_FEATURE_CHAT_STATES,
 the result will always be %TP_CHANNEL_CHAT_STATE_INACTIVE.
@@ -7918,7 +8433,8 @@ value. It is now non-%NULL in all cases.</doc>
       <method name="get_initiator_handle"
               c:identifier="tp_channel_get_initiator_handle"
               version="0.11.15"
-              introspectable="0">
+              introspectable="0"
+              deprecated="New code should use tp_channel_get_initiator_contact() instead.">
         <doc xml:whitespace="preserve">Return the #TpChannel:initiator-handle property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpChannel:initiator-handle</doc>
@@ -7928,7 +8444,8 @@ value. It is now non-%NULL in all cases.</doc>
       <method name="get_initiator_identifier"
               c:identifier="tp_channel_get_initiator_identifier"
               version="0.11.15"
-              introspectable="0">
+              introspectable="0"
+              deprecated="New code should use tp_channel_get_initiator_contact() instead.">
         <doc xml:whitespace="preserve">Return the #TpChannel:initiator-identifier property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpChannel:initiator-identifier</doc>
@@ -8068,7 +8585,8 @@ of that property for notes on validity).</doc>
       </method>
       <method name="group_get_handle_owner"
               c:identifier="tp_channel_group_get_handle_owner"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="New code should use tp_channel_group_get_contact_owner() instead.">
         <doc xml:whitespace="preserve">Synopsis (see below for further explanation):
 
 - if @self is not a group or @handle is not a member of this channel,
@@ -8119,14 +8637,17 @@ without extra D-Bus round trips is not possible using the older API).</doc>
       </method>
       <method name="group_get_local_pending"
               c:identifier="tp_channel_group_get_local_pending"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="New code should use tp_channel_group_dup_local_pending_contacts()">
         <doc xml:whitespace="preserve">If @self is a group and the %TP_CHANNEL_FEATURE_GROUP feature has been
 prepared, return a #TpIntset containing its local-pending members.
 
 If @self is a group but %TP_CHANNEL_FEATURE_GROUP has not been prepared,
 the result may either be a set of local-pending members, or %NULL.
 
-If @self is not a group, return %NULL.</doc>
+If @self is not a group, return %NULL.
+
+instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the local-pending members, or %NULL</doc>
           <type name="Intset" c:type="TpIntset*"/>
@@ -8181,7 +8702,8 @@ and "" into @message, and return %FALSE.</doc>
       </method>
       <method name="group_get_local_pending_info"
               c:identifier="tp_channel_group_get_local_pending_info"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="New code should use">
         <doc xml:whitespace="preserve">If @local_pending is actually the handle of a local-pending contact,
 write additional information into @actor, @reason and @message and return
 %TRUE. The handle and message are not referenced or copied, and can only be
@@ -8189,7 +8711,9 @@ assumed to remain valid until the main loop is re-entered.
 
 If @local_pending is not the handle of a local-pending contact,
 write 0 into @actor, %TP_CHANNEL_GROUP_CHANGE_REASON_NONE into @reason
-and "" into @message, and return %FALSE.</doc>
+and "" into @message, and return %FALSE.
+
+tp_channel_group_get_local_pending_contact_info() instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if the contact is in fact local-pending</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -8228,14 +8752,17 @@ and "" into @message, and return %FALSE.</doc>
       </method>
       <method name="group_get_members"
               c:identifier="tp_channel_group_get_members"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="New code should use tp_channel_group_dup_members_contacts()">
         <doc xml:whitespace="preserve">If @self is a group and the %TP_CHANNEL_FEATURE_GROUP feature has been
 prepared, return a #TpIntset containing its members.
 
 If @self is a group but %TP_CHANNEL_FEATURE_GROUP has not been prepared,
 the result may either be a set of members, or %NULL.
 
-If @self is not a group, return %NULL.</doc>
+If @self is not a group, return %NULL.
+
+instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the members, or %NULL</doc>
           <type name="Intset" c:type="TpIntset*"/>
@@ -8243,14 +8770,17 @@ If @self is not a group, return %NULL.</doc>
       </method>
       <method name="group_get_remote_pending"
               c:identifier="tp_channel_group_get_remote_pending"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="New code should use">
         <doc xml:whitespace="preserve">If @self is a group and the %TP_CHANNEL_FEATURE_GROUP feature has been
 prepared, return a #TpIntset containing its remote-pending members.
 
 If @self is a group but %TP_CHANNEL_FEATURE_GROUP has not been prepared,
 the result may either be a set of remote-pending members, or %NULL.
 
-If @self is not a group, return %NULL.</doc>
+If @self is not a group, return %NULL.
+
+tp_channel_group_dup_remote_pending_contacts() instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the remote-pending members, or %NULL</doc>
           <type name="Intset" c:type="TpIntset*"/>
@@ -8267,7 +8797,8 @@ If @self is not a group, return %NULL.</doc>
       </method>
       <method name="group_get_self_handle"
               c:identifier="tp_channel_group_get_self_handle"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="New code should use tp_channel_group_get_self_contact() instead.">
         <doc xml:whitespace="preserve">Return the #TpChannel:group-self-handle property (see the description
 of that property for notes on validity).</doc>
         <return-value transfer-ownership="none">
@@ -8572,6 +9103,7 @@ Change notification is via notify::group-self-contact.</doc>
       </property>
       <property name="group-self-handle"
                 version="0.7.12"
+                deprecated="Use #TpChannel:group-self-contact instead."
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">If this channel is a group and %TP_CHANNEL_FEATURE_GROUP has been
 prepared, and the user is a member of the group, the #TpHandle
@@ -8623,6 +9155,7 @@ finished preparing %TP_CHANNEL_FEATURE_CONTACTS; until then, it may be
       </property>
       <property name="initiator-handle"
                 version="0.11.15"
+                deprecated="Use #TpChannel:initiator-contact instead."
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">The %TP_HANDLE_TYPE_CONTACT #TpHandle of the initiator of this
 channel, or 0 if there is no particular initiator.
@@ -8645,6 +9178,7 @@ finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may be 0.</doc>
       </property>
       <property name="initiator-identifier"
                 version="0.11.15"
+                deprecated="Use #TpChannel:initiator-contact instead."
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">If #TpChannel:initiator-handle is 0, this will always be "".
 Otherwise, this will be the #TpContact:identifier of the contact
@@ -8707,7 +9241,8 @@ finished preparing %TP_CHANNEL_FEATURE_CONTACTS; until then, it may be
       <glib:signal name="chat-state-changed"
                    when="last"
                    detailed="1"
-                   version="0.11.3">
+                   version="0.11.3"
+                   deprecated="Use #TpTextChannel::contact-chat-state-changed instead">
         <doc xml:whitespace="preserve">Emitted when a contact's chat state changes after tp_proxy_prepare_async()
 has finished preparing the feature %TP_CHANNEL_FEATURE_CHAT_STATES.</doc>
         <return-value transfer-ownership="none">
@@ -8798,7 +9333,8 @@ channel is ready.</doc>
                    when="last"
                    detailed="1"
                    version="0.7.12"
-                   introspectable="0">
+                   introspectable="0"
+                   deprecated="Use #TpChannel::group-contacts-changed instead.">
         <doc xml:whitespace="preserve">Emitted when the group members change in a Group channel that is ready.</doc>
         <return-value transfer-ownership="none">
           <type name="none"/>
@@ -8837,7 +9373,8 @@ channel is ready.</doc>
       <glib:signal name="group-members-changed-detailed"
                    when="last"
                    detailed="1"
-                   version="0.7.21">
+                   version="0.7.21"
+                   deprecated="Use #TpChannel::group-contacts-changed instead.">
         <doc xml:whitespace="preserve">Emitted when the group members change in a Group channel that is ready.
 Contains a superset of the information in the
 TpChannel::group-members-changed signal, and is emitted at the same time;
@@ -9973,7 +10510,7 @@ with the domain %TP_DBUS_ERRORS and the error code
 indicates that the channel request no longer exists).
 
 On failure, the #TpProxy::invalidated signal will be emitted with some
-other suitable error, usually from the %TP_ERRORS domain.
+other suitable error, usually from the %TP_ERROR domain.
 
 If the channel dispatcher crashes or exits, the #TpProxy::invalidated
 signal will be emitted with the domain %TP_DBUS_ERRORS and the error code
@@ -11048,6 +11585,65 @@ to put the account offline temporarily, or disable it longer-term.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_contact_by_id_async"
+              c:identifier="tp_connection_dup_contact_by_id_async"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Create a #TpContact object and make any asynchronous method calls necessary
+to ensure that all the features specified in @features are ready for use
+(if they are supported at all).
+
+It is not an error to put features in @features even if the connection
+manager doesn't support them - users of this method should have a static
+list of features they would like to use if possible, and use it for all
+connection managers.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="id" transfer-ownership="none">
+            <doc xml:whitespace="preserve">A strings representing the desired contact by its identifier in the IM protocol (an XMPP JID, SIP URI, MSN Passport, AOL screen-name etc.)</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="n_features" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The number of features in @features (may be 0)</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+          <parameter name="features" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">An array of features that must be ready for use (if supported) before the callback is called (may be %NULL if @n_features is 0)</doc>
+            <array length="1" zero-terminated="0" c:type="TpContactFeature*">
+              <type name="ContactFeature" c:type="TpContactFeature"/>
+            </array>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="4">
+            <doc xml:whitespace="preserve">A user callback to call when the contact is ready</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">Data to pass to the callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="dup_contact_by_id_finish"
+              c:identifier="tp_connection_dup_contact_by_id_finish"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_connection_get_contact_by_id_async().</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #TpContact or %NULL on error.</doc>
+          <type name="Contact" c:type="TpContact*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="dup_contact_if_possible"
               c:identifier="tp_connection_dup_contact_if_possible"
               version="0.13.9">
@@ -11101,6 +11697,29 @@ a new #GPtrArray of #TpContact. Use g_ptr_array_unref() when done.</doc>
             <type name="Contact"/>
           </array>
         </return-value>
+      </method>
+      <method name="dup_detailed_error_vardict"
+              c:identifier="tp_connection_dup_detailed_error_vardict"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">If the connection has disconnected, return the D-Bus error name with which
+it disconnected (in particular, this is %TP_ERROR_STR_CANCELLED if it was
+disconnected by a user request).
+
+Otherwise, return %NULL, without altering @details.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a D-Bus error name, or %NULL.</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <parameter name="details"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="full"
+                     allow-none="1">
+            <doc xml:whitespace="preserve"> optionally used to return a %G_VARIANT_TYPE_VARDICT with details of the error</doc>
+            <type name="GLib.Variant" c:type="GVariant**"/>
+          </parameter>
+        </parameters>
       </method>
       <method name="get_account"
               c:identifier="tp_connection_get_account"
@@ -11429,7 +12048,8 @@ that appears as a key in the callback's @attributes parameter.</doc>
       </method>
       <method name="get_contacts_by_handle"
               c:identifier="tp_connection_get_contacts_by_handle"
-              version="0.7.18">
+              version="0.7.18"
+              deprecated="Use tp_simple_client_factory_ensure_contact() instead.">
         <doc xml:whitespace="preserve">Create a number of #TpContact objects and make asynchronous method calls
 to hold their handles and ensure that all the features specified in
 @features are ready for use (if they are supported at all).
@@ -11489,7 +12109,8 @@ connection managers.</doc>
       </method>
       <method name="get_contacts_by_id"
               c:identifier="tp_connection_get_contacts_by_id"
-              version="0.7.18">
+              version="0.7.18"
+              deprecated="Use tp_connection_get_contact_by_id_async() instead.">
         <doc xml:whitespace="preserve">Create a number of #TpContact objects and make asynchronous method calls
 to obtain their handles and ensure that all the features specified in
 @features are ready for use (if they are supported at all).
@@ -11623,7 +12244,8 @@ property, which may be %NULL</doc>
       </method>
       <method name="get_self_handle"
               c:identifier="tp_connection_get_self_handle"
-              version="0.7.26">
+              version="0.7.26"
+              deprecated="Use tp_connection_get_self_handle() instead.">
         <doc xml:whitespace="preserve">Return the %TP_HANDLE_TYPE_CONTACT handle of the local user on this
 connection, or 0 if the self-handle is not known yet or the connection
 has become invalid (the TpProxy::invalidated signal).
@@ -12426,7 +13048,8 @@ For this to work properly @self must have interface
       </method>
       <method name="upgrade_contacts"
               c:identifier="tp_connection_upgrade_contacts"
-              version="0.7.18">
+              version="0.7.18"
+              deprecated="Use tp_connection_upgrade_contacts_async() instead.">
         <doc xml:whitespace="preserve">Given several #TpContact objects, make asynchronous method calls
 ensure that all the features specified in @features are ready for use
 (if they are supported at all).
@@ -12481,6 +13104,81 @@ connection managers.</doc>
                      allow-none="1">
             <doc xml:whitespace="preserve">An object to pass to the callback, which will be weakly referenced; if this object is destroyed, the operation will be cancelled</doc>
             <type name="GObject.Object" c:type="GObject*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="upgrade_contacts_async"
+              c:identifier="tp_connection_upgrade_contacts_async"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Given several #TpContact objects, make asynchronous method calls
+ensure that all the features specified in @features are ready for use
+(if they are supported at all).
+
+It is not an error to put features in @features even if the connection
+manager doesn't support them - users of this method should have a static
+list of features they would like to use if possible, and use it for all
+connection managers.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="n_contacts" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The number of contacts in @contacts (must be at least 1)</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+          <parameter name="contacts" transfer-ownership="none">
+            <doc xml:whitespace="preserve">An array of #TpContact objects associated with @self</doc>
+            <array length="0" zero-terminated="0" c:type="TpContact**">
+              <type name="Contact" c:type="TpContact*"/>
+            </array>
+          </parameter>
+          <parameter name="n_features" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The number of features in @features (must be at least 1)</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+          <parameter name="features" transfer-ownership="none">
+            <doc xml:whitespace="preserve">An array of features that must be ready for use (if supported) before the callback is called</doc>
+            <array length="2" zero-terminated="0" c:type="TpContactFeature*">
+              <type name="ContactFeature" c:type="TpContactFeature"/>
+            </array>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="5">
+            <doc xml:whitespace="preserve">A user callback to call when the contacts are ready</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">Data to pass to the callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="upgrade_contacts_finish"
+              c:identifier="tp_connection_upgrade_contacts_finish"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_connection_upgrade_contacts_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE on success, %FALSE otherwise.</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+          <parameter name="contacts"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="container"
+                     allow-none="1">
+            <doc xml:whitespace="preserve"> a location to set a #GPtrArray of upgraded #TpContact, or %NULL.</doc>
+            <array name="GLib.PtrArray" c:type="GPtrArray**">
+              <type name="Contact"/>
+            </array>
           </parameter>
         </parameters>
       </method>
@@ -12706,7 +13404,9 @@ tp_proxy_prepare_async() with the feature
 %TP_CONNECTION_FEATURE_CONNECTED.</doc>
         <type name="Contact"/>
       </property>
-      <property name="self-handle" transfer-ownership="none">
+      <property name="self-handle"
+                deprecated="Use #TpConnection:self-contact instead."
+                transfer-ownership="none">
         <doc xml:whitespace="preserve">The %TP_HANDLE_TYPE_CONTACT handle of the local user on this connection,
 or 0 if we don't know yet or if the connection has become invalid.
 
@@ -13027,7 +13727,7 @@ considered to be a fatal error. @error will be %NULL in this situation,
 @contacts will contain contact objects for those IDs that were
 valid (it may be empty), and @failed_id_errors will map the IDs
 that were not valid to a corresponding #GError (if the connection manager
-complies with the Telepathy spec, it will have domain %TP_ERRORS and code
+complies with the Telepathy spec, it will have domain %TP_ERROR and code
 %TP_ERROR_INVALID_HANDLE).
 
 If an unrecoverable error occurs (for instance, if @connection
@@ -13298,8 +13998,7 @@ supported protocols and parameters has been retrieved.</doc>
       </method>
       <method name="dup_protocol_names"
               c:identifier="tp_connection_manager_dup_protocol_names"
-              version="0.7.26"
-              introspectable="0">
+              version="0.7.26">
         <doc xml:whitespace="preserve">Returns a list of protocol names supported by this connection manager.
 These are the internal protocol names used by the Telepathy specification
 (e.g. "jabber" and "msn"), rather than user-visible names in any particular
@@ -13313,7 +14012,9 @@ The result is copied and must be freed by the caller, but it is not
 necessarily still true after the main loop is re-entered.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a #GStrv of protocol names</doc>
-          <type name="GObject.Strv" c:type="gchar**"/>
+          <array c:type="gchar**">
+            <type name="utf8"/>
+          </array>
         </return-value>
       </method>
       <method name="dup_protocols"
@@ -13640,6 +14341,19 @@ tp_connection_manager_param_free()</doc>
                 c:type="TpConnectionManagerParam*"/>
         </return-value>
       </method>
+      <method name="dup_default_variant"
+              c:identifier="tp_connection_manager_param_dup_default_variant"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Get the default value for this parameter.
+
+Use g_variant_get_type() to check that the type is what you expect.
+For instance, a string parameter should have type
+%G_VARIANT_TYPE_STRING.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the default value, or %NULL if there is no default</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="free"
               c:identifier="tp_connection_manager_param_free"
               version="0.11.3">
@@ -13768,15 +14482,16 @@ tp_connection_manager_protocol_free()</doc>
       </method>
       <method name="dup_param_names"
               c:identifier="tp_connection_manager_protocol_dup_param_names"
-              version="0.7.26"
-              introspectable="0">
+              version="0.7.26">
         <doc xml:whitespace="preserve">Returns a list of parameter names supported by this connection manager
 for this protocol.
 
 The result is copied and must be freed by the caller with g_strfreev().</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a #GStrv of protocol names</doc>
-          <type name="GObject.Strv" c:type="gchar**"/>
+          <array c:type="gchar**">
+            <type name="utf8"/>
+          </array>
         </return-value>
       </method>
       <method name="free"
@@ -14149,6 +14864,84 @@ tp_cli_connection_interface_contacts_run_get_contact_attributes() directly.
 Those functions should be avoided in favour of using #TpContact,
 tp_connection_hold_handles(), tp_connection_request_handles() and
 tp_connection_get_contact_attributes().</doc>
+      <function name="info_list_copy"
+                c:identifier="tp_contact_info_list_copy"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
+
+tp_contact_info_list_free()</doc>
+        <return-value>
+          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoField, free it with</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="info_list_free"
+                c:identifier="tp_contact_info_list_free"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="info_spec_list_copy"
+                c:identifier="tp_contact_info_spec_list_copy"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
+
+free it with tp_contact_info_spec_list_free()</doc>
+        <return-value>
+          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoFieldSpec,</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="info_spec_list_free"
+                c:identifier="tp_contact_info_spec_list_free"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
       <method name="add_to_group_async"
               c:identifier="tp_contact_add_to_group_async"
               version="0.15.5">
@@ -14274,6 +15067,19 @@ see tp_connection_block_contacts_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="get_account"
+              c:identifier="tp_contact_get_account"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpAccount of @self's #TpContact:connection.
+See tp_connection_get_account() for details.
+
+(it must be referenced with g_object_ref if it must remain valid
+longer than the contact)</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a borrowed reference to @self's account</doc>
+          <type name="Account" c:type="TpAccount*"/>
+        </return-value>
       </method>
       <method name="get_alias"
               c:identifier="tp_contact_get_alias"
@@ -14997,12 +15803,15 @@ interface.</doc>
           <type name="utf8"/>
         </array>
       </property>
-      <property name="contact-info" version="0.11.7" transfer-ownership="none">
+      <property name="contact-info"
+                version="0.11.7"
+                introspectable="0"
+                transfer-ownership="none">
         <doc xml:whitespace="preserve">A #GList of #TpContactInfoField representing the vCard of this contact.
 
 This is set to %NULL if %TP_CONTACT_FEATURE_CONTACT_INFO is not set on this
 contact.</doc>
-        <type name="ContactInfoList"/>
+        <type/>
       </property>
       <property name="handle" transfer-ownership="none">
         <doc xml:whitespace="preserve">The contact's handle in the Telepathy D-Bus API, a handle of type
@@ -15372,94 +16181,6 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
               c:identifier="TP_CONTACT_INFO_FLAG_CAN_SET"/>
       <member name="push" value="2" c:identifier="TP_CONTACT_INFO_FLAG_PUSH"/>
     </bitfield>
-    <glib:boxed glib:name="ContactInfoList"
-                c:symbol-prefix="contact_info_list"
-                glib:type-name="TpContactInfoList"
-                glib:get-type="tp_contact_info_list_get_type">
-      <function name="copy"
-                c:identifier="tp_contact_info_list_copy"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
-
-tp_contact_info_list_free()</doc>
-        <return-value>
-          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoField, free it with</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-      <function name="free"
-                c:identifier="tp_contact_info_list_free"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-    </glib:boxed>
-    <glib:boxed glib:name="ContactInfoSpecList"
-                c:symbol-prefix="contact_info_spec_list"
-                glib:type-name="TpContactInfoSpecList"
-                glib:get-type="tp_contact_info_spec_list_get_type">
-      <function name="copy"
-                c:identifier="tp_contact_info_spec_list_copy"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
-
-free it with tp_contact_info_spec_list_free()</doc>
-        <return-value>
-          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoFieldSpec,</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-      <function name="free"
-                c:identifier="tp_contact_info_spec_list_free"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-    </glib:boxed>
     <enumeration name="ContactListState" c:type="TpContactListState">
       <doc xml:whitespace="preserve">&lt;![CDATA[         The progress made in retrieving the contact list.       ]]&gt;
 
@@ -16739,7 +17460,7 @@ for future expansion, which must always be initialized to %NULL.</doc>
     <class name="DBusTubeChannel"
            c:symbol-prefix="dbus_tube_channel"
            c:type="TpDBusTubeChannel"
-           version="0.15.6"
+           version="0.18.0"
            parent="Channel"
            glib:type-name="TpDBusTubeChannel"
            glib:get-type="tp_dbus_tube_channel_get_type"
@@ -16797,7 +17518,7 @@ has been successfully accepted and opened; %NULL otherwise.</doc>
       </method>
       <method name="get_parameters"
               c:identifier="tp_dbus_tube_channel_get_parameters"
-              version="0.15.6"
+              version="0.18.0"
               introspectable="0">
         <doc xml:whitespace="preserve">Return the #TpDBusTubeChannel:parameters property
 
@@ -16811,7 +17532,7 @@ the value of #TpDBusTubeChannel:parameters</doc>
       </method>
       <method name="get_service_name"
               c:identifier="tp_dbus_tube_channel_get_service_name"
-              version="0.15.6">
+              version="0.18.0">
         <doc xml:whitespace="preserve">Return the #TpDBusTubeChannel:service-name property</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpDBusTubeChannel:service-name</doc>
@@ -16870,7 +17591,7 @@ has been successfully offered and opened; %NULL otherwise.</doc>
         </parameters>
       </method>
       <property name="parameters"
-                version="0.15.6"
+                version="0.18.0"
                 introspectable="0"
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">A string to #GValue #GHashTable representing the parameters of the tube.
@@ -16878,7 +17599,7 @@ has been successfully offered and opened; %NULL otherwise.</doc>
 Will be %NULL for outgoing tubes until the tube has been offered.</doc>
         <type/>
       </property>
-      <property name="service-name" version="0.15.6" transfer-ownership="none">
+      <property name="service-name" version="0.18.0" transfer-ownership="none">
         <doc xml:whitespace="preserve">A string representing the service name that will be used over the tube.</doc>
         <type name="utf8"/>
       </property>
@@ -16893,7 +17614,7 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
     <record name="DBusTubeChannelClass"
             c:type="TpDBusTubeChannelClass"
             glib:is-gtype-struct-for="DBusTubeChannel"
-            version="0.15.6">
+            version="0.18.0">
       <doc xml:whitespace="preserve">The class of a #TpDBusTubeChannel.</doc>
       <field name="parent_class" readable="0" private="1">
         <type name="ChannelClass" c:type="TpChannelClass"/>
@@ -16908,6 +17629,11 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
             c:type="TpDBusTubeChannelPrivate"
             disguised="1">
     </record>
+    <constant name="DEBUG_OBJECT_PATH"
+              value="/org/freedesktop/Telepathy/debug"
+              c:type="TP_DEBUG_OBJECT_PATH">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <enumeration name="DTMFEvent" c:type="TpDTMFEvent">
       <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="digit_0" value="0" c:identifier="TP_DTMF_EVENT_DIGIT_0"/>
@@ -16937,6 +17663,181 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
               value="15"
               c:identifier="TP_DTMF_EVENT_LETTER_D"/>
     </enumeration>
+    <class name="DebugClient"
+           c:symbol-prefix="debug_client"
+           c:type="TpDebugClient"
+           version="0.19.0"
+           parent="Proxy"
+           glib:type-name="TpDebugClient"
+           glib:get-type="tp_debug_client_get_type"
+           glib:type-struct="DebugClientClass">
+      <doc xml:whitespace="preserve">A proxy object for the debug interface of a Telepathy component.</doc>
+      <constructor name="new"
+                   c:identifier="tp_debug_client_new"
+                   version="0.19.0"
+                   throws="1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new debug client proxy, or %NULL on invalid arguments</doc>
+          <type name="DebugClient" c:type="TpDebugClient*"/>
+        </return-value>
+        <parameters>
+          <parameter name="dbus" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a D-Bus daemon; may not be %NULL</doc>
+            <type name="DBusDaemon" c:type="TpDBusDaemon*"/>
+          </parameter>
+          <parameter name="unique_name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the unique name of the process to be debugged; may not be %NULL or a well-known name</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <function name="get_feature_quark_core"
+                c:identifier="tp_debug_client_get_feature_quark_core">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <function name="init_known_interfaces"
+                c:identifier="tp_debug_client_init_known_interfaces"
+                version="0.19.0">
+        <doc xml:whitespace="preserve">Ensure that the known interfaces for TpDebugClient have been set up.
+This is done automatically when necessary, but for correct
+overriding of library interfaces by local extensions, you should
+call this function before calling
+tp_proxy_or_subclass_hook_on_interface_add() with first argument
+%TP_TYPE_DEBUG_CLIENT.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </function>
+      <method name="get_messages_async"
+              c:identifier="tp_debug_client_get_messages_async"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Retrieve buffered messages from @self. Once @callback is called,
+use tp_debug_client_get_messages_finish() to retrieve the #TpDebugMessage
+objects.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">callback to call when the messages have been retrieved</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_messages_finish"
+              c:identifier="tp_debug_client_get_messages_finish"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_debug_client_set_enabled_async().
+
+a #GPtrArray of #TpDebugMessage</doc>
+        <return-value transfer-ownership="full">
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="DebugMessage"/>
+          </array>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="is_enabled"
+              c:identifier="tp_debug_client_is_enabled"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpDebugClient:enabled property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpDebugClient:enabled property</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="set_enabled_async"
+              c:identifier="tp_debug_client_set_enabled_async"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Enable or disable publishing of debug messages on the bus by the component
+owning @self's bus name.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="enabled" transfer-ownership="none">
+            <doc xml:whitespace="preserve">%TRUE if debug messages should be published on the bus, %FALSE otherwise</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="2">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_enabled_finish"
+              c:identifier="tp_debug_client_set_enabled_finish"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_debug_client_set_enabled_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE, if the operation suceeded, %FALSE otherwise</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="enabled" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">%TRUE if debug messages are published on the bus.
+
+This property is meaningless until the
+%TP_DEBUG_CLIENT_FEATURE_CORE feature has been prepared.</doc>
+        <type name="gboolean"/>
+      </property>
+      <glib:signal name="new-debug-message" when="last" version="0.19.0">
+        <doc xml:whitespace="preserve">Emitted when a #TpDebugMessage is generated if the TpDebugMessage:enabled
+property is set to %TRUE.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="message" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpDebugMessage</doc>
+            <type name="DebugMessage"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+    </class>
+    <record name="DebugClientClass"
+            c:type="TpDebugClientClass"
+            disguised="1"
+            glib:is-gtype-struct-for="DebugClient"
+            version="0.19.0">
+      <doc xml:whitespace="preserve">The class of a #TpDebugClient.</doc>
+    </record>
+    <record name="DebugClientPrivate"
+            c:type="TpDebugClientPrivate"
+            disguised="1">
+    </record>
     <enumeration name="DebugLevel" c:type="TpDebugLevel">
       <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="error" value="0" c:identifier="TP_DEBUG_LEVEL_ERROR"/>
@@ -16948,6 +17849,98 @@ Will be %NULL for outgoing tubes until the tube has been offered.</doc>
       <member name="info" value="4" c:identifier="TP_DEBUG_LEVEL_INFO"/>
       <member name="debug" value="5" c:identifier="TP_DEBUG_LEVEL_DEBUG"/>
     </enumeration>
+    <class name="DebugMessage"
+           c:symbol-prefix="debug_message"
+           c:type="TpDebugMessage"
+           version="0.19.0"
+           parent="GObject.Object"
+           glib:type-name="TpDebugMessage"
+           glib:get-type="tp_debug_message_get_type"
+           glib:type-struct="DebugMessageClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpDebugMessage.</doc>
+      <method name="get_category"
+              c:identifier="tp_debug_message_get_category"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpDebugMessage:category property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpDebugMessage:category property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_domain"
+              c:identifier="tp_debug_message_get_domain"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpDebugMessage:domain property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpDebugMessage:domain property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_level"
+              c:identifier="tp_debug_message_get_level"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpDebugMessage:level property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpDebugMessage:level property</doc>
+          <type name="GLib.LogLevelFlags" c:type="GLogLevelFlags"/>
+        </return-value>
+      </method>
+      <method name="get_message"
+              c:identifier="tp_debug_message_get_message"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpDebugMessage:message property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpDebugMessage:message property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_time"
+              c:identifier="tp_debug_message_get_time"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpDebugMessage:time property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpDebugMessage:time property</doc>
+          <type name="GLib.DateTime" c:type="GDateTime*"/>
+        </return-value>
+      </method>
+      <property name="category" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">Category of the debug message, or %NULL if none was specified.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="domain" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">Domain of the debug message.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="level" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #GLogLevelFlags representing the level of the debug message.</doc>
+        <type name="guint"/>
+      </property>
+      <property name="message" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">Text of the debug message, stripped from its trailing whitespaces.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="time" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">Timestamp of the debug message.</doc>
+        <type name="GLib.DateTime"/>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="GObject.Object" c:type="GObject"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="DebugMessagePriv" c:type="TpDebugMessagePriv*"/>
+      </field>
+    </class>
+    <record name="DebugMessageClass"
+            c:type="TpDebugMessageClass"
+            glib:is-gtype-struct-for="DebugMessage"
+            version="0.19.0">
+      <doc xml:whitespace="preserve">The class of a #TpDebugMessage.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="GObject.ObjectClass" c:type="GObjectClass"/>
+      </field>
+    </record>
+    <record name="DebugMessagePriv" c:type="TpDebugMessagePriv" disguised="1">
+    </record>
     <bitfield name="DeliveryReportingSupportFlags"
               c:type="TpDeliveryReportingSupportFlags">
       <doc xml:whitespace="preserve">&lt;![CDATA[         Flags indicating the level of support for delivery reporting on this         channel, as found on the         DeliveryReportingSupport property. Any         future flags added to this set will conform to the         convention that the presence of an extra flag implies that         more operations will succeed. Note that CMs may always provide more         reports than are requested in the         Message_Sending_Flags passed to         SendMessage.                     If senders want delivery reports, they should ask for them.  If they           don't want delivery reports, they can just ignore them, so there's no           need to have capability discovery for what will happen if a delivery           report isn't requested.                ]]&gt;
@@ -19897,7 +20890,9 @@ is not necessarily in numerical order.</doc>
         </parameters>
       </method>
     </record>
-    <record name="IntsetIter" c:type="TpIntsetIter">
+    <record name="IntsetIter"
+            c:type="TpIntsetIter"
+            deprecated="since 0.19.0. Use #TpIntsetFastIter instead">
       <doc xml:whitespace="preserve">A structure representing iteration over a set of integers. Must be
 initialized with either TP_INTSET_ITER_INIT() or tp_intset_iter_init().
 
@@ -19912,7 +20907,9 @@ which is now a backwards compatibility typedef.</doc>
       <field name="element" writable="1">
         <type name="guint" c:type="guint"/>
       </field>
-      <method name="init" c:identifier="tp_intset_iter_init">
+      <method name="init"
+              c:identifier="tp_intset_iter_init"
+              deprecated="since 0.19.0. Use #TpIntsetFastIter instead">
         <doc xml:whitespace="preserve">Reset the iterator @iter to the beginning and make it iterate over @set.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
@@ -19945,7 +20942,9 @@ numerical order is not required.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
-      <method name="reset" c:identifier="tp_intset_iter_reset">
+      <method name="reset"
+              c:identifier="tp_intset_iter_reset"
+              deprecated="since 0.19.0. Use #TpIntsetFastIter instead">
         <doc xml:whitespace="preserve">Reset the iterator @iter to the beginning. It must already be associated
 with a set.</doc>
         <return-value transfer-ownership="none">
@@ -20365,7 +21364,7 @@ tp_cm_message_set_sender().</doc>
         </return-value>
         <parameters>
           <parameter name="handle_type" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a handle type, greater than %TP_HANDLE_TYPE_NONE and less than %NUM_TP_HANDLE_TYPES</doc>
+            <doc xml:whitespace="preserve">a handle type, greater than %TP_HANDLE_TYPE_NONE and less than %TP_NUM_HANDLE_TYPES</doc>
             <type name="HandleType" c:type="TpHandleType"/>
           </parameter>
           <parameter name="handle" transfer-ownership="none">
@@ -20697,6 +21696,258 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
               value="4"
               c:identifier="TP_MESSAGE_SENDING_FLAG_REPORT_DELETED"/>
     </bitfield>
+    <constant name="NUM_ACCESS_CONTROL_TYPES"
+              value="7"
+              c:type="TP_NUM_ACCESS_CONTROL_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CALL_CONTENT_DISPOSITIONS"
+              value="2"
+              c:type="TP_NUM_CALL_CONTENT_DISPOSITIONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CALL_CONTENT_PACKETIZATION_TYPES"
+              value="3"
+              c:type="TP_NUM_CALL_CONTENT_PACKETIZATION_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CALL_STATES" value="7" c:type="TP_NUM_CALL_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CALL_STATE_CHANGE_REASONS"
+              value="14"
+              c:type="TP_NUM_CALL_STATE_CHANGE_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CALL_STREAM_CANDIDATE_TYPES"
+              value="6"
+              c:type="TP_NUM_CALL_STREAM_CANDIDATE_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CAPTCHA_CANCEL_REASONS"
+              value="3"
+              c:type="TP_NUM_CAPTCHA_CANCEL_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CAPTCHA_STATUSES"
+              value="5"
+              c:type="TP_NUM_CAPTCHA_STATUSES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CHANNEL_CHAT_STATES"
+              value="5"
+              c:type="TP_NUM_CHANNEL_CHAT_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CHANNEL_CONTACT_SEARCH_STATES"
+              value="5"
+              c:type="TP_NUM_CHANNEL_CONTACT_SEARCH_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CHANNEL_GROUP_CHANGE_REASONS"
+              value="12"
+              c:type="TP_NUM_CHANNEL_GROUP_CHANGE_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CHANNEL_TEXT_MESSAGE_TYPES"
+              value="5"
+              c:type="TP_NUM_CHANNEL_TEXT_MESSAGE_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CHANNEL_TEXT_SEND_ERRORS"
+              value="6"
+              c:type="TP_NUM_CHANNEL_TEXT_SEND_ERRORS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CONNECTION_PRESENCE_TYPES"
+              value="9"
+              c:type="TP_NUM_CONNECTION_PRESENCE_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CONNECTION_STATUSES"
+              value="3"
+              c:type="TP_NUM_CONNECTION_STATUSES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CONNECTION_STATUS_REASONS"
+              value="17"
+              c:type="TP_NUM_CONNECTION_STATUS_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CONTACT_FEATURES"
+              value="1"
+              c:type="TP_NUM_CONTACT_FEATURES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CONTACT_LIST_STATES"
+              value="4"
+              c:type="TP_NUM_CONTACT_LIST_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_CONTACT_METADATA_STORAGE_TYPES"
+              value="4"
+              c:type="TP_NUM_CONTACT_METADATA_STORAGE_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_DBUS_ERRORS" value="1" c:type="TP_NUM_DBUS_ERRORS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_DEBUG_LEVELS" value="6" c:type="TP_NUM_DEBUG_LEVELS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_DELIVERY_STATUSES"
+              value="7"
+              c:type="TP_NUM_DELIVERY_STATUSES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_DTMF_EVENTS" value="16" c:type="TP_NUM_DTMF_EVENTS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_FILE_HASH_TYPES"
+              value="4"
+              c:type="TP_NUM_FILE_HASH_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_FILE_TRANSFER_STATES"
+              value="6"
+              c:type="TP_NUM_FILE_TRANSFER_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_FILE_TRANSFER_STATE_CHANGE_REASONS"
+              value="6"
+              c:type="TP_NUM_FILE_TRANSFER_STATE_CHANGE_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_HANDLE_TYPES" value="5" c:type="TP_NUM_HANDLE_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_HTTP_METHODS" value="2" c:type="TP_NUM_HTTP_METHODS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_LOCAL_HOLD_STATES"
+              value="4"
+              c:type="TP_NUM_LOCAL_HOLD_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_LOCAL_HOLD_STATE_REASONS"
+              value="3"
+              c:type="TP_NUM_LOCAL_HOLD_STATE_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_MEDIA_STREAM_BASE_PROTOS"
+              value="2"
+              c:type="TP_NUM_MEDIA_STREAM_BASE_PROTOS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_MEDIA_STREAM_DIRECTIONS"
+              value="4"
+              c:type="TP_NUM_MEDIA_STREAM_DIRECTIONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_MEDIA_STREAM_ERRORS"
+              value="8"
+              c:type="TP_NUM_MEDIA_STREAM_ERRORS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_MEDIA_STREAM_STATES"
+              value="3"
+              c:type="TP_NUM_MEDIA_STREAM_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_MEDIA_STREAM_TRANSPORT_TYPES"
+              value="3"
+              c:type="TP_NUM_MEDIA_STREAM_TRANSPORT_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_MEDIA_STREAM_TYPES"
+              value="2"
+              c:type="TP_NUM_MEDIA_STREAM_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_RCPT_XR_RTT_MODES"
+              value="2"
+              c:type="TP_NUM_RCPT_XR_RTT_MODES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_RICH_PRESENCE_ACCESS_CONTROL_TYPES"
+              value="4"
+              c:type="TP_NUM_RICH_PRESENCE_ACCESS_CONTROL_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SASL_ABORT_REASONS"
+              value="2"
+              c:type="TP_NUM_SASL_ABORT_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SASL_STATUSES" value="7" c:type="TP_NUM_SASL_STATUSES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SENDING_STATES"
+              value="4"
+              c:type="TP_NUM_SENDING_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SERVICE_POINT_TYPES"
+              value="3"
+              c:type="TP_NUM_SERVICE_POINT_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SOCKET_ACCESS_CONTROLS"
+              value="4"
+              c:type="TP_NUM_SOCKET_ACCESS_CONTROLS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SOCKET_ADDRESS_TYPES"
+              value="4"
+              c:type="TP_NUM_SOCKET_ADDRESS_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_STREAM_COMPONENTS"
+              value="3"
+              c:type="TP_NUM_STREAM_COMPONENTS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_STREAM_ENDPOINT_STATES"
+              value="5"
+              c:type="TP_NUM_STREAM_ENDPOINT_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_STREAM_FLOW_STATES"
+              value="4"
+              c:type="TP_NUM_STREAM_FLOW_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_STREAM_TRANSPORT_TYPES"
+              value="7"
+              c:type="TP_NUM_STREAM_TRANSPORT_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_SUBSCRIPTION_STATES"
+              value="5"
+              c:type="TP_NUM_SUBSCRIPTION_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_TLS_CERTIFICATE_REJECT_REASONS"
+              value="10"
+              c:type="TP_NUM_TLS_CERTIFICATE_REJECT_REASONS">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_TLS_CERTIFICATE_STATES"
+              value="3"
+              c:type="TP_NUM_TLS_CERTIFICATE_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_TUBE_CHANNEL_STATES"
+              value="4"
+              c:type="TP_NUM_TUBE_CHANNEL_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_TUBE_STATES" value="3" c:type="TP_NUM_TUBE_STATES">
+      <type name="gint" c:type="gint"/>
+    </constant>
+    <constant name="NUM_TUBE_TYPES" value="2" c:type="TP_NUM_TUBE_TYPES">
+      <type name="gint" c:type="gint"/>
+    </constant>
     <class name="ObserveChannelsContext"
            c:symbol-prefix="observe_channels_context"
            c:type="TpObserveChannelsContext"
@@ -23059,8 +24310,7 @@ or %NULL if not supported. Free with tp_connection_manager_param_free()</doc>
       </method>
       <method name="dup_param_names"
               c:identifier="tp_protocol_dup_param_names"
-              version="0.11.11"
-              introspectable="0">
+              version="0.11.11">
         <doc xml:whitespace="preserve">Returns a list of parameter names supported by this connection manager
 for this protocol.
 
@@ -23069,7 +24319,9 @@ The result is copied and must be freed by the caller with g_strfreev().
 #TpProtocol:param-names</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a copy of</doc>
-          <type name="GObject.Strv" c:type="GStrv"/>
+          <array c:type="GStrv">
+            <type name="utf8"/>
+          </array>
         </return-value>
       </method>
       <method name="dup_params"
@@ -23833,6 +25085,323 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
               value="3"
               c:identifier="TP_RICH_PRESENCE_ACCESS_CONTROL_TYPE_OPEN"/>
     </enumeration>
+    <class name="RoomInfo"
+           c:symbol-prefix="room_info"
+           c:type="TpRoomInfo"
+           version="0.19.0"
+           parent="GObject.Object"
+           glib:type-name="TpRoomInfo"
+           glib:get-type="tp_room_info_get_type"
+           glib:type-struct="RoomInfoClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpRoomInfo.</doc>
+      <method name="get_channel_type"
+              c:identifier="tp_room_info_get_channel_type"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+the channel type of the room</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a string representing the D-Bus interface name of</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_description"
+              c:identifier="tp_room_info_get_description"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a description of the room's overall purpose</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_handle"
+              c:identifier="tp_room_info_get_handle"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the #TpHandle of the room</doc>
+          <type name="Handle" c:type="TpHandle"/>
+        </return-value>
+      </method>
+      <method name="get_handle_name"
+              c:identifier="tp_room_info_get_handle_name"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+by inspecting the #TpHandle returned by tp_room_info_get_handle())</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the identifier of the room (as would be returned</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_invite_only"
+              c:identifier="tp_room_info_get_invite_only"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if you cannot join the room, but must be invited</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="known" transfer-ownership="none">
+            <doc xml:whitespace="preserve">either %NULL, or a location in which to store %TRUE if the returned value is meaningful</doc>
+            <type name="gboolean" c:type="gboolean*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_members_count"
+              c:identifier="tp_room_info_get_members_count"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the number of members in the room</doc>
+          <type name="guint" c:type="guint"/>
+        </return-value>
+        <parameters>
+          <parameter name="known" transfer-ownership="none">
+            <doc xml:whitespace="preserve">either %NULL, or a location in which to store %TRUE if the returned value is meaningful</doc>
+            <type name="gboolean" c:type="gboolean*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_name"
+              c:identifier="tp_room_info_get_name"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+from the handle</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the human-readable name of the room if different</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_requires_password"
+              c:identifier="tp_room_info_get_requires_password"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if the room requires a password to enter</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="known" transfer-ownership="none">
+            <doc xml:whitespace="preserve">either %NULL, or a location in which to store %TRUE if the returned value is meaningful</doc>
+            <type name="gboolean" c:type="gboolean*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_room_id"
+              c:identifier="tp_room_info_get_room_id"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the human-readable identifier of the room</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_server"
+              c:identifier="tp_room_info_get_server"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the DNS name of the server hosting the room</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_subject"
+              c:identifier="tp_room_info_get_subject"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the current subject of conversation in the room</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <field name="parent" readable="0" private="1">
+        <type name="GObject.Object" c:type="GObject"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="RoomInfoPriv" c:type="TpRoomInfoPriv*"/>
+      </field>
+    </class>
+    <record name="RoomInfoClass"
+            c:type="TpRoomInfoClass"
+            glib:is-gtype-struct-for="RoomInfo"
+            version="0.19.0">
+      <doc xml:whitespace="preserve">The class of a #TpRoomInfo.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="GObject.ObjectClass" c:type="GObjectClass"/>
+      </field>
+    </record>
+    <record name="RoomInfoPriv" c:type="TpRoomInfoPriv" disguised="1">
+    </record>
+    <class name="RoomList"
+           c:symbol-prefix="room_list"
+           c:type="TpRoomList"
+           version="0.19.0"
+           parent="GObject.Object"
+           glib:type-name="TpRoomList"
+           glib:get-type="tp_room_list_get_type"
+           glib:type-struct="RoomListClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpRoomList.</doc>
+      <implements name="Gio.AsyncInitable"/>
+      <constructor name="new_finish"
+                   c:identifier="tp_room_list_new_finish"
+                   version="0.19.0"
+                   throws="1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+in case of error.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpRoomList object, or %NULL</doc>
+          <type name="RoomList" c:type="TpRoomList*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #GAsyncResult from the callback</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <function name="new_async"
+                c:identifier="tp_room_list_new_async"
+                version="0.19.0">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="account" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpAccount for the room listing</doc>
+            <type name="Account" c:type="TpAccount*"/>
+          </parameter>
+          <parameter name="server" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the DNS name of the server whose rooms should listed</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a #GAsyncReadyCallback to call when the initialization is finished</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to the callback function</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </function>
+      <method name="get_account"
+              c:identifier="tp_room_list_get_account"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpRoomList:account property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpRoomList:account property</doc>
+          <type name="Account" c:type="TpAccount*"/>
+        </return-value>
+      </method>
+      <method name="get_server"
+              c:identifier="tp_room_list_get_server"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpRoomList:server property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpRoomList:server property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="is_listing"
+              c:identifier="tp_room_list_is_listing"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpRoomList:listing property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpRoomList:listing property</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <method name="start" c:identifier="tp_room_list_start" version="0.19.0">
+        <doc xml:whitespace="preserve">Start listing rooms using @self. Use the TpRoomList::got-rooms
+signal to get the rooms found.
+Errors will be reported using the TpRoomList::failed signal.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </method>
+      <property name="account"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The #TpAccount to use for the room listing.</doc>
+        <type name="Account"/>
+      </property>
+      <property name="listing" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">%TRUE if the channel is currently listing rooms.
+
+This property is meaningless until the
+%TP_ROOM_LIST_FEATURE_LISTING feature has been prepared.</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="server"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The DNS name of the server whose rooms are listed by this channel, or
+%NULL.</doc>
+        <type name="utf8"/>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="GObject.Object" c:type="GObject"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="RoomListPrivate" c:type="TpRoomListPrivate*"/>
+      </field>
+      <glib:signal name="failed" when="last" version="0.19.0">
+        <doc xml:whitespace="preserve">Fired when something goes wrong while listing the channels; see @error
+for details.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="error" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GError indicating the reason of the error</doc>
+            <type name="GLib.Error"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+      <glib:signal name="got-room" when="last" version="0.19.0">
+        <doc xml:whitespace="preserve">Fired each time a room is found during the listing process.
+User should take his own reference on @room if he plans to
+continue using it once the signal callback has returned.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="room" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpRoomInfo</doc>
+            <type name="RoomInfo"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
+    </class>
+    <record name="RoomListClass"
+            c:type="TpRoomListClass"
+            glib:is-gtype-struct-for="RoomList"
+            version="0.19.0">
+      <doc xml:whitespace="preserve">The class of a #TpRoomList.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="GObject.ObjectClass" c:type="GObjectClass"/>
+      </field>
+      <field name="_padding" readable="0" private="1">
+        <array zero-terminated="0" c:type="GCallback" fixed-size="7">
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </array>
+      </field>
+    </record>
+    <record name="RoomListPrivate" c:type="TpRoomListPrivate" disguised="1">
+    </record>
     <enumeration name="SASLAbortReason" c:type="TpSASLAbortReason">
       <doc xml:whitespace="preserve">&lt;![CDATA[         A reason why SASL authentication was aborted by the client.       ]]&gt;
 
@@ -25969,6 +27538,315 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
       <member name="ask" value="3" c:identifier="TP_SUBSCRIPTION_STATE_ASK"/>
       <member name="yes" value="4" c:identifier="TP_SUBSCRIPTION_STATE_YES"/>
     </enumeration>
+    <class name="TLSCertificate"
+           c:symbol-prefix="tls_certificate"
+           c:type="TpTLSCertificate"
+           version="0.19.0"
+           parent="Proxy"
+           glib:type-name="TpTLSCertificate"
+           glib:get-type="tp_tls_certificate_get_type"
+           glib:type-struct="TLSCertificateClass">
+      <doc xml:whitespace="preserve">A #TpProxy subclass representing a server or peer's TLS certificate
+being presented for acceptance/rejection.</doc>
+      <constructor name="new"
+                   c:identifier="tp_tls_certificate_new"
+                   version="0.19.0"
+                   throws="1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;
+
+feature %TP_TLS_CERTIFICATE_FEATURE_CORE to make it useful.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new TLS certificate proxy. Prepare the</doc>
+          <type name="TLSCertificate" c:type="TpTLSCertificate*"/>
+        </return-value>
+        <parameters>
+          <parameter name="conn_or_chan" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpConnection or #TpChannel parent for this object, whose invalidation will also result in invalidation of the returned object</doc>
+            <type name="Proxy" c:type="TpProxy*"/>
+          </parameter>
+          <parameter name="object_path" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the object path of this TLS certificate</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <function name="get_feature_quark_core"
+                c:identifier="tp_tls_certificate_get_feature_quark_core">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
+      <function name="init_known_interfaces"
+                c:identifier="tp_tls_certificate_init_known_interfaces"
+                version="0.19.0">
+        <doc xml:whitespace="preserve">Ensure that the known interfaces for TpTLSCertificate have been set up.
+This is done automatically when necessary, but for correct
+overriding of library interfaces by local extensions, you should
+call this function before calling
+tp_proxy_or_subclass_hook_on_interface_add() with first argument
+%TP_TYPE_TLS_CERTIFICATE.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </function>
+      <method name="accept_async"
+              c:identifier="tp_tls_certificate_accept_async"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Accept this certificate, asynchronously. In or after @callback,
+you may call tp_tls_certificate_accept_finish() to check the result.
+
+#GObject::notify::state will also be emitted when the connection manager
+signals that the certificate has been accepted.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">called on success or failure</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">user data for the callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="accept_finish"
+              c:identifier="tp_tls_certificate_accept_finish"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Check the result of tp_tls_certificate_accept_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if acceptance was successful</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the result passed to the callback by tp_tls_certificate_accept_async()</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="add_rejection"
+              c:identifier="tp_tls_certificate_add_rejection"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Add a pending reason for rejection. The first call to this method is
+considered "most important". After calling this method as many times
+as are required, call tp_tls_certificate_reject_async() to reject the
+certificate.
+
+If @details is a floating reference (see g_variant_ref_sink()),
+ownership of @details is taken by this function. This means
+you can pass the result of g_variant_new() or g_variant_new_parsed()
+directly to this function without additional reference-count management.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the reason for rejection</doc>
+            <type name="TLSCertificateRejectReason"
+                  c:type="TpTLSCertificateRejectReason"/>
+          </parameter>
+          <parameter name="dbus_error" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a D-Bus error name such as %TP_ERROR_STR_CERT_REVOKED, or %NULL to derive one from @reason</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="details" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">a variant of type %G_VARIANT_TYPE_VARDICT containing the details of the rejection, or %NULL</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_cert_data"
+              c:identifier="tp_tls_certificate_get_cert_data"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificate:cert-data property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificate:cert-data property</doc>
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="GLib.Bytes"/>
+          </array>
+        </return-value>
+      </method>
+      <method name="get_cert_type"
+              c:identifier="tp_tls_certificate_get_cert_type"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificate:cert-type property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificate:cert-type property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_nth_rejection"
+              c:identifier="tp_tls_certificate_get_nth_rejection"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">If this certificate has been rejected and @n is less than the number of
+rejection reasons, return a #TpTLSCertificateRejection representing the
+@n&lt;!----&gt;th rejection reason (starting from 0).
+
+With @n == 0 this is equivalent to tp_tls_certificate_get_rejection().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #TpTLSCertificateRejection, or %NULL</doc>
+          <type name="TLSCertificateRejection"
+                c:type="TpTLSCertificateRejection*"/>
+        </return-value>
+        <parameters>
+          <parameter name="n" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the rejection reason to return; if 0, return the same thing as tp_tls_certificate_get_detailed_rejection()</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_rejection"
+              c:identifier="tp_tls_certificate_get_rejection"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">If this certificate has been rejected, return a #TpTLSCertificateRejection
+indicating the first rejection reason (by convention,
+the most important).
+
+If you want to list all the things that are wrong with the certificate
+(for instance, it might be self-signed and also have expired)
+you can call tp_tls_certificate_get_nth_rejection(), increasing @n until
+it returns %NULL.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #TpTLSCertificateRejection, or %NULL</doc>
+          <type name="TLSCertificateRejection"
+                c:type="TpTLSCertificateRejection*"/>
+        </return-value>
+      </method>
+      <method name="get_state"
+              c:identifier="tp_tls_certificate_get_state"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificate:state property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificate:state property</doc>
+          <type name="TLSCertificateState" c:type="TpTLSCertificateState"/>
+        </return-value>
+      </method>
+      <method name="reject_async"
+              c:identifier="tp_tls_certificate_reject_async"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Reject this certificate, asynchronously.
+
+Before calling this method, you must call
+tp_tls_certificate_add_rejection() at least once, to set the reason(s)
+for rejection (for instance, a certificate might be both self-signed and
+expired).
+
+In or after @callback,
+you may call tp_tls_certificate_reject_finish() to check the result.
+
+#GObject::notify::state will also be emitted when the connection manager
+signals that the certificate has been rejected.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">called on success or failure</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">user data for the callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="reject_finish"
+              c:identifier="tp_tls_certificate_reject_finish"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Check the result of tp_tls_certificate_reject_async().</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if rejection was successful</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the result passed to the callback by tp_tls_certificate_reject_async()</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="cert-data" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The raw data of the certificate or certificate chain, represented
+as a #GPtrArray of #GBytes. It should be interpreted
+according to #TpTLSCertificate:cert-type.
+
+The first certificate in this array is the server's certificate,
+followed by its issuer, followed by the issuer's issuer and so on.
+
+For "x509" certificates, each certificate is an X.509 certificate in
+binary (DER) format.
+
+For "pgp" certificates, each certificate is a binary OpenPGP key.</doc>
+        <array name="GLib.PtrArray">
+          <type name="gpointer" c:type="gpointer"/>
+        </array>
+      </property>
+      <property name="cert-type" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The type of the certificate, typically either "x509" or "pgp".</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="parent"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #TpConnection or #TpChannel which owns this TLS certificate. If the
+parent object is invalidated, the certificate is also invalidated, and
+this property is set to %NULL.</doc>
+        <type name="Proxy"/>
+      </property>
+      <property name="state" version="0.19.0" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The state of this TLS certificate as a #TpTLSCertificateState,
+initially %TP_TLS_CERTIFICATE_STATE_PENDING.
+
+#GObject::notify::state will be emitted when this changes.</doc>
+        <type name="guint"/>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="Proxy" c:type="TpProxy"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="TLSCertificatePrivate" c:type="TpTLSCertificatePrivate*"/>
+      </field>
+    </class>
+    <record name="TLSCertificateClass"
+            c:type="TpTLSCertificateClass"
+            glib:is-gtype-struct-for="TLSCertificate"
+            version="0.19.0">
+      <doc xml:whitespace="preserve">The class of a #TpTLSCertificate.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="ProxyClass" c:type="TpProxyClass"/>
+      </field>
+      <field name="_future" readable="0" private="1">
+        <array zero-terminated="0" c:type="GCallback" fixed-size="3">
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </array>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="TLSCertificateClassPrivate"
+              c:type="TpTLSCertificateClassPrivate*"/>
+      </field>
+    </record>
+    <record name="TLSCertificateClassPrivate"
+            c:type="TpTLSCertificateClassPrivate"
+            disguised="1">
+    </record>
+    <record name="TLSCertificatePrivate"
+            c:type="TpTLSCertificatePrivate"
+            disguised="1">
+    </record>
     <enumeration name="TLSCertificateRejectReason"
                  c:type="TpTLSCertificateRejectReason">
       <doc xml:whitespace="preserve">&lt;![CDATA[         Possible reasons to reject a TLS certificate.       ]]&gt;
@@ -26005,6 +27883,117 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
               value="9"
               c:identifier="TP_TLS_CERTIFICATE_REJECT_REASON_LIMIT_EXCEEDED"/>
     </enumeration>
+    <class name="TLSCertificateRejection"
+           c:symbol-prefix="tls_certificate_rejection"
+           c:type="TpTLSCertificateRejection"
+           version="0.19.0"
+           parent="GObject.Object"
+           glib:type-name="TpTLSCertificateRejection"
+           glib:get-type="tp_tls_certificate_rejection_get_type"
+           glib:type-struct="TLSCertificateRejectionClass">
+      <doc xml:whitespace="preserve">Data structure representing a #TpTLSCertificateRejection.</doc>
+      <method name="get_dbus_error"
+              c:identifier="tp_tls_certificate_rejection_get_dbus_error"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificateRejection:dbus-error property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificateRejection:dbus-error property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_details"
+              c:identifier="tp_tls_certificate_rejection_get_details"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificateRejection:details property</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificateRejection:details property</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
+      <method name="get_error"
+              c:identifier="tp_tls_certificate_rejection_get_error"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificateRejection:error property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificateRejection:error property</doc>
+          <type name="GLib.Error" c:type="GError*"/>
+        </return-value>
+      </method>
+      <method name="get_reason"
+              c:identifier="tp_tls_certificate_rejection_get_reason"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the #TpTLSCertificateRejection:reason property</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpTLSCertificateRejection:reason property</doc>
+          <type name="TLSCertificateRejectReason"
+                c:type="TpTLSCertificateRejectReason"/>
+        </return-value>
+      </method>
+      <method name="raise_error"
+              c:identifier="tp_tls_certificate_rejection_raise_error"
+              version="0.19.0"
+              throws="1">
+        <doc xml:whitespace="preserve">Convenient function to raise the #TpTLSCertificateRejection:error
+property in language binding supporting this feature.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%FALSE</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
+      <property name="dbus-error"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The D-Bus error name of the rejection</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="details"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A #G_VARIANT_TYPE_VARDICT containing the details of the rejection</doc>
+        <type name="GLib.Variant"/>
+      </property>
+      <property name="error"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">a #GError (likely to be in the %TP_ERROR domain) indicating the reason
+of the rejection</doc>
+        <type name="GLib.Error"/>
+      </property>
+      <property name="reason"
+                version="0.19.0"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">#TpTLSCertificateRejectReason representing the reason of the rejection</doc>
+        <type name="guint"/>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="GObject.Object" c:type="GObject"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="TLSCertificateRejectionPriv"
+              c:type="TpTLSCertificateRejectionPriv*"/>
+      </field>
+    </class>
+    <record name="TLSCertificateRejectionClass"
+            c:type="TpTLSCertificateRejectionClass"
+            glib:is-gtype-struct-for="TLSCertificateRejection"
+            version="0.19.0">
+      <doc xml:whitespace="preserve">The class of a #TpTLSCertificateRejection.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="GObject.ObjectClass" c:type="GObjectClass"/>
+      </field>
+    </record>
+    <record name="TLSCertificateRejectionPriv"
+            c:type="TpTLSCertificateRejectionPriv"
+            disguised="1">
+    </record>
     <enumeration name="TLSCertificateState" c:type="TpTLSCertificateState">
       <doc xml:whitespace="preserve">&lt;![CDATA[         The possible states for a TLSCertificate         object.       ]]&gt;
 
@@ -26185,6 +28174,12 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
           </parameter>
         </parameters>
       </constructor>
+      <function name="get_feature_quark_chat_states"
+                c:identifier="tp_text_channel_get_feature_quark_chat_states">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
       <function name="get_feature_quark_incoming_messages"
                 c:identifier="tp_text_channel_get_feature_quark_incoming_messages">
         <return-value transfer-ownership="none">
@@ -26348,6 +28343,25 @@ See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
           <parameter name="result" transfer-ownership="none">
             <doc xml:whitespace="preserve">a #GAsyncResult passed to the callback for tp_text_channel_ack_messages_async()</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="get_chat_state"
+              c:identifier="tp_text_channel_get_chat_state"
+              version="0.19.0">
+        <doc xml:whitespace="preserve">Return the chat state for the given contact. If tp_proxy_is_prepared()
+would return %FALSE for the feature %TP_TEXT_CHANNEL_FEATURE_CHAT_STATES,
+the result will always be %TP_CHANNEL_CHAT_STATE_INACTIVE.
+
+if their chat state is not known</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the chat state for @contact, or %TP_CHANNEL_CHAT_STATE_INACTIVE</doc>
+          <type name="ChannelChatState" c:type="TpChannelChatState"/>
+        </return-value>
+        <parameters>
+          <parameter name="contact" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpContact</doc>
+            <type name="Contact" c:type="TpContact*"/>
           </parameter>
         </parameters>
       </method>
@@ -26681,6 +28695,27 @@ preferred MIME types appearing earlier in the array.</doc>
       <field name="priv" readable="0" private="1">
         <type name="TextChannelPrivate" c:type="TpTextChannelPrivate*"/>
       </field>
+      <glib:signal name="contact-chat-state-changed"
+                   when="last"
+                   detailed="1"
+                   version="0.19.0">
+        <doc xml:whitespace="preserve">Emitted when a contact's chat state changes after tp_proxy_prepare_async()
+has finished preparing features %TP_TEXT_CHANNEL_FEATURE_CHAT_STATES,
+%TP_CHANNEL_FEATURE_GROUP and %TP_CHANNEL_FEATURE_CONTACTS.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none"/>
+        </return-value>
+        <parameters>
+          <parameter name="contact" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpContact for the local user or another contact</doc>
+            <type name="Contact"/>
+          </parameter>
+          <parameter name="state" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the new #TpChannelChatState for the contact</doc>
+            <type name="guint"/>
+          </parameter>
+        </parameters>
+      </glib:signal>
       <glib:signal name="message-received" when="last" version="0.13.10">
         <doc xml:whitespace="preserve">The ::message-received signal is emitted when a new message has been
 received on @self.
@@ -27857,87 +29892,17 @@ tp_g_value_slice_new_take_string()</doc>
         </parameter>
       </parameters>
     </function>
-    <function name="contact_info_list_copy"
-              c:identifier="tp_contact_info_list_copy"
-              moved-to="ContactInfoList.copy"
-              version="0.11.7"
-              introspectable="0">
-      <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
-
-tp_contact_info_list_free()</doc>
-      <return-value>
-        <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoField, free it with</doc>
-        <type name="GLib.List" c:type="GList*">
-          <type name="gpointer" c:type="gpointer"/>
-        </type>
-      </return-value>
-      <parameters>
-        <parameter name="list" transfer-ownership="none">
-          <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </parameter>
-      </parameters>
-    </function>
-    <function name="contact_info_list_free"
-              c:identifier="tp_contact_info_list_free"
-              moved-to="ContactInfoList.free"
-              version="0.11.7"
-              introspectable="0">
-      <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+    <function name="contact_info_list_get_type"
+              c:identifier="tp_contact_info_list_get_type">
       <return-value transfer-ownership="none">
-        <type name="none" c:type="void"/>
+        <type name="GType" c:type="GType"/>
       </return-value>
-      <parameters>
-        <parameter name="list" transfer-ownership="none">
-          <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </parameter>
-      </parameters>
     </function>
-    <function name="contact_info_spec_list_copy"
-              c:identifier="tp_contact_info_spec_list_copy"
-              moved-to="ContactInfoSpecList.copy"
-              version="0.11.7"
-              introspectable="0">
-      <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
-
-free it with tp_contact_info_spec_list_free()</doc>
-      <return-value>
-        <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoFieldSpec,</doc>
-        <type name="GLib.List" c:type="GList*">
-          <type name="gpointer" c:type="gpointer"/>
-        </type>
-      </return-value>
-      <parameters>
-        <parameter name="list" transfer-ownership="none">
-          <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </parameter>
-      </parameters>
-    </function>
-    <function name="contact_info_spec_list_free"
-              c:identifier="tp_contact_info_spec_list_free"
-              moved-to="ContactInfoSpecList.free"
-              version="0.11.7"
-              introspectable="0">
-      <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+    <function name="contact_info_spec_list_get_type"
+              c:identifier="tp_contact_info_spec_list_get_type">
       <return-value transfer-ownership="none">
-        <type name="none" c:type="void"/>
+        <type name="GType" c:type="GType"/>
       </return-value>
-      <parameters>
-        <parameter name="list" transfer-ownership="none">
-          <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </parameter>
-      </parameters>
     </function>
     <function name="contacts_mixin_add_contact_attributes_iface"
               c:identifier="tp_contacts_mixin_add_contact_attributes_iface"

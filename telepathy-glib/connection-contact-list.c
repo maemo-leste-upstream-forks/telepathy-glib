@@ -88,9 +88,9 @@ contacts_changed_head_ready (TpConnection *self)
 
   item = g_queue_pop_head (self->priv->contacts_changed_queue);
 
-  added = _tp_g_ptr_array_new_full (g_hash_table_size (item->removals),
+  added = g_ptr_array_new_full (g_hash_table_size (item->removals),
       g_object_unref);
-  removed = _tp_g_ptr_array_new_full (item->new_contacts->len,
+  removed = g_ptr_array_new_full (item->new_contacts->len,
       g_object_unref);
 
   /* Remove contacts from roster, and build a list of contacts really removed */
@@ -134,16 +134,17 @@ contacts_changed_head_ready (TpConnection *self)
 }
 
 static void
-new_contacts_upgraded_cb (TpConnection *self,
-    guint n_contacts,
-    TpContact * const *contacts,
-    const GError *error,
-    gpointer user_data,
-    GObject *weak_object)
+new_contacts_upgraded_cb (GObject *object,
+    GAsyncResult *result,
+    gpointer user_data)
 {
-  if (error != NULL)
+  TpConnection *self = (TpConnection *) object;
+  GError *error = NULL;
+
+  if (!tp_connection_upgrade_contacts_finish (self, result, NULL, &error))
     {
       DEBUG ("Error upgrading new roster contacts: %s", error->message);
+      g_clear_error (&error);
     }
 
   contacts_changed_head_ready (self);
@@ -189,10 +190,10 @@ process_queued_contacts_changed (TpConnection *self)
   features = tp_simple_client_factory_dup_contact_features (
       tp_proxy_get_factory (self), self);
 
-  tp_connection_upgrade_contacts (self,
+  tp_connection_upgrade_contacts_async (self,
       item->new_contacts->len, (TpContact **) item->new_contacts->pdata,
       features->len, (TpContactFeature *) features->data,
-      new_contacts_upgraded_cb, NULL, NULL, NULL);
+      new_contacts_upgraded_cb, NULL);
 
   g_array_unref (features);
 }
@@ -289,7 +290,7 @@ got_contact_list_attributes_cb (TpConnection *self,
 OUT:
   if (result != NULL)
     {
-      g_simple_async_result_complete (result);
+      g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
     }
 }
@@ -404,7 +405,7 @@ prepare_contact_list_props_cb (TpProxy *proxy,
       self->priv->contact_list_state);
 
 OUT:
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 void _tp_connection_prepare_contact_list_async (TpProxy *proxy,
@@ -614,7 +615,7 @@ prepare_contact_groups_cb (TpProxy *proxy,
   g_ptr_array_add (self->priv->contact_groups, NULL);
 
 OUT:
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 void
@@ -1647,7 +1648,7 @@ blocked_changed_head_ready (TpConnection *self)
           _tp_connection_set_contact_blocked (self, contact);
         }
 
-      g_simple_async_result_complete (item->result);
+      g_simple_async_result_complete_in_idle (item->result);
     }
 
   blocked_changed_item_free (item);
@@ -1655,31 +1656,32 @@ blocked_changed_head_ready (TpConnection *self)
 }
 
 static void
-blocked_contacts_upgraded_cb (TpConnection *self,
-    guint n_contacts,
-    TpContact * const *contacts,
-    const GError *error,
-    gpointer user_data,
-    GObject *weak_object)
+blocked_contacts_upgraded_cb (GObject *object,
+    GAsyncResult *result,
+    gpointer user_data)
 {
+  TpConnection *self = (TpConnection *) object;
   BlockedChangedItem *item;
   guint i;
   GPtrArray *added, *removed;
+  GPtrArray *contacts;
+  GError *error = NULL;
 
   item = g_queue_peek_head (self->priv->blocked_changed_queue);
 
-  if (error != NULL)
+  if (!tp_connection_upgrade_contacts_finish (self, result, &contacts, &error))
     {
       DEBUG ("Error upgrading blocked contacts: %s", error->message);
+      g_clear_error (&error);
       goto out;
     }
 
   added = g_ptr_array_new ();
   removed = g_ptr_array_new_with_free_func (g_object_unref);
 
-  for (i = 0; i < n_contacts; i++)
+  for (i = 0; i < contacts->len; i++)
     {
-      TpContact *contact = contacts[i];
+      TpContact *contact = g_ptr_array_index (contacts, i);
       TpHandle handle;
 
       handle = tp_contact_get_handle (contact);
@@ -1718,6 +1720,7 @@ blocked_contacts_upgraded_cb (TpConnection *self,
 
   g_ptr_array_unref (added);
   g_ptr_array_unref (removed);
+  g_ptr_array_unref (contacts);
 
 out:
   blocked_changed_head_ready (self);
@@ -1782,10 +1785,10 @@ process_queued_blocked_changed (TpConnection *self)
   features = tp_simple_client_factory_dup_contact_features (
       tp_proxy_get_factory (self), self);
 
-  tp_connection_upgrade_contacts (self,
+  tp_connection_upgrade_contacts_async (self,
       contacts->len, (TpContact **) contacts->pdata,
       features->len, (TpContactFeature *) features->data,
-      blocked_contacts_upgraded_cb, NULL, NULL, NULL);
+      blocked_contacts_upgraded_cb, NULL);
 
   g_array_unref (features);
   g_ptr_array_unref (contacts);
@@ -1821,7 +1824,7 @@ request_blocked_contacts_cb (TpConnection *self,
     {
       DEBUG ("Error calling RequestBlockedContacts: %s", error->message);
       g_simple_async_result_set_from_error (result, error);
-      g_simple_async_result_complete (result);
+      g_simple_async_result_complete_in_idle (result);
       return;
     }
 

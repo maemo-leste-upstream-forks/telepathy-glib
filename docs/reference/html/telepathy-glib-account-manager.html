@@ -42,7 +42,7 @@
 <div class="refsynopsisdiv">
 <a name="telepathy-glib-account-manager.synopsis"></a><h2>Synopsis</h2>
 <a name="TpAccountManager"></a><pre class="synopsis">
-#include &lt;telepathy-glib/account-manager.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
 struct              <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager-struct" title="struct TpAccountManager">TpAccountManager</a>;
 struct              <a class="link" href="telepathy-glib-account-manager.html#TpAccountManagerClass" title="struct TpAccountManagerClass">TpAccountManagerClass</a>;
@@ -161,6 +161,30 @@ struct              <a class="link" href="telepathy-glib-account-manager.html#Tp
 The <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> object is used to communicate with the Telepathy
 AccountManager service.
 </p>
+<p>
+A new <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> object can be created with
+<a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-dup" title="tp_account_manager_dup ()"><code class="function">tp_account_manager_dup()</code></a>.
+</p>
+<p>
+To list the existing valid accounts, the client should first
+prepare the <a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAGER-FEATURE-CORE:CAPS" title="TP_ACCOUNT_MANAGER_FEATURE_CORE"><code class="literal">TP_ACCOUNT_MANAGER_FEATURE_CORE</code></a> feature using
+<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>, then call
+<a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts" title="tp_account_manager_get_valid_accounts ()"><code class="function">tp_account_manager_get_valid_accounts()</code></a>.
+</p>
+<p>
+The <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager-account-validity-changed" title='The "account-validity-changed" signal'><span class="type">"account-validity-changed"</span></a> signal is emitted
+to notify of the validity of an account changing. New accounts are
+also indicated by the emission of this signal on an account that
+did not previously exist. (The rationale behind indicating new
+accounts by an account validity change signal is that clients
+interested in this kind of thing should be connected to this signal
+anyway: an account having just become valid is effectively a new
+account to a client.)
+</p>
+<p>
+The <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager-account-removed" title='The "account-removed" signal'><span class="type">"account-removed"</span></a> signal is emitted when
+existing accounts are removed.
+</p>
 </div>
 <div class="refsect1">
 <a name="telepathy-glib-account-manager.details"></a><h2>Details</h2>
@@ -182,17 +206,109 @@ set on that factory will be prepared on all those objects.
 </p>
 <div class="example">
 <a name="account-manager"></a><p class="title"><b>Example 2. TpAccountManager example</b></p>
-<div class="example-contents">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1</pre></td>
-        <td class="listing_code"><pre class="programlisting">FIXME<span class="gtkdoc opt">:</span> MISSING XINCLUDE CONTENT</pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<div class="example-contents"><pre class="programlisting">/*
+ * contact-list
+ *
+ * Copyright © 2011 Collabora Ltd. &lt;http://www.collabora.co.uk/&gt;
+ *
+ * Copying and distribution of this file, with or without modification,
+ * are permitted in any medium without royalty provided the copyright
+ * notice and this notice are preserved.
+ */
 
+#include "config.h"
+
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
+
+static void
+account_manager_prepared_cb (GObject *object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  TpAccountManager *manager = (TpAccountManager *) object;
+  GMainLoop *loop = user_data;  
+  GList *accounts;
+  GError *error = NULL;
+
+  if (!tp_proxy_prepare_finish (object, res, &amp;error))
+    {
+      g_print ("Error preparing AM: %s\n", error-&gt;message);
+      goto OUT;
+    }
+
+  for (accounts = tp_account_manager_get_valid_accounts (manager);
+       accounts != NULL; accounts = g_list_delete_link (accounts, accounts))
+    {
+      TpAccount *account = accounts-&gt;data;
+      TpConnection *connection = tp_account_get_connection (account);
+      GPtrArray *contacts;
+      guint i;
+
+      /* Verify account is online and received its contact list. If state is not
+       * SUCCESS this means we didn't received the roster from server yet and
+       * we would have to wait for the "notify:contact-list-state" signal. */
+      if (connection == NULL ||
+          tp_connection_get_contact_list_state (connection) !=
+              TP_CONTACT_LIST_STATE_SUCCESS)
+        continue;
+
+      contacts = tp_connection_dup_contact_list (connection);
+      for (i = 0; i &lt; contacts-&gt;len; i++)
+        {
+          TpContact *contact = g_ptr_array_index (contacts, i);
+          const gchar * const *groups;
+
+          g_print ("contact %s (%s) in groups:\n",
+              tp_contact_get_identifier (contact),
+              tp_contact_get_alias (contact));
+
+          for (groups = tp_contact_get_contact_groups (contact);
+               *groups != NULL; groups++)
+            g_print ("  %s\n", *groups);
+        }
+      g_ptr_array_unref (contacts);
+    }
+
+OUT:
+  g_main_loop_quit (loop);
+}
+
+int
+main (int argc,
+      char **argv)
+{
+  TpAccountManager *manager;
+  TpSimpleClientFactory *factory;
+  GMainLoop *loop;
+
+  g_type_init ();
+  tp_debug_set_flags (g_getenv ("EXAMPLE_DEBUG"));
+
+  loop = g_main_loop_new (NULL, FALSE);
+
+  manager = tp_account_manager_dup ();
+  factory = tp_proxy_get_factory (manager);
+  tp_simple_client_factory_add_account_features_varargs (factory,
+      TP_ACCOUNT_FEATURE_CONNECTION,
+      0);
+  tp_simple_client_factory_add_connection_features_varargs (factory,
+      TP_CONNECTION_FEATURE_CONTACT_LIST,
+      0);
+  tp_simple_client_factory_add_contact_features_varargs (factory,
+      TP_CONTACT_FEATURE_ALIAS,
+      TP_CONTACT_FEATURE_CONTACT_GROUPS,
+      TP_CONTACT_FEATURE_INVALID);
+
+  tp_proxy_prepare_async (manager, NULL, account_manager_prepared_cb, loop);
+
+  g_main_loop_run (loop);
+
+  g_object_unref (manager);
+  g_main_loop_unref (loop);
+
+  return 0;
+}
+</pre></div>
 </div>
 <p><br class="example-break">
 </p>
@@ -509,21 +625,11 @@ Note that the <a class="link" href="telepathy-glib-account.html#TpAccount"><span
 before returning from this function. One could ref every item in the list
 like the following example:
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3</pre></td>
-        <td class="listing_code"><pre class="programlisting">GList <span class="gtkdoc opt">*</span>accounts<span class="gtkdoc opt">;</span>
-account <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts">tp_account_manager_get_valid_accounts</a></span> <span class="gtkdoc opt">(</span>manager<span class="gtkdoc opt">);</span>
-<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#g-list-foreach">g_list_foreach</a></span> <span class="gtkdoc opt">(</span>accounts<span class="gtkdoc opt">, (</span>GFunc<span class="gtkdoc opt">)</span> g_object_ref<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+GList *accounts;
+account = tp_account_manager_get_valid_accounts (manager);
+g_list_foreach (accounts, (GFunc) g_object_ref, NULL);
+</pre></div>
 <p>
 </p>
 <p>
@@ -1252,6 +1358,10 @@ Emitted when an account is removed from <em class="parameter"><code>manager</cod
                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>          user_data)      : <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS"><code class="literal">Run Last</code></a></pre>
 <p>
 Emitted when the validity on <em class="parameter"><code>account</code></em> changes.
+</p>
+<p>
+This signal is also used to indicate a new account that did not
+previously exist has been added (with <em class="parameter"><code>valid</code></em> set to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>).
 </p>
 <p>
 <em class="parameter"><code>account</code></em> is guaranteed to have <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CORE:CAPS" title="TP_ACCOUNT_FEATURE_CORE"><code class="literal">TP_ACCOUNT_FEATURE_CORE</code></a> prepared, along

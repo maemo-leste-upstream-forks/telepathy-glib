@@ -433,7 +433,7 @@ tp_call_stream_endpoint_class_init (TpCallStreamEndpointClass *klass)
       G_STRUCT_OFFSET (TpCallStreamEndpointClass, dbus_props_class));
 
   /**
-   * TpCallStreamEndpoint::candidate-selected
+   * TpCallStreamEndpoint::candidate-selected:
    * @self: the #TpCallStreamEndpoint
    * @local_candidate: the local candidate
    * @remote_candidate: the remote candidate
@@ -451,7 +451,7 @@ tp_call_stream_endpoint_class_init (TpCallStreamEndpointClass *klass)
       2, TP_STRUCT_TYPE_CANDIDATE, TP_STRUCT_TYPE_CANDIDATE);
 
   /**
-   * TpCallStreamEndpoint::candidate-accepted
+   * TpCallStreamEndpoint::candidate-accepted:
    * @self: the #TpCallStreamEndpoint
    * @local_candidate: the local candidate
    * @remote_candidate: the remote candidate
@@ -469,7 +469,7 @@ tp_call_stream_endpoint_class_init (TpCallStreamEndpointClass *klass)
       2, TP_STRUCT_TYPE_CANDIDATE, TP_STRUCT_TYPE_CANDIDATE);
 
   /**
-   * TpCallStreamEndpoint::candidate-rejected
+   * TpCallStreamEndpoint::candidate-rejected:
    * @self: the #TpCallStreamEndpoint
    * @local_candidate: the local candidate
    * @remote_candidate: the remote candidate
@@ -676,15 +676,15 @@ validate_candidate (const GValueArray *candidate,
 
   if (candidate->n_values != 4)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "A candidate should have 4 values, got %d", candidate->n_values);
       return FALSE;
     }
 
   value = g_value_array_get_nth ((GValueArray *) candidate, 0);
-  if (g_value_get_uint (value) >= NUM_TP_STREAM_COMPONENTS)
+  if (g_value_get_uint (value) >= TP_NUM_STREAM_COMPONENTS)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Invalid component id: %d", g_value_get_uint (value));
       return FALSE;
     }
@@ -692,7 +692,7 @@ validate_candidate (const GValueArray *candidate,
   value = g_value_array_get_nth ((GValueArray *) candidate, 1);
   if (tp_str_empty (g_value_get_string (value)))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Invalid address: %s", g_value_get_string (value));
       return FALSE;
     }
@@ -700,7 +700,7 @@ validate_candidate (const GValueArray *candidate,
   value = g_value_array_get_nth ((GValueArray *) candidate, 2);
   if (g_value_get_uint (value) > 65535)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Invalid port: %d", g_value_get_uint (value));
       return FALSE;
     }
@@ -732,14 +732,14 @@ common_checks (TpCallStreamEndpoint *self,
   if (get_candidate_component (local_candidate) !=
       get_candidate_component (remote_candidate))
     {
-      g_set_error_literal (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error_literal (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Component must be the same in local and remote candidate");
       return FALSE;
     }
 
   if (!self->priv->controlling)
     {
-      g_set_error_literal (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error_literal (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Only controlling side can call SetSelectedCandidatePair");
       return FALSE;
     }
@@ -811,18 +811,18 @@ call_stream_endpoint_set_endpoint_state (TpSvcCallStreamEndpoint *iface,
 {
   TpCallStreamEndpoint *self = TP_CALL_STREAM_ENDPOINT (iface);
 
-  if (component >= NUM_TP_STREAM_COMPONENTS)
+  if (component >= TP_NUM_STREAM_COMPONENTS)
     {
-      GError *error = g_error_new (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError *error = g_error_new (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Stream component %d is out of the valid range.", state);
       dbus_g_method_return_error (context, error);
       g_error_free (error);
       return;
     }
 
-  if (state >= NUM_TP_STREAM_ENDPOINT_STATES)
+  if (state >= TP_NUM_STREAM_ENDPOINT_STATES)
     {
-      GError *error = g_error_new (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError *error = g_error_new (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Stream state %d is out of the valid range.", state);
       dbus_g_method_return_error (context, error);
       g_error_free (error);

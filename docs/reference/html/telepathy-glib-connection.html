@@ -184,6 +184,9 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
 #define             <a class="link" href="telepathy-glib-connection.html#TP-ERRORS-DISCONNECTED:CAPS" title="TP_ERRORS_DISCONNECTED">TP_ERRORS_DISCONNECTED</a>
 const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *       <a class="link" href="telepathy-glib-connection.html#tp-connection-get-detailed-error" title="tp_connection_get_detailed_error ()">tp_connection_get_detailed_error</a>    (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> **details</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             <a class="link" href="telepathy-glib-connection.html#tp-connection-dup-detailed-error-vardict" title="tp_connection_dup_detailed_error_vardict ()">tp_connection_dup_detailed_error_vardict</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> **details</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection.html#tp-connection-add-client-interest" title="tp_connection_add_client_interest ()">tp_connection_add_client_interest</a>   (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *interested_in</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection.html#tp-connection-add-client-interest-by-id" title="tp_connection_add_client_interest_by_id ()">tp_connection_add_client_interest_by_id</a>
@@ -232,6 +235,7 @@ struct              <a class="link" href="telepathy-glib-connection.html#TpConta
 #define             <a class="link" href="telepathy-glib-connection.html#TP-TYPE-CONTACT-INFO-LIST:CAPS" title="TP_TYPE_CONTACT_INFO_LIST">TP_TYPE_CONTACT_INFO_LIST</a>
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="telepathy-glib-connection.html#tp-contact-info-list-copy" title="tp_contact_info_list_copy ()">tp_contact_info_list_copy</a>           (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-connection.html#tp-contact-info-list-free" title="tp_contact_info_list_free ()">tp_contact_info_list_free</a>           (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
+
 
 <a class="link" href="telepathy-glib-enums.html#TpContactListState" title="enum TpContactListState"><span class="returnvalue">TpContactListState</span></a>  <a class="link" href="telepathy-glib-connection.html#tp-connection-get-contact-list-state" title="tp_connection_get_contact_list_state ()">tp_connection_get_contact_list_state</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);
@@ -1608,6 +1612,10 @@ property, which may be <a href="http://library.gnome.org/devel/glib/unstable/gli
 <div class="refsect2">
 <a name="tp-connection-get-self-handle"></a><h3>tp_connection_get_self_handle ()</h3>
 <pre class="programlisting"><a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="returnvalue">TpHandle</span></a>            tp_connection_get_self_handle       (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_get_self_handle</code> is deprecated and should not be used in newly-written code. Use <a class="link" href="telepathy-glib-connection.html#tp-connection-get-self-handle" title="tp_connection_get_self_handle ()"><code class="function">tp_connection_get_self_handle()</code></a> instead.</p>
+</div>
 <p>
 Return the <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-CONTACT:CAPS"><code class="literal">TP_HANDLE_TYPE_CONTACT</code></a> handle of the local user on this
 connection, or 0 if the self-handle is not known yet or the connection
@@ -2517,6 +2525,42 @@ modified or destroyed by the caller. <span class="annotation">[<acronym title="P
 </tbody>
 </table></div>
 <p class="since">Since 0.11.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tp-connection-dup-detailed-error-vardict"></a><h3>tp_connection_dup_detailed_error_vardict ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             tp_connection_dup_detailed_error_vardict
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> **details</code></em>);</pre>
+<p>
+If the connection has disconnected, return the D-Bus error name with which
+it disconnected (in particular, this is <a class="link" href="telepathy-glib-errors.html#TP-ERROR-STR-CANCELLED:CAPS" title="TP_ERROR_STR_CANCELLED"><code class="literal">TP_ERROR_STR_CANCELLED</code></a> if it was
+disconnected by a user request).
+</p>
+<p>
+Otherwise, return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, without altering <em class="parameter"><code>details</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a connection</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
+<td>optionally used to return a <a href="http://library.gnome.org/devel/glib/unstable/glib-GVariantType.html#G-VARIANT-TYPE-VARDICT:CAPS"><code class="literal">G_VARIANT_TYPE_VARDICT</code></a> with details
+of the error. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a D-Bus error name, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.19.0</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -7541,6 +7585,10 @@ To wait for a non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Sta
 <div class="refsect2">
 <a name="TpConnection--self-handle"></a><h3>The <code class="literal">"self-handle"</code> property</h3>
 <pre class="programlisting">  "self-handle"              <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">TpConnection:self-handle</code> is deprecated and should not be used in newly-written code. Use <a class="link" href="telepathy-glib-connection.html#TpConnection--self-contact" title='The "self-contact" property'><span class="type">"self-contact"</span></a> instead.</p>
+</div>
 <p>
 The <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-CONTACT:CAPS"><code class="literal">TP_HANDLE_TYPE_CONTACT</code></a> handle of the local user on this connection,
 or 0 if we don't know yet or if the connection has become invalid.

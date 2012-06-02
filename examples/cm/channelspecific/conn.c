@@ -16,7 +16,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/handle-repo-dynamic.h>
 
 #include "protocol.h"
 #include "room-manager.h"
@@ -137,20 +136,20 @@ example_csh_normalize_room (TpHandleRepoIface *repo,
 
   if (id[0] != '#')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "Chatroom names in this protocol start with #");
     }
 
   if (id[1] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "Chatroom name cannot be empty");
       return NULL;
     }
 
   if (strchr (id, '@') != NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "Chatroom names in this protocol cannot contain '@'");
       return NULL;
     }
@@ -160,7 +159,7 @@ example_csh_normalize_room (TpHandleRepoIface *repo,
 
 static void
 create_handle_repos (TpBaseConnection *conn,
-                     TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES])
+                     TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES])
 {
   repos[TP_HANDLE_TYPE_CONTACT] = tp_dynamic_handle_repo_new
       (TP_HANDLE_TYPE_CONTACT, example_csh_normalize_contact, NULL);

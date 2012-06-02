@@ -50,6 +50,26 @@
  * The #TpAccountManager object is used to communicate with the Telepathy
  * AccountManager service.
  *
+ * A new #TpAccountManager object can be created with
+ * tp_account_manager_dup().
+ *
+ * To list the existing valid accounts, the client should first
+ * prepare the %TP_ACCOUNT_MANAGER_FEATURE_CORE feature using
+ * tp_proxy_prepare_async(), then call
+ * tp_account_manager_get_valid_accounts().
+ *
+ * The #TpAccountManager::account-validity-changed signal is emitted
+ * to notify of the validity of an account changing. New accounts are
+ * also indicated by the emission of this signal on an account that
+ * did not previously exist. (The rationale behind indicating new
+ * accounts by an account validity change signal is that clients
+ * interested in this kind of thing should be connected to this signal
+ * anyway: an account having just become valid is effectively a new
+ * account to a client.)
+ *
+ * The #TpAccountManager::account-removed signal is emitted when
+ * existing accounts are removed.
+ *
  * Since: 0.7.32
  */
 
@@ -589,6 +609,9 @@ tp_account_manager_class_init (TpAccountManagerClass *klass)
    *
    * Emitted when the validity on @account changes.
    *
+   * This signal is also used to indicate a new account that did not
+   * previously exist has been added (with @valid set to %TRUE).
+   *
    * @account is guaranteed to have %TP_ACCOUNT_FEATURE_CORE prepared, along
    * with all features previously passed to
    * tp_simple_client_factory_add_account_features().
@@ -706,7 +729,7 @@ tp_account_manager_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_account_manager_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -1237,7 +1260,7 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
   if (error != NULL)
     {
       g_simple_async_result_set_from_error (my_res, error);
-      g_simple_async_result_complete (my_res);
+      g_simple_async_result_complete_in_idle (my_res);
       return;
     }
 
@@ -1246,7 +1269,7 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
   if (account == NULL)
     {
       g_simple_async_result_take_error (my_res, e);
-      g_simple_async_result_complete (my_res);
+      g_simple_async_result_complete_in_idle (my_res);
       return;
     }
 

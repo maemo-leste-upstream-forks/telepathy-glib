@@ -48,6 +48,8 @@ TpContactInfoFieldSpec *tp_contact_info_field_spec_copy (
     const TpContactInfoFieldSpec *self);
 void tp_contact_info_field_spec_free (TpContactInfoFieldSpec *self);
 
+typedef GList TpContactInfoSpecList;
+
 #define TP_TYPE_CONTACT_INFO_SPEC_LIST (tp_contact_info_spec_list_get_type ())
 GType tp_contact_info_spec_list_get_type (void);
 GList *tp_contact_info_spec_list_copy (GList *list);
@@ -70,6 +72,8 @@ TpContactInfoField *tp_contact_info_field_new (const gchar *field_name,
     GStrv parameters, GStrv field_value);
 TpContactInfoField *tp_contact_info_field_copy (const TpContactInfoField *self);
 void tp_contact_info_field_free (TpContactInfoField *self);
+
+typedef GList TpContactInfoList;
 
 #define TP_TYPE_CONTACT_INFO_LIST (tp_contact_info_list_get_type ())
 GType tp_contact_info_list_get_type (void);
@@ -127,6 +131,7 @@ GQuark tp_errors_disconnected_quark (void);
 TpConnection *tp_connection_new (TpDBusDaemon *dbus, const gchar *bus_name,
     const gchar *object_path, GError **error) G_GNUC_WARN_UNUSED_RESULT;
 
+_TP_AVAILABLE_IN_0_16
 TpAccount *tp_connection_get_account (TpConnection *self);
 
 TpConnectionStatus tp_connection_get_status (TpConnection *self,
@@ -136,7 +141,11 @@ const gchar *tp_connection_get_connection_manager_name (TpConnection *self);
 
 const gchar *tp_connection_get_protocol_name (TpConnection *self);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR (tp_connection_get_self_contact)
 TpHandle tp_connection_get_self_handle (TpConnection *self);
+#endif
+
 TpContact *tp_connection_get_self_contact (TpConnection *self);
 
 TpCapabilities * tp_connection_get_capabilities (TpConnection *self);
@@ -153,19 +162,21 @@ gboolean tp_connection_set_contact_info_finish (TpConnection *self,
     GAsyncResult *result, GError **error);
 
 #ifndef TP_DISABLE_DEPRECATED
-gboolean tp_connection_is_ready (TpConnection *self)
-  _TP_GNUC_DEPRECATED_FOR (tp_proxy_is_prepared);
+_TP_DEPRECATED_IN_0_18_FOR (tp_proxy_is_prepared)
+gboolean tp_connection_is_ready (TpConnection *self);
 
+_TP_DEPRECATED_IN_0_18
 gboolean tp_connection_run_until_ready (TpConnection *self,
     gboolean connect, GError **error,
-    GMainLoop **loop) _TP_GNUC_DEPRECATED;
+    GMainLoop **loop);
 
 typedef void (*TpConnectionWhenReadyCb) (TpConnection *connection,
     const GError *error, gpointer user_data);
 
+_TP_DEPRECATED_IN_0_18_FOR (tp_proxy_prepare_async)
 void tp_connection_call_when_ready (TpConnection *self,
     TpConnectionWhenReadyCb callback,
-    gpointer user_data) _TP_GNUC_DEPRECATED_FOR (tp_proxy_prepare_async);
+    gpointer user_data);
 #endif
 
 typedef void (*TpConnectionNameListCb) (const gchar * const *names,
@@ -186,8 +197,13 @@ gint tp_connection_presence_type_cmp_availability (TpConnectionPresenceType p1,
 gboolean tp_connection_parse_object_path (TpConnection *self, gchar **protocol,
     gchar **cm_name);
 
+_TP_AVAILABLE_IN_0_20
 const gchar *tp_connection_get_detailed_error (TpConnection *self,
     const GHashTable **details);
+_TP_AVAILABLE_IN_0_20
+gchar *tp_connection_dup_detailed_error_vardict (TpConnection *self,
+    GVariant **details) G_GNUC_WARN_UNUSED_RESULT;
+
 
 void tp_connection_add_client_interest (TpConnection *self,
     const gchar *interested_in);
@@ -282,21 +298,28 @@ TpAvatarRequirements * tp_connection_get_avatar_requirements (
 
 #define TP_CONNECTION_FEATURE_ALIASING \
   (tp_connection_get_feature_quark_aliasing ())
+_TP_AVAILABLE_IN_0_18
 GQuark tp_connection_get_feature_quark_aliasing (void) G_GNUC_CONST;
 
+_TP_AVAILABLE_IN_0_18
 gboolean tp_connection_can_set_contact_alias (TpConnection *self);
 
 #define TP_CONNECTION_FEATURE_BALANCE \
   (tp_connection_get_feature_quark_balance ())
+_TP_AVAILABLE_IN_0_16
 GQuark tp_connection_get_feature_quark_balance (void) G_GNUC_CONST;
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_connection_get_balance (TpConnection *self,
     gint *balance, guint *scale, const gchar **currency);
+_TP_AVAILABLE_IN_0_16
 const gchar * tp_connection_get_balance_uri (TpConnection *self);
 
+_TP_AVAILABLE_IN_0_18
 void tp_connection_disconnect_async (TpConnection *self,
     GAsyncReadyCallback callback,
     gpointer user_data);
+_TP_AVAILABLE_IN_0_18
 gboolean tp_connection_disconnect_finish (TpConnection *self,
     GAsyncResult *result,
     GError **error);

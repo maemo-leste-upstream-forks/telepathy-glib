@@ -533,7 +533,7 @@ operation_failed (TpStreamTubeChannel *self,
 {
   g_simple_async_result_set_from_error (self->priv->result, error);
 
-  g_simple_async_result_complete (self->priv->result);
+  g_simple_async_result_complete_in_idle (self->priv->result);
   tp_clear_object (&self->priv->result);
 }
 
@@ -599,8 +599,8 @@ new_local_connection_identified (TpStreamTubeChannel *self,
 
   /* We are accepting a tube so the contact of the connection is the
    * initiator of the tube */
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   initiator_handle = tp_channel_get_initiator_handle (TP_CHANNEL (self));
-
 
   connection = tp_channel_borrow_connection (TP_CHANNEL (self));
   features = tp_simple_client_factory_dup_contact_features (
@@ -612,6 +612,7 @@ new_local_connection_identified (TpStreamTubeChannel *self,
       features->len, (TpContactFeature *) features->data,
       new_local_connection_with_contact,
       tube_conn, g_object_unref, G_OBJECT (self));
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   g_array_unref (features);
 }
@@ -832,7 +833,7 @@ tp_stream_tube_channel_accept_async (TpStreamTubeChannel *self,
   if (self->priv->access_control_param != NULL)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback, user_data,
-          TP_ERRORS, TP_ERROR_INVALID_ARGUMENT, "Tube has already be accepted");
+          TP_ERROR, TP_ERROR_INVALID_ARGUMENT, "Tube has already be accepted");
 
       return;
     }
@@ -1077,12 +1078,15 @@ connection_identified (TpStreamTubeChannel *self,
       features = tp_simple_client_factory_dup_contact_features (
           tp_proxy_get_factory (connection), connection);
 
+      /* Spec does not give the id with the handle */
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       /* Pass the ref on tube_conn to the function */
       tp_connection_get_contacts_by_handle (connection,
           1, &handle,
           features->len, (TpContactFeature *) features->data,
           _new_remote_connection_with_contact,
           tube_conn, g_object_unref, G_OBJECT (self));
+       G_GNUC_END_IGNORE_DEPRECATIONS
 
       g_array_unref (features);
     }
@@ -1203,7 +1207,7 @@ _channel_offered (TpChannel *channel,
 
   DEBUG ("Stream Tube offered");
 
-  g_simple_async_result_complete (self->priv->result);
+  g_simple_async_result_complete_in_idle (self->priv->result);
   tp_clear_object (&self->priv->result);
 }
 

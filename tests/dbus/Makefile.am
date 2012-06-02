@@ -33,6 +33,7 @@ tests_list = \
     test-contacts-slow-path \
     test-dbus \
     test-dbus-tube \
+    test-debug-client \
     test-disconnection \
     test-error-enum \
     test-example-no-protocols \
@@ -49,6 +50,7 @@ tests_list = \
     test-properties \
     test-protocol-objects \
     test-proxy-preparation \
+    test-room-list \
     test-self-handle \
     test-self-presence \
     test-simple-approver \
@@ -58,6 +60,7 @@ tests_list = \
     test-text-channel \
     test-text-mixin \
     test-text-respawn \
+    test-tls-certificate \
     test-unsupported-interface
 
 if ENABLE_INSTALLED_TESTS
@@ -251,12 +254,19 @@ test_text_channel_LDADD = \
     $(LDADD) \
     $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 
+test_debug_client_SOURCES = debug-client.c
+
+test_room_list_SOURCES = room-list.c
+
+test_tls_certificate_SOURCES = tls-certificate.c
+
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
 
 AM_CPPFLAGS = \
     -I${top_srcdir} -I${top_builddir} \
+    -D_TP_COMPILATION \
     -D_TP_IGNORE_DEPRECATIONS \
     $(GLIB_CFLAGS) \
     $(DBUS_CFLAGS) \

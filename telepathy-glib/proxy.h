@@ -55,7 +55,8 @@ typedef enum {
     TP_DBUS_ERROR_CANCELLED = 9,
     TP_DBUS_ERROR_INCONSISTENT = 10,
 } TpDBusError;
-#define NUM_TP_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
+#define TP_NUM_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
+#define NUM_TP_DBUS_ERRORS TP_NUM_DBUS_ERRORS
 
 struct _TpProxy {
     /*<private>*/
@@ -156,6 +157,7 @@ GType tp_proxy_get_type (void);
 gboolean tp_proxy_has_interface_by_id (gpointer self, GQuark iface);
 gboolean tp_proxy_has_interface (gpointer self, const gchar *iface);
 
+_TP_AVAILABLE_IN_0_16
 TpSimpleClientFactory *tp_proxy_get_factory (gpointer self);
 
 TpDBusDaemon *tp_proxy_get_dbus_daemon (gpointer self);

@@ -14,7 +14,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/handle-repo-dynamic.h>
 
 #include "im-manager.h"
 #include "protocol.h"
@@ -109,7 +108,7 @@ example_normalize_contact (TpHandleRepoIface *repo G_GNUC_UNUSED,
 
 static void
 create_handle_repos (TpBaseConnection *conn,
-                     TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES])
+                     TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES])
 {
   repos[TP_HANDLE_TYPE_CONTACT] = tp_dynamic_handle_repo_new
       (TP_HANDLE_TYPE_CONTACT, example_normalize_contact, NULL);

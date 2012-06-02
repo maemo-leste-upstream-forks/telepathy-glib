@@ -44,7 +44,7 @@
 <div class="refsynopsisdiv">
 <a name="telepathy-glib-proxy.synopsis"></a><h2>Synopsis</h2>
 <a name="TpProxy"></a><a name="TpDBusError"></a><pre class="synopsis">
-#include &lt;telepathy-glib/proxy.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
 struct              <a class="link" href="telepathy-glib-proxy.html#TpProxy-struct" title="struct TpProxy">TpProxy</a>;
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-proxy.html#TpProxyPrepareAsync" title="TpProxyPrepareAsync ()">*TpProxyPrepareAsync</a>)              (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *proxy</code></em>,
@@ -85,6 +85,7 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting
 #define             <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERRORS:CAPS" title="TP_DBUS_ERRORS">TP_DBUS_ERRORS</a>
 enum                <a class="link" href="telepathy-glib-proxy.html#TpDBusError-enum" title="enum TpDBusError">TpDBusError</a>;
 #define             <a class="link" href="telepathy-glib-proxy.html#NUM-TP-DBUS-ERRORS:CAPS" title="NUM_TP_DBUS_ERRORS">NUM_TP_DBUS_ERRORS</a>
+#define             <a class="link" href="telepathy-glib-proxy.html#TP-NUM-DBUS-ERRORS:CAPS" title="TP_NUM_DBUS_ERRORS">TP_NUM_DBUS_ERRORS</a>
 #define             <a class="link" href="telepathy-glib-proxy.html#TP-TYPE-DBUS-ERROR:CAPS" title="TP_TYPE_DBUS_ERROR">TP_TYPE_DBUS_ERROR</a>
 </pre>
 </div>
@@ -105,9 +106,11 @@ enum                <a class="link" href="telepathy-glib-proxy.html#TpDBusError-
          +----<a class="link" href="telepathy-glib-connection.html#TpConnection">TpConnection</a>
          +----<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager">TpConnectionManager</a>
          +----<a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon">TpDBusDaemon</a>
+         +----<a class="link" href="TpDebugClient.html" title="TpDebugClient">TpDebugClient</a>
          +----<a class="link" href="telepathy-glib-media-interfaces.html#TpMediaSessionHandler">TpMediaSessionHandler</a>
          +----<a class="link" href="telepathy-glib-media-interfaces.html#TpMediaStreamHandler">TpMediaStreamHandler</a>
          +----<a class="link" href="telepathy-glib-protocol.html#TpProtocol">TpProtocol</a>
+         +----<a class="link" href="TpTLSCertificate.html" title="TpTLSCertificate">TpTLSCertificate</a>
 </pre>
 <pre class="synopsis">
   GEnum
@@ -440,21 +443,11 @@ instance, because <a class="link" href="telepathy-glib-channel.html#TP-CHANNEL-F
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3</pre></td>
-        <td class="listing_code"><pre class="programlisting">TpChannel <span class="gtkdoc opt">*</span>channel <span class="gtkdoc opt">= ...;</span>
+<div class="informalexample"><pre class="programlisting">
+TpChannel *channel = ...;
 
-<span class="function"><a href="telepathy-glib-proxy.html#tp-proxy-prepare-async">tp_proxy_prepare_async</a></span> <span class="gtkdoc opt">(</span>channel<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">,</span> callback<span class="gtkdoc opt">,</span> user_data<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_proxy_prepare_async (channel, NULL, callback, user_data);
+</pre></div>
 <p>
 </p>
 <p>
@@ -462,23 +455,12 @@ is equivalent to
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4</pre></td>
-        <td class="listing_code"><pre class="programlisting">TpChannel <span class="gtkdoc opt">*</span>channel <span class="gtkdoc opt">= ...;</span>
-GQuark features<span class="gtkdoc opt">[] = {</span> TP_CHANNEL_FEATURE_CORE<span class="gtkdoc opt">,</span> <span class="number">0</span> <span class="gtkdoc opt">};</span>
+<div class="informalexample"><pre class="programlisting">
+TpChannel *channel = ...;
+GQuark features[] = { TP_CHANNEL_FEATURE_CORE, 0 };
 
-<span class="function"><a href="telepathy-glib-proxy.html#tp-proxy-prepare-async">tp_proxy_prepare_async</a></span> <span class="gtkdoc opt">(</span>channel<span class="gtkdoc opt">,</span> features<span class="gtkdoc opt">,</span> callback<span class="gtkdoc opt">,</span> user_data<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_proxy_prepare_async (channel, features, callback, user_data);
+</pre></div>
 <p>
 </p>
 <p>
@@ -939,12 +921,23 @@ Since 0.11.5, there is a corresponding <a href="http://library.gnome.org/devel/g
 <hr>
 <div class="refsect2">
 <a name="NUM-TP-DBUS-ERRORS:CAPS"></a><h3>NUM_TP_DBUS_ERRORS</h3>
-<pre class="programlisting">#define NUM_TP_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
+<pre class="programlisting">#define NUM_TP_DBUS_ERRORS TP_NUM_DBUS_ERRORS
+</pre>
+<p>
+1 more than the highest valid <a class="link" href="telepathy-glib-proxy.html#TpDBusError"><span class="type">TpDBusError</span></a> at the time of compilation.
+In new code, use <a class="link" href="telepathy-glib-proxy.html#TP-NUM-DBUS-ERRORS:CAPS" title="TP_NUM_DBUS_ERRORS"><code class="literal">TP_NUM_DBUS_ERRORS</code></a> instead.
+</p>
+<p class="since">Since 0.7.1</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TP-NUM-DBUS-ERRORS:CAPS"></a><h3>TP_NUM_DBUS_ERRORS</h3>
+<pre class="programlisting">#define TP_NUM_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
 </pre>
 <p>
 1 more than the highest valid <a class="link" href="telepathy-glib-proxy.html#TpDBusError"><span class="type">TpDBusError</span></a> at the time of compilation
 </p>
-<p class="since">Since 0.7.1</p>
+<p class="since">Since 0.19.0</p>
 </div>
 <hr>
 <div class="refsect2">

@@ -59,10 +59,10 @@
  * @request_receiving: optional (see #TpBaseCallStream:can-request-receiving);
  *  virtual method called when user requested receiving from the given remote
  *  contact. This virtual method should be implemented instead of
- *  #TpBaseCallStream.request_receiving
+ *  #TpBaseCallStreamClass.request_receiving
  * @set_sending: mandatory; virtual method called when user requested to
  *  start/stop sending to remote contacts. This virtual method should be
- *  implemented instead of #TpBaseCallStream.set_sending
+ *  implemented instead of #TpBaseCallStreamClass.set_sending
  *
  * The class structure for #TpBaseMediaCallStream
  *
@@ -1213,7 +1213,7 @@ tp_base_media_call_stream_complete_sending_state_change (
 
   if (!correct_state_transition (self->priv->sending_state, state))
     {
-      GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError e = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Invalid sending state transition" };
       dbus_g_method_return_error (context, &e);
       return;
@@ -1299,7 +1299,7 @@ tp_base_media_call_stream_complete_receiving_state_change (
 
   if (!correct_state_transition (self->priv->receiving_state, state))
     {
-      GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError e = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Invalid receiving state transition" };
       dbus_g_method_return_error (context, &e);
       return;
@@ -1417,7 +1417,7 @@ tp_base_media_call_stream_add_candidates (TpSvcCallStreamInterfaceMedia *iface,
 
   if (klass->add_local_candidates == NULL)
     {
-      GError e = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      GError e = { TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Connection Manager did not implement "
           "TpBaseMediaCallStream::add_local_candidates vmethod" };
       dbus_g_method_return_error (context, &e);

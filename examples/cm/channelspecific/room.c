@@ -12,8 +12,7 @@
 #include "room.h"
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/channel-iface.h>
-#include <telepathy-glib/svc-channel.h>
+#include <telepathy-glib/telepathy-glib-dbus.h>
 
 G_DEFINE_TYPE_WITH_CODE (ExampleCSHRoomChannel,
     example_csh_room_channel,
@@ -38,13 +37,18 @@ struct _ExampleCSHRoomChannelPrivate
   guint simulation_delay;
 };
 
+static GPtrArray *
+example_csh_room_channel_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
 
-static const char * example_csh_room_channel_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_GROUP,
-    TP_IFACE_CHANNEL_INTERFACE_MESSAGES,
-    NULL
+  interfaces = TP_BASE_CHANNEL_CLASS (example_csh_room_channel_parent_class)->
+    get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_GROUP);
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_MESSAGES);
+  return interfaces;
 };
-
 
 static void
 example_csh_room_channel_init (ExampleCSHRoomChannel *self)
@@ -370,7 +374,7 @@ remove_member_with_reason (GObject *object,
     {
       /* TODO: also simulate some channels where the user is an operator and
        * can kick people */
-      g_set_error (error, TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
+      g_set_error (error, TP_ERROR, TP_ERROR_PERMISSION_DENIED,
           "You can't eject other users from this channel");
       return FALSE;
     }
@@ -392,7 +396,7 @@ example_csh_room_channel_class_init (ExampleCSHRoomChannelClass *klass)
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_TEXT;
   base_class->target_handle_type = TP_HANDLE_TYPE_ROOM;
-  base_class->interfaces = example_csh_room_channel_interfaces;
+  base_class->get_interfaces = example_csh_room_channel_get_interfaces;
 
   base_class->close = example_csh_room_channel_close;
 

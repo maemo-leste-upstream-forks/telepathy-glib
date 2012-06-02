@@ -184,7 +184,7 @@ operation_failed (TpFileTransferChannel *self,
     GError *error)
 {
   g_simple_async_result_take_error (self->priv->result, error);
-  g_simple_async_result_complete (self->priv->result);
+  g_simple_async_result_complete_in_idle (self->priv->result);
   tp_clear_object (&self->priv->result);
 }
 
@@ -441,7 +441,7 @@ tp_file_transfer_channel_prepare_core_cb (TpProxy *proxy,
     self->priv->file = g_file_new_for_uri (uri);
 
 out:
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 static void
@@ -880,7 +880,7 @@ tp_file_transfer_channel_class_init (TpFileTransferChannelClass *klass)
   param_spec = g_param_spec_uint ("state",
       "State",
       "The TpFileTransferState of the channel",
-      0, NUM_TP_FILE_TRANSFER_STATES, TP_FILE_TRANSFER_STATE_NONE,
+      0, TP_NUM_FILE_TRANSFER_STATES, TP_FILE_TRANSFER_STATE_NONE,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_STATE,
       param_spec);
@@ -1168,7 +1168,7 @@ accept_or_provide_file_cb (TpChannel *proxy,
       start_transfer (self);
     }
 
-  g_simple_async_result_complete (self->priv->result);
+  g_simple_async_result_complete_in_idle (self->priv->result);
 }
 
 static gboolean
@@ -1328,7 +1328,7 @@ tp_file_transfer_channel_accept_file_async (TpFileTransferChannel *self,
   if (self->priv->access_control_param != NULL)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-          user_data, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          user_data, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't accept already accepted transfer");
 
       return;
@@ -1337,7 +1337,7 @@ tp_file_transfer_channel_accept_file_async (TpFileTransferChannel *self,
   if (self->priv->state != TP_FILE_TRANSFER_STATE_PENDING)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-          user_data, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          user_data, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't accept a transfer that isn't pending");
 
       return;
@@ -1346,7 +1346,7 @@ tp_file_transfer_channel_accept_file_async (TpFileTransferChannel *self,
   if (tp_channel_get_requested (TP_CHANNEL (self)))
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-          user_data, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          user_data, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't accept outgoing transfer");
 
       return;
@@ -1449,7 +1449,7 @@ tp_file_transfer_channel_provide_file_async (TpFileTransferChannel *self,
   if (self->priv->access_control_param != NULL)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-          user_data, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          user_data, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't provide already provided transfer");
 
       return;
@@ -1459,7 +1459,7 @@ tp_file_transfer_channel_provide_file_async (TpFileTransferChannel *self,
       && self->priv->state != TP_FILE_TRANSFER_STATE_PENDING)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-          user_data, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          user_data, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't provide a transfer that isn't pending or accepted");
 
       return;
@@ -1468,7 +1468,7 @@ tp_file_transfer_channel_provide_file_async (TpFileTransferChannel *self,
   if (!tp_channel_get_requested (TP_CHANNEL (self)))
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-          user_data, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          user_data, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't provide incoming transfer");
 
       return;

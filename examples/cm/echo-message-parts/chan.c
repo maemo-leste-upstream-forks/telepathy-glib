@@ -16,9 +16,10 @@
 #include <string.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/channel-iface.h>
+#include <telepathy-glib/telepathy-glib-dbus.h>
+
+/* FIXME: example code should not be doing this! */
 #include <telepathy-glib/message-internal.h>
-#include <telepathy-glib/svc-channel.h>
 
 static void destroyable_iface_init (gpointer iface, gpointer data);
 static void sms_iface_init (gpointer iface, gpointer data);
@@ -30,6 +31,8 @@ G_DEFINE_TYPE_WITH_CODE (ExampleEcho2Channel,
       tp_message_mixin_text_iface_init)
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_MESSAGES,
       tp_message_mixin_messages_iface_init)
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_CHAT_STATE,
+      tp_message_mixin_chat_state_iface_init)
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_DESTROYABLE,
       destroyable_iface_init)
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_SMS, sms_iface_init)
@@ -37,11 +40,21 @@ G_DEFINE_TYPE_WITH_CODE (ExampleEcho2Channel,
 
 /* type definition stuff */
 
-static const char * example_echo_2_channel_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_MESSAGES,
-    TP_IFACE_CHANNEL_INTERFACE_DESTROYABLE,
-    TP_IFACE_CHANNEL_INTERFACE_SMS,
-    NULL };
+static GPtrArray *
+example_echo_2_channel_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (example_echo_2_channel_parent_class)->
+    get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_MESSAGES);
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_DESTROYABLE);
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_SMS);
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_CHAT_STATE);
+
+  return interfaces;
+};
 
 enum
 {
@@ -167,6 +180,13 @@ finally:
     }
 }
 
+static gboolean
+send_chat_state (GObject *object,
+    TpChannelChatState state,
+    GError **error)
+{
+  return TRUE;
+}
 
 static GObject *
 constructor (GType type,
@@ -197,6 +217,8 @@ constructor (GType type,
       TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES,
       content_types);
 
+  tp_message_mixin_implement_send_chat_state (object, send_chat_state);
+
   return object;
 }
 
@@ -212,6 +234,8 @@ static void
 example_echo_2_channel_close (TpBaseChannel *self)
 {
   GObject *object = (GObject *) self;
+
+  tp_message_mixin_maybe_send_gone (object);
 
   if (!tp_base_channel_is_destroyed (self))
     {
@@ -315,7 +339,7 @@ example_echo_2_channel_class_init (ExampleEcho2ChannelClass *klass)
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_TEXT;
   base_class->target_handle_type = TP_HANDLE_TYPE_CONTACT;
-  base_class->interfaces = example_echo_2_channel_interfaces;
+  base_class->get_interfaces = example_echo_2_channel_get_interfaces;
   base_class->close = example_echo_2_channel_close;
   base_class->fill_immutable_properties =
     example_echo_2_channel_fill_immutable_properties;

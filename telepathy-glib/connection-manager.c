@@ -407,23 +407,8 @@ tp_connection_manager_protocol_free (TpConnectionManagerProtocol *proto)
  * Since: 0.11.3
  */
 
-
-GType
-tp_connection_manager_param_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (
-          g_intern_static_string ("TpConnectionManagerParam"),
-          (GBoxedCopyFunc) tp_connection_manager_param_copy,
-          (GBoxedFreeFunc) tp_connection_manager_param_free);
-    }
-
-  return type;
-}
-
+G_DEFINE_BOXED_TYPE (TpConnectionManagerParam, tp_connection_manager_param,
+    tp_connection_manager_param_copy, tp_connection_manager_param_free)
 
 /**
  * TP_TYPE_CONNECTION_MANAGER_PROTOCOL:
@@ -433,23 +418,9 @@ tp_connection_manager_param_get_type (void)
  * Since: 0.11.3
  */
 
-
-GType
-tp_connection_manager_protocol_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (
-          g_intern_static_string ("TpConnectionManagerProtocol"),
-          (GBoxedCopyFunc) tp_connection_manager_protocol_copy,
-          (GBoxedFreeFunc) tp_connection_manager_protocol_free);
-    }
-
-  return type;
-}
-
+G_DEFINE_BOXED_TYPE (TpConnectionManagerProtocol,
+    tp_connection_manager_protocol,
+    tp_connection_manager_protocol_copy, tp_connection_manager_protocol_free)
 
 typedef struct {
     TpConnectionManager *cm;
@@ -1408,7 +1379,7 @@ tp_connection_manager_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_connection_manager_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -1998,14 +1969,14 @@ tp_connection_manager_check_valid_name (const gchar *name,
 
   if (tp_str_empty (name))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "The empty string is not a valid connection manager name");
       return FALSE;
     }
 
   if (!g_ascii_isalpha (name[0]))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Not a valid connection manager name because first character "
           "is not an ASCII letter: %s", name);
       return FALSE;
@@ -2015,7 +1986,7 @@ tp_connection_manager_check_valid_name (const gchar *name,
     {
       if (!g_ascii_isalnum (*name_char) && *name_char != '_')
         {
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "Not a valid connection manager name because character '%c' "
               "is not an ASCII letter, digit or underscore: %s",
               *name_char, name);
@@ -2047,14 +2018,14 @@ tp_connection_manager_check_valid_protocol_name (const gchar *name,
 
   if (name == NULL || name[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "The empty string is not a valid protocol name");
       return FALSE;
     }
 
   if (!g_ascii_isalpha (name[0]))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Not a valid protocol name because first character "
           "is not an ASCII letter: %s", name);
       return FALSE;
@@ -2064,7 +2035,7 @@ tp_connection_manager_check_valid_protocol_name (const gchar *name,
     {
       if (!g_ascii_isalnum (*name_char) && *name_char != '-')
         {
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "Not a valid protocol name because character '%c' "
               "is not an ASCII letter, digit or hyphen/minus: %s",
               *name_char, name);
@@ -2180,7 +2151,7 @@ tp_connection_manager_get_info_source (TpConnectionManager *self)
  * The result is copied and must be freed by the caller, but it is not
  * necessarily still true after the main loop is re-entered.
  *
- * Returns: (type GObject.Strv) (transfer full): a #GStrv of protocol names
+ * Returns: (array zero-terminated=1) (transfer full): a #GStrv of protocol names
  * Since: 0.7.26
  */
 gchar **
@@ -2417,7 +2388,7 @@ tp_connection_manager_protocol_can_register (
  *
  * The result is copied and must be freed by the caller with g_strfreev().
  *
- * Returns: (type GObject.Strv) (transfer full): a #GStrv of protocol names
+ * Returns: (array zero-terminated=1) (transfer full): a #GStrv of protocol names
  * Since: 0.7.26
  */
 gchar **
@@ -2575,4 +2546,31 @@ tp_connection_manager_param_get_default (
   g_value_copy (&param->default_value, value);
 
   return TRUE;
+}
+
+/**
+ * tp_connection_manager_param_dup_default_variant:
+ * @param: a parameter supported by a #TpConnectionManager
+ *
+ * Get the default value for this parameter.
+ *
+ * Use g_variant_get_type() to check that the type is what you expect.
+ * For instance, a string parameter should have type
+ * %G_VARIANT_TYPE_STRING.
+ *
+ * Returns: the default value, or %NULL if there is no default
+ * Since: 0.19.0
+ */
+GVariant *
+tp_connection_manager_param_dup_default_variant (
+    const TpConnectionManagerParam *param)
+{
+  g_return_val_if_fail (param != NULL, NULL);
+
+  if ((param->flags & TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT) == 0
+      || !G_IS_VALUE (&param->default_value))
+    return NULL;
+
+  return g_variant_ref_sink (dbus_g_value_build_g_variant (
+        &param->default_value));
 }

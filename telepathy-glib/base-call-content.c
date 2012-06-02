@@ -514,7 +514,7 @@ tp_base_call_content_class_init (TpBaseCallContentClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallContent:currently-sending-tones
+   * TpBaseCallContent:currently-sending-tones:
    *
    * If this content is currently sending tones or not
    *
@@ -529,7 +529,7 @@ tp_base_call_content_class_init (TpBaseCallContentClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallContent:deferred-tones
+   * TpBaseCallContent:deferred-tones:
    *
    * Tones that are waiting for the user action to play.
    *
@@ -762,7 +762,7 @@ tp_call_content_remove (TpSvcCallContent *content,
 
   if (!tp_base_call_channel_has_mutable_contents (self->priv->channel))
     {
-      GError error = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      GError error = { TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Contents are not mutable" };
       dbus_g_method_return_error (context, &error);
       return;
