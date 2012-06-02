@@ -522,7 +522,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:initial-audio-name
+   * TpBaseCallChannel:initial-audio-name:
    *
    * Name to use to create the audio #TpBaseCallContent if
    * #TpBaseCallChannel:initial-audio is set to %TRUE.
@@ -537,7 +537,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:initial-video-name
+   * TpBaseCallChannel:initial-video-name:
    *
    * Name to use to create the video #TpBaseCallContent if
    * #TpBaseCallChannel:initial-video is set to %TRUE.
@@ -552,7 +552,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:initial-transport
+   * TpBaseCallChannel:initial-transport:
    *
    * If set to %TRUE on a requested channel, this indicates the transport that
    * should be used for this call.
@@ -567,7 +567,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:mutable-contents
+   * TpBaseCallChannel:mutable-contents:
    *
    * Indicate to clients whether or not they can add/remove contents.
    *
@@ -581,7 +581,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:contents
+   * TpBaseCallChannel:contents:
    *
    * #GPtrArray of object-paths of the #TpBaseCallContent objects.
    *
@@ -595,7 +595,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:hardware-streaming
+   * TpBaseCallChannel:hardware-streaming:
    *
    * Indicate to clients whether or not this Connection Manager has hardware
    * streaming.
@@ -610,7 +610,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:call-state
+   * TpBaseCallChannel:call-state:
    *
    * The state of this call.
    *
@@ -623,7 +623,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
   g_object_class_install_property (object_class, PROP_CALL_STATE, param_spec);
 
   /**
-   * TpBaseCallChannel:call-flags
+   * TpBaseCallChannel:call-flags:
    *
    * The flags of this call.
    *
@@ -637,7 +637,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:call-state-reason
+   * TpBaseCallChannel:call-state-reason:
    *
    * The reason for last call state change.
    *
@@ -651,7 +651,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:call-state-details
+   * TpBaseCallChannel:call-state-details:
    *
    * Details on the call state.
    *
@@ -665,7 +665,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:call-members
+   * TpBaseCallChannel:call-members:
    *
    * #GHashTable mapping #TpHandle of each call member to their
    * #TpCallMemberFlags.
@@ -680,7 +680,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
       param_spec);
 
   /**
-   * TpBaseCallChannel:member-identifiers
+   * TpBaseCallChannel:member-identifiers:
    *
    * #GHashTable mapping #TpHandle of each call member to their identifiers.
    *
@@ -695,7 +695,7 @@ tp_base_call_channel_class_init (TpBaseCallChannelClass *klass)
 
 
   /**
-   * TpBaseCallChannel:initial-tones
+   * TpBaseCallChannel:initial-tones:
    *
    * DTMF Tones to be played on the channel created.
    *
@@ -1208,7 +1208,7 @@ tp_base_call_channel_get_call_members (TpBaseCallChannel *self)
  * @self: a #TpBaseCallChannel
  *
  * Must be called when the remote contact accepted the call.
- * #TpBaseCallChannel:state must be either %TP_CALL_STATE_INITIALISED or
+ * #TpBaseCallChannel:call-state must be either %TP_CALL_STATE_INITIALISED or
  * %TP_CALL_STATE_INITIALISING and will then change to %TP_CALL_STATE_ACCEPTED.
  *
  * Must be used only for outgoing calls.
@@ -1268,13 +1268,13 @@ tp_base_call_channel_set_ringing (TpSvcChannelTypeCall *iface,
 
   if (tp_base_channel_is_requested (tp_base))
     {
-      GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError e = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Call was requested. Ringing doesn't make sense." };
       dbus_g_method_return_error (context, &e);
     }
   else if (self->priv->state != TP_CALL_STATE_INITIALISED)
     {
-      GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "Call is not in the right state for Ringing." };
       dbus_g_method_return_error (context, &e);
     }
@@ -1309,14 +1309,14 @@ tp_base_call_channel_set_queued (TpSvcChannelTypeCall *iface,
 
   if (tp_base_channel_is_requested (tp_base))
     {
-      GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError e = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Call was requested. Queued doesn't make sense." };
       dbus_g_method_return_error (context, &e);
     }
   else if (self->priv->state != TP_CALL_STATE_INITIALISING &&
            self->priv->state != TP_CALL_STATE_INITIALISED)
     {
-      GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "Call is not in the right state for Queuing." };
       dbus_g_method_return_error (context, &e);
     }
@@ -1364,7 +1364,7 @@ tp_base_call_channel_accept (TpSvcChannelTypeCall *iface,
         }
       else
         {
-          GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+          GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
               "Invalid state for Accept" };
           dbus_g_method_return_error (context, &e);
           return;
@@ -1382,7 +1382,7 @@ tp_base_call_channel_accept (TpSvcChannelTypeCall *iface,
         }
       else
         {
-          GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+          GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
               "Invalid state for Accept" };
           dbus_g_method_return_error (context, &e);
           return;
@@ -1415,7 +1415,7 @@ tp_base_call_channel_hangup (TpSvcChannelTypeCall *iface,
 
   if (self->priv->state == TP_CALL_STATE_ENDED)
     {
-      GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "This call has already ended" };
       dbus_g_method_return_error (context, &e);
       return;
@@ -1445,28 +1445,28 @@ tp_base_call_channel_add_content_dbus (TpSvcChannelTypeCall *iface,
 
   if (self->priv->state == TP_CALL_STATE_ENDED)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "No contents can be added. The call has already ended.");
       goto error;
     }
 
-  if (mtype >= NUM_TP_MEDIA_STREAM_TYPES)
+  if (mtype >= TP_NUM_MEDIA_STREAM_TYPES)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Unknown content type");
       goto error;
     }
 
-  if (initial_direction >= NUM_TP_MEDIA_STREAM_DIRECTIONS)
+  if (initial_direction >= TP_NUM_MEDIA_STREAM_DIRECTIONS)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Invalid initial direction");
       goto error;
     }
 
   if (!self->priv->mutable_contents || klass->add_content == NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_CAPABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_CAPABLE,
           "Contents are not mutable");
       goto error;
     }

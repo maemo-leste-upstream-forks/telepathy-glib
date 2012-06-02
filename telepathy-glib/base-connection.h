@@ -44,7 +44,7 @@ typedef gboolean (*TpBaseConnectionStartConnectingImpl) (
     TpBaseConnection *self, GError **error);
 
 typedef void (*TpBaseConnectionCreateHandleReposImpl) (TpBaseConnection *self,
-    TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES]);
+    TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES]);
 
 
 typedef GPtrArray *(*TpBaseConnectionCreateChannelFactoriesImpl) (
@@ -131,6 +131,11 @@ void tp_base_connection_disconnect_with_error (TpBaseConnection *self,
 void tp_base_connection_disconnect_with_dbus_error (TpBaseConnection *self,
     const gchar *error_name, GHashTable *details,
     TpConnectionStatusReason reason);
+void tp_base_connection_disconnect_with_dbus_error_vardict (
+    TpBaseConnection *self,
+    const gchar *error_name,
+    GVariant *details,
+    TpConnectionStatusReason reason);
 
 void tp_base_connection_change_status (TpBaseConnection *self,
     TpConnectionStatus status, TpConnectionStatusReason reason);
@@ -145,8 +150,11 @@ void tp_base_connection_finish_shutdown (TpBaseConnection *self);
 void tp_base_connection_add_interfaces (TpBaseConnection *self,
     const gchar **interfaces);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20
 void tp_base_connection_dbus_request_handles (TpSvcConnection *iface,
     guint handle_type, const gchar **names, DBusGMethodInvocation *context);
+#endif
 
 void tp_base_connection_register_with_contacts_mixin (TpBaseConnection *self);
 
@@ -191,7 +199,7 @@ gboolean tp_base_connection_channel_manager_iter_next (
     \
     if (c->status != TP_CONNECTION_STATUS_CONNECTED) \
       { \
-        GError e = { TP_ERRORS, TP_ERROR_DISCONNECTED, \
+        GError e = { TP_ERROR, TP_ERROR_DISCONNECTED, \
             (gchar *) "Connection is disconnected" }; \
         \
         dbus_g_method_return_error ((context), &e); \

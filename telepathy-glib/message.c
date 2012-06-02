@@ -127,7 +127,7 @@ tp_message_init (TpMessage *self)
  * <!-- nothing more to say -->
  *
  * Returns: a newly allocated message suitable to be passed to
- * tp_message_mixin_take_received
+ * tp_message_mixin_take_received()
  *
  * Since: 0.7.21
  * Deprecated: since 0.13.9. Use tp_cm_message_new()
@@ -245,7 +245,7 @@ tp_message_delete_part (TpMessage *self,
  * tp_message_ref_handle:
  * @self: a message
  * @handle_type: a handle type, greater than %TP_HANDLE_TYPE_NONE and less than
- *  %NUM_TP_HANDLE_TYPES
+ *  %TP_NUM_HANDLE_TYPES
  * @handle: a handle of the given type
  *
  * Reference the given handle until this message is destroyed.

@@ -37,7 +37,7 @@ check-valgrind:
 maintainer-upload-release: _maintainer-upload-release-local
 _maintainer-upload-release-local: _maintainer-upload-release-check
 	rsync -rvzPp --chmod=Dg+s,ug+rwX,o=rX $(builddir)/docs/reference/html/ \
-	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib-0.18.x/
+	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib/
 
 BRANCH = $(shell sh tools/git-which-branch.sh misc | tr -d '\n' | tr -C "[:alnum:]" _)
 UPLOAD_BRANCH_TO = people.freedesktop.org:public_html/telepathy-glib
@@ -49,6 +49,22 @@ upload-branch-docs: all
 include tools/lcov.am
 
 CHANGELOG_RANGE = telepathy-glib-0.14.0..
-CHECK_FOR_UNRELEASED = $(srcdir)/NEWS $(wildcard $(srcdir)/telepathy-glib/*.[ch])
+CHECK_FOR_UNRELEASED = \
+    $(srcdir)/NEWS \
+    $(filter-out %/defs.h,$(wildcard $(srcdir)/telepathy-glib/*.[ch])) \
+    $(NULL)
 
 include tools/telepathy.am
+
+# Don't just "make distclean", because that would result in forgetting
+# the options we used when we ran configure.
+#
+# However, we do want to distclean in docs (to get rid of xml, html etc.)
+# and in telepathy-glib (to get rid of any stray files in _gen which might
+# not exist on the new branch).
+clean-for-new-branch:
+	$(MAKE) clean
+	$(MAKE) -C docs distclean
+	$(MAKE) -C telepathy-glib distclean
+	$(SHELL) ./config.status --recheck
+	$(SHELL) ./config.status

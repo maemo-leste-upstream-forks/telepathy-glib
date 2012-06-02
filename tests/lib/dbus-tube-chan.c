@@ -117,9 +117,16 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (TpTestsDBusTubeChannel,
 
 /* type definition stuff */
 
-static const char * tp_tests_dbus_tube_channel_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_TUBE,
-    NULL
+static GPtrArray *
+tp_tests_dbus_tube_channel_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (
+      tp_tests_dbus_tube_channel_parent_class)->get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_TUBE);
+  return interfaces;
 };
 
 static void
@@ -232,14 +239,11 @@ tp_tests_dbus_tube_channel_class_init (TpTestsDBusTubeChannelClass *klass)
   object_class->dispose = dispose;
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_DBUS_TUBE;
-  base_class->interfaces = tp_tests_dbus_tube_channel_interfaces;
+  base_class->get_interfaces = tp_tests_dbus_tube_channel_get_interfaces;
   base_class->close = channel_close;
   base_class->fill_immutable_properties = fill_immutable_properties;
 
   /* base_class->target_handle_type is defined in subclasses */
-
-  tp_text_mixin_class_init (object_class,
-      G_STRUCT_OFFSET (TpTestsDBusTubeChannelClass, text_class));
 
   param_spec = g_param_spec_string ("service-name", "Service Name",
       "the service name associated with this tube object.",
@@ -272,7 +276,7 @@ tp_tests_dbus_tube_channel_class_init (TpTestsDBusTubeChannelClass *klass)
   param_spec = g_param_spec_uint (
       "state", "TpTubeState",
       "state of the tube",
-      0, NUM_TP_TUBE_CHANNEL_STATES - 1, 0,
+      0, TP_NUM_TUBE_CHANNEL_STATES - 1, 0,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_STATE,
       param_spec);

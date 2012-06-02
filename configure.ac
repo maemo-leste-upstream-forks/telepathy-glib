@@ -10,8 +10,8 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [18])
-m4_define([tp_glib_micro_version], [1])
+m4_define([tp_glib_minor_version], [19])
+m4_define([tp_glib_micro_version], [0])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [70])
-m4_define([tp_glib_lt_revision], [1])
-m4_define([tp_glib_lt_age], [70])
+m4_define([tp_glib_lt_current], [71])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [71])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -61,6 +61,13 @@ GTK_DOC_CHECK([1.17],[--flavour no-tmpl])
 
 GOBJECT_INTROSPECTION_CHECK([1.30])
 
+TP_MAJOR_VERSION=tp_glib_major_version
+TP_MINOR_VERSION=tp_glib_minor_version
+TP_MICRO_VERSION=tp_glib_micro_version
+AC_SUBST([TP_MAJOR_VERSION])
+AC_SUBST([TP_MINOR_VERSION])
+AC_SUBST([TP_MICRO_VERSION])
+
 LT_CURRENT=tp_glib_lt_current
 LT_REVISION=tp_glib_lt_revision
 LT_AGE=tp_glib_lt_age
@@ -75,10 +82,28 @@ LINKER_OPTIMISATIONS
 LINKER_VERSION_SCRIPT
 
 ifelse(tp_glib_nano_version, 0,
-    [ official_release=yes ],
-    [ official_release=no ])
+[ # tp-glib is version x.y.z - "official release",
+  # disable extra checks by default
+  official_release=yes
+  AC_ARG_ENABLE([fatal-warnings],
+    [AC_HELP_STRING([--enable-fatal-warnings],
+                    [make various warnings fatal])],
+    [],
+    [enable_fatal_warnings=no])
+],
+[ # tp-glib is version x.y.z.1 - development snapshot,
+  # enable extra checks by default
+  official_release=no
+  AC_ARG_ENABLE([fatal-warnings],
+    [AC_HELP_STRING([--disable-fatal-warnings],
+                    [make various warnings non-fatal])],
+    [],
+    [enable_fatal_warnings=yes])
+])
 
-TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$official_release" = xno],
+AC_SUBST([enable_fatal_warnings])
+
+TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$enable_fatal_warnings" = xyes],
   [all \
    extra \
    declaration-after-statement \
@@ -91,13 +116,12 @@ TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$official_release" = xno],
    format-security \
    init-self],
   [missing-field-initializers \
-   unused-parameter \
-   deprecated-declarations])
+   unused-parameter])
 AC_SUBST([ERROR_CFLAGS])
 
 # these aren't really error flags but they serve a similar purpose for us -
 # making the toolchain stricter
-if test "x$official_release" = xno; then
+if test "x$enable_fatal_warnings" = xyes; then
   TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-copy-dt-needed-entries])
 
   # --no-copy-dt-needed-entries is the new name for --no-add-needed which
@@ -111,6 +135,16 @@ if test "x$official_release" = xno; then
   esac
 fi
 
+if test "x$enable_fatal_warnings" = xyes; then
+  ERROR_SCANNERFLAGS=--warn-error
+else
+  ERROR_SCANNERFLAGS=
+fi
+AC_SUBST([ERROR_SCANNERFLAGS])
+
+# Only use this where we really do want things to depend on whether it's
+# a release or not (like ABI-stability enforcement). For fatal warnings,
+# use ${enable_fatal_warnings} instead.
 AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])
 
 AC_ARG_ENABLE(debug,
@@ -131,33 +165,6 @@ fi
 AC_ARG_ENABLE(backtrace,
   AC_HELP_STRING([--enable-backtrace],[enable printing out the backtrace in case of crash (in most GLib connection managers)]),
     enable_backtrace=$enableval, enable_backtrace=no )
-
-ifelse(tp_glib_nano_version, 0,
-[ # tp-glib is version x.y.z - disable extra checks by default
-  AC_ARG_ENABLE(coding-style-checks,
-    AC_HELP_STRING([--enable-coding-style-checks],
-                   [check coding style using grep]),
-    [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=no] )
-  AC_ARG_ENABLE(doc-checks,
-    AC_HELP_STRING([--enable-doc-checks],
-                   [check for complete documentation coverage]),
-    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no] )
-],
-[ # tp-glib is version x.y.z.1 - enable extra checks by default
-  # (but only partially, because this is a stable branch and gtk-doc's
-  # definition of "complete" sometimes changes)
-  AC_ARG_ENABLE(coding-style-checks,
-    AC_HELP_STRING([--disable-coding-style-checks],
-                   [do not check coding style using grep]),
-    [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=yes])
-  AC_ARG_ENABLE(doc-checks,
-    AC_HELP_STRING([--enable-doc-checks],
-                   [check for complete documentation coverage]),
-    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no])
-])
-
-AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
-AC_SUBST([ENABLE_DOC_CHECKS])
 
 if test x$enable_debug = xyes; then
   AC_DEFINE(ENABLE_DEBUG, [], [Enable debug code])
@@ -200,10 +207,11 @@ AC_SUBST(tpglibtestsdir)
 
 dnl Check for Glib
 PKG_CHECK_MODULES(GLIB,
-  [glib-2.0 >= 2.30.0, gobject-2.0 >= 2.30.0, gio-2.0 >= 2.30.0])
+  [glib-2.0 >= 2.32.0, gobject-2.0 >= 2.32.0, gio-2.0 >= 2.32.0])
 
-AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_30], [Ignore post 2.30 deprecations])
-AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_30], [Prevent post 2.30 APIs])
+dnl MIN_REQUIRED must stay to 2.30 because of GValueArray
+AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_30], [Ignore post 2.32 deprecations])
+AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_32], [Prevent post 2.32 APIs])
 
 dnl Check for GIO-Unix
 PKG_CHECK_MODULES(GIO_UNIX, [gio-unix-2.0],
@@ -334,6 +342,7 @@ AC_OUTPUT( Makefile \
 	   telepathy-glib/Makefile \
 	   telepathy-glib/telepathy-glib.pc \
 	   telepathy-glib/telepathy-glib-uninstalled.pc \
+	   telepathy-glib/version.h \
 	   tests/Makefile \
 	   tests/lib/Makefile \
 	   tests/dbus/Makefile \

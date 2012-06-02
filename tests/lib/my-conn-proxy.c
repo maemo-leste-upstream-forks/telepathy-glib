@@ -33,6 +33,7 @@ enum {
     FEAT_RETRY,
     FEAT_RETRY_DEP,
     FEAT_BEFORE_CONNECTED,
+    FEAT_INTERFACE_LATER,
     N_FEAT
 };
 
@@ -109,7 +110,7 @@ prepare_fail_async (TpProxy *proxy,
   g_assert (tp_proxy_is_prepared (proxy, TP_TESTS_MY_CONN_PROXY_FEATURE_CORE));
 
   result = g_simple_async_result_new_error ((GObject *) proxy, callback,
-      user_data, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      user_data, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
       "No feature for you!");
 
   g_simple_async_result_complete_in_idle (result);
@@ -131,7 +132,7 @@ prepare_retry_async (TpProxy *proxy,
   if (!self->retry_feature_success)
     {
       /* Fail the first time we try to prepare the feature */
-      g_simple_async_result_set_error (result, TP_ERRORS,
+      g_simple_async_result_set_error (result, TP_ERROR,
           TP_ERROR_NOT_YET, "Nah");
     }
 
@@ -203,6 +204,21 @@ prepare_before_connected_before_async (TpProxy *proxy,
   g_object_unref (result);
 }
 
+static void
+prepare_interface_later_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *result;
+
+  result = g_simple_async_result_new ((GObject *) proxy, callback, user_data,
+      prepare_interface_later_async);
+
+  g_simple_async_result_complete_in_idle (result);
+  g_object_unref (result);
+}
+
 static const TpProxyFeature *
 list_features (TpProxyClass *cls G_GNUC_UNUSED)
 {
@@ -212,6 +228,7 @@ list_features (TpProxyClass *cls G_GNUC_UNUSED)
   static GQuark need_wrong_iface[2] = {0, 0};
   static GQuark need_fail[2] = {0, 0};
   static GQuark need_retry[2] = {0, 0};
+  static GQuark need_iface_later[2] = {0, 0};
 
   if (G_LIKELY (features[0].name != 0))
     return features;
@@ -261,6 +278,13 @@ list_features (TpProxyClass *cls G_GNUC_UNUSED)
     prepare_before_connected_async;
   features[FEAT_BEFORE_CONNECTED].prepare_before_signalling_connected_async =
     prepare_before_connected_before_async;
+
+  features[FEAT_INTERFACE_LATER].name =
+    TP_TESTS_MY_CONN_PROXY_FEATURE_INTERFACE_LATER;
+  features[FEAT_INTERFACE_LATER].prepare_async = prepare_interface_later_async;
+  need_iface_later[0] = g_quark_from_static_string (
+      TP_TESTS_MY_CONN_PROXY_IFACE_LATER);
+  features[FEAT_INTERFACE_LATER].interfaces_needed = need_iface_later;
 
   return features;
 }
@@ -331,4 +355,10 @@ GQuark
 tp_tests_my_conn_proxy_get_feature_quark_before_connected (void)
 {
   return g_quark_from_static_string ("tp-my-conn-proxy-feature-before-connected");
+}
+
+GQuark
+tp_tests_my_conn_proxy_get_feature_quark_interface_later (void)
+{
+  return g_quark_from_static_string ("tp-my-conn-proxy-feature-interface-later");
 }

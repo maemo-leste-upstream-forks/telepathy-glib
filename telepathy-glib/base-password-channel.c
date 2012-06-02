@@ -331,7 +331,7 @@ tp_base_password_channel_class_init (TpBasePasswordChannelClass *tp_base_passwor
   param_spec = g_param_spec_uint ("sasl-status",
       "Current status",
       "The status of the current SASL authentication.",
-      0, NUM_TP_SASL_STATUSES, 0,
+      0, TP_NUM_SASL_STATUSES, 0,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_SASL_STATUS,
       param_spec);
@@ -385,7 +385,7 @@ tp_base_password_channel_class_init (TpBasePasswordChannelClass *tp_base_passwor
       param_spec);
 
   /**
-   * TpBasePasswordChannel::finished
+   * TpBasePasswordChannel::finished:
    * @password: the password provided by the user, or %NULL if the
    * authentication has been aborted
    * @domain: domain of a #GError indicating why the authentication has been
@@ -468,7 +468,7 @@ tp_base_password_channel_close (TpBaseChannel *base)
       tp_base_password_channel_change_status (self,
           TP_SASL_STATUS_CLIENT_FAILED, TP_ERROR_STR_CANCELLED);
 
-      g_signal_emit (self, signals[FINISHED], 0, NULL, TP_ERRORS,
+      g_signal_emit (self, signals[FINISHED], 0, NULL, TP_ERROR,
           TP_ERROR_CANCELLED, "BasePassword channel was closed");
     }
 
@@ -512,14 +512,14 @@ tp_base_password_channel_start_mechanism_with_data (
   if (!tp_strv_contains (
           tp_base_password_channel_available_mechanisms, mechanism))
     {
-      error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      error = g_error_new (TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "The mechanism %s is not implemented", mechanism);
       goto error;
     }
 
   if (priv->sasl_status != TP_SASL_STATUS_NOT_STARTED)
     {
-      error = g_error_new (TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      error = g_error_new (TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "StartMechanismWithData cannot be called in state %u",
           priv->sasl_status);
       goto error;
@@ -527,7 +527,7 @@ tp_base_password_channel_start_mechanism_with_data (
 
   if (initial_data->len == 0)
     {
-      error = g_error_new (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      error = g_error_new (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "No initial data given");
       goto error;
     }
@@ -562,7 +562,7 @@ tp_base_password_channel_accept_sasl (
 
   if (priv->sasl_status != TP_SASL_STATUS_SERVER_SUCCEEDED)
     {
-      GError *error = g_error_new (TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      GError *error = g_error_new (TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "AcceptSASL cannot be called in state %u", priv->sasl_status);
       dbus_g_method_return_error (context, error);
       g_error_free (error);
@@ -591,7 +591,7 @@ tp_base_password_channel_abort_sasl (
   if (priv->sasl_status == TP_SASL_STATUS_SERVER_SUCCEEDED
       || priv->sasl_status == TP_SASL_STATUS_CLIENT_ACCEPTED)
     {
-      GError *error = g_error_new (TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      GError *error = g_error_new (TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "AbortSASL cannot be called in state %u", priv->sasl_status);
       dbus_g_method_return_error (context, error);
       g_error_free (error);
@@ -611,7 +611,7 @@ tp_base_password_channel_abort_sasl (
       tp_base_password_channel_change_status (channel,
           TP_SASL_STATUS_CLIENT_FAILED, TP_ERROR_STR_CANCELLED);
 
-      g_signal_emit (channel, signals[FINISHED], 0, NULL, TP_ERRORS,
+      g_signal_emit (channel, signals[FINISHED], 0, NULL, TP_ERROR,
           TP_ERROR_CANCELLED, "AbortSASL was called");
     }
 

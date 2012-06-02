@@ -829,7 +829,7 @@ tp_protocol_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (type,
           tp_cli_protocol_add_signals);
       tp_proxy_subclass_add_error_mapping (type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -948,7 +948,7 @@ tp_protocol_can_register (TpProtocol *self)
  *
  * The result is copied and must be freed by the caller with g_strfreev().
  *
- * Returns: (type GObject.Strv) (transfer full): a copy of
+ * Returns: (array zero-terminated=1) (transfer full): a copy of
  *  #TpProtocol:param-names
  *
  * Since: 0.11.11

@@ -44,6 +44,8 @@ libtp_glib_tests_la_SOURCES = \
     my-conn-proxy.c \
     params-cm.h \
     params-cm.c \
+    room-list-chan.h \
+    room-list-chan.c \
     simple-account.c \
     simple-account.h \
     simple-account-manager.c\
@@ -70,6 +72,8 @@ libtp_glib_tests_la_SOURCES = \
     textchan-null.h \
     textchan-group.c \
     textchan-group.h \
+    tls-certificate.h \
+    tls-certificate.c \
     util.c \
     util.h
 libtp_glib_tests_internal_la_SOURCES = $(libtp_glib_tests_la_SOURCES)
@@ -77,6 +81,10 @@ libtp_glib_tests_internal_la_SOURCES = $(libtp_glib_tests_la_SOURCES)
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
+
+AM_CPPFLAGS = \
+    -D_TP_COMPILATION \
+    $(NULL)
 
 AM_CFLAGS = \
     $(ERROR_CFLAGS) \

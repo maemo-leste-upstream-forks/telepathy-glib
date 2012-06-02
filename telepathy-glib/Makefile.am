@@ -77,7 +77,9 @@ our_headers = \
     defs.h \
     debug.h \
     debug-sender.h \
+    debug-client.h \
     debug-ansi.h \
+    debug-message.h \
     dtmf.h \
     enums.h \
     errors.h \
@@ -103,6 +105,8 @@ our_headers = \
     protocol.h \
     proxy.h \
     proxy-subclass.h \
+    room-info.h \
+    room-list.h \
     run.h \
     signalled-message.h \
     simple-approver.h \
@@ -129,8 +133,11 @@ our_headers = \
     svc-protocol.h \
     svc-tls.h \
     telepathy-glib.h \
+    telepathy-glib-dbus.h \
     text-channel.h \
     text-mixin.h \
+    tls-certificate.h \
+    tls-certificate-rejection.h \
     util.h
 
 tpginclude_HEADERS = \
@@ -141,6 +148,10 @@ BUILT_SOURCES = $(codegen_sources)
 
 CLEANFILES = \
     $(BUILT_SOURCES)
+
+nodist_tpginclude_HEADERS = \
+    version.h \
+    $(NULL)
 
 distclean-local:
 	rm -rf _gen
@@ -235,7 +246,10 @@ libtelepathy_glib_internal_la_SOURCES = \
     dbus-properties-mixin.c \
     dbus-tube-channel.c \
     debug.c \
+    debug-client.c \
     debug-sender.c \
+    debug-message.c \
+    debug-message-internal.h \
     deprecated-internal.h \
     dtmf.c \
     interfaces.c \
@@ -272,6 +286,9 @@ libtelepathy_glib_internal_la_SOURCES = \
     proxy-internal.h \
     proxy-methods.c \
     proxy-signals.c \
+    room-info.c \
+    room-info-internal.h \
+    room-list.c \
     run.c \
     signalled-message.c \
     signalled-message-internal.h \
@@ -286,11 +303,18 @@ libtelepathy_glib_internal_la_SOURCES = \
     stream-tube-connection.c \
     text-channel.c \
     text-mixin.c \
+    tls-certificate.c \
+    tls-certificate-rejection.c \
+    tls-certificate-rejection-internal.h \
     util.c \
     util-internal.h
 
-AM_CFLAGS = \
+AM_CPPFLAGS = \
     -DG_LOG_DOMAIN=\"tp-glib\" \
+    -D_TP_COMPILATION \
+    $(NULL)
+
+AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     @DBUS_CFLAGS@ \
     @GLIB_CFLAGS@ \

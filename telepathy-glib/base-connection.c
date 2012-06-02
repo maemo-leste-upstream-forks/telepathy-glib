@@ -159,8 +159,7 @@
  *  tp_base_connection_add_interfaces().
  * @create_channel_managers: Create an array of channel managers for this
  *  Connection. At least one of this or @create_channel_factories must be set
- *  by subclasses to a non-%NULL value.
- *  Since 0.7.15
+ *  by subclasses to a non-%NULL value. Since: 0.7.15
  *
  * The class of a #TpBaseConnection. Many members are virtual methods etc.
  * to be filled in in the subclass' class_init function.
@@ -243,6 +242,7 @@
 #include <telepathy-glib/contacts-mixin.h>
 #include <telepathy-glib/dbus-properties-mixin.h>
 #include <telepathy-glib/dbus.h>
+#include <telepathy-glib/dbus-internal.h>
 #include <telepathy-glib/exportable-channel.h>
 #include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/interfaces.h>
@@ -359,7 +359,7 @@ static void
 channel_request_cancel (gpointer data, gpointer user_data)
 {
   ChannelRequest *request = (ChannelRequest *) data;
-  GError error = { TP_ERRORS, TP_ERROR_DISCONNECTED,
+  GError error = { TP_ERROR, TP_ERROR_DISCONNECTED,
       "unable to service this channel request, we're disconnecting!" };
 
   DEBUG ("cancelling request at %p for %s/%u/%u", request,
@@ -385,7 +385,7 @@ struct _TpBaseConnectionPrivate
   /* array of (ChannelRequest *) */
   GPtrArray *channel_requests;
 
-  TpHandleRepoIface *handles[NUM_TP_HANDLE_TYPES];
+  TpHandleRepoIface *handles[TP_NUM_HANDLE_TYPES];
 
   /* If not %NULL, contains strings representing our interfaces.
    * If %NULL, we have no interfaces except those in
@@ -618,7 +618,7 @@ tp_base_connection_dispose (GObject *object)
       priv->channel_requests = NULL;
     }
 
-  for (i = 0; i < NUM_TP_HANDLE_TYPES; i++)
+  for (i = 0; i < TP_NUM_HANDLE_TYPES; i++)
     tp_clear_object (priv->handles + i);
 
   if (priv->interfaces)
@@ -1406,6 +1406,7 @@ conn_requests_get_channel_details (TpBaseConnection *self)
       + priv->channel_factories->len * 2);
   guint i;
 
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   for (i = 0; i < priv->channel_factories->len; i++)
     {
       TpChannelFactoryIface *factory = TP_CHANNEL_FACTORY_IFACE (
@@ -1414,6 +1415,7 @@ conn_requests_get_channel_details (TpBaseConnection *self)
       tp_channel_factory_iface_foreach (factory,
           factory_get_channel_details_foreach, details);
     }
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   for (i = 0; i < priv->channel_managers->len; i++)
     {
@@ -1708,7 +1710,7 @@ tp_base_connection_init (TpBaseConnection *self)
   self->priv = priv;
   self->status = TP_INTERNAL_CONNECTION_STATUS_NEW;
 
-  for (i = 0; i < NUM_TP_HANDLE_TYPES; i++)
+  for (i = 0; i < TP_NUM_HANDLE_TYPES; i++)
     {
       priv->handles[i] = NULL;
     }
@@ -1870,9 +1872,11 @@ tp_base_connection_close_all_channels (TpBaseConnection *self)
    * TpSvcConnection::status-changed on the connection for themselves.
    */
 
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   /* trigger close_all on all channel factories */
   g_ptr_array_foreach (priv->channel_factories, (GFunc)
       tp_channel_factory_iface_close_all, NULL);
+  G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
 /* D-Bus methods on Connection interface ----------------------------*/
@@ -1880,7 +1884,7 @@ tp_base_connection_close_all_channels (TpBaseConnection *self)
 static inline TpConnectionStatusReason
 conn_status_reason_from_g_error (GError *error)
 {
-  if (error->domain == TP_ERRORS)
+  if (error->domain == TP_ERROR)
     {
       switch (error->code)
         {
@@ -1924,7 +1928,7 @@ conn_status_reason_from_g_error (GError *error)
         case TP_ERROR_SERVICE_BUSY:
           return TP_CONNECTION_STATUS_REASON_NETWORK_ERROR;
 
-        /* current status: all TP_ERRORS up to and including
+        /* current status: all TP_ERRORs up to and including
          * TP_ERROR_RESOURCE_UNAVAILABLE have been looked at */
         }
     }
@@ -2268,6 +2272,7 @@ tp_base_connection_list_channels (TpSvcConnection *iface,
   values = g_ptr_array_sized_new (priv->channel_factories->len * 2
       + priv->channel_managers->len * 2);
 
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   for (i = 0; i < priv->channel_factories->len; i++)
     {
       TpChannelFactoryIface *factory = g_ptr_array_index
@@ -2276,6 +2281,7 @@ tp_base_connection_list_channels (TpSvcConnection *iface,
       tp_channel_factory_iface_foreach (factory,
           list_channel_factory_foreach_one, values);
     }
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   for (i = 0; i < priv->channel_managers->len; i++)
     {
@@ -2333,7 +2339,7 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
     {
       if (handle != 0)
         {
-          GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          GError e = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "When handle type is NONE, handle must be 0" };
 
           dbus_g_method_return_error (context, &e);
@@ -2347,7 +2353,7 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
 
       if (handle_repo == NULL)
         {
-          GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+          GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
               "Handle type not supported by this connection manager" };
 
           dbus_g_method_return_error (context, &e);
@@ -2410,8 +2416,10 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
       TpChannelFactoryRequestStatus cur_status;
       TpChannelIface *chan = NULL;
 
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       cur_status = tp_channel_factory_iface_request (factory, type,
           (TpHandleType) handle_type, handle, request, &chan, &error);
+      G_GNUC_END_IGNORE_DEPRECATIONS
 
       switch (cur_status)
         {
@@ -2451,7 +2459,7 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
       case TP_CHANNEL_FACTORY_REQUEST_STATUS_INVALID_HANDLE:
         DEBUG ("invalid handle %u", handle);
 
-        error = g_error_new (TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+        error = g_error_new (TP_ERROR, TP_ERROR_INVALID_HANDLE,
                              "invalid handle %u", handle);
 
         break;
@@ -2460,7 +2468,7 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
         DEBUG ("requested channel is unavailable with "
                  "handle type %u", handle_type);
 
-        error = g_error_new (TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+        error = g_error_new (TP_ERROR, TP_ERROR_NOT_AVAILABLE,
                              "requested channel is not available with "
                              "handle type %u", handle_type);
 
@@ -2469,7 +2477,7 @@ tp_base_connection_request_channel (TpSvcConnection *iface,
       case TP_CHANNEL_FACTORY_REQUEST_STATUS_NOT_IMPLEMENTED:
         DEBUG ("unsupported channel type %s", type);
 
-        error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+        error = g_error_new (TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
                              "unsupported channel type %s", type);
 
         break;
@@ -2523,11 +2531,12 @@ tp_base_connection_release_handles (TpSvcConnection *iface,
  * @context: The dbus-glib method invocation context
  *
  * Implements D-Bus method RequestHandles on interface
- * org.freedesktop.Telepathy.Connection. Exported so subclasses can
- * use it as a basis for their own implementations (for instance,
- * at the time of writing Gabble's GabbleConnection does its own processing
- * for room handles, in order to validate them asynchronously, but delegates
- * to this implementation for all other types).
+ * org.freedesktop.Telepathy.Connection.
+ *
+ * This was exported so subclasses could use it as a basis for their
+ * reimplementations, but reimplementing the method is now deprecated.
+ *
+ * Deprecated: 0.19.0
  */
 void
 tp_base_connection_dbus_request_handles (TpSvcConnection *iface,
@@ -2561,7 +2570,7 @@ tp_base_connection_dbus_request_handles (TpSvcConnection *iface,
     {
       DEBUG ("unimplemented handle type %u", handle_type);
 
-      error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      error = g_error_new (TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
                           "unimplemented handle type %u", handle_type);
       goto out;
     }
@@ -2619,7 +2628,7 @@ tp_base_connection_get_handles (TpBaseConnection *self,
 {
   g_return_val_if_fail (TP_IS_BASE_CONNECTION (self), NULL);
 
-  if (handle_type >= NUM_TP_HANDLE_TYPES)
+  if (handle_type >= TP_NUM_HANDLE_TYPES)
     return NULL;
 
   return self->priv->handles[handle_type];
@@ -2750,6 +2759,68 @@ tp_base_connection_disconnect_with_dbus_error (TpBaseConnection *self,
 
   if (dup_ != NULL)
     g_hash_table_unref (dup_);
+}
+
+/**
+ * tp_base_connection_disconnect_with_dbus_error_vardict: (skip)
+ * @self: The connection
+ * @error_name: The D-Bus error with which the connection changed status to
+ *              Disconnected
+ * @details: Further details of the error, as a variant of
+ *           type %G_VARIANT_TYPE_VARDICT. The keys
+ *           are strings as defined in the Telepathy specification, and the
+ *           values are of type %G_VARIANT_TYPE_VARIANT.
+ *           %NULL is allowed, and treated as an empty dictionary.
+ * @reason: The reason code to use in the StatusChanged signal
+ *          (a less specific, non-extensible version of @error_name)
+ *
+ * Changes the #TpBaseConnection<!-- -->.status of @self to
+ * %TP_CONNECTION_STATUS_DISCONNECTED, as if by a call to
+ * tp_base_connection_change_status(), but additionally emits the
+ * <code>ConnectionError</code> D-Bus signal to provide more details about the
+ * error.
+ *
+ * Well-known keys for @details are documented in the Telepathy specification's
+ * <ulink url='http://telepathy.freedesktop.org/spec/Connection.html#Signal:ConnectionError'>definition
+ * of the ConnectionError signal</ulink>, and include:
+ *
+ * <itemizedlist>
+ * <listitem><code>"debug-message"</code>, whose value should have type
+ *    #G_TYPE_STRING, for debugging information about the
+ *    disconnection which should not be shown to the user</listitem>
+ * <listitem><code>"server-message"</code>, whose value should also have type
+ *    #G_TYPE_STRING, for a human-readable error message from the server (in an
+ *    unspecified language) explaining why the user was
+ *    disconnected.</listitem>
+ * </itemizedlist>
+ *
+ * Since: 0.7.24
+ */
+void
+tp_base_connection_disconnect_with_dbus_error_vardict (TpBaseConnection *self,
+    const gchar *error_name,
+    GVariant *details,
+    TpConnectionStatusReason reason)
+{
+  GHashTable *hash;
+
+  g_return_if_fail (TP_IS_BASE_CONNECTION (self));
+  g_return_if_fail (tp_dbus_check_valid_interface_name (error_name, NULL));
+
+  if (details == NULL)
+    {
+      hash = g_hash_table_new (g_str_hash, g_str_equal);
+    }
+  else
+    {
+      hash = _tp_asv_from_vardict (details);
+    }
+
+  tp_svc_connection_emit_connection_error (self, error_name, hash);
+  tp_base_connection_change_status (self, TP_CONNECTION_STATUS_DISCONNECTED,
+      reason);
+
+  g_hash_table_unref (hash);
 }
 
 /**
@@ -2895,8 +2966,10 @@ tp_base_connection_change_status (TpBaseConnection *self,
     case TP_CONNECTION_STATUS_CONNECTING:
       if (klass->connecting)
         (klass->connecting) (self);
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       g_ptr_array_foreach (priv->channel_factories, (GFunc)
           tp_channel_factory_iface_connecting, NULL);
+      G_GNUC_END_IGNORE_DEPRECATIONS
       break;
 
     case TP_CONNECTION_STATUS_CONNECTED:
@@ -2908,8 +2981,10 @@ tp_base_connection_change_status (TpBaseConnection *self,
                 self->self_handle, NULL));
       if (klass->connected)
         (klass->connected) (self);
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       g_ptr_array_foreach (priv->channel_factories, (GFunc)
           tp_channel_factory_iface_connected, NULL);
+      G_GNUC_END_IGNORE_DEPRECATIONS
       break;
 
     case TP_CONNECTION_STATUS_DISCONNECTED:
@@ -2928,8 +3003,10 @@ tp_base_connection_change_status (TpBaseConnection *self,
         {
           if (klass->disconnected)
             (klass->disconnected) (self);
+          G_GNUC_BEGIN_IGNORE_DEPRECATIONS
           g_ptr_array_foreach (priv->channel_factories, (GFunc)
               tp_channel_factory_iface_disconnected, NULL);
+          G_GNUC_END_IGNORE_DEPRECATIONS
         }
       (klass->shut_down) (self);
       tp_base_connection_unregister (self);
@@ -3323,7 +3400,9 @@ conn_iface_init (gpointer g_iface, gpointer iface_data)
   IMPLEMENT(,list_channels);
   IMPLEMENT(,request_channel);
   IMPLEMENT(,release_handles);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   IMPLEMENT(dbus_,request_handles);
+G_GNUC_END_IGNORE_DEPRECATIONS
   IMPLEMENT(dbus_,add_client_interest);
   IMPLEMENT(dbus_,remove_client_interest);
 #undef IMPLEMENT
@@ -3353,7 +3432,7 @@ static void conn_requests_offer_request (TpBaseConnection *self,
 
 #define RETURN_INVALID_ARGUMENT(message) \
   G_STMT_START { \
-    GError e = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT, message }; \
+    GError e = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT, message }; \
     dbus_g_method_return_error (context, &e); \
     return; \
   } G_STMT_END
@@ -3492,7 +3571,7 @@ conn_requests_requestotron_validate_handle (TpBaseConnection *self,
 
       if (handles == NULL)
         {
-          GError e = { TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+          GError e = { TP_ERROR, TP_ERROR_NOT_AVAILABLE,
               "Handle type not supported by this connection manager" };
 
           dbus_g_method_return_error (context, &e);
@@ -3509,7 +3588,7 @@ conn_requests_requestotron_validate_handle (TpBaseConnection *self,
               /* tp_handle_ensure can return any error in any domain; force
                * the domain and code to be as documented for CreateChannel.
                */
-              error->domain = TP_ERRORS;
+              error->domain = TP_ERROR;
               error->code = TP_ERROR_INVALID_HANDLE;
               dbus_g_method_return_error (context, error);
               g_error_free (error);
@@ -3532,7 +3611,7 @@ conn_requests_requestotron_validate_handle (TpBaseConnection *self,
           /* Check the supplied TargetHandle is valid */
           if (!tp_handle_is_valid (handles, target_handle, &error))
             {
-              error->domain = TP_ERRORS;
+              error->domain = TP_ERROR;
               error->code = TP_ERROR_INVALID_HANDLE;
               dbus_g_method_return_error (context, error);
               g_error_free (error);
