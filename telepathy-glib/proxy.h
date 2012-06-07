@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_PROXY_H__
 #define __TP_PROXY_H__
 
@@ -62,12 +66,12 @@ struct _TpProxy {
     /*<private>*/
     GObject parent;
 
-    TpDBusDaemon *dbus_daemon;
-    DBusGConnection *dbus_connection;
-    gchar *bus_name;
-    gchar *object_path;
+    TpDBusDaemon *_TP_SEAL (dbus_daemon);
+    DBusGConnection *_TP_SEAL (dbus_connection);
+    gchar *_TP_SEAL (bus_name);
+    gchar *_TP_SEAL (object_path);
 
-    GError *invalidated /* initialized to NULL by g_object_new */;
+    GError *_TP_SEAL (invalidated);
 
     TpProxyPrivate *priv;
 };

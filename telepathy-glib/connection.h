@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_CONNECTION_H__
 #define __TP_CONNECTION_H__
 
@@ -202,8 +206,11 @@ void tp_connection_init_known_interfaces (void);
 gint tp_connection_presence_type_cmp_availability (TpConnectionPresenceType p1,
   TpConnectionPresenceType p2);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_connection_get_protocol_name)
 gboolean tp_connection_parse_object_path (TpConnection *self, gchar **protocol,
     gchar **cm_name);
+#endif
 
 _TP_AVAILABLE_IN_0_20
 const gchar *tp_connection_get_detailed_error (TpConnection *self,
@@ -239,10 +246,12 @@ GQuark tp_connection_get_feature_quark_contact_info (void) G_GNUC_CONST;
 
 /* connection-handles.c */
 
+#ifndef TP_DISABLE_DEPRECATED
 typedef void (*TpConnectionHoldHandlesCb) (TpConnection *connection,
     TpHandleType handle_type, guint n_handles, const TpHandle *handles,
     const GError *error, gpointer user_data, GObject *weak_object);
 
+_TP_DEPRECATED_IN_0_20
 void tp_connection_hold_handles (TpConnection *self, gint timeout_ms,
     TpHandleType handle_type, guint n_handles, const TpHandle *handles,
     TpConnectionHoldHandlesCb callback,
@@ -253,13 +262,16 @@ typedef void (*TpConnectionRequestHandlesCb) (TpConnection *connection,
     guint n_handles, const TpHandle *handles, const gchar * const *ids,
     const GError *error, gpointer user_data, GObject *weak_object);
 
+_TP_DEPRECATED_IN_0_20
 void tp_connection_request_handles (TpConnection *self, gint timeout_ms,
     TpHandleType handle_type, const gchar * const *ids,
     TpConnectionRequestHandlesCb callback,
     gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
 
+_TP_DEPRECATED_IN_0_20
 void tp_connection_unref_handles (TpConnection *self,
     TpHandleType handle_type, guint n_handles, const TpHandle *handles);
+#endif
 
 /* connection-avatars.c */
 
@@ -341,16 +353,21 @@ G_BEGIN_DECLS
 /* connection-handles.c again - this has to come after the auto-generated
  * stuff because it uses an auto-generated typedef */
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_simple_client_factory_ensure_contact)
 void tp_connection_get_contact_attributes (TpConnection *self,
     gint timeout_ms, guint n_handles, const TpHandle *handles,
     const gchar * const *interfaces, gboolean hold,
     tp_cli_connection_interface_contacts_callback_for_get_contact_attributes callback,
     gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
 
+_TP_DEPRECATED_IN_0_20_FOR(tp_connection_dup_contact_list)
 void tp_connection_get_contact_list_attributes (TpConnection *self,
     gint timeout_ms, const gchar * const *interfaces, gboolean hold,
     tp_cli_connection_interface_contacts_callback_for_get_contact_attributes callback,
     gpointer user_data, GDestroyNotify destroy, GObject *weak_object);
+#endif
+
 GBinding *tp_connection_bind_connection_status_to_property (TpConnection *self,
     gpointer target, const char *target_property, gboolean invert);
 

@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [19])
-m4_define([tp_glib_micro_version], [0])
+m4_define([tp_glib_micro_version], [1])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [71])
+m4_define([tp_glib_lt_current], [72])
 m4_define([tp_glib_lt_revision], [0])
-m4_define([tp_glib_lt_age], [71])
+m4_define([tp_glib_lt_age], [72])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -250,7 +250,7 @@ if test x$enable_vala_bindings = xyes; then
     AC_MSG_ERROR([GObject-Introspection must be enabled for Vala bindings])
   fi
 
-  AM_PROG_VALAC([0.14.0])
+  AM_PROG_VALAC([0.16.0])
   have_vala=yes
 
   AC_PATH_PROG(VALAC, valac, valac)

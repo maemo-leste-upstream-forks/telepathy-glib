@@ -16,12 +16,6 @@ and/or use gtk-doc annotations.  -->
              shared-library="libtelepathy-glib.so.0"
              c:identifier-prefixes="Tp"
              c:symbol-prefixes="tp">
-    <alias name="ContactInfoList" c:type="TpContactInfoList">
-      <type name="GLib.List" c:type="GList"/>
-    </alias>
-    <alias name="ContactInfoSpecList" c:type="TpContactInfoSpecList">
-      <type name="GLib.List" c:type="GList"/>
-    </alias>
     <alias name="Handle" c:type="TpHandle">
       <doc xml:whitespace="preserve">Type representing Telepathy handles within telepathy-glib.
 
@@ -186,6 +180,7 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
       <function name="parse_object_path"
                 c:identifier="tp_account_parse_object_path"
                 version="0.9.0"
+                deprecated="Use tp_account_get_protocol() and"
                 throws="1">
         <doc xml:whitespace="preserve">Validates and parses a Telepathy Account's object path, extracting the
 connection manager's name, the protocol, and the account's unique identifier
@@ -196,7 +191,9 @@ Any of the out parameters may be %NULL if not needed. If %TRUE is returned,
 the caller is responsible for freeing the strings stored in any non-%NULL
 out parameters, using g_free().
 
-@error otherwise.</doc>
+@error otherwise.
+
+tp_account_get_connection_manager() instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if @object_path was successfully parsed; %FALSE and sets</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -397,7 +394,8 @@ of type %G_VARIANT_TYPE_VARDICT</doc>
       </method>
       <method name="ensure_connection"
               c:identifier="tp_account_ensure_connection"
-              version="0.9.0">
+              version="0.9.0"
+              deprecated="New code should use tp_simple_client_factory_ensure_connection()">
         <doc xml:whitespace="preserve">Set the connection of the account by specifying the connection object path.
 This function does not return a new ref and it is not guaranteed that the
 returned #TpConnection object is ready.
@@ -406,7 +404,9 @@ The use-case for this function is in a HandleChannels callback and you
 already know the object path for the connection, so you can let @account
 create its #TpConnection and return it for use.
 
-the object path @path is invalid or it is the null-value "/"</doc>
+the object path @path is invalid or it is the null-value "/"
+
+instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the connection of the account, or %NULL if either</doc>
           <type name="Connection" c:type="TpConnection*"/>
@@ -3815,6 +3815,547 @@ tp_simple_client_factory_add_account_features().</doc>
     </record>
     <record name="AccountPrivate" c:type="TpAccountPrivate" disguised="1">
     </record>
+    <class name="AccountRequest"
+           c:symbol-prefix="account_request"
+           c:type="TpAccountRequest"
+           version="0.19.1"
+           parent="GObject.Object"
+           glib:type-name="TpAccountRequest"
+           glib:get-type="tp_account_request_get_type"
+           glib:type-struct="AccountRequestClass">
+      <doc xml:whitespace="preserve">An object for representing a currently non-existent account which
+is to be created on a #TpAccountManager.</doc>
+      <constructor name="new"
+                   c:identifier="tp_account_request_new"
+                   version="0.19.1">
+        <doc xml:whitespace="preserve">Convenience function to create a new account request object which
+will assist in the creation of a new account on @account_manager,
+using connection manager @manager, and protocol @protocol.
+
+object, or %NULL if any argument is incorrect</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new reference to an account request</doc>
+          <type name="AccountRequest" c:type="TpAccountRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account_manager" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #TpAccountManager to create the account on</doc>
+            <type name="AccountManager" c:type="TpAccountManager*"/>
+          </parameter>
+          <parameter name="manager" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the name of the connection manager</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="protocol" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the name of the protocol on @manager</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="display_name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the user-visible name of this account</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="new_from_protocol"
+                   c:identifier="tp_account_request_new_from_protocol"
+                   version="0.19.1">
+        <doc xml:whitespace="preserve">Convenience function to create a new #TpAccountRequest object using
+a #TpProtocol instance, instead of specifying connection manager
+and protocol name specifically. See tp_account_request_new() for
+more details.
+
+object, or %NULL if any argument is incorrect</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new reference to an account request</doc>
+          <type name="AccountRequest" c:type="TpAccountRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account_manager" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #TpAccountManager to create the account on</doc>
+            <type name="AccountManager" c:type="TpAccountManager*"/>
+          </parameter>
+          <parameter name="protocol" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpProtocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </parameter>
+          <parameter name="display_name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the user-visible name of this account</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <method name="add_supersedes"
+              c:identifier="tp_account_request_add_supersedes"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Add an account object path to the list of superseded accounts which
+this new account will supersede. Use the
+#TpAccountRequest:supersedes property to read the current list of
+superseded accounts.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="superseded_path" transfer-ownership="none">
+            <doc xml:whitespace="preserve">an account object path to add to the supersedes list</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="create_account_async"
+              c:identifier="tp_account_request_create_account_async"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Start an asynchronous operation to create the account @self on the
+account manager.
+
+@callback will only be called when the newly created #TpAccount has
+the %TP_ACCOUNT_FEATURE_CORE feature ready on it, so when calling
+tp_account_request_create_account_finish(), one can guarantee this
+feature.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="1">
+            <doc xml:whitespace="preserve">a function to call when the account has been created</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">user data to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="create_account_finish"
+              c:identifier="tp_account_request_create_account_finish"
+              version="0.19.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes an asynchronous account creation operation and returns a
+new ref to a #TpAccount object. The returned account will have the
+features listed in tp_simple_client_factory_dup_account_features()
+(with the proxy factory from #TpAccountRequest:account-manager)
+prepared on it.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new ref to a #TpAccount, or %NULL</doc>
+          <type name="Account" c:type="TpAccount*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_automatic_presence"
+              c:identifier="tp_account_request_set_automatic_presence"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the automatic presence for the new account, @self, to the type
+(@presence, @status), with message @message. Use the
+#TpAccountRequest:automatic-presence-type,
+#TpAccountRequest:automatic-status, and
+#TpAccountRequest:automatic-status-message properties to read the
+current automatic presence.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="presence" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the automatic presence type</doc>
+            <type name="ConnectionPresenceType"
+                  c:type="TpConnectionPresenceType"/>
+          </parameter>
+          <parameter name="status" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the automatic presence status</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="message" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the automatic presence message</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_avatar"
+              c:identifier="tp_account_request_set_avatar"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the avatar of the account @self to @avatar. Use the
+#TpAccountRequest:avatar and #TpAccountRequest:avatar-mime-type
+properties to read the current avatar.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="avatar" transfer-ownership="none">
+            <doc xml:whitespace="preserve">(allow-none) (array length=len) a new avatar to set; can be %NULL only if %len equals 0</doc>
+            <type name="guint8" c:type="guchar*"/>
+          </parameter>
+          <parameter name="len" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the length of the new avatar</doc>
+            <type name="gsize" c:type="gsize"/>
+          </parameter>
+          <parameter name="mime_type" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">the MIME type of the new avatar; can be %NULL only if @len equals 0</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_connect_automatically"
+              c:identifier="tp_account_request_set_connect_automatically"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the connect automatically property of the account on creation
+to @connect_automatically so that the account is brought online to
+the automatic presence. Use the
+#TpAccountRequest:connect-automatically property to read the current
+connect automatically value.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="connect_automatically" transfer-ownership="none">
+            <doc xml:whitespace="preserve">%TRUE if the account is to connect automatically</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_display_name"
+              c:identifier="tp_account_request_set_display_name"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the display name for the new account, @self, to @name. Use the
+#TpAccountRequest:display-name property to read the current display
+name.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a display name for the account</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_enabled"
+              c:identifier="tp_account_request_set_enabled"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the enabled property of the account on creation to
+@enabled. Use the #TpAccountRequest:enabled property to read the
+current enabled value.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="enabled" transfer-ownership="none">
+            <doc xml:whitespace="preserve">%TRUE if the account is to be enabled</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_icon_name"
+              c:identifier="tp_account_request_set_icon_name"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the icon name for the new account, @self, to @icon. Use the
+#TpAccountRequest:icon-name property to read the current icon name.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="icon" transfer-ownership="none">
+            <doc xml:whitespace="preserve">an icon name for the account</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_nickname"
+              c:identifier="tp_account_request_set_nickname"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the nickname for the new account, @self, to @nickname. Use the
+#TpAccountRequest:nickname property to read the current nickname.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="nickname" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a nickname for the account</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_parameter"
+              c:identifier="tp_account_request_set_parameter"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set an account parameter, @key, to @value. Use the
+#TpAccountRequest:parameters property to read the current list of
+set parameters.
+
+Parameters can be unset using tp_account_request_unset_parameter().</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="key" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the parameter key</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="value" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a variant containing the parameter value</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_parameter_string"
+              c:identifier="tp_account_request_set_parameter_string"
+              version="0.19.1"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Convenience function to set an account parameter string value. See
+tp_account_request_set_parameter() for more details.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="key" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the parameter key</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="value" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the parameter value</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_requested_presence"
+              c:identifier="tp_account_request_set_requested_presence"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the requested presence for the new account, @self, to the type
+(@presence, @status), with message @message. Use the
+#TpAccountRequest:requested-presence-type,
+#TpAccountRequest:requested-status, and
+#TpAccountRequest:requested-status-message properties to read the
+current requested presence.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="presence" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the requested presence type</doc>
+            <type name="ConnectionPresenceType"
+                  c:type="TpConnectionPresenceType"/>
+          </parameter>
+          <parameter name="status" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the requested presence status</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="message" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the requested presence message</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_service"
+              c:identifier="tp_account_request_set_service"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Set the service property of the account to @service. Use the
+#TpAccountRequest:service property to read the current value.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="service" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the service name for</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="unset_parameter"
+              c:identifier="tp_account_request_unset_parameter"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Unset the account parameter @key which has previously been set
+using tp_account_request_set_parameter() or another convenience
+function.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="key" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the parameter key</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="account-manager"
+                version="0.19.1"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The #TpAccountManager to create the account on.</doc>
+        <type name="AccountManager"/>
+      </property>
+      <property name="automatic-presence-type"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's automatic presence type (a
+#TpConnectionPresenceType). To change this property use
+tp_account_request_set_automatic_presence().
+
+When the account is put online automatically, for instance to
+make a channel request or because network connectivity becomes
+available, the automatic presence type, status and message will
+be copied to their "requested" counterparts.</doc>
+        <type name="guint"/>
+      </property>
+      <property name="automatic-status"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The string status name to use in conjunction with the
+#TpAccountRequest:automatic-presence-type. To change this property
+use tp_account_request_set_automatic_presence().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="automatic-status-message"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The user-defined message to use in conjunction with the
+#TpAccount:automatic-presence-type. To change this property use
+tp_account_request_set_automatic_presence().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="avatar" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The avatar set on the account. The avatar's mime type can be read
+in the #TpAccountRequest:avatar-mime-type property. To change this
+property, use tp_account_request_set_avatar().</doc>
+        <array name="GLib.Array">
+          <type name="gpointer" c:type="gpointer"/>
+        </array>
+      </property>
+      <property name="avatar-mime-type"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The mime type of the #TpAccountRequest:avatar property. To change
+this property, use tp_account_request_set_avatar().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="connect-automatically"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">Whether the account should connect automatically or not. To change this
+property, use tp_account_request_set_connect_automatically().</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="connection-manager"
+                version="0.19.1"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's connection manager name.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="display-name"
+                version="0.19.1"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's display name. To change this property use
+tp_account_request_set_display_name().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="enabled" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">Whether the account is enabled or not. To change this property
+use tp_account_request_set_enabled().</doc>
+        <type name="gboolean"/>
+      </property>
+      <property name="icon-name" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's icon name. To change this propery, use
+tp_account_request_set_icon_name().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="nickname" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's nickname. To change this property use
+tp_account_request_set_nickname().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="parameters" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's connection parameters. To add a parameter, use
+tp_account_request_set_parameter() or another convience function.</doc>
+        <type name="GLib.Variant"/>
+      </property>
+      <property name="properties" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's properties.</doc>
+        <type name="GLib.Variant"/>
+      </property>
+      <property name="protocol"
+                version="0.19.1"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's machine-readable protocol name, such as "jabber", "msn" or
+"local-xmpp". Recommended names for most protocols can be found in the
+Telepathy D-Bus Interface Specification.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="requested-presence-type"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's requested presence type (a
+#TpConnectionPresenceType). To change this property use
+tp_account_request_set_requested_presence().</doc>
+        <type name="guint"/>
+      </property>
+      <property name="requested-status"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The requested Status string of the account. To change this
+property use tp_account_request_set_requested_presence().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="requested-status-message"
+                version="0.19.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The requested status message message of the account. To change
+this property use tp_account_request_set_requested_presence().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="service" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">A string describing the service of the account, which must
+consist only of ASCII letters, numbers and hyphen/minus signs,
+and start with a letter (matching the requirements for
+Protocol). To change this property, use
+tp_account_request_set_service().</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="supersedes" version="0.19.1" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The object paths of previously-active accounts superseded by this one.
+For instance, this can be used in a logger to read old logs for an
+account that has been migrated from one connection manager to another.
+
+To add to this property use tp_account_request_add_supersedes().</doc>
+        <array>
+          <type name="utf8"/>
+        </array>
+      </property>
+      <field name="parent" readable="0" private="1">
+        <type name="GObject.Object" c:type="GObject"/>
+      </field>
+      <field name="priv" readable="0" private="1">
+        <type name="AccountRequestPrivate" c:type="TpAccountRequestPrivate*"/>
+      </field>
+    </class>
+    <record name="AccountRequestClass"
+            c:type="TpAccountRequestClass"
+            glib:is-gtype-struct-for="AccountRequest">
+      <doc xml:whitespace="preserve">The class of a #TpAccountRequest.</doc>
+      <field name="parent_class" readable="0" private="1">
+        <type name="GObject.ObjectClass" c:type="GObjectClass"/>
+      </field>
+      <field name="_padding" readable="0" private="1">
+        <array zero-terminated="0" c:type="GCallback" fixed-size="7">
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </array>
+      </field>
+    </record>
+    <record name="AccountRequestPrivate"
+            c:type="TpAccountRequestPrivate"
+            disguised="1">
+    </record>
     <class name="AddDispatchOperationContext"
            c:symbol-prefix="add_dispatch_operation_context"
            c:type="TpAddDispatchOperationContext"
@@ -3961,15 +4502,16 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
       <constructor name="new"
                    c:identifier="tp_automatic_client_factory_new"
                    version="0.15.5">
-        <doc xml:whitespace="preserve">Returns a new #TpAutomaticClientFactory instance.</doc>
+        <doc xml:whitespace="preserve">Returns a new #TpAutomaticClientFactory instance. If @dbus is %NULL,
+tp_dbus_daemon_dup() will be used.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new #TpAutomaticClientFactory</doc>
           <type name="AutomaticClientFactory"
                 c:type="TpAutomaticClientFactory*"/>
         </return-value>
         <parameters>
-          <parameter name="dbus" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #TpDBusDaemon</doc>
+          <parameter name="dbus" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">a #TpDBusDaemon, or %NULL</doc>
             <type name="DBusDaemon" c:type="TpDBusDaemon*"/>
           </parameter>
         </parameters>
@@ -5389,9 +5931,10 @@ When this function is called @client is not longer handling @channels.</doc>
            glib:type-struct="BaseConnectionClass">
       <doc xml:whitespace="preserve">Data structure representing a generic #TpSvcConnection implementation.
 
-In addition to the fields documented here, there are four gpointer fields
-which must currently be %NULL (a meaning may be defined for these in a
-future version of telepathy-glib), and a pointer to opaque private data.</doc>
+Since 0.19.1, accessing the fields of this structure is deprecated.
+Use tp_base_connection_get_bus_name(), tp_base_connection_get_object_path(),
+tp_base_connection_get_status(), tp_base_connection_get_self_handle()
+instead.</doc>
       <function name="channel_manager_iter_init"
                 c:identifier="tp_base_connection_channel_manager_iter_init"
                 version="0.7.15"
@@ -5599,6 +6142,22 @@ is disposed.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="check_connected"
+              c:identifier="tp_base_connection_check_connected"
+              version="0.19.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Return whether this connection is fully active and connected.
+If it is not, raise %TP_ERROR_DISCONNECTED.
+
+This is equivalent to checking whether tp_base_connection_get_status()
+returns %TP_CONNECTION_STATUS_CONNECTED; it is provided because methods
+on the connection often need to make this check, and return a
+#GError if it fails.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if this connection is connected</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+      </method>
       <method name="disconnect_with_dbus_error"
               c:identifier="tp_base_connection_disconnect_with_dbus_error"
               version="0.7.24"
@@ -5695,6 +6254,25 @@ has emitted StatusChanged and is ready to be removed from D-Bus.</doc>
           <type name="none" c:type="void"/>
         </return-value>
       </method>
+      <method name="get_bus_name"
+              c:identifier="tp_base_connection_get_bus_name"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Return the bus name starting with %TP_CONN_BUS_NAME_BASE that represents
+this connection on D-Bus.
+
+The returned string belongs to the #TpBaseConnection and must be copied
+by the caller if it will be kept.
+
+If this connection has never been present on D-Bus
+(tp_base_connection_register() has never been called), return %NULL
+instead.
+
+or %NULL</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the bus name of this connection,</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
       <method name="get_dbus_daemon"
               c:identifier="tp_base_connection_get_dbus_daemon"
               version="0.11.3"
@@ -5723,6 +6301,25 @@ handle type, or #NULL if it's unsupported or invalid.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="get_object_path"
+              c:identifier="tp_base_connection_get_object_path"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Return the object path starting with %TP_CONN_OBJECT_PATH_BASE that
+represents this connection on D-Bus.
+
+The returned string belongs to the #TpBaseConnection and must be copied
+by the caller if it will be kept.
+
+If this connection has never been present on D-Bus
+(tp_base_connection_register() has never been called), return %NULL
+instead.
+
+or %NULL</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the object path of this connection,</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
       <method name="get_self_handle"
               c:identifier="tp_base_connection_get_self_handle"
               version="0.7.15"
@@ -5732,6 +6329,42 @@ to be 0 once the connection has moved to the CONNECTED state.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the current self handle of the connection.</doc>
           <type name="Handle" c:type="TpHandle"/>
+        </return-value>
+      </method>
+      <method name="get_status"
+              c:identifier="tp_base_connection_get_status"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Return the status of this connection, as set by
+tp_base_connection_change_status() or similar functions like
+tp_base_connection_disconnect_with_dbus_error().
+
+Like the corresponding D-Bus property, this method returns
+%TP_CONNECTION_STATUS_DISCONNECTED in two situations:
+either the connection is newly-created (and has never emitted
+#TpSvcConnection::status-changed), or D-Bus clients have already been
+told that it has been destroyed (by the Disconnect D-Bus method,
+a failed attempt to connect, or loss of an established connection).
+Use tp_base_connection_is_destroyed() to distinguish between the two.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpBaseConnection:dbus-status</doc>
+          <type name="ConnectionStatus" c:type="TpConnectionStatus"/>
+        </return-value>
+      </method>
+      <method name="is_destroyed"
+              c:identifier="tp_base_connection_is_destroyed"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Return whether this connection has already emitted the D-Bus signal
+indicating that it has been destroyed.
+
+In particular, this can be used to distinguish between the two reasons
+why tp_base_connection_get_status() would return
+%TP_CONNECTION_STATUS_DISCONNECTED: it will return %FALSE if the
+connection is newly-created, and %TRUE if the Disconnect D-Bus method
+has been called, an attempt to connect has failed, or an established
+connection has encountered an error.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if this connection is disappearing from D-Bus</doc>
+          <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
       <method name="register"
@@ -5856,19 +6489,19 @@ name is required.</doc>
 Must be set nonzero by the subclass before moving to state CONNECTED.</doc>
         <type name="guint"/>
       </property>
-      <field name="parent">
+      <field name="parent" readable="0" private="1">
         <type name="GObject.Object" c:type="GObject"/>
       </field>
-      <field name="bus_name">
+      <field name="bus_name" readable="0" private="1">
         <type name="utf8" c:type="gchar*"/>
       </field>
-      <field name="object_path">
+      <field name="object_path" readable="0" private="1">
         <type name="utf8" c:type="gchar*"/>
       </field>
-      <field name="status">
+      <field name="status" readable="0" private="1">
         <type name="ConnectionStatus" c:type="TpConnectionStatus"/>
       </field>
-      <field name="self_handle">
+      <field name="self_handle" readable="0" private="1">
         <type name="Handle" c:type="TpHandle"/>
       </field>
       <field name="_future1" readable="0" private="1">
@@ -11844,7 +12477,8 @@ Requires %TP_CONNECTION_FEATURE_BALANCE to be prepared.</doc>
         </return-value>
       </method>
       <method name="get_contact_attributes"
-              c:identifier="tp_connection_get_contact_attributes">
+              c:identifier="tp_connection_get_contact_attributes"
+              deprecated="Use tp_simple_client_factory_ensure_contact() instead.">
         <doc xml:whitespace="preserve">Return (via a callback) any number of attributes of the given handles.
 
 Since telepathy-glib version 0.13.8,
@@ -11970,7 +12604,8 @@ yet prepared or the connection doesn't have the necessary properties.</doc>
         </return-value>
       </method>
       <method name="get_contact_list_attributes"
-              c:identifier="tp_connection_get_contact_list_attributes">
+              c:identifier="tp_connection_get_contact_list_attributes"
+              deprecated="Use tp_connection_dup_contact_list() instead.">
         <doc xml:whitespace="preserve">Return (via a callback) the contacts on the contact list and any number of
 their attributes.
 
@@ -12295,7 +12930,9 @@ identifier for the whole lifetime of the connection.</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
-      <method name="hold_handles" c:identifier="tp_connection_hold_handles">
+      <method name="hold_handles"
+              c:identifier="tp_connection_hold_handles"
+              deprecated="Holding handles is not needed with Connection Managers having">
         <doc xml:whitespace="preserve">Hold (ensure a reference to) the given handles, if they are valid.
 
 If they are valid, the callback will later be called with the given
@@ -12306,7 +12943,11 @@ This function, along with tp_connection_unref_handles(),
 tp_connection_get_contact_attributes() and #TpContact, keeps a client-side
 reference count of handles; you should not use the RequestHandles,
 HoldHandles and GetContactAttributes D-Bus methods directly as well as these
-functions.</doc>
+functions.
+
+immortal handles (any Connection Manager using telepathy-glib &gt;= 0.13.8).
+Other Connection Managers are considered deprecated, clients wanting to
+still support them should continue using this deprecated function.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -12368,10 +13009,14 @@ functions.</doc>
       </method>
       <method name="parse_object_path"
               c:identifier="tp_connection_parse_object_path"
-              version="0.7.27">
+              version="0.7.27"
+              deprecated="Use tp_connection_get_protocol_name() and">
         <doc xml:whitespace="preserve">If the object path of @connection is in the correct form, set
 @protocol and @cm_name, return TRUE. Otherwise leave them unchanged and
-return FALSE.</doc>
+return FALSE.
+
+
+tp_connection_get_connection_manager_name() instead.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">TRUE if the object path was correctly parsed, FALSE otherwise.</doc>
           <type name="gboolean" c:type="gboolean"/>
@@ -12626,13 +13271,17 @@ For this to work properly @self must have interface
         </parameters>
       </method>
       <method name="request_handles"
-              c:identifier="tp_connection_request_handles">
+              c:identifier="tp_connection_request_handles"
+              deprecated="If @handle_type is TP_HANDLE_TYPE_CONTACT, use">
         <doc xml:whitespace="preserve">Request the handles corresponding to the given identifiers, and if they
 are valid, hold (ensure a reference to) the corresponding handles.
 
 If they are valid, the callback will later be called with the given
 handles; if not all of them are valid, the callback will be called with
-an error.</doc>
+an error.
+
+tp_connection_dup_contact_by_id_async() instead. For channel requests,
+use tp_account_channel_request_set_target_id() instead.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -12971,7 +13620,9 @@ For this to work properly @self must have interface
           </parameter>
         </parameters>
       </method>
-      <method name="unref_handles" c:identifier="tp_connection_unref_handles">
+      <method name="unref_handles"
+              c:identifier="tp_connection_unref_handles"
+              deprecated="This is no-op so can be safely removed.">
         <doc xml:whitespace="preserve">Do nothing. In versions of telepathy-glib prior to 0.13.8,
 this released a reference to the handles in @handles.</doc>
         <return-value transfer-ownership="none">
@@ -13782,7 +14433,8 @@ fatal error occurred, or a copy of @error).</doc>
       </parameters>
     </callback>
     <callback name="ConnectionHoldHandlesCb"
-              c:type="TpConnectionHoldHandlesCb">
+              c:type="TpConnectionHoldHandlesCb"
+              deprecated="See tp_connection_hold_handles().">
       <doc xml:whitespace="preserve">Signature of the callback called when tp_connection_hold_handles() succeeds
 or fails.
 
@@ -13850,10 +14502,13 @@ Various fields and methods on this object do not work until
 %TP_CONNECTION_MANAGER_FEATURE_CORE is prepared. Use
 tp_proxy_prepare_async() to wait for this to happen.
 
-Note that the @protocols may be freed and reallocated (based on new
-information) whenever the main loop is entered. Since 0.11.3, each protocol
-struct can be copied with tp_connection_manager_protocol_copy() if a
-private copy is needed.</doc>
+Since 0.19.1, accessing the fields of this struct is deprecated,
+and they are no longer documented here.
+Use the accessors tp_connection_manager_get_name(),
+tp_connection_manager_is_running(),
+tp_connection_manager_dup_protocols(),
+tp_connection_manager_get_info_source()
+and the #TpConnectionManager:always-introspect property instead.</doc>
       <constructor name="new"
                    c:identifier="tp_connection_manager_new"
                    throws="1">
@@ -14071,7 +14726,8 @@ if a longer lifetime is required.</doc>
       </method>
       <method name="get_protocol"
               c:identifier="tp_connection_manager_get_protocol"
-              version="0.7.26">
+              version="0.7.26"
+              deprecated="0.19.1, use tp_connection_manager_get_protocol_object()">
         <doc xml:whitespace="preserve">Returns a structure representing a protocol, or %NULL if this connection
 manager does not support the specified protocol.
 
@@ -14203,29 +14859,29 @@ correct name.
 If set to the empty string, no .manager file will be read.</doc>
         <type name="utf8"/>
       </property>
-      <field name="parent">
+      <field name="parent" readable="0" private="1">
         <type name="Proxy" c:type="TpProxy"/>
       </field>
-      <field name="name">
+      <field name="name" readable="0" private="1">
         <type name="utf8" c:type="gchar*"/>
       </field>
-      <field name="protocols">
+      <field name="protocols" readable="0" private="1">
         <type name="ConnectionManagerProtocol"
               c:type="TpConnectionManagerProtocol**"/>
       </field>
-      <field name="running" bits="1">
+      <field name="running" readable="0" bits="1" private="1">
         <type name="guint" c:type="unsigned"/>
       </field>
-      <field name="always_introspect" bits="1">
+      <field name="always_introspect" readable="0" bits="1" private="1">
         <type name="guint" c:type="unsigned"/>
       </field>
-      <field name="info_source" bits="2">
+      <field name="info_source" readable="0" bits="2" private="1">
         <type name="guint" c:type="unsigned"/>
       </field>
-      <field name="reserved_flags" bits="28">
+      <field name="reserved_flags" readable="0" bits="28" private="1">
         <type name="guint" c:type="guint"/>
       </field>
-      <field name="priv">
+      <field name="priv" readable="0" private="1">
         <type name="ConnectionManagerPrivate"
               c:type="TpConnectionManagerPrivate*"/>
       </field>
@@ -14313,20 +14969,31 @@ launching that connection manager.</doc>
             glib:type-name="TpConnectionManagerParam"
             glib:get-type="tp_connection_manager_param_get_type"
             c:symbol-prefix="connection_manager_param">
-      <doc xml:whitespace="preserve">Structure representing a connection manager parameter.</doc>
-      <field name="name" writable="1">
+      <doc xml:whitespace="preserve">Structure representing a connection manager parameter.
+
+Since 0.19.1, accessing the fields of this struct is deprecated,
+and they are no longer documented here.
+Use the accessors tp_connection_manager_param_get_name(),
+tp_connection_manager_param_get_dbus_signature(),
+tp_connection_manager_param_is_required(),
+tp_connection_manager_param_is_required_for_registration(),
+tp_connection_manager_param_is_secret(),
+tp_connection_manager_param_is_dbus_property(),
+tp_connection_manager_param_get_default(),
+tp_connection_manager_param_dup_default_variant() instead.</doc>
+      <field name="name" readable="0" private="1">
         <type name="utf8" c:type="gchar*"/>
       </field>
-      <field name="dbus_signature" writable="1">
+      <field name="dbus_signature" readable="0" private="1">
         <type name="utf8" c:type="gchar*"/>
       </field>
-      <field name="default_value" writable="1">
+      <field name="default_value" readable="0" private="1">
         <type name="GObject.Value" c:type="GValue"/>
       </field>
-      <field name="flags" writable="1">
+      <field name="flags" readable="0" private="1">
         <type name="guint" c:type="guint"/>
       </field>
-      <field name="priv" writable="1">
+      <field name="priv" readable="0" private="1">
         <type name="gpointer" c:type="gpointer"/>
       </field>
       <method name="copy"
@@ -14442,6 +15109,7 @@ returned, @value is left uninitialized.</doc>
     <record name="ConnectionManagerProtocol"
             c:type="TpConnectionManagerProtocol"
             version="0.7.1"
+            deprecated="0.19.1, use #TpProtocol objects instead"
             glib:type-name="TpConnectionManagerProtocol"
             glib:get-type="tp_connection_manager_protocol_get_type"
             c:symbol-prefix="connection_manager_protocol">
@@ -14460,7 +15128,8 @@ relied on.</doc>
       </field>
       <method name="can_register"
               c:identifier="tp_connection_manager_protocol_can_register"
-              version="0.7.26">
+              version="0.7.26"
+              deprecated="0.19.1, use #TpProtocol objects instead">
         <doc xml:whitespace="preserve">Return whether a new account can be registered on this protocol, by setting
 the special "register" parameter to %TRUE.</doc>
         <return-value transfer-ownership="none">
@@ -14470,7 +15139,8 @@ the special "register" parameter to %TRUE.</doc>
       </method>
       <method name="copy"
               c:identifier="tp_connection_manager_protocol_copy"
-              version="0.11.3">
+              version="0.11.3"
+              deprecated="0.19.1, use #TpProtocol objects instead">
         <doc xml:whitespace="preserve">&lt;!-- Returns: says it all --&gt;
 
 tp_connection_manager_protocol_free()</doc>
@@ -14482,7 +15152,8 @@ tp_connection_manager_protocol_free()</doc>
       </method>
       <method name="dup_param_names"
               c:identifier="tp_connection_manager_protocol_dup_param_names"
-              version="0.7.26">
+              version="0.7.26"
+              deprecated="0.19.1, use #TpProtocol objects instead">
         <doc xml:whitespace="preserve">Returns a list of parameter names supported by this connection manager
 for this protocol.
 
@@ -14496,7 +15167,8 @@ The result is copied and must be freed by the caller with g_strfreev().</doc>
       </method>
       <method name="free"
               c:identifier="tp_connection_manager_protocol_free"
-              version="0.11.3">
+              version="0.11.3"
+              deprecated="0.19.1, use #TpProtocol objects instead">
         <doc xml:whitespace="preserve">Frees @proto, which was copied with tp_connection_manager_protocol_copy().</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
@@ -14504,7 +15176,8 @@ The result is copied and must be freed by the caller with g_strfreev().</doc>
       </method>
       <method name="get_param"
               c:identifier="tp_connection_manager_protocol_get_param"
-              version="0.7.26">
+              version="0.7.26"
+              deprecated="0.19.1, use #TpProtocol objects instead">
         <doc xml:whitespace="preserve">&lt;!-- no more to say --&gt;
 
 supported</doc>
@@ -14522,7 +15195,8 @@ supported</doc>
       </method>
       <method name="has_param"
               c:identifier="tp_connection_manager_protocol_has_param"
-              version="0.7.26">
+              version="0.7.26"
+              deprecated="0.19.1, use #TpProtocol objects instead">
         <doc xml:whitespace="preserve">&lt;!-- no more to say --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">%TRUE if @protocol supports the parameter @param.</doc>
@@ -14645,7 +15319,8 @@ non-%NULL and @cm is not ready.</doc>
             disguised="1">
     </record>
     <callback name="ConnectionRequestHandlesCb"
-              c:type="TpConnectionRequestHandlesCb">
+              c:type="TpConnectionRequestHandlesCb"
+              deprecated="See tp_connection_request_handles().">
       <doc xml:whitespace="preserve">Signature of the callback called when tp_connection_request_handles()
 succeeds or fails.
 
@@ -14864,84 +15539,6 @@ tp_cli_connection_interface_contacts_run_get_contact_attributes() directly.
 Those functions should be avoided in favour of using #TpContact,
 tp_connection_hold_handles(), tp_connection_request_handles() and
 tp_connection_get_contact_attributes().</doc>
-      <function name="info_list_copy"
-                c:identifier="tp_contact_info_list_copy"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
-
-tp_contact_info_list_free()</doc>
-        <return-value>
-          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoField, free it with</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-      <function name="info_list_free"
-                c:identifier="tp_contact_info_list_free"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-      <function name="info_spec_list_copy"
-                c:identifier="tp_contact_info_spec_list_copy"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
-
-free it with tp_contact_info_spec_list_free()</doc>
-        <return-value>
-          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoFieldSpec,</doc>
-          <type name="GLib.List" c:type="GList*">
-            <type name="gpointer" c:type="gpointer"/>
-          </type>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
-      <function name="info_spec_list_free"
-                c:identifier="tp_contact_info_spec_list_free"
-                version="0.11.7"
-                introspectable="0">
-        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="list" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
-            <type name="GLib.List" c:type="GList*">
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
-          </parameter>
-        </parameters>
-      </function>
       <method name="add_to_group_async"
               c:identifier="tp_contact_add_to_group_async"
               version="0.15.5">
@@ -15803,15 +16400,12 @@ interface.</doc>
           <type name="utf8"/>
         </array>
       </property>
-      <property name="contact-info"
-                version="0.11.7"
-                introspectable="0"
-                transfer-ownership="none">
+      <property name="contact-info" version="0.11.7" transfer-ownership="none">
         <doc xml:whitespace="preserve">A #GList of #TpContactInfoField representing the vCard of this contact.
 
 This is set to %NULL if %TP_CONTACT_FEATURE_CONTACT_INFO is not set on this
 contact.</doc>
-        <type/>
+        <type name="ContactInfoList"/>
       </property>
       <property name="handle" transfer-ownership="none">
         <doc xml:whitespace="preserve">The contact's handle in the Telepathy D-Bus API, a handle of type
@@ -16181,6 +16775,94 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
               c:identifier="TP_CONTACT_INFO_FLAG_CAN_SET"/>
       <member name="push" value="2" c:identifier="TP_CONTACT_INFO_FLAG_PUSH"/>
     </bitfield>
+    <glib:boxed glib:name="ContactInfoList"
+                c:symbol-prefix="contact_info_list"
+                glib:type-name="TpContactInfoList"
+                glib:get-type="tp_contact_info_list_get_type">
+      <function name="copy"
+                c:identifier="tp_contact_info_list_copy"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
+
+tp_contact_info_list_free()</doc>
+        <return-value>
+          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoField, free it with</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="free"
+                c:identifier="tp_contact_info_list_free"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+    </glib:boxed>
+    <glib:boxed glib:name="ContactInfoSpecList"
+                c:symbol-prefix="contact_info_spec_list"
+                glib:type-name="TpContactInfoSpecList"
+                glib:get-type="tp_contact_info_spec_list_get_type">
+      <function name="copy"
+                c:identifier="tp_contact_info_spec_list_copy"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
+
+free it with tp_contact_info_spec_list_free()</doc>
+        <return-value>
+          <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoFieldSpec,</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+      <function name="free"
+                c:identifier="tp_contact_info_spec_list_free"
+                version="0.11.7"
+                introspectable="0">
+        <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
+    </glib:boxed>
     <enumeration name="ContactListState" c:type="TpContactListState">
       <doc xml:whitespace="preserve">&lt;![CDATA[         The progress made in retrieving the contact list.       ]]&gt;
 
@@ -24370,6 +25052,15 @@ a list of #TpConnectionManagerParam structures, owned by the caller</doc>
           <type name="Capabilities" c:type="TpCapabilities*"/>
         </return-value>
       </method>
+      <method name="get_cm_name"
+              c:identifier="tp_protocol_get_cm_name"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Return the #TpProtocol:cm-name property.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpProtocol:cm-name</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
       <method name="get_english_name"
               c:identifier="tp_protocol_get_english_name"
               version="0.11.11">
@@ -24466,6 +25157,14 @@ if the protocol doesn't support avatars.</doc>
 protocol, or %NULL if this is unknown or the %TP_PROTOCOL_FEATURE_CORE
 feature has not been prepared.</doc>
         <type name="Capabilities"/>
+      </property>
+      <property name="cm-name"
+                version="0.19.1"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The name of the connection manager this protocol is on.</doc>
+        <type name="utf8"/>
       </property>
       <property name="english-name"
                 version="0.11.11"
@@ -25760,14 +26459,15 @@ tp_add_dispatch_operation_context_fail() on @context before it returns.</doc>
       <constructor name="new"
                    c:identifier="tp_simple_client_factory_new"
                    version="0.15.5">
-        <doc xml:whitespace="preserve">Creates a new #TpSimpleClientFactory instance.</doc>
+        <doc xml:whitespace="preserve">Creates a new #TpSimpleClientFactory instance. If @dbus is %NULL,
+tp_dbus_daemon_dup() will be used.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new #TpSimpleClientFactory</doc>
           <type name="SimpleClientFactory" c:type="TpSimpleClientFactory*"/>
         </return-value>
         <parameters>
-          <parameter name="dbus" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #TpDBusDaemon</doc>
+          <parameter name="dbus" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">a #TpDBusDaemon, or %NULL</doc>
             <type name="DBusDaemon" c:type="TpDBusDaemon*"/>
           </parameter>
         </parameters>
@@ -26308,6 +27008,54 @@ must return %TRUE for @connection.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="ensure_contact_by_id_async"
+              c:identifier="tp_simple_client_factory_ensure_contact_by_id_async"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Same as tp_connection_dup_contact_by_id_async(), but prepare the
+contact with all features previously passed to
+tp_simple_client_factory_add_contact_features().</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="connection" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpConnection</doc>
+            <type name="Connection" c:type="TpConnection*"/>
+          </parameter>
+          <parameter name="identifier" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a string representing the contact's identifier</doc>
+            <type name="utf8" c:type="gchar*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="ensure_contact_by_id_finish"
+              c:identifier="tp_simple_client_factory_ensure_contact_by_id_finish"
+              version="0.19.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_simple_client_factory_ensure_contact_by_id_async()</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #TpContact or %NULL on error.</doc>
+          <type name="Contact" c:type="TpContact*"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="get_dbus_daemon"
               c:identifier="tp_simple_client_factory_get_dbus_daemon"
               version="0.15.5">
@@ -26318,6 +27066,70 @@ property</doc>
           <doc xml:whitespace="preserve">the value of the #TpSimpleClientFactory:dbus-daemon</doc>
           <type name="DBusDaemon" c:type="TpDBusDaemon*"/>
         </return-value>
+      </method>
+      <method name="upgrade_contacts_async"
+              c:identifier="tp_simple_client_factory_upgrade_contacts_async"
+              version="0.19.1">
+        <doc xml:whitespace="preserve">Same as tp_connection_upgrade_contacts_async(), but prepare contacts with all
+features previously passed to
+tp_simple_client_factory_add_contact_features().</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="connection" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpConnection</doc>
+            <type name="Connection" c:type="TpConnection*"/>
+          </parameter>
+          <parameter name="n_contacts" transfer-ownership="none">
+            <doc xml:whitespace="preserve">The number of contacts in @contacts (must be at least 1)</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+          <parameter name="contacts" transfer-ownership="none">
+            <doc xml:whitespace="preserve">An array of #TpContact objects associated with @self</doc>
+            <array length="1" zero-terminated="0" c:type="TpContact**">
+              <type name="Contact" c:type="TpContact*"/>
+            </array>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="4">
+            <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="upgrade_contacts_finish"
+              c:identifier="tp_simple_client_factory_upgrade_contacts_finish"
+              version="0.19.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Finishes tp_simple_client_factory_upgrade_contacts_async()</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE on success, %FALSE otherwise.</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+          <parameter name="contacts"
+                     direction="out"
+                     caller-allocates="0"
+                     transfer-ownership="container"
+                     allow-none="1">
+            <doc xml:whitespace="preserve"> a location to set a #GPtrArray of upgraded #TpContact, or %NULL.</doc>
+            <array name="GLib.PtrArray" c:type="GPtrArray**">
+              <type name="Contact"/>
+            </array>
+          </parameter>
+        </parameters>
       </method>
       <property name="dbus-daemon"
                 writable="1"
@@ -29892,17 +30704,87 @@ tp_g_value_slice_new_take_string()</doc>
         </parameter>
       </parameters>
     </function>
-    <function name="contact_info_list_get_type"
-              c:identifier="tp_contact_info_list_get_type">
-      <return-value transfer-ownership="none">
-        <type name="GType" c:type="GType"/>
+    <function name="contact_info_list_copy"
+              c:identifier="tp_contact_info_list_copy"
+              moved-to="ContactInfoList.copy"
+              version="0.11.7"
+              introspectable="0">
+      <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
+
+tp_contact_info_list_free()</doc>
+      <return-value>
+        <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoField, free it with</doc>
+        <type name="GLib.List" c:type="GList*">
+          <type name="gpointer" c:type="gpointer"/>
+        </type>
       </return-value>
+      <parameters>
+        <parameter name="list" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </parameter>
+      </parameters>
     </function>
-    <function name="contact_info_spec_list_get_type"
-              c:identifier="tp_contact_info_spec_list_get_type">
+    <function name="contact_info_list_free"
+              c:identifier="tp_contact_info_list_free"
+              moved-to="ContactInfoList.free"
+              version="0.11.7"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
       <return-value transfer-ownership="none">
-        <type name="GType" c:type="GType"/>
+        <type name="none" c:type="void"/>
       </return-value>
+      <parameters>
+        <parameter name="list" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoField</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="contact_info_spec_list_copy"
+              c:identifier="tp_contact_info_spec_list_copy"
+              moved-to="ContactInfoSpecList.copy"
+              version="0.11.7"
+              introspectable="0">
+      <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;
+
+free it with tp_contact_info_spec_list_free()</doc>
+      <return-value>
+        <doc xml:whitespace="preserve">a new #GList of newly allocated #TpContactInfoFieldSpec,</doc>
+        <type name="GLib.List" c:type="GList*">
+          <type name="gpointer" c:type="gpointer"/>
+        </type>
+      </return-value>
+      <parameters>
+        <parameter name="list" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="contact_info_spec_list_free"
+              c:identifier="tp_contact_info_spec_list_free"
+              moved-to="ContactInfoSpecList.free"
+              version="0.11.7"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Free all memory used by the #GList and its elements.</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="list" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </parameter>
+      </parameters>
     </function>
     <function name="contacts_mixin_add_contact_attributes_iface"
               c:identifier="tp_contacts_mixin_add_contact_attributes_iface"
@@ -31766,6 +32648,7 @@ by the channel implementation.</doc>
     <function name="handle_client_hold"
               c:identifier="tp_handle_client_hold"
               introspectable="0"
+              deprecated="This is no-op so can be safely removed."
               throws="1">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
@@ -31791,6 +32674,7 @@ the connection; previously, this function provided refcounting for handles.</doc
     <function name="handle_client_release"
               c:identifier="tp_handle_client_release"
               introspectable="0"
+              deprecated="This is no-op so can be safely removed."
               throws="1">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
@@ -31936,7 +32820,8 @@ does not exist or is invalid</doc>
     </function>
     <function name="handle_ref"
               c:identifier="tp_handle_ref"
-              introspectable="0">
+              introspectable="0"
+              deprecated="This is no-op so can be safely removed.">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.
 
@@ -32029,7 +32914,8 @@ For invalid handle types, returns "(no handle)" for 0 or
     </function>
     <function name="handle_unref"
               c:identifier="tp_handle_unref"
-              introspectable="0">
+              introspectable="0"
+              deprecated="This is no-op so can be safely removed.">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
       <return-value transfer-ownership="none">
@@ -32075,6 +32961,7 @@ the connection; previously, this function provided refcounting for handles.</doc
     <function name="handles_client_hold"
               c:identifier="tp_handles_client_hold"
               introspectable="0"
+              deprecated="This is no-op so can be safely removed."
               throws="1">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
@@ -32102,6 +32989,7 @@ the connection; previously, this function provided refcounting for handles.</doc
     <function name="handles_client_release"
               c:identifier="tp_handles_client_release"
               introspectable="0"
+              deprecated="This is no-op so can be safely removed."
               throws="1">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
@@ -32128,7 +33016,8 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="handles_ref"
               c:identifier="tp_handles_ref"
-              introspectable="0">
+              introspectable="0"
+              deprecated="This is no-op so can be safely removed.">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
       <return-value transfer-ownership="none">
@@ -32183,7 +33072,8 @@ valid.</doc>
     </function>
     <function name="handles_unref"
               c:identifier="tp_handles_unref"
-              introspectable="0">
+              introspectable="0"
+              deprecated="This is no-op so can be safely removed.">
       <doc xml:whitespace="preserve">Do nothing. Since version 0.13.8, handles always last as long as
 the connection; previously, this function provided refcounting for handles.</doc>
       <return-value transfer-ownership="none">
@@ -32793,7 +33683,8 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="list_connection_managers"
               c:identifier="tp_list_connection_managers"
-              version="0.7.1">
+              version="0.7.1"
+              deprecated="since 0.19.1, use tp_list_connection_managers_async()">
       <doc xml:whitespace="preserve">List the available (running or installed) connection managers. Call the
 callback when done.
 

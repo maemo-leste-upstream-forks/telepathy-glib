@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_SIMPLE_CLIENT_FACTORY_H__
 #define __TP_SIMPLE_CLIENT_FACTORY_H__
 
@@ -175,6 +179,32 @@ TpContact *tp_simple_client_factory_ensure_contact (TpSimpleClientFactory *self,
     TpConnection *connection,
     TpHandle handle,
     const gchar *identifier);
+_TP_AVAILABLE_IN_0_20
+void tp_simple_client_factory_upgrade_contacts_async (
+    TpSimpleClientFactory *self,
+    TpConnection *connection,
+    guint n_contacts,
+    TpContact * const *contacts,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+_TP_AVAILABLE_IN_0_20
+gboolean tp_simple_client_factory_upgrade_contacts_finish (
+    TpSimpleClientFactory *self,
+    GAsyncResult *result,
+    GPtrArray **contacts,
+    GError **error);
+_TP_AVAILABLE_IN_0_20
+void tp_simple_client_factory_ensure_contact_by_id_async (
+    TpSimpleClientFactory *self,
+    TpConnection *connection,
+    const gchar *identifier,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+_TP_AVAILABLE_IN_0_20
+TpContact *tp_simple_client_factory_ensure_contact_by_id_finish (
+    TpSimpleClientFactory *self,
+    GAsyncResult *result,
+    GError **error);
 _TP_AVAILABLE_IN_0_16
 GArray *tp_simple_client_factory_dup_contact_features (
     TpSimpleClientFactory *self,

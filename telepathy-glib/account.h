@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_ACCOUNT_H
 #define TP_ACCOUNT_H
 
@@ -85,16 +89,22 @@ GQuark tp_account_get_feature_quark_addressing (void) G_GNUC_CONST;
 TpAccount *tp_account_new (TpDBusDaemon *bus_daemon, const gchar *object_path,
     GError **error) G_GNUC_WARN_UNUSED_RESULT;
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_account_get_protocol)
 gboolean tp_account_parse_object_path (const gchar *object_path,
     gchar **cm, gchar **protocol, gchar **account_id, GError **error);
+#endif
 const gchar *tp_account_get_path_suffix (TpAccount *account);
 
 void tp_account_init_known_interfaces (void);
 
 TpConnection *tp_account_get_connection (TpAccount *account);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_simple_client_factory_ensure_connection)
 TpConnection *tp_account_ensure_connection (TpAccount *account,
     const gchar *path);
+#endif
 
 const gchar *tp_account_get_display_name (TpAccount *account);
 
