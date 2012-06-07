@@ -20,7 +20,8 @@
 
 #ifndef __TP_GLIB_H__
 #define __TP_GLIB_H__
-#define __TP_IN_GLIB_H__
+
+#define _TP_IN_META_HEADER
 
 #include <telepathy-glib/enums.h>
 #include <telepathy-glib/errors.h>
@@ -32,6 +33,7 @@
 
 #include <telepathy-glib/account-channel-request.h>
 #include <telepathy-glib/account-manager.h>
+#include <telepathy-glib/account-request.h>
 #include <telepathy-glib/account.h>
 #include <telepathy-glib/add-dispatch-operation-context.h>
 #include <telepathy-glib/automatic-client-factory.h>
@@ -122,5 +124,6 @@
 #include <telepathy-glib/svc-generic.h>
 #include <telepathy-glib/svc-client.h>
 
-#undef  __TP_IN_GLIB_H__
+#undef _TP_IN_META_HEADER
+
 #endif /* __TP_GLIB_H__ */

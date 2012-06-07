@@ -9,6 +9,10 @@
 
 tools_dir = $(top_srcdir)/tools
 
+AM_CPPFLAGS = \
+    -DTP_DISABLE_SINGLE_INCLUDE \
+    $(NULL)
+
 AM_CFLAGS = \
     $(ERROR_CFLAGS) \
     $(DBUS_CFLAGS) \
@@ -136,7 +140,7 @@ _gen/svc-connection.c: _gen/connection.xml \
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/glib-ginterface-gen.py \
 		--filename=_gen/svc-connection \
 		--signal-marshal-prefix=_example_ext \
-		--include='<telepathy-glib/dbus.h>' \
+		--include='<telepathy-glib/telepathy-glib.h>' \
 		--not-implemented-func='tp_dbus_g_method_return_not_implemented' \
 		--allow-unstable \
 		$< Example_Svc_

@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_BASE_CONNECTION_H__
 #define __TP_BASE_CONNECTION_H__
 
@@ -57,15 +61,15 @@ typedef gchar *(*TpBaseConnectionGetUniqueConnectionNameImpl) (
     TpBaseConnection *self);
 
 struct _TpBaseConnection {
-    /*<public>*/
+    /*<private>*/
     GObject parent;
 
-    gchar *bus_name;
-    gchar *object_path;
+    gchar *_TP_SEAL (bus_name);
+    gchar *_TP_SEAL (object_path);
 
-    TpConnectionStatus status;
+    TpConnectionStatus _TP_SEAL (status);
 
-    TpHandle self_handle;
+    TpHandle _TP_SEAL (self_handle);
 
     /*<private>*/
     gpointer _future1;
@@ -114,6 +118,22 @@ struct _TpBaseConnectionClass {
 #   define TP_INTERNAL_CONNECTION_STATUS_NEW ((TpConnectionStatus)(-1))
 
 GType tp_base_connection_get_type (void);
+
+_TP_AVAILABLE_IN_0_20
+const gchar *tp_base_connection_get_bus_name (TpBaseConnection *self);
+
+_TP_AVAILABLE_IN_0_20
+const gchar *tp_base_connection_get_object_path (TpBaseConnection *self);
+
+_TP_AVAILABLE_IN_0_20
+TpConnectionStatus tp_base_connection_get_status (TpBaseConnection *self);
+
+_TP_AVAILABLE_IN_0_20
+gboolean tp_base_connection_is_destroyed (TpBaseConnection *self);
+
+_TP_AVAILABLE_IN_0_20
+gboolean tp_base_connection_check_connected (TpBaseConnection *self,
+    GError **error);
 
 TpHandleRepoIface *tp_base_connection_get_handles (TpBaseConnection *self,
     TpHandleType handle_type);
@@ -192,19 +212,19 @@ gboolean tp_base_connection_channel_manager_iter_next (
   (G_TYPE_INSTANCE_GET_CLASS ((obj), TP_TYPE_BASE_CONNECTION, \
                               TpBaseConnectionClass))
 
-/* The cast of a string literal to (gchar *) is to keep C++ compilers happy */
 #define TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED(conn, context) \
   G_STMT_START { \
-    TpBaseConnection *c = (conn); \
+    TpBaseConnection *c_ = (conn); \
+    GError *e_ = NULL; \
     \
-    if (c->status != TP_CONNECTION_STATUS_CONNECTED) \
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS \
+    if (!tp_base_connection_check_connected (c_, &e_)) \
       { \
-        GError e = { TP_ERROR, TP_ERROR_DISCONNECTED, \
-            (gchar *) "Connection is disconnected" }; \
-        \
-        dbus_g_method_return_error ((context), &e); \
+        dbus_g_method_return_error ((context), e_); \
+        g_error_free (e_); \
         return; \
       } \
+    G_GNUC_END_IGNORE_DEPRECATIONS \
   } G_STMT_END
 
 TpDBusDaemon *tp_base_connection_get_dbus_daemon (TpBaseConnection *self);

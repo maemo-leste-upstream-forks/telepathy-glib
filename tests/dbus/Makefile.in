@@ -60,9 +60,10 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test-account$(EXEEXT) \
 	test-account-channel-request$(EXEEXT) \
-	test-account-manager$(EXEEXT) test-base-client$(EXEEXT) \
-	test-call-cancellation$(EXEEXT) test-call-channel$(EXEEXT) \
-	test-channel$(EXEEXT) test-channel-dispatcher$(EXEEXT) \
+	test-account-manager$(EXEEXT) test-account-request$(EXEEXT) \
+	test-base-client$(EXEEXT) test-call-cancellation$(EXEEXT) \
+	test-call-channel$(EXEEXT) test-channel$(EXEEXT) \
+	test-channel-dispatcher$(EXEEXT) \
 	test-channel-dispatch-operation$(EXEEXT) \
 	test-channel-introspect$(EXEEXT) test-channel-request$(EXEEXT) \
 	test-channel-manager-request-properties$(EXEEXT) \
@@ -126,6 +127,13 @@ am_test_account_manager_OBJECTS = account-manager.$(OBJEXT)
 test_account_manager_OBJECTS = $(am_test_account_manager_OBJECTS)
 test_account_manager_LDADD = $(LDADD)
 test_account_manager_DEPENDENCIES =  \
+	$(top_builddir)/tests/lib/libtp-glib-tests.la \
+	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_test_account_request_OBJECTS = account-request.$(OBJEXT)
+test_account_request_OBJECTS = $(am_test_account_request_OBJECTS)
+test_account_request_LDADD = $(LDADD)
+test_account_request_DEPENDENCIES =  \
 	$(top_builddir)/tests/lib/libtp-glib-tests.la \
 	$(top_builddir)/telepathy-glib/libtelepathy-glib.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -621,7 +629,8 @@ am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(test_account_SOURCES) \
 	$(test_account_channel_request_SOURCES) \
-	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
+	$(test_account_manager_SOURCES) \
+	$(test_account_request_SOURCES) $(test_base_client_SOURCES) \
 	$(test_call_cancellation_SOURCES) $(test_call_channel_SOURCES) \
 	$(test_channel_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
@@ -667,7 +676,8 @@ SOURCES = $(test_account_SOURCES) \
 	$(test_unsupported_interface_SOURCES)
 DIST_SOURCES = $(test_account_SOURCES) \
 	$(test_account_channel_request_SOURCES) \
-	$(test_account_manager_SOURCES) $(test_base_client_SOURCES) \
+	$(test_account_manager_SOURCES) \
+	$(test_account_request_SOURCES) $(test_base_client_SOURCES) \
 	$(test_call_cancellation_SOURCES) $(test_call_channel_SOURCES) \
 	$(test_channel_SOURCES) \
 	$(test_channel_dispatch_operation_SOURCES) \
@@ -891,6 +901,7 @@ tests_list = \
     test-account \
     test-account-channel-request \
     test-account-manager \
+    test-account-request \
     test-base-client \
     test-call-cancellation \
     test-call-channel \
@@ -978,6 +989,7 @@ test_account_channel_request_LDADD = \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
     $(GLIB_LIBS)
 
+test_account_request_SOURCES = account-request.c
 test_account_manager_SOURCES = account-manager.c
 test_base_client_SOURCES = base-client.c
 test_call_cancellation_SOURCES = call-cancellation.c
@@ -1262,6 +1274,9 @@ test-account-channel-request$(EXEEXT): $(test_account_channel_request_OBJECTS) $
 test-account-manager$(EXEEXT): $(test_account_manager_OBJECTS) $(test_account_manager_DEPENDENCIES) $(EXTRA_test_account_manager_DEPENDENCIES) 
 	@rm -f test-account-manager$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_account_manager_OBJECTS) $(test_account_manager_LDADD) $(LIBS)
+test-account-request$(EXEEXT): $(test_account_request_OBJECTS) $(test_account_request_DEPENDENCIES) $(EXTRA_test_account_request_DEPENDENCIES) 
+	@rm -f test-account-request$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_account_request_OBJECTS) $(test_account_request_LDADD) $(LIBS)
 test-base-client$(EXEEXT): $(test_base_client_OBJECTS) $(test_base_client_DEPENDENCIES) $(EXTRA_test_base_client_DEPENDENCIES) 
 	@rm -f test-base-client$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_base_client_OBJECTS) $(test_base_client_LDADD) $(LIBS)
@@ -1483,6 +1498,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-channel-request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account-request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/account.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base-client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call-cancellation.Po@am__quote@

@@ -17,6 +17,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_PROTOCOL_H
 #define TP_PROTOCOL_H
 
@@ -33,13 +37,12 @@ typedef struct _TpConnectionManagerParam TpConnectionManagerParam;
 
 struct _TpConnectionManagerParam
 {
-  /*<public>*/
-  gchar *name;
-  gchar *dbus_signature;
-  GValue default_value;
-  guint flags;
-
-  gpointer priv;
+  /*<private>*/
+  gchar *_TP_SEAL (name);
+  gchar *_TP_SEAL (dbus_signature);
+  GValue _TP_SEAL (default_value);
+  guint _TP_SEAL (flags);
+  gpointer _TP_SEAL (priv);
 };
 
 typedef struct _TpProtocol TpProtocol;
@@ -79,6 +82,9 @@ TpProtocol *tp_protocol_new (TpDBusDaemon *dbus, const gchar *cm_name,
     GError **error);
 
 const gchar *tp_protocol_get_name (TpProtocol *self);
+
+_TP_AVAILABLE_IN_0_20
+const gchar *tp_protocol_get_cm_name (TpProtocol *self);
 
 #define TP_PROTOCOL_FEATURE_PARAMETERS \
   (tp_protocol_get_feature_quark_parameters ())

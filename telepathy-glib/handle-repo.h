@@ -21,6 +21,10 @@
  *
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_HANDLE_REPO_H__
 #define __TP_HANDLE_REPO_H__
 
@@ -79,19 +83,29 @@ gboolean tp_handle_is_valid (TpHandleRepoIface *self,
 gboolean tp_handles_are_valid (TpHandleRepoIface *self,
     const GArray *handles, gboolean allow_zero, GError **error);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20
 TpHandle tp_handle_ref (TpHandleRepoIface *self, TpHandle handle);
+_TP_DEPRECATED_IN_0_20
 void tp_handles_ref (TpHandleRepoIface *self, const GArray *handles);
+_TP_DEPRECATED_IN_0_20
 void tp_handle_unref (TpHandleRepoIface *self, TpHandle handle);
+_TP_DEPRECATED_IN_0_20
 void tp_handles_unref (TpHandleRepoIface *self, const GArray *handles);
 
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handle_client_hold (TpHandleRepoIface *self,
     const gchar *client, TpHandle handle, GError **error);
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handles_client_hold (TpHandleRepoIface *self,
     const gchar *client, const GArray *handles, GError **error);
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handle_client_release (TpHandleRepoIface *self,
     const gchar *client, TpHandle handle, GError **error);
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handles_client_release (TpHandleRepoIface *self,
     const gchar *client, const GArray *handles, GError **error);
+#endif
 
 const char *tp_handle_inspect (TpHandleRepoIface *self,
     TpHandle handle) G_GNUC_WARN_UNUSED_RESULT;
