@@ -105,7 +105,10 @@ with the domain %TP_DBUS_ERRORS and the error code
 One can connect to the #GObject::notify signal to get change notifications
 for many of the properties on this object. Refer to each property's
 documentation for whether it can be used in this way.</doc>
-      <constructor name="new" c:identifier="tp_account_new" throws="1">
+      <constructor name="new"
+                   c:identifier="tp_account_new"
+                   deprecated="Use tp_simple_client_factory_ensure_account() instead."
+                   throws="1">
         <doc xml:whitespace="preserve">Convenience function to create a new account proxy. The returned #TpAccount
 is not guaranteed to be ready at the point of return.
 
@@ -504,6 +507,15 @@ containing the bytes of the account's avatar, or %NULL on failure</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
+      <method name="get_cm_name"
+              c:identifier="tp_account_get_cm_name"
+              version="0.19.3">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the same as the #TpAccount:cm-name property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
       <method name="get_connect_automatically"
               c:identifier="tp_account_get_connect_automatically"
               version="0.9.0">
@@ -524,7 +536,8 @@ containing the bytes of the account's avatar, or %NULL on failure</doc>
       </method>
       <method name="get_connection_manager"
               c:identifier="tp_account_get_connection_manager"
-              version="0.9.0">
+              version="0.9.0"
+              deprecated="Use tp_account_get_cm_name() instead.">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the same as the #TpAccount:connection-manager property</doc>
@@ -706,10 +719,20 @@ persistent identification of the account, use tp_proxy_get_object_path().</doc>
       </method>
       <method name="get_protocol"
               c:identifier="tp_account_get_protocol"
-              version="0.9.0">
+              version="0.9.0"
+              deprecated="Use tp_account_get_cm_name() instead.">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the same as the #TpAccount:protocol property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_protocol_name"
+              c:identifier="tp_account_get_protocol_name"
+              version="0.19.3">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the same as the #TpAccount:protocol-name property</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
       </method>
@@ -1719,6 +1742,10 @@ tp_proxy_prepare_async() has finished; until then, the value is
 %FALSE.</doc>
         <type name="gboolean"/>
       </property>
+      <property name="cm-name" version="0.19.3" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's connection manager name.</doc>
+        <type name="utf8"/>
+      </property>
       <property name="connect-automatically"
                 version="0.9.0"
                 transfer-ownership="none">
@@ -1795,6 +1822,7 @@ an empty map.</doc>
       </property>
       <property name="connection-manager"
                 version="0.9.0"
+                deprecated="Use #TpAccount:cm-name instead."
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">The account's connection manager name.</doc>
         <type name="utf8"/>
@@ -1956,7 +1984,18 @@ tp_proxy_prepare_async() has finished; until then, the value is
 %NULL.</doc>
         <type name="utf8"/>
       </property>
-      <property name="protocol" version="0.9.0" transfer-ownership="none">
+      <property name="protocol"
+                version="0.9.0"
+                deprecated="Use #TpAccount:protocol-name instead."
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The account's machine-readable protocol name, such as "jabber", "msn" or
+"local-xmpp". Recommended names for most protocols can be found in the
+Telepathy D-Bus Interface Specification.</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="protocol-name"
+                version="0.19.3"
+                transfer-ownership="none">
         <doc xml:whitespace="preserve">The account's machine-readable protocol name, such as "jabber", "msn" or
 "local-xmpp". Recommended names for most protocols can be found in the
 Telepathy D-Bus Interface Specification.</doc>
@@ -8702,6 +8741,7 @@ subclassing.)</doc>
       <constructor name="new"
                    c:identifier="tp_channel_new"
                    version="0.7.1"
+                   deprecated="Use tp_simple_client_factory_ensure_channel() instead."
                    throws="1">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="full">
@@ -8734,6 +8774,7 @@ subclassing.)</doc>
       <constructor name="new_from_properties"
                    c:identifier="tp_channel_new_from_properties"
                    version="0.7.19"
+                   deprecated="Use tp_simple_client_factory_ensure_channel() instead."
                    throws="1">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="full">
@@ -11768,6 +11809,7 @@ subclassing.)</doc>
       <constructor name="new"
                    c:identifier="tp_connection_new"
                    version="0.7.1"
+                   deprecated="Use tp_simple_client_factory_ensure_connection() instead."
                    throws="1">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;
 
@@ -12470,9 +12512,22 @@ Requires %TP_CONNECTION_FEATURE_BALANCE to be prepared.</doc>
           <type name="Capabilities" c:type="TpCapabilities*"/>
         </return-value>
       </method>
-      <method name="get_connection_manager_name"
-              c:identifier="tp_connection_get_connection_manager_name">
+      <method name="get_cm_name"
+              c:identifier="tp_connection_get_cm_name"
+              version="0.19.3">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the same as the #TpConnection:cm-name property</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+      </method>
+      <method name="get_connection_manager_name"
+              c:identifier="tp_connection_get_connection_manager_name"
+              version="0.13.16"
+              deprecated="Use tp_connection_get_cm_name() instead.">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the same as the #TpConnection:connection-manager-name property</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
       </method>
@@ -12849,8 +12904,11 @@ Otherwise, return %NULL, without altering @details.</doc>
         </return-value>
       </method>
       <method name="get_protocol_name"
-              c:identifier="tp_connection_get_protocol_name">
+              c:identifier="tp_connection_get_protocol_name"
+              version="0.13.16">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the same as the #TpConnection:protocol-name property</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
       </method>
@@ -13919,8 +13977,13 @@ To wait for valid capability information, call tp_proxy_prepare_async()
 with the feature %TP_CONNECTION_FEATURE_CAPABILITIES.</doc>
         <type name="Capabilities"/>
       </property>
+      <property name="cm-name" version="0.19.3" transfer-ownership="none">
+        <doc xml:whitespace="preserve">This connection's connection manager name.</doc>
+        <type name="utf8"/>
+      </property>
       <property name="connection-manager-name"
                 version="0.13.16"
+                deprecated="Use #TpConnection:cm-name instead."
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">This connection's connection manager name.</doc>
         <type name="utf8"/>
@@ -14720,7 +14783,7 @@ without the "telepathy-" prefix.
 The returned string is valid as long as @self is. Copy it with g_strdup()
 if a longer lifetime is required.</doc>
         <return-value transfer-ownership="none">
-          <doc xml:whitespace="preserve">the #TpConnectionManager:connection-manager property</doc>
+          <doc xml:whitespace="preserve">the #TpConnectionManager:cm-name property</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
       </method>
@@ -14833,7 +14896,13 @@ are emitted.</doc>
 even if we already have its info from a .manager file. Default %FALSE.</doc>
         <type name="gboolean"/>
       </property>
-      <property name="connection-manager" transfer-ownership="none">
+      <property name="cm-name" version="0.19.3" transfer-ownership="none">
+        <doc xml:whitespace="preserve">The name of the connection manager, e.g. "gabble" (read-only).</doc>
+        <type name="utf8"/>
+      </property>
+      <property name="connection-manager"
+                deprecated="Use #TpConnectionManager:cm-name instead."
+                transfer-ownership="none">
         <doc xml:whitespace="preserve">The name of the connection manager, e.g. "gabble" (read-only).</doc>
         <type name="utf8"/>
       </property>
@@ -18836,6 +18905,7 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
       <constructor name="new"
                    c:identifier="tp_file_transfer_channel_new"
                    version="0.15.5"
+                   deprecated="Use tp_simple_client_factory_ensure_channel() instead."
                    throws="1">
         <doc xml:whitespace="preserve">Convenient function to create a new #TpFileTransferChannel</doc>
         <return-value transfer-ownership="full">
@@ -28044,6 +28114,7 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
       <constructor name="new"
                    c:identifier="tp_stream_tube_channel_new"
                    version="0.13.2"
+                   deprecated="Use tp_simple_client_factory_ensure_channel() instead."
                    throws="1">
         <doc xml:whitespace="preserve">Creates a new #TpStreamTubeChannel proxy object from the provided path and
 properties. Most developers will not need to use this function; use
@@ -28962,6 +29033,7 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
       <constructor name="new"
                    c:identifier="tp_text_channel_new"
                    version="0.13.10"
+                   deprecated="Use tp_simple_client_factory_ensure_channel() instead."
                    throws="1">
         <doc xml:whitespace="preserve">Convenient function to create a new #TpTextChannel</doc>
         <return-value transfer-ownership="full">
@@ -32718,6 +32790,69 @@ is invalid.</doc>
         <parameter name="context" transfer-ownership="none">
           <doc xml:whitespace="preserve">User data to be passed to the normalization callback</doc>
           <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="handle_ensure_async"
+              c:identifier="tp_handle_ensure_async"
+              version="0.19.2"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Asyncronously normalize an identifier and create an handle for it. This could
+involve a server round-trip. This should be used instead of
+tp_handle_ensure() for user provided contact identifiers, but it is not
+necessary for identifiers from the server.</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="self" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A handle repository implementation</doc>
+          <type name="HandleRepoIface" c:type="TpHandleRepoIface*"/>
+        </parameter>
+        <parameter name="connection" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the #TpBaseConnection using this handle repo</doc>
+          <type name="BaseConnection" c:type="TpBaseConnection*"/>
+        </parameter>
+        <parameter name="id" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A string whose handle is required</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </parameter>
+        <parameter name="context" transfer-ownership="none">
+          <doc xml:whitespace="preserve">User data to be passed to the normalization callback</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="callback"
+                   transfer-ownership="none"
+                   allow-none="1"
+                   scope="async"
+                   closure="5">
+          <doc xml:whitespace="preserve">a callback to call when the operation finishes</doc>
+          <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+        </parameter>
+        <parameter name="user_data" transfer-ownership="none">
+          <doc xml:whitespace="preserve">data to pass to @callback</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="handle_ensure_finish"
+              c:identifier="tp_handle_ensure_finish"
+              version="0.19.2"
+              introspectable="0"
+              throws="1">
+      <doc xml:whitespace="preserve">Finishes tp_handle_ensure_async()</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">non-0 #TpHandle if the operation was successful, otherwise 0.</doc>
+        <type name="Handle" c:type="TpHandle"/>
+      </return-value>
+      <parameters>
+        <parameter name="self" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A handle repository implementation</doc>
+          <type name="HandleRepoIface" c:type="TpHandleRepoIface*"/>
+        </parameter>
+        <parameter name="result" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+          <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
         </parameter>
       </parameters>
     </function>

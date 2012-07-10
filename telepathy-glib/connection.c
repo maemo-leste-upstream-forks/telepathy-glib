@@ -267,6 +267,7 @@ enum
   PROP_STATUS = 1,
   PROP_STATUS_REASON,
   PROP_CONNECTION_MANAGER_NAME,
+  PROP_CM_NAME,
   PROP_PROTOCOL_NAME,
   PROP_CONNECTION_READY,
   PROP_SELF_CONTACT,
@@ -317,6 +318,9 @@ tp_connection_get_property (GObject *object,
   switch (property_id)
     {
     case PROP_CONNECTION_MANAGER_NAME:
+      g_value_set_string (value, self->priv->cm_name);
+      break;
+    case PROP_CM_NAME:
       g_value_set_string (value, self->priv->cm_name);
       break;
     case PROP_PROTOCOL_NAME:
@@ -1762,10 +1766,24 @@ tp_connection_class_init (TpConnectionClass *klass)
    * This connection's connection manager name.
    *
    * Since: 0.13.16
-   *
+   * Deprecated: Use #TpConnection:cm-name instead.
    */
   g_object_class_install_property (object_class, PROP_CONNECTION_MANAGER_NAME,
       g_param_spec_string ("connection-manager-name",
+          "Connection manager name",
+          "The connection's connection manager name",
+          NULL,
+          G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  /**
+   * TpConnection:cm-name:
+   *
+   * This connection's connection manager name.
+   *
+   * Since: 0.19.3
+   */
+  g_object_class_install_property (object_class, PROP_CM_NAME,
+      g_param_spec_string ("cm-name",
           "Connection manager name",
           "The connection's connection manager name",
           NULL,
@@ -2346,6 +2364,7 @@ tp_connection_class_init (TpConnectionClass *klass)
  *  fails or on invalid arguments
  *
  * Since: 0.7.1
+ * Deprecated: Use tp_simple_client_factory_ensure_connection() instead.
  */
 TpConnection *
 tp_connection_new (TpDBusDaemon *dbus,
@@ -2520,16 +2539,17 @@ tp_connection_get_status (TpConnection *self,
 }
 
 /**
-* tp_connection_get_connection_manager_name:
-* @self: a #TpConnection
-*
-* <!-- -->
-*
-* Returns: the same as the #TpConnection:connection-manager-name property
-*
-* Since: 0.13.16
-*
-*/
+ * tp_connection_get_connection_manager_name:
+ * @self: a #TpConnection
+ *
+ * <!-- -->
+ *
+ * Returns: the same as the #TpConnection:connection-manager-name property
+ *
+ * Since: 0.13.16
+ * Deprecated: Use tp_connection_get_cm_name() instead.
+ *
+ */
 const gchar *
 tp_connection_get_connection_manager_name (TpConnection *self)
 {
@@ -2539,16 +2559,35 @@ tp_connection_get_connection_manager_name (TpConnection *self)
 }
 
 /**
-* tp_connection_get_protocol_name:
-* @self: a #TpConnection
-*
-* <!-- -->
-*
-* Returns: the same as the #TpConnection:protocol-name property
-*
-* Since: 0.13.16
-*
-*/
+ * tp_connection_get_cm_name:
+ * @self: a #TpConnection
+ *
+ * <!-- -->
+ *
+ * Returns: the same as the #TpConnection:cm-name property
+ *
+ * Since: 0.19.3
+ *
+ */
+const gchar *
+tp_connection_get_cm_name (TpConnection *self)
+{
+    g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+    return self->priv->cm_name;
+}
+
+/**
+ * tp_connection_get_protocol_name:
+ * @self: a #TpConnection
+ *
+ * <!-- -->
+ *
+ * Returns: the same as the #TpConnection:protocol-name property
+ *
+ * Since: 0.13.16
+ *
+ */
 const gchar *
 tp_connection_get_protocol_name (TpConnection *self)
 {
