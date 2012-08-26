@@ -1,3 +1,253 @@
+commit 4c6f55112a8542035ba8311cdd3456c6b7673f1b
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-08-06 15:33:36 +0200
+
+    prepare 0.19.6
+
+commit 48cfae7dfe818c39835d609933e9db12a3bdc573
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-08-02 15:24:41 +0200
+
+    add tp_account_manager_can_set_default()
+    
+    When creating/editing an account, the Ubuntu Online Accounts panel loads the
+    relevant plugin dynamically. In order to work properly, this plugin has to
+    define the default AM with some features. But
+    tp_account_manager_set_default() can only be called once, later calls
+    resulting in critical warnings. By using tp_account_manager_can_set_default()
+    the plugin can check if the default AM has already be defined or not.
+
+commit ae5de32be39b2dbb6df88033e74ac792ad4ace84
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2012-07-31 20:54:31 +0200
+
+    BaseChannel: assert that the subclass sets TargetHandleType
+    
+    If the subclass sets the channel's target handle, then it had better set
+    the target handle type in the klass. I got this wrong when porting Idle
+    to TpBaseChannel.
+    
+    Fist-bumped-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 25dee6daf0cd5fcf72e0fb204c85074119e4af1d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-07-26 11:50:48 +0100
+
+    NEWS
+
+commit fbacc9202217a86da303df05d881bfefe6385bd9
+Author: Ross Burton <ross.burton@intel.com>
+Date:   2012-07-25 12:58:16 +0100
+
+    Fix a race in _gen/reentrant-methods.list
+    
+    Very occasionally, a parallel build will fail like this:
+    
+    | Making all in telepathy-glib
+    | make[2]: Entering directory `/buildarea1/yocto-autobuilder/yocto-slave/nightly-x86/build/build/tmp/work/i586-poky-linux/telepathy-glib-0.19.2-r0/telepathy-glib-0.19.2/telepathy-glib'
+    | /bin/mkdir -p _gen
+    | ( cd . && cat versions/0.7.0.abi [...] versions/0.19.2.abi  ) | \
+    | 		/bin/grep '^tp_cli_.*_run_.*' > _gen/reentrant-methods.list.tmp
+    | /bin/sh: line 1: _gen/reentrant-methods.list.tmp: No such file or directory
+    | make[2]: *** [_gen/reentrant-methods.list] Error 1
+    
+    It's doing the mkdir and the subshell in parallel, when the mkdir should be done
+    first.  Add an explicit dependency on spec-stamp to reentrant-methods.list to
+    ensure the ordering.
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=52480
+    Reviwewed-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+    Reviwewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit 38ca0a65e896c3af583b0c2ece61bc717746cd06
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-24 16:50:24 +0200
+
+    Bump nano version
+
+commit 746ff16c0d9bfd4e234e2066a49dec5a2f21624f
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-24 16:25:18 +0200
+
+    Prepare 0.19.5 release
+
+commit bf772bf88572d235e905eea9a67e168b886bf670
+Merge: 523691b e2f99aa
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-24 16:17:38 +0200
+
+    Merge branch 'telepathy-glib-0.18'
+
+commit e2f99aa39425dd3431e9cd8d09fb3b144c1ab0a7
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-24 15:28:00 +0200
+
+    tp_connection_upgrade_contacts(): Use special trick of ready_enough_for_contacts
+    
+    TpConnection itself wants to prepare TpContacts before being officially
+    CONNECTED. This was already the case for self contact. Use the same
+    trick for blocked contacts.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=52441
+
+commit 523691b44584947b25ce1e93a0191e60c60ca78f
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-24 13:45:25 +0200
+
+    TpAccountManager: set the requested presence on newly created accounts
+
+commit 505403d253c7071ab081cc258827b605a6ed93b0
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-07-19 12:36:00 +0200
+
+    set nano version
+
+commit f01424d595211eff173e4ca1cda9d89f11d48493
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-07-19 12:21:21 +0200
+
+    set UNRELEASED versions
+
+commit 70f4a3665d14868653e2f99b0fa77b6a81293ca1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-07-19 12:04:36 +0200
+
+    prepare 0.19.4
+
+commit 8dd23a0617edfc8fbc9adf1c855834ccd60ff531
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-07-17 15:51:59 +0200
+
+    add tp_account_request_set_storage_provider()
+
+commit 248a1c9c0dc909e6ebd4bf93d3f83b873a697f06
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-07-17 15:40:59 +0200
+
+    account-request: add missing 'service' getter
+
+commit b0e97c3827c4f5da668e0472afa0f02f7b533a47
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-10 15:24:08 +0100
+
+    base-connection: return from RequestHandles if called with no names
+    
+    Since we added async handle normalization functions, RequestHandles(1, [])
+    would just not return at all.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 4e35e0198e6a21d68f25adfe896f50afa74e3f2b
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-10 16:18:01 +0200
+
+    Fix some gtk-doc errors
+
+commit 932a5758b82c9440d482694e66a80b0dcabba561
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-09 16:38:27 +0100
+
+    base-{connection,protocol}: be sure to add new class members to the end of the struct
+    
+    I already removed the padding (in c14d25b4bf4 and 436219789348) so
+    just re-arrange the struct.
+    
+    D'oh.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 528770ed041b494a23dc00b4e0b1f5b4ee5c75f9
+Merge: 8e50904 ec9a04f
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-06 17:01:50 +0100
+
+    Merge branch '51441-get-interfaces'
+    
+    Conflicts:
+    	telepathy-glib/base-connection-manager.c
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit ec9a04f139900957a59630a7f74015f55dffe100
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 16:52:51 +0100
+
+    example protocols: update to use get_interfaces_array vfunc
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 43621978934824f2b6815ef5d5e20887d59bca28
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 16:48:36 +0100
+
+    base-protocol: add get_interfaces_array vfunc to class struct
+    
+    This is a lot like 74bd945252, but we're having to deal with another
+    older get_interfaces vfunc, which is slightly annoying.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit c14d25b4bf471b7d9797e097d4318af4b9da001c
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 16:04:46 +0100
+
+    fixup! bcde9c87323454f946be989825b2dc74f61d16f7
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 05ea1395d99b67e8569dd6e50ec99b782b72ea08
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 15:56:12 +0100
+
+    base-connection: simplify add_interfaces
+    
+    Calling set_size on the GArray is a little overkill.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 6b037b43df5104636f58ab0a3e10c075012feee5
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 15:54:52 +0100
+
+    base-connection{,-manager}: seal old interfaces members
+    
+    gtk-doc gets confused, so they've been removed from the docs. See
+    also: e8f9a27a388e21
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit aaea3147323cd1ad1b67e17c06504a5a6d6517cc
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 15:05:34 +0100
+
+    example & test connections: update to use new get_interfaces… vfunc
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit bcde9c87323454f946be989825b2dc74f61d16f7
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-05 15:04:00 +0100
+
+    base-connection: add get_interfaces… vfunc to class struct
+    
+    This is a lot like 74bd945252.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 245d48040d0b52aab05b57c7c859b4118b0af776
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-04 17:58:16 +0100
+
+    base-room-config: fix old comment referring to TpBaseChannelClass.interfaces
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
+
+commit 8e509049846753db229d49465a85442d9dc7a009
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-07-05 15:40:16 +0200
+
+    Bump nano version
+
 commit dc783450b25d72b452dd15ac121f495beac1f436
 Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
 Date:   2012-07-05 15:29:58 +0200
@@ -17,6 +267,16 @@ Date:   2012-07-05 14:23:46 +0200
     Remove from doc sealed fields
     
     Otherwise gtk-doc gets confused
+
+commit 19fd0c69ae3d557f9ed430ecced67701ec6a8c9f
+Author: Jonny Lamb <jonny.lamb@collabora.co.uk>
+Date:   2012-07-04 17:57:38 +0100
+
+    base-connection-manager: add get_interfaces vfunc to class struct
+    
+    This is a lot like 74bd945252.
+    
+    Signed-off-by: Jonny Lamb <jonny.lamb@collabora.co.uk>
 
 commit ac0a38eb86993bb2b223f08d3402ff9e1d4be27a
 Author: Xavier Claessens <xavier.claessens@collabora.co.uk>

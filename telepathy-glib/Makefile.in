@@ -786,6 +786,8 @@ ABI_LISTS = \
     versions/0.19.1.abi \
     versions/0.19.2.abi \
     versions/0.19.3.abi \
+    versions/0.19.4.abi \
+    versions/0.19.6.abi \
     $(NULL)
 
 
@@ -1839,7 +1841,7 @@ _gen/stable-spec.xml: stable-interfaces.xml _gen/stable-stamp $(tools_dir)/xincl
 # Grab a list of re-entrant tp_cli_*_run_* methods we are committed to
 # generating for backwards compatibility.
 # grep --no-filename is not portable :-(
-_gen/reentrant-methods.list: $(ABI_LISTS) codegen.am
+_gen/reentrant-methods.list: _gen/spec-stamp $(ABI_LISTS) codegen.am
 	$(AM_V_GEN)( cd $(srcdir) && cat $(ABI_LISTS) ) | \
 		$(GREP) '^tp_cli_.*_run_.*' > $@.tmp
 	@mv $@.tmp $@
