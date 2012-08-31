@@ -120,56 +120,28 @@ chats:
 <p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
   <span class="type">TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG</span> using
   <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-iface-init" title="tp_base_room_config_iface_init ()"><code class="function">tp_base_room_config_iface_init()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="gtkdoc opt">(</span>MyMucChannel<span class="gtkdoc opt">,</span> my_muc_channel<span class="gtkdoc opt">,</span>
-    TP_TYPE_BASE_CHANNEL<span class="gtkdoc opt">,</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="gtkdoc opt">(</span>TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG<span class="gtkdoc opt">,</span>
-        tp_base_room_config_iface_init<span class="gtkdoc opt">)</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="gtkdoc opt">)</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+G_DEFINE_TYPE_WITH_CODE (MyMucChannel, my_muc_channel,
+    TP_TYPE_BASE_CHANNEL,
+    // ...
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG,
+        tp_base_room_config_iface_init)
+    // ...
+    )
+</pre></div>
 </li>
 <li class="listitem">
 <p>in the <code class="function">class_init</code> method, call
    <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-register-class" title="tp_base_room_config_register_class ()"><code class="function">tp_base_room_config_register_class()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static void</span>
-<span class="function">my_muc_channel_class_init</span> <span class="gtkdoc opt">(</span>MyMucChannelClass <span class="gtkdoc opt">*</span>klass<span class="gtkdoc opt">)</span>
-<span class="gtkdoc opt">{</span>
-  <span class="gtkdoc slc">// ...</span>
-  <span class="function"><a href="TpBaseRoomConfig.html#tp-base-room-config-register-class">tp_base_room_config_register_class</a></span> <span class="gtkdoc opt">(</span><span class="function">TP_BASE_CHANNEL_CLASS</span> <span class="gtkdoc opt">(</span>klass<span class="gtkdoc opt">));</span>
-  <span class="gtkdoc slc">// ...</span>
-<span class="gtkdoc opt">}</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+static void
+my_muc_channel_class_init (MyMucChannelClass *klass)
+{
+  // ...
+  tp_base_room_config_register_class (TP_BASE_CHANNEL_CLASS (klass));
+  // ...
+}
+</pre></div>
 </li>
 <li class="listitem"><p>include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CHANNEL-INTERFACE-ROOM-CONFIG:CAPS" title="TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG"><code class="literal">TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG</code></a> in the return of
    <a class="link" href="TpBaseChannel.html#TpBaseChannelClass.get-interfaces"><span class="type">TpBaseChannelClass.get_interfaces</span></a>.</p></li>
@@ -189,25 +161,13 @@ are received from the network, they should be updated on this object using
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function">g_object_self</span> <span class="gtkdoc opt">(</span>room_config<span class="gtkdoc opt">,</span>
-   <span class="string">&quot;description&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;A place to bury strangers&quot;</span><span class="gtkdoc opt">,</span>
-   <span class="string">&quot;private&quot;</span><span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">,</span>
-   NULL<span class="gtkdoc opt">);</span>
-<span class="function"><a href="TpBaseRoomConfig.html#tp-base-room-config-emit-properties-changed">tp_base_room_config_emit_properties_changed</a></span> <span class="gtkdoc opt">(</span>room_config<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+  g_object_self (room_config,
+     "description", "A place to bury strangers",
+     "private", TRUE,
+     NULL);
+  tp_base_room_config_emit_properties_changed (room_config);
+</pre></div>
 <p>
 </p>
 <p>
