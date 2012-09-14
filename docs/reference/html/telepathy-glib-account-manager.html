@@ -70,6 +70,8 @@ struct              <a class="link" href="telepathy-glib-account-manager.html#Tp
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *path</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts" title="tp_account_manager_get_valid_accounts ()">tp_account_manager_get_valid_accounts</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *manager</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-dup-valid-accounts" title="tp_account_manager_dup_valid_accounts ()">tp_account_manager_dup_valid_accounts</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *manager</code></em>);
 <a class="link" href="telepathy-glib-enums.html#TpConnectionPresenceType" title="enum TpConnectionPresenceType"><span class="returnvalue">TpConnectionPresenceType</span></a> <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-get-most-available-presence" title="tp_account_manager_get_most_available_presence ()">tp_account_manager_get_most_available_presence</a>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *manager</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **status</code></em>,
@@ -170,7 +172,7 @@ A new <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager
 To list the existing valid accounts, the client should first
 prepare the <a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAGER-FEATURE-CORE:CAPS" title="TP_ACCOUNT_MANAGER_FEATURE_CORE"><code class="literal">TP_ACCOUNT_MANAGER_FEATURE_CORE</code></a> feature using
 <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>, then call
-<a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts" title="tp_account_manager_get_valid_accounts ()"><code class="function">tp_account_manager_get_valid_accounts()</code></a>.
+<a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-dup-valid-accounts" title="tp_account_manager_dup_valid_accounts ()"><code class="function">tp_account_manager_dup_valid_accounts()</code></a>.
 </p>
 <p>
 The <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager-account-validity-changed" title='The "account-validity-changed" signal'><span class="type">"account-validity-changed"</span></a> signal is emitted
@@ -227,8 +229,8 @@ account_manager_prepared_cb (GObject *object,
     gpointer user_data)
 {
   TpAccountManager *manager = (TpAccountManager *) object;
-  GMainLoop *loop = user_data;  
-  GList *accounts;
+  GMainLoop *loop = user_data;
+  GList *accounts, *l;
   GError *error = NULL;
 
   if (!tp_proxy_prepare_finish (object, res, &amp;error))
@@ -237,8 +239,8 @@ account_manager_prepared_cb (GObject *object,
       goto OUT;
     }
 
-  for (accounts = tp_account_manager_get_valid_accounts (manager);
-       accounts != NULL; accounts = g_list_delete_link (accounts, accounts))
+  accounts = tp_account_manager_dup_valid_accounts (manager);
+  for (l = accounts; l != NULL; l = l-&gt;next)
     {
       TpAccount *account = accounts-&gt;data;
       TpConnection *connection = tp_account_get_connection (account);
@@ -269,6 +271,7 @@ account_manager_prepared_cb (GObject *object,
         }
       g_ptr_array_unref (contacts);
     }
+  g_list_free_full (accounts, g_object_unref);
 
 OUT:
   g_main_loop_quit (loop);
@@ -635,6 +638,11 @@ not a valid account path. <span class="annotation">[<acronym title="Don't free d
 <a name="tp-account-manager-get-valid-accounts"></a><h3>tp_account_manager_get_valid_accounts ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             tp_account_manager_get_valid_accounts
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *manager</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_account_manager_get_valid_accounts</code> is deprecated and should not be used in newly-written code. Since 0.19.9. New code should use
+ <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-dup-valid-accounts" title="tp_account_manager_dup_valid_accounts ()"><code class="function">tp_account_manager_dup_valid_accounts()</code></a> instead.</p>
+</div>
 <p>
 Returns a newly allocated <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of valid accounts in <em class="parameter"><code>manager</code></em>. The list
 must be freed with <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#g-list-free"><code class="function">g_list_free()</code></a> after used. None of the accounts in the
@@ -679,6 +687,45 @@ been prepared, an empty list (<a href="http://library.gnome.org/devel/glib/unsta
 </tbody>
 </table></div>
 <p class="since">Since 0.9.0</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tp-account-manager-dup-valid-accounts"></a><h3>tp_account_manager_dup_valid_accounts ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             tp_account_manager_dup_valid_accounts
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> *manager</code></em>);</pre>
+<p>
+Returns a newly allocated <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of reffed valid accounts in <em class="parameter"><code>manager</code></em>.
+The list must be freed with <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#g-list-free-full"><code class="function">g_list_free_full()</code></a> and <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref"><code class="function">g_object_unref()</code></a> after
+used.
+</p>
+<p>
+The returned <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>s are guaranteed to have
+<a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CORE:CAPS" title="TP_ACCOUNT_FEATURE_CORE"><code class="literal">TP_ACCOUNT_FEATURE_CORE</code></a> prepared, along with all features previously passed
+to <a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features" title="tp_simple_client_factory_add_account_features ()"><code class="function">tp_simple_client_factory_add_account_features()</code></a>.
+</p>
+<p>
+The list of valid accounts returned is not guaranteed to have been retrieved
+until <a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAGER-FEATURE-CORE:CAPS" title="TP_ACCOUNT_MANAGER_FEATURE_CORE"><code class="literal">TP_ACCOUNT_MANAGER_FEATURE_CORE</code></a> is prepared
+(<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has returned). Until this feature has
+been prepared, an empty list (<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>) will be returned.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a newly
+allocated <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of reffed valid accounts in <em class="parameter"><code>manager</code></em>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Account][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.19.9</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -815,7 +862,7 @@ this feature was prepared will have <a class="link" href="telepathy-glib-account
 <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> objects subsequently announced by
 <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager-account-validity-changed" title='The "account-validity-changed" signal'><span class="type">"account-validity-changed"</span></a> are <span class="emphasis"><em>not</em></span>
 guaranteed to have this feature prepared. In practice, this means that
-the accounts returned by calling <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts" title="tp_account_manager_get_valid_accounts ()"><code class="function">tp_account_manager_get_valid_accounts()</code></a>
+the accounts returned by calling <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-dup-valid-accounts" title="tp_account_manager_dup_valid_accounts ()"><code class="function">tp_account_manager_dup_valid_accounts()</code></a>
 immediately after successfully calling <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-finish" title="tp_proxy_prepare_finish ()"><code class="function">tp_proxy_prepare_finish()</code></a> on the
 <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> will have <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-CORE:CAPS" title="TP_ACCOUNT_FEATURE_CORE"><span class="type">TP_ACCOUNT_FEATURE_CORE</span></a> prepared, but later
 calls to that function do not have the same guarantee.

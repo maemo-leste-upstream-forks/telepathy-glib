@@ -48,6 +48,9 @@
 <span class="returnvalue">DBusGProxy</span> *        <a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-borrow-interface-by-id" title="tp_proxy_borrow_interface_by_id ()">tp_proxy_borrow_interface_by_id</a>     (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<span class="returnvalue">DBusGProxy</span> *        <a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-get-interface-by-id" title="tp_proxy_get_interface_by_id ()">tp_proxy_get_interface_by_id</a>        (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-invalidate" title="tp_proxy_invalidate ()">tp_proxy_invalidate</a>                 (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>);
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-proxy-subclass.html#TpProxyInterfaceAddedCb" title="TpProxyInterfaceAddedCb ()">*TpProxyInterfaceAddedCb</a>)          (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *self</code></em>,
@@ -129,7 +132,7 @@ Declare that this proxy supports a given interface.
 </p>
 <p>
 To use methods and signals of that interface, either call
-<a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-borrow-interface-by-id" title="tp_proxy_borrow_interface_by_id ()"><code class="function">tp_proxy_borrow_interface_by_id()</code></a> to get the <span class="type">DBusGProxy</span>, or use the
+<a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-get-interface-by-id" title="tp_proxy_get_interface_by_id ()"><code class="function">tp_proxy_get_interface_by_id()</code></a> to get the <span class="type">DBusGProxy</span>, or use the
 tp_cli_* wrapper functions (strongly recommended).
 </p>
 <p>
@@ -151,7 +154,7 @@ added, then do nothing.
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>either <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> or a borrowed <span class="type">DBusGProxy</span> corresponding to <em class="parameter"><code>iface</code></em>,
 depending on implementation details. To reliably borrow the <span class="type">DBusGProxy</span>, use
-<a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-borrow-interface-by-id" title="tp_proxy_borrow_interface_by_id ()"><code class="function">tp_proxy_borrow_interface_by_id()</code></a>. (This method should probably have
+<a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-get-interface-by-id" title="tp_proxy_get_interface_by_id ()"><code class="function">tp_proxy_get_interface_by_id()</code></a>. (This method should probably have
 returned void; sorry.)</td>
 </tr>
 </tbody>
@@ -189,6 +192,11 @@ of the interface names.
 <pre class="programlisting"><span class="returnvalue">DBusGProxy</span> *        tp_proxy_borrow_interface_by_id     (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *self</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_proxy_borrow_interface_by_id</code> is deprecated and should not be used in newly-written code. Since 0.19.9. New code should use
+ <a class="link" href="telepathy-glib-proxy-subclass.html#tp-proxy-get-interface-by-id" title="tp_proxy_get_interface_by_id ()"><code class="function">tp_proxy_get_interface_by_id()</code></a> instead.</p>
+</div>
 <p>
 
 </p>
@@ -220,6 +228,44 @@ The reference is only valid as long as <em class="parameter"><code>self</code></
 </tbody>
 </table></div>
 <p class="since">Since 0.7.1</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tp-proxy-get-interface-by-id"></a><h3>tp_proxy_get_interface_by_id ()</h3>
+<pre class="programlisting"><span class="returnvalue">DBusGProxy</span> *        tp_proxy_get_interface_by_id        (<em class="parameter"><code><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> *self</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Quarks.html#GQuark"><span class="type">GQuark</span></a> iface</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>the TpProxy</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>iface</code></em> :</span></p></td>
+<td>quark representing the interface required</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>used to raise an error in the <a class="link" href="telepathy-glib-proxy.html#TP-DBUS-ERRORS:CAPS" title="TP_DBUS_ERRORS"><span class="type">TP_DBUS_ERRORS</span></a> domain if <em class="parameter"><code>iface</code></em>
+is invalid, <em class="parameter"><code>self</code></em> has been invalidated or <em class="parameter"><code>self</code></em> does not implement
+<em class="parameter"><code>iface</code></em>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a borrowed reference to a <span class="type">DBusGProxy</span>
+for which the bus name and object path are the same as for <em class="parameter"><code>self</code></em>, but the
+interface is as given (or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if an <em class="parameter"><code>error</code></em> is raised).
+The reference is only valid as long as <em class="parameter"><code>self</code></em> is.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.19.9</p>
 </div>
 <hr>
 <div class="refsect2">

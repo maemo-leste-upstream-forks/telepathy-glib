@@ -193,7 +193,7 @@ get_sender (TpTextChannel *self,
 
   sender_id = tp_asv_get_string (header, "message-sender-id");
 
-  conn = tp_channel_borrow_connection ((TpChannel *) self);
+  conn = tp_channel_get_connection ((TpChannel *) self);
   *contact = tp_connection_dup_contact_if_possible (conn, handle, sender_id);
 
   if (*contact == NULL)
@@ -230,7 +230,7 @@ prepare_sender_async (TpTextChannel *self,
     {
       TpConnection *conn;
 
-      conn = tp_channel_borrow_connection ((TpChannel *) self);
+      conn = tp_channel_get_connection ((TpChannel *) self);
 
       DEBUG ("Failed to get our self contact, please fix CM (%s)",
           tp_proxy_get_object_path (conn));
@@ -372,7 +372,7 @@ chat_state_changed_cb (TpTextChannel *self,
    * TP_CHANNEL_FEATURE_CONTACTS has been prepared, we should already have its
    * TpContact. If the TpContact does not exist, telling its chat state is
    * useless anyway. */
-  conn = tp_channel_borrow_connection ((TpChannel *) self);
+  conn = tp_channel_get_connection ((TpChannel *) self);
   contact = tp_connection_dup_contact_if_possible (conn, handle, NULL);
   if (contact == NULL)
     return;
@@ -441,7 +441,7 @@ tp_text_channel_constructed (GObject *obj)
   g_signal_connect (self, "chat-state-changed",
       G_CALLBACK (chat_state_changed_cb), NULL);
 
-  props = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  props = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
 
   self->priv->supported_content_types = (GStrv) tp_asv_get_strv (props,
       TP_PROP_CHANNEL_INTERFACE_MESSAGES_SUPPORTED_CONTENT_TYPES);
@@ -1229,7 +1229,7 @@ tp_text_channel_get_delivery_reporting_support (
  * Expands to a call to a function that returns a quark representing the
  * incoming messages features of a #TpTextChannel.
  *
- * When this feature is prepared, tp_text_channel_get_pending_messages() will
+ * When this feature is prepared, tp_text_channel_dup_pending_messages() will
  * return a non-empty list if any unacknowledged messages are waiting, and the
  * #TpTextChannel::message-received and #TpTextChannel::pending-message-removed
  * signals will be emitted.
@@ -1261,11 +1261,37 @@ tp_text_channel_get_feature_quark_incoming_messages (void)
  * a #GList of borrowed #TpSignalledMessage
  *
  * Since: 0.13.10
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_text_channel_dup_pending_messages() instead.
  */
 GList *
 tp_text_channel_get_pending_messages (TpTextChannel *self)
 {
   return g_list_copy (g_queue_peek_head_link (self->priv->pending_messages));
+}
+
+/**
+ * tp_text_channel_dup_pending_messages:
+ * @self: a #TpTextChannel
+ *
+ * Return a newly allocated list of unacknowledged #TpSignalledMessage
+ * objects.
+ *
+ * It is guaranteed that the #TpSignalledMessage:sender of each
+ * #TpSignalledMessage has all of the features previously passed to
+ * tp_simple_client_factory_add_contact_features() prepared.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.SignalledMessage):
+ * a #GList of reffed #TpSignalledMessage
+ *
+ * Since: 0.19.9
+ */
+GList *
+tp_text_channel_dup_pending_messages (TpTextChannel *self)
+{
+  return _tp_g_list_copy_deep (
+      g_queue_peek_head_link (self->priv->pending_messages),
+      (GCopyFunc) g_object_ref, NULL);
 }
 
 static void
@@ -1408,7 +1434,7 @@ acknowledge_pending_messages_cb (TpChannel *channel,
  * result of the operation.
  *
  * You should use the #TpSignalledMessage received from
- * tp_text_channel_get_pending_messages() or the
+ * tp_text_channel_dup_pending_messages() or the
  * #TpTextChannel::message-received signal.
  *
  * See tp_text_channel_ack_message_async() about acknowledging messages.
@@ -1506,7 +1532,7 @@ tp_text_channel_ack_messages_finish (TpTextChannel *self,
  * signal is fired.
  *
  * You should use the #TpSignalledMessage received from
- * tp_text_channel_get_pending_messages() or the
+ * tp_text_channel_dup_pending_messages() or the
  * #TpTextChannel::message-received signal.
  *
  * Since: 0.13.10
@@ -1946,7 +1972,7 @@ tp_text_channel_get_sms_length_finish (TpTextChannel *self,
  *
  * Acknowledge all the pending messages. This is equivalent of calling
  * tp_text_channel_ack_messages_async() with the list of #TpSignalledMessage
- * returned by tp_text_channel_get_pending_messages().
+ * returned by tp_text_channel_dup_pending_messages().
  *
  * Once the messages have been acked, @callback will be called.
  * You can then call tp_text_channel_ack_all_pending_messages_finish() to get
