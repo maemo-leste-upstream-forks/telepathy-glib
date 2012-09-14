@@ -1,3 +1,256 @@
+commit 2126739841326c79f98ae795b3c962ad3a1d7884
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-11 12:49:12 +0200
+
+    prepare 0.19.9 release
+
+commit 6555f449c4b6490f08d7b2c8c523faa4c542b89d
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-06-08 16:28:49 +0200
+
+    TpContact: do not override properties with attributes we didn't request
+    
+    We check wanted flags for everything but States and Groups, there is
+    no reason for that. Besides, if we did not request those attributes,
+    there are chances we didn't bind to change notification neither.
+
+commit 0e224c223a3a78f20c3b940129c7bba84f815f6d
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-06 15:13:41 +0200
+
+    TpHandleRepo: Deprecate tp_handle_set/get_qdata()
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=50886
+
+commit 4770a0dd38909fb3f74f1e3436e4c628a7df3020
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-03 15:35:25 +0200
+
+    Deprecate tp_channel_request_new() and tp_channel_dispatch_operation_new()
+    
+    Those constructors are useless because TpChannelRequest and
+    TpChannelDispatchOperation objects are created internally by
+    TpBaseClient and friends. Applications using the high-level API
+    should never need them.
+    
+    Those constructors are harmful because they do not take a factory and
+    they need a factory internally. This means that creating our own
+    TpChannelRequest/TpChannelDispatchOperation will create our own
+    account/connection/channel/whatever objects instead of sharing them.
+    
+    Internally we already have _new_with_factory() variant.
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=49372
+
+commit 29daab56223b7a2bb8c98e389aca85a2b8a0dcfb
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-10 17:03:25 +0200
+
+    Do not include single headers in codegen
+    
+    Headers to use is caller's choice, like that tp-glib internal can use
+    single headers while extensions can use global header.
+    
+    This also move command line headers to generated .h instead of .c
+
+commit 6834819cccb408e6c44931b3cc6321018cbbfb56
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-10 17:02:40 +0200
+
+    properties-mixin.h: This header should be include separately
+
+commit 400cb44ea5b0175a07f98abe8a5c6c6b777e8aaa
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-09-07 16:47:24 +0100
+
+    NEWS
+
+commit 18f9679ecf30474e772ce2db852398b6e20dc18f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-09-05 11:23:16 +0100
+
+    Introspect util.[ch]
+    
+    Most of it is useless in non-C languages, so we (skip) it. However,
+    tp_simple_async_report_success_in_idle(), tp_utf8_make_valid(),
+    tp_escape_as_identifier() and the user-action-time functions all
+    seem like useful things to have.
+    
+    The tp_g_value_slice_new() family confuses g-ir-scanner (which goes
+    looking for a TpGValueSlice type), but they're all (skip)'d anyway,
+    so #ifdef them out.
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=54543
+
+commit 8f9b57121072744bb57dd4aa801589e156048072
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpContact: Deprecate _get_ functions returning a GList and replace them by _dup_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit 8a628bd8efeee4fe359a72cf56bdde6350c024dc
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpTextChannel: Deprecate _get_ functions returning a GList and replace them by _dup_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit cde6fbb93f2c1392e51f67f5d4d15b22ff48e307
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpBaseClient: Deprecate _get_ functions returning a GList and replace them by _dup_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit a934de9b7cdec5204046dacf38afcac9a12eef69
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpAccountManager: Deprecate _get_ functions returning a GList and replace them by _dup_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit 53e5e36d9fa59d62f0ae99caaca3a8ac9d67a1bc
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpContactSearchResult: Deprecate _get_ functions returning a GList and replace them by _dup_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit 53e05b8c3dc0a09d79724142d8013224520cd449
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpConnection: Deprecate _get_ functions returning a GList and replace them by _dup_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit 8a541d754eddda27039cf759c7228bf2e7f8a10c
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpProtocol: Deprecate _borrow_ functions
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+    
+    There is intentionally no tp_protocol_get_params() because it is internally
+    an unintrospectable C-array, so a proper container needs to be created. In
+    next branch they are internally in a GPtrArray so a _get_ function could
+    be added.
+
+commit 93409a1f9ca16777e544e6c5da8bdec18b4bdd8f
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpDispatchOperation: Deprecate _borrow_ functions and replace them by _get_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+    
+    There is intentionally no tp_dispatch_operation_get_immutable_properties()
+    since those are internal implementation detail. Individual property getters
+    should be enough.
+
+commit 050fedeeacb312b99cf82482fa4aeea55194765e
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 13:02:41 +0200
+
+    TpChannel: Deprecate _borrow_ functions and replace them by _get_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+    
+    _tp_channel_get_immutable_properties() is kept internal because we don't
+    want to expose more dbus-glib structures. tp_channel_dup_immutable_properties()
+    is added, it returns a GVariant and should be needed only to TpChannel
+    subclasses.
+
+commit fad8f1f85525c1bf698240af6e6bad0cd3636a57
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:15:00 +0200
+
+    TpProxy: Deprecate _borrow_ functions and replace them by _get_
+    
+    New transfer and naming policy has been discussed in
+    https://bugs.freedesktop.org/show_bug.cgi?id=39189 and is
+    documented there: http://telepathy.freedesktop.org/wiki/Style/TelepathyGLib
+
+commit 625f553077d234316b81ae81f399c99917217ae7
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 11:11:41 +0200
+
+    Modernise GList usage
+    
+    We can use g_list_free_full and (_tp_)g_list_copy_deep in more places
+
+commit 3df9ac884e876dc685951556a28c0f085e3938a3
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-09-05 10:53:22 +0200
+
+    Util: Add _tp_g_list_copy_deep()
+    
+    This implementation is less optimized than g_list_copy_deep() because it
+    iterates the list twice. But it will be removed once we depend on
+    glib 2.34
+
+commit a04137272f0468fc1f4904280a02633cea60c998
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2012-09-03 11:14:34 +0200
+
+    Fix retrieving the remove contact from a MediaDescription hash
+    
+    Correctly get the remote contact handle out of the MediaDescription
+    hash, it's an a{sv} not string => uint32.
+    
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=54425
+
+commit 680a5dd2a492078a0cc497502aab1d81cdba39ac
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2012-09-03 11:10:01 +0200
+
+    Fix incorrect error on UpdateLocalMediaDescription
+    
+    Remove the code that errors out a local description update if there is
+    *any* outstanding offer. A bit later in the same function a proper check
+    is done to see if there is a offer for the update contact, which is
+    correct.
+
+commit 8c682d0122b066ad69cc7106884f383563c2ba6d
+Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Date:   2012-08-31 15:33:08 +0200
+
+    tls-certificate test: GBytes aren't 0 terminated
+
+commit f59f0ef8f7966733385e545c4c2d702425d1efd1
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2012-08-31 12:36:31 +0200
+
+    Bump nano version
+
 commit 79e202509ce1ddf470dd856d71aa542f3953c3ca
 Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
 Date:   2012-08-31 12:22:47 +0200

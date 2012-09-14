@@ -158,15 +158,8 @@ G_DEFINE_BOXED_TYPE (TpContactInfoFieldSpec, tp_contact_info_field_spec,
 GList *
 tp_contact_info_spec_list_copy (GList *list)
 {
-  GList *copy = NULL;
-
-  while (list != NULL)
-    {
-      copy = g_list_prepend (copy, tp_contact_info_field_spec_copy (list->data));
-      list = list->next;
-    }
-
-  return g_list_reverse (copy);
+  return _tp_g_list_copy_deep (list,
+      (GCopyFunc) tp_contact_info_field_spec_copy, NULL);
 }
 
 /**
@@ -180,8 +173,7 @@ tp_contact_info_spec_list_copy (GList *list)
 void
 tp_contact_info_spec_list_free (GList *list)
 {
-  g_list_foreach (list, (GFunc) tp_contact_info_field_spec_free, NULL);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify) tp_contact_info_field_spec_free);
 }
 
 /**
@@ -316,15 +308,8 @@ G_DEFINE_BOXED_TYPE (TpContactInfoField, tp_contact_info_field,
 GList *
 tp_contact_info_list_copy (GList *list)
 {
-  GList *copy = NULL;
-
-  while (list != NULL)
-    {
-      copy = g_list_prepend (copy, tp_contact_info_field_copy (list->data));
-      list = list->next;
-    }
-
-  return g_list_reverse (copy);
+  return _tp_g_list_copy_deep (list,
+      (GCopyFunc) tp_contact_info_field_copy, NULL);
 }
 
 /**
@@ -338,8 +323,7 @@ tp_contact_info_list_copy (GList *list)
 void
 tp_contact_info_list_free (GList *list)
 {
-  g_list_foreach (list, (GFunc) tp_contact_info_field_free, NULL);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify) tp_contact_info_field_free);
 }
 
 /**
@@ -361,7 +345,7 @@ G_DEFINE_BOXED_TYPE (TpContactInfoList, tp_contact_info_list,
  *
  * When this feature is prepared, the ContactInfoFlags and SupportedFields of
  * the Connection has been retrieved. Use tp_connection_get_contact_info_flags()
- * and tp_connection_get_contact_info_supported_fields() to get them once
+ * and tp_connection_dup_contact_info_supported_fields() to get them once
  * prepared.
  *
  * One can ask for a feature to be prepared using the
@@ -492,6 +476,8 @@ tp_connection_get_contact_info_flags (TpConnection *self)
  *  a #GList of #TpContactInfoFieldSpec struct, or %NULL if the feature is not
  *  yet prepared or the connection doesn't have the necessary properties.
  * Since: 0.11.7
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_connection_dup_contact_info_supported_fields() instead.
  */
 GList *
 tp_connection_get_contact_info_supported_fields (TpConnection *self)
@@ -499,6 +485,32 @@ tp_connection_get_contact_info_supported_fields (TpConnection *self)
   g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
 
   return g_list_copy (self->priv->contact_info_supported_fields);
+}
+
+/**
+ * tp_connection_dup_contact_info_supported_fields:
+ * @self: a connection
+ *
+ * Returns a newly allocated #GList of supported contact info fields for this
+ * connection. The list must be freed with tp_contact_info_spec_list_free().
+ *
+ * To wait for valid supported fields, call tp_proxy_prepare_async() with the
+ * feature %TP_CONNECTION_FEATURE_CONTACT_INFO.
+ *
+ * This property cannot change after @self goes to the Connected state.
+ *
+ * Returns: (element-type TelepathyGLib.ContactInfoFieldSpec) (transfer full):
+ *  a #GList of #TpContactInfoFieldSpec struct, or %NULL if the feature is not
+ *  yet prepared or the connection doesn't have the necessary properties.
+ * Since: 0.19.9
+ */
+GList *
+tp_connection_dup_contact_info_supported_fields (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+  return _tp_g_list_copy_deep (self->priv->contact_info_supported_fields,
+      (GCopyFunc) tp_contact_info_field_spec_copy, NULL);
 }
 
 static void

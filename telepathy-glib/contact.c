@@ -609,6 +609,8 @@ tp_contact_get_capabilities (TpContact *self)
  *  a #GList of #TpContactInfoField, or %NULL if the feature is not yet
  *  prepared.
  * Since: 0.11.7
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_contact_dup_contact_info() instead.
  */
 GList *
 tp_contact_get_contact_info (TpContact *self)
@@ -616,6 +618,29 @@ tp_contact_get_contact_info (TpContact *self)
   g_return_val_if_fail (TP_IS_CONTACT (self), NULL);
 
   return g_list_copy (self->priv->contact_info);
+}
+
+/**
+ * tp_contact_dup_contact_info:
+ * @self: a #TpContact
+ *
+ * Returns a newly allocated #GList of contact's vCard fields. The list must be
+ * freed with tp_contact_info_list_free() after used.
+ *
+ * Same as the #TpContact:contact-info property.
+ *
+ * Returns: (element-type TelepathyGLib.ContactInfoField) (transfer full):
+ *  a #GList of #TpContactInfoField, or %NULL if the feature is not yet
+ *  prepared.
+ * Since: 0.19.9
+ */
+GList *
+tp_contact_dup_contact_info (TpContact *self)
+{
+  g_return_val_if_fail (TP_IS_CONTACT (self), NULL);
+
+  return _tp_g_list_copy_deep (self->priv->contact_info,
+      (GCopyFunc) tp_contact_info_field_copy, NULL);
 }
 
 /**
@@ -3624,6 +3649,7 @@ tp_contact_set_attributes (TpContact *contact,
   const gchar *s;
   gpointer boxed;
 
+  /* Identifier */
   s = tp_asv_get_string (asv, TP_TOKEN_CONNECTION_CONTACT_ID);
 
   if (s == NULL)
@@ -3651,7 +3677,7 @@ tp_contact_set_attributes (TpContact *contact,
       return FALSE;
     }
 
-
+  /* Alias */
   if (wanted & CONTACT_FEATURE_FLAG_ALIAS)
     {
       s = tp_asv_get_string (asv,
@@ -3672,6 +3698,7 @@ tp_contact_set_attributes (TpContact *contact,
         }
     }
 
+  /* Avatar */
   if (wanted & CONTACT_FEATURE_FLAG_AVATAR_TOKEN)
     {
       s = tp_asv_get_string (asv,
@@ -3686,6 +3713,7 @@ tp_contact_set_attributes (TpContact *contact,
       contact_maybe_update_avatar_data (contact);
     }
 
+  /* Presence */
   if (wanted & CONTACT_FEATURE_FLAG_PRESENCE)
     {
       boxed = tp_asv_get_boxed (asv,
@@ -3739,34 +3767,38 @@ tp_contact_set_attributes (TpContact *contact,
     }
 
   /* ContactList subscription states */
-  {
-    TpSubscriptionState subscribe;
-    TpSubscriptionState publish;
-    const gchar *publish_request;
-    gboolean subscribe_valid = FALSE;
-    gboolean publish_valid = FALSE;
+  if (wanted & CONTACT_FEATURE_FLAG_STATES)
+    {
+      TpSubscriptionState subscribe;
+      TpSubscriptionState publish;
+      const gchar *publish_request;
+      gboolean subscribe_valid = FALSE;
+      gboolean publish_valid = FALSE;
 
-    subscribe = tp_asv_get_uint32 (asv,
-          TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_SUBSCRIBE,
-          &subscribe_valid);
-    publish = tp_asv_get_uint32 (asv,
-          TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_PUBLISH,
-          &publish_valid);
-    publish_request = tp_asv_get_string (asv,
-          TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_PUBLISH_REQUEST);
+      subscribe = tp_asv_get_uint32 (asv,
+            TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_SUBSCRIBE,
+            &subscribe_valid);
+      publish = tp_asv_get_uint32 (asv,
+            TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_PUBLISH,
+            &publish_valid);
+      publish_request = tp_asv_get_string (asv,
+            TP_TOKEN_CONNECTION_INTERFACE_CONTACT_LIST_PUBLISH_REQUEST);
 
-    if (subscribe_valid && publish_valid)
-      {
-        contact_set_subscription_states (contact, subscribe, publish,
-            publish_request);
-      }
-  }
+      if (subscribe_valid && publish_valid)
+        {
+          contact_set_subscription_states (contact, subscribe, publish,
+              publish_request);
+        }
+    }
 
   /* ContactGroups */
-  boxed = tp_asv_get_boxed (asv,
-      TP_TOKEN_CONNECTION_INTERFACE_CONTACT_GROUPS_GROUPS,
-      G_TYPE_STRV);
-  contact_maybe_set_contact_groups (contact, boxed);
+  if (wanted & CONTACT_FEATURE_FLAG_CONTACT_GROUPS)
+    {
+      boxed = tp_asv_get_boxed (asv,
+          TP_TOKEN_CONNECTION_INTERFACE_CONTACT_GROUPS_GROUPS,
+          G_TYPE_STRV);
+      contact_maybe_set_contact_groups (contact, boxed);
+    }
 
   /* ContactBlocking */
   if (wanted & CONTACT_FEATURE_FLAG_CONTACT_BLOCKING)

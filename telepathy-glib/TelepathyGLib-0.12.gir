@@ -3474,6 +3474,28 @@ it is to be kept beyond the lifetime of @result.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_valid_accounts"
+              c:identifier="tp_account_manager_dup_valid_accounts"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Returns a newly allocated #GList of reffed valid accounts in @manager.
+The list must be freed with g_list_free_full() and g_object_unref() after
+used.
+
+The returned #TpAccount&lt;!-- --&gt;s are guaranteed to have
+%TP_ACCOUNT_FEATURE_CORE prepared, along with all features previously passed
+to tp_simple_client_factory_add_account_features().
+
+The list of valid accounts returned is not guaranteed to have been retrieved
+until %TP_ACCOUNT_MANAGER_FEATURE_CORE is prepared
+(tp_proxy_prepare_async() has returned). Until this feature has
+been prepared, an empty list (%NULL) will be returned.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a newly allocated #GList of reffed valid accounts in @manager</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="Account"/>
+          </type>
+        </return-value>
+      </method>
       <method name="enable_restart"
               c:identifier="tp_account_manager_enable_restart">
         <doc xml:whitespace="preserve">Enable autostarting the account manager D-Bus service. This means
@@ -3550,7 +3572,8 @@ value will be the same as if no accounts are enabled or valid.</doc>
       </method>
       <method name="get_valid_accounts"
               c:identifier="tp_account_manager_get_valid_accounts"
-              version="0.9.0">
+              version="0.9.0"
+              deprecated="Since 0.19.9. New code should use tp_account_manager_dup_valid_accounts() instead.">
         <doc xml:whitespace="preserve">Returns a newly allocated #GList of valid accounts in @manager. The list
 must be freed with g_list_free() after used. None of the accounts in the
 returned list are guaranteed to be ready.
@@ -5161,6 +5184,31 @@ tp_base_client_delegate_channels_async().</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_handled_channels"
+              c:identifier="tp_base_client_dup_handled_channels"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Returns the set of channels currently handled by this base client or by any
+other #TpBaseClient with which it shares a unique name.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the handled channels</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="Channel"/>
+          </type>
+        </return-value>
+      </method>
+      <method name="dup_pending_requests"
+              c:identifier="tp_base_client_dup_pending_requests"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Only works if tp_base_client_set_handler_request_notification() has been
+called.
+Returns the list of requests @self is likely be asked to handle.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #GList of #TpChannelRequest</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="ChannelRequest"/>
+          </type>
+        </return-value>
+      </method>
       <method name="get_account_manager"
               c:identifier="tp_base_client_get_account_manager"
               version="0.11.14"
@@ -5216,7 +5264,8 @@ necessarily valid after @self is destroyed.</doc>
       </method>
       <method name="get_handled_channels"
               c:identifier="tp_base_client_get_handled_channels"
-              version="0.11.6">
+              version="0.11.6"
+              deprecated="Since 0.19.9. New code should use tp_base_client_dup_handled_channels() instead.">
         <doc xml:whitespace="preserve">Returns the set of channels currently handled by this base client or by any
 other #TpBaseClient with which it shares a unique name.</doc>
         <return-value transfer-ownership="container">
@@ -5249,7 +5298,8 @@ has not been called yet or failed.</doc>
       </method>
       <method name="get_pending_requests"
               c:identifier="tp_base_client_get_pending_requests"
-              version="0.11.6">
+              version="0.11.6"
+              deprecated="Since 0.19.9. New code should use tp_base_client_dup_pending_requests() instead.">
         <doc xml:whitespace="preserve">Only works if tp_base_client_set_handler_request_notification() has been
 called.
 Returns the list of requests @self is likely be asked to handle.</doc>
@@ -8773,7 +8823,8 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
       </function>
       <method name="borrow_connection"
               c:identifier="tp_channel_borrow_connection"
-              version="0.7.12">
+              version="0.7.12"
+              deprecated="Since 0.19.9. New code should use tp_channel_get_connection() instead.">
         <doc xml:whitespace="preserve">Returns the connection for this channel. The returned pointer is only valid
 while this channel is valid - reference it with g_object_ref() if needed.</doc>
         <return-value transfer-ownership="none">
@@ -8782,7 +8833,8 @@ while this channel is valid - reference it with g_object_ref() if needed.</doc>
         </return-value>
       </method>
       <method name="borrow_immutable_properties"
-              c:identifier="tp_channel_borrow_immutable_properties">
+              c:identifier="tp_channel_borrow_immutable_properties"
+              deprecated="Since 0.19.9. New code should use tp_channel_dup_immutable_properties() instead.">
         <doc xml:whitespace="preserve">Returns the immutable D-Bus properties of this channel, the same as
 #TpChannel:channel-properties.
 
@@ -8921,6 +8973,28 @@ the operation.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_immutable_properties"
+              c:identifier="tp_channel_dup_immutable_properties"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Returns the immutable D-Bus properties of this channel, in a variant of type
+%G_VARIANT_TYPE_VARDICT where the keys are strings,
+D-Bus interface name + "." + property name. Use g_variant_lookup() or
+g_variant_lookup_value() for convenient access to the values.
+
+If the #TpChannel:channel-properties property was not set during
+construction (e.g. by calling tp_channel_new_from_properties()), a
+reasonable but possibly incomplete version will be made up from the values
+of individual properties; reading this property repeatedly may yield
+progressively more complete values until the %TP_CHANNEL_FEATURE_CORE
+feature is prepared.
+
+This function should be used only by #TpChannel subclasses, otherwise it is
+recommended to use individual property getters instead.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a dictionary where the keys are strings, D-Bus interface name + "." + property name.</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="get_channel_type"
               c:identifier="tp_channel_get_channel_type"
               version="0.7.12">
@@ -8966,6 +9040,16 @@ the result will always be %TP_CHANNEL_CHAT_STATE_INACTIVE.</doc>
             <type name="Handle" c:type="TpHandle"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="get_connection"
+              c:identifier="tp_channel_get_connection"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Returns the connection for this channel. The returned pointer is only valid
+while this channel is valid - reference it with g_object_ref() if needed.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpChannel:connection</doc>
+          <type name="Connection" c:type="TpConnection*"/>
+        </return-value>
       </method>
       <method name="get_handle"
               c:identifier="tp_channel_get_handle"
@@ -10121,6 +10205,7 @@ be added in a later version of telepathy-glib, along with a mechanism
 similar to tp_connection_call_when_ready().</doc>
       <constructor name="new"
                    c:identifier="tp_channel_dispatch_operation_new"
+                   deprecated="Since 0.19.9. New code should get #TpChannelDispatchOperation objects from a #TpBaseClient"
                    throws="1">
         <doc xml:whitespace="preserve">Convenience function to create a new channel dispatch operation proxy.
 
@@ -10170,7 +10255,8 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
       <method name="borrow_account"
               c:identifier="tp_channel_dispatch_operation_borrow_account"
               version="0.11.5"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. New code should use tp_channel_dispatch_operation_get_account() instead.">
         <doc xml:whitespace="preserve">Returns the #TpAccount of this ChannelDispatchOperation.
 The returned pointer is only valid while @self is valid - reference
 it with g_object_ref() if needed.</doc>
@@ -10182,7 +10268,8 @@ it with g_object_ref() if needed.</doc>
       <method name="borrow_channels"
               c:identifier="tp_channel_dispatch_operation_borrow_channels"
               version="0.11.5"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. New code should use tp_channel_dispatch_operation_get_channels() instead.">
         <doc xml:whitespace="preserve">Returns a #GPtrArray containing the #TpChannel of this
 ChannelDispatchOperation.
 The returned array and its #TpChannel are only valid while @self is
@@ -10197,7 +10284,8 @@ valid - copy array and reference channels with g_object_ref() if needed.</doc>
       <method name="borrow_connection"
               c:identifier="tp_channel_dispatch_operation_borrow_connection"
               version="0.11.5"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. New code should use tp_channel_dispatch_operation_get_connection() instead.">
         <doc xml:whitespace="preserve">Returns the #TpConnection of this ChannelDispatchOperation.
 The returned pointer is only valid while @self is valid - reference
 it with g_object_ref() if needed.</doc>
@@ -10209,7 +10297,8 @@ it with g_object_ref() if needed.</doc>
       <method name="borrow_immutable_properties"
               c:identifier="tp_channel_dispatch_operation_borrow_immutable_properties"
               version="0.11.5"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. New code should use individual property getters like tp_channel_dispatch_operation_get_connection(), tp_channel_dispatch_operation_get_account(), tp_channel_dispatch_operation_get_channels(), or tp_channel_dispatch_operation_get_possible_handlers() instead.">
         <doc xml:whitespace="preserve">Returns the immutable D-Bus properties of this channel.
 The returned hash table is only valid while @self is valid - reference
 it with g_hash_table_ref() if needed.</doc>
@@ -10224,7 +10313,8 @@ it with g_hash_table_ref() if needed.</doc>
       <method name="borrow_possible_handlers"
               c:identifier="tp_channel_dispatch_operation_borrow_possible_handlers"
               version="0.11.5"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. New code should use tp_channel_dispatch_operation_get_possible_handlers() instead.">
         <doc xml:whitespace="preserve">Returns a #GStrv containing the possible handlers of this
 ChannelDispatchOperation.
 The returned array and its strings are only valid while @self is
@@ -10450,6 +10540,60 @@ tp_channel_dispatch_operation_destroy_channels_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="get_account"
+              c:identifier="tp_channel_dispatch_operation_get_account"
+              version="0.19.9"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Returns the #TpAccount of this ChannelDispatchOperation.
+The returned pointer is only valid while @self is valid - reference
+it with g_object_ref() if needed.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpChannelDispatchOperation:account</doc>
+          <type name="Account" c:type="TpAccount*"/>
+        </return-value>
+      </method>
+      <method name="get_channels"
+              c:identifier="tp_channel_dispatch_operation_get_channels"
+              version="0.19.9"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Returns a #GPtrArray containing the #TpChannel of this
+ChannelDispatchOperation.
+The returned array and its #TpChannel are only valid while @self is
+valid - copy array and reference channels with g_object_ref() if needed.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpChannelDispatchOperation:channels</doc>
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="gpointer" c:type="gpointer"/>
+          </array>
+        </return-value>
+      </method>
+      <method name="get_connection"
+              c:identifier="tp_channel_dispatch_operation_get_connection"
+              version="0.19.9"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Returns the #TpConnection of this ChannelDispatchOperation.
+The returned pointer is only valid while @self is valid - reference
+it with g_object_ref() if needed.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpChannelDispatchOperation:connection</doc>
+          <type name="Connection" c:type="TpConnection*"/>
+        </return-value>
+      </method>
+      <method name="get_possible_handlers"
+              c:identifier="tp_channel_dispatch_operation_get_possible_handlers"
+              version="0.19.9"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Returns a #GStrv containing the possible handlers of this
+ChannelDispatchOperation.
+The returned array and its strings are only valid while @self is
+valid - copy it with g_strdupv if needed.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpChannelDispatchOperation:possible-handlers</doc>
+          <array c:type="GStrv">
+            <type name="utf8"/>
+          </array>
+        </return-value>
       </method>
       <method name="handle_with_async"
               c:identifier="tp_channel_dispatch_operation_handle_with_async"
@@ -11072,7 +11216,10 @@ similar to tp_connection_call_when_ready().
 Until suitable convenience methods are implemented, the generic
 tp_cli_dbus_properties_call_get_all() method can be used to get those
 properties.</doc>
-      <constructor name="new" c:identifier="tp_channel_request_new" throws="1">
+      <constructor name="new"
+                   c:identifier="tp_channel_request_new"
+                   deprecated="Since 0.19.9. New code should get #TpChannelRequest objects from a #TpBaseClient"
+                   throws="1">
         <doc xml:whitespace="preserve">Convenience function to create a new channel request proxy.
 
 If the channel request was newly created, the client making the request
@@ -12211,6 +12358,23 @@ tp_connection_get_contacts_by_handle().</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_contact_info_supported_fields"
+              c:identifier="tp_connection_dup_contact_info_supported_fields"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Returns a newly allocated #GList of supported contact info fields for this
+connection. The list must be freed with tp_contact_info_spec_list_free().
+
+To wait for valid supported fields, call tp_proxy_prepare_async() with the
+feature %TP_CONNECTION_FEATURE_CONTACT_INFO.
+
+This property cannot change after @self goes to the Connected state.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoFieldSpec struct, or %NULL if the feature is not yet prepared or the connection doesn't have the necessary properties.</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="ContactInfoFieldSpec"/>
+          </type>
+        </return-value>
+      </method>
       <method name="dup_contact_list"
               c:identifier="tp_connection_dup_contact_list"
               version="0.15.5">
@@ -12480,7 +12644,8 @@ This property cannot change after @self goes to the Connected state.</doc>
       </method>
       <method name="get_contact_info_supported_fields"
               c:identifier="tp_connection_get_contact_info_supported_fields"
-              version="0.11.7">
+              version="0.11.7"
+              deprecated="Since 0.19.9. New code should use tp_connection_dup_contact_info_supported_fields() instead.">
         <doc xml:whitespace="preserve">Returns a newly allocated #GList of supported contact info fields for this
 connection. The list must be freed with g_list_free() after used.
 
@@ -15532,6 +15697,20 @@ see tp_connection_block_contacts_async().</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_contact_info"
+              c:identifier="tp_contact_dup_contact_info"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Returns a newly allocated #GList of contact's vCard fields. The list must be
+freed with tp_contact_info_list_free() after used.
+
+Same as the #TpContact:contact-info property.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoField, or %NULL if the feature is not yet prepared.</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="ContactInfoField"/>
+          </type>
+        </return-value>
+      </method>
       <method name="get_account"
               c:identifier="tp_contact_get_account"
               version="0.19.0">
@@ -15633,7 +15812,8 @@ with g_strdupv().</doc>
       </method>
       <method name="get_contact_info"
               c:identifier="tp_contact_get_contact_info"
-              version="0.11.7">
+              version="0.11.7"
+              deprecated="Since 0.19.9. New code should use tp_contact_dup_contact_info() instead.">
         <doc xml:whitespace="preserve">Returns a newly allocated #GList of contact's vCard fields. The list must be
 freed with g_list_free() after used.
 
@@ -16998,6 +17178,17 @@ be emitted multiple times for the same search.</doc>
       <doc xml:whitespace="preserve">An object representing the results of a Telepathy contact
 search channel.
 There are no interesting public struct fields.</doc>
+      <method name="dup_fields"
+              c:identifier="tp_contact_search_result_dup_fields"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #GList of #TpContactInfoField for the specified contact. You should free it when you're done with tp_contact_info_list_free().</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="ContactInfoField"/>
+          </type>
+        </return-value>
+      </method>
       <method name="get_field"
               c:identifier="tp_contact_search_result_get_field"
               version="0.13.11">
@@ -17014,7 +17205,8 @@ There are no interesting public struct fields.</doc>
         </parameters>
       </method>
       <method name="get_fields"
-              c:identifier="tp_contact_search_result_get_fields">
+              c:identifier="tp_contact_search_result_get_fields"
+              deprecated="Since 0.19.9. New code should use tp_contact_search_result_dup_fields() instead.">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="container">
           <doc xml:whitespace="preserve">a #GList of #TpContactInfoField for the specified contact. You should free it when you're done with g_list_free().</doc>
@@ -20444,7 +20636,8 @@ already members. The TpIntset returned must be freed with tp_intset_destroy.</do
       </method>
       <function name="qdata"
                 c:identifier="tp_handle_set_qdata"
-                introspectable="0">
+                introspectable="0"
+                deprecated="Since 0.19.9. It is not recommended to use this function because the associated data won&apos;t be freed until the connection disconnects.">
         <doc xml:whitespace="preserve">Associates a blob of data with a given handle and a given key
 
 If @destroy is set, then the data is freed when the handle is freed.
@@ -24685,7 +24878,8 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
       <method name="borrow_params"
               c:identifier="tp_protocol_borrow_params"
               version="0.17.6"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. New code should use tp_protocol_dup_params() instead.">
         <doc xml:whitespace="preserve">Returns an array of parameters supported by this connection manager,
 without additional memory allocations. The returned array is owned by
 @self, and must not be used after @self has been freed.</doc>
@@ -25289,7 +25483,7 @@ construction.</doc>
         <doc xml:whitespace="preserve">Emitted when this proxy has gained an interface. It is not guaranteed
 to be emitted immediately, but will be emitted before the interface is
 first used (at the latest: before it's returned from
-tp_proxy_borrow_interface_by_id(), any signal is connected, or any
+tp_proxy_get_interface_by_id(), any signal is connected, or any
 method is called).
 
 The intended use is to call dbus_g_proxy_add_signals(). This signal
@@ -28685,7 +28879,7 @@ Bitfield/set of flags generated from the Telepathy specification.</doc>
               version="0.15.3">
         <doc xml:whitespace="preserve">Acknowledge all the pending messages. This is equivalent of calling
 tp_text_channel_ack_messages_async() with the list of #TpSignalledMessage
-returned by tp_text_channel_get_pending_messages().
+returned by tp_text_channel_dup_pending_messages().
 
 Once the messages have been acked, @callback will be called.
 You can then call tp_text_channel_ack_all_pending_messages_finish() to get
@@ -28741,7 +28935,7 @@ pending-message queue and so the #TpTextChannel::pending-message-removed
 signal is fired.
 
 You should use the #TpSignalledMessage received from
-tp_text_channel_get_pending_messages() or the
+tp_text_channel_dup_pending_messages() or the
 #TpTextChannel::message-received signal.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
@@ -28790,7 +28984,7 @@ You can then call tp_text_channel_ack_messages_finish() to get the
 result of the operation.
 
 You should use the #TpSignalledMessage received from
-tp_text_channel_get_pending_messages() or the
+tp_text_channel_dup_pending_messages() or the
 #TpTextChannel::message-received signal.
 
 See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
@@ -28833,6 +29027,22 @@ See tp_text_channel_ack_message_async() about acknowledging messages.</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="dup_pending_messages"
+              c:identifier="tp_text_channel_dup_pending_messages"
+              version="0.19.9">
+        <doc xml:whitespace="preserve">Return a newly allocated list of unacknowledged #TpSignalledMessage
+objects.
+
+It is guaranteed that the #TpSignalledMessage:sender of each
+#TpSignalledMessage has all of the features previously passed to
+tp_simple_client_factory_add_contact_features() prepared.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a #GList of reffed #TpSignalledMessage</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="SignalledMessage"/>
+          </type>
+        </return-value>
       </method>
       <method name="get_chat_state"
               c:identifier="tp_text_channel_get_chat_state"
@@ -28884,7 +29094,8 @@ the result will always be %TP_CHANNEL_CHAT_STATE_INACTIVE.</doc>
       </method>
       <method name="get_pending_messages"
               c:identifier="tp_text_channel_get_pending_messages"
-              version="0.13.10">
+              version="0.13.10"
+              deprecated="Since 0.19.9. New code should use tp_text_channel_dup_pending_messages() instead.">
         <doc xml:whitespace="preserve">Return a newly allocated list of unacknowledged #TpSignalledMessage
 objects.
 
@@ -29326,6 +29537,75 @@ tp_simple_client_factory_add_contact_features() prepared.</doc>
               c:type="TP_USER_ACTION_TIME_NOT_USER_ACTION">
       <type name="gint64" c:type="gint64"/>
     </constant>
+    <record name="WeakRef" c:type="TpWeakRef" disguised="1" version="0.11.3">
+      <doc xml:whitespace="preserve">A simple wrapper for a weak reference to a #GObject, suitable for use in
+asynchronous calls which should only affect the object if it hasn't already
+been freed.
+
+As well as wrapping a weak reference to an object, this structure can
+contain an extra pointer to arbitrary data. This is useful for asynchronous
+calls which act on an object and some second piece of data, which are quite
+common in practice.
+
+If more than one piece of auxiliary data is required, the @user_data
+argument to the constructor can be a struct or a #GValueArray.</doc>
+      <method name="destroy"
+              c:identifier="tp_weak_ref_destroy"
+              version="0.11.3"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Free a weak reference wrapper. This drops the weak reference to the
+object (if it still exists), and frees the user data with the user-supplied
+destructor function if one was provided.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </method>
+      <method name="dup_object"
+              c:identifier="tp_weak_ref_dup_object"
+              version="0.11.3"
+              introspectable="0">
+        <doc xml:whitespace="preserve">If the weakly referenced object still exists, return a new reference to
+it. Otherwise, return %NULL.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new reference, or %NULL</doc>
+          <type name="GObject.Object" c:type="gpointer"/>
+        </return-value>
+      </method>
+      <method name="get_user_data"
+              c:identifier="tp_weak_ref_get_user_data"
+              version="0.11.3"
+              introspectable="0">
+        <doc xml:whitespace="preserve">Return the additional data that was passed to tp_weak_ref_new().</doc>
+        <return-value>
+          <doc xml:whitespace="preserve">the additional data supplied in tp_weak_ref_new(), which may be %NULL</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </return-value>
+      </method>
+      <function name="new"
+                c:identifier="tp_weak_ref_new"
+                version="0.11.3"
+                introspectable="0">
+        <doc xml:whitespace="preserve">Return a new weak reference wrapper for @object.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new weak-reference wrapper  Free-function: tp_weak_ref_destroy()</doc>
+          <type name="WeakRef" c:type="TpWeakRef*"/>
+        </return-value>
+        <parameters>
+          <parameter name="object" transfer-ownership="none">
+            <doc xml:whitespace="preserve">an object to which to take a weak reference</doc>
+            <type name="GObject.Object" c:type="gpointer"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none">
+            <doc xml:whitespace="preserve">optional additional data to store alongside the weak ref</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+          <parameter name="destroy" transfer-ownership="none" scope="async">
+            <doc xml:whitespace="preserve">destructor for @user_data, called when the weak ref is freed</doc>
+            <type name="GLib.DestroyNotify" c:type="GDestroyNotify"/>
+          </parameter>
+        </parameters>
+      </function>
+    </record>
     <record name="_DBusPropertiesMixinClass"
             c:type="_TpDBusPropertiesMixinClass">
       <field name="interfaces" writable="1">
@@ -31349,6 +31629,35 @@ format similar to RFC-3339.</doc>
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
     </function>
+    <function name="escape_as_identifier"
+              c:identifier="tp_escape_as_identifier">
+      <doc xml:whitespace="preserve">Escape an arbitrary string so it follows the rules for a C identifier,
+and hence an object path component, interface element component,
+bus name component or member name in D-Bus.
+
+Unlike g_strcanon this is a reversible encoding, so it preserves
+distinctness.
+
+The escaping consists of replacing all non-alphanumerics, and the first
+character if it's a digit, with an underscore and two lower-case hex
+digits:
+
+   "0123abc_xyz\x01\xff" -&gt; _30123abc_5fxyz_01_ff
+
+i.e. similar to URI encoding, but with _ taking the role of %, and a
+smaller allowed set. As a special case, "" is escaped to "_" (just for
+completeness, really).</doc>
+      <return-value transfer-ownership="full">
+        <doc xml:whitespace="preserve">the escaped string, which must be freed by the caller with #g_free</doc>
+        <type name="utf8" c:type="gchar*"/>
+      </return-value>
+      <parameters>
+        <parameter name="name" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The string to be escaped</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
     <function name="external_group_mixin_finalize"
               c:identifier="tp_external_group_mixin_finalize"
               version="0.5.13"
@@ -31462,6 +31771,146 @@ the DBus properties are available.</doc>
         </parameter>
       </parameters>
     </function>
+    <function name="g_hash_table_update"
+              c:identifier="tp_g_hash_table_update"
+              version="0.7.0"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Add each item in @source to @target, replacing any existing item with the
+same key. @key_dup and @value_dup are used to duplicate the items; in
+principle they could also be used to convert between types.</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="target" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The hash table to be updated</doc>
+          <type name="GLib.HashTable" c:type="GHashTable*">
+            <type name="gpointer" c:type="gpointer"/>
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </parameter>
+        <parameter name="source" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The hash table to update it with (read-only)</doc>
+          <type name="GLib.HashTable" c:type="GHashTable*">
+            <type name="gpointer" c:type="gpointer"/>
+            <type name="gpointer" c:type="gpointer"/>
+          </type>
+        </parameter>
+        <parameter name="key_dup" transfer-ownership="none">
+          <doc xml:whitespace="preserve">function to duplicate a key from @source so it can be be stored in @target. If NULL, the key is not copied, but is used as-is</doc>
+          <type name="GObject.BoxedCopyFunc" c:type="GBoxedCopyFunc"/>
+        </parameter>
+        <parameter name="value_dup" transfer-ownership="none">
+          <doc xml:whitespace="preserve">function to duplicate a value from @source so it can be stored in @target. If NULL, the value is not copied, but is used as-is</doc>
+          <type name="GObject.BoxedCopyFunc" c:type="GBoxedCopyFunc"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_key_file_get_int64"
+              c:identifier="tp_g_key_file_get_int64"
+              version="0.7.31"
+              introspectable="0"
+              throws="1">
+      <doc xml:whitespace="preserve">Returns the value associated with @key under @group_name as a signed
+64-bit integer. This is similar to g_key_file_get_integer() but can return
+64-bit results without truncation.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">the value associated with the key as a signed 64-bit integer, or 0 if the key was not found or could not be parsed.</doc>
+        <type name="gint64" c:type="gint64"/>
+      </return-value>
+      <parameters>
+        <parameter name="key_file" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-%NULL #GKeyFile</doc>
+          <type name="GLib.KeyFile" c:type="GKeyFile*"/>
+        </parameter>
+        <parameter name="group_name" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-%NULL group name</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+        <parameter name="key" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-%NULL key</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_key_file_get_uint64"
+              c:identifier="tp_g_key_file_get_uint64"
+              version="0.7.31"
+              introspectable="0"
+              throws="1">
+      <doc xml:whitespace="preserve">Returns the value associated with @key under @group_name as an unsigned
+64-bit integer. This is similar to g_key_file_get_integer() but can return
+large positive results without truncation.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">the value associated with the key as an unsigned 64-bit integer, or 0 if the key was not found or could not be parsed.</doc>
+        <type name="guint64" c:type="guint64"/>
+      </return-value>
+      <parameters>
+        <parameter name="key_file" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-%NULL #GKeyFile</doc>
+          <type name="GLib.KeyFile" c:type="GKeyFile*"/>
+        </parameter>
+        <parameter name="group_name" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-%NULL group name</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+        <parameter name="key" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-%NULL key</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_ptr_array_contains"
+              c:identifier="tp_g_ptr_array_contains"
+              introspectable="0">
+      <doc xml:whitespace="preserve">&lt;!--no further documentation needed--&gt;</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">%TRUE if @needle is one of the elements of @haystack</doc>
+        <type name="gboolean" c:type="gboolean"/>
+      </return-value>
+      <parameters>
+        <parameter name="haystack" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The pointer array to be searched</doc>
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="gpointer" c:type="gpointer"/>
+          </array>
+        </parameter>
+        <parameter name="needle" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The pointer to look for</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_ptr_array_extend"
+              c:identifier="tp_g_ptr_array_extend"
+              version="0.14.3"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Appends all elements of @source to @target. Note that this only copies the
+pointers from @source; any duplication or reference-incrementing must be
+performed by the caller.
+
+After this function has been called, it is safe to call
+g_ptr_array_free() on @source and also free the actual pointer array,
+as long as doing so does not free the data pointed to by the new
+items in @target.</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="target" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GPtrArray to copy items to</doc>
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="gpointer" c:type="gpointer"/>
+          </array>
+        </parameter>
+        <parameter name="source" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GPtrArray to copy items from</doc>
+          <array name="GLib.PtrArray" c:type="GPtrArray*">
+            <type name="gpointer" c:type="gpointer"/>
+          </array>
+        </parameter>
+      </parameters>
+    </function>
     <function name="g_set_error_invalid_handle_type"
               c:identifier="tp_g_set_error_invalid_handle_type"
               introspectable="0"
@@ -31497,6 +31946,87 @@ InvalidArgument.</doc>
         <parameter name="type" transfer-ownership="none">
           <doc xml:whitespace="preserve">An unsupported handle type</doc>
           <type name="guint" c:type="guint"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_signal_connect_object"
+              c:identifier="tp_g_signal_connect_object"
+              version="0.9.2"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Connects a #GCallback function to a signal for a particular object, as if
+with g_signal_connect(). Additionally, arranges for the signal handler to be
+disconnected if @gobject is destroyed.
+
+This is similar to g_signal_connect_data(), but uses a closure which
+ensures that the @gobject stays alive during the call to @c_handler
+by temporarily adding a reference count to @gobject.
+
+This is similar to g_signal_connect_object(), but doesn't have the
+documented bug that everyone is too scared to fix. Also, it does not allow
+you to pass in NULL as @gobject
+
+This is intended to be a convenient way for objects to use themselves as
+user_data for callbacks without having to explicitly disconnect all the
+handlers in their finalizers.
+
+Changed in 0.10.4 and 0.11.3: %G_CONNECT_AFTER is now respected.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">the handler id</doc>
+        <type name="gulong" c:type="gulong"/>
+      </return-value>
+      <parameters>
+        <parameter name="instance" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the instance to connect to.</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="detailed_signal" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a string of the form "signal-name::detail".</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+        <parameter name="c_handler" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the #GCallback to connect.</doc>
+          <type name="GObject.Callback" c:type="GCallback"/>
+        </parameter>
+        <parameter name="gobject" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the object to pass as data to @c_handler.</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="connect_flags" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a combination of #GConnectFlags. Only %G_CONNECT_AFTER and %G_CONNECT_SWAPPED are supported by this function.</doc>
+          <type name="GObject.ConnectFlags" c:type="GConnectFlags"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_value_slice_dup"
+              c:identifier="tp_g_value_slice_dup"
+              version="0.5.14"
+              introspectable="0">
+      <doc xml:whitespace="preserve">&lt;!-- 'Returns' says it all --&gt;</doc>
+      <return-value transfer-ownership="full">
+        <doc xml:whitespace="preserve">a newly allocated copy of @value, to be freed with tp_g_value_slice_free() or g_slice_free().</doc>
+        <type name="GObject.Value" c:type="GValue*"/>
+      </return-value>
+      <parameters>
+        <parameter name="value" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A GValue</doc>
+          <type name="GObject.Value" c:type="const GValue*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="g_value_slice_free"
+              c:identifier="tp_g_value_slice_free"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Unset and free a slice-allocated GValue.
+
+&lt;literal&gt;(GDestroyNotify) tp_g_value_slice_free&lt;/literal&gt; can be used
+as a destructor for values in a #GHashTable, for example.</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="value" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A GValue which was allocated with the g_slice API</doc>
+          <type name="GObject.Value" c:type="GValue*"/>
         </parameter>
       </parameters>
     </function>
@@ -32425,7 +32955,8 @@ necessary for identifiers from the server.</doc>
     </function>
     <function name="handle_get_qdata"
               c:identifier="tp_handle_get_qdata"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. It is not recommended to use this function because the associated data won&apos;t be freed until the connection disconnects.">
       <doc xml:whitespace="preserve">&lt;!--Returns: says it all--&gt;</doc>
       <return-value>
         <doc xml:whitespace="preserve">the data associated with a given key on a given handle; %NULL if there is no associated data.</doc>
@@ -32537,7 +33068,8 @@ this function didn't return anything.</doc>
     <function name="handle_set_qdata"
               c:identifier="tp_handle_set_qdata"
               moved-to="HandleSet.qdata"
-              introspectable="0">
+              introspectable="0"
+              deprecated="Since 0.19.9. It is not recommended to use this function because the associated data won&apos;t be freed until the connection disconnects.">
       <doc xml:whitespace="preserve">Associates a blob of data with a given handle and a given key
 
 If @destroy is set, then the data is freed when the handle is freed.
@@ -33498,6 +34030,81 @@ objects for any connections that are of interest.</doc>
         </parameter>
       </parameters>
     </function>
+    <function name="mixin_class_get_offset"
+              c:identifier="tp_mixin_class_get_offset"
+              introspectable="0">
+      <doc xml:whitespace="preserve">If the type of @klass, or any of its ancestor types, has had an offset
+attached using qdata with the given @quark, return that offset; if not,
+return 0.
+
+In older telepathy-glib versions, calling this function on an instance that
+did not have the mixin was considered to be a programming error. Since
+version 0.13.9, 0 is returned, without error.
+
+This is used to implement the telepathy-glib mixin classes.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">the offset of the mixin class</doc>
+        <type name="guint" c:type="guint"/>
+      </return-value>
+      <parameters>
+        <parameter name="klass" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A pointer to a GObjectClass-derived class structure</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="quark" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A quark that was used to store the offset with g_type_set_qdata()</doc>
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="mixin_instance_get_offset"
+              c:identifier="tp_mixin_instance_get_offset"
+              introspectable="0">
+      <doc xml:whitespace="preserve">If the type of @instance, or any of its ancestor types, has had an offset
+attached using qdata with the given @quark, return that offset. If not,
+return 0.
+
+In older telepathy-glib versions, calling this function on an instance that
+did not have the mixin was considered to be a programming error. Since
+version 0.13.9, 0 is returned, without error.
+
+This is used to implement the telepathy-glib mixin classes.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">the offset of the mixin</doc>
+        <type name="guint" c:type="guint"/>
+      </return-value>
+      <parameters>
+        <parameter name="instance" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A pointer to a GObject-derived instance structure</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="quark" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A quark that was used to store the offset with g_type_set_qdata()</doc>
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="mixin_offset_cast"
+              c:identifier="tp_mixin_offset_cast"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Extend a pointer by an offset, provided the offset is not 0.
+This is used to cast from an object instance to one of the telepathy-glib
+mixin classes.</doc>
+      <return-value>
+        <doc xml:whitespace="preserve">a pointer @offset bytes beyond @instance</doc>
+        <type name="gpointer" c:type="gpointer"/>
+      </return-value>
+      <parameters>
+        <parameter name="instance" transfer-ownership="none">
+          <doc xml:whitespace="preserve">A pointer to a structure</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="offset" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The offset of a structure member in bytes, which must not be 0</doc>
+          <type name="guint" c:type="guint"/>
+        </parameter>
+      </parameters>
+    </function>
     <function name="presence_mixin_class_get_offset_quark"
               c:identifier="tp_presence_mixin_class_get_offset_quark"
               moved-to="PresenceMixinClass.get_offset_quark"
@@ -33755,6 +34362,83 @@ structure with #tp_presence_status_free.</doc>
         </parameter>
       </parameters>
     </function>
+    <function name="simple_async_report_success_in_idle"
+              c:identifier="tp_simple_async_report_success_in_idle"
+              version="0.11.9">
+      <doc xml:whitespace="preserve">Create a new #GSimpleAsyncResult with no operation result, and call
+g_simple_async_result_complete_in_idle() on it.
+
+This is like a successful version of g_simple_async_report_error_in_idle(),
+suitable for asynchronous functions that (conceptually) either succeed and
+return nothing, or raise an error, such as tp_proxy_prepare_async().
+
+The corresponding finish function should not call a function that attempts
+to get a result, such as g_simple_async_result_get_op_res_gpointer().</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="source" transfer-ownership="none" allow-none="1">
+          <doc xml:whitespace="preserve">the source object</doc>
+          <type name="GObject.Object" c:type="GObject*"/>
+        </parameter>
+        <parameter name="callback"
+                   transfer-ownership="none"
+                   allow-none="1"
+                   scope="async"
+                   closure="2">
+          <doc xml:whitespace="preserve">the callback</doc>
+          <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+        </parameter>
+        <parameter name="user_data" transfer-ownership="none">
+          <doc xml:whitespace="preserve">user data for @callback</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="source_tag" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the source tag for the #GSimpleAsyncResult</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="strdiff" c:identifier="tp_strdiff" introspectable="0">
+      <doc xml:whitespace="preserve">Return %TRUE if the given strings are different. Unlike #strcmp this
+function will handle null pointers, treating them as distinct from any
+string.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">%FALSE if @left and @right are both %NULL, or if neither is %NULL and both have the same contents; %TRUE otherwise</doc>
+        <type name="gboolean" c:type="gboolean"/>
+      </return-value>
+      <parameters>
+        <parameter name="left" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The first string to compare (may be NULL)</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+        <parameter name="right" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The second string to compare (may be NULL)</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="strv_contains"
+              c:identifier="tp_strv_contains"
+              version="0.7.15"
+              introspectable="0">
+      <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">TRUE if @str is an element of @strv, according to strcmp().</doc>
+        <type name="gboolean" c:type="gboolean"/>
+      </return-value>
+      <parameters>
+        <parameter name="strv" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a NULL-terminated array of strings, or %NULL (which is treated as an empty strv)</doc>
+          <type name="utf8" c:type="const gchar* const*"/>
+        </parameter>
+        <parameter name="str" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a non-NULL string</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
     <function name="svc_interface_get_dbus_properties_info"
               c:identifier="tp_svc_interface_get_dbus_properties_info"
               version="0.15.8"
@@ -33796,6 +34480,173 @@ reason to call it manually.</doc>
           <doc xml:whitespace="preserve">an interface description</doc>
           <type name="DBusPropertiesMixinIfaceInfo"
                 c:type="TpDBusPropertiesMixinIfaceInfo*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="user_action_time_from_x11"
+              c:identifier="tp_user_action_time_from_x11"
+              version="0.11.13">
+      <doc xml:whitespace="preserve">Convert an X11 timestamp into a user action time as used in Telepathy.
+
+This also works for the timestamps used by GDK 2, GDK 3 and Clutter 1.0;
+it may or may not work with other toolkits or versions.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">a nonzero Telepathy user action time, or %TP_USER_ACTION_TIME_CURRENT_TIME</doc>
+        <type name="gint64" c:type="gint64"/>
+      </return-value>
+      <parameters>
+        <parameter name="x11_time" transfer-ownership="none">
+          <doc xml:whitespace="preserve">an X11 timestamp, or 0 to indicate the current time</doc>
+          <type name="guint32" c:type="guint32"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="user_action_time_should_present"
+              c:identifier="tp_user_action_time_should_present"
+              version="0.11.13">
+      <doc xml:whitespace="preserve">Interpret a Telepathy user action time to decide whether a Handler should
+attempt to gain focus. If %TRUE is returned, it would be appropriate to
+call gtk_window_present_with_time() using @x11_time as input, for instance.
+
+@x11_time is used to return a timestamp in the right format for X11,
+GDK 2, GDK 3 and Clutter 1.0; it may or may not work with other
+toolkits or versions.</doc>
+      <return-value transfer-ownership="none">
+        <doc xml:whitespace="preserve">%TRUE if it would be appropriate to present a window</doc>
+        <type name="gboolean" c:type="gboolean"/>
+      </return-value>
+      <parameters>
+        <parameter name="user_action_time" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the Telepathy user action time</doc>
+          <type name="gint64" c:type="gint64"/>
+        </parameter>
+        <parameter name="x11_time"
+                   direction="out"
+                   caller-allocates="0"
+                   transfer-ownership="full"
+                   allow-none="1">
+          <doc xml:whitespace="preserve">a pointer to guint32 used to return an X11 timestamp, or 0 to indicate the current time; if %FALSE is returned, the value placed here is not meaningful</doc>
+          <type name="guint32" c:type="guint32*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="utf8_make_valid"
+              c:identifier="tp_utf8_make_valid"
+              version="0.13.15">
+      <doc xml:whitespace="preserve">Validate that the provided string is valid UTF8. If not,
+replace all invalid bytes with unicode replacement
+character (U+FFFD).
+
+This method is a verbatim copy of glib's internal
+_g_utf8_make_valid&lt;!-- --&gt;() function, and will be deprecated as
+soon as the glib one becomes public.</doc>
+      <return-value transfer-ownership="full">
+        <doc xml:whitespace="preserve">a new valid UTF8 string</doc>
+        <type name="utf8" c:type="gchar*"/>
+      </return-value>
+      <parameters>
+        <parameter name="name" transfer-ownership="none">
+          <doc xml:whitespace="preserve">string to coerce into UTF8</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="value_array_build"
+              c:identifier="tp_value_array_build"
+              version="0.9.2"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Creates a new #GValueArray for use with structs, containing the values
+passed in as parameters. The values are copied or reffed as appropriate for
+their type.
+
+&lt;example&gt;
+  &lt;title&gt; using tp_value_array_build&lt;/title&gt;
+   &lt;programlisting&gt;
+GValueArray *array = tp_value_array_build (2,
+   G_TYPE_STRING, host,
+   G_TYPE_UINT, port,
+   G_TYPE_INVALID);
+   &lt;/programlisting&gt;
+&lt;/example&gt;</doc>
+      <return-value transfer-ownership="full">
+        <doc xml:whitespace="preserve">a newly created #GValueArray, free with g_value_array_free.</doc>
+        <type name="GObject.ValueArray" c:type="GValueArray*"/>
+      </return-value>
+      <parameters>
+        <parameter name="length" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The number of elements that should be in the array</doc>
+          <type name="gsize" c:type="gsize"/>
+        </parameter>
+        <parameter name="type" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The type of the first argument.</doc>
+          <type name="GType" c:type="GType"/>
+        </parameter>
+        <parameter transfer-ownership="none">
+          <varargs>
+          </varargs>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="value_array_unpack"
+              c:identifier="tp_value_array_unpack"
+              version="0.11.0"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Unpacks a #GValueArray into separate variables.
+
+The contents of the values aren't copied into the variables, and so become
+invalid when @array is freed.
+
+&lt;example&gt;
+  &lt;title&gt;using tp_value_array_unpack&lt;/title&gt;
+   &lt;programlisting&gt;
+const gchar *host;
+guint port;
+
+tp_value_array_unpack (array, 2,
+   &amp;host,
+   &amp;port);
+   &lt;/programlisting&gt;
+&lt;/example&gt;</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="array" transfer-ownership="none">
+          <doc xml:whitespace="preserve">the array to unpack</doc>
+          <type name="GObject.ValueArray" c:type="GValueArray*"/>
+        </parameter>
+        <parameter name="len" transfer-ownership="none">
+          <doc xml:whitespace="preserve">The number of elements that should be in the array</doc>
+          <type name="gsize" c:type="gsize"/>
+        </parameter>
+        <parameter transfer-ownership="none">
+          <varargs>
+          </varargs>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="weak_ref_new"
+              c:identifier="tp_weak_ref_new"
+              moved-to="WeakRef.new"
+              version="0.11.3"
+              introspectable="0">
+      <doc xml:whitespace="preserve">Return a new weak reference wrapper for @object.</doc>
+      <return-value transfer-ownership="full">
+        <doc xml:whitespace="preserve">a new weak-reference wrapper  Free-function: tp_weak_ref_destroy()</doc>
+        <type name="WeakRef" c:type="TpWeakRef*"/>
+      </return-value>
+      <parameters>
+        <parameter name="object" transfer-ownership="none">
+          <doc xml:whitespace="preserve">an object to which to take a weak reference</doc>
+          <type name="GObject.Object" c:type="gpointer"/>
+        </parameter>
+        <parameter name="user_data" transfer-ownership="none">
+          <doc xml:whitespace="preserve">optional additional data to store alongside the weak ref</doc>
+          <type name="gpointer" c:type="gpointer"/>
+        </parameter>
+        <parameter name="destroy" transfer-ownership="none" scope="async">
+          <doc xml:whitespace="preserve">destructor for @user_data, called when the weak ref is freed</doc>
+          <type name="GLib.DestroyNotify" c:type="GDestroyNotify"/>
         </parameter>
       </parameters>
     </function>
