@@ -2369,6 +2369,34 @@ of the channel by calling one of the following functions:
           </parameter>
         </parameters>
       </constructor>
+      <constructor name="new_vardict"
+                   c:identifier="tp_account_channel_request_new_vardict"
+                   version="0.19.10">
+        <doc xml:whitespace="preserve">Convenience function to create a new #TpAccountChannelRequest object.
+
+If @request is a floating reference, this function will
+take ownership of it, much like g_variant_ref_sink(). See documentation of
+that function for details.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpAccountChannelRequest object</doc>
+          <type name="AccountChannelRequest"
+                c:type="TpAccountChannelRequest*"/>
+        </return-value>
+        <parameters>
+          <parameter name="account" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #TpAccount</doc>
+            <type name="Account" c:type="TpAccount*"/>
+          </parameter>
+          <parameter name="request" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the requested properties of the channel (see #TpAccountChannelRequest:request) as a %G_VARIANT_TYPE_VARDICT</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+          <parameter name="user_action_time" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the time of the user action that caused this request, or one of the special values %TP_USER_ACTION_TIME_NOT_USER_ACTION or %TP_USER_ACTION_TIME_CURRENT_TIME (see #TpAccountChannelRequest:user-action-time)</doc>
+            <type name="gint64" c:type="gint64"/>
+          </parameter>
+        </parameters>
+      </constructor>
       <method name="create_and_handle_channel_async"
               c:identifier="tp_account_channel_request_create_and_handle_channel_async"
               version="0.11.12">
@@ -2555,6 +2583,16 @@ tp_account_channel_request_create_channel_async().</doc>
             <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
           </parameter>
         </parameters>
+      </method>
+      <method name="dup_request"
+              c:identifier="tp_account_channel_request_dup_request"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Return the #TpAccountChannelRequest:request-vardict construct-only
+property.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the value of #TpAccountChannelRequest:request-vardict</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
       </method>
       <method name="ensure_and_handle_channel_async"
               c:identifier="tp_account_channel_request_ensure_and_handle_channel_async"
@@ -3033,7 +3071,10 @@ channel.</doc>
 as the value for the resulting request's #TpChannelRequest:hints property.
 
 This function can't be called once @self has been used to request a
-channel.</doc>
+channel.
+
+In high-level language bindings, use tp_account_channel_request_set_hint()
+instead.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -3167,8 +3208,24 @@ Since 0.13.13</doc>
         <doc xml:whitespace="preserve">The desired D-Bus properties for the channel, represented as a
 #GHashTable where the keys are strings and the values are #GValue.
 
-This property can't be %NULL.</doc>
+When constructing a new object, one of
+#TpAccountChannelRequest:request or
+#TpAccountChannelRequest:request-vardict must be set to a non-%NULL
+value, and the other must remain unspecified.</doc>
         <type/>
+      </property>
+      <property name="request-vardict"
+                version="0.19.10"
+                writable="1"
+                construct-only="1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The desired D-Bus properties for the channel.
+
+When constructing a new object, one of
+#TpAccountChannelRequest:request or
+#TpAccountChannelRequest:request-vardict must be set to a non-%NULL
+value, and the other must remain unspecified.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="user-action-time"
                 version="0.11.12"
@@ -3409,7 +3466,10 @@ the operation.
 @callback will only be called when the newly created #TpAccount has the
 %TP_ACCOUNT_FEATURE_CORE feature ready on it, so when calling
 tp_account_manager_create_account_finish(), one can guarantee this feature
-will be ready.</doc>
+will be ready.
+
+It is usually better to use #TpAccountRequest instead, particularly when
+using high-level language bindings.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -4891,6 +4951,30 @@ called, and may only be called on objects whose class implements
           </parameter>
         </parameters>
       </method>
+      <method name="add_approver_filter_vardict"
+              c:identifier="tp_base_client_add_approver_filter_vardict"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Register a new channel class as Approver.ApproverChannelFilter.
+The #TpBaseClientClass.add_dispatch_operation virtual method will be called
+whenever a new channel's properties match the ones in @filter.
+
+This method may only be called before tp_base_client_register() is
+called, and may only be called on objects whose class implements
+#TpBaseClientClass.add_dispatch_operation.
+
+If the variant is floating (see g_variant_ref_sink()), ownership
+will be taken. See tp_base_client_add_observer_filter_vardict() for
+more details.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="filter" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a variant of type %G_VARIANT_TYPE_VARDICT</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="add_channel_features"
               c:identifier="tp_base_client_add_channel_features"
               version="0.11.14"
@@ -5072,6 +5156,30 @@ called, and may only be called on objects whose class implements
           </parameter>
         </parameters>
       </method>
+      <method name="add_handler_filter_vardict"
+              c:identifier="tp_base_client_add_handler_filter_vardict"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Register a new channel class as Handler.HandlerChannelFilter.
+The #TpBaseClientClass.handle_channels virtual method will be called
+whenever a new channel's properties match the ones in @filter.
+
+This method may only be called before tp_base_client_register() is
+called, and may only be called on objects whose class implements
+#TpBaseClientClass.handle_channels.
+
+If the variant is floating (see g_variant_ref_sink()), ownership
+will be taken. See tp_base_client_add_observer_filter_vardict() for
+more details.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="filter" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a variant of type %G_VARIANT_TYPE_VARDICT</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="add_observer_filter"
               c:identifier="tp_base_client_add_observer_filter"
               version="0.11.5">
@@ -5092,6 +5200,37 @@ called, and may only be called on objects whose class implements
               <type name="utf8"/>
               <type name="GObject.Value"/>
             </type>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="add_observer_filter_vardict"
+              c:identifier="tp_base_client_add_observer_filter_vardict"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Register a new channel class as Observer.ObserverChannelFilter.
+The #TpBaseClientClass.observe_channels virtual method will be called
+whenever a new channel's properties match the ones in @filter.
+
+This method may only be called before tp_base_client_register() is
+called, and may only be called on objects whose class implements
+#TpBaseClientClass.observe_channels.
+
+If the variant is floating (see g_variant_ref_sink()), ownership
+will be taken, allowing for uses like this:
+
+|[
+tp_base_client_add_observer_filter_vardict (client,
+   g_variant_new_parsed ("{ %s: &lt;%s&gt;, %s: &lt;%u&gt;, ... }",
+       TP_PROP_CHANNEL_CHANNEL_TYPE, TP_IFACE_CHANNEL_TYPE_TEXT,
+       TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, (guint32) TP_HANDLE_TYPE_CONTACT,
+       ...));
+]|</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="filter" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a variant of type %G_VARIANT_TYPE_VARDICT</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
           </parameter>
         </parameters>
       </method>
@@ -10555,8 +10694,7 @@ it with g_object_ref() if needed.</doc>
       </method>
       <method name="get_channels"
               c:identifier="tp_channel_dispatch_operation_get_channels"
-              version="0.19.9"
-              introspectable="0">
+              version="0.19.9">
         <doc xml:whitespace="preserve">Returns a #GPtrArray containing the #TpChannel of this
 ChannelDispatchOperation.
 The returned array and its #TpChannel are only valid while @self is
@@ -10564,7 +10702,7 @@ valid - copy array and reference channels with g_object_ref() if needed.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the value of #TpChannelDispatchOperation:channels</doc>
           <array name="GLib.PtrArray" c:type="GPtrArray*">
-            <type name="gpointer" c:type="gpointer"/>
+            <type name="Channel"/>
           </array>
         </return-value>
       </method>
@@ -11260,6 +11398,24 @@ tp_proxy_or_subclass_hook_on_interface_add() with first argument
           <type name="none" c:type="void"/>
         </return-value>
       </function>
+      <method name="dup_hints"
+              c:identifier="tp_channel_request_dup_hints"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Return the #TpChannelRequest:hints-vardict property</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the value of #TpChannelRequest:hints-vardict</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
+      <method name="dup_immutable_properties"
+              c:identifier="tp_channel_request_dup_immutable_properties"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Return the #TpChannelRequest:immutable-properties-vardict property.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the value of #TpChannelRequest:immutable-properties-vardict</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="get_account"
               c:identifier="tp_channel_request_get_account"
               version="0.15.3">
@@ -11360,6 +11516,16 @@ is not defined or if no hints has been defined.
 Read-only.</doc>
         <type/>
       </property>
+      <property name="hints-vardict"
+                version="0.19.10"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A %G_VARIANT_TYPE_VARDICT of metadata provided by
+the channel requester; or %NULL if #TpChannelRequest:immutable-properties
+is not defined or if no hints have been defined.
+
+Read-only.</doc>
+        <type name="GLib.Variant"/>
+      </property>
       <property name="immutable-properties"
                 version="0.13.14"
                 introspectable="0"
@@ -11375,6 +11541,19 @@ set during the construction of the #TpChannelRequest.
 
 Read-only except during construction.</doc>
         <type/>
+      </property>
+      <property name="immutable-properties-vardict"
+                version="0.19.10"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">The immutable D-Bus properties of this channel request, represented by a
+%G_VARIANT_TYPE_VARDICT where the keys are
+D-Bus interface name + "." + property name.
+
+Note that this property is set only if the immutable properties have been
+set during the construction of the #TpChannelRequest.
+
+Read-only except during construction.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="preferred-handler"
                 version="0.15.3"
@@ -15711,6 +15890,19 @@ Same as the #TpContact:contact-info property.</doc>
           </type>
         </return-value>
       </method>
+      <method name="dup_location"
+              c:identifier="tp_contact_dup_location"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Return the contact's user-defined location, or %NULL if the location is
+unspecified.
+
+This function returns the same information as tp_contact_get_location(),
+but in a different format.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a variant of type %G_VARIANT_TYPE_VARDICT, the same as the #TpContact:location-vardict property</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="get_account"
               c:identifier="tp_contact_get_account"
               version="0.19.0">
@@ -16474,6 +16666,22 @@ This may be %NULL even if the contact has set a location,
 if this #TpContact object has not been set up to track
 %TP_CONTACT_FEATURE_LOCATION.</doc>
         <type/>
+      </property>
+      <property name="location-vardict"
+                version="0.19.10"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">If this contact has set a user-defined location, a string to
+variant map containing his location. If not, %NULL.
+tp_vardict_get_string() and similar functions can be used to access
+the contents.
+
+This may be %NULL even if the contact has set a location,
+if this #TpContact object has not been set up to track
+%TP_CONTACT_FEATURE_LOCATION.
+
+This property contains the same information as #TpContact:location,
+in a different format.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="presence-message" transfer-ownership="none">
         <doc xml:whitespace="preserve">If this contact has set a user-defined status message, that message;
@@ -18201,6 +18409,24 @@ is ready to be used to exchange data through the tube.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_parameters_vardict"
+              c:identifier="tp_dbus_tube_channel_dup_parameters_vardict"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Return the parameters of the dbus-tube channel in a variant of
+type %G_VARIANT_TYPE_VARDICT whose keys are strings representing
+parameter names and values are variants representing corresponding
+parameter values set by the offerer when offering this channel.
+
+The GVariant returned is %NULL if this is an outgoing tube that has not
+yet been offered or the parameters property has not been set.
+
+Use g_variant_lookup(), g_variant_lookup_value(), or tp_vardict_get_uint32()
+and similar functions for convenient access to the values.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new reference to a #GVariant</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="get_parameters"
               c:identifier="tp_dbus_tube_channel_get_parameters"
               version="0.18.0"
@@ -18278,8 +18504,20 @@ is ready to be used to exchange data through the tube.</doc>
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">A string to #GValue #GHashTable representing the parameters of the tube.
 
-Will be %NULL for outgoing tubes until the tube has been offered.</doc>
+Will be %NULL for outgoing tubes until the tube has been offered.
+
+In high-level language bindings, use
+tp_dbus_tube_channel_dup_parameters_vardict() to get the same information
+in a more convenient format.</doc>
         <type/>
+      </property>
+      <property name="parameters-vardict"
+                version="0.19.10"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A %G_VARIANT_TYPE_VARDICT representing the parameters of the tube.
+
+Will be %NULL for outgoing tubes until the tube has been offered.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="service-name" version="0.18.0" transfer-ownership="none">
         <doc xml:whitespace="preserve">A string representing the service name that will be used over the tube.</doc>
@@ -21816,6 +22054,21 @@ g_object_unref()</doc>
           <type name="none" c:type="void"/>
         </return-value>
       </method>
+      <method name="dup_part"
+              c:identifier="tp_message_dup_part"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">&lt;!-- nothing more to say --&gt;</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the current contents of the given part, or %NULL if the part number is out of range</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+        <parameters>
+          <parameter name="part" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a part number</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+        </parameters>
+      </method>
       <method name="get_message_type"
               c:identifier="tp_message_get_message_type"
               version="0.13.10">
@@ -21993,7 +22246,9 @@ Loggers should check this flag to avoid duplicating messages, for instance.</doc
         <doc xml:whitespace="preserve">Set @key in part @part of @self to have a copy of @source as its value.
 
 If @source represents a data structure containing handles, they should
-all be referenced with tp_message_ref_handle() first.</doc>
+all be referenced with tp_message_ref_handle() first.
+
+In high-level language bindings, use tp_message_set_variant() instead.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -22007,7 +22262,7 @@ all be referenced with tp_message_ref_handle() first.</doc>
             <type name="utf8" c:type="const gchar*"/>
           </parameter>
           <parameter name="source" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a value</doc>
+            <doc xml:whitespace="preserve">a value, encoded as dbus-glib would</doc>
             <type name="GObject.Value" c:type="const GValue*"/>
           </parameter>
         </parameters>
@@ -22229,6 +22484,31 @@ printf-style format string.</doc>
           <parameter name="u" transfer-ownership="none">
             <doc xml:whitespace="preserve">an unsigned integer value</doc>
             <type name="guint64" c:type="guint64"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="set_variant"
+              c:identifier="tp_message_set_variant"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Set @key in part @part of @self to have @value as its value.
+
+If @value is a floating reference (see g_variant_ref_sink()), then this
+function will take ownership of it.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="part" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a part number, which must be strictly less than the number returned by tp_message_count_parts()</doc>
+            <type name="guint" c:type="guint"/>
+          </parameter>
+          <parameter name="key" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a key in the mapping representing the part</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="value" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a value</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
           </parameter>
         </parameters>
       </method>
@@ -27984,6 +28264,24 @@ to get a #TpStreamTubeConnection connected to the tube.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="dup_parameters_vardict"
+              c:identifier="tp_stream_tube_channel_dup_parameters_vardict"
+              version="0.19.10">
+        <doc xml:whitespace="preserve">Return the parameters of the dbus-tube channel in a variant of
+type %G_VARIANT_TYPE_VARDICT whose keys are strings representing
+parameter names and values are variants representing corresponding
+parameter values set by the offerer when offering this channel.
+
+The GVariant returned is %NULL if this is an outgoing tube that has not
+yet been offered or the parameters property has not been set.
+
+Use g_variant_lookup(), g_variant_lookup_value(), or tp_vardict_get_uint32()
+and similar functions for convenient access to the values.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new reference to a #GVariant</doc>
+          <type name="GLib.Variant" c:type="GVariant*"/>
+        </return-value>
+      </method>
       <method name="get_parameters"
               c:identifier="tp_stream_tube_channel_get_parameters"
               version="0.13.2"
@@ -28063,8 +28361,21 @@ the tube.</doc>
                 transfer-ownership="none">
         <doc xml:whitespace="preserve">A string to #GValue #GHashTable representing the parameters of the tube.
 
-Will be %NULL for outgoing tubes until the tube has been offered.</doc>
+Will be %NULL for outgoing tubes until the tube has been offered.
+
+In high-level language bindings, use
+#TpStreamTubeChannel:parameters-vardict or
+tp_stream_tube_channel_dup_parameters_vardict() to get the same
+information in a more convenient format.</doc>
         <type/>
+      </property>
+      <property name="parameters-vardict"
+                version="0.19.10"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A %G_VARIANT_TYPE_VARDICT representing the parameters of the tube.
+
+Will be %NULL for outgoing tubes until the tube has been offered.</doc>
+        <type name="GLib.Variant"/>
       </property>
       <property name="service" version="0.13.2" transfer-ownership="none">
         <doc xml:whitespace="preserve">A string representing the service name that will be used over the tube.</doc>
