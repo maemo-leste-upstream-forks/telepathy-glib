@@ -48,16 +48,31 @@
     and define the type you'll be using, declaring it to implement the
     media stream handler interface:
   </p>
-<div class="informalexample"><pre class="programlisting">
-static void stream_handler_iface_init (gpointer, gpointer);
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">stream_handler_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">gpointer</span><span class="symbol">,</span><span class="normal"> gpointer</span><span class="symbol">);</span>
 
-G_DEFINE_TYPE_WITH_CODE(GabbleMediaStream,
-    gabble_media_stream,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_MEDIA_STREAM_HANDLER,
-      stream_handler_iface_init)
-    )
-  </pre></div>
+<span class="function">G_DEFINE_TYPE_WITH_CODE</span><span class="symbol">(</span><span class="normal">GabbleMediaStream</span><span class="symbol">,</span>
+<span class="normal">    gabble_media_stream</span><span class="symbol">,</span>
+<span class="normal">    G_TYPE_OBJECT</span><span class="symbol">,</span>
+<span class="normal">    </span><span class="function">G_IMPLEMENT_INTERFACE</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_MEDIA_STREAM_HANDLER</span><span class="symbol">,</span>
+<span class="normal">      stream_handler_iface_init</span><span class="symbol">)</span>
+<span class="normal">    </span><span class="symbol">)</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
     Here we're using a subclass of G_TYPE_OBJECT. You can of course subclass
     any type.
@@ -69,31 +84,61 @@ G_DEFINE_TYPE_WITH_CODE(GabbleMediaStream,
     if you want to separate off chunks of functionality into a different
     .c file. For instance, here's GabbleConnection:
   </p>
-<div class="informalexample"><pre class="programlisting">
-/* in header files */
-void conn_aliasing_iface_init (gpointer, gpointer);
-void conn_avatars_iface_init (gpointer, gpointer);
-void conn_presence_iface_init (gpointer, gpointer);
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="comment">/* in header files */</span>
+<span class="type">void</span><span class="normal"> </span><span class="function">conn_aliasing_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">gpointer</span><span class="symbol">,</span><span class="normal"> gpointer</span><span class="symbol">);</span>
+<span class="type">void</span><span class="normal"> </span><span class="function">conn_avatars_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">gpointer</span><span class="symbol">,</span><span class="normal"> gpointer</span><span class="symbol">);</span>
+<span class="type">void</span><span class="normal"> </span><span class="function">conn_presence_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">gpointer</span><span class="symbol">,</span><span class="normal"> gpointer</span><span class="symbol">);</span>
 
-/* in gabble-connection.c */
-static void conn_iface_init (gpointer, gpointer);
-static void capabilities_iface_init (gpointer, gpointer);
+<span class="comment">/* in gabble-connection.c */</span>
+<span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">conn_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">gpointer</span><span class="symbol">,</span><span class="normal"> gpointer</span><span class="symbol">);</span>
+<span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">capabilities_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">gpointer</span><span class="symbol">,</span><span class="normal"> gpointer</span><span class="symbol">);</span>
 
-G_DEFINE_TYPE_WITH_CODE(GabbleConnection,
-    gabble_connection,
-    TP_TYPE_BASE_CONNECTION,
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION,
-      conn_iface_init);
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_ALIASING,
-      conn_aliasing_iface_init);
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_AVATARS,
-      conn_avatars_iface_init);
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CAPABILITIES,
-      capabilities_init);
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE,
-      conn_presence_iface_init);
-    )
-  </pre></div>
+<span class="function">G_DEFINE_TYPE_WITH_CODE</span><span class="symbol">(</span><span class="normal">GabbleConnection</span><span class="symbol">,</span>
+<span class="normal">    gabble_connection</span><span class="symbol">,</span>
+<span class="normal">    TP_TYPE_BASE_CONNECTION</span><span class="symbol">,</span>
+<span class="normal">    </span><span class="function">G_IMPLEMENT_INTERFACE</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CONNECTION</span><span class="symbol">,</span>
+<span class="normal">      conn_iface_init</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="function">G_IMPLEMENT_INTERFACE</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CONNECTION_INTERFACE_ALIASING</span><span class="symbol">,</span>
+<span class="normal">      conn_aliasing_iface_init</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="function">G_IMPLEMENT_INTERFACE</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CONNECTION_INTERFACE_AVATARS</span><span class="symbol">,</span>
+<span class="normal">      conn_avatars_iface_init</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="function">G_IMPLEMENT_INTERFACE</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CONNECTION_INTERFACE_CAPABILITIES</span><span class="symbol">,</span>
+<span class="normal">      capabilities_init</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="function">G_IMPLEMENT_INTERFACE</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE</span><span class="symbol">,</span>
+<span class="normal">      conn_presence_iface_init</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="symbol">)</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
     The _class_init, _init etc. functions are just like normal, so I
     won't describe them here. One thing to note, though, is that for
@@ -107,25 +152,51 @@ G_DEFINE_TYPE_WITH_CODE(GabbleConnection,
     For example, here's the signature for the Error method on the
     media session handler interface:
     </p>
-<div class="informalexample"><pre class="programlisting">
-        void (*tp_svc_media_session_handler_error_impl)
-          (TpSvcMediaSessionHandler *self, guint errno, const char *message,
-           DBusGMethodInvocation *context);
-    </pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="type">void</span><span class="normal"> </span><span class="symbol">(*</span><span class="normal"><a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-error-impl">tp_svc_media_session_handler_error_impl</a></span><span class="symbol">)</span>
+<span class="normal">  </span><span class="symbol">(</span><span class="usertype">TpSvcMediaSessionHandler</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">self</span><span class="symbol">,</span><span class="normal"> </span><span class="usertype">guint</span><span class="normal"> errno</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="type">char</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">message</span><span class="symbol">,</span>
+<span class="normal">   </span><span class="usertype">DBusGMethodInvocation</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">context</span><span class="symbol">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
     and here's the beginning of the corresponding implementation:
     </p>
-<div class="informalexample"><pre class="programlisting">
-static void
-gabble_media_session_error (TpSvcMediaSessionHandler *iface,
-                            guint errno,
-                            const char *message,
-                            DBusGMethodInvocation *context)
-{
-  GabbleMediaSession *self = GABBLE_MEDIA_SESSION (iface);
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
+<span class="function">gabble_media_session_error</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">TpSvcMediaSessionHandler</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">iface</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">guint</span><span class="normal"> errno</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="keyword">const</span><span class="normal"> </span><span class="type">char</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">message</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">DBusGMethodInvocation</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">context</span><span class="symbol">)</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="usertype">GabbleMediaSession</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">self </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GABBLE_MEDIA_SESSION</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">iface</span><span class="symbol">);</span>
 
-  /* do stuff with self here */
-    </pre></div>
+<span class="normal">  </span><span class="comment">/* do stuff with self here */</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
     All service methods in telepathy-glib are asynchronous - you can of
     course implement them synchronously if you like, but you have to return
@@ -147,20 +218,39 @@ gabble_media_session_error (TpSvcMediaSessionHandler *iface,
     tp_svc_media_session_handler_return_from_error() doesn't take any
     parameters apart from the DBusGMethodInvocation:
     </p>
-<div class="informalexample"><pre class="programlisting">
-static void
-gabble_media_session_error (TpSvcMediaSessionHandler *iface,
-                            guint errno,
-                            const char *message,
-                            DBusGMethodInvocation *context)
-{
-  GabbleMediaSession *self = GABBLE_MEDIA_SESSION (iface);
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
+<span class="function">gabble_media_session_error</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">TpSvcMediaSessionHandler</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">iface</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">guint</span><span class="normal"> errno</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="keyword">const</span><span class="normal"> </span><span class="type">char</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">message</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">DBusGMethodInvocation</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">context</span><span class="symbol">)</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="usertype">GabbleMediaSession</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">self </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GABBLE_MEDIA_SESSION</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">iface</span><span class="symbol">);</span>
 
-  /* do stuff with self here */
+<span class="normal">  </span><span class="comment">/* do stuff with self here */</span>
 
-  tp_svc_media_session_handler_return_from_error (context);
-}
-    </pre></div>
+<span class="normal">  </span><span class="function"><a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-return-from-error">tp_svc_media_session_handler_return_from_error</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">context</span><span class="symbol">);</span>
+<span class="cbracket">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
   </p>
 <p>
@@ -173,10 +263,19 @@ gabble_media_session_error (TpSvcMediaSessionHandler *iface,
     function whose name contains _emit_. This is prototyped to take
     the correct arguments for the signal, and emits it efficiently:
     </p>
-<div class="informalexample"><pre class="programlisting">
-tp_svc_media_session_handler_emit_new_stream_handler (session,
-  object_path, id, media_type, TP_MEDIA_STREAM_DIRECTION_BIDIRECTIONAL);
-    </pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-emit-new-stream-handler">tp_svc_media_session_handler_emit_new_stream_handler</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">session</span><span class="symbol">,</span>
+<span class="normal">  object_path</span><span class="symbol">,</span><span class="normal"> id</span><span class="symbol">,</span><span class="normal"> media_type</span><span class="symbol">,</span><span class="normal"> <a href="telepathy-glib-enums.html#TP-MEDIA-STREAM-DIRECTION-BIDIRECTIONAL:CAPS">TP_MEDIA_STREAM_DIRECTION_BIDIRECTIONAL</a></span><span class="symbol">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
   </p>
 <p>
@@ -187,38 +286,75 @@ tp_svc_media_session_handler_emit_new_stream_handler (session,
     to an interface. Instead, you call functions, with pointers to your
     method implementations as a parameter:
     </p>
-<div class="informalexample"><pre class="programlisting">
-static void
-session_handler_iface_init (gpointer g_iface, gpointer iface_data)
-{
-  TpSvcMediaSessionHandlerClass *klass =
-    (TpSvcMediaSessionHandlerClass *)g_iface;
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
+<span class="function">session_handler_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">gpointer</span><span class="normal"> g_iface</span><span class="symbol">,</span><span class="normal"> </span><span class="usertype">gpointer</span><span class="normal"> iface_data</span><span class="symbol">)</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="usertype">TpSvcMediaSessionHandlerClass</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">klass </span><span class="symbol">=</span>
+<span class="normal">    </span><span class="symbol">(</span><span class="normal"><a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a> </span><span class="symbol">*)</span><span class="normal">g_iface</span><span class="symbol">;</span>
 
-  tp_svc_media_session_handler_implement_error (klass,
-      gabble_media_session_error);
-  tp_svc_media_session_handler_implement_ready (klass,
-      gabble_media_session_ready);
-}
-    </pre></div>
+<span class="normal">  </span><span class="function"><a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-implement-error">tp_svc_media_session_handler_implement_error</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">klass</span><span class="symbol">,</span>
+<span class="normal">      gabble_media_session_error</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="function"><a href="telepathy-glib-svc-media-interfaces.html#tp-svc-media-session-handler-implement-ready">tp_svc_media_session_handler_implement_ready</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">klass</span><span class="symbol">,</span>
+<span class="normal">      gabble_media_session_ready</span><span class="symbol">);</span>
+<span class="cbracket">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
     This is obviously quite repetitive if there are a lot of methods, so
     the convention I've used in telepathy-glib, Gabble and
     telepathy-sofiasip is to define a temporary macro called IMPLEMENT:
     </p>
-<div class="informalexample"><pre class="programlisting">
-static void
-session_handler_iface_init (gpointer g_iface, gpointer iface_data)
-{
-  TpSvcMediaSessionHandlerClass *klass =
-    (TpSvcMediaSessionHandlerClass *)g_iface;
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
+<span class="function">session_handler_iface_init</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">gpointer</span><span class="normal"> g_iface</span><span class="symbol">,</span><span class="normal"> </span><span class="usertype">gpointer</span><span class="normal"> iface_data</span><span class="symbol">)</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="usertype">TpSvcMediaSessionHandlerClass</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">klass </span><span class="symbol">=</span>
+<span class="normal">    </span><span class="symbol">(</span><span class="normal"><a href="telepathy-glib-svc-media-interfaces.html#TpSvcMediaSessionHandlerClass">TpSvcMediaSessionHandlerClass</a> </span><span class="symbol">*)</span><span class="normal">g_iface</span><span class="symbol">;</span>
 
-#define IMPLEMENT(x) tp_svc_media_session_handler_implement_##x (\
-    klass, gabble_media_session_##x)
-  IMPLEMENT(error);
-  IMPLEMENT(ready);
-#undef IMPLEMENT
-}
-    </pre></div>
+<span class="preproc">#define</span><span class="normal"> </span><span class="function">IMPLEMENT</span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">)</span><span class="normal"> tp_svc_media_session_handler_implement_##</span><span class="function">x</span><span class="normal"> </span><span class="symbol">(\</span>
+<span class="normal">    klass</span><span class="symbol">,</span><span class="normal"> gabble_media_session_##x</span><span class="symbol">)</span>
+<span class="normal">  </span><span class="function">IMPLEMENT</span><span class="symbol">(</span><span class="normal">error</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="function">IMPLEMENT</span><span class="symbol">(</span><span class="normal">ready</span><span class="symbol">);</span>
+<span class="preproc">#undef</span><span class="normal"> IMPLEMENT</span>
+<span class="cbracket">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
   </p>
 <p>
