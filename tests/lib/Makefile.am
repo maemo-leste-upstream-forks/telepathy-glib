@@ -95,6 +95,11 @@ AM_LDFLAGS = \
     $(ERROR_LDFLAGS) \
     $(NULL)
 
+libtp_glib_tests_internal_la_CPPFLAGS = \
+    $(AM_CPPFLAGS) \
+    -DTP_GLIB_TESTS_INTERNAL \
+    $(NULL)
+
 libtp_glib_tests_internal_la_LIBADD = \
     $(DBUS_LIBS) \
     $(GLIB_LIBS) \

@@ -1,3 +1,111 @@
+commit 162f347d313608bd6ea7148813c9fef99a0dee81
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-11-09 17:37:38 +0000
+
+    Add dbus-properties-mixin-internal.h to tarballs, fixing distcheck
+
+commit 6695cfc46050203ce1a4cc9bc0ab16285d8dc00f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-11-09 17:25:08 +0000
+
+    Prepare release 0.20.1
+
+commit 1dcb667751898544efad73b8e42d91ff58119e0d
+Author: Debarshi Ray <rishi@gnu.org>
+Date:   2012-10-17 14:48:11 +0200
+
+    base-call-channel: Don't call set_state from set_ringing and set_queued
+    
+    ... because they only change the flags and not the state. Instead emit
+    CallStateChanged directly.
+    
+    Fixes: https://bugs.freedesktop.org/56044
+
+commit fd0448c174cfd169f297a8e3e306319806c4c074
+Author: Debarshi Ray <rishi@gnu.org>
+Date:   2012-10-17 10:50:24 +0200
+
+    base-call-channel: Ignore transitions with the same state
+    
+    Fixes: https://bugs.freedesktop.org/56044
+
+commit ce8d1f6edf9161df170bc781f903f85346ac5554
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-10-08 14:32:12 +0100
+
+    tests/lib: define _TP_COMPILATION for the internal variant
+    
+    foo_CPPFLAGS overrides AM_CPPFLAGS, so if you want to include the latter
+    in the former, you have to do it explicitly.
+
+commit e39ce95dbf2b2c57fb4621291a450aa8584fb193
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-10-08 13:24:33 +0100
+
+    NEWS
+
+commit 5168e4145e4caf54b8b0a26f4268948edd8d9483
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-10-08 13:23:06 +0100
+
+    self-handle test: test with a modern CM, not just an archaic one
+    
+    If we'd done this at the time, we wouldn't have broken SelfHandleChanged.
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=55666
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+    [g_debug -> DEBUG as per Xavier's review -smcv]
+
+commit 99990babb32af5ebcf6912bb533ac001b12b085d
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-10-05 15:58:15 +0100
+
+    _tp_dbus_properties_mixin_get_all: expose to internal code
+    
+    The self-handle test can't exercise certain situations without this,
+    except by pretending to be an obsolete CM, which means we don't test
+    the non-obsolete code path properly.
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=55666
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+
+commit 70cf7cfcc62418264e3aeb0c346857440a9dfd8f
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-10-05 16:06:43 +0100
+
+    TpConnection: connect to SelfHandleChanged much earlier
+    
+    Previously, we only connected to it just before calling GetSelfHandle -
+    but on the "modern" code path we no longer call that, because
+    GetAll("...Connection") is just as informative. This meant we missed
+    self-handle changes on modern connection managers.
+    
+    This was masked by the fact that the self-handle regression test
+    deliberately breaks the "modern" code path, because some of its tests
+    rely on GetSelfHandle being called.
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=55666
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+
+commit ab9489ed9e96b9b8cc3bfd9ee3fc18be22efb016
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2012-10-05 15:56:16 +0100
+
+    Run the tests with G_MESSAGES_DEBUG=all
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=55666
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+
+commit dc6f2f106202da6903e49848272f49d171423366
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2012-10-03 14:12:58 +0200
+
+    set nano version
+
 commit 2c9b852db37f2ba1df678f94d6d9a6e93f0a0634
 Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
 Date:   2012-10-03 12:48:13 +0200
