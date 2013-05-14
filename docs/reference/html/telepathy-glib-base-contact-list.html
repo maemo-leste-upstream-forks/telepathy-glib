@@ -407,53 +407,27 @@ Then, in the connection manager's <a class="link" href="TpBaseConnection.html" t
 <p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
   <span class="type">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST</span> using
   <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-list-iface-init" title="tp_base_contact_list_mixin_list_iface_init ()"><code class="function">tp_base_contact_list_mixin_list_iface_init()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="gtkdoc opt">(</span>MyConnection<span class="gtkdoc opt">,</span> my_connection<span class="gtkdoc opt">,</span>
-    TP_TYPE_BASE_CONNECTION<span class="gtkdoc opt">,</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="gtkdoc opt">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST<span class="gtkdoc opt">,</span>
-        tp_base_contact_list_mixin_list_iface_init<span class="gtkdoc opt">);</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="gtkdoc opt">)</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
+    TP_TYPE_BASE_CONNECTION,
+    // ...
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST,
+        tp_base_contact_list_mixin_list_iface_init);
+    // ...
+    )
+</pre></div>
 </li>
 <li class="listitem">
 <p>in the <code class="function">class_init</code> method, call
    <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init" title="tp_base_contact_list_mixin_class_init ()"><code class="function">tp_base_contact_list_mixin_class_init()</code></a> after
    <a class="link" href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init" title="tp_contacts_mixin_class_init ()"><code class="function">tp_contacts_mixin_class_init()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc slc">// ...</span>
-<span class="function"><a href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init">tp_contacts_mixin_class_init</a></span> <span class="gtkdoc opt">(</span>object_class<span class="gtkdoc opt">,</span>
-    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="gtkdoc opt">(</span>MyConnectionClass<span class="gtkdoc opt">,</span> contacts_mixin<span class="gtkdoc opt">));</span>
-<span class="function"><a href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init">tp_base_contact_list_mixin_class_init</a></span> <span class="gtkdoc opt">(</span>base_connection_class<span class="gtkdoc opt">);</span>
-<span class="gtkdoc slc">// ...</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+// ...
+tp_contacts_mixin_class_init (object_class,
+    G_STRUCT_OFFSET (MyConnectionClass, contacts_mixin));
+tp_base_contact_list_mixin_class_init (base_connection_class);
+// ...
+</pre></div>
 <p>and include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-LIST:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST</code></a> in
    the output of
    <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.get-interfaces-always-present"><span class="type">TpBaseConnectionClass.get_interfaces_always_present</span></a>;</p>

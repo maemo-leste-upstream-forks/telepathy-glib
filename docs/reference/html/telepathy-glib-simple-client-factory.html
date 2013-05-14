@@ -181,45 +181,23 @@ common channel types.
 <p>
 An application using its own factory subclass would look like this:
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">int</span> <span class="function">main</span><span class="gtkdoc opt">(</span><span class="gtkdoc kwb">int</span> argc<span class="gtkdoc opt">,</span> <span class="gtkdoc kwb">char</span> <span class="gtkdoc opt">*</span>argv<span class="gtkdoc opt">[])</span>
-<span class="gtkdoc opt">{</span>
-  TpSimpleClientFactory <span class="gtkdoc opt">*</span>factory<span class="gtkdoc opt">;</span>
-  TpAccountManager <span class="gtkdoc opt">*</span>manager<span class="gtkdoc opt">;</span>
+<div class="informalexample"><pre class="programlisting">
+int main(int argc, char *argv[])
+{
+  TpSimpleClientFactory *factory;
+  TpAccountManager *manager;
 
-  <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#g-type-init">g_type_init</a></span> <span class="gtkdoc opt">();</span>
+  g_type_init ();
 
-  factory <span class="gtkdoc opt">=</span> <span class="function">my_factory_new</span> <span class="gtkdoc opt">();</span>
-  manager <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-account-manager.html#tp-account-manager-new-with-factory">tp_account_manager_new_with_factory</a></span> <span class="gtkdoc opt">(</span>factory<span class="gtkdoc opt">);</span>
-  <span class="function"><a href="telepathy-glib-account-manager.html#tp-account-manager-set-default">tp_account_manager_set_default</a></span> <span class="gtkdoc opt">(</span>manager<span class="gtkdoc opt">);</span>
+  factory = my_factory_new ();
+  manager = tp_account_manager_new_with_factory (factory);
+  tp_account_manager_set_default (manager);
 
-  <span class="gtkdoc opt">...</span>
-  <span class="function"><a href="telepathy-glib-proxy.html#tp-proxy-prepare-async">tp_proxy_prepare_async</a></span> <span class="gtkdoc opt">(</span>manager<span class="gtkdoc opt">,</span> am_features<span class="gtkdoc opt">,</span> callback<span class="gtkdoc opt">,</span> user_data<span class="gtkdoc opt">);</span>
-  <span class="gtkdoc opt">...</span>
-<span class="gtkdoc opt">}</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+  ...
+  tp_proxy_prepare_async (manager, am_features, callback, user_data);
+  ...
+}
+</pre></div>
 <p>
 </p>
 <p>

@@ -1123,24 +1123,13 @@ their type.
 <p>
 </p>
 <div class="example">
-<a name="idp125745648"></a><p class="title"><b>Example 3.  using tp_value_array_build</b></p>
-<div class="example-contents">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4</pre></td>
-        <td class="listing_code"><pre class="programlisting">GValueArray <span class="gtkdoc opt">*</span>array <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-util.html#tp-value-array-build">tp_value_array_build</a></span> <span class="gtkdoc opt">(</span><span class="number">2</span><span class="gtkdoc opt">,</span>
-   G_TYPE_STRING<span class="gtkdoc opt">,</span> host<span class="gtkdoc opt">,</span>
-   G_TYPE_UINT<span class="gtkdoc opt">,</span> port<span class="gtkdoc opt">,</span>
-   G_TYPE_INVALID<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<a name="idp126329392"></a><p class="title"><b>Example 3.  using tp_value_array_build</b></p>
+<div class="example-contents"><pre class="programlisting">
+GValueArray *array = tp_value_array_build (2,
+   G_TYPE_STRING, host,
+   G_TYPE_UINT, port,
+   G_TYPE_INVALID);
+   </pre></div>
 </div>
 <p><br class="example-break">
 </p>
@@ -1184,28 +1173,15 @@ invalid when <em class="parameter"><code>array</code></em> is freed.
 <p>
 </p>
 <div class="example">
-<a name="idp125767120"></a><p class="title"><b>Example 4. using tp_value_array_unpack</b></p>
-<div class="example-contents">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">const</span> gchar <span class="gtkdoc opt">*</span>host<span class="gtkdoc opt">;</span>
-guint port<span class="gtkdoc opt">;</span>
+<a name="idp126348256"></a><p class="title"><b>Example 4. using tp_value_array_unpack</b></p>
+<div class="example-contents"><pre class="programlisting">
+const gchar *host;
+guint port;
 
-<span class="function"><a href="telepathy-glib-util.html#tp-value-array-unpack">tp_value_array_unpack</a></span> <span class="gtkdoc opt">(</span>array<span class="gtkdoc opt">,</span> <span class="number">2</span><span class="gtkdoc opt">,</span>
-   <span class="gtkdoc opt">&amp;</span>host<span class="gtkdoc opt">,</span>
-   <span class="gtkdoc opt">&amp;</span>port<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_value_array_unpack (array, 2,
+   &amp;host,
+   &amp;port);
+   </pre></div>
 </div>
 <p><br class="example-break">
 </p>
@@ -1373,43 +1349,22 @@ Typical usage is something like this:
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwc">typedef</span> <span class="gtkdoc kwb">struct</span> <span class="gtkdoc opt">{</span>
-  TpConnection <span class="gtkdoc opt">*</span>conn<span class="gtkdoc opt">;</span>
-  GError <span class="gtkdoc opt">*</span>error<span class="gtkdoc opt">;</span>
-  GHashTable <span class="gtkdoc opt">*</span>table<span class="gtkdoc opt">;</span>
-  MyStruct <span class="gtkdoc opt">*</span>misc<span class="gtkdoc opt">;</span>
-<span class="gtkdoc opt">}</span> Foo<span class="gtkdoc opt">;</span>
-Foo <span class="gtkdoc opt">*</span>foo<span class="gtkdoc opt">;</span>
+<div class="informalexample"><pre class="programlisting">
+typedef struct {
+  TpConnection *conn;
+  GError *error;
+  GHashTable *table;
+  MyStruct *misc;
+} Foo;
+Foo *foo;
 
-<span class="gtkdoc opt">...</span>
+...
 
-<span class="function"><a href="telepathy-glib-util.html#tp-clear-object">tp_clear_object</a></span> <span class="gtkdoc opt">(&amp;</span>foo<span class="gtkdoc opt">-&gt;</span>conn<span class="gtkdoc opt">);</span>
-<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#g-clear-error">g_clear_error</a></span> <span class="gtkdoc opt">(&amp;</span>foo<span class="gtkdoc opt">-&gt;</span>error<span class="gtkdoc opt">);</span>
-<span class="function"><a href="telepathy-glib-util.html#tp-clear-boxed">tp_clear_boxed</a></span> <span class="gtkdoc opt">(</span>G_TYPE_HASH_TABLE<span class="gtkdoc opt">, &amp;</span>foo<span class="gtkdoc opt">-&gt;</span>table<span class="gtkdoc opt">);</span>
-<span class="function"><a href="telepathy-glib-util.html#tp-clear-pointer">tp_clear_pointer</a></span> <span class="gtkdoc opt">(&amp;</span>foo<span class="gtkdoc opt">-&gt;</span>misc<span class="gtkdoc opt">,</span> my_struct_destroy<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_clear_object (&amp;foo-&gt;conn);
+g_clear_error (&amp;foo-&gt;error);
+tp_clear_boxed (G_TYPE_HASH_TABLE, &amp;foo-&gt;table);
+tp_clear_pointer (&amp;foo-&gt;misc, my_struct_destroy);
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">
