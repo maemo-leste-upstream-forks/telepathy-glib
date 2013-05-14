@@ -40,6 +40,7 @@
 #include "telepathy-glib/deprecated-internal.h"
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/simple-client-factory-internal.h"
+#include "telepathy-glib/variant-util-internal.h"
 #include "telepathy-glib/_gen/tp-cli-channel-request-body.h"
 
 /**
@@ -72,7 +73,7 @@
  * indicates that the channel request no longer exists).
  *
  * On failure, the #TpProxy::invalidated signal will be emitted with some
- * other suitable error, usually from the %TP_ERRORS domain.
+ * other suitable error, usually from the %TP_ERROR domain.
  *
  * If the channel dispatcher crashes or exits, the #TpProxy::invalidated
  * signal will be emitted with the domain %TP_DBUS_ERRORS and the error code
@@ -105,10 +106,12 @@ enum {
 enum {
   PROP_CHANNEL_FACTORY = 1,
   PROP_IMMUTABLE_PROPERTIES,
+  PROP_IMMUTABLE_PROPERTIES_VARDICT,
   PROP_ACCOUNT,
   PROP_USER_ACTION_TIME,
   PROP_PREFERRED_HANDLER,
   PROP_HINTS,
+  PROP_HINTS_VARDICT
 };
 
 static guint signals[N_SIGNALS] = { 0 };
@@ -174,6 +177,11 @@ tp_channel_request_get_property (GObject *object,
         g_value_set_boxed (value, self->priv->immutable_properties);
         break;
 
+      case PROP_IMMUTABLE_PROPERTIES_VARDICT:
+        g_value_take_variant (value,
+            tp_channel_request_dup_immutable_properties (self));
+        break;
+
       case PROP_ACCOUNT:
         g_value_set_object (value, tp_channel_request_get_account (self));
         break;
@@ -190,6 +198,10 @@ tp_channel_request_get_property (GObject *object,
 
       case PROP_HINTS:
         g_value_set_boxed (value, tp_channel_request_get_hints (self));
+        break;
+
+      case PROP_HINTS_VARDICT:
+        g_value_take_variant (value, tp_channel_request_dup_hints (self));
         break;
 
       default:
@@ -408,6 +420,28 @@ tp_channel_request_class_init (TpChannelRequestClass *klass)
       param_spec);
 
   /**
+   * TpChannelRequest:immutable-properties-vardict:
+   *
+   * The immutable D-Bus properties of this channel request, represented by a
+   * %G_VARIANT_TYPE_VARDICT where the keys are
+   * D-Bus interface name + "." + property name.
+   *
+   * Note that this property is set only if the immutable properties have been
+   * set during the construction of the #TpChannelRequest.
+   *
+   * Read-only except during construction.
+   *
+   * Since: 0.19.10
+   */
+  param_spec = g_param_spec_variant ("immutable-properties-vardict",
+      "Immutable D-Bus properties",
+      "A map D-Bus interface + \".\" + property name => variant",
+      G_VARIANT_TYPE_VARDICT, NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class,
+      PROP_IMMUTABLE_PROPERTIES_VARDICT, param_spec);
+
+  /**
    * TpChannelRequest:account:
    *
    * The #TpAccount on which this request was made, not guaranteed
@@ -473,6 +507,23 @@ tp_channel_request_class_init (TpChannelRequestClass *klass)
       TP_HASH_TYPE_STRING_VARIANT_MAP,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_HINTS, param_spec);
+
+  /**
+   * TpChannelRequest:hints-vardict:
+   *
+   * A %G_VARIANT_TYPE_VARDICT of metadata provided by
+   * the channel requester; or %NULL if #TpChannelRequest:immutable-properties
+   * is not defined or if no hints have been defined.
+   *
+   * Read-only.
+   *
+   * Since: 0.19.10
+   */
+  param_spec = g_param_spec_variant ("hints-vardict", "Hints", "Hints",
+      G_VARIANT_TYPE_VARDICT, NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_HINTS_VARDICT,
+      param_spec);
 
   /**
    * TpChannelRequest::succeeded:
@@ -544,7 +595,7 @@ tp_channel_request_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_channel_request_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -567,6 +618,8 @@ tp_channel_request_init_known_interfaces (void)
  * Returns: a new reference to an channel request proxy, or %NULL if
  *    @object_path is not syntactically valid or the channel dispatcher is
  *    not running
+ * Deprecated: Since 0.19.9. New code should get #TpChannelRequest objects
+ *  from a #TpBaseClient
  */
 TpChannelRequest *
 tp_channel_request_new (TpDBusDaemon *bus_daemon,
@@ -659,6 +712,28 @@ tp_channel_request_get_immutable_properties (TpChannelRequest *self)
   g_return_val_if_fail (TP_IS_CHANNEL_REQUEST (self), NULL);
 
   return self->priv->immutable_properties;
+}
+
+/**
+ * tp_channel_request_dup_immutable_properties:
+ * @self: a #TpChannelRequest
+ *
+ * Return the #TpChannelRequest:immutable-properties-vardict property.
+ *
+ * Returns: (transfer full): the value of
+ * #TpChannelRequest:immutable-properties-vardict
+ *
+ * Since: 0.19.10
+ */
+GVariant *
+tp_channel_request_dup_immutable_properties (TpChannelRequest *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL_REQUEST (self), NULL);
+
+  if (self->priv->immutable_properties == NULL)
+    return NULL;
+
+  return _tp_asv_to_vardict (self->priv->immutable_properties);
 }
 
 void
@@ -772,4 +847,29 @@ tp_channel_request_get_hints (TpChannelRequest *self)
 
   return tp_asv_get_boxed (self->priv->immutable_properties,
       TP_PROP_CHANNEL_REQUEST_HINTS, TP_HASH_TYPE_STRING_VARIANT_MAP);
+}
+
+/**
+ * tp_channel_request_dup_hints:
+ * @self: a #TpChannelRequest
+ *
+ * Return the #TpChannelRequest:hints-vardict property
+ *
+ * Returns: (transfer full): the value of #TpChannelRequest:hints-vardict
+ *
+ * Since: 0.19.10
+ */
+GVariant *
+tp_channel_request_dup_hints (TpChannelRequest *self)
+{
+  const GHashTable *hints;
+
+  g_return_val_if_fail (TP_IS_CHANNEL_REQUEST (self), NULL);
+
+  hints = tp_channel_request_get_hints (self);
+
+  if (hints == NULL)
+    return NULL;
+
+  return _tp_asv_to_vardict (hints);
 }

@@ -56,10 +56,12 @@ nodist_geninclude_HEADERS = \
     _gen/tp-cli-connection.h \
     _gen/tp-cli-connection-manager.h \
     _gen/tp-cli-dbus-daemon.h \
+    _gen/tp-cli-debug.h \
     _gen/tp-cli-generic.h \
     _gen/tp-cli-media-session-handler.h \
     _gen/tp-cli-media-stream-handler.h \
     _gen/tp-cli-protocol.h \
+    _gen/tp-cli-tls-cert.h \
     _gen/tp-svc-account.h \
     _gen/tp-svc-account-manager.h \
     _gen/tp-svc-call-content.h \
@@ -100,10 +102,12 @@ nodist_libtelepathy_glib_internal_la_SOURCES = \
     _gen/tp-cli-connection-body.h \
     _gen/tp-cli-connection-manager-body.h \
     _gen/tp-cli-dbus-daemon-body.h \
+    _gen/tp-cli-debug-body.h \
     _gen/tp-cli-generic-body.h \
     _gen/tp-cli-media-session-handler-body.h \
     _gen/tp-cli-media-stream-handler-body.h \
     _gen/tp-cli-protocol-body.h \
+    _gen/tp-cli-tls-cert-body.h \
     _gen/tp-svc-account.c \
     _gen/tp-svc-account-manager.c \
     _gen/tp-svc-call-content.c \
@@ -145,7 +149,7 @@ _gen/stable-spec.xml: stable-interfaces.xml _gen/stable-stamp $(tools_dir)/xincl
 # Grab a list of re-entrant tp_cli_*_run_* methods we are committed to
 # generating for backwards compatibility.
 # grep --no-filename is not portable :-(
-_gen/reentrant-methods.list: $(ABI_LISTS) codegen.am
+_gen/reentrant-methods.list: _gen/spec-stamp $(ABI_LISTS) codegen.am
 	$(AM_V_GEN)( cd $(srcdir) && cat $(ABI_LISTS) ) | \
 		$(GREP) '^tp_cli_.*_run_.*' > $@.tmp
 	@mv $@.tmp $@
@@ -215,6 +219,7 @@ _gen/tp-svc-%.c: _gen/tp-spec-%.xml \
 		--filename=_gen/tp-svc-$* \
 		--signal-marshal-prefix=_tp \
 		--include='<telepathy-glib/dbus.h>' \
+		--include='<telepathy-glib/dbus-properties-mixin.h>' \
 		--not-implemented-func='tp_dbus_g_method_return_not_implemented' \
 		$< Tp_Svc_
 
@@ -288,10 +293,19 @@ _gen/tp-cli-%-body.h: _gen/tp-spec-%.xml \
 			subclass=--subclass=TpDBusDaemon; \
 			subclass_assert=--subclass-assert=TP_IS_DBUS_DAEMON; \
 			;; \
+		debug) \
+			subclass=--subclass=TpDebugClient; \
+			subclass_assert=--subclass-assert=TP_IS_DEBUG_CLIENT; \
+			;; \
+		tls-cert) \
+			subclass=--subclass=TpTLSCertificate; \
+			subclass_assert=--subclass-assert=TP_IS_TLS_CERTIFICATE; \
+			;; \
 	esac; \
 	$(PYTHON) $(tools_dir)/glib-client-gen.py \
 		$$subclass $$subclass_assert \
 		--group `echo $* | tr - _` \
+		--guard "TP_GEN_TP_CLI_`echo $* | tr a-z- A-Z_`_H_INCLUDED" \
 		--iface-quark-prefix=TP_IFACE_QUARK \
 		--tp-proxy-api=0.7.6 \
 		--deprecation-attribute=_TP_GNUC_DEPRECATED \

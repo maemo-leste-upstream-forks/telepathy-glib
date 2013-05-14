@@ -26,8 +26,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/handle-repo-dynamic.h>
-#include <telepathy-glib/handle-repo-static.h>
 
 #include "call-manager.h"
 #include "protocol.h"
@@ -158,7 +156,7 @@ example_call_normalize_contact (TpHandleRepoIface *repo,
 
 static void
 create_handle_repos (TpBaseConnection *conn,
-    TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES])
+    TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES])
 {
   repos[TP_HANDLE_TYPE_CONTACT] = tp_dynamic_handle_repo_new
       (TP_HANDLE_TYPE_CONTACT, example_call_normalize_contact, NULL);
@@ -186,16 +184,19 @@ start_connecting (TpBaseConnection *conn,
   ExampleCallConnection *self = EXAMPLE_CALL_CONNECTION (conn);
   TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (conn,
       TP_HANDLE_TYPE_CONTACT);
+  TpHandle self_handle;
 
   /* In a real connection manager we'd ask the underlying implementation to
    * start connecting, then go to state CONNECTED when finished, but here
    * we can do it immediately. */
 
-  conn->self_handle = tp_handle_ensure (contact_repo, self->priv->account,
+  self_handle = tp_handle_ensure (contact_repo, self->priv->account,
       NULL, error);
 
-  if (conn->self_handle == 0)
+  if (self_handle == 0)
     return FALSE;
+
+  tp_base_connection_set_self_handle (conn, self_handle);
 
   tp_base_connection_change_status (conn, TP_CONNECTION_STATUS_CONNECTED,
       TP_CONNECTION_STATUS_REASON_REQUESTED);
@@ -237,10 +238,7 @@ status_available (GObject *object,
 {
   TpBaseConnection *base = TP_BASE_CONNECTION (object);
 
-  if (base->status != TP_CONNECTION_STATUS_CONNECTED)
-    return FALSE;
-
-  return TRUE;
+  return tp_base_connection_check_connected (base, NULL);
 }
 
 static GHashTable *
@@ -266,7 +264,7 @@ get_contact_statuses (GObject *object,
 
       /* we know our own status from the connection; for this example CM,
        * everyone else's status is assumed to be "available" */
-      if (contact == base->self_handle)
+      if (contact == tp_base_connection_get_self_handle (base))
         {
           presence = (self->priv->away ? EXAMPLE_CALL_PRESENCE_AWAY
               : EXAMPLE_CALL_PRESENCE_AVAILABLE);
@@ -334,7 +332,8 @@ set_own_status (GObject *object,
 
   presences = g_hash_table_new_full (g_direct_hash, g_direct_equal,
       NULL, NULL);
-  g_hash_table_insert (presences, GUINT_TO_POINTER (base->self_handle),
+  g_hash_table_insert (presences,
+      GUINT_TO_POINTER (tp_base_connection_get_self_handle (base)),
       (gpointer) status);
   tp_presence_mixin_emit_presence_update (object, presences);
   g_hash_table_unref (presences);
@@ -378,6 +377,21 @@ example_call_connection_get_possible_interfaces (void)
   return interfaces_always_present;
 }
 
+static GPtrArray *
+get_interfaces_always_present (TpBaseConnection *base)
+{
+  GPtrArray *interfaces;
+  guint i;
+
+  interfaces = TP_BASE_CONNECTION_CLASS (
+      example_call_connection_parent_class)->get_interfaces_always_present (base);
+
+  for (i = 0; interfaces_always_present[i] != NULL; i++)
+    g_ptr_array_add (interfaces, (gchar *) interfaces_always_present[i]);
+
+  return interfaces;
+}
+
 static void
 example_call_connection_class_init (
     ExampleCallConnectionClass *klass)
@@ -398,7 +412,7 @@ example_call_connection_class_init (
   base_class->create_channel_managers = create_channel_managers;
   base_class->start_connecting = start_connecting;
   base_class->shut_down = shut_down;
-  base_class->interfaces_always_present = interfaces_always_present;
+  base_class->get_interfaces_always_present = get_interfaces_always_present;
 
   param_spec = g_param_spec_string ("account", "Account name",
       "The username of this user", NULL,

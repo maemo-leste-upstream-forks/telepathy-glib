@@ -1,3 +1,4 @@
+/*<private_header>*/
 /*
  * TpConnection - proxy for a Telepathy connection (internals)
  *
@@ -53,7 +54,7 @@ struct _TpConnectionPrivate {
 
     /* items are GQuarks that represent arguments to
      * Connection.AddClientInterests */
-    TpIntSet *interests;
+    TpIntset *interests;
 
     /* TpHandle => weak ref to TpContact */
     GHashTable *contacts;
@@ -137,15 +138,13 @@ void _tp_connection_get_capabilities_async (TpConnection *self,
 gboolean _tp_connection_get_capabilities_finish (TpConnection *self,
     GAsyncResult *result, GError **error);
 
+/* Those functions should be used only from contact.c, they are risky since they
+ * could operate on incomplete contacts */
 void _tp_connection_add_contact (TpConnection *self, TpHandle handle,
     TpContact *contact);
 void _tp_connection_remove_contact (TpConnection *self, TpHandle handle,
     TpContact *contact);
 TpContact *_tp_connection_lookup_contact (TpConnection *self, TpHandle handle);
-
-/* Actually implemented in contact.c, but having a contact-internal header
- * just for this would be overkill */
-void _tp_contact_connection_invalidated (TpContact *contact);
 
 void _tp_connection_set_account (TpConnection *self, TpAccount *account);
 

@@ -20,6 +20,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_BASE_CALL_CONTENT_H
 #define TP_BASE_CALL_CONTENT_H
 
@@ -28,6 +32,7 @@
 #include <telepathy-glib/base-call-stream.h>
 #include <telepathy-glib/base-connection.h>
 #include <telepathy-glib/dbus-properties-mixin.h>
+#include <telepathy-glib/defs.h>
 
 G_BEGIN_DECLS
 
@@ -72,6 +77,7 @@ struct _TpBaseCallContent {
   TpBaseCallContentPrivate *priv;
 };
 
+_TP_AVAILABLE_IN_0_18
 GType tp_base_call_content_get_type (void);
 
 /* TYPE MACROS */
@@ -91,17 +97,25 @@ GType tp_base_call_content_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
     TP_TYPE_BASE_CALL_CONTENT, TpBaseCallContentClass))
 
+_TP_AVAILABLE_IN_0_18
 TpBaseConnection *tp_base_call_content_get_connection (TpBaseCallContent *self);
+_TP_AVAILABLE_IN_0_18
 const gchar *tp_base_call_content_get_object_path (TpBaseCallContent *self);
 
+_TP_AVAILABLE_IN_0_18
 const gchar *tp_base_call_content_get_name (TpBaseCallContent *self);
+_TP_AVAILABLE_IN_0_18
 TpMediaStreamType tp_base_call_content_get_media_type (TpBaseCallContent *self);
+_TP_AVAILABLE_IN_0_18
 TpCallContentDisposition tp_base_call_content_get_disposition (
     TpBaseCallContent *self);
 
+_TP_AVAILABLE_IN_0_18
 GList *tp_base_call_content_get_streams (TpBaseCallContent *self);
+_TP_AVAILABLE_IN_0_18
 void tp_base_call_content_add_stream (TpBaseCallContent *self,
     TpBaseCallStream *stream);
+_TP_AVAILABLE_IN_0_18
 void tp_base_call_content_remove_stream (TpBaseCallContent *self,
     TpBaseCallStream *stream,
     TpHandle actor_handle,

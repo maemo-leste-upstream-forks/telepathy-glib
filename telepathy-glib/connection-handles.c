@@ -37,6 +37,8 @@
  *
  * Do nothing. In versions of telepathy-glib prior to 0.13.8,
  * this released a reference to the handles in @handles.
+ *
+ * Deprecated: This is no-op so can be safely removed.
  */
 void
 tp_connection_unref_handles (TpConnection *self G_GNUC_UNUSED,
@@ -97,6 +99,8 @@ hold_handles_context_free (gpointer p)
  * For convenience, the handle type and handles requested by the caller are
  * passed through to this callback on success, so the caller does not have to
  * include them in @user_data.
+ *
+ * Deprecated: See tp_connection_hold_handles().
  */
 
 static void
@@ -159,6 +163,11 @@ connection_held_handles (TpConnection *self,
  * reference count of handles; you should not use the RequestHandles,
  * HoldHandles and GetContactAttributes D-Bus methods directly as well as these
  * functions.
+ *
+ * Deprecated: Holding handles is not needed with Connection Managers having
+ *  immortal handles (any Connection Manager using telepathy-glib >= 0.13.8).
+ *  Other Connection Managers are considered deprecated, clients wanting to
+ *  still support them should continue using this deprecated function.
  */
 void
 tp_connection_hold_handles (TpConnection *self,
@@ -175,7 +184,7 @@ tp_connection_hold_handles (TpConnection *self,
 
   g_return_if_fail (TP_IS_CONNECTION (self));
   g_return_if_fail (handle_type > TP_HANDLE_TYPE_NONE);
-  g_return_if_fail (handle_type < NUM_TP_HANDLE_TYPES);
+  g_return_if_fail (handle_type < TP_NUM_HANDLE_TYPES);
   g_return_if_fail (n_handles >= 1);
   g_return_if_fail (callback != NULL);
 
@@ -249,6 +258,8 @@ request_handles_context_free (gpointer p)
  * For convenience, the handle type and IDs requested by the caller are
  * passed through to this callback, so the caller does not have to include
  * them in @user_data.
+ *
+ * Deprecated: See tp_connection_request_handles().
  */
 
 
@@ -327,6 +338,10 @@ connection_requested_handles (TpConnection *self,
  * If they are valid, the callback will later be called with the given
  * handles; if not all of them are valid, the callback will be called with
  * an error.
+ *
+ * Deprecated: If @handle_type is TP_HANDLE_TYPE_CONTACT, use
+ *  tp_connection_dup_contact_by_id_async() instead. For channel requests,
+ *  use tp_account_channel_request_set_target_id() instead.
  */
 void
 tp_connection_request_handles (TpConnection *self,
@@ -342,7 +357,7 @@ tp_connection_request_handles (TpConnection *self,
 
   g_return_if_fail (TP_IS_CONNECTION (self));
   g_return_if_fail (handle_type > TP_HANDLE_TYPE_NONE);
-  g_return_if_fail (handle_type < NUM_TP_HANDLE_TYPES);
+  g_return_if_fail (handle_type < TP_NUM_HANDLE_TYPES);
   g_return_if_fail (ids != NULL);
   g_return_if_fail (ids[0] != NULL);
   g_return_if_fail (callback != NULL);
@@ -399,6 +414,8 @@ tp_connection_request_handles (TpConnection *self,
  *
  * If @hold is %TRUE, the @callback is given one reference to each handle
  * that appears as a key in the callback's @attributes parameter.
+ *
+ * Deprecated: Use tp_simple_client_factory_ensure_contact() instead.
  */
 void
 tp_connection_get_contact_attributes (TpConnection *self,
@@ -470,6 +487,8 @@ tp_connection_get_contact_attributes (TpConnection *self,
  *
  * If @hold is %TRUE, the @callback is given a reference to each handle
  * that appears as a key in the callback's @attributes parameter.
+ *
+ * Deprecated: Use tp_connection_dup_contact_list() instead.
  */
 void
 tp_connection_get_contact_list_attributes (TpConnection *self,

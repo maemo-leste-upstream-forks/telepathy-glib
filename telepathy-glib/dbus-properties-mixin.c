@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include <telepathy-glib/dbus-properties-mixin.h>
+#include "telepathy-glib/dbus-properties-mixin-internal.h"
 
 #include <telepathy-glib/errors.h>
 #include <telepathy-glib/svc-generic.h>
@@ -755,7 +756,7 @@ _iface_impl_get_property_impl (
 
   if (prop_impl == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Unknown property %s on %s", property_name, interface_name);
       return FALSE;
     }
@@ -764,14 +765,14 @@ _iface_impl_get_property_impl (
 
   if ((prop_info->flags & TP_DBUS_PROPERTIES_MIXIN_FLAG_READ) == 0)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
+      g_set_error (error, TP_ERROR, TP_ERROR_PERMISSION_DENIED,
           "Property %s on %s is write-only", property_name, interface_name);
       return FALSE;
     }
 
   if (iface_impl->getter == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Getting properties on %s is unimplemented", interface_name);
       return FALSE;
     }
@@ -818,7 +819,7 @@ tp_dbus_properties_mixin_get (GObject *self,
 
   if (iface_impl == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "No properties known for interface %s", interface_name);
       return FALSE;
     }
@@ -1093,7 +1094,7 @@ tp_dbus_properties_mixin_emit_properties_changed (
  * tp_dbus_properties_mixin_emit_properties_changed_varargs: (skip)
  * @object: an object which uses the D-Bus properties mixin
  * @interface_name: the interface on which properties have changed
- * @...: unqualified property names whose values have changed, terminated by
+ * @...: property names (unqualified) whose values have changed, terminated by
  *  %NULL.
  *
  * A shortcut for calling tp_dbus_properties_mixin_emit_properties_changed().
@@ -1147,12 +1148,22 @@ _tp_dbus_properties_mixin_get (TpSvcDBusProperties *iface,
     }
 }
 
-static void
-_tp_dbus_properties_mixin_get_all (TpSvcDBusProperties *iface,
-                                   const gchar *interface_name,
-                                   DBusGMethodInvocation *context)
+/*
+ * _tp_dbus_properties_mixin_get_all:
+ * @self: an object with this mixin
+ * @interface_name: a D-Bus interface name
+ *
+ * Get all the properties of a particular interface. This implementation
+ * never returns an error: it will return an empty map if the interface
+ * is unknown.
+ *
+ * Returns: (transfer container) (element-type utf8 GObject.Value): a map
+ *  from property name (without the interface name) to value
+ */
+GHashTable *
+_tp_dbus_properties_mixin_get_all (GObject *self,
+    const gchar *interface_name)
 {
-  GObject *self = G_OBJECT (iface);
   TpDBusPropertiesMixinIfaceImpl *iface_impl;
   TpDBusPropertiesMixinIfaceInfo *iface_info;
   TpDBusPropertiesMixinPropImpl *prop_impl;
@@ -1164,7 +1175,7 @@ _tp_dbus_properties_mixin_get_all (TpSvcDBusProperties *iface,
       interface_name);
 
   if (iface_impl == NULL || iface_impl->getter == NULL)
-    goto out;   /* no properties, but we need to return that */
+    return values;
 
   iface_info = iface_impl->mixin_priv;
 
@@ -1184,7 +1195,17 @@ _tp_dbus_properties_mixin_get_all (TpSvcDBusProperties *iface,
       g_hash_table_insert (values, (gchar *) prop_impl->name, value);
     }
 
-out:
+  return values;
+}
+
+static void
+_tp_dbus_properties_mixin_get_all_dbus (TpSvcDBusProperties *iface,
+    const gchar *interface_name,
+    DBusGMethodInvocation *context)
+{
+  GHashTable *values = _tp_dbus_properties_mixin_get_all (G_OBJECT (iface),
+      interface_name);
+
   tp_svc_dbus_properties_return_from_get_all (context, values);
   g_hash_table_unref (values);
 }
@@ -1230,7 +1251,7 @@ tp_dbus_properties_mixin_set (
 
   if (iface_impl == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "No properties known for interface '%s'", interface_name);
       return FALSE;
     }
@@ -1242,7 +1263,7 @@ tp_dbus_properties_mixin_set (
 
   if (prop_impl == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Unknown property '%s' on interface '%s'", property_name,
           interface_name);
       return FALSE;
@@ -1252,14 +1273,14 @@ tp_dbus_properties_mixin_set (
 
   if ((prop_info->flags & TP_DBUS_PROPERTIES_MIXIN_FLAG_WRITE) == 0)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
+      g_set_error (error, TP_ERROR, TP_ERROR_PERMISSION_DENIED,
           "'%s.%s' is read-only", interface_name, property_name);
       return FALSE;
     }
 
   if (iface_impl->setter == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Setting properties on '%s' is unimplemented", interface_name);
       return FALSE;
     }
@@ -1270,7 +1291,7 @@ tp_dbus_properties_mixin_set (
 
       if (!g_value_transform (value, &copy))
         {
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "Cannot convert %s to %s for property %s",
               g_type_name (G_VALUE_TYPE (value)),
               g_type_name (prop_info->type),
@@ -1329,10 +1350,11 @@ tp_dbus_properties_mixin_iface_init (gpointer g_iface,
 {
   TpSvcDBusPropertiesClass *cls = g_iface;
 
-#define IMPLEMENT(x) \
-    tp_svc_dbus_properties_implement_##x (cls, _tp_dbus_properties_mixin_##x)
-  IMPLEMENT (get);
-  IMPLEMENT (get_all);
-  IMPLEMENT (set);
+#define IMPLEMENT(x, suffix) \
+    tp_svc_dbus_properties_implement_##x (cls, \
+        _tp_dbus_properties_mixin_##x##suffix)
+  IMPLEMENT (get,);
+  IMPLEMENT (get_all,_dbus);
+  IMPLEMENT (set,);
 #undef IMPLEMENT
 }

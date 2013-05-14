@@ -40,11 +40,8 @@
 
 #include <gobject/gvaluecollector.h>
 
-#include <telepathy-glib/base-connection.h>
-#include <telepathy-glib/channel-iface.h>
-#include <telepathy-glib/svc-channel.h>
-#include <telepathy-glib/svc-call.h>
 #include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/telepathy-glib-dbus.h>
 
 #include "call-content.h"
 #include "call-stream.h"
@@ -77,10 +74,17 @@ struct _ExampleCallChannelPrivate
   gboolean closed;
 };
 
-static const char * example_call_channel_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_HOLD,
-    NULL
-};
+static GPtrArray *
+example_call_channel_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (
+      example_call_channel_parent_class)->get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_HOLD);
+  return interfaces;
+}
 
 /* In practice you need one for audio, plus one per video (e.g. a
  * presentation might have separate video contents for the slides
@@ -333,7 +337,7 @@ example_call_channel_class_init (ExampleCallChannelClass *klass)
   call_class->hangup = call_hangup;
 
   base_class->target_handle_type = TP_HANDLE_TYPE_CONTACT;
-  base_class->interfaces = example_call_channel_interfaces;
+  base_class->get_interfaces = example_call_channel_get_interfaces;
   base_class->close = close_channel;
 
   object_class->constructed = constructed;
@@ -475,7 +479,7 @@ example_call_channel_add_content (ExampleCallChannel *self,
   contents = tp_base_call_channel_get_contents (base);
   if (g_list_length (contents) > MAX_CONTENTS_PER_CALL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
+      g_set_error (error, TP_ERROR, TP_ERROR_PERMISSION_DENIED,
           "What are you doing with all those contents anyway?!");
       return NULL;
     }
@@ -517,7 +521,7 @@ example_call_channel_add_content (ExampleCallChannel *self,
   if (locally_requested)
     {
       g_message ("SIGNALLING: send: new %s stream %s", type_str, name);
-      creator = self->priv->conn->self_handle;
+      creator = tp_base_connection_get_self_handle (self->priv->conn);
     }
 
   path = g_strdup_printf ("%s/Content%u",
@@ -778,7 +782,7 @@ hold_request_hold (TpSvcChannelInterfaceHold *iface,
 
   if (!hold && strstr (peer, "(no unhold)") != NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "unable to unhold");
       goto error;
     }

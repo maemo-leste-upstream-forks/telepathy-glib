@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_SIMPLE_APPROVER_H__
 #define __TP_SIMPLE_APPROVER_H__
 
@@ -72,13 +76,15 @@ typedef void (*TpSimpleApproverAddDispatchOperationImpl) (
     TpAddDispatchOperationContext *context,
     gpointer user_data);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_16_FOR (tp_simple_approver_new_with_factory)
 TpBaseClient * tp_simple_approver_new (TpDBusDaemon *dbus,
     const gchar *name,
     gboolean uniquify,
     TpSimpleApproverAddDispatchOperationImpl callback,
     gpointer user_data,
-    GDestroyNotify destroy)
-    _TP_GNUC_DEPRECATED_FOR (tp_simple_approver_new_with_factory);
+    GDestroyNotify destroy);
+#endif
 
 TpBaseClient *tp_simple_approver_new_with_am (
     TpAccountManager *account_manager,
@@ -88,6 +94,7 @@ TpBaseClient *tp_simple_approver_new_with_am (
     gpointer user_data,
     GDestroyNotify destroy);
 
+_TP_AVAILABLE_IN_0_16
 TpBaseClient *tp_simple_approver_new_with_factory (
     TpSimpleClientFactory *factory,
     const gchar *name,

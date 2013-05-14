@@ -28,11 +28,7 @@
 
 #include <dbus/dbus-glib.h>
 
-#include <telepathy-glib/base-connection.h>
-#include <telepathy-glib/channel-manager.h>
-#include <telepathy-glib/dbus.h>
-#include <telepathy-glib/errors.h>
-#include <telepathy-glib/interfaces.h>
+#include <telepathy-glib/telepathy-glib.h>
 
 #include "call-channel.h"
 
@@ -324,14 +320,16 @@ new_channel (ExampleCallManager *self,
   /* FIXME: This could potentially wrap around, but only after 4 billion
    * calls, which is probably plenty. */
   object_path = g_strdup_printf ("%s/CallChannel%u",
-      self->priv->conn->object_path, self->priv->next_channel_index++);
+      tp_base_connection_get_object_path (self->priv->conn),
+      self->priv->next_channel_index++);
 
   chan = g_object_new (EXAMPLE_TYPE_CALL_CHANNEL,
       "connection", self->priv->conn,
       "object-path", object_path,
       "handle", handle,
       "initiator-handle", initiator,
-      "requested", (self->priv->conn->self_handle == initiator),
+      "requested",
+          (tp_base_connection_get_self_handle (self->priv->conn) == initiator),
       "simulation-delay", self->priv->simulation_delay,
       "initial-audio", initial_audio,
       "initial-video", initial_video,
@@ -439,7 +437,7 @@ example_call_manager_request (ExampleCallManager *self,
 
   if (!initial_audio && !initial_video)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Call channels must initially have either audio or video content");
       goto error;
     }
@@ -452,7 +450,7 @@ example_call_manager_request (ExampleCallManager *self,
       goto error;
     }
 
-  if (handle == self->priv->conn->self_handle)
+  if (handle == tp_base_connection_get_self_handle (self->priv->conn))
     {
       /* In protocols with a concept of multiple "resources" signed in to
        * one account (XMPP, and possibly MSN) it is technically possible to
@@ -460,7 +458,7 @@ example_call_manager_request (ExampleCallManager *self,
        * from the other. For simplicity, this example simulates a protocol
        * where this is not the case.
        */
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "In this protocol, you can't call yourself");
       goto error;
     }
@@ -490,8 +488,9 @@ example_call_manager_request (ExampleCallManager *self,
         }
     }
 
-  new_channel (self, handle, self->priv->conn->self_handle, request_token,
-      initial_audio, initial_video);
+  new_channel (self, handle,
+      tp_base_connection_get_self_handle (self->priv->conn),
+      request_token, initial_audio, initial_video);
   return TRUE;
 
 error:

@@ -1,3 +1,4 @@
+/*<private_header>*/
 /*
  * internal-dbus-glib.h - private header for dbus-glib glue
  *
@@ -35,8 +36,6 @@ DBusGConnection *_tp_dbus_starter_bus_conn (GError **error)
   G_GNUC_WARN_UNUSED_RESULT;
 
 gboolean _tp_dbus_daemon_is_the_shared_one (TpDBusDaemon *self);
-
-GVariant *_tp_asv_to_vardict (const GHashTable *asv);
 
 G_END_DECLS
 

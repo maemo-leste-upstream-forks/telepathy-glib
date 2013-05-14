@@ -18,11 +18,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_TEXT_CHANNEL_H__
 #define __TP_TEXT_CHANNEL_H__
 
 #include <telepathy-glib/channel.h>
 #include <telepathy-glib/client-message.h>
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/signalled-message.h>
 
 G_BEGIN_DECLS
@@ -55,6 +60,7 @@ struct _TpTextChannelClass
 
 GType tp_text_channel_get_type (void);
 
+_TP_DEPRECATED_IN_0_20_FOR(tp_simple_client_factory_ensure_channel)
 TpTextChannel *tp_text_channel_new (TpConnection *conn,
     const gchar *object_path,
     const GHashTable *immutable_properties,
@@ -79,7 +85,13 @@ gboolean tp_text_channel_supports_message_type (TpTextChannel *self,
   tp_text_channel_get_feature_quark_incoming_messages ()
 GQuark tp_text_channel_get_feature_quark_incoming_messages (void) G_GNUC_CONST;
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR (tp_text_channel_dup_pending_messages)
 GList * tp_text_channel_get_pending_messages (TpTextChannel *self);
+#endif
+
+_TP_AVAILABLE_IN_0_20
+GList * tp_text_channel_dup_pending_messages (TpTextChannel *self);
 
 void tp_text_channel_send_message_async (TpTextChannel *self,
     TpMessage *message,
@@ -110,13 +122,24 @@ gboolean tp_text_channel_ack_message_finish (TpTextChannel *self,
     GAsyncResult *result,
     GError **error);
 
+_TP_AVAILABLE_IN_0_16
 void tp_text_channel_ack_all_pending_messages_async (TpTextChannel *self,
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_text_channel_ack_all_pending_messages_finish (TpTextChannel *self,
     GAsyncResult *result,
     GError **error);
+
+#define TP_TEXT_CHANNEL_FEATURE_CHAT_STATES \
+  tp_text_channel_get_feature_quark_chat_states ()
+_TP_AVAILABLE_IN_0_20
+GQuark tp_text_channel_get_feature_quark_chat_states (void) G_GNUC_CONST;
+
+_TP_AVAILABLE_IN_0_20
+TpChannelChatState tp_text_channel_get_chat_state (TpTextChannel *self,
+    TpContact *contact);
 
 void tp_text_channel_set_chat_state_async (TpTextChannel *self,
     TpChannelChatState state,
@@ -129,17 +152,22 @@ gboolean tp_text_channel_set_chat_state_finish (TpTextChannel *self,
 
 #define TP_TEXT_CHANNEL_FEATURE_SMS \
   tp_text_channel_get_feature_quark_sms ()
+_TP_AVAILABLE_IN_0_16
 GQuark tp_text_channel_get_feature_quark_sms (void) G_GNUC_CONST;
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_text_channel_is_sms_channel (TpTextChannel *self);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_text_channel_get_sms_flash (TpTextChannel *self);
 
+_TP_AVAILABLE_IN_0_16
 void tp_text_channel_get_sms_length_async (TpTextChannel *self,
     TpMessage *message,
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_text_channel_get_sms_length_finish (TpTextChannel *self,
     GAsyncResult *result,
     guint *chunks_required,

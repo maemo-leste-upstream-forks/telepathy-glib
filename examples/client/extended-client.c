@@ -119,46 +119,31 @@ contact_pair_free (gpointer p)
 }
 
 static void
-contacts_ready_cb (TpConnection *conn,
-    guint n_contacts,
-    TpContact * const *contacts,
-    const gchar * const *requested_ids,
-    GHashTable *failed_id_errors,
-    const GError *general_error,
-    gpointer user_data,
-    GObject *weak_object)
+contact_ready_cb (GObject *object,
+    GAsyncResult *result,
+    gpointer user_data)
 {
-  GHashTableIter iter;
-  gpointer k, v;
+  TpConnection *conn = (TpConnection *) object;
   GHashTable *asv;
   ContactPair *pair;
+  GError *error = NULL;
 
-  /* This runs if tp_connection_get_contacts_by_id failed completely (e.g.
-   * the CM crashed) */
-  if (die_if (general_error, "tp_connection_get_contacts_by_id()"))
-    return;
+  pair = g_slice_new0 (ContactPair);
+  pair->contacts[0] = tp_connection_dup_contact_by_id_finish (conn,
+      result, &error);
+  pair->contacts[1] = g_object_ref (tp_connection_get_self_contact (conn));
 
-  /* If any making a TpContact for one of the requested IDs fails, they'll
-   * be present in this hash table with an error as value */
-  g_hash_table_iter_init (&iter, failed_id_errors);
-
-  while (g_hash_table_iter_next (&iter, &k, &v))
+  if (die_if (error, "tp_connection_dup_contact_by_id_async()"))
     {
-      const gchar *failed_id = k;
-      const GError *contact_error = v;
-
-      if (die_if (contact_error, failed_id))
-        return;
+      g_clear_error (&error);
+      contact_pair_free (pair);
+      return;
     }
 
   asv = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
       (GDestroyNotify) tp_g_value_slice_free);
   g_hash_table_insert (asv, "previous-owner",
       tp_g_value_slice_new_static_string ("Shadowman"));
-
-  pair = g_slice_new0 (ContactPair);
-  pair->contacts[0] = g_object_ref (contacts[0]);
-  pair->contacts[1] = g_object_ref (contacts[1]);
 
   example_cli_connection_interface_hats_call_set_hat (conn, -1,
       "red", EXAMPLE_HAT_STYLE_FEDORA, asv,
@@ -173,7 +158,6 @@ conn_ready (GObject *source,
     gpointer user_data)
 {
   GError *error = NULL;
-  static const gchar * const names[] = { "myself@server", "other@server" };
   TpConnection *conn = TP_CONNECTION (source);
 
   if (!tp_proxy_prepare_finish (conn, result, &error))
@@ -192,9 +176,9 @@ conn_ready (GObject *source,
       return;
     }
 
-  /* Get contact objects for myself and someone else */
-  tp_connection_get_contacts_by_id (conn, 2, names, 0, NULL,
-      contacts_ready_cb, NULL, NULL, NULL);
+  /* Get contact object for someone else */
+  tp_connection_dup_contact_by_id_async (conn, "other@server", 0, NULL,
+      contact_ready_cb, NULL);
 }
 
 static void
@@ -221,16 +205,18 @@ cm_requested_connection (TpConnectionManager *manager,
                          gpointer user_data,
                          GObject *weak_object)
 {
+  TpSimpleClientFactory *factory;
   GError *e = NULL;
   TpConnection *conn;
-  TpProxy *proxy = (TpProxy *) manager;
 
   if (die_if (error, "RequestConnection()"))
     return;
 
   /* FIXME: there should be convenience API for this */
-  conn = tp_connection_new (proxy->dbus_daemon,
-      bus_name, object_path, &e);
+  factory = tp_simple_client_factory_new (NULL);
+  conn = tp_simple_client_factory_ensure_connection (factory, object_path, NULL,
+      &e);
+  g_object_unref (factory);
 
   if (conn == NULL)
     {

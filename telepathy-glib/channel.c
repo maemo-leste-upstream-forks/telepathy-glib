@@ -32,9 +32,11 @@
 #include <telepathy-glib/util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CHANNEL
+#include "telepathy-glib/dbus-internal.h"
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/simple-client-factory-internal.h"
+#include "telepathy-glib/variant-util-internal.h"
 
 #include "_gen/tp-cli-channel-body.h"
 
@@ -227,6 +229,7 @@ tp_channel_get_feature_quark_contacts (void)
  * tp_proxy_prepare_async() function, and waiting for it to callback.
  *
  * Since: 0.11.3
+ * Deprecated: Use TP_TEXT_CHANNEL_FEATURE_CHAT_STATES instead.
  */
 
 GQuark
@@ -393,6 +396,8 @@ tp_channel_is_ready (TpChannel *self)
  *
  * Returns: (transfer none): the value of #TpChannel:connection
  * Since: 0.7.12
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_channel_get_connection() instead.
  */
 TpConnection *
 tp_channel_borrow_connection (TpChannel *self)
@@ -402,6 +407,23 @@ tp_channel_borrow_connection (TpChannel *self)
   return self->priv->connection;
 }
 
+/**
+ * tp_channel_get_connection:
+ * @self: a channel
+ *
+ * Returns the connection for this channel. The returned pointer is only valid
+ * while this channel is valid - reference it with g_object_ref() if needed.
+ *
+ * Returns: (transfer none): the value of #TpChannel:connection
+ * Since: 0.19.9
+ */
+TpConnection *
+tp_channel_get_connection (TpChannel *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
+
+  return self->priv->connection;
+}
 
 /**
  * tp_channel_borrow_immutable_properties:
@@ -426,6 +448,8 @@ tp_channel_borrow_connection (TpChannel *self)
  *  where the keys are strings,
  *  D-Bus interface name + "." + property name, and the values are #GValue
  *  instances
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_channel_dup_immutable_properties() instead.
  */
 GHashTable *
 tp_channel_borrow_immutable_properties (TpChannel *self)
@@ -435,6 +459,44 @@ tp_channel_borrow_immutable_properties (TpChannel *self)
   return self->priv->channel_properties;
 }
 
+GHashTable *
+_tp_channel_get_immutable_properties (TpChannel *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
+
+  return self->priv->channel_properties;
+}
+
+/**
+ * tp_channel_dup_immutable_properties:
+ * @self: a channel
+ *
+ * Returns the immutable D-Bus properties of this channel, in a variant of type
+ * %G_VARIANT_TYPE_VARDICT where the keys are strings,
+ * D-Bus interface name + "." + property name. Use g_variant_lookup() or
+ * g_variant_lookup_value() for convenient access to the values.
+ *
+ * If the #TpChannel:channel-properties property was not set during
+ * construction (e.g. by calling tp_channel_new_from_properties()), a
+ * reasonable but possibly incomplete version will be made up from the values
+ * of individual properties; reading this property repeatedly may yield
+ * progressively more complete values until the %TP_CHANNEL_FEATURE_CORE
+ * feature is prepared.
+ *
+ * This function should be used only by #TpChannel subclasses, otherwise it is
+ * recommended to use individual property getters instead.
+ *
+ * Returns: (transfer full): a dictionary where the keys are strings,
+ *  D-Bus interface name + "." + property name.
+ * Since: 0.19.9
+ */
+GVariant *
+tp_channel_dup_immutable_properties (TpChannel *self)
+{
+  g_return_val_if_fail (TP_IS_CHANNEL (self), NULL);
+
+  return _tp_asv_to_vardict (self->priv->channel_properties);
+}
 
 static void
 tp_channel_get_property (GObject *object,
@@ -444,6 +506,8 @@ tp_channel_get_property (GObject *object,
 {
   TpChannel *self = TP_CHANNEL (object);
 
+  /* We still need to use deprecated getters funcs */
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   switch (property_id)
     {
     case PROP_CONNECTION:
@@ -499,6 +563,7 @@ tp_channel_get_property (GObject *object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+  G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
 /**
@@ -513,6 +578,7 @@ tp_channel_get_property (GObject *object,
  * Returns: the chat state for @contact, or %TP_CHANNEL_CHAT_STATE_INACTIVE
  *  if their chat state is not known
  * Since: 0.11.3
+ * Deprecated: Use tp_text_channel_get_chat_state() instead.
  */
 TpChannelChatState
 tp_channel_get_chat_state (TpChannel *self,
@@ -719,9 +785,11 @@ tp_channel_chat_state_changed_cb (TpChannel *self,
   g_hash_table_insert (self->priv->chat_states,
       GUINT_TO_POINTER (contact), GUINT_TO_POINTER (state));
 
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   /* Don't emit the signal until we've had the initial state */
   if (!tp_proxy_is_prepared (self, TP_CHANNEL_FEATURE_CHAT_STATES))
     return;
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   g_signal_emit (self, signals[SIGNAL_CHAT_STATE_CHANGED], 0, contact, state);
 }
@@ -744,7 +812,7 @@ tp_channel_get_initial_chat_states_cb (TpProxy *proxy,
   /* else just ignore it and assume everyone was initially in the default
    * Inactive state, unless we already saw a signal for them */
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 static void
@@ -1427,7 +1495,7 @@ got_password_flags_cb (TpChannel *self,
         }
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 static void
@@ -1498,11 +1566,13 @@ tp_channel_list_features (TpProxyClass *cls G_GNUC_UNUSED)
   features[FEAT_CONTACTS].prepare_async =
     _tp_channel_contacts_prepare_async;
 
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   features[FEAT_CHAT_STATES].name = TP_CHANNEL_FEATURE_CHAT_STATES;
   features[FEAT_CHAT_STATES].prepare_async =
     tp_channel_prepare_chat_states_async;
   need_chat_states[0] = TP_IFACE_QUARK_CHANNEL_INTERFACE_CHAT_STATE;
   features[FEAT_CHAT_STATES].interfaces_needed = need_chat_states;
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   features[FEAT_PASSWORD].name = TP_CHANNEL_FEATURE_PASSWORD;
   features[FEAT_PASSWORD].prepare_async =
@@ -1642,6 +1712,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * Change notification is via notify::group-self-handle.
    *
    * Since: 0.7.12
+   * Deprecated: Use #TpChannel:group-self-contact instead.
    */
   param_spec = g_param_spec_uint ("group-self-handle", "Group.SelfHandle",
       "Undefined if not a group", 0, G_MAXUINT32, 0,
@@ -1718,6 +1789,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * finished preparing %TP_CHANNEL_FEATURE_CORE; until then, it may be 0.
    *
    * Since: 0.11.15
+   * Deprecated: Use #TpChannel:initiator-contact instead.
    */
   param_spec = g_param_spec_uint ("initiator-handle", "TpHandle",
       "The handle of the initiator of the channel",
@@ -1738,6 +1810,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * the empty string.
    *
    * Since: 0.11.15
+   * Deprecated: Use #TpChannel:initiator-contact instead.
    */
   param_spec = g_param_spec_string ("initiator-identifier",
       "Initiator identifier",
@@ -1804,6 +1877,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * Emitted when the group members change in a Group channel that is ready.
    *
    * Since: 0.7.12
+   * Deprecated: Use #TpChannel::group-contacts-changed instead.
    */
   signals[SIGNAL_GROUP_MEMBERS_CHANGED] = g_signal_new (
       "group-members-changed", G_OBJECT_CLASS_TYPE (klass),
@@ -1836,6 +1910,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * applications can connect to this signal and ignore the other.
    *
    * Since: 0.7.21
+   * Deprecated: Use #TpChannel::group-contacts-changed instead.
    */
   signals[SIGNAL_GROUP_MEMBERS_CHANGED_DETAILED] = g_signal_new (
       "group-members-changed-detailed", G_OBJECT_CLASS_TYPE (klass),
@@ -1855,6 +1930,7 @@ tp_channel_class_init (TpChannelClass *klass)
    * has finished preparing the feature %TP_CHANNEL_FEATURE_CHAT_STATES.
    *
    * Since: 0.11.3
+   * Deprecated: Use #TpTextChannel::contact-chat-state-changed instead
    */
   signals[SIGNAL_CHAT_STATE_CHANGED] = g_signal_new ("chat-state-changed",
       G_OBJECT_CLASS_TYPE (klass),
@@ -1985,6 +2061,7 @@ tp_channel_class_init (TpChannelClass *klass)
  * Returns: a new channel proxy, or %NULL on invalid arguments
  *
  * Since: 0.7.19
+ * Deprecated: Use tp_simple_client_factory_ensure_channel() instead.
  */
 TpChannel *
 tp_channel_new_from_properties (TpConnection *conn,
@@ -2049,6 +2126,7 @@ finally:
  * Returns: a new channel proxy, or %NULL on invalid arguments.
  *
  * Since: 0.7.1
+ * Deprecated: Use tp_simple_client_factory_ensure_channel() instead.
  */
 TpChannel *
 tp_channel_new (TpConnection *conn,
@@ -2082,7 +2160,7 @@ tp_channel_new (TpConnection *conn,
         {
           /* in the properties, we do actually allow the user to give us an
            * assumed-valid handle of unknown type - but that'd be silly */
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "Nonzero handle of type NONE or unknown makes no sense");
           goto finally;
         }
@@ -2305,7 +2383,7 @@ tp_channel_once (gpointer data G_GNUC_UNUSED)
   tp_proxy_or_subclass_hook_on_interface_add (type,
       tp_cli_channel_add_signals);
   tp_proxy_subclass_add_error_mapping (type,
-      TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+      TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
   return NULL;
 }
@@ -2356,6 +2434,7 @@ tp_channel_get_requested (TpChannel *self)
  * Returns: the value of #TpChannel:initiator-handle
  *
  * Since: 0.11.15
+ * Deprecated: New code should use tp_channel_get_initiator_contact() instead.
  */
 TpHandle
 tp_channel_get_initiator_handle (TpChannel *self)
@@ -2373,6 +2452,7 @@ tp_channel_get_initiator_handle (TpChannel *self)
  * Returns: the value of #TpChannel:initiator-identifier
  *
  * Since: 0.11.15
+ * Deprecated: New code should use tp_channel_get_initiator_contact() instead.
  */
 const gchar *
 tp_channel_get_initiator_identifier (TpChannel *self)
@@ -2430,7 +2510,6 @@ tp_channel_join_async (TpChannel *self,
 {
   GSimpleAsyncResult *result;
   GArray *array;
-  TpHandle self_handle;
 
   g_return_if_fail (TP_IS_CHANNEL (self));
   g_return_if_fail (tp_proxy_is_prepared (self, TP_CHANNEL_FEATURE_GROUP));
@@ -2438,9 +2517,8 @@ tp_channel_join_async (TpChannel *self,
   result = g_simple_async_result_new (G_OBJECT (self), callback,
       user_data, tp_channel_join_async);
 
-  self_handle = tp_channel_group_get_self_handle (self);
   array = g_array_sized_new (FALSE, FALSE, sizeof (TpHandle), 1);
-  g_array_append_val (array, self_handle);
+  g_array_append_val (array, self->priv->group_self_handle);
 
   tp_cli_channel_interface_group_call_add_members (self, -1, array, message,
       channel_join_cb, result, g_object_unref, NULL);
@@ -2507,7 +2585,7 @@ channel_remove_self_cb (TpChannel *channel,
 {
   GSimpleAsyncResult *result = user_data;
 
-  if (tp_proxy_get_invalidated (channel) != NULL &&
+  if (tp_proxy_get_invalidated (channel) == NULL &&
       error != NULL)
     {
       DEBUG ("RemoveMembersWithDetails() with self handle failed; call Close()"
@@ -2563,7 +2641,6 @@ group_prepared_cb (GObject *source,
   LeaveCtx *ctx = user_data;
   TpChannel *self = (TpChannel *) source;
   GError *error = NULL;
-  TpHandle self_handle;
   GArray *handles;
 
   if (!tp_proxy_prepare_finish (source, res, &error))
@@ -2575,15 +2652,14 @@ group_prepared_cb (GObject *source,
       goto call_close;
     }
 
-  self_handle = tp_channel_group_get_self_handle (self);
-  if (self_handle == 0)
+  if (self->priv->group_self_handle == 0)
     {
       DEBUG ("We are not in the channel, fallback to Close()");
       goto call_close;
     }
 
   handles = g_array_sized_new (FALSE, FALSE, sizeof (TpHandle), 1);
-  g_array_append_val (handles, self_handle);
+  g_array_append_val (handles, self->priv->group_self_handle);
 
   tp_cli_channel_interface_group_call_remove_members_with_reason (
       self, -1, handles, ctx->message, ctx->reason,
@@ -2751,7 +2827,7 @@ channel_destroy_cb (TpChannel *channel,
       return;
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -2872,11 +2948,11 @@ provide_password_cb (TpChannel *self,
     {
       DEBUG ("Wrong password provided for %s", tp_proxy_get_object_path (self));
 
-      g_simple_async_result_set_error (result, TP_ERRORS,
+      g_simple_async_result_set_error (result, TP_ERROR,
           TP_ERROR_AUTHENTICATION_FAILED, "Password was not correct");
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 /**

@@ -516,7 +516,7 @@ update_channels_array (TpChannelDispatchOperation *self,
       old = self->priv->channels;
     }
 
-  self->priv->channels = _tp_g_ptr_array_new_full (channels->len,
+  self->priv->channels = g_ptr_array_new_full (channels->len,
       g_object_unref);
 
   for (i = 0; i < channels->len; i++)
@@ -588,7 +588,7 @@ get_dispatch_operation_prop_cb (TpProxy *proxy,
 
   if (self->priv->connection == NULL)
     {
-      e = g_error_new_literal (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      e = g_error_new_literal (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Mandatory 'Connection' property is missing");
       DEBUG ("%s", e->message);
 
@@ -602,7 +602,7 @@ get_dispatch_operation_prop_cb (TpProxy *proxy,
 
   if (self->priv->account == NULL)
     {
-      e = g_error_new_literal (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      e = g_error_new_literal (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Mandatory 'Account' property is missing");
       DEBUG ("%s", e->message);
 
@@ -616,7 +616,7 @@ get_dispatch_operation_prop_cb (TpProxy *proxy,
 
   if (self->priv->possible_handlers == NULL)
     {
-      e = g_error_new_literal (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      e = g_error_new_literal (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Mandatory 'PossibleHandlers' property is missing");
       DEBUG ("%s", e->message);
 
@@ -632,7 +632,7 @@ get_dispatch_operation_prop_cb (TpProxy *proxy,
       TP_ARRAY_TYPE_CHANNEL_DETAILS_LIST);
   if (channels == NULL)
     {
-      e = g_error_new_literal (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      e = g_error_new_literal (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Mandatory 'Channels' property is missing");
       DEBUG ("%s", e->message);
 
@@ -649,7 +649,7 @@ out:
   if (e != NULL)
     g_simple_async_result_set_from_error (result, e);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 
   if (!prepared)
     {
@@ -865,7 +865,7 @@ tp_channel_dispatch_operation_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_channel_dispatch_operation_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -886,6 +886,8 @@ tp_channel_dispatch_operation_init_known_interfaces (void)
  * Returns: a new reference to an channel dispatch operation proxy, or %NULL if
  *    @object_path is not syntactically valid or the channel dispatcher is not
  *    running
+ * Deprecated: Since 0.19.9. New code should get
+ *  #TpChannelDispatchOperation objects from a #TpBaseClient
  */
 TpChannelDispatchOperation *
 tp_channel_dispatch_operation_new (TpDBusDaemon *bus_daemon,
@@ -977,6 +979,8 @@ tp_channel_dispatch_operation_get_feature_quark_core (void)
  * Returns: (transfer none): the value of #TpChannelDispatchOperation:connection
  *
  * Since: 0.11.5
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_channel_dispatch_operation_get_connection() instead.
  */
 TpConnection *
 tp_channel_dispatch_operation_borrow_connection (
@@ -996,6 +1000,8 @@ tp_channel_dispatch_operation_borrow_connection (
  * Returns: (transfer none): the value of #TpChannelDispatchOperation:account
  *
  * Since: 0.11.5
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_channel_dispatch_operation_get_account() instead.
  */
 TpAccount *
 tp_channel_dispatch_operation_borrow_account (
@@ -1016,6 +1022,8 @@ tp_channel_dispatch_operation_borrow_account (
  * Returns: (transfer none): the value of #TpChannelDispatchOperation:channels
  *
  * Since: 0.11.5
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_channel_dispatch_operation_get_channels() instead.
  */
 GPtrArray *
 tp_channel_dispatch_operation_borrow_channels (
@@ -1037,6 +1045,8 @@ tp_channel_dispatch_operation_borrow_channels (
  * #TpChannelDispatchOperation:possible-handlers
  *
  * Since: 0.11.5
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_channel_dispatch_operation_get_possible_handlers() instead.
  */
 GStrv
 tp_channel_dispatch_operation_borrow_possible_handlers (
@@ -1057,12 +1067,97 @@ tp_channel_dispatch_operation_borrow_possible_handlers (
  * #TpChannelDispatchOperation:cdo-properties
  *
  * Since: 0.11.5
+ * Deprecated: Since 0.19.9. New code should use individual property
+ *  getters like tp_channel_dispatch_operation_get_connection(),
+ *  tp_channel_dispatch_operation_get_account(),
+ *  tp_channel_dispatch_operation_get_channels(), or
+ *  tp_channel_dispatch_operation_get_possible_handlers() instead.
  */
 GHashTable *
 tp_channel_dispatch_operation_borrow_immutable_properties (
     TpChannelDispatchOperation *self)
 {
   return self->priv->immutable_properties;
+}
+
+/**
+ * tp_channel_dispatch_operation_get_connection: (skip)
+ * @self: a #TpChannelDispatchOperation
+ *
+ * Returns the #TpConnection of this ChannelDispatchOperation.
+ * The returned pointer is only valid while @self is valid - reference
+ * it with g_object_ref() if needed.
+ *
+ * Returns: (transfer none): the value of #TpChannelDispatchOperation:connection
+ *
+ * Since: 0.19.9
+ */
+TpConnection *
+tp_channel_dispatch_operation_get_connection (
+    TpChannelDispatchOperation *self)
+{
+  return self->priv->connection;
+}
+
+/**
+ * tp_channel_dispatch_operation_get_account: (skip)
+ * @self: a #TpChannelDispatchOperation
+ *
+ * Returns the #TpAccount of this ChannelDispatchOperation.
+ * The returned pointer is only valid while @self is valid - reference
+ * it with g_object_ref() if needed.
+ *
+ * Returns: (transfer none): the value of #TpChannelDispatchOperation:account
+ *
+ * Since: 0.19.9
+ */
+TpAccount *
+tp_channel_dispatch_operation_get_account (
+    TpChannelDispatchOperation *self)
+{
+  return self->priv->account;
+}
+
+/**
+ * tp_channel_dispatch_operation_get_channels:
+ * @self: a #TpChannelDispatchOperation
+ *
+ * Returns a #GPtrArray containing the #TpChannel of this
+ * ChannelDispatchOperation.
+ * The returned array and its #TpChannel are only valid while @self is
+ * valid - copy array and reference channels with g_object_ref() if needed.
+ *
+ * Returns: (transfer none) (element-type TelepathyGLib.Channel): the value
+ *  of #TpChannelDispatchOperation:channels
+ *
+ * Since: 0.19.9
+ */
+GPtrArray *
+tp_channel_dispatch_operation_get_channels (
+    TpChannelDispatchOperation *self)
+{
+  return self->priv->channels;
+}
+
+/**
+ * tp_channel_dispatch_operation_get_possible_handlers: (skip)
+ * @self: a #TpChannelDispatchOperation
+ *
+ * Returns a #GStrv containing the possible handlers of this
+ * ChannelDispatchOperation.
+ * The returned array and its strings are only valid while @self is
+ * valid - copy it with g_strdupv if needed.
+ *
+ * Returns: (transfer none): the value of
+ * #TpChannelDispatchOperation:possible-handlers
+ *
+ * Since: 0.19.9
+ */
+GStrv
+tp_channel_dispatch_operation_get_possible_handlers (
+    TpChannelDispatchOperation *self)
+{
+  return self->priv->possible_handlers;
 }
 
 static void
@@ -1079,7 +1174,7 @@ handle_with_cb (TpChannelDispatchOperation *self,
       g_simple_async_result_set_from_error (result, error);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1167,7 +1262,7 @@ claim_cb (TpChannelDispatchOperation *self,
       g_simple_async_result_set_from_error (result, error);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1246,7 +1341,7 @@ _tp_channel_dispatch_operation_ensure_channels (TpChannelDispatchOperation *self
     return;
 
   /* Do not just ref the GPtrArray because we'll modify its content */
-  self->priv->channels = _tp_g_ptr_array_new_full (channels->len,
+  self->priv->channels = g_ptr_array_new_full (channels->len,
       g_object_unref);
 
   for (i = 0; i < channels->len; i++)
@@ -1339,7 +1434,7 @@ claim_with_cb (TpChannelDispatchOperation *self,
 
   _tp_base_client_now_handling_channels (client, self->priv->channels);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1450,7 +1545,7 @@ claim_close_channels_cb (TpChannelDispatchOperation *self,
       tp_channel_close_async (channel, channel_close_cb, NULL);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1580,7 +1675,7 @@ claim_leave_channels_cb (TpChannelDispatchOperation *self,
           channel_leave_cb, NULL);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1691,7 +1786,7 @@ claim_destroy_channels_cb (TpChannelDispatchOperation *self,
       tp_channel_destroy_async (channel, channel_destroy_cb, NULL);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 

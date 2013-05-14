@@ -17,12 +17,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_DEBUG_SENDER_H__
 #define __TP_DEBUG_SENDER_H__
 
 #include <glib-object.h>
 
 #include <telepathy-glib/dbus-properties-mixin.h>
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/enums.h>
 #include <telepathy-glib/svc-debug.h>
 
@@ -88,6 +93,7 @@ void tp_debug_sender_add_message_printf (TpDebugSender *self,
 void tp_debug_sender_log_handler (const gchar *log_domain,
     GLogLevelFlags log_level, const gchar *message, gpointer exclude);
 
+_TP_AVAILABLE_IN_0_16
 void tp_debug_sender_set_timestamps (TpDebugSender *self, gboolean maybe);
 
 G_END_DECLS

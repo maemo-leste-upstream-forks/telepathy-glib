@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_BASE_MEDIA_CALL_CONTENT_H__
 #define __TP_BASE_MEDIA_CALL_CONTENT_H__
 
@@ -26,6 +30,7 @@
 
 #include <telepathy-glib/base-call-content.h>
 #include <telepathy-glib/call-content-media-description.h>
+#include <telepathy-glib/defs.h>
 
 G_BEGIN_DECLS
 
@@ -66,15 +71,18 @@ GType tp_base_media_call_content_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
     TP_TYPE_BASE_MEDIA_CALL_CONTENT, TpBaseMediaCallContentClass))
 
+_TP_AVAILABLE_IN_0_18
 GHashTable *tp_base_media_call_content_get_local_media_description (
     TpBaseMediaCallContent *self,
     TpHandle contact);
 
+_TP_AVAILABLE_IN_0_18
 void tp_base_media_call_content_offer_media_description_async (
     TpBaseMediaCallContent *self,
     TpCallContentMediaDescription *md,
     GAsyncReadyCallback callback,
     gpointer user_data);
+_TP_AVAILABLE_IN_0_18
 gboolean tp_base_media_call_content_offer_media_description_finish (
     TpBaseMediaCallContent *self,
     GAsyncResult *result,

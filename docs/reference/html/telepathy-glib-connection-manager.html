@@ -44,10 +44,10 @@
 <div class="refsynopsisdiv">
 <a name="telepathy-glib-connection-manager.synopsis"></a><h2>Synopsis</h2>
 <a name="TpConnectionManager"></a><a name="TpCMInfoSource"></a><a name="TpConnectionManagerProtocol"></a><a name="TpConnectionManagerParam"></a><pre class="synopsis">
-#include &lt;telepathy-glib/connection-manager.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerListCb" title="TpConnectionManagerListCb ()">*TpConnectionManagerListCb</a>)        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> * const *cms</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> n_cms</code></em>,
+                                                         <em class="parameter"><code><span class="type">gsize</span> n_cms</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
@@ -124,6 +124,8 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-get-default" title="tp_connection_manager_param_get_default ()">tp_connection_manager_param_get_default</a>
                                                         (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *param</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> *value</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#GVariant"><span class="returnvalue">GVariant</span></a> *          <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-dup-default-variant" title="tp_connection_manager_param_dup_default_variant ()">tp_connection_manager_param_dup_default_variant</a>
+                                                        (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *param</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-check-valid-name" title="tp_connection_manager_check_valid_name ()">tp_connection_manager_check_valid_name</a>
                                                         (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
@@ -245,6 +247,7 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
 <a name="telepathy-glib-connection-manager.properties"></a><h2>Properties</h2>
 <pre class="synopsis">
   "<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--always-introspect" title='The "always-introspect" property'>always-introspect</a>"        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Read / Write
+  "<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--cm-name" title='The "cm-name" property'>cm-name</a>"                  <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
   "<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--connection-manager" title='The "connection-manager" property'>connection-manager</a>"       <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
   "<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--info-source" title='The "info-source" property'>info-source</a>"              <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
   "<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--manager-file" title='The "manager-file" property'>manager-file</a>"             <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read / Write / Construct
@@ -270,7 +273,7 @@ can be used to open connections.
 <div class="refsect2">
 <a name="TpConnectionManagerListCb"></a><h3>TpConnectionManagerListCb ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                (*TpConnectionManagerListCb)        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> * const *cms</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> n_cms</code></em>,
+                                                         <em class="parameter"><code><span class="type">gsize</span> n_cms</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
@@ -289,22 +292,22 @@ launching that connection manager.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>cms</code></em> :</span></p></td>
 <td>
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of
 <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> (the objects will
 be unreferenced and the array will be freed after the callback returns,
 so the callback must reference any CMs it stores a pointer to),
-or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span>
+or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>n_cms</code></em> :</span></p></td>
 <td>number of connection managers in <em class="parameter"><code>cms</code></em> (not including the final
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>)</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>)</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
 <td>
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error that occurred</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error that occurred</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
@@ -334,7 +337,7 @@ feature to be ready.
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>dbus_daemon</code></em> :</span></p></td>
-<td>a <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a>, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> to use
+<td>a <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a>, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use
 <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()"><code class="function">tp_dbus_daemon_dup()</code></a>. <span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span>
 </td>
 </tr>
@@ -393,6 +396,10 @@ newly allocated list of references to <a class="link" href="telepathy-glib-conne
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_list_connection_managers</code> is deprecated and should not be used in newly-written code. since 0.19.1, use <a class="link" href="telepathy-glib-connection-manager.html#tp-list-connection-managers-async" title="tp_list_connection_managers_async ()"><code class="function">tp_list_connection_managers_async()</code></a></p>
+</div>
 <p>
 List the available (running or installed) connection managers. Call the
 callback when done.
@@ -426,7 +433,7 @@ succeeds or fails; not called if the <em class="parameter"><code>weak_object</co
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td>if not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, will be weakly
+<td>if not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, will be weakly
 referenced; the callback will not be called, and the call will be
 cancelled, if the object has vanished. <span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span>
 </td>
@@ -438,22 +445,7 @@ cancelled, if the object has vanished. <span class="annotation">[<acronym title=
 <hr>
 <div class="refsect2">
 <a name="TpConnectionManager-struct"></a><h3>struct TpConnectionManager</h3>
-<pre class="programlisting">struct TpConnectionManager {
-    TpProxy parent;
-
-    const gchar *name;
-    const TpConnectionManagerProtocol * const *protocols;
-
-    /* These are really booleans, but gboolean is signed. Thanks, GLib */
-    unsigned int running:1;
-    unsigned int always_introspect:1;
-    /* TpCMInfoSource, but can't rely on enums being unsigned */
-    unsigned int info_source:2;
-    guint reserved_flags:28;
-
-    TpConnectionManagerPrivate *priv;
-};
-</pre>
+<pre class="programlisting">struct TpConnectionManager;</pre>
 <p>
 A proxy object for a Telepathy connection manager.
 </p>
@@ -470,57 +462,14 @@ Various fields and methods on this object do not work until
 <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> to wait for this to happen.
 </p>
 <p>
-Note that the <em class="parameter"><code>protocols</code></em> may be freed and reallocated (based on new
-information) whenever the main loop is entered. Since 0.11.3, each protocol
-struct can be copied with <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-copy" title="tp_connection_manager_protocol_copy ()"><code class="function">tp_connection_manager_protocol_copy()</code></a> if a
-private copy is needed.
+Since 0.19.1, accessing the fields of this struct is deprecated,
+and they are no longer documented here.
+Use the accessors <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-name" title="tp_connection_manager_get_name ()"><code class="function">tp_connection_manager_get_name()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-is-running" title="tp_connection_manager_is_running ()"><code class="function">tp_connection_manager_is_running()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-dup-protocols" title="tp_connection_manager_dup_protocols ()"><code class="function">tp_connection_manager_dup_protocols()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-info-source" title="tp_connection_manager_get_info_source ()"><code class="function">tp_connection_manager_get_info_source()</code></a>
+and the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--always-introspect" title='The "always-introspect" property'><span class="type">"always-introspect"</span></a> property instead.
 </p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> <em class="structfield"><code><a name="TpConnectionManager-struct.parent"></a>parent</code></em>;</span></p></td>
-<td>The parent class instance</td>
-</tr>
-<tr>
-<td><p><span class="term">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="TpConnectionManager-struct.name"></a>name</code></em>;</span></p></td>
-<td>The identifier of the connection manager (e.g. "gabble").
-Should be considered read-only</td>
-</tr>
-<tr>
-<td><p><span class="term">const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> * const  *<em class="structfield"><code><a name="TpConnectionManager-struct.protocols"></a>protocols</code></em>;</span></p></td>
-<td>If info_source &gt; <a class="link" href="telepathy-glib-connection-manager.html#TP-CM-INFO-SOURCE-NONE:CAPS"><code class="literal">TP_CM_INFO_SOURCE_NONE</code></a>, a <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated
-array of pointers to <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> structures; otherwise
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. Should be considered read-only</td>
-</tr>
-<tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpConnectionManager-struct.running"></a>running</code></em> :1;</span></p></td>
-<td>
-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the CM is currently known to be running. Should be
-considered read-only</td>
-</tr>
-<tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpConnectionManager-struct.always-introspect"></a>always_introspect</code></em> :1;</span></p></td>
-<td>
-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the CM will be introspected automatically.
-Should be considered read-only: use the
-<a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--always-introspect" title='The "always-introspect" property'><span class="type">"always-introspect"</span></a> property if you want to change it</td>
-</tr>
-<tr>
-<td><p><span class="term">unsigned <span class="type">int</span> <em class="structfield"><code><a name="TpConnectionManager-struct.info-source"></a>info_source</code></em> :2;</span></p></td>
-<td>The source of <em class="parameter"><code>protocols</code></em>, or <a class="link" href="telepathy-glib-connection-manager.html#TP-CM-INFO-SOURCE-NONE:CAPS"><code class="literal">TP_CM_INFO_SOURCE_NONE</code></a>
-if no info has been discovered yet</td>
-</tr>
-<tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> <em class="structfield"><code><a name="TpConnectionManager-struct.reserved-flags"></a>reserved_flags</code></em> :28;</span></p></td>
-<td>Reserved for future use</td>
-</tr>
-<tr>
-<td><p><span class="term"><span class="type">TpConnectionManagerPrivate</span> *<em class="structfield"><code><a name="TpConnectionManager-struct.priv"></a>priv</code></em>;</span></p></td>
-<td>Pointer to opaque private data</td>
-</tr>
-</tbody>
-</table></div>
 <p class="since">Since 0.7.1</p>
 </div>
 <hr>
@@ -560,16 +509,16 @@ its protocol and parameter information are required, you should call
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager_filename</code></em> :</span></p></td>
 <td>The <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--manager-file" title='The "manager-file" property'><span class="type">"manager-file"</span></a>
-property, which may (and generally should) be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span>
+property, which may (and generally should) be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a new reference to a connection manager proxy, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>error</code></em>
+<td>a new reference to a connection manager proxy, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>error</code></em>
 is set.</td>
 </tr>
 </tbody>
@@ -597,7 +546,7 @@ if a longer lifetime is required.
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--connection-manager" title='The "connection-manager" property'><span class="type">"connection-manager"</span></a> property</td>
+<td>the <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--cm-name" title='The "cm-name" property'><span class="type">"cm-name"</span></a> property</td>
 </tr>
 </tbody>
 </table></div>
@@ -647,8 +596,8 @@ One can ask for a feature to be prepared using the
 <p>
 Called as the result of <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-call-when-ready" title="tp_connection_manager_call_when_ready ()"><code class="function">tp_connection_manager_call_when_ready()</code></a>. If the
 connection manager's protocol and parameter information could be retrieved,
-<em class="parameter"><code>error</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> and <em class="parameter"><code>cm</code></em> is considered to be ready. Otherwise, <em class="parameter"><code>error</code></em> is
-non-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> and <em class="parameter"><code>cm</code></em> is not ready.
+<em class="parameter"><code>error</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> and <em class="parameter"><code>cm</code></em> is considered to be ready. Otherwise, <em class="parameter"><code>error</code></em> is
+non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> and <em class="parameter"><code>cm</code></em> is not ready.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -660,7 +609,7 @@ non-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><c
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
 <td>
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or the reason why <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-is-ready" title="tp_connection_manager_is_ready ()"><code class="function">tp_connection_manager_is_ready()</code></a>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or the reason why <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-is-ready" title="tp_connection_manager_is_ready ()"><code class="function">tp_connection_manager_is_ready()</code></a>
 would return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
 </td>
 </tr>
@@ -916,7 +865,7 @@ manager.
 </p>
 <p>
 If this function is called before the connection manager information has
-been obtained, the result is always <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
+been obtained, the result is always <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
 to wait for this.
 </p>
 <p>
@@ -954,7 +903,7 @@ locale.
 </p>
 <p>
 If this function is called before the connection manager information has
-been obtained, the result is always <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use
+been obtained, the result is always <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use
 <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> to wait for this.
 </p>
 <p>
@@ -970,7 +919,7 @@ necessarily still true after the main loop is re-entered.
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> of protocol names. <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GObject.Strv][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> of protocol names. <span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1018,8 +967,12 @@ e.g. "jabber" or "msn"</td>
 <pre class="programlisting">const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="returnvalue">TpConnectionManagerProtocol</span></a> * tp_connection_manager_get_protocol
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *protocol</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_get_protocol</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-get-protocol-object" title="tp_connection_manager_get_protocol_object ()"><code class="function">tp_connection_manager_get_protocol_object()</code></a></p>
+</div>
 <p>
-Returns a structure representing a protocol, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if this connection
+Returns a structure representing a protocol, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if this connection
 manager does not support the specified protocol.
 </p>
 <p>
@@ -1028,7 +981,7 @@ functionality by calling <a class="link" href="telepathy-glib-connection-manager
 </p>
 <p>
 If this function is called before the connection manager information has
-been obtained, the result is always <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use
+been obtained, the result is always <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use
 <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> to wait for this.
 </p>
 <p>
@@ -1064,12 +1017,12 @@ e.g. "jabber" or "msn"</td>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *protocol</code></em>);</pre>
 <p>
-Returns an object representing a protocol, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if this connection
+Returns an object representing a protocol, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if this connection
 manager does not support the specified protocol.
 </p>
 <p>
 If this function is called before the connection manager information has
-been obtained, the result is always <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
+been obtained, the result is always <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Use <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
 to wait for this.
 </p>
 <p>
@@ -1089,7 +1042,7 @@ e.g. "jabber" or "msn"</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>an object representing the protocol, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+<td>an object representing the protocol, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1104,6 +1057,10 @@ e.g. "jabber" or "msn"</td>
   TpConnectionManagerParam *params;
 };
 </pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">TpConnectionManagerProtocol</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 Structure representing a protocol supported by a connection manager.
 Note that the size of this structure may change, so its size must not be
@@ -1119,7 +1076,7 @@ relied on.
 <tr>
 <td><p><span class="term"><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *<em class="structfield"><code><a name="TpConnectionManagerProtocol-struct.params"></a>params</code></em>;</span></p></td>
 <td>Array of <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> structures, terminated by
-a structure whose <em class="parameter"><code>name</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+a structure whose <em class="parameter"><code>name</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 </tbody>
@@ -1131,6 +1088,10 @@ a structure whose <em class="parameter"><code>name</code></em> is <a href="/usr/
 <a name="tp-connection-manager-protocol-can-register"></a><h3>tp_connection_manager_protocol_can_register ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_connection_manager_protocol_can_register
                                                         (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *protocol</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_protocol_can_register</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 Return whether a new account can be registered on this protocol, by setting
 the special "register" parameter to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>.
@@ -1156,6 +1117,10 @@ the special "register" parameter to <a href="http://library.gnome.org/devel/glib
 <a name="tp-connection-manager-protocol-dup-param-names"></a><h3>tp_connection_manager_protocol_dup_param_names ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **            tp_connection_manager_protocol_dup_param_names
                                                         (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *protocol</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_protocol_dup_param_names</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 Returns a list of parameter names supported by this connection manager
 for this protocol.
@@ -1173,7 +1138,7 @@ The result is copied and must be freed by the caller with <a href="http://librar
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> of protocol names. <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GObject.Strv][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> of protocol names. <span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1186,6 +1151,10 @@ The result is copied and must be freed by the caller with <a href="http://librar
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_connection_manager_protocol_has_param
                                                         (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *protocol</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *param</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_protocol_has_param</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 
 </p>
@@ -1215,6 +1184,10 @@ The result is copied and must be freed by the caller with <a href="http://librar
 <pre class="programlisting">const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam"><span class="returnvalue">TpConnectionManagerParam</span></a> * tp_connection_manager_protocol_get_param
                                                         (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *protocol</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *param</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_protocol_get_param</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 
 </p>
@@ -1231,7 +1204,7 @@ The result is copied and must be freed by the caller with <a href="http://librar
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a structure representing the parameter <em class="parameter"><code>param</code></em>, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if not
+<td>a structure representing the parameter <em class="parameter"><code>param</code></em>, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not
 supported</td>
 </tr>
 </tbody>
@@ -1242,45 +1215,23 @@ supported</td>
 <div class="refsect2">
 <a name="TpConnectionManagerParam-struct"></a><h3>struct TpConnectionManagerParam</h3>
 <pre class="programlisting">struct TpConnectionManagerParam {
-  gchar *name;
-  gchar *dbus_signature;
-  GValue default_value;
-  guint flags;
-
-  gpointer priv;
 };
 </pre>
 <p>
 Structure representing a connection manager parameter.
 </p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="TpConnectionManagerParam-struct.name"></a>name</code></em>;</span></p></td>
-<td>The name of this parameter</td>
-</tr>
-<tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="TpConnectionManagerParam-struct.dbus-signature"></a>dbus_signature</code></em>;</span></p></td>
-<td>This parameter's D-Bus signature</td>
-</tr>
-<tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> <em class="structfield"><code><a name="TpConnectionManagerParam-struct.default-value"></a>default_value</code></em>;</span></p></td>
-<td>This parameter's default value, or an arbitrary value
-of an appropriate type if <a class="link" href="telepathy-glib-enums.html#TP-CONN-MGR-PARAM-FLAG-HAS-DEFAULT:CAPS"><code class="literal">TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT</code></a> is not
-set on this parameter, or an unset GValue if the signature is not
-recognised by telepathy-glib</td>
-</tr>
-<tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> <em class="structfield"><code><a name="TpConnectionManagerParam-struct.flags"></a>flags</code></em>;</span></p></td>
-<td>This parameter's flags (a combination of <a class="link" href="telepathy-glib-enums.html#TpConnMgrParamFlags" title="enum TpConnMgrParamFlags"><span class="type">TpConnMgrParamFlags</span></a>)</td>
-</tr>
-<tr>
-<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> <em class="structfield"><code><a name="TpConnectionManagerParam-struct.priv"></a>priv</code></em>;</span></p></td>
-<td>Pointer to opaque private data</td>
-</tr>
-</tbody>
-</table></div>
+<p>
+Since 0.19.1, accessing the fields of this struct is deprecated,
+and they are no longer documented here.
+Use the accessors <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-get-name" title="tp_connection_manager_param_get_name ()"><code class="function">tp_connection_manager_param_get_name()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-get-dbus-signature" title="tp_connection_manager_param_get_dbus_signature ()"><code class="function">tp_connection_manager_param_get_dbus_signature()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-is-required" title="tp_connection_manager_param_is_required ()"><code class="function">tp_connection_manager_param_is_required()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-is-required-for-registration" title="tp_connection_manager_param_is_required_for_registration ()"><code class="function">tp_connection_manager_param_is_required_for_registration()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-is-secret" title="tp_connection_manager_param_is_secret ()"><code class="function">tp_connection_manager_param_is_secret()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-is-dbus-property" title="tp_connection_manager_param_is_dbus_property ()"><code class="function">tp_connection_manager_param_is_dbus_property()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-get-default" title="tp_connection_manager_param_get_default ()"><code class="function">tp_connection_manager_param_get_default()</code></a>,
+<a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-param-dup-default-variant" title="tp_connection_manager_param_dup_default_variant ()"><code class="function">tp_connection_manager_param_dup_default_variant()</code></a> instead.
+</p>
 <p class="since">Since 0.7.1</p>
 </div>
 <hr>
@@ -1466,6 +1417,35 @@ type and value are written</td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="tp-connection-manager-param-dup-default-variant"></a><h3>tp_connection_manager_param_dup_default_variant ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#GVariant"><span class="returnvalue">GVariant</span></a> *          tp_connection_manager_param_dup_default_variant
+                                                        (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerParam"><span class="type">TpConnectionManagerParam</span></a> *param</code></em>);</pre>
+<p>
+Get the default value for this parameter.
+</p>
+<p>
+Use <a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-get-type"><code class="function">g_variant_get_type()</code></a> to check that the type is what you expect.
+For instance, a string parameter should have type
+<a href="http://library.gnome.org/devel/glib/unstable/glib-GVariantType.html#G-VARIANT-TYPE-STRING:CAPS"><code class="literal">G_VARIANT_TYPE_STRING</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>param</code></em> :</span></p></td>
+<td>a parameter supported by a <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager"><span class="type">TpConnectionManager</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>the default value, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if there is no default</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.19.0</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="tp-connection-manager-check-valid-name"></a><h3>tp_connection_manager_check_valid_name ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_connection_manager_check_valid_name
                                                         (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
@@ -1587,6 +1567,10 @@ Frees <em class="parameter"><code>param</code></em>, which was copied with <a cl
 <a name="tp-connection-manager-protocol-copy"></a><h3>tp_connection_manager_protocol_copy ()</h3>
 <pre class="programlisting"><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="returnvalue">TpConnectionManagerProtocol</span></a> * tp_connection_manager_protocol_copy
                                                         (<em class="parameter"><code>const <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *in</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_protocol_copy</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 
 </p>
@@ -1611,6 +1595,10 @@ Frees <em class="parameter"><code>param</code></em>, which was copied with <a cl
 <div class="refsect2">
 <a name="tp-connection-manager-protocol-free"></a><h3>tp_connection_manager_protocol_free ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                tp_connection_manager_protocol_free (<em class="parameter"><code><a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManagerProtocol"><span class="type">TpConnectionManagerProtocol</span></a> *proto</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_connection_manager_protocol_free</code> is deprecated and should not be used in newly-written code. 0.19.1, use <a class="link" href="telepathy-glib-protocol.html#TpProtocol"><span class="type">TpProtocol</span></a> objects instead</p>
+</div>
 <p>
 Frees <em class="parameter"><code>proto</code></em>, which was copied with <a class="link" href="telepathy-glib-connection-manager.html#tp-connection-manager-protocol-copy" title="tp_connection_manager_protocol_copy ()"><code class="function">tp_connection_manager_protocol_copy()</code></a>.
 </p>
@@ -1645,12 +1633,12 @@ succeeds or fails.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out_Parameters</code></em> :</span></p></td>
-<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>: &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           An array of structs representing possible parameters.</td>
+<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>: &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;           An array of structs representing possible parameters.</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
 <td>
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error on failure</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error on failure</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
@@ -1700,28 +1688,28 @@ default</td>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td>called when the method call succeeds or fails;
-may be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> to make a "fire and forget" call with no
+may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to make a "fire and forget" call with no
 reply tracking</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td>user-supplied data passed to the callback;
-must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td>called with the user_data as argument, after the
 call has succeeded, failed or been cancelled;
-must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be
 weakly referenced; if it is destroyed, this call
-will automatically be cancelled. Must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if
-<em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+will automatically be cancelled. Must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if
+<em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
@@ -1779,12 +1767,12 @@ Get a list of the parameters which may be specified in the         &lt;tp:dbus-r
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return errors if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return errors if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
 is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, set before re-entering
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set before re-entering
 the main loop, to point to a <a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#GMainLoop"><span class="type">GMainLoop</span></a>
 which can be used to cancel this call with
 <a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit"><code class="function">g_main_loop_quit()</code></a>, causing a return of
@@ -1820,12 +1808,12 @@ succeeds or fails.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out_Protocols</code></em> :</span></p></td>
-<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>: The keys of the &lt;tp:member-ref&gt;Protocols&lt;/tp:member-ref&gt; map.</td>
+<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>: The keys of the &lt;tp:member-ref&gt;Protocols&lt;/tp:member-ref&gt; map.</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
 <td>
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error on failure</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error on failure</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
@@ -1870,28 +1858,28 @@ default</td>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td>called when the method call succeeds or fails;
-may be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> to make a "fire and forget" call with no
+may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to make a "fire and forget" call with no
 reply tracking</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td>user-supplied data passed to the callback;
-must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td>called with the user_data as argument, after the
 call has succeeded, failed or been cancelled;
-must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be
 weakly referenced; if it is destroyed, this call
-will automatically be cancelled. Must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if
-<em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+will automatically be cancelled. Must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if
+<em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
@@ -1944,12 +1932,12 @@ Get a list of protocol identifiers that are implemented by this         connecti
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return errors if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return errors if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
 is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, set before re-entering
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set before re-entering
 the main loop, to point to a <a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#GMainLoop"><span class="type">GMainLoop</span></a>
 which can be used to cancel this call with
 <a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit"><code class="function">g_main_loop_quit()</code></a>, causing a return of
@@ -1986,16 +1974,16 @@ succeeds or fails.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out_Bus_Name</code></em> :</span></p></td>
-<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>: A D-Bus service name where the new Connection object can be found</td>
+<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>: A D-Bus service name where the new Connection object can be found</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>out_Object_Path</code></em> :</span></p></td>
-<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>: The D-Bus object path to the Connection on this service</td>
+<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>: The D-Bus object path to the Connection on this service</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
 <td>
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error on failure</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on success, or an error on failure</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
@@ -2050,28 +2038,28 @@ default</td>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td>called when the method call succeeds or fails;
-may be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> to make a "fire and forget" call with no
+may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to make a "fire and forget" call with no
 reply tracking</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
 <td>user-supplied data passed to the callback;
-must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td>called with the user_data as argument, after the
 call has succeeded, failed or been cancelled;
-must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, a <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be
 weakly referenced; if it is destroyed, this call
-will automatically be cancelled. Must be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if
-<em class="parameter"><code>callback</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+will automatically be cancelled. Must be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if
+<em class="parameter"><code>callback</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
@@ -2139,12 +2127,12 @@ state.
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return errors if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to return errors if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
 is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>loop</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, set before re-entering
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set before re-entering
 the main loop, to point to a <a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#GMainLoop"><span class="type">GMainLoop</span></a>
 which can be used to cancel this call with
 <a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit"><code class="function">g_main_loop_quit()</code></a>, causing a return of
@@ -2238,7 +2226,7 @@ received</td>
 <td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
 <td>Destructor for the user-supplied data, which
 will be called when this signal is disconnected, or
-before this function returns <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>
+before this function returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
@@ -2249,14 +2237,14 @@ disconnected</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>If not <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to raise an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to raise an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is
 returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
 above, which can be used to disconnect the signal; or
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the proxy does not have the desired interface
 or has become invalid.</td>
 </tr>
 </tbody>
@@ -2276,8 +2264,22 @@ even if we already have its info from a .manager file. Default <a href="http://l
 </div>
 <hr>
 <div class="refsect2">
+<a name="TpConnectionManager--cm-name"></a><h3>The <code class="literal">"cm-name"</code> property</h3>
+<pre class="programlisting">  "cm-name"                  <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read</pre>
+<p>
+The name of the connection manager, e.g. "gabble" (read-only).
+</p>
+<p>Default value: NULL</p>
+<p class="since">Since 0.19.3</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="TpConnectionManager--connection-manager"></a><h3>The <code class="literal">"connection-manager"</code> property</h3>
 <pre class="programlisting">  "connection-manager"       <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">TpConnectionManager:connection-manager</code> is deprecated and should not be used in newly-written code. Use <a class="link" href="telepathy-glib-connection-manager.html#TpConnectionManager--cm-name" title='The "cm-name" property'><span class="type">"cm-name"</span></a> instead.</p>
+</div>
 <p>
 The name of the connection manager, e.g. "gabble" (read-only).
 </p>
@@ -2307,7 +2309,7 @@ for historical reasons.)
 <a name="TpConnectionManager--manager-file"></a><h3>The <code class="literal">"manager-file"</code> property</h3>
 <pre class="programlisting">  "manager-file"             <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read / Write / Construct</pre>
 <p>
-The absolute path of the .manager file. If set to <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> (the default),
+The absolute path of the .manager file. If set to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (the default),
 the XDG data directories will be searched for a .manager file of the
 correct name.
 </p>

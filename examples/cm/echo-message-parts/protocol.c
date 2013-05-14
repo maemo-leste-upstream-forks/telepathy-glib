@@ -21,11 +21,6 @@ G_DEFINE_TYPE_WITH_CODE (ExampleEcho2Protocol, example_echo_2_protocol,
     TP_TYPE_BASE_PROTOCOL,
     G_IMPLEMENT_INTERFACE (TP_TYPE_PROTOCOL_ADDRESSING, addressing_iface_init))
 
-const gchar * const protocol_interfaces[] = {
-  TP_IFACE_PROTOCOL_INTERFACE_AVATARS,
-  TP_IFACE_PROTOCOL_INTERFACE_ADDRESSING,
-  NULL };
-
 const gchar * const supported_avatar_mime_types[] = {
   "image/png",
   "image/jpeg",
@@ -77,7 +72,7 @@ new_connection (TpBaseProtocol *protocol,
 
   if (account == NULL || account[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "The 'account' parameter is required");
       return NULL;
     }
@@ -96,7 +91,7 @@ example_echo_2_protocol_normalize_contact (const gchar *id, GError **error)
 {
   if (id[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "ID must not be empty");
       return NULL;
     }
@@ -122,15 +117,23 @@ identify_account (TpBaseProtocol *self G_GNUC_UNUSED,
   if (account != NULL)
     return g_strdup (account);
 
-  g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+  g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
       "'account' parameter not given");
   return NULL;
 }
 
-static GStrv
-get_interfaces (TpBaseProtocol *self)
+static GPtrArray *
+get_interfaces_array (TpBaseProtocol *self)
 {
-  return g_strdupv ((GStrv) protocol_interfaces);
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_PROTOCOL_CLASS (
+      example_echo_2_protocol_parent_class)->get_interfaces_array (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_PROTOCOL_INTERFACE_AVATARS);
+  g_ptr_array_add (interfaces, TP_IFACE_PROTOCOL_INTERFACE_ADDRESSING);
+
+  return interfaces;
 }
 
 static void
@@ -235,7 +238,7 @@ example_echo_2_protocol_class_init (
 
   base_class->normalize_contact = normalize_contact;
   base_class->identify_account = identify_account;
-  base_class->get_interfaces = get_interfaces;
+  base_class->get_interfaces_array = get_interfaces_array;
   base_class->get_connection_details = get_connection_details;
   base_class->get_avatar_details = get_avatar_details;
 }

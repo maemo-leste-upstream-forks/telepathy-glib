@@ -60,7 +60,7 @@
  * url="http://cgit.freedesktop.org/telepathy/telepathy-glib/tree/examples/client/dbus-tubes/">examples/client/dbus-tubes</ulink>
  * directory.
  *
- * Since: 0.15.6
+ * Since: 0.18.0
  */
 
 /**
@@ -68,7 +68,7 @@
  *
  * Data structure representing a #TpDBusTubeChannel.
  *
- * Since: 0.15.6
+ * Since: 0.18.0
  */
 
 /**
@@ -76,7 +76,7 @@
  *
  * The class of a #TpDBusTubeChannel.
  *
- * Since: 0.15.6
+ * Since: 0.18.0
  */
 
 #include "config.h"
@@ -95,7 +95,9 @@
 
 #define DEBUG_FLAG TP_DEBUG_CHANNEL
 #include "telepathy-glib/automatic-client-factory-internal.h"
+#include "telepathy-glib/channel-internal.h"
 #include "telepathy-glib/debug-internal.h"
+#include "telepathy-glib/variant-util-internal.h"
 
 #include <stdio.h>
 #include <glib/gstdio.h>
@@ -114,7 +116,8 @@ struct _TpDBusTubeChannelPrivate
 enum
 {
   PROP_SERVICE_NAME = 1,
-  PROP_PARAMETERS
+  PROP_PARAMETERS,
+  PROP_PARAMETERS_VARDICT
 };
 
 static void
@@ -147,6 +150,11 @@ tp_dbus_tube_channel_get_property (GObject *object,
 
       case PROP_PARAMETERS:
         g_value_set_boxed (value, self->priv->parameters);
+        break;
+
+      case PROP_PARAMETERS_VARDICT:
+        g_value_take_variant (value,
+            tp_dbus_tube_channel_dup_parameters_vardict (self));
         break;
 
       default:
@@ -276,7 +284,7 @@ tp_dbus_tube_channel_constructed (GObject *obj)
       return;
     }
 
-  props = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  props = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
 
   if (tp_asv_get_string (props, TP_PROP_CHANNEL_TYPE_DBUS_TUBE_SERVICE_NAME)
       == NULL)
@@ -411,7 +419,7 @@ tp_dbus_tube_channel_class_init (TpDBusTubeChannelClass *klass)
    *
    * A string representing the service name that will be used over the tube.
    *
-   * Since: 0.15.6
+   * Since: 0.18.0
    */
   param_spec = g_param_spec_string ("service-name", "Service Name",
       "The service name of the dbus tube",
@@ -427,13 +435,33 @@ tp_dbus_tube_channel_class_init (TpDBusTubeChannelClass *klass)
    *
    * Will be %NULL for outgoing tubes until the tube has been offered.
    *
-   * Since: 0.15.6
+   * In high-level language bindings, use
+   * tp_dbus_tube_channel_dup_parameters_vardict() to get the same information
+   * in a more convenient format.
+   *
+   * Since: 0.18.0
    */
   param_spec = g_param_spec_boxed ("parameters", "Parameters",
       "The parameters of the dbus tube",
       TP_HASH_TYPE_STRING_VARIANT_MAP,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (gobject_class, PROP_PARAMETERS, param_spec);
+
+  /**
+   * TpDBusTubeChannel:parameters-vardict:
+   *
+   * A %G_VARIANT_TYPE_VARDICT representing the parameters of the tube.
+   *
+   * Will be %NULL for outgoing tubes until the tube has been offered.
+   *
+   * Since: 0.19.10
+   */
+  param_spec = g_param_spec_variant ("parameters-vardict", "Parameters",
+      "The parameters of the D-Bus tube",
+      G_VARIANT_TYPE_VARDICT, NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (gobject_class, PROP_PARAMETERS_VARDICT,
+      param_spec);
 
   g_type_class_add_private (gobject_class, sizeof (TpDBusTubeChannelPrivate));
 }
@@ -481,14 +509,14 @@ _tp_dbus_tube_channel_new_with_factory (
  *
  * Returns: (transfer none): the value of #TpDBusTubeChannel:service-name
  *
- * Since: 0.15.6
+ * Since: 0.18.0
  */
 const gchar *
 tp_dbus_tube_channel_get_service_name (TpDBusTubeChannel *self)
 {
   GHashTable *props;
 
-  props = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  props = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
 
   return tp_asv_get_string (props, TP_PROP_CHANNEL_TYPE_DBUS_TUBE_SERVICE_NAME);
 }
@@ -502,12 +530,42 @@ tp_dbus_tube_channel_get_service_name (TpDBusTubeChannel *self)
  * Returns: (transfer none) (element-type utf8 GObject.Value):
  * the value of #TpDBusTubeChannel:parameters
  *
- * Since: 0.15.6
+ * Since: 0.18.0
  */
 GHashTable *
 tp_dbus_tube_channel_get_parameters (TpDBusTubeChannel *self)
 {
   return self->priv->parameters;
+}
+
+/**
+ * tp_dbus_tube_channel_dup_parameters_vardict:
+ * @self: a #TpDBusTubeChannel
+ *
+ * Return the parameters of the dbus-tube channel in a variant of
+ * type %G_VARIANT_TYPE_VARDICT whose keys are strings representing
+ * parameter names and values are variants representing corresponding
+ * parameter values set by the offerer when offering this channel.
+ *
+ * The GVariant returned is %NULL if this is an outgoing tube that has not
+ * yet been offered or the parameters property has not been set.
+ *
+ * Use g_variant_lookup(), g_variant_lookup_value(), or tp_vardict_get_uint32()
+ * and similar functions for convenient access to the values.
+ *
+ * Returns: (transfer full): a new reference to a #GVariant
+ *
+ * Since: 0.19.10
+ */
+GVariant *
+tp_dbus_tube_channel_dup_parameters_vardict (TpDBusTubeChannel *self)
+{
+  g_return_val_if_fail (TP_IS_DBUS_TUBE_CHANNEL (self), NULL);
+
+  if (self->priv->parameters == NULL)
+      return NULL;
+
+  return _tp_asv_to_vardict (self->priv->parameters);
 }
 
 /**
@@ -569,7 +627,7 @@ proxy_prepare_offer_cb (GObject *source,
 
   if (self->priv->state != TP_TUBE_CHANNEL_STATE_NOT_OFFERED)
     {
-      g_simple_async_result_set_error (self->priv->result, TP_ERRORS,
+      g_simple_async_result_set_error (self->priv->result, TP_ERROR,
           TP_ERROR_INVALID_ARGUMENT, "Tube is not in the NotOffered state");
       complete_operation (self);
       goto out;
@@ -582,6 +640,7 @@ proxy_prepare_offer_cb (GObject *source,
     self->priv->parameters = tp_asv_new (NULL, NULL);
 
   g_object_notify (G_OBJECT (self), "parameters");
+  g_object_notify (G_OBJECT (self), "parameters-vardict");
 
   /* TODO: provide a way to use TP_SOCKET_ACCESS_CONTROL_LOCALHOST if you're in
    * an environment where you need to disable authentication. tp-glib can't
@@ -694,7 +753,7 @@ proxy_prepare_accept_cb (GObject *source,
 
   if (self->priv->state != TP_TUBE_CHANNEL_STATE_LOCAL_PENDING)
     {
-      g_simple_async_result_set_error (self->priv->result, TP_ERRORS,
+      g_simple_async_result_set_error (self->priv->result, TP_ERROR,
           TP_ERROR_INVALID_ARGUMENT, "Tube is not in the LocalPending state");
       complete_operation (self);
       return;

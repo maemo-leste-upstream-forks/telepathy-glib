@@ -21,6 +21,10 @@
 #include <telepathy-glib/svc-channel.h>
 #include <telepathy-glib/svc-generic.h>
 
+/* This is for text-mixin unit tests, others should be using ExampleEcho2Channel
+ * which uses newer TpMessageMixin */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
 static void text_iface_init (gpointer iface, gpointer data);
 static void password_iface_init (gpointer iface, gpointer data);
 
@@ -34,10 +38,17 @@ G_DEFINE_TYPE_WITH_CODE (TpTestsTextChannelGroup,
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_DBUS_PROPERTIES,
       tp_dbus_properties_mixin_iface_init))
 
-static const char *text_channel_group_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_GROUP,
-    TP_IFACE_CHANNEL_INTERFACE_PASSWORD,
-    NULL
+static GPtrArray *
+text_channel_group_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (
+      tp_tests_text_channel_group_parent_class)->get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_GROUP);
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_PASSWORD);
+  return interfaces;
 };
 
 /* type definition stuff */
@@ -72,7 +83,8 @@ add_member (GObject *obj,
 
   tp_intset_add (add, handle);
   tp_group_mixin_change_members (obj, message, add, NULL, NULL, NULL,
-      self->conn->self_handle, TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
+      tp_base_connection_get_self_handle (self->conn),
+      TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
   tp_intset_destroy (add);
 
   return TRUE;
@@ -151,7 +163,8 @@ constructor (GType type,
   flags |= TP_CHANNEL_GROUP_FLAG_CAN_ADD;
 
   tp_group_mixin_init (object, G_STRUCT_OFFSET (TpTestsTextChannelGroup, group),
-      contact_repo, self->conn->self_handle);
+      contact_repo,
+      tp_base_connection_get_self_handle (self->conn));
 
   if (!self->priv->detailed)
     {
@@ -271,7 +284,7 @@ tp_tests_text_channel_group_class_init (TpTestsTextChannelGroupClass *klass)
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_TEXT;
   base_class->target_handle_type = TP_HANDLE_TYPE_NONE;
-  base_class->interfaces = text_channel_group_interfaces;
+  base_class->get_interfaces = text_channel_group_get_interfaces;
   base_class->close = channel_close;
 
   param_spec = g_param_spec_boolean ("detailed",
@@ -333,7 +346,8 @@ tp_tests_text_channel_group_join (TpTestsTextChannelGroup *self)
   TpIntset *add, *empty;
 
  /* Add ourself as a member */
-  add = tp_intset_new_containing (self->conn->self_handle);
+  add = tp_intset_new_containing (
+      tp_base_connection_get_self_handle (self->conn));
   empty = tp_intset_new ();
 
   tp_group_mixin_change_members ((GObject *) self, NULL, add, empty,
@@ -403,3 +417,5 @@ password_iface_init (gpointer iface, gpointer data)
   IMPLEMENT (provide_password);
 #undef IMPLEMENT
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS

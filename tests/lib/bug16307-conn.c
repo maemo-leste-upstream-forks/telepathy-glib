@@ -78,14 +78,16 @@ pretend_connected (gpointer data)
   TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (conn,
       TP_HANDLE_TYPE_CONTACT);
   gchar *account;
+  TpHandle self_handle;
 
   g_object_get (self, "account", &account, NULL);
 
-  conn->self_handle = tp_handle_ensure (contact_repo, account,
+  self_handle = tp_handle_ensure (contact_repo, account,
       NULL, NULL);
 
   g_free (account);
 
+  tp_base_connection_set_self_handle (conn, self_handle);
   tp_base_connection_change_status (conn, TP_CONNECTION_STATUS_CONNECTED,
       TP_CONNECTION_STATUS_REASON_REQUESTED);
 
@@ -117,16 +119,8 @@ tp_tests_bug16307_connection_inject_get_status_return (TpTestsBug16307Connection
   context = self->priv->get_status_invocation;
   g_assert (context != NULL);
 
-  if (self_base->status == TP_INTERNAL_CONNECTION_STATUS_NEW)
-    {
-      tp_svc_connection_return_from_get_status (
-          context, TP_CONNECTION_STATUS_DISCONNECTED);
-    }
-  else
-    {
-      tp_svc_connection_return_from_get_status (
-          context, self_base->status);
-    }
+  tp_svc_connection_return_from_get_status (context,
+      tp_base_connection_get_status (self_base));
 
   self->priv->get_status_invocation = NULL;
 }
@@ -141,18 +135,28 @@ start_connecting (TpBaseConnection *conn,
   return TRUE;
 }
 
+static GPtrArray *
+get_interfaces_always_present (TpBaseConnection *base)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CONNECTION_CLASS (
+      tp_tests_bug16307_connection_parent_class)->get_interfaces_always_present (base);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CONNECTION_INTERFACE_ALIASING);
+  g_ptr_array_add (interfaces, TP_IFACE_CONNECTION_INTERFACE_CAPABILITIES);
+  g_ptr_array_add (interfaces, TP_IFACE_CONNECTION_INTERFACE_PRESENCE);
+  g_ptr_array_add (interfaces, TP_IFACE_CONNECTION_INTERFACE_AVATARS);
+
+  return interfaces;
+}
+
 static void
 tp_tests_bug16307_connection_class_init (TpTestsBug16307ConnectionClass *klass)
 {
   TpBaseConnectionClass *base_class =
       (TpBaseConnectionClass *) klass;
   GObjectClass *object_class = (GObjectClass *) klass;
-  static const gchar *interfaces_always_present[] = {
-      TP_IFACE_CONNECTION_INTERFACE_ALIASING,
-      TP_IFACE_CONNECTION_INTERFACE_CAPABILITIES,
-      TP_IFACE_CONNECTION_INTERFACE_PRESENCE,
-      TP_IFACE_CONNECTION_INTERFACE_AVATARS,
-      NULL };
   static TpDBusPropertiesMixinPropImpl connection_properties[] = {
       { "Status", "dbus-status-except-i-broke-it", NULL },
       { NULL }
@@ -163,7 +167,7 @@ tp_tests_bug16307_connection_class_init (TpTestsBug16307ConnectionClass *klass)
 
   base_class->start_connecting = start_connecting;
 
-  base_class->interfaces_always_present = interfaces_always_present;
+  base_class->get_interfaces_always_present = get_interfaces_always_present;
 
   signals[SIGNAL_GET_STATUS_RECEIVED] = g_signal_new ("get-status-received",
       G_OBJECT_CLASS_TYPE (klass),
@@ -194,8 +198,8 @@ tp_tests_bug16307_connection_get_status (TpSvcConnection *iface,
   TpTestsBug16307Connection *self = TP_TESTS_BUG16307_CONNECTION (iface);
 
   /* auto-connect on get_status */
-  if ((self_base->status == TP_INTERNAL_CONNECTION_STATUS_NEW ||
-       self_base->status == TP_CONNECTION_STATUS_DISCONNECTED))
+  if (tp_base_connection_get_status (self_base) ==
+      TP_CONNECTION_STATUS_DISCONNECTED)
     {
       pretend_connected (self);
     }

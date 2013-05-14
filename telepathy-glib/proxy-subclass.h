@@ -23,6 +23,8 @@
 #ifndef __TP_PROXY_SUBCLASS_H__
 #define __TP_PROXY_SUBCLASS_H__
 
+#define _TP_IN_META_HEADER
+
 #include <telepathy-glib/proxy.h>
 
 G_BEGIN_DECLS
@@ -61,7 +63,14 @@ typedef void (*TpProxyInterfaceAddedCb) (TpProxy *self,
 void tp_proxy_or_subclass_hook_on_interface_add (GType proxy_or_subclass,
     TpProxyInterfaceAddedCb callback);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_proxy_get_interface_by_id)
 DBusGProxy *tp_proxy_borrow_interface_by_id (TpProxy *self, GQuark iface,
+    GError **error);
+#endif
+
+_TP_AVAILABLE_IN_0_20
+DBusGProxy *tp_proxy_get_interface_by_id (TpProxy *self, GQuark iface,
     GError **error);
 
 DBusGProxy *tp_proxy_add_interface_by_id (TpProxy *self, GQuark iface);
@@ -77,5 +86,7 @@ gboolean tp_proxy_dbus_g_proxy_claim_for_signal_adding (DBusGProxy *proxy);
 void tp_proxy_init_known_interfaces (void);
 
 G_END_DECLS
+
+#undef _TP_IN_META_HEADER
 
 #endif /* #ifndef __TP_PROXY_SUBCLASS_H__*/

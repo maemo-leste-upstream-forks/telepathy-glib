@@ -1,3 +1,4 @@
+/*<private_header>*/
 /*
  * TpChannel - proxy for a Telepathy channel (internals)
  *
@@ -88,9 +89,10 @@ struct _TpChannelPrivate {
     GHashTable *group_contact_owners;
     gboolean cm_too_old_for_contacts;
 
+    /* Queue of GSimpleAsyncResult with ContactsQueueItem payload */
     GQueue *contacts_queue;
     /* Item currently being prepared, not part of contacts_queue anymore */
-    ContactsQueueItem *current_item;
+    GSimpleAsyncResult *current_contacts_queue_result;
 
     /* NULL, or TpHandle => TpChannelChatState;
      * if non-NULL, we're watching for ChatStateChanged */
@@ -115,6 +117,7 @@ void _tp_channel_continue_introspection (TpChannel *self);
 void _tp_channel_abort_introspection (TpChannel *self,
     const gchar *debug,
     const GError *error);
+GHashTable *_tp_channel_get_immutable_properties (TpChannel *self);
 
 /* channel-group.c internals */
 

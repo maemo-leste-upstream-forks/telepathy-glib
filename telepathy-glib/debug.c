@@ -53,6 +53,9 @@
  *     #TpAccount objects (client)</listitem>
  * <listitem><literal>contact-lists</literal> - the #TpBaseContactList
  *    (service)</listitem>
+ * <listitem><literal>debugger</literal> - #TpDebugClient objects</listitem>
+ * <listitem><literal>tls</literal> - #TpTLSCertificate objects
+ *     (client)</listitem>
  * <listitem><literal>all</literal> - all of the above</listitem>
  * </itemizedlist>
  */
@@ -115,6 +118,8 @@ static GDebugKey keys[] = {
   { "sasl",          TP_DEBUG_SASL },
   { "room-config",   TP_DEBUG_ROOM_CONFIG },
   { "call",          TP_DEBUG_CALL },
+  { "debugger",      TP_DEBUG_DEBUGGER },
+  { "tls",           TP_DEBUG_TLS },
   { 0, }
 };
 
@@ -148,6 +153,8 @@ static DebugKeyToDomain key_to_domain[] = {
   { TP_DEBUG_CONTACT_LISTS, G_LOG_DOMAIN "/contact-lists" },
   { TP_DEBUG_SASL,       G_LOG_DOMAIN "/sasl" },
   { TP_DEBUG_ROOM_CONFIG, G_LOG_DOMAIN "/room-config" },
+  { TP_DEBUG_DEBUGGER,   G_LOG_DOMAIN "/debugger" },
+  { TP_DEBUG_TLS,        G_LOG_DOMAIN "/tls" },
   { 0, NULL }
 };
 

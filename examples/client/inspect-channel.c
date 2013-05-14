@@ -64,18 +64,20 @@ channel_ready_cb (GObject *source,
   if (tp_proxy_has_interface_by_id (channel,
         TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP))
     {
-      const TpIntset *members = tp_channel_group_get_members (channel);
-      TpIntsetFastIter group_iter;
-      TpHandle member;
+      GPtrArray *members = tp_channel_group_dup_members_contacts (channel);
+      guint i;
 
       printf ("Group members:\n");
 
-      tp_intset_fast_iter_init (&group_iter, members);
-
-      while (tp_intset_fast_iter_next (&group_iter, &member))
+      for (i = 0; i < members->len; i++)
         {
-          printf ("\tcontact #%u\n", member);
+          TpContact *member = g_ptr_array_index (members, i);
+
+          printf ("\tcontact #%u %s\n",
+              tp_contact_get_handle (member),
+              tp_contact_get_identifier (member));
         }
+      g_ptr_array_unref (members);
     }
 
   data->exit_status = 0;
@@ -89,6 +91,7 @@ connection_ready_cb (GObject *source,
 {
   InspectChannelData *data = user_data;
   GError *error = NULL;
+  TpSimpleClientFactory *factory;
   TpConnection *connection = TP_CONNECTION (source);
   TpChannel *channel = NULL;
 
@@ -102,8 +105,9 @@ connection_ready_cb (GObject *source,
       return;
     }
 
-  channel = tp_channel_new (connection, data->object_path, NULL,
-      TP_UNKNOWN_HANDLE_TYPE, 0, &error);
+  factory = tp_proxy_get_factory (connection);
+  channel = tp_simple_client_factory_ensure_channel (factory, connection,
+      data->object_path, NULL, &error);
 
   if (channel == NULL)
     {
@@ -128,8 +132,7 @@ main (int argc,
       char **argv)
 {
   InspectChannelData data = { 1, NULL, NULL };
-  const gchar *conn_name;
-  TpDBusDaemon *dbus = NULL;
+  TpSimpleClientFactory *factory;
   TpConnection *connection = NULL;
   GError *error = NULL;
 
@@ -139,30 +142,15 @@ main (int argc,
   if (argc < 3)
     {
       fputs ("Usage:\n"
-          "    telepathy-example-inspect-channel CONN OBJECT_PATH\n"
-          "CONN may either be a connection's well-known bus name or object\n"
-          "path.\n",
+          "    telepathy-example-inspect-channel CONN_PATH CHANNEL_PATH\n",
           stderr);
       return 2;
     }
 
-  conn_name = argv[1];
   data.object_path = argv[2];
-
-  dbus = tp_dbus_daemon_dup (&error);
-
-  if (dbus == NULL)
-    {
-      g_warning ("%s", error->message);
-      g_error_free (error);
-      data.exit_status = 1;
-      goto out;
-    }
-
-  if (conn_name[0] == '/')
-    connection = tp_connection_new (dbus, NULL, conn_name, &error);
-  else
-    connection = tp_connection_new (dbus, conn_name, NULL, &error);
+  factory = tp_simple_client_factory_new (NULL);
+  connection = tp_simple_client_factory_ensure_connection (factory,
+      argv[1], NULL, &error);
 
   if (connection == NULL)
     {
@@ -183,14 +171,13 @@ main (int argc,
   g_main_loop_run (data.main_loop);
 
 out:
-  if (dbus != NULL)
-    g_object_unref (dbus);
-
   if (data.main_loop != NULL)
     g_main_loop_unref (data.main_loop);
 
   if (connection != NULL)
     g_object_unref (connection);
+
+  g_object_unref (factory);
 
   return data.exit_status;
 }

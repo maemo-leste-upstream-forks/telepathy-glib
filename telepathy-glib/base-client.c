@@ -191,6 +191,7 @@
 #include <telepathy-glib/channel-request.h>
 #include <telepathy-glib/channel.h>
 #include <telepathy-glib/dbus-internal.h>
+#include <telepathy-glib/gtypes.h>
 #include <telepathy-glib/handle-channels-context-internal.h>
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/observe-channels-context-internal.h>
@@ -199,10 +200,12 @@
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG TP_DEBUG_CLIENT
+#include "telepathy-glib/connection-internal.h"
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/deprecated-internal.h"
 #include "telepathy-glib/simple-client-factory-internal.h"
 #include "telepathy-glib/util-internal.h"
+#include "telepathy-glib/variant-util-internal.h"
 
 static void observer_iface_init (gpointer, gpointer);
 static void approver_iface_init (gpointer, gpointer);
@@ -407,6 +410,43 @@ tp_base_client_take_observer_filter (TpBaseClient *self,
 }
 
 /**
+ * tp_base_client_add_observer_filter_vardict:
+ * @self: a client
+ * @filter: (transfer none): a variant of type %G_VARIANT_TYPE_VARDICT
+ *
+ * Register a new channel class as Observer.ObserverChannelFilter.
+ * The #TpBaseClientClass.observe_channels virtual method will be called
+ * whenever a new channel's properties match the ones in @filter.
+ *
+ * This method may only be called before tp_base_client_register() is
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.observe_channels.
+ *
+ * If the variant is floating (see g_variant_ref_sink()), ownership
+ * will be taken, allowing for uses like this:
+ *
+ * |[
+ * tp_base_client_add_observer_filter_vardict (client,
+ *    g_variant_new_parsed ("{ %s: <%s>, %s: <%u>, ... }",
+ *        TP_PROP_CHANNEL_CHANNEL_TYPE, TP_IFACE_CHANNEL_TYPE_TEXT,
+ *        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, (guint32) TP_HANDLE_TYPE_CONTACT,
+ *        ...));
+ * ]|
+ *
+ * Since: 0.19.10
+ */
+void
+tp_base_client_add_observer_filter_vardict (TpBaseClient *self,
+    GVariant *filter)
+{
+  g_return_if_fail (g_variant_is_of_type (filter, G_VARIANT_TYPE_VARDICT));
+
+  g_variant_ref_sink (filter);
+  tp_base_client_take_observer_filter (self, _tp_asv_from_vardict (filter));
+  g_variant_unref (filter);
+}
+
+/**
  * tp_base_client_set_observer_recover:
  * @self: a #TpBaseClient
  * @recover: the value of the Observer.Recover property
@@ -553,6 +593,36 @@ tp_base_client_take_approver_filter (TpBaseClient *self,
 }
 
 /**
+ * tp_base_client_add_approver_filter_vardict:
+ * @self: a client
+ * @filter: (transfer none): a variant of type %G_VARIANT_TYPE_VARDICT
+ *
+ * Register a new channel class as Approver.ApproverChannelFilter.
+ * The #TpBaseClientClass.add_dispatch_operation virtual method will be called
+ * whenever a new channel's properties match the ones in @filter.
+ *
+ * This method may only be called before tp_base_client_register() is
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.add_dispatch_operation.
+ *
+ * If the variant is floating (see g_variant_ref_sink()), ownership
+ * will be taken. See tp_base_client_add_observer_filter_vardict() for
+ * more details.
+ *
+ * Since: 0.19.10
+ */
+void
+tp_base_client_add_approver_filter_vardict (TpBaseClient *self,
+    GVariant *filter)
+{
+  g_return_if_fail (g_variant_is_of_type (filter, G_VARIANT_TYPE_VARDICT));
+
+  g_variant_ref_sink (filter);
+  tp_base_client_take_approver_filter (self, _tp_asv_from_vardict (filter));
+  g_variant_unref (filter);
+}
+
+/**
  * tp_base_client_be_a_handler:
  * @self: a #TpBaseClient
  *
@@ -637,6 +707,36 @@ tp_base_client_take_handler_filter (TpBaseClient *self,
 
   self->priv->flags |= CLIENT_IS_HANDLER;
   g_ptr_array_add (self->priv->handler_filters, filter);
+}
+
+/**
+ * tp_base_client_add_handler_filter_vardict:
+ * @self: a client
+ * @filter: (transfer none): a variant of type %G_VARIANT_TYPE_VARDICT
+ *
+ * Register a new channel class as Handler.HandlerChannelFilter.
+ * The #TpBaseClientClass.handle_channels virtual method will be called
+ * whenever a new channel's properties match the ones in @filter.
+ *
+ * This method may only be called before tp_base_client_register() is
+ * called, and may only be called on objects whose class implements
+ * #TpBaseClientClass.handle_channels.
+ *
+ * If the variant is floating (see g_variant_ref_sink()), ownership
+ * will be taken. See tp_base_client_add_observer_filter_vardict() for
+ * more details.
+ *
+ * Since: 0.19.10
+ */
+void
+tp_base_client_add_handler_filter_vardict (TpBaseClient *self,
+    GVariant *filter)
+{
+  g_return_if_fail (g_variant_is_of_type (filter, G_VARIANT_TYPE_VARDICT));
+
+  g_variant_ref_sink (filter);
+  tp_base_client_take_handler_filter (self, _tp_asv_from_vardict (filter));
+  g_variant_unref (filter);
 }
 
 /**
@@ -905,6 +1005,8 @@ tp_base_client_register (TpBaseClient *self,
  * #GList of #TpChannelRequest
  *
  * Since: 0.11.6
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_base_client_dup_pending_requests() instead.
  */
 GList *
 tp_base_client_get_pending_requests (TpBaseClient *self)
@@ -925,6 +1027,8 @@ tp_base_client_get_pending_requests (TpBaseClient *self)
  * handled channels
  *
  * Since: 0.11.6
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_base_client_dup_handled_channels() instead.
  */
 GList *
 tp_base_client_get_handled_channels (TpBaseClient *self)
@@ -956,6 +1060,53 @@ tp_base_client_get_handled_channels (TpBaseClient *self)
   g_hash_table_unref (set);
 
   return result;
+}
+
+/**
+ * tp_base_client_dup_pending_requests:
+ * @self: a #TpBaseClient
+ *
+ * Only works if tp_base_client_set_handler_request_notification() has been
+ * called.
+ * Returns the list of requests @self is likely be asked to handle.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.ChannelRequest): a
+ * #GList of #TpChannelRequest
+ *
+ * Since: 0.19.9
+ */
+GList *
+tp_base_client_dup_pending_requests (TpBaseClient *self)
+{
+  g_return_val_if_fail (self->priv->flags & CLIENT_IS_HANDLER, NULL);
+
+  return _tp_g_list_copy_deep (self->priv->pending_requests,
+      (GCopyFunc) g_object_ref, NULL);
+}
+
+/**
+ * tp_base_client_dup_handled_channels:
+ * @self: a #TpBaseClient
+ *
+ * Returns the set of channels currently handled by this base client or by any
+ * other #TpBaseClient with which it shares a unique name.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.Channel): the
+ * handled channels
+ *
+ * Since: 0.19.9
+ */
+GList *
+tp_base_client_dup_handled_channels (TpBaseClient *self)
+{
+  GList *ret;
+
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  ret = tp_base_client_get_handled_channels (self);
+  G_GNUC_END_IGNORE_DEPRECATIONS
+  g_list_foreach (ret, (GFunc) g_object_ref, NULL);
+
+  return ret;
 }
 
 static void
@@ -997,8 +1148,7 @@ tp_base_client_dispose (GObject *object)
   tp_clear_object (&self->priv->only_for_account);
   tp_clear_object (&self->priv->channel_factory);
 
-  g_list_foreach (self->priv->pending_requests, (GFunc) g_object_unref, NULL);
-  g_list_free (self->priv->pending_requests);
+  g_list_free_full (self->priv->pending_requests, g_object_unref);
   self->priv->pending_requests = NULL;
 
   if (self->priv->my_chans != NULL &&
@@ -1278,7 +1428,7 @@ tp_base_client_get_dbus_properties (GObject *object,
 
     case DP_HANDLED_CHANNELS:
         {
-          GList *channels = tp_base_client_get_handled_channels (self);
+          GList *channels = tp_base_client_dup_handled_channels (self);
           GList *iter;
           GPtrArray *arr = g_ptr_array_sized_new (g_list_length (channels));
 
@@ -1287,7 +1437,7 @@ tp_base_client_get_dbus_properties (GObject *object,
                 g_strdup (tp_proxy_get_object_path (iter->data)));
 
           g_value_take_boxed (value, arr);
-          g_list_free (channels);
+          g_list_free_full (channels, g_object_unref);
         }
       break;
 
@@ -1585,7 +1735,7 @@ context_prepare_cb (GObject *source,
   if (_tp_observe_channels_context_get_state (ctx) ==
       TP_OBSERVE_CHANNELS_CONTEXT_STATE_NONE)
     {
-      error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      error = g_error_new (TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Implementation of ObserveChannels in %s didn't call "
           "tp_observe_channels_context_{accept,fail,delay}",
           G_OBJECT_TYPE_NAME (self));
@@ -1660,19 +1810,87 @@ dup_features_for_channel (TpBaseClient *self,
 }
 
 static TpChannel *
-ensure_channel (TpBaseClient *self,
-    TpConnection *connection,
-    const gchar *chan_path,
-    GHashTable *chan_props,
+ensure_account_connection_channels (TpBaseClient *self,
+    const gchar *account_path,
+    const gchar *connection_path,
+    const GPtrArray *channels_arr,
+    TpAccount **account,
+    TpConnection **connection,
+    GPtrArray **channels,
     GError **error)
 {
-  /* Use legacy channel factory if one is set */
-  if (self->priv->channel_factory != NULL)
-    return tp_client_channel_factory_create_channel (
-        self->priv->channel_factory, connection, chan_path, chan_props, error);
+  TpChannel *channel = NULL;
+  guint i;
 
-  return tp_simple_client_factory_ensure_channel (self->priv->factory,
-      connection, chan_path, chan_props, error);
+  g_assert (account != NULL);
+  g_assert (connection != NULL);
+  g_assert (channels != NULL);
+
+  *account = NULL;
+  *connection = NULL;
+  *channels = NULL;
+
+  *account = tp_base_client_dup_account (self, account_path, error);
+  if (*account == NULL)
+    goto error;
+
+  *connection = tp_simple_client_factory_ensure_connection (self->priv->factory,
+      connection_path, NULL, error);
+  if (*connection == NULL)
+    goto error;
+
+  /* fdo#51444: Custom TpChannel subclasses constructors may assume that the
+   * Connection already knows its Account. If we don't do it here, it will be
+   * done only when TP_ACCOUNT_FEATURE_CORE gets prepared on the Account. */
+  _tp_connection_set_account (*connection, *account);
+
+  if (channels_arr->len == 0)
+    {
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+          "Channels should contain at least one channel");
+      goto error;
+    }
+
+  *channels = g_ptr_array_new_full (channels_arr->len, g_object_unref);
+  for (i = 0; i < channels_arr->len; i++)
+    {
+      const gchar *chan_path;
+      GHashTable *chan_props;
+
+      tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
+          &chan_path, &chan_props);
+
+      /* Use legacy channel factory if one is set */
+      if (self->priv->channel_factory != NULL)
+        {
+          channel = tp_client_channel_factory_create_channel (
+              self->priv->channel_factory, *connection, chan_path, chan_props,
+              error);
+        }
+      else
+        {
+          channel = tp_simple_client_factory_ensure_channel (
+              self->priv->factory, *connection, chan_path, chan_props, error);
+        }
+
+      if (channel == NULL)
+        goto error;
+
+      g_ptr_array_add (*channels, channel);
+    }
+
+  /* FIXME: We will consider features set only for the last channel. This is
+   * wrong in the case we receive multiple channels of different types.
+   * It has always been like that, and multiple channel dispatch is being
+   * deprecated. So let's just live with it. */
+  return channel;
+
+error:
+  g_clear_object (account);
+  g_clear_object (connection);
+  tp_clear_pointer (channels, g_ptr_array_unref);
+
+  return NULL;
 }
 
 static void
@@ -1698,6 +1916,7 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
   GArray *account_features;
   GArray *connection_features;
   GArray *channel_features;
+  GHashTable *request_props;
 
   if (!(self->priv->flags & CLIENT_IS_OBSERVER))
     {
@@ -1716,48 +1935,10 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
       return;
     }
 
-  if (channels_arr->len == 0)
-    {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
-          "Channels should contain at least one channel");
-      DEBUG ("%s", error->message);
-      goto out;
-    }
-
-  account = tp_base_client_dup_account (self, account_path, &error);
-
-  if (account == NULL)
+  channel = ensure_account_connection_channels (self, account_path,
+      connection_path, channels_arr, &account, &connection, &channels, &error);
+  if (channel == NULL)
     goto out;
-
-  connection = tp_account_ensure_connection (account, connection_path);
-  if (connection == NULL)
-    {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
-          "Connection %s doesn't seem to exist. (Maybe the CM doesn't own "
-          "the corresponding bus name?)", connection_path);
-      DEBUG ("Failed to create TpConnection: %s", error->message);
-      goto out;
-    }
-
-  channels = _tp_g_ptr_array_new_full (channels_arr->len, g_object_unref);
-  for (i = 0; i < channels_arr->len; i++)
-    {
-      const gchar *chan_path;
-      GHashTable *chan_props;
-
-      tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
-          &chan_path, &chan_props);
-
-      channel = ensure_channel (self, connection, chan_path, chan_props,
-          &error);
-      if (channel == NULL)
-        {
-          DEBUG ("Failed to create TpChannel: %s", error->message);
-          goto out;
-        }
-
-      g_ptr_array_add (channels, channel);
-    }
 
   if (!tp_strdiff (dispatch_operation_path, "/"))
     {
@@ -1776,14 +1957,20 @@ _tp_base_client_observe_channels (TpSvcClientObserver *iface,
         }
     }
 
-  requests = _tp_g_ptr_array_new_full (requests_arr->len, g_object_unref);
+  requests = g_ptr_array_new_full (requests_arr->len, g_object_unref);
+  request_props = tp_asv_get_boxed (observer_info, "request-properties",
+    TP_HASH_TYPE_OBJECT_IMMUTABLE_PROPERTIES_MAP);
   for (i = 0; i < requests_arr->len; i++)
     {
       const gchar *req_path = g_ptr_array_index (requests_arr, i);
       TpChannelRequest *request;
+      GHashTable *props = NULL;
+
+      if (request_props != NULL)
+        props = g_hash_table_lookup (request_props, req_path);
 
       request = _tp_simple_client_factory_ensure_channel_request (
-          self->priv->factory, req_path, NULL, &error);
+          self->priv->factory, req_path, props, &error);
       if (request == NULL)
         {
           DEBUG ("Failed to create TpChannelRequest: %s", error->message);
@@ -1873,7 +2060,7 @@ add_dispatch_context_prepare_cb (GObject *source,
   if (_tp_add_dispatch_operation_context_get_state (ctx) ==
       TP_ADD_DISPATCH_OPERATION_CONTEXT_STATE_NONE)
     {
-      error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      error = g_error_new (TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Implementation of AddDispatchOperation in %s didn't call "
           "tp_add_dispatch_operation_context_{accept,fail,delay}",
           G_OBJECT_TYPE_NAME (self));
@@ -1895,13 +2082,13 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
   TpBaseClient *self = TP_BASE_CLIENT (iface);
   TpAddDispatchOperationContext *ctx;
   TpBaseClientClass *cls = TP_BASE_CLIENT_GET_CLASS (self);
+  const gchar *account_path;
+  const gchar *connection_path;
   GError *error = NULL;
   TpAccount *account = NULL;
   TpConnection *connection = NULL;
   GPtrArray *channels = NULL;
   TpChannelDispatchOperation *dispatch_operation = NULL;
-  guint i;
-  const gchar *path;
   TpChannel *channel = NULL;
   GArray *account_features;
   GArray *connection_features;
@@ -1924,65 +2111,36 @@ _tp_base_client_add_dispatch_operation (TpSvcClientApprover *iface,
       return;
     }
 
-  path = tp_asv_get_object_path (properties,
+  account_path = tp_asv_get_object_path (properties,
       TP_PROP_CHANNEL_DISPATCH_OPERATION_ACCOUNT);
-  if (path == NULL)
+  if (account_path == NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Properties doesn't contain 'Account'");
       DEBUG ("%s", error->message);
       goto out;
     }
 
-  account = tp_base_client_dup_account (self, path, &error);
-
-  if (account == NULL)
-    goto out;
-
-  path = tp_asv_get_object_path (properties,
+  connection_path = tp_asv_get_object_path (properties,
       TP_PROP_CHANNEL_DISPATCH_OPERATION_CONNECTION);
-  if (path == NULL)
+  if (connection_path == NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Properties doesn't contain 'Connection'");
       DEBUG ("%s", error->message);
       goto out;
     }
 
-  connection = tp_account_ensure_connection (account, path);
-  if (connection == NULL)
-    {
-      DEBUG ("Failed to create TpConnection");
-      goto out;
-    }
+  channel = ensure_account_connection_channels (self, account_path,
+      connection_path, channels_arr, &account, &connection, &channels, &error);
+  if (channel == NULL)
+    goto out;
 
-  if (channels_arr->len == 0)
-    {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
-          "Channels should contain at least one channel");
-      DEBUG ("%s", error->message);
-      goto out;
-    }
-
-  channels = _tp_g_ptr_array_new_full (channels_arr->len, g_object_unref);
-  for (i = 0; i < channels_arr->len; i++)
-    {
-      const gchar *chan_path;
-      GHashTable *chan_props;
-
-      tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
-          &chan_path, &chan_props);
-
-      channel = ensure_channel (self, connection, chan_path, chan_props,
-          &error);
-      if (channel == NULL)
-        {
-          DEBUG ("Failed to create TpChannel: %s", error->message);
-          goto out;
-        }
-
-      g_ptr_array_add (channels, channel);
-    }
+  /* FIXME: We will consider features set only for the first channel. This is
+   * wrong in the case we receive multiple channels of different types.
+   * It has always been like that, and multiple channel dispatch is being
+   * deprecated. So let's just live with it. */
+  channel = g_ptr_array_index (channels, 0);
 
   dispatch_operation =
       _tp_simple_client_factory_ensure_channel_dispatch_operation (
@@ -2230,7 +2388,7 @@ handle_channels_context_prepare_cb (GObject *source,
   if (_tp_handle_channels_context_get_state (ctx) ==
       TP_HANDLE_CHANNELS_CONTEXT_STATE_NONE)
     {
-      error = g_error_new (TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      error = g_error_new (TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Implementation of HandledChannels in %s didn't call "
           "tp_handle_channels_context_{accept,fail,delay}",
           G_OBJECT_TYPE_NAME (self));
@@ -2281,6 +2439,7 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
   GArray *account_features;
   GArray *connection_features;
   GArray *channel_features;
+  GHashTable *request_props;
 
   if (!(self->priv->flags & CLIENT_IS_HANDLER))
     {
@@ -2299,61 +2458,39 @@ _tp_base_client_handle_channels (TpSvcClientHandler *iface,
       return;
     }
 
-  if (channels_arr->len == 0)
-    {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
-          "Channels should contain at least one channel");
-      DEBUG ("%s", error->message);
-      goto out;
-    }
-
-  account = tp_base_client_dup_account (self, account_path, &error);
-
-  if (account == NULL)
+  channel = ensure_account_connection_channels (self, account_path,
+      connection_path, channels_arr, &account, &connection, &channels, &error);
+  if (channel == NULL)
     goto out;
 
-  connection = tp_account_ensure_connection (account, connection_path);
-  if (connection == NULL)
-    {
-      DEBUG ("Failed to create TpConnection");
-      goto out;
-    }
+  /* FIXME: We will consider features set only for the first channel. This is
+   * wrong in the case we receive multiple channels of different types.
+   * It has always been like that, and multiple channel dispatch is being
+   * deprecated. So let's just live with it. */
+  channel = g_ptr_array_index (channels, 0);
 
-  channels = _tp_g_ptr_array_new_full (channels_arr->len, g_object_unref);
-  for (i = 0; i < channels_arr->len; i++)
-    {
-      const gchar *chan_path;
-      GHashTable *chan_props;
-
-      tp_value_array_unpack (g_ptr_array_index (channels_arr, i), 2,
-          &chan_path, &chan_props);
-
-      channel = ensure_channel (self, connection, chan_path, chan_props,
-          &error);
-      if (channel == NULL)
-        {
-          DEBUG ("Failed to create TpChannel: %s", error->message);
-          goto out;
-        }
-
-      g_ptr_array_add (channels, channel);
-    }
-
-  requests = _tp_g_ptr_array_new_full (requests_arr->len, g_object_unref);
+  requests = g_ptr_array_new_full (requests_arr->len, g_object_unref);
+  request_props = tp_asv_get_boxed (handler_info, "request-properties",
+    TP_HASH_TYPE_OBJECT_IMMUTABLE_PROPERTIES_MAP);
   for (i = 0; i < requests_arr->len; i++)
     {
       const gchar *req_path = g_ptr_array_index (requests_arr, i);
       TpChannelRequest *request;
+      GHashTable *props = NULL;
+
+      if (request_props != NULL)
+        props = g_hash_table_lookup (request_props, req_path);
 
       request = find_request_by_path (self, req_path);
       if (request != NULL)
         {
           g_object_ref (request);
+          _tp_channel_request_ensure_immutable_properties (request, props);
         }
       else
         {
           request = _tp_simple_client_factory_ensure_channel_request (
-              self->priv->factory, req_path, NULL, &error);
+              self->priv->factory, req_path, props, &error);
           if (request == NULL)
             {
               DEBUG ("Failed to create TpChannelRequest: %s", error->message);
@@ -2480,7 +2617,7 @@ _tp_base_client_add_request (TpSvcClientInterfaceRequests *iface,
   path = tp_asv_get_object_path (properties, TP_PROP_CHANNEL_REQUEST_ACCOUNT);
   if (path == NULL)
     {
-      error = g_error_new_literal (TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      error = g_error_new_literal (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Mandatory 'Account' property is missing");
 
       DEBUG ("%s", error->message);
@@ -2528,7 +2665,7 @@ _tp_base_client_remove_request (TpSvcClientInterfaceRequests *iface,
   request = find_request_by_path (self, path);
   if (request == NULL)
     {
-      GError err = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      GError err = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Uknown ChannelRequest" };
 
       dbus_g_method_return_error (context, &err);
@@ -3035,7 +3172,7 @@ tp_base_client_is_handling_channel (TpBaseClient *self,
   g_return_val_if_fail (TP_IS_BASE_CLIENT (self), FALSE);
   g_return_val_if_fail (self->priv->flags & CLIENT_IS_HANDLER, FALSE);
 
-  channels = tp_base_client_get_handled_channels (self);
+  channels = tp_base_client_dup_handled_channels (self);
   for (l = channels; l != NULL && !found; l = g_list_next (l))
     {
       TpChannel *chan = l->data;
@@ -3045,7 +3182,7 @@ tp_base_client_is_handling_channel (TpBaseClient *self,
         found = TRUE;
     }
 
-  g_list_free (channels);
+  g_list_free_full (channels, g_object_unref);
   return found;
 }
 
@@ -3078,7 +3215,7 @@ delegate_channels_ctx_new (GList *channels)
   DelegateChannelsCtx *ctx = g_slice_new0 (DelegateChannelsCtx);
   GList *l;
 
-  ctx->channels = _tp_g_ptr_array_new_full (g_list_length (channels),
+  ctx->channels = g_ptr_array_new_full (g_list_length (channels),
       g_object_unref);
 
   for (l = channels; l != NULL; l = g_list_next (l))
@@ -3181,7 +3318,7 @@ delegate_channels_cb (TpChannelDispatcher *cd,
         }
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 /**
@@ -3224,7 +3361,7 @@ tp_base_client_delegate_channels_async (TpBaseClient *self,
 
   cd = tp_channel_dispatcher_new (self->priv->dbus);
 
-  chans = _tp_g_ptr_array_new_full (g_list_length (channels), g_free);
+  chans = g_ptr_array_new_full (g_list_length (channels), g_free);
 
   for (l = channels; l != NULL; l = g_list_next (l))
     {

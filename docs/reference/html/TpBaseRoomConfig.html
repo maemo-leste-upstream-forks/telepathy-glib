@@ -42,7 +42,7 @@
 <div class="refsynopsisdiv">
 <a name="TpBaseRoomConfig.synopsis"></a><h2>Synopsis</h2>
 <a name="TpBaseRoomConfigProperty"></a><pre class="synopsis">
-#include &lt;telepathy-glib/base-room-config.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
                     <a class="link" href="TpBaseRoomConfig.html#TpBaseRoomConfig-struct" title="TpBaseRoomConfig">TpBaseRoomConfig</a>;
 struct              <a class="link" href="TpBaseRoomConfig.html#TpBaseRoomConfigClass" title="struct TpBaseRoomConfigClass">TpBaseRoomConfigClass</a>;
@@ -120,59 +120,31 @@ chats:
 <p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
   <span class="type">TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG</span> using
   <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-iface-init" title="tp_base_room_config_iface_init ()"><code class="function">tp_base_room_config_iface_init()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MyMucChannel</span><span class="symbol">,</span><span class="normal"> my_muc_channel</span><span class="symbol">,</span>
-<span class="normal">    TP_TYPE_BASE_CHANNEL</span><span class="symbol">,</span>
-<span class="normal">    </span><span class="comment">// ...</span>
-<span class="normal">    </span><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG</span><span class="symbol">,</span>
-<span class="normal">        <a href="TpBaseRoomConfig.html#tp-base-room-config-iface-init">tp_base_room_config_iface_init</a></span><span class="symbol">)</span>
-<span class="normal">    </span><span class="comment">// ...</span>
-<span class="normal">    </span><span class="symbol">)</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+G_DEFINE_TYPE_WITH_CODE (MyMucChannel, my_muc_channel,
+    TP_TYPE_BASE_CHANNEL,
+    // ...
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG,
+        tp_base_room_config_iface_init)
+    // ...
+    )
+</pre></div>
 </li>
 <li class="listitem">
 <p>in the <code class="function">class_init</code> method, call
    <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-register-class" title="tp_base_room_config_register_class ()"><code class="function">tp_base_room_config_register_class()</code></a>:</p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
-<span class="function">my_muc_channel_class_init</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">MyMucChannelClass</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">klass</span><span class="symbol">)</span>
-<span class="cbracket">{</span>
-<span class="normal">  </span><span class="comment">// ...</span>
-<span class="normal">  </span><span class="function"><a href="TpBaseRoomConfig.html#tp-base-room-config-register-class">tp_base_room_config_register_class</a></span><span class="normal"> </span><span class="symbol">(</span><span class="function">TP_BASE_CHANNEL_CLASS</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">klass</span><span class="symbol">));</span>
-<span class="normal">  </span><span class="comment">// ...</span>
-<span class="cbracket">}</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+static void
+my_muc_channel_class_init (MyMucChannelClass *klass)
+{
+  // ...
+  tp_base_room_config_register_class (TP_BASE_CHANNEL_CLASS (klass));
+  // ...
+}
+</pre></div>
 </li>
-<li class="listitem"><p>include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CHANNEL-INTERFACE-ROOM-CONFIG:CAPS" title="TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG"><code class="literal">TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG</code></a> in
-   <a class="link" href="TpBaseChannel.html#TpBaseChannelClass.interfaces"><span class="type">TpBaseChannelClass.interfaces</span></a>.</p></li>
+<li class="listitem"><p>include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CHANNEL-INTERFACE-ROOM-CONFIG:CAPS" title="TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG"><code class="literal">TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG</code></a> in the return of
+   <a class="link" href="TpBaseChannel.html#TpBaseChannelClass.get-interfaces"><span class="type">TpBaseChannelClass.get_interfaces</span></a>.</p></li>
 </ul></div>
 <p>
 </p>
@@ -189,25 +161,13 @@ are received from the network, they should be updated on this object using
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function">g_object_self</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">room_config</span><span class="symbol">,</span>
-<span class="normal">   </span><span class="string">"description"</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"A place to bury strangers"</span><span class="symbol">,</span>
-<span class="normal">   </span><span class="string">"private"</span><span class="symbol">,</span><span class="normal"> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS">TRUE</a></span><span class="symbol">,</span>
-<span class="normal">   <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS">NULL</a></span><span class="symbol">);</span>
-<span class="function"><a href="TpBaseRoomConfig.html#tp-base-room-config-emit-properties-changed">tp_base_room_config_emit_properties_changed</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">room_config</span><span class="symbol">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+  g_object_self (room_config,
+     "description", "A place to bury strangers",
+     "private", TRUE,
+     NULL);
+  tp_base_room_config_emit_properties_changed (room_config);
+</pre></div>
 <p>
 </p>
 <p>
@@ -236,7 +196,7 @@ There are no public fields.
 };
 </pre>
 <p>
-Class structure for <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a>. By default, <em class="parameter"><code>update_async</code></em> is <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>,
+Class structure for <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a>. By default, <em class="parameter"><code>update_async</code></em> is <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>,
 indicating that updating room configuration is not implemented; subclasses
 should override it if they wish to support updating room configuration.
 </p>

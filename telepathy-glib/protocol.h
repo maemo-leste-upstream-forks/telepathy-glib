@@ -17,6 +17,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_PROTOCOL_H
 #define TP_PROTOCOL_H
 
@@ -24,6 +28,7 @@
 
 #include <telepathy-glib/capabilities.h>
 #include <telepathy-glib/connection.h>
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/proxy.h>
 
 G_BEGIN_DECLS
@@ -32,13 +37,12 @@ typedef struct _TpConnectionManagerParam TpConnectionManagerParam;
 
 struct _TpConnectionManagerParam
 {
-  /*<public>*/
-  gchar *name;
-  gchar *dbus_signature;
-  GValue default_value;
-  guint flags;
-
-  gpointer priv;
+  /*<private>*/
+  gchar *_TP_SEAL (name);
+  gchar *_TP_SEAL (dbus_signature);
+  GValue _TP_SEAL (default_value);
+  guint _TP_SEAL (flags);
+  gpointer _TP_SEAL (priv);
 };
 
 typedef struct _TpProtocol TpProtocol;
@@ -79,21 +83,31 @@ TpProtocol *tp_protocol_new (TpDBusDaemon *dbus, const gchar *cm_name,
 
 const gchar *tp_protocol_get_name (TpProtocol *self);
 
+_TP_AVAILABLE_IN_0_20
+const gchar *tp_protocol_get_cm_name (TpProtocol *self);
+
 #define TP_PROTOCOL_FEATURE_PARAMETERS \
   (tp_protocol_get_feature_quark_parameters ())
 GQuark tp_protocol_get_feature_quark_parameters (void) G_GNUC_CONST;
 
 const TpConnectionManagerParam *tp_protocol_get_param (TpProtocol *self,
     const gchar *param);
+_TP_AVAILABLE_IN_0_18
 TpConnectionManagerParam *tp_protocol_dup_param (TpProtocol *self,
     const gchar *param);
 gboolean tp_protocol_has_param (TpProtocol *self,
     const gchar *param);
 gboolean tp_protocol_can_register (TpProtocol *self);
 GStrv tp_protocol_dup_param_names (TpProtocol *self) G_GNUC_WARN_UNUSED_RESULT;
+_TP_AVAILABLE_IN_0_18
 GList *tp_protocol_dup_params (TpProtocol *self) G_GNUC_WARN_UNUSED_RESULT;
+
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_protocol_dup_params)
+_TP_AVAILABLE_IN_0_18
 const TpConnectionManagerParam *tp_protocol_borrow_params (TpProtocol *self)
   G_GNUC_WARN_UNUSED_RESULT;
+#endif
 
 const gchar * const *
 /* gtk-doc sucks */
@@ -108,6 +122,7 @@ const gchar *tp_protocol_get_english_name (TpProtocol *self);
 const gchar *tp_protocol_get_icon_name (TpProtocol *self);
 TpCapabilities *tp_protocol_get_capabilities (TpProtocol *self);
 
+_TP_AVAILABLE_IN_0_16
 TpAvatarRequirements * tp_protocol_get_avatar_requirements (TpProtocol *self);
 
 G_END_DECLS

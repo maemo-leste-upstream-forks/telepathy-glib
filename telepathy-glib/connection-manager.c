@@ -154,26 +154,12 @@ enum
   PROP_MANAGER_FILE,
   PROP_ALWAYS_INTROSPECT,
   PROP_CONNECTION_MANAGER,
+  PROP_CM_NAME,
   N_PROPS
 };
 
 /**
  * TpConnectionManager:
- * @parent: The parent class instance
- * @name: The identifier of the connection manager (e.g. "gabble").
- *  Should be considered read-only
- * @protocols: If info_source > %TP_CM_INFO_SOURCE_NONE, a %NULL-terminated
- *  array of pointers to #TpConnectionManagerProtocol structures; otherwise
- *  %NULL. Should be considered read-only
- * @running: %TRUE if the CM is currently known to be running. Should be
- *  considered read-only
- * @always_introspect: %TRUE if the CM will be introspected automatically.
- *  Should be considered read-only: use the
- *  #TpConnectionManager:always-introspect property if you want to change it
- * @info_source: The source of @protocols, or %TP_CM_INFO_SOURCE_NONE
- *  if no info has been discovered yet
- * @reserved_flags: Reserved for future use
- * @priv: Pointer to opaque private data
  *
  * A proxy object for a Telepathy connection manager.
  *
@@ -187,26 +173,32 @@ enum
  * %TP_CONNECTION_MANAGER_FEATURE_CORE is prepared. Use
  * tp_proxy_prepare_async() to wait for this to happen.
  *
- * Note that the @protocols may be freed and reallocated (based on new
- * information) whenever the main loop is entered. Since 0.11.3, each protocol
- * struct can be copied with tp_connection_manager_protocol_copy() if a
- * private copy is needed.
+ * Since 0.19.1, accessing the fields of this struct is deprecated,
+ * and they are no longer documented here.
+ * Use the accessors tp_connection_manager_get_name(),
+ * tp_connection_manager_is_running(),
+ * tp_connection_manager_dup_protocols(),
+ * tp_connection_manager_get_info_source()
+ * and the #TpConnectionManager:always-introspect property instead.
  *
  * Since: 0.7.1
  */
 
 /**
  * TpConnectionManagerParam:
- * @name: The name of this parameter
- * @dbus_signature: This parameter's D-Bus signature
- * @default_value: This parameter's default value, or an arbitrary value
- *  of an appropriate type if %TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT is not
- *  set on this parameter, or an unset GValue if the signature is not
- *  recognised by telepathy-glib
- * @flags: This parameter's flags (a combination of #TpConnMgrParamFlags)
- * @priv: Pointer to opaque private data
  *
  * Structure representing a connection manager parameter.
+ *
+ * Since 0.19.1, accessing the fields of this struct is deprecated,
+ * and they are no longer documented here.
+ * Use the accessors tp_connection_manager_param_get_name(),
+ * tp_connection_manager_param_get_dbus_signature(),
+ * tp_connection_manager_param_is_required(),
+ * tp_connection_manager_param_is_required_for_registration(),
+ * tp_connection_manager_param_is_secret(),
+ * tp_connection_manager_param_is_dbus_property(),
+ * tp_connection_manager_param_get_default(),
+ * tp_connection_manager_param_dup_default_variant() instead.
  *
  * Since: 0.7.1
  */
@@ -222,6 +214,8 @@ enum
  * relied on.
  *
  * Since: 0.7.1
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 
 typedef enum {
@@ -357,6 +351,8 @@ tp_connection_manager_param_free (TpConnectionManagerParam *param)
  *  tp_connection_manager_protocol_free()
  *
  * Since: 0.11.3
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 TpConnectionManagerProtocol *
 tp_connection_manager_protocol_copy (const TpConnectionManagerProtocol *in)
@@ -389,6 +385,8 @@ tp_connection_manager_protocol_copy (const TpConnectionManagerProtocol *in)
  * Frees @proto, which was copied with tp_connection_manager_protocol_copy().
  *
  * Since: 0.11.3
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 void
 tp_connection_manager_protocol_free (TpConnectionManagerProtocol *proto)
@@ -407,23 +405,8 @@ tp_connection_manager_protocol_free (TpConnectionManagerProtocol *proto)
  * Since: 0.11.3
  */
 
-
-GType
-tp_connection_manager_param_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (
-          g_intern_static_string ("TpConnectionManagerParam"),
-          (GBoxedCopyFunc) tp_connection_manager_param_copy,
-          (GBoxedFreeFunc) tp_connection_manager_param_free);
-    }
-
-  return type;
-}
-
+G_DEFINE_BOXED_TYPE (TpConnectionManagerParam, tp_connection_manager_param,
+    tp_connection_manager_param_copy, tp_connection_manager_param_free)
 
 /**
  * TP_TYPE_CONNECTION_MANAGER_PROTOCOL:
@@ -431,25 +414,15 @@ tp_connection_manager_param_get_type (void)
  * The boxed type of a #TpConnectionManagerProtocol.
  *
  * Since: 0.11.3
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 
-
-GType
-tp_connection_manager_protocol_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (
-          g_intern_static_string ("TpConnectionManagerProtocol"),
-          (GBoxedCopyFunc) tp_connection_manager_protocol_copy,
-          (GBoxedFreeFunc) tp_connection_manager_protocol_free);
-    }
-
-  return type;
-}
-
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+G_DEFINE_BOXED_TYPE (TpConnectionManagerProtocol,
+    tp_connection_manager_protocol,
+    tp_connection_manager_protocol_copy, tp_connection_manager_protocol_free)
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 typedef struct {
     TpConnectionManager *cm;
@@ -1298,6 +1271,10 @@ tp_connection_manager_get_property (GObject *object,
       g_value_set_string (value, self->name);
       break;
 
+    case PROP_CM_NAME:
+      g_value_set_string (value, self->name);
+      break;
+
     case PROP_INFO_SOURCE:
       g_value_set_uint (value, self->info_source);
       break;
@@ -1408,7 +1385,7 @@ tp_connection_manager_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_connection_manager_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -1479,12 +1456,28 @@ tp_connection_manager_class_init (TpConnectionManagerClass *klass)
    * TpConnectionManager:connection-manager:
    *
    * The name of the connection manager, e.g. "gabble" (read-only).
+   *
+   * Deprecated: Use #TpConnectionManager:cm-name instead.
    */
   param_spec = g_param_spec_string ("connection-manager", "CM name",
       "The name of the connection manager, e.g. \"gabble\" (read-only)",
       NULL,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_CONNECTION_MANAGER,
+      param_spec);
+
+  /**
+   * TpConnectionManager:cm-name:
+   *
+   * The name of the connection manager, e.g. "gabble" (read-only).
+   *
+   * Since: 0.19.3
+   */
+  param_spec = g_param_spec_string ("cm-name", "CM name",
+      "The name of the connection manager, e.g. \"gabble\" (read-only)",
+      NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CM_NAME,
       param_spec);
 
   /**
@@ -1845,6 +1838,8 @@ tp_list_connection_managers_got_names (TpDBusDaemon *bus_daemon,
  * occurred while launching that connection manager.
  *
  * Since: 0.7.1
+ *
+ * Deprecated: since 0.19.1, use tp_list_connection_managers_async()
  */
 void
 tp_list_connection_managers (TpDBusDaemon *bus_daemon,
@@ -1948,8 +1943,10 @@ tp_list_connection_managers_async (TpDBusDaemon *dbus_daemon,
     }
   else
     {
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       tp_list_connection_managers (dbus_daemon,
           list_connection_managers_async_cb, result, g_object_unref, NULL);
+      G_GNUC_END_IGNORE_DEPRECATIONS
       g_object_unref (dbus_daemon);
     }
 }
@@ -1998,14 +1995,14 @@ tp_connection_manager_check_valid_name (const gchar *name,
 
   if (tp_str_empty (name))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "The empty string is not a valid connection manager name");
       return FALSE;
     }
 
   if (!g_ascii_isalpha (name[0]))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Not a valid connection manager name because first character "
           "is not an ASCII letter: %s", name);
       return FALSE;
@@ -2015,7 +2012,7 @@ tp_connection_manager_check_valid_name (const gchar *name,
     {
       if (!g_ascii_isalnum (*name_char) && *name_char != '_')
         {
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "Not a valid connection manager name because character '%c' "
               "is not an ASCII letter, digit or underscore: %s",
               *name_char, name);
@@ -2047,14 +2044,14 @@ tp_connection_manager_check_valid_protocol_name (const gchar *name,
 
   if (name == NULL || name[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "The empty string is not a valid protocol name");
       return FALSE;
     }
 
   if (!g_ascii_isalpha (name[0]))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Not a valid protocol name because first character "
           "is not an ASCII letter: %s", name);
       return FALSE;
@@ -2064,7 +2061,7 @@ tp_connection_manager_check_valid_protocol_name (const gchar *name,
     {
       if (!g_ascii_isalnum (*name_char) && *name_char != '-')
         {
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "Not a valid protocol name because character '%c' "
               "is not an ASCII letter, digit or hyphen/minus: %s",
               *name_char, name);
@@ -2086,7 +2083,7 @@ tp_connection_manager_check_valid_protocol_name (const gchar *name,
  * The returned string is valid as long as @self is. Copy it with g_strdup()
  * if a longer lifetime is required.
  *
- * Returns: the #TpConnectionManager:connection-manager property
+ * Returns: the #TpConnectionManager:cm-name property
  * Since: 0.7.26
  */
 const gchar *
@@ -2180,7 +2177,7 @@ tp_connection_manager_get_info_source (TpConnectionManager *self)
  * The result is copied and must be freed by the caller, but it is not
  * necessarily still true after the main loop is re-entered.
  *
- * Returns: (type GObject.Strv) (transfer full): a #GStrv of protocol names
+ * Returns: (array zero-terminated=1) (transfer full): a #GStrv of protocol names
  * Since: 0.7.26
  */
 gchar **
@@ -2234,6 +2231,8 @@ tp_connection_manager_dup_protocol_names (TpConnectionManager *self)
  *
  * Returns: (transfer none): a structure representing the protocol
  * Since: 0.7.26
+ *
+ * Deprecated: 0.19.1, use tp_connection_manager_get_protocol_object()
  */
 const TpConnectionManagerProtocol *
 tp_connection_manager_get_protocol (TpConnectionManager *self,
@@ -2349,13 +2348,17 @@ tp_connection_manager_has_protocol (TpConnectionManager *self,
  *
  * Returns: %TRUE if @protocol supports the parameter @param.
  * Since: 0.7.26
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 gboolean
 tp_connection_manager_protocol_has_param (
     const TpConnectionManagerProtocol *protocol,
     const gchar *param)
 {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   return (tp_connection_manager_protocol_get_param (protocol, param) != NULL);
+G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
 /**
@@ -2368,6 +2371,8 @@ tp_connection_manager_protocol_has_param (
  * Returns: a structure representing the parameter @param, or %NULL if not
  *          supported
  * Since: 0.7.26
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 const TpConnectionManagerParam *
 tp_connection_manager_protocol_get_param (
@@ -2400,12 +2405,16 @@ tp_connection_manager_protocol_get_param (
  *
  * Returns: %TRUE if @protocol supports the parameter "register"
  * Since: 0.7.26
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 gboolean
 tp_connection_manager_protocol_can_register (
     const TpConnectionManagerProtocol *protocol)
 {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   return tp_connection_manager_protocol_has_param (protocol, "register");
+G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
 /**
@@ -2417,8 +2426,10 @@ tp_connection_manager_protocol_can_register (
  *
  * The result is copied and must be freed by the caller with g_strfreev().
  *
- * Returns: (type GObject.Strv) (transfer full): a #GStrv of protocol names
+ * Returns: (array zero-terminated=1) (transfer full): a #GStrv of protocol names
  * Since: 0.7.26
+ *
+ * Deprecated: 0.19.1, use #TpProtocol objects instead
  */
 gchar **
 tp_connection_manager_protocol_dup_param_names (
@@ -2575,4 +2586,31 @@ tp_connection_manager_param_get_default (
   g_value_copy (&param->default_value, value);
 
   return TRUE;
+}
+
+/**
+ * tp_connection_manager_param_dup_default_variant:
+ * @param: a parameter supported by a #TpConnectionManager
+ *
+ * Get the default value for this parameter.
+ *
+ * Use g_variant_get_type() to check that the type is what you expect.
+ * For instance, a string parameter should have type
+ * %G_VARIANT_TYPE_STRING.
+ *
+ * Returns: the default value, or %NULL if there is no default
+ * Since: 0.19.0
+ */
+GVariant *
+tp_connection_manager_param_dup_default_variant (
+    const TpConnectionManagerParam *param)
+{
+  g_return_val_if_fail (param != NULL, NULL);
+
+  if ((param->flags & TP_CONN_MGR_PARAM_FLAG_HAS_DEFAULT) == 0
+      || !G_IS_VALUE (&param->default_value))
+    return NULL;
+
+  return g_variant_ref_sink (dbus_g_value_build_g_variant (
+        &param->default_value));
 }

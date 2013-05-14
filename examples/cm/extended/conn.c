@@ -16,7 +16,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/handle-repo-dynamic.h>
 
 /* This would conventionally be extensions/extensions.h */
 #include "examples/extensions/extensions.h"
@@ -130,7 +129,7 @@ example_normalize_contact (TpHandleRepoIface *repo,
 
 static void
 create_handle_repos (TpBaseConnection *conn,
-                     TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES])
+                     TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES])
 {
   repos[TP_HANDLE_TYPE_CONTACT] = tp_dynamic_handle_repo_new
       (TP_HANDLE_TYPE_CONTACT, example_normalize_contact, NULL);
@@ -149,13 +148,16 @@ start_connecting (TpBaseConnection *conn,
   ExampleExtendedConnection *self = EXAMPLE_EXTENDED_CONNECTION (conn);
   TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (conn,
       TP_HANDLE_TYPE_CONTACT);
+  TpHandle self_handle;
 
   /* In a real connection manager we'd ask the underlying implementation to
    * start connecting, then go to state CONNECTED when finished, but here
    * we can do it immediately. */
 
-  conn->self_handle = tp_handle_ensure (contact_repo, self->priv->account,
+  self_handle = tp_handle_ensure (contact_repo, self->priv->account,
       NULL, NULL);
+
+  tp_base_connection_set_self_handle (conn, self_handle);
 
   tp_base_connection_change_status (conn, TP_CONNECTION_STATUS_CONNECTED,
       TP_CONNECTION_STATUS_REASON_REQUESTED);
@@ -201,6 +203,21 @@ example_extended_connection_get_possible_interfaces (void)
   return interfaces_always_present;
 }
 
+static GPtrArray *
+get_interfaces_always_present (TpBaseConnection *base)
+{
+  GPtrArray *interfaces;
+  guint i;
+
+  interfaces = TP_BASE_CONNECTION_CLASS (
+      example_extended_connection_parent_class)->get_interfaces_always_present (base);
+
+  for (i = 0; interfaces_always_present[i] != NULL; i++)
+    g_ptr_array_add (interfaces, (gchar *) interfaces_always_present[i]);
+
+  return interfaces;
+}
+
 static void
 example_extended_connection_class_init (ExampleExtendedConnectionClass *klass)
 {
@@ -221,7 +238,7 @@ example_extended_connection_class_init (ExampleExtendedConnectionClass *klass)
   base_class->start_connecting = start_connecting;
   base_class->shut_down = shut_down;
 
-  base_class->interfaces_always_present = interfaces_always_present;
+  base_class->get_interfaces_always_present = get_interfaces_always_present;
 
   param_spec = g_param_spec_string ("account", "Account name",
       "The username of this user", NULL,
@@ -275,7 +292,7 @@ my_get_hats (ExampleSvcConnectionInterfaceHats *iface,
 
       /* for the sake of a simple example, let's assume nobody except me
        * has any hats */
-      if (handle == base->self_handle)
+      if (handle == tp_base_connection_get_self_handle (base))
         {
           g_value_set_string (g_value_array_get_nth (vals, 1),
               self->priv->hat_color);
@@ -321,7 +338,8 @@ my_set_hat (ExampleSvcConnectionInterfaceHats *iface,
 
   /* success */
   example_svc_connection_interface_hats_emit_hats_changed (self,
-      base->self_handle, color, style, properties);
+      tp_base_connection_get_self_handle (base),
+      color, style, properties);
   example_svc_connection_interface_hats_return_from_set_hat (context);
 }
 

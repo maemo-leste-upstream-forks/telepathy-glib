@@ -82,7 +82,7 @@ static TpContactFeature all_contact_features[] = {
 /* If people add new features, they should add them to this test. We could
  * generate the list dynamically but this seems less brittle.
  */
-G_STATIC_ASSERT (G_N_ELEMENTS (all_contact_features) == NUM_TP_CONTACT_FEATURES);
+G_STATIC_ASSERT (G_N_ELEMENTS (all_contact_features) == TP_NUM_CONTACT_FEATURES);
 
 
 static void
@@ -532,22 +532,22 @@ test_avatar_requirements (Fixture *f,
   g_main_loop_unref (result.loop);
 }
 
-static GFile *
+static TpContact *
 create_contact_with_fake_avatar (TpTestsContactsConnection *service_conn,
     TpConnection *client_conn,
-    const gchar *id)
+    const gchar *id,
+    gboolean request_avatar)
 {
   Result result = { g_main_loop_new (NULL, FALSE), NULL, NULL, NULL };
   TpHandleRepoIface *service_repo = tp_base_connection_get_handles (
       (TpBaseConnection *) service_conn, TP_HANDLE_TYPE_CONTACT);
-  TpContactFeature features[] = { TP_CONTACT_FEATURE_AVATAR_DATA };
+  TpContactFeature feature;
   const gchar avatar_data[] = "fake-avatar-data";
   const gchar avatar_token[] = "fake-avatar-token";
   const gchar avatar_mime_type[] = "fake-avatar-mime-type";
   TpContact *contact;
   TpHandle handle;
   GArray *array;
-  GFile *avatar_file;
   gchar *content = NULL;
 
   handle = tp_handle_ensure (service_repo, id, NULL, NULL);
@@ -557,35 +557,46 @@ create_contact_with_fake_avatar (TpTestsContactsConnection *service_conn,
   tp_tests_contacts_connection_change_avatar_data (service_conn, handle, array,
       avatar_mime_type, avatar_token);
 
+  if (request_avatar)
+    feature = TP_CONTACT_FEATURE_AVATAR_DATA;
+  else
+    feature = TP_CONTACT_FEATURE_AVATAR_TOKEN;
+
   tp_connection_get_contacts_by_handle (client_conn,
       1, &handle,
-      G_N_ELEMENTS (features), features,
+      1, &feature,
       by_handle_cb,
       &result, finish, NULL);
   g_main_loop_run (result.loop);
   g_assert_no_error (result.error);
 
-  contact = g_ptr_array_index (result.contacts, 0);
-  if (tp_contact_get_avatar_file (contact) == NULL)
-    {
-      g_signal_connect_swapped (contact, "notify::avatar-file",
-          G_CALLBACK (finish), &result);
-      g_main_loop_run (result.loop);
-    }
+  contact = g_object_ref (g_ptr_array_index (result.contacts, 0));
 
-  g_assert_cmpstr (tp_contact_get_avatar_mime_type (contact), ==,
-      avatar_mime_type);
   g_assert_cmpstr (tp_contact_get_avatar_token (contact), ==, avatar_token);
 
-  avatar_file = tp_contact_get_avatar_file (contact);
-  g_assert (avatar_file != NULL);
-  g_file_load_contents (avatar_file, NULL, &content, NULL, NULL, &result.error);
-  g_assert_no_error (result.error);
-  g_assert_cmpstr (content, ==, avatar_data);
-  g_free (content);
+  if (request_avatar)
+    {
+      GFile *avatar_file;
 
-  /* Keep avatar_file alive after contact destruction */
-  g_object_ref (avatar_file);
+      /* If we requested avatar, it could come later */
+      if (tp_contact_get_avatar_file (contact) == NULL)
+        {
+          g_signal_connect_swapped (contact, "notify::avatar-file",
+              G_CALLBACK (finish), &result);
+          g_main_loop_run (result.loop);
+        }
+
+      g_assert_cmpstr (tp_contact_get_avatar_mime_type (contact), ==,
+          avatar_mime_type);
+
+      avatar_file = tp_contact_get_avatar_file (contact);
+      g_assert (avatar_file != NULL);
+      g_file_load_contents (avatar_file, NULL, &content, NULL, NULL,
+          &result.error);
+      g_assert_no_error (result.error);
+      g_assert_cmpstr (content, ==, avatar_data);
+      g_free (content);
+    }
 
   reset_result (&result);
   g_main_loop_unref (result.loop);
@@ -593,7 +604,7 @@ create_contact_with_fake_avatar (TpTestsContactsConnection *service_conn,
   tp_handle_unref (service_repo, handle);
   g_array_unref (array);
 
-  return avatar_file;
+  return contact;
 }
 
 static void
@@ -652,28 +663,18 @@ haze_remove_directory (const gchar *path)
   return ret;
 }
 
-#define RAND_STR_LEN 6
-
 static void
 test_avatar_data (Fixture *f,
     gconstpointer unused G_GNUC_UNUSED)
 {
   TpTestsContactsConnection *service_conn = f->service_conn;
   TpConnection *client_conn = f->client_conn;
-  gchar *dir;
   gboolean avatar_retrieved_called;
   GError *error = NULL;
-  GFile *file1, *file2;
+  TpContact *contact1, *contact2;
   TpProxySignalConnection *signal_id;
 
   g_message (G_STRFUNC);
-
-  /* Make sure g_get_user_cache_dir() returns a tmp directory, to not mess up
-   * user's cache dir. */
-  dir = g_dir_make_tmp ("tp-glib-tests-XXXXXX", &error);
-  g_assert_no_error (error);
-  g_setenv ("XDG_CACHE_HOME", dir, TRUE);
-  g_assert_cmpstr (g_get_user_cache_dir (), ==, dir);
 
   /* Check if AvatarRetrieved gets called */
   signal_id = tp_cli_connection_interface_avatars_connect_to_avatar_retrieved (
@@ -684,24 +685,58 @@ test_avatar_data (Fixture *f,
   /* First time we create a contact, avatar should not be in cache, so
    * AvatarRetrived should be called */
   avatar_retrieved_called = FALSE;
-  file1 = create_contact_with_fake_avatar (service_conn, client_conn,
-      "fake-id1");
+  contact1 = create_contact_with_fake_avatar (service_conn, client_conn,
+      "fake-id1", TRUE);
   g_assert (avatar_retrieved_called);
+  g_assert (contact1 != NULL);
+  g_assert (tp_contact_get_avatar_file (contact1) != NULL);
 
   /* Second time we create a contact, avatar should be in cache now, so
    * AvatarRetrived should NOT be called */
   avatar_retrieved_called = FALSE;
-  file2 = create_contact_with_fake_avatar (service_conn, client_conn,
-      "fake-id2");
+  contact2 = create_contact_with_fake_avatar (service_conn, client_conn,
+      "fake-id2", TRUE);
   g_assert (!avatar_retrieved_called);
+  g_assert (contact2 != NULL);
+  g_assert (tp_contact_get_avatar_file (contact2) != NULL);
 
-  g_assert (g_file_equal (file1, file2));
-  g_assert (haze_remove_directory (dir));
+  g_assert (g_file_equal (
+      tp_contact_get_avatar_file (contact1),
+      tp_contact_get_avatar_file (contact2)));
 
   tp_proxy_signal_connection_disconnect (signal_id);
-  g_object_unref (file1);
-  g_object_unref (file2);
-  g_free (dir);
+  g_object_unref (contact1);
+  g_object_unref (contact2);
+}
+
+static void
+test_avatar_data_after_token (Fixture *f,
+    gconstpointer unused G_GNUC_UNUSED)
+{
+  TpTestsContactsConnection *service_conn = f->service_conn;
+  TpConnection *client_conn = f->client_conn;
+  const gchar *id = "avatar-data-after-token";
+  TpContact *contact1, *contact2;
+
+  g_message (G_STRFUNC);
+
+  /* Create a contact with AVATAR_TOKEN feature */
+  contact1 = create_contact_with_fake_avatar (service_conn, client_conn, id,
+      FALSE);
+  g_assert (contact1 != NULL);
+  g_assert (tp_contact_get_avatar_file (contact1) == NULL);
+
+  /* Now create the same contact with AVATAR_DATA feature */
+  contact2 = create_contact_with_fake_avatar (service_conn, client_conn, id,
+      TRUE);
+  g_assert (contact2 != NULL);
+  g_assert (tp_contact_get_avatar_file (contact2) != NULL);
+
+  g_assert (contact1 == contact2);
+
+  /* Cleanup */
+  g_object_unref (contact1);
+  g_object_unref (contact2);
 }
 
 static void
@@ -866,7 +901,8 @@ put_the_connection_back (Fixture *f)
 
   tp_dbus_daemon_register_object (
       tp_base_connection_get_dbus_daemon (f->base_connection),
-      f->base_connection->object_path, f->base_connection);
+      tp_base_connection_get_object_path (f->base_connection),
+      f->base_connection);
   /* check that *that* worked */
   ok = tp_cli_connection_run_get_self_handle (f->client_conn, -1, NULL,
       &error, NULL);
@@ -1166,12 +1202,18 @@ upgrade_cb (TpConnection *connection,
 
 /* Just put a country in locations for easier comparaisons.
  * FIXME: Ideally we should have a MYASSERT_SAME_ASV */
-#define ASSERT_SAME_LOCATION(left, right)\
+#define ASSERT_SAME_LOCATION(left, left_vardict, right)\
   G_STMT_START {\
     g_assert_cmpuint (g_hash_table_size (left), ==, \
         g_hash_table_size (right));\
-    g_assert_cmpstr (g_hash_table_lookup (left, "country"), ==,\
-        g_hash_table_lookup (right, "country"));\
+    g_assert_cmpstr (tp_asv_get_string (left, "country"), ==,\
+        tp_asv_get_string (right, "country"));\
+    \
+    g_assert_cmpstr (g_variant_get_type_string (left_vardict), ==, "a{sv}"); \
+    g_assert_cmpuint (g_variant_n_children (left_vardict), ==, \
+        g_hash_table_size (right));\
+    g_assert_cmpstr (tp_vardict_get_string (left_vardict, "country"), ==,\
+        tp_asv_get_string (right, "country"));\
   } G_STMT_END
 
 static void
@@ -1357,6 +1399,8 @@ test_upgrade (Fixture *f,
 
   for (i = 0; i < 3; i++)
     {
+      GVariant *vardict;
+
       g_assert_cmpuint (tp_contact_get_handle (contacts[i]), ==, handles[i]);
       g_assert_cmpstr (tp_contact_get_identifier (contacts[i]), ==,
           ids[i]);
@@ -1378,8 +1422,18 @@ test_upgrade (Fixture *f,
 
       MYASSERT (tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_LOCATION), "");
+
+      vardict = tp_contact_dup_location (contacts[i]);
       ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
-          locations[i]);
+          vardict, locations[i]);
+      g_variant_unref (vardict);
+
+      g_object_get (contacts[i],
+          "location-vardict", &vardict,
+          NULL);
+      ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
+          vardict, locations[i]);
+      g_variant_unref (vardict);
 
       MYASSERT (tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_CAPABILITIES), "");
@@ -1461,6 +1515,7 @@ typedef struct
   gboolean presence_status_changed;
   gboolean presence_msg_changed;
   gboolean location_changed;
+  gboolean location_vardict_changed;
   gboolean capabilities_changed;
 } notify_ctx;
 
@@ -1473,6 +1528,7 @@ notify_ctx_init (notify_ctx *ctx)
   ctx->presence_status_changed = FALSE;
   ctx->presence_msg_changed = FALSE;
   ctx->location_changed = FALSE;
+  ctx->location_vardict_changed = FALSE;
   ctx->capabilities_changed = FALSE;
 }
 
@@ -1482,7 +1538,7 @@ notify_ctx_is_fully_changed (notify_ctx *ctx)
   return ctx->alias_changed && ctx->avatar_token_changed &&
     ctx->presence_type_changed && ctx->presence_status_changed &&
     ctx->presence_msg_changed && ctx->location_changed &&
-    ctx->capabilities_changed;
+    ctx->location_vardict_changed && ctx->capabilities_changed;
 }
 
 static gboolean
@@ -1491,7 +1547,7 @@ notify_ctx_is_changed (notify_ctx *ctx)
   return ctx->alias_changed || ctx->avatar_token_changed ||
     ctx->presence_type_changed || ctx->presence_status_changed ||
     ctx->presence_msg_changed || ctx->location_changed ||
-    ctx->capabilities_changed;
+    ctx->location_vardict_changed || ctx->capabilities_changed;
 }
 
 static void
@@ -1511,6 +1567,8 @@ contact_notify_cb (TpContact *contact,
     ctx->presence_msg_changed = TRUE;
   else if (!tp_strdiff (param->name, "location"))
     ctx->location_changed = TRUE;
+  else if (!tp_strdiff (param->name, "location-vardict"))
+    ctx->location_vardict_changed = TRUE;
   else if (!tp_strdiff (param->name, "capabilities"))
     ctx->capabilities_changed = TRUE;
 }
@@ -1597,9 +1655,11 @@ test_features (Fixture *f,
       gchar *presence_status;
       gchar *presence_message;
       GHashTable *location;
+      GVariant *location_vardict;
       TpCapabilities *capabilities;
   } from_gobject;
   notify_ctx notify_ctx_alice, notify_ctx_chris;
+  GVariant *vardict;
 
   g_message (G_STRFUNC);
 
@@ -1668,8 +1728,10 @@ test_features (Fixture *f,
 
       MYASSERT (tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_LOCATION), "");
+      vardict = tp_contact_dup_location (contacts[i]);
       ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
-          locations[i]);
+          vardict, locations[i]);
+      g_variant_unref (vardict);
 
       MYASSERT (tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_CAPABILITIES), "");
@@ -1708,6 +1770,7 @@ test_features (Fixture *f,
       "presence-status", &from_gobject.presence_status,
       "presence-message", &from_gobject.presence_message,
       "location", &from_gobject.location,
+      "location-vardict", &from_gobject.location_vardict,
       "capabilities", &from_gobject.capabilities,
       NULL);
   MYASSERT (from_gobject.connection == client_conn, "");
@@ -1719,7 +1782,8 @@ test_features (Fixture *f,
       TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
   g_assert_cmpstr (from_gobject.presence_status, ==, "available");
   g_assert_cmpstr (from_gobject.presence_message, ==, "");
-  ASSERT_SAME_LOCATION (from_gobject.location, locations[0]);
+  ASSERT_SAME_LOCATION (from_gobject.location, from_gobject.location_vardict,
+      locations[0]);
   MYASSERT (tp_capabilities_is_specific_to_contact (from_gobject.capabilities),
       "");
   MYASSERT (tp_capabilities_supports_text_chats (from_gobject.capabilities)
@@ -1733,6 +1797,7 @@ test_features (Fixture *f,
   g_free (from_gobject.presence_status);
   g_free (from_gobject.presence_message);
   g_hash_table_unref (from_gobject.location);
+  g_variant_unref (from_gobject.location_vardict);
   g_object_unref (from_gobject.capabilities);
 
   notify_ctx_init (&notify_ctx_alice);
@@ -1788,8 +1853,10 @@ test_features (Fixture *f,
 
       MYASSERT (tp_contact_has_feature (contacts[i],
             TP_CONTACT_FEATURE_LOCATION), "");
+      vardict = tp_contact_dup_location (contacts[i]);
       ASSERT_SAME_LOCATION (tp_contact_get_location (contacts[i]),
-          new_locations[i]);
+          vardict, new_locations[i]);
+      g_variant_unref (vardict);
 
       caps = tp_contact_get_capabilities (contacts[i]);
       MYASSERT (caps != NULL, "");
@@ -2392,6 +2459,7 @@ test_no_location (Fixture *f,
   TpContactFeature feature = TP_CONTACT_FEATURE_LOCATION;
   GHashTable *norway = tp_asv_new ("country",  G_TYPE_STRING, "Norway", NULL);
   notify_ctx notify_ctx_alice;
+  GVariant *vardict;
 
   g_test_bug ("39377");
 
@@ -2446,7 +2514,10 @@ test_no_location (Fixture *f,
       1, &handle, &norway);
   tp_tests_proxy_run_until_dbus_queue_processed (f->client_conn);
   g_assert (notify_ctx_alice.location_changed);
-  ASSERT_SAME_LOCATION (tp_contact_get_location (contact), norway);
+  g_assert (notify_ctx_alice.location_vardict_changed);
+  vardict = tp_contact_dup_location (contact);
+  ASSERT_SAME_LOCATION (tp_contact_get_location (contact), vardict, norway);
+  g_variant_unref (vardict);
 
   weak_pointer = contact;
   g_object_add_weak_pointer ((GObject *) contact, &weak_pointer);
@@ -2490,7 +2561,9 @@ test_no_location (Fixture *f,
   g_assert_cmpuint (f->result.contacts->len, ==, 1);
 
   g_assert (g_ptr_array_index (f->result.contacts, 0) == contact);
-  ASSERT_SAME_LOCATION (tp_contact_get_location (contact), norway);
+  vardict = tp_contact_dup_location (contact);
+  ASSERT_SAME_LOCATION (tp_contact_get_location (contact), vardict, norway);
+  g_variant_unref (vardict);
   reset_result (&f->result);
 
   weak_pointer = contact;
@@ -2651,6 +2724,7 @@ test_contact_list (Fixture *f,
   factory = tp_proxy_get_factory (f->client_conn);
   tp_simple_client_factory_add_contact_features_varargs (factory,
       TP_CONTACT_FEATURE_ALIAS,
+      TP_CONTACT_FEATURE_AVATAR_DATA,
       TP_CONTACT_FEATURE_INVALID);
 
   /* Now put it online and wait for contact list state move to success */
@@ -2678,6 +2752,11 @@ test_contact_list (Fixture *f,
   /* Even if we didn't explicitely asked that feature, we should have it for free */
   g_assert (tp_contact_has_feature (contact, TP_CONTACT_FEATURE_SUBSCRIPTION_STATES));
   g_assert_cmpint (tp_contact_get_subscribe_state (contact), ==, TP_SUBSCRIPTION_STATE_ASK);
+  /* We asked for AVATAR_DATA, verify we got it. This is special because it has
+   * no contact attribute, and ContactList preparation does not go through
+   * the slow path. */
+  g_assert (tp_contact_has_feature (contact, TP_CONTACT_FEATURE_AVATAR_DATA));
+
   g_ptr_array_unref (contacts);
 }
 
@@ -2924,8 +3003,19 @@ int
 main (int argc,
       char **argv)
 {
+  gint ret;
+  gchar *dir;
+  GError *error = NULL;
+
   tp_tests_init (&argc, &argv);
   g_test_bug_base ("http://bugs.freedesktop.org/show_bug.cgi?id=");
+
+  /* Make sure g_get_user_cache_dir() returns a tmp directory, to not mess up
+   * user's cache dir. */
+  dir = g_dir_make_tmp ("tp-glib-tests-XXXXXX", &error);
+  g_assert_no_error (error);
+  g_setenv ("XDG_CACHE_HOME", dir, TRUE);
+  g_assert_cmpstr (g_get_user_cache_dir (), ==, dir);
 
 #define ADD(x) \
   g_test_add ("/contacts/" #x, Fixture, NULL, setup, test_ ## x, teardown)
@@ -2940,6 +3030,7 @@ main (int argc,
   ADD (by_id);
   ADD (avatar_requirements);
   ADD (avatar_data);
+  ADD (avatar_data_after_token);
   ADD (contact_info);
   ADD (dup_if_possible);
   ADD (subscription_states);
@@ -2969,5 +3060,10 @@ main (int argc,
   g_test_add ("/contacts/self-contact", Fixture, NULL,
       setup_no_connect, test_self_contact, teardown);
 
-  return g_test_run ();
+  ret = g_test_run ();
+
+  g_assert (haze_remove_directory (dir));
+  g_free (dir);
+
+  return ret;
 }

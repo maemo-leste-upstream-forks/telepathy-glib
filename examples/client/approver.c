@@ -14,8 +14,6 @@
 #include <stdio.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/debug.h>
-#include <telepathy-glib/simple-approver.h>
 
 GMainLoop *mainloop = NULL;
 
@@ -95,7 +93,7 @@ add_dispatch_operation_cb (TpSimpleApprover *self,
           tp_channel_get_identifier (channel));
     }
 
-  possible_handlers = tp_channel_dispatch_operation_borrow_possible_handlers (
+  possible_handlers = tp_channel_dispatch_operation_get_possible_handlers (
       cdo);
   if (possible_handlers[0] == NULL)
     {

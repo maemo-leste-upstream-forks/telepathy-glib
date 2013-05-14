@@ -11,7 +11,6 @@
 #include "config.h"
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/debug.h>
 
 static void
 account_manager_prepared_cb (GObject *object,
@@ -19,8 +18,8 @@ account_manager_prepared_cb (GObject *object,
     gpointer user_data)
 {
   TpAccountManager *manager = (TpAccountManager *) object;
-  GMainLoop *loop = user_data;  
-  GList *accounts;
+  GMainLoop *loop = user_data;
+  GList *accounts, *l;
   GError *error = NULL;
 
   if (!tp_proxy_prepare_finish (object, res, &error))
@@ -29,10 +28,10 @@ account_manager_prepared_cb (GObject *object,
       goto OUT;
     }
 
-  for (accounts = tp_account_manager_get_valid_accounts (manager);
-       accounts != NULL; accounts = g_list_delete_link (accounts, accounts))
+  accounts = tp_account_manager_dup_valid_accounts (manager);
+  for (l = accounts; l != NULL; l = l->next)
     {
-      TpAccount *account = accounts->data;
+      TpAccount *account = l->data;
       TpConnection *connection = tp_account_get_connection (account);
       GPtrArray *contacts;
       guint i;
@@ -61,6 +60,7 @@ account_manager_prepared_cb (GObject *object,
         }
       g_ptr_array_unref (contacts);
     }
+  g_list_free_full (accounts, g_object_unref);
 
 OUT:
   g_main_loop_quit (loop);

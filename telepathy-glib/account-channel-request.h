@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_ACCOUNT_CHANNEL_REQUEST_H__
 #define __TP_ACCOUNT_CHANNEL_REQUEST_H__
 
@@ -62,30 +66,110 @@ TpAccountChannelRequest * tp_account_channel_request_new (
     TpAccount *account,
     GHashTable *request,
     gint64 user_action_time) G_GNUC_WARN_UNUSED_RESULT;
+_TP_AVAILABLE_IN_0_20
+TpAccountChannelRequest * tp_account_channel_request_new_vardict (
+    TpAccount *account,
+    GVariant *request,
+    gint64 user_action_time) G_GNUC_WARN_UNUSED_RESULT;
 
 TpAccount * tp_account_channel_request_get_account (
     TpAccountChannelRequest *self);
 
 GHashTable * tp_account_channel_request_get_request (
     TpAccountChannelRequest *self);
+_TP_AVAILABLE_IN_0_20
+GVariant *tp_account_channel_request_dup_request (
+    TpAccountChannelRequest *self);
 
 gint64 tp_account_channel_request_get_user_action_time (
     TpAccountChannelRequest *self);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_16
 void tp_account_channel_request_set_channel_factory (
     TpAccountChannelRequest *self,
-    TpClientChannelFactory *factory) _TP_GNUC_DEPRECATED;
-
+    TpClientChannelFactory *factory);
+#endif
 
 TpChannelRequest * tp_account_channel_request_get_channel_request (
     TpAccountChannelRequest *self);
 
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_hint (TpAccountChannelRequest *self,
+    const gchar *key,
+    GVariant *value);
+
 void tp_account_channel_request_set_hints (TpAccountChannelRequest *self,
     GHashTable *hints);
 
+_TP_AVAILABLE_IN_0_16
 void tp_account_channel_request_set_delegate_to_preferred_handler (
     TpAccountChannelRequest *self,
     gboolean delegate);
+
+/* Text */
+
+_TP_AVAILABLE_IN_0_20
+TpAccountChannelRequest *tp_account_channel_request_new_text (
+    TpAccount *account,
+    gint64 user_action_time) G_GNUC_WARN_UNUSED_RESULT;
+
+/* Calls */
+
+_TP_AVAILABLE_IN_0_20
+TpAccountChannelRequest *tp_account_channel_request_new_audio_call (
+    TpAccount *account,
+    gint64 user_action_time) G_GNUC_WARN_UNUSED_RESULT;
+_TP_AVAILABLE_IN_0_20
+TpAccountChannelRequest *tp_account_channel_request_new_audio_video_call (
+    TpAccount *account,
+    gint64 user_action_time) G_GNUC_WARN_UNUSED_RESULT;
+
+/* File transfer */
+
+_TP_AVAILABLE_IN_0_20
+TpAccountChannelRequest *tp_account_channel_request_new_file_transfer (
+    TpAccount *account,
+    const gchar *filename,
+    const gchar *mime_type,
+    guint64 size,
+    gint64 user_action_time) G_GNUC_WARN_UNUSED_RESULT;
+
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_file_transfer_description (
+    TpAccountChannelRequest *self,
+    const gchar *description);
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_file_transfer_uri (
+    TpAccountChannelRequest *self,
+    const gchar *uri);
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_file_transfer_timestamp (
+    TpAccountChannelRequest *self,
+    guint64 timestamp);
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_file_transfer_initial_offset (
+    TpAccountChannelRequest *self,
+    guint64 offset);
+
+/* Channel target (shared between all channel types) */
+
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_target_contact (
+    TpAccountChannelRequest *self,
+    TpContact *contact);
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_target_id (TpAccountChannelRequest *self,
+    TpHandleType handle_type,
+    const gchar *identifier);
+
+/* Generic low-level */
+
+_TP_AVAILABLE_IN_0_20
+void tp_account_channel_request_set_request_property (
+    TpAccountChannelRequest *self,
+    const gchar *name,
+    GVariant *value);
 
 /* Request and handle API */
 
@@ -118,6 +202,7 @@ typedef void (*TpAccountChannelRequestDelegatedChannelCb) (
     TpChannel *channel,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 void tp_account_channel_request_set_delegated_channel_callback (
     TpAccountChannelRequest *self,
     TpAccountChannelRequestDelegatedChannelCb callback,

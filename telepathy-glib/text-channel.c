@@ -103,6 +103,7 @@ enum /* signals */
   SIG_MESSAGE_RECEIVED,
   SIG_PENDING_MESSAGE_REMOVED,
   SIG_MESSAGE_SENT,
+  SIG_CONTACT_CHAT_STATE_CHANGED,
   LAST_SIGNAL
 };
 
@@ -192,7 +193,7 @@ get_sender (TpTextChannel *self,
 
   sender_id = tp_asv_get_string (header, "message-sender-id");
 
-  conn = tp_channel_borrow_connection ((TpChannel *) self);
+  conn = tp_channel_get_connection ((TpChannel *) self);
   *contact = tp_connection_dup_contact_if_possible (conn, handle, sender_id);
 
   if (*contact == NULL)
@@ -229,7 +230,7 @@ prepare_sender_async (TpTextChannel *self,
     {
       TpConnection *conn;
 
-      conn = tp_channel_borrow_connection ((TpChannel *) self);
+      conn = tp_channel_get_connection ((TpChannel *) self);
 
       DEBUG ("Failed to get our self contact, please fix CM (%s)",
           tp_proxy_get_object_path (conn));
@@ -359,6 +360,42 @@ message_sent_cb (TpChannel *channel,
 }
 
 static void
+chat_state_changed_cb (TpTextChannel *self,
+    TpHandle handle,
+    TpChannelChatState state)
+{
+  TpConnection *conn;
+  TpContact *contact;
+
+  /* We have only an handle, but since we guarantee "contact-chat-state-changed"
+   * to be emitted only if TP_CHANNEL_FEATURE_GROUP and
+   * TP_CHANNEL_FEATURE_CONTACTS has been prepared, we should already have its
+   * TpContact. If the TpContact does not exist, telling its chat state is
+   * useless anyway. */
+  conn = tp_channel_get_connection ((TpChannel *) self);
+  contact = tp_connection_dup_contact_if_possible (conn, handle, NULL);
+  if (contact == NULL)
+    return;
+
+  g_signal_emit (self, signals[SIG_CONTACT_CHAT_STATE_CHANGED], 0,
+      contact, state);
+
+  g_object_unref (contact);
+}
+
+static void
+tp_text_channel_prepare_chat_states_async (TpProxy *proxy,
+    const TpProxyFeature *feature,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  /* This feature depends on TP_CHANNEL_FEATURE_CHAT_STATES so it's already
+   * prepared. */
+  tp_simple_async_report_success_in_idle ((GObject *) proxy,
+      callback, user_data, tp_text_channel_prepare_chat_states_async);
+}
+
+static void
 tp_text_channel_constructed (GObject *obj)
 {
   TpTextChannel *self = (TpTextChannel *) obj;
@@ -399,7 +436,12 @@ tp_text_channel_constructed (GObject *obj)
 
     }
 
-  props = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  /* Forward TpChannel::chat-state-changed as
+   * TpTextChannel::contact-chat-state-changed */
+  g_signal_connect (self, "chat-state-changed",
+      G_CALLBACK (chat_state_changed_cb), NULL);
+
+  props = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
 
   self->priv->supported_content_types = (GStrv) tp_asv_get_strv (props,
       TP_PROP_CHANNEL_INTERFACE_MESSAGES_SUPPORTED_CONTENT_TYPES);
@@ -639,7 +681,7 @@ get_pending_messages_cb (TpProxy *proxy,
           error->domain, error->code,
           "Failed to get PendingMessages property: %s", error->message);
 
-      g_simple_async_result_complete (self->priv->pending_messages_result);
+      g_simple_async_result_complete_in_idle (self->priv->pending_messages_result);
       g_clear_object (&self->priv->pending_messages_result);
       return;
     }
@@ -649,10 +691,10 @@ get_pending_messages_cb (TpProxy *proxy,
       DEBUG ("PendingMessages property is of the wrong type");
 
       g_simple_async_result_set_error (self->priv->pending_messages_result,
-          TP_ERRORS, TP_ERROR_CONFUSED,
+          TP_ERROR, TP_ERROR_CONFUSED,
           "PendingMessages property is of the wrong type");
 
-      g_simple_async_result_complete (self->priv->pending_messages_result);
+      g_simple_async_result_complete_in_idle (self->priv->pending_messages_result);
       g_clear_object (&self->priv->pending_messages_result);
       return;
     }
@@ -661,7 +703,7 @@ get_pending_messages_cb (TpProxy *proxy,
 
   if (messages->len == 0)
     {
-      g_simple_async_result_complete (self->priv->pending_messages_result);
+      g_simple_async_result_complete_in_idle (self->priv->pending_messages_result);
       g_clear_object (&self->priv->pending_messages_result);
       return;
     }
@@ -740,7 +782,7 @@ get_sms_channel_cb (TpProxy *proxy,
     {
       DEBUG ("SMSChannel property is of the wrong type");
 
-      g_simple_async_result_set_error (result, TP_ERRORS, TP_ERROR_CONFUSED,
+      g_simple_async_result_set_error (result, TP_ERROR, TP_ERROR_CONFUSED,
           "SMSChannel property is of the wrong type");
       goto out;
     }
@@ -753,7 +795,7 @@ get_sms_channel_cb (TpProxy *proxy,
     g_object_notify (G_OBJECT (self), "is-sms-channel");
 
 out:
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -802,6 +844,7 @@ tp_text_channel_prepare_sms_async (TpProxy *proxy,
 enum {
     FEAT_PENDING_MESSAGES,
     FEAT_SMS,
+    FEAT_CHAT_STATES,
     N_FEAT
 };
 
@@ -810,6 +853,7 @@ tp_text_channel_list_features (TpProxyClass *cls G_GNUC_UNUSED)
 {
   static TpProxyFeature features[N_FEAT + 1] = { { 0 } };
   static GQuark need_sms[2] = {0, 0};
+  static GQuark depends_chat_state[2] = {0, 0};
 
   if (G_LIKELY (features[0].name != 0))
     return features;
@@ -825,6 +869,15 @@ tp_text_channel_list_features (TpProxyClass *cls G_GNUC_UNUSED)
     tp_text_channel_prepare_sms_async;
   need_sms[0] = TP_IFACE_QUARK_CHANNEL_INTERFACE_SMS;
   features[FEAT_SMS].interfaces_needed = need_sms;
+
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  features[FEAT_CHAT_STATES].name =
+    TP_TEXT_CHANNEL_FEATURE_CHAT_STATES;
+  features[FEAT_CHAT_STATES].prepare_async =
+    tp_text_channel_prepare_chat_states_async;
+  depends_chat_state[0] = TP_CHANNEL_FEATURE_CHAT_STATES;
+  features[FEAT_CHAT_STATES].depends_on = depends_chat_state;
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   /* assert that the terminator at the end is there */
   g_assert (features[N_FEAT].name == 0);
@@ -1025,6 +1078,26 @@ tp_text_channel_class_init (TpTextChannelClass *klass)
       3, TP_TYPE_SIGNALLED_MESSAGE, G_TYPE_UINT, G_TYPE_STRING);
 
   g_type_class_add_private (gobject_class, sizeof (TpTextChannelPrivate));
+
+  /**
+   * TpTextChannel::contact-chat-state-changed:
+   * @self: a channel
+   * @contact: a #TpContact for the local user or another contact
+   * @state: the new #TpChannelChatState for the contact
+   *
+   * Emitted when a contact's chat state changes after tp_proxy_prepare_async()
+   * has finished preparing features %TP_TEXT_CHANNEL_FEATURE_CHAT_STATES,
+   * %TP_CHANNEL_FEATURE_GROUP and %TP_CHANNEL_FEATURE_CONTACTS.
+   *
+   * Since: 0.19.0
+   */
+  signals[SIG_CONTACT_CHAT_STATE_CHANGED] = g_signal_new (
+      "contact-chat-state-changed",
+      G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL, NULL,
+      G_TYPE_NONE, 2, TP_TYPE_CONTACT, G_TYPE_UINT);
 }
 
 static void
@@ -1053,6 +1126,7 @@ tp_text_channel_init (TpTextChannel *self)
  * Returns: (transfer full): a newly created #TpTextChannel
  *
  * Since: 0.13.10
+ * Deprecated: Use tp_simple_client_factory_ensure_channel() instead.
  */
 TpTextChannel *
 tp_text_channel_new (TpConnection *conn,
@@ -1155,7 +1229,7 @@ tp_text_channel_get_delivery_reporting_support (
  * Expands to a call to a function that returns a quark representing the
  * incoming messages features of a #TpTextChannel.
  *
- * When this feature is prepared, tp_text_channel_get_pending_messages() will
+ * When this feature is prepared, tp_text_channel_dup_pending_messages() will
  * return a non-empty list if any unacknowledged messages are waiting, and the
  * #TpTextChannel::message-received and #TpTextChannel::pending-message-removed
  * signals will be emitted.
@@ -1187,11 +1261,37 @@ tp_text_channel_get_feature_quark_incoming_messages (void)
  * a #GList of borrowed #TpSignalledMessage
  *
  * Since: 0.13.10
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_text_channel_dup_pending_messages() instead.
  */
 GList *
 tp_text_channel_get_pending_messages (TpTextChannel *self)
 {
   return g_list_copy (g_queue_peek_head_link (self->priv->pending_messages));
+}
+
+/**
+ * tp_text_channel_dup_pending_messages:
+ * @self: a #TpTextChannel
+ *
+ * Return a newly allocated list of unacknowledged #TpSignalledMessage
+ * objects.
+ *
+ * It is guaranteed that the #TpSignalledMessage:sender of each
+ * #TpSignalledMessage has all of the features previously passed to
+ * tp_simple_client_factory_add_contact_features() prepared.
+ *
+ * Returns: (transfer full) (element-type TelepathyGLib.SignalledMessage):
+ * a #GList of reffed #TpSignalledMessage
+ *
+ * Since: 0.19.9
+ */
+GList *
+tp_text_channel_dup_pending_messages (TpTextChannel *self)
+{
+  return _tp_g_list_copy_deep (
+      g_queue_peek_head_link (self->priv->pending_messages),
+      (GCopyFunc) g_object_ref, NULL);
 }
 
 static void
@@ -1213,7 +1313,7 @@ send_message_cb (TpChannel *proxy,
   g_simple_async_result_set_op_res_gpointer (result,
       tp_str_empty (token) ? NULL : g_strdup (token), g_free);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1291,7 +1391,7 @@ acknowledge_pending_messages_ready_cb (GObject *object,
 
   _tp_channel_contacts_queue_prepare_finish (channel, res, NULL, NULL);
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1308,7 +1408,7 @@ acknowledge_pending_messages_cb (TpChannel *channel,
       DEBUG ("Failed to ack messages: %s", error->message);
 
       g_simple_async_result_set_from_error (result, error);
-      g_simple_async_result_complete (result);
+      g_simple_async_result_complete_in_idle (result);
       g_object_unref (result);
       return;
     }
@@ -1334,7 +1434,7 @@ acknowledge_pending_messages_cb (TpChannel *channel,
  * result of the operation.
  *
  * You should use the #TpSignalledMessage received from
- * tp_text_channel_get_pending_messages() or the
+ * tp_text_channel_dup_pending_messages() or the
  * #TpTextChannel::message-received signal.
  *
  * See tp_text_channel_ack_message_async() about acknowledging messages.
@@ -1432,7 +1532,7 @@ tp_text_channel_ack_messages_finish (TpTextChannel *self,
  * signal is fired.
  *
  * You should use the #TpSignalledMessage received from
- * tp_text_channel_get_pending_messages() or the
+ * tp_text_channel_dup_pending_messages() or the
  * #TpTextChannel::message-received signal.
  *
  * Since: 0.13.10
@@ -1456,7 +1556,7 @@ tp_text_channel_ack_message_async (TpTextChannel *self,
   if (!valid)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback, user_data,
-          TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Message doesn't have a pending-message-id");
 
       return;
@@ -1494,6 +1594,53 @@ tp_text_channel_ack_message_finish (TpTextChannel *self,
   _tp_implement_finish_void (self, tp_text_channel_ack_message_async)
 }
 
+/**
+ * TP_TEXT_CHANNEL_FEATURE_CHAT_STATES:
+ *
+ * Expands to a call to a function that returns a quark representing the
+ * chat states feature on a #TpTextChannel.
+ *
+ * When this feature is prepared, tp_text_channel_get_chat_state() and the
+ * #TpTextChannel::contact-chat-state-changed signal become useful.
+ *
+ * One can ask for a feature to be prepared using the
+ * tp_proxy_prepare_async() function, and waiting for it to callback.
+ *
+ * Since: 0.19.0
+ */
+
+GQuark
+tp_text_channel_get_feature_quark_chat_states (void)
+{
+  return g_quark_from_static_string ("tp-text-channel-feature-chat-states");
+}
+
+/**
+ * tp_text_channel_get_chat_state:
+ * @self: a channel
+ * @contact: a #TpContact
+ *
+ * Return the chat state for the given contact. If tp_proxy_is_prepared()
+ * would return %FALSE for the feature %TP_TEXT_CHANNEL_FEATURE_CHAT_STATES,
+ * the result will always be %TP_CHANNEL_CHAT_STATE_INACTIVE.
+ *
+ * Returns: the chat state for @contact, or %TP_CHANNEL_CHAT_STATE_INACTIVE
+ *  if their chat state is not known
+ * Since: 0.19.0
+ */
+TpChannelChatState
+tp_text_channel_get_chat_state (TpTextChannel *self,
+    TpContact *contact)
+{
+  g_return_val_if_fail (TP_IS_TEXT_CHANNEL (self), 0);
+
+  /* Use the deprecated function internally to avoid duplicated introspection */
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  return tp_channel_get_chat_state ((TpChannel *) self,
+      tp_contact_get_handle (contact));
+  G_GNUC_END_IGNORE_DEPRECATIONS
+}
+
 static void
 set_chat_state_cb (TpChannel *proxy,
       const GError *error,
@@ -1509,7 +1656,7 @@ set_chat_state_cb (TpChannel *proxy,
       g_simple_async_result_set_from_error (result, error);
     }
 
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
   g_object_unref (result);
 }
 
@@ -1721,7 +1868,7 @@ get_sms_length_cb (TpChannel *proxy,
       (GDestroyNotify) get_sms_length_return_free);
 
 out:
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 /**
@@ -1825,7 +1972,7 @@ tp_text_channel_get_sms_length_finish (TpTextChannel *self,
  *
  * Acknowledge all the pending messages. This is equivalent of calling
  * tp_text_channel_ack_messages_async() with the list of #TpSignalledMessage
- * returned by tp_text_channel_get_pending_messages().
+ * returned by tp_text_channel_dup_pending_messages().
  *
  * Once the messages have been acked, @callback will be called.
  * You can then call tp_text_channel_ack_all_pending_messages_finish() to get

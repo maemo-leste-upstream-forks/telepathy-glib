@@ -75,7 +75,8 @@
  * // ...
  * ]|
  *   <para>and include %TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST in
- *    #TpBaseConnectionClass.interfaces_always_present;</para>
+ *    the output of
+ *    #TpBaseConnectionClass.get_interfaces_always_present;</para>
  *  </listitem>
  *  <listitem>
  *   <para>in the #TpBaseConnectionClass.create_channel_managers
@@ -91,8 +92,8 @@
  *
  * To support user-defined contact groups too, additionally implement
  * %TP_TYPE_CONTACT_GROUP_LIST in the #TpBaseContactList subclass, add the
- * %TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS interface to
- * #TpBaseConnectionClass.interfaces_always_present, and implement the
+ * %TP_IFACE_CONNECTION_INTERFACE_CONTACT_GROUPS interface to the output of
+ * #TpBaseConnectionClass.get interfaces_always_present, and implement the
  * %TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_GROUPS in the #TpBaseConnection
  * subclass using tp_base_contact_list_mixin_groups_iface_init().
  *
@@ -275,7 +276,7 @@ struct _TpBaseContactListPrivate
   GError *failure /* initially NULL */;
 
   /* values referenced; 0'th remains NULL */
-  TpBaseContactListChannel *lists[NUM_TP_LIST_HANDLES];
+  TpBaseContactListChannel *lists[TP_NUM_LIST_HANDLES];
 
   TpHandleRepoIface *group_repo;
   /* handle borrowed from channel => referenced TpContactGroupChannel */
@@ -591,16 +592,16 @@ tp_base_contact_list_fail_blocked_contact_requests (
 static void
 tp_base_contact_list_free_contents (TpBaseContactList *self)
 {
-  GError error = { TP_ERRORS, TP_ERROR_DISCONNECTED,
+  GError error = { TP_ERROR, TP_ERROR_DISCONNECTED,
       "Disconnected before blocked contacts were retrieved" };
   guint i;
 
-  tp_base_contact_list_fail_channel_requests (self, TP_ERRORS,
+  tp_base_contact_list_fail_channel_requests (self, TP_ERROR,
       TP_ERROR_DISCONNECTED,
       "Unable to complete channel request due to disconnection");
   tp_base_contact_list_fail_blocked_contact_requests (self, &error);
 
-  for (i = 0; i < NUM_TP_LIST_HANDLES; i++)
+  for (i = 0; i < TP_NUM_LIST_HANDLES; i++)
     tp_clear_object (self->priv->lists + i);
 
   tp_clear_pointer (&self->priv->groups, g_hash_table_unref);
@@ -720,7 +721,7 @@ tp_base_contact_list_repo_normalize_group (TpHandleRepoIface *repo,
   ret = tp_base_contact_list_normalize_group (self, id);
 
   if (ret == NULL)
-    g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+    g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
         "Invalid group name '%s'", id);
 
   return ret;
@@ -729,7 +730,7 @@ tp_base_contact_list_repo_normalize_group (TpHandleRepoIface *repo,
 /* elements 0, 1... of this enum must be kept in sync with elements 1, 2...
  * of the enum in the -internal header */
 static const gchar * const tp_base_contact_list_contact_lists
-  [NUM_TP_LIST_HANDLES + 1] = {
+  [TP_NUM_LIST_HANDLES + 1] = {
     "subscribe",
     "publish",
     "stored",
@@ -883,7 +884,7 @@ tp_base_contact_list_download_async_default (TpBaseContactList *self,
     gpointer user_data)
 {
   g_simple_async_report_error_in_idle (G_OBJECT (self), callback,
-      user_data, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      user_data, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
       "This CM does not implement Download");
 }
 
@@ -1001,7 +1002,7 @@ tp_base_contact_list_foreach_channel (TpChannelManager *manager,
   /* in both cases, we look in channel_requests to avoid including channels
    * that don't officially exist yet */
 
-  for (i = 0; i < NUM_TP_LIST_HANDLES; i++)
+  for (i = 0; i < TP_NUM_LIST_HANDLES; i++)
     {
       if (self->priv->lists[i] != NULL &&
           !g_hash_table_lookup_extended (self->priv->channel_requests,
@@ -1082,7 +1083,7 @@ tp_base_contact_list_new_channel (TpBaseContactList *self,
   if (handle_type == TP_HANDLE_TYPE_LIST)
     {
       object_path = g_strdup_printf ("%s/ContactList/%s",
-          self->priv->conn->object_path,
+          tp_base_connection_get_object_path (self->priv->conn),
           tp_base_contact_list_contact_lists[handle - 1]);
       type = TP_TYPE_CONTACT_LIST_CHANNEL;
     }
@@ -1090,7 +1091,7 @@ tp_base_contact_list_new_channel (TpBaseContactList *self,
     {
       g_assert (handle_type == TP_HANDLE_TYPE_GROUP);
       object_path = g_strdup_printf ("%s/Group/%u",
-          self->priv->conn->object_path, handle);
+          tp_base_connection_get_object_path (self->priv->conn), handle);
       type = TP_TYPE_CONTACT_GROUP_CHANNEL;
     }
 
@@ -1173,7 +1174,7 @@ tp_base_contact_list_create_group_cb (GObject *source,
       if (tokens == NULL)
         return;
 
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "%s did not create a group even though it claims to have done so",
           G_OBJECT_TYPE_NAME (self));
     }
@@ -1229,12 +1230,12 @@ tp_base_contact_list_request_helper (TpChannelManager *manager,
     {
       /* TpBaseConnection already checked the handle for validity */
       g_assert (handle > 0);
-      g_assert (handle < NUM_TP_LIST_HANDLES);
+      g_assert (handle < TP_NUM_LIST_HANDLES);
 
       if (handle == TP_LIST_HANDLE_STORED &&
           !tp_base_contact_list_get_contact_list_persists (self))
         {
-          g_set_error_literal (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+          g_set_error_literal (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
               "Subscriptions do not persist, so this connection lacks the "
               "'stored' channel");
           goto error;
@@ -1243,7 +1244,7 @@ tp_base_contact_list_request_helper (TpChannelManager *manager,
       if (handle == TP_LIST_HANDLE_DENY &&
           !tp_base_contact_list_can_block (self))
         {
-          g_set_error_literal (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+          g_set_error_literal (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
               "This connection cannot put people on the 'deny' list");
           goto error;
         }
@@ -1288,7 +1289,7 @@ tp_base_contact_list_request_helper (TpChannelManager *manager,
             }
           else
             {
-              g_set_error_literal (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+              g_set_error_literal (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
                   "This connection cannot create new groups");
               goto error;
             }
@@ -1296,7 +1297,7 @@ tp_base_contact_list_request_helper (TpChannelManager *manager,
     }
   else if (is_create)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "A ContactList channel for type #%u, handle #%u already exists",
           handle_type, handle);
       goto error;
@@ -1446,7 +1447,7 @@ _tp_base_contact_list_add_to_group (TpBaseContactList *self,
 
   if (!TP_IS_MUTABLE_CONTACT_GROUP_LIST (self))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot add contacts to a group");
       goto error;
     }
@@ -1508,7 +1509,7 @@ _tp_base_contact_list_remove_from_group (TpBaseContactList *self,
 
   if (!TP_IS_MUTABLE_CONTACT_GROUP_LIST (self))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot remove contacts from a group");
       goto error;
     }
@@ -1562,13 +1563,13 @@ _tp_base_contact_list_delete_group_by_handle (TpBaseContactList *self,
   if (tp_base_contact_list_get_state (self, error) !=
       TP_CONTACT_LIST_STATE_SUCCESS)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_DISCONNECTED, "Disconnected");
+      g_set_error (error, TP_ERROR, TP_ERROR_DISCONNECTED, "Disconnected");
       return FALSE;
     }
 
   if (!TP_IS_MUTABLE_CONTACT_GROUP_LIST (self))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot remove a group");
       return FALSE;
     }
@@ -1673,7 +1674,7 @@ _tp_base_contact_list_add_to_list (TpBaseContactList *self,
 
   if (!tp_base_contact_list_can_change_contact_list (self))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot change subscriptions");
       goto error;
     }
@@ -1775,7 +1776,7 @@ _tp_base_contact_list_remove_from_list (TpBaseContactList *self,
 
   if (!tp_base_contact_list_can_change_contact_list (self))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot change subscriptions");
       goto error;
     }
@@ -1992,7 +1993,7 @@ tp_base_contact_list_set_list_received (TpBaseContactList *self)
       tp_handle_set_destroy (blocked);
     }
 
-  for (i = 0; i < NUM_TP_LIST_HANDLES; i++)
+  for (i = 0; i < TP_NUM_LIST_HANDLES; i++)
     {
       if (self->priv->lists[i] != NULL)
         tp_base_contact_list_announce_channel (self, self->priv->lists[i],
@@ -3211,7 +3212,7 @@ tp_base_contact_list_download_async (TpBaseContactList *self,
  * tp_base_contact_list_download_async().
  *
  * This is a virtual method which may be implemented using
- * #TpContactListClass.download_finish. If the @result
+ * #TpBaseContactListClass.download_finish. If the @result
  * will be a #GSimpleAsyncResult, the default implementation may be used.
  *
  * Returns: %TRUE on success or %FALSE on error
@@ -3728,8 +3729,6 @@ tp_base_contact_list_groups_created (TpBaseContactList *self,
 
               tp_base_contact_list_announce_channel (self, c, NULL);
             }
-
-          tp_handle_unref (self->priv->group_repo, handle);
         }
     }
 
@@ -3803,7 +3802,7 @@ tp_base_contact_list_groups_removed (TpBaseContactList *self,
     return;
 
   old_members = tp_handle_set_new (self->priv->contact_repo);
-  actually_removed = _tp_g_ptr_array_new_full (n_removed + 1, g_free);
+  actually_removed = g_ptr_array_new_full (n_removed + 1, g_free);
 
   for (i = 0; i < n_removed; i++)
     {
@@ -3840,7 +3839,7 @@ tp_base_contact_list_groups_removed (TpBaseContactList *self,
                * actor. */
               tp_group_mixin_change_members (c, "",
                   NULL, tp_handle_set_peek (group_members), NULL, NULL,
-                  self->priv->conn->self_handle,
+                  tp_base_connection_get_self_handle (self->priv->conn),
                   TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
 
               tp_channel_manager_emit_channel_closed_for_object (self, c);
@@ -3934,10 +3933,7 @@ tp_base_contact_list_group_renamed (TpBaseContactList *self,
   new_handle = tp_handle_ensure (self->priv->group_repo, new_name, NULL, NULL);
 
   if (new_handle == 0)
-    {
-      tp_handle_unref (self->priv->group_repo, old_handle);
-      return;
-    }
+    return;
 
   new_chan = g_hash_table_lookup (self->priv->groups,
       GUINT_TO_POINTER (new_handle));
@@ -3960,12 +3956,14 @@ tp_base_contact_list_group_renamed (TpBaseContactList *self,
   /* move the members - presumably the self-handle is the actor */
   set = tp_handle_set_peek (old_members);
   tp_group_mixin_change_members (new_chan, "", set, NULL, NULL, NULL,
-      self->priv->conn->self_handle, TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
+      tp_base_connection_get_self_handle (self->priv->conn),
+      TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
 
   if (old_chan != NULL)
     {
       tp_group_mixin_change_members (old_chan, "", NULL, set, NULL, NULL,
-          self->priv->conn->self_handle, TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
+          tp_base_connection_get_self_handle (self->priv->conn),
+          TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
       tp_channel_manager_emit_channel_closed_for_object (self, old_chan);
       _tp_base_contact_list_channel_close (old_chan);
     }
@@ -4005,8 +4003,6 @@ tp_base_contact_list_group_renamed (TpBaseContactList *self,
         }
     }
 
-  tp_handle_unref (self->priv->group_repo, new_handle);
-  tp_handle_unref (self->priv->group_repo, old_handle);
   tp_handle_set_destroy (old_members);
 }
 
@@ -4125,7 +4121,8 @@ tp_base_contact_list_groups_changed (TpBaseContactList *self,
 
       if (tp_group_mixin_change_members (c, "",
           tp_handle_set_peek (contacts), NULL, NULL, NULL,
-          self->priv->conn->self_handle, TP_CHANNEL_GROUP_CHANGE_REASON_NONE))
+          tp_base_connection_get_self_handle (self->priv->conn),
+          TP_CHANNEL_GROUP_CHANGE_REASON_NONE))
         g_ptr_array_add (really_added, (gchar *) added[i]);
     }
 
@@ -4150,7 +4147,8 @@ tp_base_contact_list_groups_changed (TpBaseContactList *self,
 
       if (tp_group_mixin_change_members (c, "",
           NULL, tp_handle_set_peek (contacts), NULL, NULL,
-          self->priv->conn->self_handle, TP_CHANNEL_GROUP_CHANGE_REASON_NONE))
+          tp_base_connection_get_self_handle (self->priv->conn),
+          TP_CHANNEL_GROUP_CHANGE_REASON_NONE))
         g_ptr_array_add (really_removed, (gchar *) removed[i]);
     }
 
@@ -5084,7 +5082,7 @@ tp_base_contact_list_check_list_change (TpBaseContactList *self,
 
   if (!tp_base_contact_list_can_change_contact_list (self))
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot change subscriptions");
       return FALSE;
     }
@@ -5103,7 +5101,7 @@ tp_base_contact_list_check_group_change (TpBaseContactList *self,
   if (tp_base_contact_list_get_group_storage (self) ==
       TP_CONTACT_METADATA_STORAGE_TYPE_NONE)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "Cannot change group memberships");
       return FALSE;
     }
@@ -5593,7 +5591,6 @@ tp_base_contact_list_mixin_set_contact_groups (
               (gchar *) tp_handle_inspect (self->priv->group_repo,
                 group_handle));
           tp_handle_set_add (group_set, group_handle);
-          tp_handle_unref (self->priv->group_repo, group_handle);
         }
       else
         {
@@ -5700,16 +5697,12 @@ tp_base_contact_list_mixin_add_to_group (
   tp_base_contact_list_add_to_group_async (self,
       tp_handle_inspect (self->priv->group_repo, group_handle),
       contacts_set, tp_base_contact_list_mixin_add_to_group_cb, context);
-  tp_handle_unref (self->priv->group_repo, group_handle);
   tp_handle_set_destroy (contacts_set);
   return;
 
 sync_exit:
   tp_base_contact_list_mixin_return_void (context, error);
   g_clear_error (&error);
-
-  if (group_handle != 0)
-    tp_handle_unref (self->priv->group_repo, group_handle);
 }
 
 static void
@@ -5840,7 +5833,7 @@ tp_base_contact_list_mixin_rename_group (
 
   if (old_handle == 0 || old_channel == NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_DOES_NOT_EXIST,
+      g_set_error (&error, TP_ERROR, TP_ERROR_DOES_NOT_EXIST,
           "Group '%s' does not exist", before);
       goto sync_exit;
     }
@@ -5853,7 +5846,7 @@ tp_base_contact_list_mixin_rename_group (
   if (g_hash_table_lookup (self->priv->groups, GUINT_TO_POINTER (new_handle))
       != NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "Group '%s' already exists",
           tp_handle_inspect (self->priv->group_repo, new_handle));
       goto sync_exit;
@@ -5863,15 +5856,11 @@ tp_base_contact_list_mixin_rename_group (
       tp_handle_inspect (self->priv->group_repo, old_handle),
       tp_handle_inspect (self->priv->group_repo, new_handle),
       tp_base_contact_list_mixin_rename_group_cb, context);
-  tp_handle_unref (self->priv->group_repo, new_handle);
   return;
 
 sync_exit:
   tp_base_contact_list_mixin_return_void (context, error);
   g_clear_error (&error);
-
-  if (new_handle != 0)
-    tp_handle_unref (self->priv->group_repo, new_handle);
 }
 
 typedef enum {
@@ -6026,7 +6015,7 @@ tp_base_contact_list_mixin_groups_iface_init (
 #define ERROR_IF_BLOCKING_NOT_SUPPORTED(self, context) \
   if (!self->priv->svc_contact_blocking) \
     { \
-      GError e = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED, \
+      GError e = { TP_ERROR, TP_ERROR_NOT_IMPLEMENTED, \
           "ContactBlocking is not supported on this connection" }; \
       dbus_g_method_return_error (context, &e); \
       return; \
@@ -6068,7 +6057,7 @@ tp_base_contact_list_mixin_request_blocked_contacts (
 
     default:
       {
-        GError broken = { TP_ERRORS, TP_ERROR_CONFUSED,
+        GError broken = { TP_ERROR, TP_ERROR_CONFUSED,
             "My internal list of blocked contacts is inconsistent! "
             "I apologise for any inconvenience caused." };
         dbus_g_method_return_error (context, &broken);
@@ -6360,7 +6349,7 @@ tp_base_contact_list_get_state (TpBaseContactList *self,
       TP_CONTACT_LIST_STATE_FAILURE);
 
   if (self->priv->state != TP_CONTACT_LIST_STATE_SUCCESS)
-    g_set_error (error, TP_ERRORS, TP_ERROR_NOT_YET,
+    g_set_error (error, TP_ERROR, TP_ERROR_NOT_YET,
         "Contact list not downloaded yet");
 
   return self->priv->state;
@@ -6386,7 +6375,7 @@ tp_base_contact_list_get_connection (TpBaseContactList *self,
 
   if (self->priv->conn == NULL)
     {
-      g_set_error_literal (error, TP_ERRORS, TP_ERROR_DISCONNECTED,
+      g_set_error_literal (error, TP_ERROR, TP_ERROR_DISCONNECTED,
           "Connection is no longer connected");
       return NULL;
     }

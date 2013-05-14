@@ -221,7 +221,7 @@ tp_cm_param_filter_uint_nonzero (const TpCMParamSpec *paramspec,
 {
   if (g_value_get_uint (value) == 0)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account parameter '%s' may not be set to zero",
           paramspec->name);
       return FALSE;
@@ -248,7 +248,7 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
 
   if (str == NULL || str[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Account parameter '%s' may not be set to an empty string",
           paramspec->name);
       return FALSE;
@@ -414,6 +414,37 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
  */
 
 /**
+ * TpBaseProtocolGetInterfacesArrayFunc:
+ * @self: a #TpBaseProtocol
+ *
+ * Signature of an implementation of
+ * #TpBaseProtocolClass.get_interfaces_array virtual function.
+ *
+ * Implementation must first chainup on parent class implementation and then
+ * add extra interfaces into the #GPtrArray.
+ *
+ * |[
+ * static GPtrArray *
+ * my_protocol_get_interfaces_array (TpBaseProtocol *self)
+ * {
+ *   GPtrArray *interfaces;
+ *
+ *   interfaces = TP_BASE_PROTOCOL_CLASS (
+ *       my_protocol_parent_class)->get_interfaces_array (self);
+ *
+ *   g_ptr_array_add (interfaces, TP_IFACE_BADGERS);
+ *
+ *   return interfaces;
+ * }
+ * ]|
+ *
+ * Returns: (transfer container): a #GPtrArray of static strings for D-Bus
+ *   interfaces implemented by this client.
+ *
+ * Since: 0.19.4
+ */
+
+/**
  * TP_TYPE_PROTOCOL_ADDRESSING:
  *
  * Interface representing a #TpBaseProtocol that implements
@@ -517,8 +548,10 @@ tp_cm_param_filter_string_nonempty (const TpCMParamSpec *paramspec,
  *  and must either return a newly allocated string that represents the
  *  "identity" of the parameters in @asv (usually the "account" parameter),
  *  or %NULL with an error raised via @error
- * @get_interfaces: a callback used to implement the Interfaces D-Bus property;
- *  it must return a newly allocated #GStrv containing D-Bus interface names
+ * @get_interfaces_array: a callback used to implement the Interfaces
+ *  D-Bus property; The implementation must first chainup to parent
+ *  class implementation and then add extra interfaces to the
+ *  #GPtrArray. Replaces @get_interfaces
  * @get_connection_details: a callback used to implement the Protocol D-Bus
  *  properties that represent details of the connections provided by this
  *  protocol
@@ -633,14 +666,17 @@ tp_base_protocol_constructed (GObject *object)
   TpBaseProtocolClass *cls = TP_BASE_PROTOCOL_GET_CLASS (self);
   void (*chain_up) (GObject *) =
     ((GObjectClass *) tp_base_protocol_parent_class)->constructed;
+  GPtrArray *ifaces;
 
   if (chain_up != NULL)
     chain_up (object);
 
-  if (cls->get_interfaces != NULL)
-    {
-      self->priv->interfaces = (cls->get_interfaces) (self);
-    }
+  /* TODO: when we don't have to deal with
+   * TpBaseProtocolClass.get_interfaces, we won't have to do any of this */
+  ifaces = (cls->get_interfaces_array) (self);
+  g_ptr_array_add (ifaces, NULL);
+  self->priv->interfaces = g_strdupv ((GStrv) ifaces->pdata);
+  g_ptr_array_unref (ifaces);
 
   if (cls->get_connection_details != NULL)
     {
@@ -1112,6 +1148,32 @@ protocol_properties_getter (GObject *object,
     }
 }
 
+static GPtrArray *
+tp_base_protocol_get_interfaces_array (TpBaseProtocol *self)
+{
+  TpBaseProtocolClass *klass = TP_BASE_PROTOCOL_GET_CLASS (self);
+  GPtrArray *interfaces = g_ptr_array_new ();
+  gchar **old_ifaces = NULL, **ptr;
+
+  /* copy the klass->get_interfaces property value for backwards
+   * compatibility */
+  if (klass->get_interfaces != NULL)
+    old_ifaces = klass->get_interfaces (self);
+
+  for (ptr = old_ifaces;
+       ptr != NULL && *ptr != NULL;
+       ptr++)
+    {
+      g_ptr_array_add (interfaces, (char *) *ptr);
+    }
+
+  /* TODO: old_ifaces is leaked because get_interfaces returns a new
+   * GStrv, but we want static strings nowadays. leaking is better
+   * than crashing though. this'll be fixed soon */
+
+  return interfaces;
+}
+
 static void
 tp_base_protocol_class_init (TpBaseProtocolClass *klass)
 {
@@ -1177,6 +1239,8 @@ tp_base_protocol_class_init (TpBaseProtocolClass *klass)
   object_class->get_property = tp_base_protocol_get_property;
   object_class->set_property = tp_base_protocol_set_property;
   object_class->finalize = tp_base_protocol_finalize;
+
+  klass->get_interfaces_array = tp_base_protocol_get_interfaces_array;
 
   g_object_class_install_property (object_class, PROP_NAME,
       g_param_spec_string ("name",
@@ -1314,7 +1378,7 @@ _tp_cm_param_spec_check_all_allowed (const TpCMParamSpec *parameters,
       error_txt = g_string_free (error_str, FALSE);
 
       DEBUG ("%s", error_txt);
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "%s", error_txt);
       g_free (error_txt);
       ret = FALSE;
@@ -1335,7 +1399,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
   if (tp_asv_lookup (asv, name) == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "%s not found in parameters", name);
       return NULL;
     }
@@ -1351,7 +1415,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (G_VALUE_TYPE (value) != param_spec->gtype)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s has type %s, but %s was expected",
                   name, G_VALUE_TYPE_NAME (value),
                   g_type_name (param_spec->gtype));
@@ -1372,7 +1436,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (!valid)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s has a non-integer type or is out of range (type=%s)",
                   name, G_VALUE_TYPE_NAME (value));
               return NULL;
@@ -1381,7 +1445,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
           if (param_spec->dtype[0] == DBUS_TYPE_INT16 &&
               (i < -0x8000 || i > 0x7fff))
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s is out of range for a 16-bit signed integer", name);
               return NULL;
             }
@@ -1401,7 +1465,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (!valid)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s has a non-integer type or is out of range (type=%s)",
                   name, G_VALUE_TYPE_NAME (value));
               return NULL;
@@ -1409,14 +1473,14 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (param_spec->dtype[0] == DBUS_TYPE_BYTE && i > 0xff)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s is out of range for a byte", name);
               return NULL;
             }
 
           if (param_spec->dtype[0] == DBUS_TYPE_UINT16 && i > 0xffff)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s is out of range for a 16-bit unsigned integer", name);
               return NULL;
             }
@@ -1437,7 +1501,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (!valid)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s is not a valid 64-bit signed integer (type=%s)", name,
                   G_VALUE_TYPE_NAME (value));
               return NULL;
@@ -1456,7 +1520,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (!valid)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s is not a valid 64-bit unsigned integer (type=%s)", name,
                   G_VALUE_TYPE_NAME (value));
               return NULL;
@@ -1475,7 +1539,7 @@ _tp_cm_param_spec_coerce (const TpCMParamSpec *param_spec,
 
           if (!valid)
             {
-              g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
                   "%s is not a valid double (type=%s)", name,
                   G_VALUE_TYPE_NAME (value));
               return NULL;
@@ -1579,7 +1643,7 @@ tp_base_protocol_sanitize_parameters (TpBaseProtocol *self,
       else if ((parameters[i].flags & mandatory_flag) != 0)
         {
           DEBUG ("missing mandatory account parameter %s", name);
-          g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
               "missing mandatory account parameter %s",
               name);
           goto except;
@@ -1669,7 +1733,7 @@ protocol_normalize_contact (TpSvcProtocol *protocol,
     }
   else
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "This Protocol does not implement NormalizeContact");
     }
 
@@ -1710,7 +1774,7 @@ protocol_identify_account (TpSvcProtocol *protocol,
     }
   else
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
           "This Protocol does not implement IdentifyAccount");
     }
 

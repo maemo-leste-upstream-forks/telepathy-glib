@@ -10,7 +10,7 @@ AC_PREREQ([2.59])
 #   set nano_version to 1
 
 m4_define([tp_glib_major_version], [0])
-m4_define([tp_glib_minor_version], [18])
+m4_define([tp_glib_minor_version], [20])
 m4_define([tp_glib_micro_version], [2])
 m4_define([tp_glib_nano_version], [0])
 
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [70])
+m4_define([tp_glib_lt_current], [78])
 m4_define([tp_glib_lt_revision], [2])
-m4_define([tp_glib_lt_age], [70])
+m4_define([tp_glib_lt_age], [78])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -43,7 +43,7 @@ AC_INIT([Telepathy-GLib], [tp_glib_version],
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.11 -Wno-portability])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AM_SILENT_RULES
 
@@ -61,6 +61,13 @@ GTK_DOC_CHECK([1.17],[--flavour no-tmpl])
 
 GOBJECT_INTROSPECTION_CHECK([1.30])
 
+TP_MAJOR_VERSION=tp_glib_major_version
+TP_MINOR_VERSION=tp_glib_minor_version
+TP_MICRO_VERSION=tp_glib_micro_version
+AC_SUBST([TP_MAJOR_VERSION])
+AC_SUBST([TP_MINOR_VERSION])
+AC_SUBST([TP_MICRO_VERSION])
+
 LT_CURRENT=tp_glib_lt_current
 LT_REVISION=tp_glib_lt_revision
 LT_AGE=tp_glib_lt_age
@@ -75,10 +82,28 @@ LINKER_OPTIMISATIONS
 LINKER_VERSION_SCRIPT
 
 ifelse(tp_glib_nano_version, 0,
-    [ official_release=yes ],
-    [ official_release=no ])
+[ # tp-glib is version x.y.z - "official release",
+  # disable extra checks by default
+  official_release=yes
+  AC_ARG_ENABLE([fatal-warnings],
+    [AC_HELP_STRING([--enable-fatal-warnings],
+                    [make various warnings fatal])],
+    [],
+    [enable_fatal_warnings=no])
+],
+[ # tp-glib is version x.y.z.1 - development snapshot,
+  # enable extra checks by default
+  official_release=no
+  AC_ARG_ENABLE([fatal-warnings],
+    [AC_HELP_STRING([--disable-fatal-warnings],
+                    [make various warnings non-fatal])],
+    [],
+    [enable_fatal_warnings=yes])
+])
 
-TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$official_release" = xno],
+AC_SUBST([enable_fatal_warnings])
+
+TP_COMPILER_WARNINGS([ERROR_CFLAGS], [test "x$enable_fatal_warnings" = xyes],
   [all \
    extra \
    declaration-after-statement \
@@ -97,20 +122,27 @@ AC_SUBST([ERROR_CFLAGS])
 
 # these aren't really error flags but they serve a similar purpose for us -
 # making the toolchain stricter
-if test "x$official_release" = xno; then
+AS_IF([test "x$enable_fatal_warnings" = xyes],
+[
   TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-copy-dt-needed-entries])
 
   # --no-copy-dt-needed-entries is the new name for --no-add-needed which
   # is much more widely supported
-  case "$ERROR_LDFLAGS" in
-  (*-Wl,--no-copy-dt-needed-entries*)
-    ;;
-  (*)
-    TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-add-needed])
-    ;;
-  esac
-fi
+  AS_CASE(["$ERROR_LDFLAGS"],
+    [*-Wl,--no-copy-dt-needed-entries*],
+      [],
+    [*],
+      [TP_ADD_LINKER_FLAG([ERROR_LDFLAGS], [-Wl,--no-add-needed])])
+])
 
+AS_IF([test "x$enable_fatal_warnings" = xyes],
+  [ERROR_SCANNERFLAGS=--warn-error],
+  [ERROR_SCANNERFLAGS=])
+AC_SUBST([ERROR_SCANNERFLAGS])
+
+# Only use this where we really do want things to depend on whether it's
+# a release or not (like ABI-stability enforcement). For fatal warnings,
+# use ${enable_fatal_warnings} instead.
 AM_CONDITIONAL([OFFICIAL_RELEASE], [test "x$official_release" = xyes])
 
 AC_ARG_ENABLE(debug,
@@ -123,49 +155,18 @@ AC_ARG_ENABLE(debug-cache,
                  [enable_debug_cache=$enableval],
                  [enable_debug_cache=yes])
 
-if test x"$enable_debug_cache" != xno
-then
-  AC_DEFINE([ENABLE_DEBUG_CACHE], [1], [Define to enable debug message cache])
-fi
+AS_IF([test x"$enable_debug_cache" != xno],
+  [AC_DEFINE([ENABLE_DEBUG_CACHE], [1], [Define to enable debug message cache])])
 
 AC_ARG_ENABLE(backtrace,
   AC_HELP_STRING([--enable-backtrace],[enable printing out the backtrace in case of crash (in most GLib connection managers)]),
     enable_backtrace=$enableval, enable_backtrace=no )
 
-ifelse(tp_glib_nano_version, 0,
-[ # tp-glib is version x.y.z - disable extra checks by default
-  AC_ARG_ENABLE(coding-style-checks,
-    AC_HELP_STRING([--enable-coding-style-checks],
-                   [check coding style using grep]),
-    [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=no] )
-  AC_ARG_ENABLE(doc-checks,
-    AC_HELP_STRING([--enable-doc-checks],
-                   [check for complete documentation coverage]),
-    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no] )
-],
-[ # tp-glib is version x.y.z.1 - enable extra checks by default
-  # (but only partially, because this is a stable branch and gtk-doc's
-  # definition of "complete" sometimes changes)
-  AC_ARG_ENABLE(coding-style-checks,
-    AC_HELP_STRING([--disable-coding-style-checks],
-                   [do not check coding style using grep]),
-    [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=yes])
-  AC_ARG_ENABLE(doc-checks,
-    AC_HELP_STRING([--enable-doc-checks],
-                   [check for complete documentation coverage]),
-    [ENABLE_DOC_CHECKS=$enableval], [ENABLE_DOC_CHECKS=no])
-])
+AS_IF([test x$enable_debug = xyes],
+  [AC_DEFINE([ENABLE_DEBUG], [], [Enable debug code])])
 
-AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
-AC_SUBST([ENABLE_DOC_CHECKS])
-
-if test x$enable_debug = xyes; then
-  AC_DEFINE(ENABLE_DEBUG, [], [Enable debug code])
-fi
-
-if test x$enable_backtrace = xyes; then
-  AC_DEFINE(ENABLE_BACKTRACE, [], [Enable backtrace output on crashes])
-fi
+AS_IF([test x$enable_backtrace = xyes],
+  [AC_DEFINE([ENABLE_BACKTRACE], [], [Enable backtrace output on crashes])])
 
 AC_SUBST(COVERAGE_CFLAGS)
 
@@ -174,10 +175,8 @@ AC_ARG_ENABLE([installed-tests],
  [make tests installable]),
  [installed_tests=$enableval], [installed_tests=no])
 
-if test x$installed_tests = xyes; then
- AC_DEFINE(ENABLE_INSTALLED_TESTS, [],
- [Make tests installable])
-fi
+AS_IF([test x$installed_tests = xyes],
+  [AC_DEFINE([ENABLE_INSTALLED_TESTS], [], [Make tests installable])])
 AM_CONDITIONAL([ENABLE_INSTALLED_TESTS], [test "x$installed_tests" = xyes])
 
 AC_ARG_ENABLE([installed-examples],
@@ -187,9 +186,9 @@ AC_ARG_ENABLE([installed-examples],
     [enable_installed_examples=$installed_tests])
 AM_CONDITIONAL([INSTALL_EXAMPLES], [test "$enable_installed_examples" = yes])
 
-if test x$installed_tests = xyes -a x$enable_installed_examples != xyes; then
-  AC_MSG_ERROR([examples must be installed when tests are installed.])
-fi
+AS_IF(
+  [test x$installed_tests = xyes && test x$enable_installed_examples != xyes],
+  [AC_MSG_ERROR([examples must be installed when tests are installed.])])
 
 dnl docs/Makefile.am needs to know whether it's an out of tree build
 dnl (srcdir != builddir)
@@ -200,21 +199,22 @@ AC_SUBST(tpglibtestsdir)
 
 dnl Check for Glib
 PKG_CHECK_MODULES(GLIB,
-  [glib-2.0 >= 2.30.0, gobject-2.0 >= 2.30.0, gio-2.0 >= 2.30.0])
+  [glib-2.0 >= 2.32.0, gobject-2.0 >= 2.32.0, gio-2.0 >= 2.32.0])
 
-AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_30], [Ignore post 2.30 deprecations])
-AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_30], [Prevent post 2.30 APIs])
+dnl MIN_REQUIRED must stay to 2.30 because of GValueArray
+AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_30], [Ignore post 2.32 deprecations])
+AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_32], [Prevent post 2.32 APIs])
 
 dnl Check for GIO-Unix
 PKG_CHECK_MODULES(GIO_UNIX, [gio-unix-2.0],
   have_gio_unix=yes, have_gio_unix=no)
 
-if test "x$have_gio_unix" = "xyes"; then
-  AC_DEFINE(HAVE_GIO_UNIX, [], [Define if GIO-Unix is available])
+AS_IF([test "x$have_gio_unix" = "xyes"],
+  [AC_DEFINE(HAVE_GIO_UNIX, [], [Define if GIO-Unix is available])
 
   GLIB_CFLAGS="$GLIB_CFLAGS $GIO_UNIX_CFLAGS"
   GLIB_LIBS="$GLIB_LIBS $GIO_UNIX_LIBS"
-fi
+  ])
 
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
@@ -237,12 +237,12 @@ AC_ARG_ENABLE(vala-bindings,
                   enable_vala_bindings=$enableval,
                   enable_vala_bindings=no )
 
-if test x$enable_vala_bindings = xyes; then
-  if test "x$INTROSPECTION_SCANNER" = x; then
-    AC_MSG_ERROR([GObject-Introspection must be enabled for Vala bindings])
-  fi
+AS_IF([test x$enable_vala_bindings = xyes],
+  [
+  AS_IF([test "x$INTROSPECTION_SCANNER" = x],
+    [AC_MSG_ERROR([GObject-Introspection must be enabled for Vala bindings])])
 
-  AM_PROG_VALAC([0.14.0])
+  AM_PROG_VALAC([0.16.0])
   have_vala=yes
 
   AC_PATH_PROG(VALAC, valac, valac)
@@ -251,12 +251,11 @@ if test x$enable_vala_bindings = xyes; then
 
   AC_PATH_PROG([VAPIGEN], [vapigen], [false])
 
-  if test "x$VAPIGEN" = "xfalse"; then
-    AC_MSG_ERROR([vapigen not found. Was vala compiled with --enable-vapigen?])
-  fi
+  AS_IF([test "x$VAPIGEN" = "xfalse"],
+    [AC_MSG_ERROR([vapigen not found. Was vala compiled with --enable-vapigen?])])
 
   AC_SUBST(VAPIGEN)
-fi
+  ])
 
 AM_CONDITIONAL([HAVE_VALA], [test "x$have_vala" = "xyes"])
 AC_SUBST(HAVE_VALA)
@@ -270,9 +269,8 @@ AC_SUBST(TP_GLIB_CFLAGS)
 dnl Check for code generation tools
 XSLTPROC=
 AC_CHECK_PROGS([XSLTPROC], [xsltproc])
-if test -z "$XSLTPROC"; then
-  AC_MSG_ERROR([xsltproc (from the libxslt source package) is required])
-fi
+AS_IF([test -z "$XSLTPROC"],
+  [AC_MSG_ERROR([xsltproc (from the libxslt source package) is required])])
 AM_PATH_PYTHON([2.5])
 
 dnl glibc backtrace functions
@@ -284,13 +282,9 @@ AC_CHECK_FUNCS(signal)
 AC_CHECK_HEADERS(signal.h)
 
 HAVE_LD_VERSION_SCRIPT=no
-if test -n "$VERSION_SCRIPT_ARG"; then
-	HAVE_LD_VERSION_SCRIPT=yes
-fi
+AS_IF([test -n "$VERSION_SCRIPT_ARG"], [HAVE_LD_VERSION_SCRIPT=yes])
 AC_CHECK_PROGS([NM], [nm])
-if test -z "$NM"; then
-	HAVE_LD_VERSION_SCRIPT=no
-fi
+AS_IF([test -z "$NM"], [HAVE_LD_VERSION_SCRIPT=no])
 AM_CONDITIONAL([HAVE_LD_VERSION_SCRIPT], [test $HAVE_LD_VERSION_SCRIPT = yes])
 
 dnl Check for C++ compiler, for syntax checking
@@ -334,6 +328,7 @@ AC_OUTPUT( Makefile \
 	   telepathy-glib/Makefile \
 	   telepathy-glib/telepathy-glib.pc \
 	   telepathy-glib/telepathy-glib-uninstalled.pc \
+	   telepathy-glib/version.h \
 	   tests/Makefile \
 	   tests/lib/Makefile \
 	   tests/dbus/Makefile \

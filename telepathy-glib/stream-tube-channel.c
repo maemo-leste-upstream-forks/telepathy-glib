@@ -59,8 +59,10 @@
 #include <telepathy-glib/stream-tube-connection-internal.h>
 #include <telepathy-glib/util-internal.h>
 #include <telepathy-glib/util.h>
+#include <telepathy-glib/variant-util-internal.h>
 
 #define DEBUG_FLAG TP_DEBUG_CHANNEL
+#include "telepathy-glib/channel-internal.h"
 #include "telepathy-glib/debug-internal.h"
 #include "telepathy-glib/automatic-client-factory-internal.h"
 
@@ -176,7 +178,8 @@ struct _TpStreamTubeChannelPrivate
 enum
 {
   PROP_SERVICE = 1,
-  PROP_PARAMETERS
+  PROP_PARAMETERS,
+  PROP_PARAMETERS_VARDICT
 };
 
 enum /* signals */
@@ -288,6 +291,11 @@ tp_stream_tube_channel_get_property (GObject *object,
         g_value_set_boxed (value, self->priv->parameters);
         break;
 
+      case PROP_PARAMETERS_VARDICT:
+        g_value_take_variant (value,
+            tp_stream_tube_channel_dup_parameters_vardict (self));
+        break;
+
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
         break;
@@ -350,7 +358,7 @@ tp_stream_tube_channel_constructed (GObject *obj)
       return;
     }
 
-  props = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  props = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
 
   if (tp_asv_get_string (props, TP_PROP_CHANNEL_TYPE_STREAM_TUBE_SERVICE)
       == NULL)
@@ -430,6 +438,11 @@ tp_stream_tube_channel_class_init (TpStreamTubeChannelClass *klass)
    *
    * Will be %NULL for outgoing tubes until the tube has been offered.
    *
+   * In high-level language bindings, use
+   * #TpStreamTubeChannel:parameters-vardict or
+   * tp_stream_tube_channel_dup_parameters_vardict() to get the same
+   * information in a more convenient format.
+   *
    * Since: 0.13.2
    */
   param_spec = g_param_spec_boxed ("parameters", "Parameters",
@@ -437,6 +450,22 @@ tp_stream_tube_channel_class_init (TpStreamTubeChannelClass *klass)
       TP_HASH_TYPE_STRING_VARIANT_MAP,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (gobject_class, PROP_PARAMETERS, param_spec);
+
+  /**
+   * TpStreamTubeChannel:parameters-vardict:
+   *
+   * A %G_VARIANT_TYPE_VARDICT representing the parameters of the tube.
+   *
+   * Will be %NULL for outgoing tubes until the tube has been offered.
+   *
+   * Since: 0.19.10
+   */
+  param_spec = g_param_spec_variant ("parameters-vardict", "Parameters",
+      "The parameters of the stream tube",
+      G_VARIANT_TYPE_VARDICT, NULL,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (gobject_class, PROP_PARAMETERS_VARDICT,
+      param_spec);
 
   /**
    * TpStreamTubeChannel::incoming:
@@ -488,6 +517,7 @@ tp_stream_tube_channel_init (TpStreamTubeChannel *self)
  * Returns: (transfer full): a newly-created #TpStreamTubeChannel proxy
  *
  * Since: 0.13.2
+ * Deprecated: Use tp_simple_client_factory_ensure_channel() instead.
  */
 TpStreamTubeChannel *
 tp_stream_tube_channel_new (TpConnection *conn,
@@ -533,7 +563,7 @@ operation_failed (TpStreamTubeChannel *self,
 {
   g_simple_async_result_set_from_error (self->priv->result, error);
 
-  g_simple_async_result_complete (self->priv->result);
+  g_simple_async_result_complete_in_idle (self->priv->result);
   tp_clear_object (&self->priv->result);
 }
 
@@ -599,10 +629,10 @@ new_local_connection_identified (TpStreamTubeChannel *self,
 
   /* We are accepting a tube so the contact of the connection is the
    * initiator of the tube */
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   initiator_handle = tp_channel_get_initiator_handle (TP_CHANNEL (self));
 
-
-  connection = tp_channel_borrow_connection (TP_CHANNEL (self));
+  connection = tp_channel_get_connection (TP_CHANNEL (self));
   features = tp_simple_client_factory_dup_contact_features (
       tp_proxy_get_factory (connection), connection);
 
@@ -612,6 +642,7 @@ new_local_connection_identified (TpStreamTubeChannel *self,
       features->len, (TpContactFeature *) features->data,
       new_local_connection_with_contact,
       tube_conn, g_object_unref, G_OBJECT (self));
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   g_array_unref (features);
 }
@@ -832,7 +863,7 @@ tp_stream_tube_channel_accept_async (TpStreamTubeChannel *self,
   if (self->priv->access_control_param != NULL)
     {
       g_simple_async_report_error_in_idle (G_OBJECT (self), callback, user_data,
-          TP_ERRORS, TP_ERROR_INVALID_ARGUMENT, "Tube has already be accepted");
+          TP_ERROR, TP_ERROR_INVALID_ARGUMENT, "Tube has already be accepted");
 
       return;
     }
@@ -840,7 +871,7 @@ tp_stream_tube_channel_accept_async (TpStreamTubeChannel *self,
   self->priv->result = g_simple_async_result_new (G_OBJECT (self), callback,
       user_data, tp_stream_tube_channel_accept_async);
 
-  properties = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  properties = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
   supported_sockets = tp_asv_get_boxed (properties,
       TP_PROP_CHANNEL_TYPE_STREAM_TUBE_SUPPORTED_SOCKET_TYPES,
       TP_HASH_TYPE_SUPPORTED_SOCKET_MAP);
@@ -1073,16 +1104,19 @@ connection_identified (TpStreamTubeChannel *self,
       TpConnection *connection;
       GArray *features;
 
-      connection = tp_channel_borrow_connection (TP_CHANNEL (self));
+      connection = tp_channel_get_connection (TP_CHANNEL (self));
       features = tp_simple_client_factory_dup_contact_features (
           tp_proxy_get_factory (connection), connection);
 
+      /* Spec does not give the id with the handle */
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       /* Pass the ref on tube_conn to the function */
       tp_connection_get_contacts_by_handle (connection,
           1, &handle,
           features->len, (TpContactFeature *) features->data,
           _new_remote_connection_with_contact,
           tube_conn, g_object_unref, G_OBJECT (self));
+       G_GNUC_END_IGNORE_DEPRECATIONS
 
       g_array_unref (features);
     }
@@ -1203,7 +1237,7 @@ _channel_offered (TpChannel *channel,
 
   DEBUG ("Stream Tube offered");
 
-  g_simple_async_result_complete (self->priv->result);
+  g_simple_async_result_complete_in_idle (self->priv->result);
   tp_clear_object (&self->priv->result);
 }
 
@@ -1244,6 +1278,7 @@ _offer_with_address (TpStreamTubeChannel *self,
     self->priv->parameters = tp_asv_new (NULL, NULL);
 
   g_object_notify (G_OBJECT (self), "parameters");
+  g_object_notify (G_OBJECT (self), "parameters-vardict");
 
   /* Call Offer */
   tp_cli_channel_type_stream_tube_call_offer (TP_CHANNEL (self), -1,
@@ -1406,7 +1441,7 @@ tp_stream_tube_channel_offer_async (TpStreamTubeChannel *self,
   self->priv->result = g_simple_async_result_new (G_OBJECT (self), callback,
       user_data, tp_stream_tube_channel_offer_async);
 
-  properties = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  properties = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
   supported_sockets = tp_asv_get_boxed (properties,
       TP_PROP_CHANNEL_TYPE_STREAM_TUBE_SUPPORTED_SOCKET_TYPES,
       TP_HASH_TYPE_SUPPORTED_SOCKET_MAP);
@@ -1525,7 +1560,7 @@ tp_stream_tube_channel_get_service (TpStreamTubeChannel *self)
 {
   GHashTable *props;
 
-  props = tp_channel_borrow_immutable_properties (TP_CHANNEL (self));
+  props = _tp_channel_get_immutable_properties (TP_CHANNEL (self));
 
   return tp_asv_get_string (props, TP_PROP_CHANNEL_TYPE_STREAM_TUBE_SERVICE);
 }
@@ -1545,4 +1580,34 @@ GHashTable *
 tp_stream_tube_channel_get_parameters (TpStreamTubeChannel *self)
 {
   return self->priv->parameters;
+}
+
+/**
+ * tp_stream_tube_channel_dup_parameters_vardict:
+ * @self: a #TpStreamTubeChannel
+ *
+ * Return the parameters of the dbus-tube channel in a variant of
+ * type %G_VARIANT_TYPE_VARDICT whose keys are strings representing
+ * parameter names and values are variants representing corresponding
+ * parameter values set by the offerer when offering this channel.
+ *
+ * The GVariant returned is %NULL if this is an outgoing tube that has not
+ * yet been offered or the parameters property has not been set.
+ *
+ * Use g_variant_lookup(), g_variant_lookup_value(), or tp_vardict_get_uint32()
+ * and similar functions for convenient access to the values.
+ *
+ * Returns: (transfer full): a new reference to a #GVariant
+ *
+ * Since: 0.19.10
+ */
+GVariant *
+tp_stream_tube_channel_dup_parameters_vardict (TpStreamTubeChannel *self)
+{
+  g_return_val_if_fail (TP_IS_STREAM_TUBE_CHANNEL (self), NULL);
+
+  if (self->priv->parameters == NULL)
+      return NULL;
+
+  return _tp_asv_to_vardict (self->priv->parameters);
 }

@@ -18,10 +18,6 @@ TpDBusDaemon *tp_tests_dbus_daemon_dup_or_die (void);
 
 void tp_tests_proxy_run_until_dbus_queue_processed (gpointer proxy);
 
-TpHandle tp_tests_connection_run_request_contact_handle (
-    TpConnection *connection,
-    const gchar *id);
-
 void tp_tests_proxy_run_until_prepared (gpointer proxy,
     const GQuark *features);
 gboolean tp_tests_proxy_run_until_prepared_or_failed (gpointer proxy,
@@ -39,6 +35,12 @@ void _test_assert_empty_strv (const char *file, int line, gconstpointer strv);
 void _tp_tests_assert_strv_equals (const char *file, int line,
   const char *actual_desc, gconstpointer actual_strv,
   const char *expected_desc, gconstpointer expected_strv);
+
+#define tp_tests_assert_bytes_equals(actual, expected, expected_length) \
+  _tp_tests_assert_bytes_equal (__FILE__, __LINE__, \
+      actual, expected, expected_length)
+void _tp_tests_assert_bytes_equal (const gchar *file, int line,
+  GBytes *actual, gconstpointer expected_data, gsize expected_length);
 
 void tp_tests_create_conn (GType conn_type,
     const gchar *account,
@@ -72,5 +74,11 @@ GValue *_tp_create_local_socket (TpSocketAddressType address_type,
 void _tp_destroy_socket_control_list (gpointer data);
 
 void tp_tests_connection_assert_disconnect_succeeds (TpConnection *connection);
+
+TpContact *tp_tests_connection_run_until_contact_by_id (
+    TpConnection *connection,
+    const gchar *id,
+    guint n_features,
+    const TpContactFeature *features);
 
 #endif /* #ifndef __TP_TESTS_LIB_UTIL_H__ */

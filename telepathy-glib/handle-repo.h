@@ -21,15 +21,24 @@
  *
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_HANDLE_REPO_H__
 #define __TP_HANDLE_REPO_H__
 
 #include <glib-object.h>
 
+#include <gio/gio.h>
+
 #include <telepathy-glib/intset.h>
 #include <telepathy-glib/handle.h>
 
 G_BEGIN_DECLS
+
+/* Forward declaration to avoid circular includes */
+typedef struct _TpBaseConnection TpBaseConnection;
 
 /* Forward declaration because it's in the HandleRepo API */
 
@@ -79,19 +88,29 @@ gboolean tp_handle_is_valid (TpHandleRepoIface *self,
 gboolean tp_handles_are_valid (TpHandleRepoIface *self,
     const GArray *handles, gboolean allow_zero, GError **error);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20
 TpHandle tp_handle_ref (TpHandleRepoIface *self, TpHandle handle);
+_TP_DEPRECATED_IN_0_20
 void tp_handles_ref (TpHandleRepoIface *self, const GArray *handles);
+_TP_DEPRECATED_IN_0_20
 void tp_handle_unref (TpHandleRepoIface *self, TpHandle handle);
+_TP_DEPRECATED_IN_0_20
 void tp_handles_unref (TpHandleRepoIface *self, const GArray *handles);
 
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handle_client_hold (TpHandleRepoIface *self,
     const gchar *client, TpHandle handle, GError **error);
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handles_client_hold (TpHandleRepoIface *self,
     const gchar *client, const GArray *handles, GError **error);
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handle_client_release (TpHandleRepoIface *self,
     const gchar *client, TpHandle handle, GError **error);
+_TP_DEPRECATED_IN_0_20
 gboolean tp_handles_client_release (TpHandleRepoIface *self,
     const gchar *client, const GArray *handles, GError **error);
+#endif
 
 const char *tp_handle_inspect (TpHandleRepoIface *self,
     TpHandle handle) G_GNUC_WARN_UNUSED_RESULT;
@@ -101,10 +120,26 @@ TpHandle tp_handle_ensure (TpHandleRepoIface *self,
     const gchar *id, gpointer context, GError **error)
     G_GNUC_WARN_UNUSED_RESULT;
 
+_TP_AVAILABLE_IN_0_20
+void tp_handle_ensure_async (TpHandleRepoIface *self,
+    TpBaseConnection *connection,
+    const gchar *id,
+    gpointer context,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+_TP_AVAILABLE_IN_0_20
+TpHandle tp_handle_ensure_finish (TpHandleRepoIface *self,
+    GAsyncResult *result,
+    GError **error);
+
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20
 void tp_handle_set_qdata (TpHandleRepoIface *repo, TpHandle handle,
     GQuark key_id, gpointer data, GDestroyNotify destroy);
+_TP_DEPRECATED_IN_0_20
 gpointer tp_handle_get_qdata (TpHandleRepoIface *repo, TpHandle handle,
     GQuark key_id);
+#endif
 
 /* Handle set helper class */
 
@@ -148,7 +183,7 @@ TpIntset *tp_handle_set_difference_update (TpHandleSet *set,
 
 gchar *tp_handle_set_dump (const TpHandleSet *self) G_GNUC_WARN_UNUSED_RESULT;
 
-/* static inline because it relies on NUM_TP_HANDLE_TYPES */
+/* static inline because it relies on TP_NUM_HANDLE_TYPES */
 /**
  * tp_handles_supported_and_valid: (skip)
  * @repos: An array of possibly null pointers to handle repositories, indexed
@@ -170,12 +205,12 @@ gchar *tp_handle_set_dump (const TpHandleSet *self) G_GNUC_WARN_UNUSED_RESULT;
 static inline
 /* spacer so gtkdoc documents this function as though not static */
 gboolean tp_handles_supported_and_valid (
-    TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES],
+    TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES],
     TpHandleType handle_type, const GArray *handles, gboolean allow_zero,
     GError **error);
 
 static inline gboolean
-tp_handles_supported_and_valid (TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES],
+tp_handles_supported_and_valid (TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES],
                                 TpHandleType handle_type,
                                 const GArray *handles,
                                 gboolean allow_zero,

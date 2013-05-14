@@ -149,9 +149,16 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (TpTestsStreamTubeChannel,
 
 /* type definition stuff */
 
-static const char * tp_tests_stream_tube_channel_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_TUBE,
-    NULL
+static GPtrArray *
+tp_tests_stream_tube_channel_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (
+      tp_tests_stream_tube_channel_parent_class)->get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_TUBE);
+  return interfaces;
 };
 
 static void
@@ -262,14 +269,11 @@ tp_tests_stream_tube_channel_class_init (TpTestsStreamTubeChannelClass *klass)
   object_class->dispose = dispose;
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_STREAM_TUBE;
-  base_class->interfaces = tp_tests_stream_tube_channel_interfaces;
+  base_class->get_interfaces = tp_tests_stream_tube_channel_get_interfaces;
   base_class->close = channel_close;
   base_class->fill_immutable_properties = fill_immutable_properties;
 
   /* base_class->target_handle_type is defined in subclasses */
-
-  tp_text_mixin_class_init (object_class,
-      G_STRUCT_OFFSET (TpTestsStreamTubeChannelClass, text_class));
 
   param_spec = g_param_spec_string ("service", "service name",
       "the service associated with this tube object.",
@@ -296,7 +300,7 @@ tp_tests_stream_tube_channel_class_init (TpTestsStreamTubeChannelClass *klass)
   param_spec = g_param_spec_uint (
       "state", "TpTubeState",
       "state of the tube",
-      0, NUM_TP_TUBE_CHANNEL_STATES - 1, 0,
+      0, TP_NUM_TUBE_CHANNEL_STATES - 1, 0,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_STATE,
       param_spec);
@@ -374,14 +378,14 @@ stream_tube_offer (TpSvcChannelTypeStreamTube *iface,
 
   if (self->priv->state != TP_TUBE_CHANNEL_STATE_NOT_OFFERED)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Tube is not in the not offered state");
       goto fail;
     }
 
   if (!check_address_type (self, address_type, access_control))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Address type not supported with this access control");
       goto fail;
     }
@@ -465,14 +469,14 @@ stream_tube_accept (TpSvcChannelTypeStreamTube *iface,
 
   if (self->priv->state != TP_TUBE_CHANNEL_STATE_LOCAL_PENDING)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Tube is not in the local pending state");
       goto fail;
     }
 
   if (!check_address_type (self, address_type, access_control))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Address type not supported with this access control");
       goto fail;
     }

@@ -75,6 +75,9 @@
 G_DEFINE_INTERFACE(TpClientChannelFactory, tp_client_channel_factory,
     G_TYPE_OBJECT)
 
+/* Deprecated module can use deprecated APIs */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
 static void
 tp_client_channel_factory_default_init (TpClientChannelFactoryInterface *iface)
 {
@@ -136,7 +139,7 @@ tp_client_channel_factory_create_channel (TpClientChannelFactory *self,
  * it expected an object instance as its first parameter, but the type of the
  * parameter was the type of the interface vtable.
  *
- * Returns: (transfer full): a newly allocated #GArray
+ * Returns: (transfer full) (element-type GQuark): a newly allocated #GArray
  *
  * Since: 0.13.3
  */
@@ -165,3 +168,5 @@ tp_client_channel_factory_dup_channel_features (
 
   return arr;
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS

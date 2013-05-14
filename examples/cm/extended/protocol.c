@@ -55,7 +55,7 @@ new_connection (TpBaseProtocol *protocol,
 
   if (account == NULL || account[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "The 'account' parameter is required");
       return NULL;
     }
@@ -75,7 +75,7 @@ example_extended_protocol_normalize_contact (const gchar *id,
 {
   if (id[0] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "ID must not be empty");
       return NULL;
     }
@@ -101,14 +101,8 @@ identify_account (TpBaseProtocol *self G_GNUC_UNUSED,
   if (account != NULL)
     return example_extended_protocol_normalize_contact (account, error);
 
-  g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+  g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
       "'account' parameter not given");
-  return NULL;
-}
-
-static GStrv
-get_interfaces (TpBaseProtocol *self)
-{
   return NULL;
 }
 
@@ -167,6 +161,5 @@ example_extended_protocol_class_init (
 
   base_class->normalize_contact = normalize_contact;
   base_class->identify_account = identify_account;
-  base_class->get_interfaces = get_interfaces;
   base_class->get_connection_details = get_connection_details;
 }
