@@ -44,6 +44,7 @@ TESTS_ENVIRONMENT = \
     abs_top_srcdir=@abs_top_srcdir@ \
     G_SLICE=debug-blocks \
     G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
+    G_MESSAGES_DEBUG=all \
     PYTHONPATH=@abs_top_srcdir@/tools \
     $(top_srcdir)/tools/test-wrapper.sh \
     $(EXTRA_TESTS_ENVIRONMENT)
@@ -69,8 +70,13 @@ EXTRA_DIST = README \
     all-errors-documented.py \
     tests.supp
 
+# this one uses internal ABI
 test_asv_SOURCES = \
     asv.c
+test_asv_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests-internal.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS)
 
 # this one uses internal ABI
 test_capabilities_SOURCES = \
@@ -142,6 +148,7 @@ LDADD = \
 
 AM_CPPFLAGS = \
     -I${top_srcdir} -I${top_builddir} \
+    -D_TP_COMPILATION \
     -D_TP_IGNORE_DEPRECATIONS \
     $(GLIB_CFLAGS) \
     $(DBUS_CFLAGS) \

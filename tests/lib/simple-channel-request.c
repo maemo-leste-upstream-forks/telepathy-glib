@@ -93,13 +93,29 @@ add_channel (TpTestsSimpleChannelRequest *self,
   gchar *chan_path;
   GHashTable *request;
   GHashTable *props;
+  const char *chan_type;
 
   request = g_ptr_array_index (self->priv->requests, 0);
-  target_id = tp_asv_get_string (request, TP_PROP_CHANNEL_TARGET_ID);
-  g_assert (target_id != NULL);
+  chan_type = tp_asv_get_string (request, TP_PROP_CHANNEL_CHANNEL_TYPE);
 
-  chan_path = tp_tests_simple_connection_ensure_text_chan (self->priv->conn,
-      target_id, &props);
+  if (!tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_TEXT))
+    {
+      target_id = tp_asv_get_string (request, TP_PROP_CHANNEL_TARGET_ID);
+      g_assert (target_id != NULL);
+
+      chan_path = tp_tests_simple_connection_ensure_text_chan (self->priv->conn,
+          target_id, &props);
+    }
+  else if (!tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_ROOM_LIST))
+    {
+      chan_path = tp_tests_simple_connection_ensure_room_list_chan (
+          self->priv->conn, tp_asv_get_string (request,
+            TP_PROP_CHANNEL_TYPE_ROOM_LIST_SERVER), &props);
+    }
+  else
+    {
+      g_assert_not_reached ();
+    }
 
   g_ptr_array_add (channels, tp_value_array_build (2,
       DBUS_TYPE_G_OBJECT_PATH, chan_path,
@@ -156,7 +172,7 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
   if (tp_asv_get_boolean (req, "ProceedFail", NULL))
     {
       /* We have been asked to fail */
-     GError error = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+     GError error = { TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Computer says no" };
 
       dbus_g_method_return_error (context, &error);
@@ -189,7 +205,8 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
       props = g_hash_table_new (NULL, NULL);
 
       tp_svc_channel_request_emit_succeeded_with_channel (self,
-          base_conn->object_path, props, "/chan", props);
+          tp_base_connection_get_object_path (base_conn),
+          props, "/chan", props);
       tp_svc_channel_request_emit_succeeded (self);
 
       g_hash_table_unref (props);
@@ -239,7 +256,8 @@ tp_tests_simple_channel_request_proceed (TpSvcChannelRequest *request,
       NULL);
 
   tp_cli_client_handler_call_handle_channels (client, -1,
-      self->priv->account_path, base_conn->object_path, channels,
+      self->priv->account_path,
+      tp_base_connection_get_object_path (base_conn), channels,
       satisfied, self->priv->user_action_time, info, handle_channels_cb, NULL,
       NULL, G_OBJECT (self));
 

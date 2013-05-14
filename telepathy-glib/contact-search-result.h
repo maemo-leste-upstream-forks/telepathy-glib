@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_CONTACT_SEARCH_RESULT_H__
 #define __TP_CONTACT_SEARCH_RESULT_H__
 
@@ -66,7 +70,14 @@ GType tp_contact_search_result_get_type (void);
 const gchar *tp_contact_search_result_get_identifier (TpContactSearchResult *self);
 TpContactInfoField *tp_contact_search_result_get_field (TpContactSearchResult *self,
     const gchar *field);
+
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR (tp_contact_search_result_dup_fields)
 GList *tp_contact_search_result_get_fields (TpContactSearchResult *self);
+#endif
+
+_TP_AVAILABLE_IN_0_20
+GList *tp_contact_search_result_dup_fields (TpContactSearchResult *self);
 
 G_END_DECLS
 

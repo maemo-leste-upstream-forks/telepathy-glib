@@ -50,6 +50,26 @@
  * The #TpAccountManager object is used to communicate with the Telepathy
  * AccountManager service.
  *
+ * A new #TpAccountManager object can be created with
+ * tp_account_manager_dup().
+ *
+ * To list the existing valid accounts, the client should first
+ * prepare the %TP_ACCOUNT_MANAGER_FEATURE_CORE feature using
+ * tp_proxy_prepare_async(), then call
+ * tp_account_manager_dup_valid_accounts().
+ *
+ * The #TpAccountManager::account-validity-changed signal is emitted
+ * to notify of the validity of an account changing. New accounts are
+ * also indicated by the emission of this signal on an account that
+ * did not previously exist. (The rationale behind indicating new
+ * accounts by an account validity change signal is that clients
+ * interested in this kind of thing should be connected to this signal
+ * anyway: an account having just become valid is effectively a new
+ * account to a client.)
+ *
+ * The #TpAccountManager::account-removed signal is emitted when
+ * existing accounts are removed.
+ *
  * Since: 0.7.32
  */
 
@@ -136,7 +156,7 @@ G_DEFINE_TYPE (TpAccountManager, tp_account_manager, TP_TYPE_PROXY)
  * #TpAccount objects subsequently announced by
  * #TpAccountManager::account-validity-changed are <emphasis>not</emphasis>
  * guaranteed to have this feature prepared. In practice, this means that
- * the accounts returned by calling tp_account_manager_get_valid_accounts()
+ * the accounts returned by calling tp_account_manager_dup_valid_accounts()
  * immediately after successfully calling tp_proxy_prepare_finish() on the
  * #TpAccountManager will have #TP_ACCOUNT_FEATURE_CORE prepared, but later
  * calls to that function do not have the same guarantee.
@@ -589,6 +609,9 @@ tp_account_manager_class_init (TpAccountManagerClass *klass)
    *
    * Emitted when the validity on @account changes.
    *
+   * This signal is also used to indicate a new account that did not
+   * previously exist has been added (with @valid set to %TRUE).
+   *
    * @account is guaranteed to have %TP_ACCOUNT_FEATURE_CORE prepared, along
    * with all features previously passed to
    * tp_simple_client_factory_add_account_features().
@@ -706,7 +729,7 @@ tp_account_manager_init_known_interfaces (void)
       tp_proxy_or_subclass_hook_on_interface_add (tp_type,
           tp_cli_account_manager_add_signals);
       tp_proxy_subclass_add_error_mapping (tp_type,
-          TP_ERROR_PREFIX, TP_ERRORS, TP_TYPE_ERROR);
+          TP_ERROR_PREFIX, TP_ERROR, TP_TYPE_ERROR);
 
       g_once_init_leave (&once, 1);
     }
@@ -812,6 +835,23 @@ tp_account_manager_set_default (TpAccountManager *manager)
     }
 
   starter_account_manager_proxy = g_object_ref (manager);
+}
+
+/**
+ * tp_account_manager_can_set_default:
+ *
+ * Check if tp_account_manager_set_default() has already successfully been
+ * called.
+ *
+ * Returns: %TRUE if tp_account_manager_set_default() has already successfully
+ * been called in this process, %FALSE otherwise.
+ *
+ * Since: 0.19.6
+ */
+gboolean
+tp_account_manager_can_set_default (void)
+{
+  return starter_account_manager_proxy == NULL;
 }
 
 /**
@@ -966,6 +1006,16 @@ insert_account (TpAccountManager *self,
       g_strdup (tp_proxy_get_object_path (account)),
       g_object_ref (account));
 
+  /* If a global presence has been requested, set in on new accounts as well */
+  if (self->priv->requested_presence != TP_CONNECTION_PRESENCE_TYPE_UNSET)
+    {
+      tp_account_request_presence_async (account,
+          self->priv->requested_presence,
+          self->priv->requested_status,
+          self->priv->requested_status_message,
+          NULL, NULL);
+    }
+
   tp_g_signal_connect_object (account, "notify::enabled",
       G_CALLBACK (_tp_account_manager_account_enabled_cb),
       G_OBJECT (self), 0);
@@ -1066,6 +1116,8 @@ tp_account_manager_ensure_account (TpAccountManager *self,
  * Returns: (element-type TelepathyGLib.Account) (transfer container): a newly allocated #GList of valid accounts in @manager
  *
  * Since: 0.9.0
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_account_manager_dup_valid_accounts() instead.
  */
 GList *
 tp_account_manager_get_valid_accounts (TpAccountManager *manager)
@@ -1073,6 +1125,41 @@ tp_account_manager_get_valid_accounts (TpAccountManager *manager)
   g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
 
   return g_hash_table_get_values (manager->priv->accounts);
+}
+
+/**
+ * tp_account_manager_dup_valid_accounts:
+ * @manager: a #TpAccountManager
+ *
+ * Returns a newly allocated #GList of reffed valid accounts in @manager.
+ * The list must be freed with g_list_free_full() and g_object_unref() after
+ * used.
+ *
+ * The returned #TpAccount<!-- -->s are guaranteed to have
+ * %TP_ACCOUNT_FEATURE_CORE prepared, along with all features previously passed
+ * to tp_simple_client_factory_add_account_features().
+ *
+ * The list of valid accounts returned is not guaranteed to have been retrieved
+ * until %TP_ACCOUNT_MANAGER_FEATURE_CORE is prepared
+ * (tp_proxy_prepare_async() has returned). Until this feature has
+ * been prepared, an empty list (%NULL) will be returned.
+ *
+ * Returns: (element-type TelepathyGLib.Account) (transfer full): a newly
+ *  allocated #GList of reffed valid accounts in @manager
+ *
+ * Since: 0.19.9
+ */
+GList *
+tp_account_manager_dup_valid_accounts (TpAccountManager *manager)
+{
+  GList *ret;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT_MANAGER (manager), NULL);
+
+  ret = g_hash_table_get_values (manager->priv->accounts);
+  g_list_foreach (ret, (GFunc) g_object_ref, NULL);
+
+  return ret;
 }
 
 /**
@@ -1237,7 +1324,7 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
   if (error != NULL)
     {
       g_simple_async_result_set_from_error (my_res, error);
-      g_simple_async_result_complete (my_res);
+      g_simple_async_result_complete_in_idle (my_res);
       return;
     }
 
@@ -1246,7 +1333,7 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
   if (account == NULL)
     {
       g_simple_async_result_take_error (my_res, e);
-      g_simple_async_result_complete (my_res);
+      g_simple_async_result_complete_in_idle (my_res);
       return;
     }
 
@@ -1284,6 +1371,9 @@ _tp_account_manager_created_cb (TpAccountManager *proxy,
  * %TP_ACCOUNT_FEATURE_CORE feature ready on it, so when calling
  * tp_account_manager_create_account_finish(), one can guarantee this feature
  * will be ready.
+ *
+ * It is usually better to use #TpAccountRequest instead, particularly when
+ * using high-level language bindings.
  *
  * Since: 0.9.0
  */

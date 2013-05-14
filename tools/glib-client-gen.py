@@ -71,6 +71,8 @@ class Generator(object):
         self.deprecation_attribute = opts.get('--deprecation-attribute',
                 'G_GNUC_DEPRECATED')
 
+        self.guard = opts.get('--guard', None)
+
     def h(self, s):
         if isinstance(s, unicode):
             s = s.encode('utf-8')
@@ -781,9 +783,11 @@ class Generator(object):
         self.b('  g_return_val_if_fail (callback != NULL || '
                'weak_object == NULL, NULL);')
         self.b('')
+        self.b('  G_GNUC_BEGIN_IGNORE_DEPRECATIONS')
         self.b('  iface = tp_proxy_borrow_interface_by_id (')
         self.b('      (TpProxy *) proxy,')
         self.b('      interface, &error);')
+        self.b('  G_GNUC_END_IGNORE_DEPRECATIONS')
         self.b('')
         self.b('  if (iface == NULL)')
         self.b('    {')
@@ -1062,8 +1066,10 @@ class Generator(object):
         self.b('  g_return_val_if_fail (%s (proxy), FALSE);'
                % self.proxy_assert)
         self.b('')
+        self.b('  G_GNUC_BEGIN_IGNORE_DEPRECATIONS')
         self.b('  iface = tp_proxy_borrow_interface_by_id')
         self.b('       ((TpProxy *) proxy, interface, error);')
+        self.b('  G_GNUC_END_IGNORE_DEPRECATIONS')
         self.b('')
         self.b('  if (iface == NULL)')
         self.b('    return FALSE;')
@@ -1171,6 +1177,11 @@ class Generator(object):
 
     def __call__(self):
 
+        if self.guard is not None:
+            self.h('#ifndef %s' % self.guard)
+            self.h('#define %s' % self.guard)
+            self.h('')
+
         self.h('G_BEGIN_DECLS')
         self.h('')
 
@@ -1229,6 +1240,10 @@ class Generator(object):
         self.h('G_END_DECLS')
         self.h('')
 
+        if self.guard is not None:
+            self.h('#endif /* defined (%s) */' % self.guard)
+            self.h('')
+
         file_set_contents(self.basename + '.h', '\n'.join(self.__header))
         file_set_contents(self.basename + '-body.h', '\n'.join(self.__body))
         file_set_contents(self.basename + '-gtk-doc.h', '\n'.join(self.__docs))
@@ -1242,7 +1257,7 @@ if __name__ == '__main__':
                                ['group=', 'subclass=', 'subclass-assert=',
                                 'iface-quark-prefix=', 'tp-proxy-api=',
                                 'generate-reentrant=', 'deprecate-reentrant=',
-                                'deprecation-attribute='])
+                                'deprecation-attribute=', 'guard='])
 
     opts = {}
 

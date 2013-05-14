@@ -79,6 +79,19 @@ balanced_connection_init (BalancedConnection *self G_GNUC_UNUSED)
 {
 }
 
+static GPtrArray *
+get_interfaces (TpBaseConnection *base)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CONNECTION_CLASS (
+      balanced_connection_parent_class)->get_interfaces_always_present (base);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CONNECTION_INTERFACE_BALANCE);
+
+  return interfaces;
+}
+
 static void
 balanced_connection_class_init (BalancedConnectionClass *cls)
 {
@@ -91,14 +104,9 @@ balanced_connection_class_init (BalancedConnectionClass *cls)
         { NULL }
   };
 
-  static const gchar *interfaces[] = {
-      TP_IFACE_CONNECTION_INTERFACE_BALANCE,
-      NULL
-  };
-
   object_class->get_property = balanced_connection_get_property;
 
-  base_class->interfaces_always_present = interfaces;
+  base_class->get_interfaces_always_present = get_interfaces;
 
   g_object_class_install_property (object_class, PROP_ACCOUNT_BALANCE,
       g_param_spec_boxed ("account-balance", "", "",
@@ -262,7 +270,7 @@ teardown (Test *test,
   tp_tests_connection_assert_disconnect_succeeds (conn);
 
   g_assert (!tp_connection_run_until_ready (conn, FALSE, &error, NULL));
-  g_assert_error (error, TP_ERRORS, TP_ERROR_CANCELLED);
+  g_assert_error (error, TP_ERROR, TP_ERROR_CANCELLED);
   g_clear_error (&error);
 
   test->service_conn_as_base = NULL;

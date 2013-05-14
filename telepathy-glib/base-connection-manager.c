@@ -124,7 +124,7 @@ _tp_legacy_protocol_new_connection (TpBaseProtocol *protocol,
 
   if (self->cm == NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "Connection manager no longer available");
       return NULL;
     }
@@ -209,14 +209,12 @@ _tp_legacy_protocol_new (TpBaseConnectionManager *cm,
  *  D-Bus object paths and bus names. Must contain only letters, digits
  *  and underscores, and may not start with a digit. Must be filled in by
  *  subclasses in their class_init function.
- * @protocol_params: An array of #TpCMProtocolSpec structures representing
- *  the protocols this connection manager supports, terminated by a structure
- *  whose name member is %NULL; or %NULL if this CM uses Protocol objects.
- * @new_connection: A #TpBaseConnectionManagerNewConnFunc used to construct
- *  new connections, or %NULL if this CM uses Protocol objects.
- * @interfaces: A #GStrv of extra D-Bus interfaces implemented
- *  by instances of this class, which may be filled in by subclasses. The
- *  default is to list no additional interfaces. Since: 0.11.11
+ * @get_interfaces: Returns a #GPtrArray of static strings of extra
+ *  D-Bus interfaces implemented by instances of this class, which may be
+ *  filled in by subclasses. The default is to list no additional interfaces.
+ *  Implementations must first chainup on parent class implementation and then
+ *  add extra interfaces to the #GPtrArray. Replaces @interfaces. Since:
+ *  0.19.4
  *
  * The class structure for #TpBaseConnectionManager.
  *
@@ -229,7 +227,8 @@ _tp_legacy_protocol_new (TpBaseConnectionManager *cm,
  *
  * Changed in 0.11.11: protocol_params and new_connection may both be
  * %NULL. If so, this connection manager is assumed to use Protocol objects
- * instead.
+ * instead. Since 0.19.2 those fields are deprecated and should not be
+ * used anymore.
  */
 
 /**
@@ -252,6 +251,37 @@ _tp_legacy_protocol_new (TpBaseConnectionManager *cm,
  * connections until the connection's shutdown process finishes.
  *
  * Returns: the new connection object, or %NULL on error.
+ */
+
+/**
+ * TpBaseConnectionManagerGetInterfacesFunc:
+ * @self: a #TpBaseConnectionManager
+ *
+ * Signature of an implementation of
+ * #TpBaseConnectionManagerClass.get_interfaces virtual function.
+ *
+ * Implementation must first chainup on parent class implementation and then
+ * add extra interfaces into the #GPtrArray.
+ *
+ * |[
+ * static GPtrArray *
+ * my_connection_manager_get_interfaces (TpBaseConnectionManager *self)
+ * {
+ *   GPtrArray *interfaces;
+ *
+ *   interfaces = TP_BASE_CONNECTION_MANAGER_CLASS (
+ *       my_connection_manager_parent_class)->get_interfaces (self);
+ *
+ *   g_ptr_array_add (interfaces, TP_IFACE_BADGERS);
+ *
+ *   return interfaces;
+ * }
+ * ]|
+ *
+ * Returns: (transfer container): a #GPtrArray of static strings for D-Bus
+ *   interfaces implemented by this client.
+ *
+ * Since: 0.19.4
  */
 
 static void service_iface_init (gpointer, gpointer);
@@ -395,7 +425,15 @@ tp_base_connection_manager_get_property (GObject *object,
       break;
 
     case PROP_INTERFACES:
-      g_value_set_boxed (value, cls->interfaces);
+      {
+        GPtrArray *interfaces = cls->get_interfaces (self);
+
+        /* make sure there's a terminating NULL */
+        g_ptr_array_add (interfaces, NULL);
+        g_value_set_boxed (value, interfaces->pdata);
+
+        g_ptr_array_unref (interfaces);
+      }
       break;
 
     case PROP_PROTOCOLS:
@@ -455,6 +493,23 @@ tp_base_connection_manager_set_property (GObject *object,
   }
 }
 
+static GPtrArray *
+tp_base_connection_manager_get_interfaces (TpBaseConnectionManager *self)
+{
+  GPtrArray *interfaces = g_ptr_array_new ();
+  const char * const *ptr;
+
+  /* copy the klass->interfaces property for backwards compatibility */
+  for (ptr = TP_BASE_CONNECTION_MANAGER_GET_CLASS (self)->interfaces;
+       ptr != NULL && *ptr != NULL;
+       ptr++)
+    {
+      g_ptr_array_add (interfaces, (char *) *ptr);
+    }
+
+  return interfaces;
+}
+
 static void
 tp_base_connection_manager_class_init (TpBaseConnectionManagerClass *klass)
 {
@@ -471,6 +526,8 @@ tp_base_connection_manager_class_init (TpBaseConnectionManagerClass *klass)
   object_class->set_property = tp_base_connection_manager_set_property;
   object_class->dispose = tp_base_connection_manager_dispose;
   object_class->finalize = tp_base_connection_manager_finalize;
+
+  klass->get_interfaces = tp_base_connection_manager_get_interfaces;
 
   /**
    * TpBaseConnectionManager:dbus-daemon:
@@ -605,7 +662,7 @@ tp_base_connection_manager_get_protocol (TpBaseConnectionManager *self,
   if (protocol != NULL)
     return protocol;
 
-  g_set_error (error, TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+  g_set_error (error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
       "unknown protocol %s", protocol_name);
 
   return NULL;
@@ -808,7 +865,7 @@ set_param_from_value (const TpCMParamSpec *paramspec,
       DEBUG ("expected type %s for parameter %s, got %s",
                g_type_name (paramspec->gtype), paramspec->name,
                G_VALUE_TYPE_NAME (value));
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "expected type %s for account parameter %s, got %s",
           g_type_name (paramspec->gtype), paramspec->name,
           G_VALUE_TYPE_NAME (value));
@@ -853,8 +910,8 @@ parse_parameters (const TpCMParamSpec *paramspec,
 }
 
 
-/**
- * tp_base_connection_manager_get_parameters
+/*
+ * tp_base_connection_manager_get_parameters:
  *
  * Implements D-Bus method GetParameters
  * on interface org.freedesktop.Telepathy.ConnectionManager
@@ -906,8 +963,8 @@ tp_base_connection_manager_get_parameters (TpSvcConnectionManager *iface,
 }
 
 
-/**
- * tp_base_connection_manager_list_protocols
+/*
+ * tp_base_connection_manager_list_protocols:
  *
  * Implements D-Bus method ListProtocols
  * on interface org.freedesktop.Telepathy.ConnectionManager
@@ -942,8 +999,8 @@ tp_base_connection_manager_list_protocols (TpSvcConnectionManager *iface,
 }
 
 
-/**
- * tp_base_connection_manager_request_connection
+/*
+ * tp_base_connection_manager_request_connection:
  *
  * Implements D-Bus method RequestConnection
  * on interface org.freedesktop.Telepathy.ConnectionManager

@@ -62,7 +62,6 @@ contact_detail_destroy (gpointer p)
 
   g_free (d->publish_request);
   tp_handle_set_destroy (d->groups);
-  tp_handle_unref (d->contact_repo, d->handle);
 
   g_slice_free (ContactDetails, d);
 }
@@ -90,7 +89,6 @@ ensure_contact (TpTestsContactListManager *self,
       d->groups = tp_handle_set_new (self->priv->group_repo);
       d->handle = handle;
       d->contact_repo = self->priv->contact_repo;
-      tp_handle_ref (d->contact_repo, d->handle);
 
       g_hash_table_insert (self->priv->contact_details,
           GUINT_TO_POINTER (handle), d);
@@ -199,7 +197,7 @@ contact_list_dup_groups (TpBaseContactList *base)
 
   if (self->priv->groups != NULL)
     {
-      TpIntSetFastIter iter;
+      TpIntsetFastIter iter;
       TpHandle group;
 
       ret = g_ptr_array_sized_new (tp_handle_set_size (self->priv->groups) + 1);
@@ -231,7 +229,7 @@ contact_list_dup_contact_groups (TpBaseContactList *base,
 
   if (d != NULL && d->groups != NULL)
     {
-      TpIntSetFastIter iter;
+      TpIntsetFastIter iter;
       TpHandle group;
 
       ret = g_ptr_array_sized_new (tp_handle_set_size (d->groups) + 1);
@@ -297,7 +295,7 @@ contact_list_set_contact_groups_async (TpBaseContactList *base,
   TpIntset *set, *added_set, *removed_set;
   GPtrArray *added_names, *removed_names;
   GPtrArray *new_groups;
-  TpIntSetFastIter iter;
+  TpIntsetFastIter iter;
   TpHandle group_handle;
   guint i;
 
@@ -883,8 +881,9 @@ tp_tests_contact_list_manager_add_initial_contacts (TpTestsContactListManager *s
   TpHandleSet *handles;
   guint i;
 
-  g_assert_cmpint (self->priv->conn->status, ==,
-      TP_INTERNAL_CONNECTION_STATUS_NEW);
+  g_assert_cmpint (tp_base_connection_get_status (self->priv->conn), ==,
+      TP_CONNECTION_STATUS_DISCONNECTED);
+  g_assert (!tp_base_connection_is_destroyed (self->priv->conn));
 
   handles = tp_handle_set_new (self->priv->contact_repo);
   for (i = 0; i < n_members; i++)

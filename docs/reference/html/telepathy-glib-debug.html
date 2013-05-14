@@ -38,7 +38,7 @@
 <div class="refsynopsisdiv">
 <a name="telepathy-glib-debug.synopsis"></a><h2>Synopsis</h2>
 <pre class="synopsis">
-#include &lt;telepathy-glib/debug.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-flags" title="tp_debug_set_flags ()">tp_debug_set_flags</a>                  (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *flags_string</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="telepathy-glib-debug.html#tp-debug-set-persistent" title="tp_debug_set_persistent ()">tp_debug_set_persistent</a>             (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> persistent</code></em>);
@@ -101,6 +101,11 @@ are subject to change, but currently include:
 <code class="literal">contact-lists</code> - the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a>
    (service)</li>
 <li class="listitem">
+<code class="literal">debugger</code> - <a class="link" href="TpDebugClient.html" title="TpDebugClient"><span class="type">TpDebugClient</span></a> objects</li>
+<li class="listitem">
+<code class="literal">tls</code> - <a class="link" href="TpTLSCertificate.html" title="TpTLSCertificate"><span class="type">TpTLSCertificate</span></a> objects
+    (client)</li>
+<li class="listitem">
 <code class="literal">all</code> - all of the above</li>
 </ul></div>
 <p>
@@ -127,7 +132,7 @@ enable were removed at compile time.
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>flags_string</code></em> :</span></p></td>
-<td>The flags to set, comma-separated. If <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> or empty,
+<td>The flags to set, comma-separated. If <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> or empty,
 no additional flags are set.</td>
 </tr></tbody>
 </table></div>
@@ -168,7 +173,7 @@ Since version 0.7.14, if the filename is prefixed with '+' then the
 file is not truncated and output is added at the end of the file.
 </p>
 <p>
-Passing <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> to this function is guaranteed to have no effect. This is
+Passing <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to this function is guaranteed to have no effect. This is
 so you can call it with the recommended usage
 <code class="literal">tp_debug_divert_messages (g_getenv ("MYAPP_LOGFILE"))</code>
 and it won't do anything if the environment variable is not set.
@@ -181,7 +186,7 @@ support.
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
-<td>A file to which to divert stdout and stderr, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> to
+<td>A file to which to divert stdout and stderr, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to
 do nothing</td>
 </tr></tbody>
 </table></div>
@@ -210,8 +215,8 @@ Intended usage is:
       <tr>
         <td class="listing_lines" align="right"><pre>1
 2</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Miscellaneous-Utility-Functions.html#g-getenv">g_getenv</a></span><span class="normal"> </span><span class="symbol">(</span><span class="string">"MYPROG_TIMING"</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">!=</span><span class="normal"> <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS">NULL</a></span><span class="symbol">)</span>
-<span class="normal">  </span><span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Message-Logging.html#g-log-set-default-handler">g_log_set_default_handler</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal"><a href="telepathy-glib-debug.html#tp-debug-timestamped-log-handler">tp_debug_timestamped_log_handler</a></span><span class="symbol">,</span><span class="normal"> <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS">NULL</a></span><span class="symbol">);</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">if</span> <span class="gtkdoc opt">(</span><span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Miscellaneous-Utility-Functions.html#g-getenv">g_getenv</a></span> <span class="gtkdoc opt">(</span><span class="string">&quot;MYPROG_TIMING&quot;</span><span class="gtkdoc opt">) !=</span> NULL<span class="gtkdoc opt">)</span>
+  <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Message-Logging.html#g-log-set-default-handler">g_log_set_default_handler</a></span> <span class="gtkdoc opt">(</span>tp_debug_timestamped_log_handler<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -274,7 +279,7 @@ The parsing matches that of <a href="http://library.gnome.org/devel/glib/unstabl
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>flags_string</code></em> :</span></p></td>
-<td>The flags to set, comma-separated. If <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> or empty,
+<td>The flags to set, comma-separated. If <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> or empty,
 no additional flags are set.</td>
 </tr></tbody>
 </table></div>

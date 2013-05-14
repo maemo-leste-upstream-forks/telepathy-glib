@@ -130,7 +130,7 @@ _tp_call_content_new (TpCallChannel *self,
       "dbus-daemon", tp_proxy_get_dbus_daemon (self),
       "dbus-connection", tp_proxy_get_dbus_connection (self),
       "object-path", object_path,
-      "connection", tp_channel_borrow_connection ((TpChannel *) self),
+      "connection", tp_channel_get_connection ((TpChannel *) self),
       "channel", self,
       NULL);
 }
@@ -262,7 +262,7 @@ _tp_call_members_convert_array (TpConnection *connection,
   GPtrArray *result;
   guint i;
 
-  result = _tp_g_ptr_array_new_full (array->len, g_object_unref);
+  result = g_ptr_array_new_full (array->len, g_object_unref);
 
   for (i = 0; i < array->len; i++)
     {
@@ -509,7 +509,7 @@ update_call_members (TpCallChannel *self,
    * contact features on the factory, in which case this becomes no-op.
    */
 
-  contacts = _tp_g_ptr_array_new_full (g_hash_table_size (updates),
+  contacts = g_ptr_array_new_full (g_hash_table_size (updates),
       g_object_unref);
 
   g_hash_table_iter_init (&iter, updates);
@@ -544,7 +544,7 @@ call_members_changed_cb (TpChannel *channel,
   DEBUG ("Call members: %d changed, %d removed",
       g_hash_table_size (updates), removed->len);
 
-  connection = tp_channel_borrow_connection (channel);
+  connection = tp_channel_get_connection (channel);
   updates_contacts = _tp_call_members_convert_table (connection,
       updates, identifiers);
   removed_contacts = _tp_call_members_convert_array (connection,
@@ -582,7 +582,7 @@ got_all_properties_cb (TpProxy *proxy,
       return;
     }
 
-  connection = tp_channel_borrow_connection ((TpChannel *) self);
+  connection = tp_channel_get_connection ((TpChannel *) self);
   g_assert (tp_connection_has_immortal_handles (connection));
 
   self->priv->properties_retrieved = TRUE;
@@ -701,7 +701,7 @@ static void
 tp_call_channel_constructed (GObject *obj)
 {
   TpCallChannel *self = (TpCallChannel *) obj;
-  GHashTable *properties = tp_channel_borrow_immutable_properties (
+  GHashTable *properties = _tp_channel_get_immutable_properties (
       (TpChannel *) self);
 
   G_OBJECT_CLASS (tp_call_channel_parent_class)->constructed (obj);
@@ -878,7 +878,7 @@ tp_call_channel_class_init (TpCallChannelClass *klass)
   /**
    * TpCallChannel:state:
    *
-   * A #TpChannelCallState specifying the state of the call.
+   * A #TpCallState specifying the state of the call.
    *
    * Since: 0.17.5
    */
@@ -1345,7 +1345,7 @@ tp_call_channel_get_members (TpCallChannel *self)
  * tp_call_channel_has_dtmf:
  * @self: a #TpCallChannel
  *
- * Whether or not %self can send DTMF tones using
+ * Whether or not @self can send DTMF tones using
  * tp_call_channel_send_tones_async(). To be able to send DTMF tones, at least
  * one of @self's #TpCallChannel:contents must implement
  * %TP_IFACE_CALL_CONTENT_INTERFACE_DTMF interface.
@@ -1377,7 +1377,7 @@ tp_call_channel_has_dtmf (TpCallChannel *self)
  * tp_call_channel_has_hold:
  * @self: a #TpCallChannel
  *
- * Whether or not %self has the %TP_IFACE_CHANNEL_INTERFACE_HOLD
+ * Whether or not @self has the %TP_IFACE_CHANNEL_INTERFACE_HOLD
  * interfaces
  *
  * Returns: whether or not @self supports Hold
@@ -1791,7 +1791,7 @@ tp_call_channel_send_tones_finish (TpCallChannel *self,
  * @user_data: data to pass to @callback
  *
  * Requests that the connection manager holds or unholds the call. Watch
- * #TpCallChannel::hold-state property to know when the channel goes on
+ * #TpCallChannel:hold-state property to know when the channel goes on
  * hold or is unheld. Unholding may fail if the streaming implementation
  * can not obtain all the resources needed to restart the call.
  *
@@ -1820,7 +1820,7 @@ tp_call_channel_request_hold_async (TpCallChannel *self,
     else
       {
         g_simple_async_result_set_error (result,
-            TP_ERRORS, TP_ERROR_NOT_CAPABLE,
+            TP_ERROR, TP_ERROR_NOT_CAPABLE,
             "Channel does NOT implement the Hold interface");
         g_simple_async_result_complete_in_idle (result);
       }

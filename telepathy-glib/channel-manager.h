@@ -20,11 +20,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_CHANNEL_MANAGER_H
 #define TP_CHANNEL_MANAGER_H
 
 #include <glib-object.h>
 
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/exportable-channel.h>
 
 G_BEGIN_DECLS
@@ -129,6 +134,8 @@ GType tp_channel_manager_get_type (void);
 
 void tp_channel_manager_emit_new_channel (gpointer instance,
     TpExportableChannel *channel, GSList *request_tokens);
+
+_TP_DEPRECATED_IN_0_20
 void tp_channel_manager_emit_new_channels (gpointer instance,
     GHashTable *channels);
 

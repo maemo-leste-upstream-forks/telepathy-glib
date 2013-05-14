@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_MESSAGE_H__
 #define __TP_MESSAGE_H__
 
@@ -42,6 +46,8 @@ GType tp_message_get_type (void);
 void tp_message_destroy (TpMessage *self);
 guint tp_message_count_parts (TpMessage *self);
 const GHashTable *tp_message_peek (TpMessage *self, guint part);
+_TP_AVAILABLE_IN_0_20
+GVariant *tp_message_dup_part (TpMessage *self, guint part);
 guint tp_message_append_part (TpMessage *self);
 void tp_message_delete_part (TpMessage *self, guint part);
 
@@ -68,18 +74,24 @@ void tp_message_set_bytes (TpMessage *self, guint part, const gchar *key,
     guint len, gconstpointer bytes);
 void tp_message_set (TpMessage *self, guint part, const gchar *key,
     const GValue *source);
+_TP_AVAILABLE_IN_0_20
+void tp_message_set_variant (TpMessage *self, guint part, const gchar *key,
+    GVariant *value);
 
 gchar * tp_message_to_text (TpMessage *message,
     TpChannelTextMessageFlags *out_flags) G_GNUC_WARN_UNUSED_RESULT;
 
 #ifndef TP_DISABLE_DEPRECATED
 /* Takes a TpCMMessage */
+_TP_DEPRECATED_FOR (tp_cm_message_set_sender)
 void tp_message_set_handle (TpMessage *self, guint part, const gchar *key,
     TpHandleType handle_type, TpHandle handle_or_0);
 
+_TP_DEPRECATED_FOR (tp_cm_message_take_message)
 void tp_message_take_message (TpMessage *self, guint part, const gchar *key,
     TpMessage *message);
 
+_TP_DEPRECATED_FOR (tp_cm_message_set_sender)
 void tp_message_ref_handle (TpMessage *self, TpHandleType handle_type,
     TpHandle handle);
 #endif
@@ -95,6 +107,7 @@ gboolean tp_message_is_rescued (TpMessage *self);
 const gchar *tp_message_get_supersedes (TpMessage *self);
 const gchar *tp_message_get_specific_to_interface (TpMessage *self);
 gboolean tp_message_is_delivery_report (TpMessage *self);
+_TP_AVAILABLE_IN_0_16
 guint32 tp_message_get_pending_message_id (TpMessage *self,
     gboolean *valid);
 

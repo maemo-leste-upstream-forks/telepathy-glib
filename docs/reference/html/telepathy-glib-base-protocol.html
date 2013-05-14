@@ -89,6 +89,8 @@ const <a class="link" href="TpBaseConnectionManager.html#TpCMParamSpec" title="s
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *max_height</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *max_width</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *max_bytes</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="returnvalue">GPtrArray</span></a> *         (<a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocolGetInterfacesArrayFunc" title="TpBaseProtocolGetInterfacesArrayFunc ()">*TpBaseProtocolGetInterfacesArrayFunc</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>);
 
 
 struct              <a class="link" href="telepathy-glib-base-protocol.html#TpProtocolAddressingInterface" title="struct TpProtocolAddressingInterface">TpProtocolAddressingInterface</a>;
@@ -253,7 +255,7 @@ interface, it need not implement this virtual method.
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>an array of <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceStatusSpec" title="struct TpPresenceStatusSpec"><span class="type">TpPresenceStatusSpec</span></a> structs describing the
 standard statuses supported by this protocol, with a final element
-whose name element is guaranteed to be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. The array must remain
+whose name element is guaranteed to be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. The array must remain
 valid at least as long as <em class="parameter"><code>self</code></em> does.</td>
 </tr>
 </tbody>
@@ -298,11 +300,11 @@ provided via D-Bus. <span class="annotation">[<acronym title="Don't free data af
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a new connection, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error</td>
+<td>a new connection, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error</td>
 </tr>
 </tbody>
 </table></div>
@@ -328,7 +330,6 @@ provided via D-Bus. <span class="annotation">[<acronym title="Don't free data af
       GHashTable *asv,
       GError **error);
 
-  GStrv (*get_interfaces) (TpBaseProtocol *self);
 
   void (*get_connection_details) (TpBaseProtocol *self,
       GStrv *connection_interfaces,
@@ -342,6 +343,8 @@ provided via D-Bus. <span class="annotation">[<acronym title="Don't free data af
   TpBaseProtocolGetAvatarDetailsFunc get_avatar_details;
 
   GStrv (*dup_authentication_types) (TpBaseProtocol *self);
+
+  TpBaseProtocolGetInterfacesArrayFunc get_interfaces_array;
 };
 </pre>
 <p>
@@ -380,7 +383,7 @@ see the documentation of that method for details</td>
 <td>a callback used to implement the NormalizeContact
 D-Bus method; it must either return a newly allocated string that is the
 normalized version of <em class="parameter"><code>contact</code></em>, or raise an error via <em class="parameter"><code>error</code></em> and
-return <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>. If not implemented, <a class="link" href="telepathy-glib-errors.html#TP-ERROR-NOT-IMPLEMENTED:CAPS"><code class="literal">TP_ERROR_NOT_IMPLEMENTED</code></a> will be raised
+return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. If not implemented, <a class="link" href="telepathy-glib-errors.html#TP-ERROR-NOT-IMPLEMENTED:CAPS"><code class="literal">TP_ERROR_NOT_IMPLEMENTED</code></a> will be raised
 instead.</td>
 </tr>
 <tr>
@@ -389,13 +392,8 @@ instead.</td>
 D-Bus method; it takes as input a map from strings to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>s,
 and must either return a newly allocated string that represents the
 "identity" of the parameters in <em class="parameter"><code>asv</code></em> (usually the "account" parameter),
-or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> with an error raised via <em class="parameter"><code>error</code></em>
+or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> with an error raised via <em class="parameter"><code>error</code></em>
 </td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="structfield"><code><a name="TpBaseProtocolClass.get-interfaces"></a>get_interfaces</code></em> ()</span></p></td>
-<td>a callback used to implement the Interfaces D-Bus property;
-it must return a newly allocated <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a> containing D-Bus interface names</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="structfield"><code><a name="TpBaseProtocolClass.get-connection-details"></a>get_connection_details</code></em> ()</span></p></td>
@@ -418,6 +416,14 @@ Protocol.Interface.Avatars interface's properties. Since 0.13.7</td>
 <td>a callback used to implement the
 AuthenticationTypes D-Bus property; it must return a newly allocated <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>
 containing D-Bus interface names. Since 0.13.9</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocolGetInterfacesArrayFunc" title="TpBaseProtocolGetInterfacesArrayFunc ()"><span class="type">TpBaseProtocolGetInterfacesArrayFunc</span></a> <em class="structfield"><code><a name="TpBaseProtocolClass.get-interfaces-array"></a>get_interfaces_array</code></em>;</span></p></td>
+<td>a callback used to implement the Interfaces
+D-Bus property; The implementation must first chainup to parent
+class implementation and then add extra interfaces to the
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a>. Replaces <em class="parameter"><code>get_interfaces</code></em>
+</td>
 </tr>
 </tbody>
 </table></div>
@@ -484,11 +490,11 @@ provided via D-Bus. <span class="annotation">[<acronym title="Don't free data af
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a new connection, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a new connection, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -505,7 +511,7 @@ provided via D-Bus. <span class="annotation">[<acronym title="Don't free data af
 <p>
 Signature of a virtual method to perform best-effort offline normalization
 of a contact's identifier. It must either return a newly allocated string
-that is the normalized form of <em class="parameter"><code>contact</code></em>, or raise an error and return <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+that is the normalized form of <em class="parameter"><code>contact</code></em>, or raise an error and return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -520,11 +526,11 @@ that is the normalized form of <em class="parameter"><code>contact</code></em>, 
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a normalized identifier, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a normalized identifier, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -562,11 +568,11 @@ the parameters in <em class="parameter"><code>asv</code></em> conform to the spe
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a unique name for the account, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a unique name for the account, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -594,7 +600,7 @@ If you implement <a class="link" href="telepathy-glib-base-protocol.html#TpBaseP
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of D-Bus interface names. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of D-Bus interface names. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -625,7 +631,7 @@ Signature of a virtual method to get the D-Bus interfaces implemented by
 <tr>
 <td><p><span class="term"><em class="parameter"><code>connection_interfaces</code></em> :</span></p></td>
 <td>used to return a
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of interfaces which might be implemented on
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of interfaces which might be implemented on
 connections to this protocol. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
@@ -687,7 +693,7 @@ protocol implemented by <em class="parameter"><code>self</code></em>.
 <tr>
 <td><p><span class="term"><em class="parameter"><code>supported_mime_types</code></em> :</span></p></td>
 <td>used to return a
-<a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of supported avatar mime types. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of supported avatar mime types. <span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 <tr>
@@ -735,6 +741,74 @@ this protocol, or 0 if there is no limit. <span class="annotation">[<acronym tit
 </tbody>
 </table></div>
 <p class="since">Since 0.13.7</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TpBaseProtocolGetInterfacesArrayFunc"></a><h3>TpBaseProtocolGetInterfacesArrayFunc ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="returnvalue">GPtrArray</span></a> *         (*TpBaseProtocolGetInterfacesArrayFunc)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a> *self</code></em>);</pre>
+<p>
+Signature of an implementation of
+<a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocolClass.get-interfaces-array"><span class="type">TpBaseProtocolClass.get_interfaces_array</span></a> virtual function.
+</p>
+<p>
+Implementation must first chainup on parent class implementation and then
+add extra interfaces into the <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a>.
+</p>
+<p>
+</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static</span> GPtrArray <span class="gtkdoc opt">*</span>
+<span class="function">my_protocol_get_interfaces_array</span> <span class="gtkdoc opt">(</span>TpBaseProtocol <span class="gtkdoc opt">*</span>self<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+  GPtrArray <span class="gtkdoc opt">*</span>interfaces<span class="gtkdoc opt">;</span>
+
+  interfaces <span class="gtkdoc opt">=</span> <span class="function">TP_BASE_PROTOCOL_CLASS</span> <span class="gtkdoc opt">(</span>
+      my_protocol_parent_class<span class="gtkdoc opt">)-&gt;</span><span class="function">get_interfaces_array</span> <span class="gtkdoc opt">(</span>self<span class="gtkdoc opt">);</span>
+
+  <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#g-ptr-array-add">g_ptr_array_add</a></span> <span class="gtkdoc opt">(</span>interfaces<span class="gtkdoc opt">,</span> TP_IFACE_BADGERS<span class="gtkdoc opt">);</span>
+
+  <span class="keyword">return</span> interfaces<span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-base-protocol.html#TpBaseProtocol"><span class="type">TpBaseProtocol</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of static strings for D-Bus
+interfaces implemented by this client. <span class="annotation">[<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.19.4</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -847,7 +921,7 @@ Signature of a virtual method to get the supported URI schemes supported by
 Signature of a virtual method to perform best-effort offline normalization
 of a vCard address. It must either return a newly allocated string
 that is the normalized form of <em class="parameter"><code>vcard_address</code></em>, or raise an error and
-return <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -866,11 +940,11 @@ return <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a normalized identifier, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a normalized identifier, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -886,7 +960,7 @@ return <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"
 <p>
 Signature of a virtual method to perform best-effort offline normalization
 of a URI. It must either return a newly allocated string
-that is the normalized form of <em class="parameter"><code>uri</code></em>, or raise an error and return <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+that is the normalized form of <em class="parameter"><code>uri</code></em>, or raise an error and return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -901,11 +975,11 @@ that is the normalized form of <em class="parameter"><code>uri</code></em>, or r
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td>used to return an error if <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
+<td>used to return an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a normalized identifier, or <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a normalized identifier, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>

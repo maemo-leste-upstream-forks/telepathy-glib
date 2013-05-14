@@ -1,23 +1,443 @@
-telepathy-glib 0.18.2 (2012-07-28)
+telepathy-glib 0.20.1 (2012-11-09)
+==================================
+
+The "world's slowest ticket machines" release.
+
+Fixes:
+
+• In Call channels, ignore state transitions where the state did not
+  actually change (fd.o #56044, Debarshi Ray)
+
+• Process the SelfHandleChanged signal for non-obsolete connection managers
+  (fd.o #55666, Simon)
+
+telepathy-glib 0.20.0 (2012-10-03)
+==================================
+
+The "why not indeed" release.
+
+This starts a new stable branch, recommended for use with GNOME 3.6.
+
+Summary of changes since the last stable branch, 0.18:
+
+• GLib 2.32 or later is required.
+
+• Many old things are now deprecated. New TP_VERSION_MIN_REQUIRED and
+  TP_VERSION_MAX_ALLOWED macros are provided for deprecation control:
+  they work like the ones in GLib 2.32.
+
+• Many functions that expected or returned dbus-glib parameterized types
+  are now deprecated, and have an equivalent GVariant-based function which
+  should be used instead.
+
+• The only headers you should #include are <telepathy-glib/telepathy-glib.h>,
+  <telepathy-glib/telepathy-glib-dbus.h> and <telepathy-glib/proxy-subclass.h>.
+  Including anything else is deprecated.
+
+• All TpChannel APIs using contact TpHandle have been deprecated in favor of
+  their TpContact variants.
+
+• TpRoomList and TpRoomInfo: high level API to list rooms on a server.
+
+• TpDebugClient: high level API to retrieve logs from Telepathy components.
+
+• TpTLSCertificate: TpProxy subclass representing a TLS certificate
+
+• TpAccountRequest: object to help account creation
+
+• TpSimpleClientFactory gained API to prepare TpContact objects with the
+  features set on it.
+
+• Add tp_vardict_get_uint32() etc., analogous to tp_asv_get_uint32() etc.
+
+• The configure flags --disable-coding-style-checks, --disable-doc-checks
+  and part of --disable-Werror have been superseded
+  by --disable-fatal-warning
+
+There were no code changes since 0.19.10.
+
+telepathy-glib 0.19.10 (2012-09-26)
+===================================
+
+The “Why not 0.20.0?” release.
+
+This is the release candidate for the future 0.20.0 stable release.
+
+Enhancements:
+
+• Add tp_vardict_get_uint32() etc., analogous to tp_asv_get_uint32() etc.
+  (Xavier)
+
+• tp_channel_dispatch_operation_get_channels() is now introspected (fd.o #55102, Simon)
+
+• Add tp_vardict_get_*() helper functions to lookup values in a GVariant of
+  type %G_VARIANT_TYPE_VARDICT (Xavier)
+
+• Add tp_variant_convert() and tp_variant_type_classify() to manipulate and
+  convert GVariant (Xavier)
+
+A bunch of GVariant oriented API have been added as an alternative of their
+GValue equivalent:
+• tp_{dbus,stream}_tube_channel_dup_parameters_vardict() (fd.o #55024, Chandni Verma)
+• tp_message_set_variant() and tp_message_dup_part() (fd.o #55096, Simon)
+• tp_account_channel_request_dup_request(),
+• tp_account_channel_request_new_vardict(),
+  tp_channel_request_dup_immutable_properties(), tp_channel_request_dup_hints(),
+  tp_account_channel_request_set_hints() and
+  TpAccountChannelRequest:request-vardict property (fd.o #55099, Simon)
+• tp_g_socket_address_from_g_variant() and
+  tp_address_g_variant_from_g_socket_address() (fd.o #55101, Simon)
+• TpDBusTubeChannel:parameters-vardict and
+  TpStreamTubeCha:parameters-vardict properties (fd.o #55024, Simon)
+• tp_contact_dup_location() and TpContact:location-vardict
+  property (fd.o#55095, Simon)
+• tp_base_client_add_{observer,approver,handler}_filter_vardict (fd.o #55100, Simon)
+
+telepathy-glib 0.19.9 (2012-09-11)
+==================================
+
+Deprecations:
+
+• Various functions whose names include _borrow_, such as
+  tp_proxy_borrow_interface_by_id() and
+  tp_channel_borrow_immutable_properties(),
+  are deprecated. Use the corresponding function with _get_ or _dup_ in its
+  name, such as tp_proxy_get_interface_by_id() or
+  tp_channel_dup_immutable_properties(), instead. (Xavier)
+
+• Various functions returning a (transfer container) list, such as
+  tp_text_channel_get_pending_messages(), are deprecated. Use the
+  corresponding function with _dup_ in its name, such as
+  tp_text_channel_dup_pending_messages(), instead. (Xavier)
+
+• tp_handle_set/get_qdata() are now deprecated. Handles are immortal so using
+  them would leak the data until Connection gets disconnected.
+
+• tp_channel_request_new() and tp_channel_dispatch_operation_new() constructors
+  are now deprecated. Applications should not need them since they are created
+  internaly in TpBaseClient.
+
+Enhancements:
+
+• Some functions from util.h, such as tp_utf8_make_valid(),
+  tp_escape_as_identifier() and user-action-time functions are now
+  available via gobject-introspection (fd.o #54543, Simon)
+
+Fixes:
+
+• Get the remote contact from a MediaDescription correctly (fd.o #54425,
+  Sjoerd)
+
+• Fix an incorrect error on UpdateLocalMediaDescription (Sjoerd)
+
+• Fix use of an unterminated string in the tls-certificates test (Sjoerd)
+
+• Fix service-side codegen using single includes, which prevents extensions to
+  build with TP_DISABLE_SINGLE_INCLUDE.
+
+telepathy-glib 0.19.8 (2012-08-31)
 ==================================
 
 Enhancements:
+
+• New introspectable function tp_account_channel_request_set_hint() to add hints
+  one by one. (Sjoerd)
+
+Fixes:
+
+• Set the ChannelRequests immutable properties when observing/handling channels.
+  (Sjoerd)
+
+telepathy-glib 0.19.7 (2012-08-27)
+==================================
+
+Enhancements:
+
+• Add API to TpBaseChannel to allow it to disappear and reappear from
+  the bus without disposing the object. (fd.o#48210, Jonny)
+
+Fixes:
+
+• In tp_account_dup_storage_identifier_variant, don't fail if there is no
+  storage identifier (fd.o #53201, Guillaume)
+
+• Remove duplicate TpBaseConnection typedef, fixing compilation with pre-C11
+  compilers like gcc < 4.6 (fd.o #53100, Simon)
+
+• Use AS_CASE instead of case/esac, and AS_IF instead of
+  if/then/[else/]fi in configure.ac, as they are safer and guaranteed
+  to work (fd.o#681413, Simon)
+
+telepathy-glib 0.19.6 (2012-08-06)
+==================================
+
+Enhancements:
+
+• Add tp_account_manager_can_set_default() (Guillaume)
+
+Fixes:
+
+• Fix generation of reentrant-methods.list in highly parallel builds
+  (fd.o #52480, Ross Burton)
+
+• TpBaseChannel: assert that the subclass sets TargetHandleType. (Will)
+
+telepathy-glib 0.19.5 (2012-07-24)
+==================================
+
+Fixes:
+
+• fdo#52441 - fix warning when preparing blocked contacts before
+  TP_CONNECTION_FEATURE_CONNECTED is officially prepared.
+• TpAccountManager: set the requested presence on newly created accounts
+
+telepathy-glib 0.19.4 (2012-07-19)
+==================================
+
+The “#hellopaul” release.
+
+Enhancements:
+
+• TpBaseConnectionManager, TpBaseConnection and TpBaseProtocol: add virtual
+  methods to get interfaces. (Jonny)
+
+• Add tp_account_request_set_storage_provider(). (Guillaume)
+
+Fixes:
+
+• base-connection: return from RequestHandles if called with no names. (Jonny)
+
+• TpAccountRequest: add missing 'service' property getter. (Guillaume)
+
+telepathy-glib 0.19.3 (2012-07-05)
+==================================
+
+Deprecations:
+
+• tp_account_new(), tp_connection_new() and tp_*_channel_new() have been
+  deprecated. Those proxies should be created using corresponding
+  TpSimpleClientFactory APIs. (Xavier)
+
+• TpAccount, TpConnection and TpConnectionManager: deprecate
+  "connection-manager" and "protocol" properties and replace them by "cm-name"
+  and "protocol-name" to be more consistent. Ditto for their getters. (Xavier)
+
+Fixes:
+
+• fdo#51444 - Crash in TpBaseClient (Xavier)
+
+telepathy-glib 0.19.2 (2012-06-28)
+==================================
+
+Enhancements:
+
+• TpDynamicHandleRepo can now have an asynchronous ID normalization function.
+  That function can be set by Connection Manager wishing to do network rountrip
+  to normalize an ID. (Xavier)
+
+Fixes:
+
+• fdo#51250 - tp_debug_client_get_messages_async: error is not propagated
+  (Guillaume)
+
+telepathy-glib 0.19.1 (2012-06-06)
+==================================
+
+Dependencies:
+
+• Valac ≥ 0.16.0 is now required for the Vala bindings.
+
+Deprecations:
+
+• TpHandle reference count related APIs have been deprecated.
+  - The CM-side APIs tp_handle(s)_ref/unref() and
+    tp_handle(s)_client_hold/release() were already no-op since immortal
+    handles.
+  - The Client-side APIs tp_connection_hold/unref_handles() are not needed with
+    CMs having immortal handles. Others CM are considered legacy, clients
+    wanting to keep support for them should continue using those deprecated
+    APIs (Notably Empathy already dropped support for them since version 3.4).
+  (Xavier)
+
+• Contact attributes APIs have been deprecated. It is considered an internal
+  implementation detail for TpContact that clients doesn't need to care about.
+  tp_connection_get_contact(_list)_attributes(). (Xavier)
+
+• tp_connection_request_handles() has been deprecated because higher level APIs
+  now make it useless. If handle_type is TP_HANDLE_TYPE_CONTACT, use
+  tp_connection_dup_contact_by_id_async() instead. For channel requests, use
+  tp_account_channel_request_set_target_id() instead. (Xavier)
+
+• tp_channel_manager_emit_new_channels() has been deprecated, emitting multiple
+  channels at once is discouraged because it makes client-side code more
+  complicated for no good reason. (Jonny)
+
+• tp_connection_parse_object_path() has been deprecated because the connection's
+  object-path is already parsed internaly and exposed via
+  tp_connection_get_connection_manager_name() and
+  tp_connection_get_protocol_name(). (Xavier)
+
+• tp_account_parse_object_path() has been deprecated because the account's
+  object-path is already parsed internaly and exposed via
+  tp_account_get_connection_manager() and tp_account_get_protocol(). (Xavier)
+
+• tp_account_ensure_connection() has been deprecated. Its purpose was to share
+  a common TpConnection object between TpBaseClient and TpAccount. Now proxy
+  uniqueness is guaranteed by TpSimpleClientFactory. (Xavier)
+
+• Struct members of TpProxy, TpConnectionManagerParam, TpConnectionManager and
+  TpBaseConnection have been sealed. In the same spirit than G_SEAL, we
+  introduced _TP_SEAL to force usage of getters and setters. (Simon)
+
+• Including individual headers is now deprecated. Only the teleapthy-glib.h and
+  telepathy-glib-dbus.h meta headers should be included in applications. Build
+  error is disabled by default and can be turned on by defining
+  TP_DISABLE_SINGLE_INCLUDE. (Xavier)
+
+• tp_list_connection_managers() has been deprecated in favor of
+  tp_list_connection_managers_async() and tp_list_connection_managers_finish().
+  (Simon)
+
+• TpConnectionManagerProtocol and all its related functions have been deprecated
+  in favor of TpProtocol. (Simon)
+
+Enhancements:
+
+• New TpAccountRequest object to help account creation (Jonny)
+
+• TpSimpleClientFactory gained API to prepare TpContact objects with the
+  features set on it. tp_simple_client_factory_upgrade_contacts_async() is
+  convenience API for tp_connection_upgrade_contacts_async().
+  tp_simple_client_factory_ensure_contact_by_id_async() is convenience API for
+  tp_connection_dup_contact_by_id_async(). (Xavier)
+
+• tp_simple/automatic_client_factory_new() now accept NULL TpDBusDaemon arg.
+  tp_dbus_daemon_dup() will be used internaly in that case. (Xavier)
+
+Fixes:
+
+• Fixed possible case where TP_CONTACT_FEATURE_AVATAR_DATA does not get
+  prepared. (Xavier)
+
+• Fix Vala bindings build when srcdir is different from
+  builddir. (fdo#49802, Colin)
+
+telepathy-glib 0.19.0 (2012-05-09)
+==================================
+
+Dependencies:
+
+• GLib ≥ 2.32, as released with GNOME 3.4, is now required.
+
+Deprecations:
+
+• Deprecations are now versioned. telepathy-glib users can define
+  TP_VERSION_MIN_REQUIRED and/or TP_VERSION_MAX_ALLOWED, which work like the
+  corresponding macros in GLib 2.32. (Simon)
+
+• All TpChannel APIs using contact TpHandle have been deprecated in favor of
+  their TpContact variants. Note that replacement APIs are only guaranteed to
+  work with Connection Managers implementing spec >= 0.23.4. Any CMs using
+  telepathy-glib's TpGroupMixin for implementing the channel's group iface
+  are fine. (Xavier)
+
+• TpTextMixin is (officially) deprecated, use TpMessageMixin. (Xavier)
+
+• TpIntsetIter is deprecated, use TpIntsetFastIter. The typedefs
+  TpIntSetIter and TpIntSetFastIter are also deprecated. (Simon)
+
+• TP_ERRORS has officially been deprecated since 0.11; it now produces
+  deprecation warnings too. (Simon)
+
+• Reimplementation of the RequestHandles method is deprecated. (Simon)
+
+• tp_connection_get_contacts_by_id is deprecated and replaced by
+  tp_connection_dup_contact_by_id_async, for proper GAsyncResult API, and is
+  now for single identifier to simplify most common use case.
+  (fd.o #27687 and #30874, Xavier)
+
+• tp_connection_get_contacts_by_handle() is deprecated with no replacement. It
+  is deprecated to create a TpContact without knowing both its id and handle.
+  (fd.o #27687 and #30874, Xavier)
+
+• tp_connection_upgrade_contacts is deprecated and replaced by
+  tp_connection_upgrade_contacts_async, for proper GAsyncResult API. Note that
+  the connection must implement the Contacts interface to use this new API.
+  (fd.o #27687 and #30874, Xavier)
+
+• TP_CHANNEL_FEATURE_CHAT_STATES and its corresponding APIs are deprecated and
+  replaced by similar API on TpTextChannel.
+
+Enhancements:
+
+• <telepathy-glib/telepathy-glib.h> now includes all non-generated code
+  except proxy-subclass.h. Please use it instead of individual headers -
+  direct inclusion of most individual headers will become an error in
+  future versions, as was done for GLib. (Simon)
+
+• A new meta-header, <telepathy-glib/telepathy-glib-dbus.h>, now includes
+  all generated code. Please include it in any file that uses tp_svc_*,
+  tp_cli_*, TP_IFACE_*, TP_HASH_TYPE_*, TP_STRUCT_TYPE_* or TP_ARRAY_TYPE_*.
+  In telepathy-glib 1.0, it will become a separate pkg-config module. (Simon)
+
+• Replace --disable-coding-style-checks and --disable-doc-checks with
+  --disable-fatal-warnings. In addition to what the removed options did,
+  it changes the default for --disable-Werror and turns off
+  g-ir-scanner warnings. In future releases, it might control additional
+  "warnings are treated as errors" options. Developers can also use
+  --enable-fatal-warnings to force all of these on, even in official
+  releases. (Simon)
+
+• Add TpRoomList and TpRoomInfo (fd.o #30338, Guillaume)
+
+• Add TpDebugClient (fd.o #23344; Will, Guillaume)
+
+• Add tp_account_channel_request_new_text(),
+  tp_account_channel_request_new_audio_call(),
+  tp_account_channel_request_set_target_contact() etc., which do not require
+  the caller to know D-Bus property names (fd.o #48780, Simon)
+
+• Add tp_connection_dup_detailed_error_vardict(),
+  tp_base_connection_disconnect_with_dbus_error_vardict(),
+  tp_connection_manager_param_dup_default_variant(),
+  tp_capabilities_dup_channel_classes_variant() which use/return GVariants
+  instead of dbus-glib parameterized types (Simon, Guillaume)
+
+• Add a simple PyGtk3 dialler to the examples, and optionally install
+  the Python examples as well as the C ones (fd.o #48504, Simon)
+
+• Add tp_contact_get_account() (Xavier)
+
+• Improve documentation (Jonny, Simon, Xavier)
 
 • Add "clean-for-new-branch" Makefile target which is more thorough than
   clean, but less thorough than distclean (in particular, it doesn't
   forget your ./configure options) (Simon)
 
+• Add TpTLSCertificate, a TpProxy subclass representing a TLS
+  certificate (fdo #30460, Guillaume)
+
+• TpMessageMixin now has helpers to implement the ChatState interface.
+
 Fixes:
+
+• Make it safe to hold refs to a remaining GAsyncResult after returning
+  to the main loop (fd.o #45554, Simon)
+
+• When a TpProxy method call returns, which can occasionally be synchronous,
+  use an idle to finish the corresponding GAsyncResult (fd.o #45514, Simon)
+
+• Add TP_NUM_DBUS_ERRORS (etc.) to supersede NUM_TP_DBUS_ERRORS (etc.)
+  (fd.o #46470, Simon)
+
+• Make several methods returning a GStrv introspectable (fd.o #46471, Simon)
 
 • Retry preparation of features that depended on a missing connection
   interface after the connection connects, in the hope that the interface has
   now become available (fd.o #42981, Guillaume)
 
-• Fix warning when preparing blocked contacts before
-  TP_CONNECTION_FEATURE_CONNECTED is officially prepared. (fd.o #52441, Xavier)
-
-• Fix Vala bindings build when srcdir is different from
-  builddir. (fdo#49802, Colin)
+• Interpret capabilities more strictly, avoiding falsely saying we support
+  channel requests with fixed properties we don't understand (Xavier)
 
 telepathy-glib 0.18.1 (2012-04-20)
 ==================================

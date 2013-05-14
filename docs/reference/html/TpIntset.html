@@ -40,7 +40,7 @@
 <div class="refsynopsisdiv">
 <a name="TpIntset.synopsis"></a><h2>Synopsis</h2>
 <pre class="synopsis">
-#include &lt;telepathy-glib/intset.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
                     <a class="link" href="TpIntset.html#TpIntset-struct" title="TpIntset">TpIntset</a>;
 #define             <a class="link" href="TpIntset.html#TP-TYPE-INTSET:CAPS" title="TP_TYPE_INTSET">TP_TYPE_INTSET</a>
@@ -707,15 +707,15 @@ Usage is similar to <a href="http://library.gnome.org/devel/glib/unstable/glib-H
 7
 8
 9</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="usertype">TpIntsetFastIter</span><span class="normal"> iter</span><span class="symbol">;</span>
-<span class="usertype">guint</span><span class="normal"> element</span><span class="symbol">;</span>
+        <td class="listing_code"><pre class="programlisting">TpIntsetFastIter iter<span class="gtkdoc opt">;</span>
+guint element<span class="gtkdoc opt">;</span>
 
-<span class="function"><a href="TpIntset.html#tp-intset-fast-iter-init">tp_intset_fast_iter_init</a></span><span class="normal"> </span><span class="symbol">(&amp;</span><span class="normal">iter</span><span class="symbol">,</span><span class="normal"> intset</span><span class="symbol">);</span>
+<span class="function"><a href="TpIntset.html#tp-intset-fast-iter-init">tp_intset_fast_iter_init</a></span> <span class="gtkdoc opt">(&amp;</span>iter<span class="gtkdoc opt">,</span> intset<span class="gtkdoc opt">);</span>
 
-<span class="keyword">while</span><span class="normal"> </span><span class="symbol">(</span><span class="function"><a href="TpIntset.html#tp-intset-fast-iter-next">tp_intset_fast_iter_next</a></span><span class="normal"> </span><span class="symbol">(&amp;</span><span class="normal">iter</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">element</span><span class="symbol">))</span>
-<span class="cbracket">{</span>
-<span class="normal">  </span><span class="function">printf</span><span class="normal"> </span><span class="symbol">(</span><span class="string">"%u is in the intset</span><span class="specialchar">\n</span><span class="string">"</span><span class="symbol">,</span><span class="normal"> element</span><span class="symbol">);</span>
-<span class="cbracket">}</span></pre></td>
+<span class="keyword">while</span> <span class="gtkdoc opt">(</span><span class="function"><a href="TpIntset.html#tp-intset-fast-iter-next">tp_intset_fast_iter_next</a></span> <span class="gtkdoc opt">(&amp;</span>iter<span class="gtkdoc opt">, &amp;</span>element<span class="gtkdoc opt">))</span>
+<span class="gtkdoc opt">{</span>
+  <span class="function">printf</span> <span class="gtkdoc opt">(</span><span class="string">&quot;%u is in the intset</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span> element<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -783,6 +783,10 @@ is not necessarily in numerical order.
 <a name="TP-INTSET-ITER-INIT:CAPS"></a><h3>TP_INTSET_ITER_INIT()</h3>
 <pre class="programlisting">#define TP_INTSET_ITER_INIT(set) { (set), (guint)(-1) }
 </pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">TP_INTSET_ITER_INIT</code> is deprecated and should not be used in newly-written code. since 0.19.0. Use <a class="link" href="TpIntset.html#TpIntsetFastIter" title="TpIntsetFastIter"><span class="type">TpIntsetFastIter</span></a> instead</p>
+</div>
 <p>
 A suitable static initializer for a <a class="link" href="TpIntset.html#TpIntsetIter" title="TpIntsetIter"><span class="type">TpIntsetIter</span></a>, to be used as follows:
 </p>
@@ -798,22 +802,18 @@ A suitable static initializer for a <a class="link" href="TpIntset.html#TpIntset
 4
 5
 6</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="type">void</span>
-<span class="function">do_something</span><span class="normal"> </span><span class="symbol">(</span><span class="keyword">const</span><span class="normal"> </span><span class="usertype">TpIntset</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">intset</span><span class="symbol">)</span>
-<span class="cbracket">{</span>
-<span class="normal">  </span><span class="usertype">TpIntsetIter</span><span class="normal"> iter </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="TpIntset.html#TP-INTSET-ITER-INIT:CAPS">TP_INTSET_ITER_INIT</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">intset</span><span class="symbol">);</span>
-<span class="normal">  </span><span class="comment">/* ... do something with iter ... */</span>
-<span class="cbracket">}</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">void</span>
+<span class="function">do_something</span> <span class="gtkdoc opt">(</span><span class="gtkdoc kwb">const</span> TpIntset <span class="gtkdoc opt">*</span>intset<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+  TpIntsetIter iter <span class="gtkdoc opt">=</span> <span class="function"><a href="TpIntset.html#TP-INTSET-ITER-INIT:CAPS">TP_INTSET_ITER_INIT</a></span> <span class="gtkdoc opt">(</span>intset<span class="gtkdoc opt">);</span>
+  <span class="comment">/* ... do something with iter ... */</span>
+<span class="gtkdoc opt">}</span></pre></td>
       </tr>
     </tbody>
   </table>
 </div>
 
 <p>
-</p>
-<p>
-Since 0.11.6, consider using <a class="link" href="TpIntset.html#TpIntsetFastIter" title="TpIntsetFastIter"><span class="type">TpIntsetFastIter</span></a> if iteration in
-numerical order is not required.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -831,6 +831,10 @@ numerical order is not required.
     guint element;
 } TpIntsetIter;
 </pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">TpIntsetIter</code> is deprecated and should not be used in newly-written code. since 0.19.0. Use <a class="link" href="TpIntset.html#TpIntsetFastIter" title="TpIntsetFastIter"><span class="type">TpIntsetFastIter</span></a> instead</p>
+</div>
 <p>
 A structure representing iteration over a set of integers. Must be
 initialized with either <a class="link" href="TpIntset.html#TP-INTSET-ITER-INIT:CAPS" title="TP_INTSET_ITER_INIT()"><code class="function">TP_INTSET_ITER_INIT()</code></a> or <a class="link" href="TpIntset.html#tp-intset-iter-init" title="tp_intset_iter_init ()"><code class="function">tp_intset_iter_init()</code></a>.
@@ -864,6 +868,10 @@ element in the set by <a class="link" href="TpIntset.html#tp-intset-iter-next" t
 <a name="tp-intset-iter-init"></a><h3>tp_intset_iter_init ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                tp_intset_iter_init                 (<em class="parameter"><code><a class="link" href="TpIntset.html#TpIntsetIter" title="TpIntsetIter"><span class="type">TpIntsetIter</span></a> *iter</code></em>,
                                                          <em class="parameter"><code>const <a class="link" href="TpIntset.html" title="TpIntset"><span class="type">TpIntset</span></a> *set</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_intset_iter_init</code> is deprecated and should not be used in newly-written code. since 0.19.0. Use <a class="link" href="TpIntset.html#TpIntsetFastIter" title="TpIntsetFastIter"><span class="type">TpIntsetFastIter</span></a> instead</p>
+</div>
 <p>
 Reset the iterator <em class="parameter"><code>iter</code></em> to the beginning and make it iterate over <em class="parameter"><code>set</code></em>.
 </p>
@@ -885,6 +893,10 @@ Reset the iterator <em class="parameter"><code>iter</code></em> to the beginning
 <div class="refsect2">
 <a name="tp-intset-iter-next"></a><h3>tp_intset_iter_next ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_intset_iter_next                 (<em class="parameter"><code><a class="link" href="TpIntset.html#TpIntsetIter" title="TpIntsetIter"><span class="type">TpIntsetIter</span></a> *iter</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_intset_iter_next</code> is deprecated and should not be used in newly-written code.</p>
+</div>
 <p>
 If there are integers in (<em class="parameter"><code>iter-&gt;set</code></em>) higher than (<em class="parameter"><code>iter-&gt;element</code></em>), set
 (iter-&gt;element) to the next one and return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>. Otherwise return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
@@ -903,11 +915,11 @@ Usage:
 3
 4
 5</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="usertype">TpIntsetIter</span><span class="normal"> iter </span><span class="symbol">=</span><span class="normal"> </span><span class="function">TP_INTSET_INIT</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">intset</span><span class="symbol">);</span>
-<span class="keyword">while</span><span class="normal"> </span><span class="symbol">(</span><span class="function"><a href="TpIntset.html#tp-intset-iter-next">tp_intset_iter_next</a></span><span class="normal"> </span><span class="symbol">(&amp;</span><span class="normal">iter</span><span class="symbol">))</span>
-<span class="cbracket">{</span>
-<span class="normal">  </span><span class="function">printf</span><span class="normal"> </span><span class="symbol">(</span><span class="string">"%u is in the intset</span><span class="specialchar">\n</span><span class="string">"</span><span class="symbol">,</span><span class="normal"> iter</span><span class="symbol">.</span><span class="normal">element</span><span class="symbol">);</span>
-<span class="cbracket">}</span></pre></td>
+        <td class="listing_code"><pre class="programlisting">TpIntsetIter iter <span class="gtkdoc opt">=</span> <span class="function">TP_INTSET_INIT</span> <span class="gtkdoc opt">(</span>intset<span class="gtkdoc opt">);</span>
+<span class="keyword">while</span> <span class="gtkdoc opt">(</span><span class="function"><a href="TpIntset.html#tp-intset-iter-next">tp_intset_iter_next</a></span> <span class="gtkdoc opt">(&amp;</span>iter<span class="gtkdoc opt">))</span>
+<span class="gtkdoc opt">{</span>
+  <span class="function">printf</span> <span class="gtkdoc opt">(</span><span class="string">&quot;%u is in the intset</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span> iter<span class="gtkdoc opt">.</span>element<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -938,6 +950,10 @@ numerical order is not required.
 <div class="refsect2">
 <a name="tp-intset-iter-reset"></a><h3>tp_intset_iter_reset ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                tp_intset_iter_reset                (<em class="parameter"><code><a class="link" href="TpIntset.html#TpIntsetIter" title="TpIntsetIter"><span class="type">TpIntsetIter</span></a> *iter</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_intset_iter_reset</code> is deprecated and should not be used in newly-written code. since 0.19.0. Use <a class="link" href="TpIntset.html#TpIntsetFastIter" title="TpIntsetFastIter"><span class="type">TpIntsetFastIter</span></a> instead</p>
+</div>
 <p>
 Reset the iterator <em class="parameter"><code>iter</code></em> to the beginning. It must already be associated
 with a set.

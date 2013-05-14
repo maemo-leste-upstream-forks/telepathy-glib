@@ -16,7 +16,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/handle-repo-dynamic.h>
 
 #include "protocol.h"
 #include "room-manager.h"
@@ -137,20 +136,20 @@ example_csh_normalize_room (TpHandleRepoIface *repo,
 
   if (id[0] != '#')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "Chatroom names in this protocol start with #");
     }
 
   if (id[1] == '\0')
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "Chatroom name cannot be empty");
       return NULL;
     }
 
   if (strchr (id, '@') != NULL)
     {
-      g_set_error (error, TP_ERRORS, TP_ERROR_INVALID_HANDLE,
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_HANDLE,
           "Chatroom names in this protocol cannot contain '@'");
       return NULL;
     }
@@ -160,7 +159,7 @@ example_csh_normalize_room (TpHandleRepoIface *repo,
 
 static void
 create_handle_repos (TpBaseConnection *conn,
-                     TpHandleRepoIface *repos[NUM_TP_HANDLE_TYPES])
+                     TpHandleRepoIface *repos[TP_NUM_HANDLE_TYPES])
 {
   repos[TP_HANDLE_TYPE_CONTACT] = tp_dynamic_handle_repo_new
       (TP_HANDLE_TYPE_CONTACT, example_csh_normalize_contact, NULL);
@@ -190,16 +189,19 @@ start_connecting (TpBaseConnection *conn,
   ExampleCSHConnection *self = EXAMPLE_CSH_CONNECTION (conn);
   TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (conn,
       TP_HANDLE_TYPE_CONTACT);
+  TpHandle self_handle;
 
   /* In a real connection manager we'd ask the underlying implementation to
    * start connecting, then go to state CONNECTED when finished, but here
    * we can do it immediately. */
 
-  conn->self_handle = tp_handle_ensure (contact_repo, self->priv->account,
+  self_handle = tp_handle_ensure (contact_repo, self->priv->account,
       NULL, error);
 
-  if (conn->self_handle == 0)
+  if (self_handle == 0)
     return FALSE;
+
+  tp_base_connection_set_self_handle (conn, self_handle);
 
   tp_base_connection_change_status (conn, TP_CONNECTION_STATUS_CONNECTED,
       TP_CONNECTION_STATUS_REASON_REQUESTED);
@@ -244,6 +246,21 @@ example_csh_connection_get_possible_interfaces (void)
   return interfaces_always_present;
 }
 
+static GPtrArray *
+get_interfaces_always_present (TpBaseConnection *base)
+{
+  GPtrArray *interfaces;
+  guint i;
+
+  interfaces = TP_BASE_CONNECTION_CLASS (
+      example_csh_connection_parent_class)->get_interfaces_always_present (base);
+
+  for (i = 0; interfaces_always_present[i] != NULL; i++)
+    g_ptr_array_add (interfaces, (gchar *) interfaces_always_present[i]);
+
+  return interfaces;
+}
+
 static void
 example_csh_connection_class_init (ExampleCSHConnectionClass *klass)
 {
@@ -263,7 +280,7 @@ example_csh_connection_class_init (ExampleCSHConnectionClass *klass)
   base_class->create_channel_managers = create_channel_managers;
   base_class->start_connecting = start_connecting;
   base_class->shut_down = shut_down;
-  base_class->interfaces_always_present = interfaces_always_present;
+  base_class->get_interfaces_always_present = get_interfaces_always_present;
 
   param_spec = g_param_spec_string ("account", "Account name",
       "The username of this user", NULL,

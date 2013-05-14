@@ -93,7 +93,7 @@
 void
 tp_dbus_g_method_return_not_implemented (DBusGMethodInvocation *context)
 {
-  GError e = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED, "Not implemented" };
+  GError e = { TP_ERROR, TP_ERROR_NOT_IMPLEMENTED, "Not implemented" };
 
   dbus_g_method_return_error (context, &e);
 }
@@ -1951,26 +1951,4 @@ tp_asv_dump (GHashTable *asv)
   }
 
   g_debug ("}");
-}
-
-/*
- * _tp_asv_to_vardict:
- *
- * Returns: (transfer full): a #GVariant of type %G_VARIANT_TYPE_VARDICT
- */
-GVariant *
-_tp_asv_to_vardict (const GHashTable *asv)
-{
-  GValue v = G_VALUE_INIT;
-  GVariant *ret;
-
-  g_value_init (&v, TP_HASH_TYPE_STRING_VARIANT_MAP);
-  g_value_set_boxed (&v, asv);
-
-  ret = dbus_g_value_build_g_variant (&v);
-  g_assert (!tp_strdiff (g_variant_get_type_string (ret), "a{sv}"));
-
-  g_value_unset (&v);
-
-  return g_variant_ref_sink (ret);
 }

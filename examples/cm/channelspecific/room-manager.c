@@ -235,7 +235,7 @@ new_channel (ExampleCSHRoomManager *self,
   GSList *requests = NULL;
 
   object_path = g_strdup_printf ("%s/CSHRoomChannel%u",
-      self->priv->conn->object_path, handle);
+      tp_base_connection_get_object_path (self->priv->conn), handle);
 
   chan = g_object_new (EXAMPLE_TYPE_CSH_ROOM_CHANNEL,
       "connection", self->priv->conn,
@@ -323,12 +323,13 @@ example_csh_room_manager_request (ExampleCSHRoomManager *self,
 
   if (chan == NULL)
     {
-      new_channel (self, handle, self->priv->conn->self_handle,
+      new_channel (self, handle,
+          tp_base_connection_get_self_handle (self->priv->conn),
           request_token);
     }
   else if (require_new)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "A Text channel for room #%u already exists", handle);
       goto error;
     }

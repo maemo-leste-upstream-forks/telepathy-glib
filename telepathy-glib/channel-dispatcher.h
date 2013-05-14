@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_CHANNEL_DISPATCHER_H
 #define TP_CHANNEL_DISPATCHER_H
 
@@ -71,12 +75,14 @@ TpChannelDispatcher *tp_channel_dispatcher_new (TpDBusDaemon *bus_daemon)
 
 void tp_channel_dispatcher_init_known_interfaces (void);
 
+_TP_AVAILABLE_IN_0_16
 void tp_channel_dispatcher_present_channel_async (TpChannelDispatcher *self,
     TpChannel *channel,
     gint64 user_action_time,
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_channel_dispatcher_present_channel_finish (
     TpChannelDispatcher *self,
     GAsyncResult *result,

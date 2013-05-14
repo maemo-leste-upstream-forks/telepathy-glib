@@ -58,9 +58,16 @@ G_DEFINE_TYPE_WITH_CODE (TpContactGroupChannel, _tp_contact_group_channel,
       group_group_iface_init);
     G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL, group_channel_iface_init))
 
-static const gchar *contact_list_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_GROUP,
-    NULL
+static GPtrArray *
+base_contact_list_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
+
+  interfaces = TP_BASE_CHANNEL_CLASS (
+      _tp_base_contact_list_channel_parent_class)->get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_GROUP);
+  return interfaces;
 };
 
 enum
@@ -103,7 +110,8 @@ tp_base_contact_list_channel_constructed (GObject *object)
   tp_base_channel_register (base);
 
   tp_group_mixin_init (object, G_STRUCT_OFFSET (TpBaseContactListChannel,
-        group), contact_repo, conn->self_handle);
+        group), contact_repo,
+      tp_base_connection_get_self_handle (conn));
   /* Both the subclasses have full support for telepathy-spec 0.17.6. */
   tp_group_mixin_change_flags (object,
       TP_CHANNEL_GROUP_FLAG_PROPERTIES, 0);
@@ -212,7 +220,7 @@ tp_base_contact_list_channel_check_still_usable (
 {
   if (self->manager == NULL)
     {
-      GError e = { TP_ERRORS, TP_ERROR_TERMINATED, "Channel already closed" };
+      GError e = { TP_ERROR, TP_ERROR_TERMINATED, "Channel already closed" };
       dbus_g_method_return_error (context, &e);
       return FALSE;
     }
@@ -282,7 +290,7 @@ _tp_base_contact_list_channel_class_init (TpBaseContactListChannelClass *cls)
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_CONTACT_LIST;
   base_class->target_handle_type = 0;       /* placeholder, set in subclass */
-  base_class->interfaces = contact_list_interfaces;
+  base_class->get_interfaces = base_contact_list_get_interfaces;
   base_class->close = stub_close;           /* placeholder, not called */
 
   g_object_class_install_property (object_class, PROP_MANAGER,
@@ -333,7 +341,7 @@ static void
 list_channel_close (TpSvcChannel *iface G_GNUC_UNUSED,
     DBusGMethodInvocation *context)
 {
-  GError e = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+  GError e = { TP_ERROR, TP_ERROR_NOT_IMPLEMENTED,
       "ContactList channels with handle type LIST may not be closed" };
 
   dbus_g_method_return_error (context, &e);
@@ -351,7 +359,7 @@ group_channel_close (TpSvcChannel *iface,
 
   if (tp_handle_set_size (self->group.members) > 0)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "Non-empty groups may not be deleted (closed)");
       goto error;
     }

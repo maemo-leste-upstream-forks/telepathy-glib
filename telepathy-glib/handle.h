@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_HANDLE_H__
 #define __TP_HANDLE_H__
 
@@ -72,16 +76,16 @@ static inline
 /* spacer so gtkdoc documents this function as though not static */
 gboolean tp_handle_type_is_valid (TpHandleType type, GError **error);
 
-/* Must be static inline because it references NUM_TP_HANDLE_TYPES -
+/* Must be static inline because it references TP_NUM_HANDLE_TYPES -
  * if it wasn't inlined, a newer libtelepathy-glib with a larger number
  * of handle types might accept handle types that won't fit in the
- * connection manager's array of length NUM_TP_HANDLE_TYPES
+ * connection manager's array of length TP_NUM_HANDLE_TYPES
  */
 
 static inline gboolean
 tp_handle_type_is_valid (TpHandleType type, GError **error)
 {
-  if (type > TP_HANDLE_TYPE_NONE && type < NUM_TP_HANDLE_TYPES)
+  if (type > TP_HANDLE_TYPE_NONE && type < TP_NUM_HANDLE_TYPES)
     return TRUE;
 
   tp_g_set_error_invalid_handle_type (type, error);

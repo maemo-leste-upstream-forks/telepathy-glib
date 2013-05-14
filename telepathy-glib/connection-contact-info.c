@@ -37,8 +37,6 @@
 #include "telepathy-glib/proxy-internal.h"
 #include "telepathy-glib/util-internal.h"
 
-
-
 /**
  * TpContactInfoFieldSpec:
  * @name: The name of the field; this is the lowercased name of a vCard
@@ -143,20 +141,9 @@ tp_contact_info_field_spec_free (TpContactInfoFieldSpec *self)
  *
  * Since: 0.11.7
  */
-GType
-tp_contact_info_field_spec_get_type (void)
-{
-  static GType type = 0;
 
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (g_intern_static_string ("TpContactInfoFieldSpec"),
-          (GBoxedCopyFunc) tp_contact_info_field_spec_copy,
-          (GBoxedFreeFunc) tp_contact_info_field_spec_free);
-    }
-
-  return type;
-}
+G_DEFINE_BOXED_TYPE (TpContactInfoFieldSpec, tp_contact_info_field_spec,
+    tp_contact_info_field_spec_copy, tp_contact_info_field_spec_free)
 
 /**
  * tp_contact_info_spec_list_copy: (skip)
@@ -171,15 +158,8 @@ tp_contact_info_field_spec_get_type (void)
 GList *
 tp_contact_info_spec_list_copy (GList *list)
 {
-  GList *copy = NULL;
-
-  while (list != NULL)
-    {
-      copy = g_list_prepend (copy, tp_contact_info_field_spec_copy (list->data));
-      list = list->next;
-    }
-
-  return g_list_reverse (copy);
+  return _tp_g_list_copy_deep (list,
+      (GCopyFunc) tp_contact_info_field_spec_copy, NULL);
 }
 
 /**
@@ -193,8 +173,7 @@ tp_contact_info_spec_list_copy (GList *list)
 void
 tp_contact_info_spec_list_free (GList *list)
 {
-  g_list_foreach (list, (GFunc) tp_contact_info_field_spec_free, NULL);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify) tp_contact_info_field_spec_free);
 }
 
 /**
@@ -204,20 +183,9 @@ tp_contact_info_spec_list_free (GList *list)
  *
  * Since: 0.11.7
  */
-GType
-tp_contact_info_spec_list_get_type (void)
-{
-  static GType type = 0;
 
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (g_intern_static_string ("TpContactInfoSpecList"),
-          (GBoxedCopyFunc) tp_contact_info_spec_list_copy,
-          (GBoxedFreeFunc) tp_contact_info_spec_list_free);
-    }
-
-  return type;
-}
+G_DEFINE_BOXED_TYPE (TpContactInfoSpecList, tp_contact_info_spec_list,
+    tp_contact_info_spec_list_copy, tp_contact_info_spec_list_free)
 
 /**
  * TpContactInfoField:
@@ -323,20 +291,9 @@ tp_contact_info_field_free (TpContactInfoField *self)
  *
  * Since: 0.11.7
  */
-GType
-tp_contact_info_field_get_type (void)
-{
-  static GType type = 0;
 
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (g_intern_static_string ("TpContactInfoField"),
-          (GBoxedCopyFunc) tp_contact_info_field_copy,
-          (GBoxedFreeFunc) tp_contact_info_field_free);
-    }
-
-  return type;
-}
+G_DEFINE_BOXED_TYPE (TpContactInfoField, tp_contact_info_field,
+    tp_contact_info_field_copy, tp_contact_info_field_free)
 
 /**
  * tp_contact_info_list_copy: (skip)
@@ -351,15 +308,8 @@ tp_contact_info_field_get_type (void)
 GList *
 tp_contact_info_list_copy (GList *list)
 {
-  GList *copy = NULL;
-
-  while (list != NULL)
-    {
-      copy = g_list_prepend (copy, tp_contact_info_field_copy (list->data));
-      list = list->next;
-    }
-
-  return g_list_reverse (copy);
+  return _tp_g_list_copy_deep (list,
+      (GCopyFunc) tp_contact_info_field_copy, NULL);
 }
 
 /**
@@ -373,8 +323,7 @@ tp_contact_info_list_copy (GList *list)
 void
 tp_contact_info_list_free (GList *list)
 {
-  g_list_foreach (list, (GFunc) tp_contact_info_field_free, NULL);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify) tp_contact_info_field_free);
 }
 
 /**
@@ -384,20 +333,9 @@ tp_contact_info_list_free (GList *list)
  *
  * Since: 0.11.7
  */
-GType
-tp_contact_info_list_get_type (void)
-{
-  static GType type = 0;
 
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (g_intern_static_string ("TpContactInfoList"),
-          (GBoxedCopyFunc) tp_contact_info_list_copy,
-          (GBoxedFreeFunc) tp_contact_info_list_free);
-    }
-
-  return type;
-}
+G_DEFINE_BOXED_TYPE (TpContactInfoList, tp_contact_info_list,
+    tp_contact_info_list_copy, tp_contact_info_list_free)
 
 /**
  * TP_CONNECTION_FEATURE_CONTACT_INFO:
@@ -407,7 +345,7 @@ tp_contact_info_list_get_type (void)
  *
  * When this feature is prepared, the ContactInfoFlags and SupportedFields of
  * the Connection has been retrieved. Use tp_connection_get_contact_info_flags()
- * and tp_connection_get_contact_info_supported_fields() to get them once
+ * and tp_connection_dup_contact_info_supported_fields() to get them once
  * prepared.
  *
  * One can ask for a feature to be prepared using the
@@ -453,7 +391,7 @@ tp_connection_get_contact_info_cb (TpProxy *proxy,
   if (!valid || specs == NULL)
     {
       DEBUG ("Some properties are missing on the ContactInfo interface");
-      g_simple_async_result_set_error (result, TP_ERRORS, TP_ERROR_CONFUSED,
+      g_simple_async_result_set_error (result, TP_ERROR, TP_ERROR_CONFUSED,
           "Some properties are missing on the ContactInfo interface");
       goto finally;
     }
@@ -475,7 +413,7 @@ tp_connection_get_contact_info_cb (TpProxy *proxy,
     }
 
 finally:
-  g_simple_async_result_complete (result);
+  g_simple_async_result_complete_in_idle (result);
 }
 
 void
@@ -538,6 +476,8 @@ tp_connection_get_contact_info_flags (TpConnection *self)
  *  a #GList of #TpContactInfoFieldSpec struct, or %NULL if the feature is not
  *  yet prepared or the connection doesn't have the necessary properties.
  * Since: 0.11.7
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_connection_dup_contact_info_supported_fields() instead.
  */
 GList *
 tp_connection_get_contact_info_supported_fields (TpConnection *self)
@@ -545,6 +485,32 @@ tp_connection_get_contact_info_supported_fields (TpConnection *self)
   g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
 
   return g_list_copy (self->priv->contact_info_supported_fields);
+}
+
+/**
+ * tp_connection_dup_contact_info_supported_fields:
+ * @self: a connection
+ *
+ * Returns a newly allocated #GList of supported contact info fields for this
+ * connection. The list must be freed with tp_contact_info_spec_list_free().
+ *
+ * To wait for valid supported fields, call tp_proxy_prepare_async() with the
+ * feature %TP_CONNECTION_FEATURE_CONTACT_INFO.
+ *
+ * This property cannot change after @self goes to the Connected state.
+ *
+ * Returns: (element-type TelepathyGLib.ContactInfoFieldSpec) (transfer full):
+ *  a #GList of #TpContactInfoFieldSpec struct, or %NULL if the feature is not
+ *  yet prepared or the connection doesn't have the necessary properties.
+ * Since: 0.19.9
+ */
+GList *
+tp_connection_dup_contact_info_supported_fields (TpConnection *self)
+{
+  g_return_val_if_fail (TP_IS_CONNECTION (self), NULL);
+
+  return _tp_g_list_copy_deep (self->priv->contact_info_supported_fields,
+      (GCopyFunc) tp_contact_info_field_spec_copy, NULL);
 }
 
 static void

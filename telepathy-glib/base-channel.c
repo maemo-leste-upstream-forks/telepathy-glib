@@ -43,6 +43,72 @@
  * be called to determine the channel's path, whose default implementation
  * simply generates a unique path based on the object's address in memory.
  *
+ * #TpBaseChannel also has the ability to remove the channel from the
+ * bus, but keep the object around. To close the channel and remove it
+ * from the bus, subclasses should call
+ * tp_base_channel_disappear(). To bring the channel back, subclasses
+ * use tp_base_channel_reopened_with_requested() and the channel
+ * should be re-announced with
+ * tp_channel_manager_emit_new_channel(). Note that channels which can
+ * disappear but can also reopen due to pending messages need special
+ * casing by the channel manager:
+ *
+ * |[
+ * static void
+ * channel_closed_cb (TpBaseChannel *chan,
+ *     TpChannelManager *manager)
+ * {
+ *   MyChannelManager *self = MY_CHANNEL_MANAGER (manager);
+ *   TpHandle handle = tp_base_channel_get_target_handle (chan);
+ *
+ *   // first, emit ChannelClosed if the channel is registered (it
+ *   // won't be registered if it is appearing from being hidden, so
+ *   // let's not emit the signal in this case)
+ *   if (tp_base_channel_is_registered (chan))
+ *     {
+ *       tp_channel_manager_emit_channel_closed (manager,
+ *           TP_EXPORTABLE_CHANNEL (chan));
+ *     }
+ *
+ *   if (tp_base_channel_is_destroyed (chan))
+ *     {
+ *       // destroyed() must have been called; forget this channel
+ *       g_hash_table_remove (self->priv->channels, handle);
+ *     }
+ *   else if (tp_base_channel_is_respawning (chan))
+ *     {
+ *       // reopened_with_requested() must have been called; re-announce the channel
+ *       tp_channel_manager_emit_new_channel (manager, TP_EXPORTABLE_CHANNEL (chan));
+ *     }
+ *   else
+ *     {
+ *       // disappear() must have been called, do nothing special
+ *     }
+ * }
+ * ]|
+ *
+ * and the #TpChannelManagerIface.foreach_channel virtual function
+ * should be updated to only include registered channels:
+ *
+ * |[
+ * static void
+ * foreach_channel (TpChannelManager *manager,
+ *     TpChannelManagerChannelClassFunc func,
+ *     gpointer user_data)
+ * {
+ *   MyChannelManager *self = MY_CHANNEL_MANAGER (manager);
+ *   GHashTableIter iter;
+ *   gpointer chan;
+ *
+ *   g_hash_table_iter_init (&iter, self->priv->channels);
+ *   while (g_hash_table_iter_next (&iter, NULL, &chan))
+ *     {
+ *       if (tp_base_channel_is_registered (TP_BASE_CHANNEL (chan)))
+ *         func (TP_EXPORTABLE_CHANNEL (chan), user_data);
+ *     }
+ * }
+ * ]|
+ *
  * Since: 0.11.14
  */
 
@@ -61,7 +127,6 @@
  * (e.g. #TP_IFACE_CHANNEL_TYPE_TEXT)
  * @target_handle_type: The type of handle that is the target of channels of
  * this type
- * @interfaces: Deprecated. Replaced by @get_interfaces.
  * @close: A virtual function called to close the channel, which will be called
  *  by tp_base_channel_close() and by the implementation of the Closed D-Bus
  *  method.
@@ -282,6 +347,7 @@ struct _TpBaseChannelPrivate
   gboolean requested;
   gboolean destroyed;
   gboolean registered;
+  gboolean respawning;
 
   gboolean dispose_has_run;
 };
@@ -338,6 +404,7 @@ tp_base_channel_destroyed (TpBaseChannel *chan)
   g_object_ref (chan);
 
   chan->priv->destroyed = TRUE;
+  chan->priv->respawning = FALSE;
   tp_svc_channel_emit_closed (chan);
 
   if (chan->priv->registered)
@@ -355,15 +422,77 @@ tp_base_channel_destroyed (TpBaseChannel *chan)
  * @initiator: the handle of the contact that re-opened the channel
  *
  * Called by subclasses to indicate that this channel was closed but was
- * re-opened due to pending messages.  The "Closed" signal will be emitted, but
- * the #TpExportableChannel:channel-destroyed property will not be set.  The
- * channel's #TpBaseChannel:initiator-handle property will be set to
- * @initiator, and the #TpBaseChannel:requested property will be set to FALSE.
+ * re-opened due to pending messages.
+ *
+ * Calling this method is the same as calling
+ * tp_base_channel_reopened_with_requested() with a requested value of
+ * %FALSE.
  *
  * Since: 0.11.14
  */
 void
 tp_base_channel_reopened (TpBaseChannel *chan, TpHandle initiator)
+{
+  tp_base_channel_reopened_with_requested (chan, FALSE, initiator);
+}
+
+/**
+ * tp_base_channel_disappear:
+ * @chan: a channel
+ *
+ * Called by subclasses to indicate that this channel is closing and
+ * should be unregistered from the bus, but the actual object
+ * shouldn't be destroyed. The "Closed" signal will be emitted,
+ * the #TpExportableChannel:channel-destroyed property will not be
+ * set, and the channel will be unregistered from the bus.
+ *
+ * Since: 0.19.7
+ */
+void
+tp_base_channel_disappear (TpBaseChannel *chan)
+{
+  TpBaseChannelPrivate *priv = chan->priv;
+  TpDBusDaemon *bus = tp_base_connection_get_dbus_daemon (priv->conn);
+
+  /* Take a ref to ourself: the 'closed' handler might drop its reference on us.
+   */
+  g_object_ref (chan);
+
+  priv->destroyed = FALSE;
+  priv->respawning = FALSE;
+
+  tp_svc_channel_emit_closed (chan);
+
+  if (priv->registered)
+    {
+      tp_dbus_daemon_unregister_object (bus, chan);
+      priv->registered = FALSE;
+    }
+
+  g_object_unref (chan);
+}
+
+/**
+ * tp_base_channel_reopened_with_requested:
+ * @chan: a channel
+ * @requested: %TRUE if the channel is requested, otherwise %FALSE
+ * @initiator: the handle of the contact that re-opened the channel
+ *
+ * Called by subclasses to indicate that this channel was closed but
+ * was re-opened, either due to pending messages or from having
+ * disappeared (with tp_base_channel_disappear()). The "Closed" signal
+ * will be emitted, but the #TpExportableChannel:channel-destroyed
+ * property will not be set.  The channel's
+ * #TpBaseChannel:initiator-handle property will be set to @initiator,
+ * and the #TpBaseChannel:requested property will be set to
+ * @requested.
+ *
+ * Since: 0.19.7
+ */
+void
+tp_base_channel_reopened_with_requested (TpBaseChannel *chan,
+    gboolean requested,
+    TpHandle initiator)
 {
   TpBaseChannelPrivate *priv = chan->priv;
 
@@ -372,23 +501,15 @@ tp_base_channel_reopened (TpBaseChannel *chan, TpHandle initiator)
   g_object_ref (chan);
 
   if (priv->initiator != initiator)
-    {
-      TpHandleRepoIface *contact_repo = tp_base_connection_get_handles (
-          priv->conn, TP_HANDLE_TYPE_CONTACT);
-      TpHandle old_initiator = priv->initiator;
+    priv->initiator = initiator;
 
-      if (initiator != 0)
-        tp_handle_ref (contact_repo, initiator);
-
-      priv->initiator = initiator;
-
-      if (old_initiator != 0)
-        tp_handle_unref (contact_repo, old_initiator);
-    }
-
-  chan->priv->requested = FALSE;
+  priv->requested = requested;
+  priv->respawning = TRUE;
 
   tp_svc_channel_emit_closed (chan);
+
+  if (!priv->registered)
+    tp_base_channel_register (chan);
 
   g_object_unref (chan);
 }
@@ -491,9 +612,7 @@ tp_base_channel_get_self_handle (TpBaseChannel *chan)
  * Returns the target handle of @chan (without a reference), which will be 0
  * if #TpBaseChannelClass.target_handle_type is #TP_HANDLE_TYPE_NONE for this
  * class, and non-zero otherwise. This is a shortcut for retrieving the
- * #TpChannelIface:handle property. The reference count of the handle
- * is not increased; you should use tp_handle_ref() if you want to keep a hold
- * of it.
+ * #TpChannelIface:handle property.
  *
  * Returns: the target handle of @chan
  *
@@ -512,9 +631,7 @@ tp_base_channel_get_target_handle (TpBaseChannel *chan)
  * @chan: a channel
  *
  * Returns the initiator handle of @chan, as a shortcut for retrieving the
- * #TpBaseChannel:initiator-handle property. The reference count of the handle
- * is not increased; you should use tp_handle_ref() if you want to keep a hold
- * of it.
+ * #TpBaseChannel:initiator-handle property.
  *
  * Returns: the initiator handle of @chan
  *
@@ -587,6 +704,28 @@ tp_base_channel_is_destroyed (TpBaseChannel *chan)
   return chan->priv->destroyed;
 }
 
+/**
+ * tp_base_channel_is_respawning:
+ * @chan: a channel
+ *
+ * Returns %TRUE if the channel has been reopened, either by a
+ * subclass calling tp_base_channel_reopened() or
+ * tp_base_channel_reopened_with_requested(). This is useful for
+ * "closed" handlers to distinguish between channels really closing
+ * and channels that have been reopened due to pending messages.
+ *
+ * Returns: %TRUE if tp_base_channel_reopened() or
+ *   tp_base_channel_reopened_with_requested() have been called.
+ *
+ * Since: 0.19.7
+ */
+gboolean
+tp_base_channel_is_respawning (TpBaseChannel *chan)
+{
+  g_return_val_if_fail (TP_IS_BASE_CHANNEL (chan), FALSE);
+
+  return chan->priv->respawning;
+}
 
 /*
  * tp_base_channel_fill_basic_immutable_properties:
@@ -655,28 +794,12 @@ tp_base_channel_constructed (GObject *object)
   GObjectClass *parent_class = tp_base_channel_parent_class;
   TpBaseChannel *chan = TP_BASE_CHANNEL (object);
   TpBaseConnection *conn = chan->priv->conn;
-  TpHandleRepoIface *handles;
 
   if (parent_class->constructed != NULL)
     parent_class->constructed (object);
 
   g_return_if_fail (conn != NULL);
   g_return_if_fail (TP_IS_BASE_CONNECTION (conn));
-
-  if (klass->target_handle_type != TP_HANDLE_TYPE_NONE)
-    {
-      handles = tp_base_connection_get_handles (conn, klass->target_handle_type);
-      g_assert (handles != NULL);
-      g_assert (chan->priv->target != 0);
-      tp_handle_ref (handles, chan->priv->target);
-    }
-
-  if (chan->priv->initiator != 0)
-    {
-      handles = tp_base_connection_get_handles (conn, TP_HANDLE_TYPE_CONTACT);
-      g_assert (handles != NULL);
-      tp_handle_ref (handles, chan->priv->initiator);
-    }
 
   if (chan->priv->object_path == NULL)
     {
@@ -686,7 +809,7 @@ tp_base_channel_constructed (GObject *object)
       g_assert (*base_path != '\0');
 
       chan->priv->object_path = g_strdup_printf ("%s/%s",
-          conn->object_path, base_path);
+          tp_base_connection_get_object_path (conn), base_path);
       g_free (base_path);
     }
 }
@@ -719,6 +842,8 @@ tp_base_channel_get_property (GObject *object,
           TpHandleRepoIface *repo = tp_base_connection_get_handles (
               chan->priv->conn, klass->target_handle_type);
 
+          g_assert (klass->target_handle_type != TP_HANDLE_TYPE_NONE);
+          g_assert (repo != NULL);
           g_value_set_string (value, tp_handle_inspect (repo, chan->priv->target));
         }
       else
@@ -735,6 +860,7 @@ tp_base_channel_get_property (GObject *object,
           TpHandleRepoIface *repo = tp_base_connection_get_handles (
               chan->priv->conn, TP_HANDLE_TYPE_CONTACT);
 
+          g_assert (repo != NULL);
           g_assert (chan->priv->initiator != 0);
           g_value_set_string (value, tp_handle_inspect (repo, chan->priv->initiator));
         }
@@ -823,9 +949,7 @@ static void
 tp_base_channel_dispose (GObject *object)
 {
   TpBaseChannel *chan = TP_BASE_CHANNEL (object);
-  TpBaseChannelClass *klass = TP_BASE_CHANNEL_GET_CLASS (chan);
   TpBaseChannelPrivate *priv = chan->priv;
-  TpHandleRepoIface *handles;
 
   if (priv->dispose_has_run)
     return;
@@ -835,23 +959,6 @@ tp_base_channel_dispose (GObject *object)
   if (!priv->destroyed)
     {
       tp_base_channel_destroyed (chan);
-    }
-
-  if (klass->target_handle_type != TP_HANDLE_TYPE_NONE
-      && priv->target != 0)
-    {
-      handles = tp_base_connection_get_handles (priv->conn,
-                                                klass->target_handle_type);
-      tp_handle_unref (handles, priv->target);
-      priv->target = 0;
-    }
-
-  if (priv->initiator != 0)
-    {
-      handles = tp_base_connection_get_handles (priv->conn,
-                                                TP_HANDLE_TYPE_CONTACT);
-      tp_handle_unref (handles, priv->initiator);
-      priv->initiator = 0;
     }
 
   tp_clear_object (&priv->conn);

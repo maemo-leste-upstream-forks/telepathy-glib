@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_STREAM_TUBE_CHANNEL_H__
 #define __TP_STREAM_TUBE_CHANNEL_H__
 
@@ -55,6 +59,7 @@ struct _TpStreamTubeChannelClass
 
 GType tp_stream_tube_channel_get_type (void);
 
+_TP_DEPRECATED_IN_0_20_FOR(tp_simple_client_factory_ensure_channel)
 TpStreamTubeChannel *tp_stream_tube_channel_new (TpConnection *conn,
     const gchar *object_path,
     const GHashTable *immutable_properties,
@@ -63,6 +68,10 @@ TpStreamTubeChannel *tp_stream_tube_channel_new (TpConnection *conn,
 const gchar * tp_stream_tube_channel_get_service (TpStreamTubeChannel *self);
 
 GHashTable * tp_stream_tube_channel_get_parameters (TpStreamTubeChannel *self);
+
+_TP_AVAILABLE_IN_0_20
+GVariant *tp_stream_tube_channel_dup_parameters_vardict (
+    TpStreamTubeChannel *self);
 
 /* Incoming tube methods */
 

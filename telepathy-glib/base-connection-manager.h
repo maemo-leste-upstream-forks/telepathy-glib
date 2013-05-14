@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_BASE_CONNECTION_MANAGER_H__
 #define __TP_BASE_CONNECTION_MANAGER_H__
 
@@ -59,17 +63,24 @@ typedef TpBaseConnection *(*TpBaseConnectionManagerNewConnFunc)(
     TpBaseConnectionManager *self, const gchar *proto,
     TpIntset *params_present, void *parsed_params, GError **error);
 
+typedef GPtrArray * (*TpBaseConnectionManagerGetInterfacesFunc) (
+    TpBaseConnectionManager *self);
+
 struct _TpBaseConnectionManagerClass {
     GObjectClass parent_class;
 
     const char *cm_dbus_name;
-    const TpCMProtocolSpec *protocol_params;
-    TpBaseConnectionManagerNewConnFunc new_connection;
-
-    const gchar * const *interfaces;
+    /*<private>*/
+    const TpCMProtocolSpec *_TP_SEAL (protocol_params);
+    TpBaseConnectionManagerNewConnFunc _TP_SEAL (new_connection);
+    /*< public >*/
 
     /*<private>*/
-    gpointer _future2;
+    const gchar * const *_TP_SEAL (interfaces);
+    /*<public>*/
+    TpBaseConnectionManagerGetInterfacesFunc get_interfaces;
+
+    /*<private>*/
     gpointer _future3;
     gpointer _future4;
 

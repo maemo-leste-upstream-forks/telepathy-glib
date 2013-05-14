@@ -53,21 +53,8 @@ struct _TpHandleSet
  * Since: 0.11.6
  */
 
-GType
-tp_handle_set_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (type == 0))
-    {
-      type = g_boxed_type_register_static (
-          g_intern_static_string ("TpHandleSet"),
-          (GBoxedCopyFunc) tp_handle_set_copy,
-          (GBoxedFreeFunc) tp_handle_set_destroy);
-    }
-
-  return type;
-}
+G_DEFINE_BOXED_TYPE (TpHandleSet, tp_handle_set, tp_handle_set_copy,
+    tp_handle_set_destroy)
 
 /**
  * tp_handle_set_new: (skip)
@@ -194,11 +181,7 @@ tp_handle_set_add (TpHandleSet *set, TpHandle handle)
   g_return_if_fail (set != NULL);
   g_return_if_fail (handle != 0);
 
-  if (!tp_intset_is_member (set->intset, handle))
-    {
-      tp_intset_add (set->intset,
-          tp_handle_ref (set->repo, handle));
-    }
+  tp_intset_add (set->intset, handle);
 }
 
 /**
@@ -218,14 +201,7 @@ tp_handle_set_remove (TpHandleSet *set, TpHandle handle)
   g_return_val_if_fail (set != NULL, FALSE);
   g_return_val_if_fail (handle != 0, FALSE);
 
-  if (tp_intset_is_member (set->intset, handle))
-    {
-      tp_handle_unref (set->repo, handle);
-      tp_intset_remove (set->intset, handle);
-      return TRUE;
-    }
-
-  return FALSE;
+  return tp_intset_remove (set->intset, handle);
 }
 
 /**
@@ -359,13 +335,6 @@ tp_handle_set_to_identifier_map (
   return map;
 }
 
-static void
-ref_one (guint handle, gpointer data)
-{
-  TpHandleSet *set = (TpHandleSet *) data;
-  tp_handle_ref (set->repo, handle);
-}
-
 /**
  * tp_handle_set_copy: (skip)
  * @other: another handle set
@@ -430,7 +399,6 @@ tp_handle_set_new_from_intset (TpHandleRepoIface *repo,
   set = g_slice_new0 (TpHandleSet);
   set->repo = repo;
   set->intset = tp_intset_copy (intset);
-  tp_intset_foreach (set->intset, ref_one, set);
   return set;
 }
 
@@ -454,7 +422,6 @@ tp_handle_set_update (TpHandleSet *set, const TpIntset *add)
 
   /* reference each of ADD - CURRENT */
   ret = tp_intset_difference (add, set->intset);
-  tp_intset_foreach (ret, ref_one, set);
 
   /* update CURRENT to be the union of CURRENT and ADD */
   tmp = tp_intset_union (add, set->intset);
@@ -462,13 +429,6 @@ tp_handle_set_update (TpHandleSet *set, const TpIntset *add)
   set->intset = tmp;
 
   return ret;
-}
-
-static void
-unref_one (guint handle, gpointer data)
-{
-  TpHandleSet *set = (TpHandleSet *) data;
-  tp_handle_unref (set->repo, handle);
 }
 
 /**
@@ -498,7 +458,6 @@ tp_handle_set_difference_update (TpHandleSet *set, const TpIntset *remove)
 
   /* dereference each of REMOVE n CURRENT */
   ret = tp_intset_intersection (remove, set->intset);
-  tp_intset_foreach (ret, unref_one, set);
 
   /* update CURRENT to be CURRENT - REMOVE */
   tmp = tp_intset_difference (set->intset, remove);

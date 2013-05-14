@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_CHANNEL_DISPATCH_OPERATION_H
 #define TP_CHANNEL_DISPATCH_OPERATION_H
 
@@ -71,10 +75,13 @@ GType tp_channel_dispatch_operation_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), TP_TYPE_CHANNEL_DISPATCH_OPERATION, \
                               TpChannelDispatchOperationClass))
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20
 TpChannelDispatchOperation *tp_channel_dispatch_operation_new (
     TpDBusDaemon *bus_daemon, const gchar *object_path,
     GHashTable *immutable_properties, GError **error)
   G_GNUC_WARN_UNUSED_RESULT;
+#endif
 
 void tp_channel_dispatch_operation_init_known_interfaces (void);
 
@@ -83,19 +90,42 @@ void tp_channel_dispatch_operation_init_known_interfaces (void);
 
 GQuark tp_channel_dispatch_operation_get_feature_quark_core (void) G_GNUC_CONST;
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20_FOR(tp_channel_dispatch_operation_get_connection)
 TpConnection * tp_channel_dispatch_operation_borrow_connection (
     TpChannelDispatchOperation *self);
 
+_TP_DEPRECATED_IN_0_20_FOR(tp_channel_dispatch_operation_get_account)
 TpAccount * tp_channel_dispatch_operation_borrow_account (
     TpChannelDispatchOperation *self);
 
+_TP_DEPRECATED_IN_0_20_FOR(tp_channel_dispatch_operation_get_channels)
 GPtrArray * tp_channel_dispatch_operation_borrow_channels (
     TpChannelDispatchOperation *self);
 
+_TP_DEPRECATED_IN_0_20_FOR(tp_channel_dispatch_operation_get_possible_handlers)
 GStrv tp_channel_dispatch_operation_borrow_possible_handlers (
     TpChannelDispatchOperation *self);
 
+_TP_DEPRECATED_IN_0_20
 GHashTable * tp_channel_dispatch_operation_borrow_immutable_properties (
+    TpChannelDispatchOperation *self);
+#endif
+
+_TP_AVAILABLE_IN_0_20
+TpConnection * tp_channel_dispatch_operation_get_connection (
+    TpChannelDispatchOperation *self);
+
+_TP_AVAILABLE_IN_0_20
+TpAccount * tp_channel_dispatch_operation_get_account (
+    TpChannelDispatchOperation *self);
+
+_TP_AVAILABLE_IN_0_20
+GPtrArray * tp_channel_dispatch_operation_get_channels (
+    TpChannelDispatchOperation *self);
+
+_TP_AVAILABLE_IN_0_20
+GStrv tp_channel_dispatch_operation_get_possible_handlers (
     TpChannelDispatchOperation *self);
 
 void tp_channel_dispatch_operation_handle_with_async (
@@ -131,12 +161,14 @@ gboolean tp_channel_dispatch_operation_handle_with_time_finish (
     GAsyncResult *result,
     GError **error);
 
+_TP_AVAILABLE_IN_0_16
 void tp_channel_dispatch_operation_claim_with_async (
     TpChannelDispatchOperation *self,
     TpBaseClient *client,
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_channel_dispatch_operation_claim_with_finish (
     TpChannelDispatchOperation *self,
     GAsyncResult *result,
@@ -144,16 +176,19 @@ gboolean tp_channel_dispatch_operation_claim_with_finish (
 
 /* Reject API */
 
+_TP_AVAILABLE_IN_0_16
 void tp_channel_dispatch_operation_close_channels_async (
     TpChannelDispatchOperation *self,
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_channel_dispatch_operation_close_channels_finish (
     TpChannelDispatchOperation *self,
     GAsyncResult *result,
     GError **error);
 
+_TP_AVAILABLE_IN_0_16
 void tp_channel_dispatch_operation_leave_channels_async (
     TpChannelDispatchOperation *self,
     TpChannelGroupChangeReason reason,
@@ -161,16 +196,19 @@ void tp_channel_dispatch_operation_leave_channels_async (
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_channel_dispatch_operation_leave_channels_finish (
     TpChannelDispatchOperation *self,
     GAsyncResult *result,
     GError **error);
 
+_TP_AVAILABLE_IN_0_16
 void tp_channel_dispatch_operation_destroy_channels_async (
     TpChannelDispatchOperation *self,
     GAsyncReadyCallback callback,
     gpointer user_data);
 
+_TP_AVAILABLE_IN_0_16
 gboolean tp_channel_dispatch_operation_destroy_channels_finish (
     TpChannelDispatchOperation *self,
     GAsyncResult *result,

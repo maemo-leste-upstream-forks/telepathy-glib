@@ -33,9 +33,6 @@ G_DEFINE_TYPE_WITH_CODE (TpTestsFileTransferChannel,
       NULL);
     )
 
-static const char *
-tp_tests_file_transfer_channel_interfaces[] = { NULL };
-
 enum /* properties */
 {
   PROP_AVAILABLE_SOCKET_TYPES = 1,
@@ -446,7 +443,7 @@ file_transfer_provide_file (TpSvcChannelTypeFileTransfer *iface,
 
   if (tp_base_channel_is_requested (base_chan) != TRUE)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "File transfer is not outgoing. Cannot offer file");
       goto fail;
     }
@@ -454,21 +451,21 @@ file_transfer_provide_file (TpSvcChannelTypeFileTransfer *iface,
   if (self->priv->state != TP_FILE_TRANSFER_STATE_PENDING &&
       self->priv->state != TP_FILE_TRANSFER_STATE_ACCEPTED)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "File transfer is not pending or accepted. Cannot offer file");
       goto fail;
     }
 
   if (self->priv->address != NULL)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+      g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
           "ProvideFile has already been called for this channel");
       goto fail;
     }
 
   if (!check_address_type (self, address_type, access_control))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Address type %i is not supported with access control %i",
           address_type, access_control);
       goto fail;
@@ -479,7 +476,7 @@ file_transfer_provide_file (TpSvcChannelTypeFileTransfer *iface,
 
   if (self->priv->address == NULL)
       {
-        g_set_error (&error, TP_ERRORS, TP_ERROR_NOT_AVAILABLE,
+        g_set_error (&error, TP_ERROR, TP_ERROR_NOT_AVAILABLE,
             "Could not set up local socket");
         goto fail;
       }
@@ -520,21 +517,21 @@ file_transfer_accept_file (TpSvcChannelTypeFileTransfer *iface,
 
   if (tp_base_channel_is_requested (base_chan) == TRUE)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "File transfer is not incoming. Cannot accept file");
       goto fail;
     }
 
   if (self->priv->state != TP_FILE_TRANSFER_STATE_PENDING)
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "File transfer is not in the pending state");
       goto fail;
     }
 
   if (!check_address_type (self, address_type, access_control))
     {
-      g_set_error (&error, TP_ERRORS, TP_ERROR_INVALID_ARGUMENT,
+      g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Address type %i is not supported with access control %i",
           address_type, access_control);
       goto fail;
@@ -603,13 +600,9 @@ tp_tests_file_transfer_channel_class_init (
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER;
   base_class->target_handle_type = TP_HANDLE_TYPE_CONTACT;
-  base_class->interfaces = tp_tests_file_transfer_channel_interfaces;
 
   base_class->close = channel_close;
   base_class->fill_immutable_properties = fill_immutable_properties;
-
-  tp_text_mixin_class_init (object_class,
-      G_STRUCT_OFFSET (TpTestsFileTransferChannelClass, text_class));
 
   param_spec = g_param_spec_boxed ("available-socket-types",
       "AvailableSocketTypes",
@@ -670,7 +663,7 @@ tp_tests_file_transfer_channel_class_init (
   param_spec = g_param_spec_uint ("state",
       "State",
       "The State property of this channel",
-      0, NUM_TP_FILE_TRANSFER_STATES, TP_FILE_TRANSFER_STATE_NONE,
+      0, TP_NUM_FILE_TRANSFER_STATES, TP_FILE_TRANSFER_STATE_NONE,
       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_STATE,
       param_spec);

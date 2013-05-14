@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_PROXY_H__
 #define __TP_PROXY_H__
 
@@ -55,18 +59,19 @@ typedef enum {
     TP_DBUS_ERROR_CANCELLED = 9,
     TP_DBUS_ERROR_INCONSISTENT = 10,
 } TpDBusError;
-#define NUM_TP_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
+#define TP_NUM_DBUS_ERRORS (TP_DBUS_ERROR_INCONSISTENT + 1)
+#define NUM_TP_DBUS_ERRORS TP_NUM_DBUS_ERRORS
 
 struct _TpProxy {
     /*<private>*/
     GObject parent;
 
-    TpDBusDaemon *dbus_daemon;
-    DBusGConnection *dbus_connection;
-    gchar *bus_name;
-    gchar *object_path;
+    TpDBusDaemon *_TP_SEAL (dbus_daemon);
+    DBusGConnection *_TP_SEAL (dbus_connection);
+    gchar *_TP_SEAL (bus_name);
+    gchar *_TP_SEAL (object_path);
 
-    GError *invalidated /* initialized to NULL by g_object_new */;
+    GError *_TP_SEAL (invalidated);
 
     TpProxyPrivate *priv;
 };
@@ -156,6 +161,7 @@ GType tp_proxy_get_type (void);
 gboolean tp_proxy_has_interface_by_id (gpointer self, GQuark iface);
 gboolean tp_proxy_has_interface (gpointer self, const gchar *iface);
 
+_TP_AVAILABLE_IN_0_16
 TpSimpleClientFactory *tp_proxy_get_factory (gpointer self);
 
 TpDBusDaemon *tp_proxy_get_dbus_daemon (gpointer self);

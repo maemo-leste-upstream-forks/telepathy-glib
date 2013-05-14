@@ -44,7 +44,7 @@
 <div class="refsynopsisdiv">
 <a name="TpChannelManager.synopsis"></a><h2>Synopsis</h2>
 <pre class="synopsis">
-#include &lt;telepathy-glib/channel-manager.h&gt;
+#include &lt;telepathy-glib/telepathy-glib.h&gt;
 
 <span class="returnvalue">void</span>                (<a class="link" href="TpChannelManager.html#TpChannelManagerChannelClassFunc" title="TpChannelManagerChannelClassFunc ()">*TpChannelManagerChannelClassFunc</a>) (<em class="parameter"><code><a class="link" href="TpChannelManager.html" title="TpChannelManager"><span class="type">TpChannelManager</span></a> *manager</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *fixed_properties</code></em>,
@@ -202,7 +202,7 @@ channels of a particular class.</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>allowed_properties</code></em> :</span></p></td>
-<td>A <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names which may
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names which may
 appear in requests for a particular channel class.</td>
 </tr>
 <tr>
@@ -272,7 +272,7 @@ channels of a particular class.</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>allowed_properties</code></em> :</span></p></td>
-<td>A <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names which may
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names which may
 appear in requests for a particular channel class.</td>
 </tr>
 <tr>
@@ -453,7 +453,7 @@ The vtable for a channel manager implementation.
 </p>
 <p>
 In addition to the fields documented here there are several GCallback
-fields which must currently be <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+fields which must currently be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -535,11 +535,11 @@ as passed to methods of <a class="link" href="TpChannelManager.html" title="TpCh
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>fixed</code></em> :</span></p></td>
-<td>a <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names</td>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>allowed</code></em> :</span></p></td>
-<td>a <a href="/usr/share/gtk-doc/html/liboil/liboil-liboiljunk.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names</td>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated array of property names</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
@@ -655,8 +655,7 @@ calling <a class="link" href="TpChannelManager.html#tp-channel-manager-emit-chan
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Singly-Linked-Lists.html#GSList"><span class="type">GSList</span></a> *request_tokens</code></em>);</pre>
 <p>
 Emit the <a class="link" href="TpChannelManager.html#TpChannelManager-new-channels" title='The "new-channels" signal'><span class="type">"new-channels"</span></a> signal indicating that the
-channel has been created. (This is a convenient shortcut for calling
-<a class="link" href="TpChannelManager.html#tp-channel-manager-emit-new-channels" title="tp_channel_manager_emit_new_channels ()"><code class="function">tp_channel_manager_emit_new_channels()</code></a> with a one-entry hash table.)
+channel has been created.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -686,6 +685,15 @@ channel</td>
 <pre class="programlisting"><span class="returnvalue">void</span>                tp_channel_manager_emit_new_channels
                                                         (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> instance</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *channels</code></em>);</pre>
+<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Warning</h3>
+<p><code class="literal">tp_channel_manager_emit_new_channels</code> is deprecated and should not be used in newly-written code. in 0.19.1 this function should not be
+ used. Signalling the creation of multiple channels together in a
+ single signal is strongly recommended against as it's very
+ complicated, hard to get right in clients, and not nearly as
+ useful as it originally sounded. Use
+ <a class="link" href="TpChannelManager.html#tp-channel-manager-emit-new-channel" title="tp_channel_manager_emit_new_channel ()"><code class="function">tp_channel_manager_emit_new_channel()</code></a> instead.</p>
+</div>
 <p>
 If <em class="parameter"><code>channels</code></em> is non-empty, emit the <a class="link" href="TpChannelManager.html#TpChannelManager-new-channels" title='The "new-channels" signal'><span class="type">"new-channels"</span></a>
 signal indicating that those channels have been created.
@@ -1038,6 +1046,14 @@ Emitted when new channels have been created. The Connection should
 generally emit NewChannels (and NewChannel) in response to this
 signal, and then return from pending CreateChannel, EnsureChannel
 and/or RequestChannel calls if appropriate.
+</p>
+<p>
+Since 0.19.1, clients should not emit more than one
+ channel in this signal at one time as the creation of
+ multiple channels together in a single signal is strongly
+ recommended against: it's very complicated, hard to get
+ right in clients, and not nearly as useful as it originally
+ sounded.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">

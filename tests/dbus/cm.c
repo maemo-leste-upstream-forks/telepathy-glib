@@ -219,6 +219,7 @@ test_file_got_info (Test *test,
   gchar **strv;
   GValue value = { 0 };
   gboolean ok;
+  GVariant *variant;
 
   test->cm = tp_connection_manager_new (test->dbus, "spurious",
       NULL, &error);
@@ -288,6 +289,7 @@ test_file_got_info (Test *test,
   ok = tp_connection_manager_param_get_default (param, &value);
   g_assert (!ok);
   g_assert (!G_IS_VALUE (&value));
+  g_assert (tp_connection_manager_param_dup_default_variant (param) == NULL);
 
   param = &protocol->params[1];
   g_assert_cmpstr (param->name, ==, "password");
@@ -309,6 +311,9 @@ test_file_got_info (Test *test,
   g_assert (G_IS_VALUE (&value));
   g_assert (G_VALUE_HOLDS_BOOLEAN (&value));
   g_value_unset (&value);
+  variant = tp_connection_manager_param_dup_default_variant (param);
+  g_assert_cmpstr (g_variant_get_type_string (variant), ==, "b");
+  g_assert_cmpint (g_variant_get_boolean (variant), ==, TRUE);
 
   param = &protocol->params[3];
   g_assert (param->name == NULL);
@@ -784,7 +789,7 @@ test_nothing_ready (Test *test,
 
   g_object_get (test->cm,
       "info-source", &info_source,
-      "connection-manager", &name,
+      "cm-name", &name,
       NULL);
   g_assert_cmpstr (name, ==, "nonexistent_cm");
   g_assert_cmpuint (info_source, ==, TP_CM_INFO_SOURCE_NONE);
@@ -832,7 +837,7 @@ test_file_ready (Test *test,
 
   g_object_get (test->cm,
       "info-source", &info_source,
-      "connection-manager", &name,
+      "cm-name", &name,
       NULL);
   g_assert_cmpstr (name, ==, "spurious");
   g_assert_cmpuint (info_source, ==, TP_CM_INFO_SOURCE_FILE);
@@ -885,7 +890,7 @@ test_complex_file_ready (Test *test,
 
   g_object_get (test->cm,
       "info-source", &info_source,
-      "connection-manager", &name,
+      "cm-name", &name,
       NULL);
   g_assert_cmpstr (name, ==, "test_manager_file");
   g_assert_cmpuint (info_source, ==, TP_CM_INFO_SOURCE_FILE);
@@ -956,7 +961,7 @@ test_dbus_ready (Test *test,
 
   g_object_get (test->cm,
       "info-source", &info_source,
-      "connection-manager", &name,
+      "cm-name", &name,
       NULL);
   g_assert_cmpstr (name, ==, "example_echo");
   g_assert_cmpuint (info_source, ==, TP_CM_INFO_SOURCE_LIVE);
@@ -1039,7 +1044,7 @@ test_dbus_fallback (Test *test,
 
   g_object_get (test->cm,
       "info-source", &info_source,
-      "connection-manager", &name,
+      "cm-name", &name,
       NULL);
   g_assert_cmpstr (name, ==, "example_echo");
   g_assert_cmpuint (info_source, ==, TP_CM_INFO_SOURCE_LIVE);

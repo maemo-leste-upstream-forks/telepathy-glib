@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_CALL_STREAM_ENDPOINT_H__
 #define __TP_CALL_STREAM_ENDPOINT_H__
 
@@ -25,6 +29,7 @@
 
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/dbus-properties-mixin.h>
+#include <telepathy-glib/defs.h>
 
 #include <telepathy-glib/enums.h>
 
@@ -48,6 +53,7 @@ struct _TpCallStreamEndpoint {
   TpCallStreamEndpointPrivate *priv;
 };
 
+_TP_AVAILABLE_IN_0_18
 GType tp_call_stream_endpoint_get_type (void);
 
 /* TYPE MACROS */
@@ -67,26 +73,32 @@ GType tp_call_stream_endpoint_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
     TP_TYPE_CALL_STREAM_ENDPOINT, TpCallStreamEndpointClass))
 
+_TP_AVAILABLE_IN_0_18
 TpCallStreamEndpoint *tp_call_stream_endpoint_new (TpDBusDaemon *dbus_daemon,
     const gchar *object_path,
     TpStreamTransportType transport,
     gboolean is_ice_lite);
 
+_TP_AVAILABLE_IN_0_18
 const gchar *tp_call_stream_endpoint_get_object_path (
     TpCallStreamEndpoint *self);
 
+_TP_AVAILABLE_IN_0_18
 TpStreamEndpointState tp_call_stream_endpoint_get_state (
     TpCallStreamEndpoint *self,
     TpStreamComponent component);
 
+_TP_AVAILABLE_IN_0_18
 void tp_call_stream_endpoint_add_new_candidates (TpCallStreamEndpoint *self,
     const GPtrArray *candidates);
+_TP_AVAILABLE_IN_0_18
 void tp_call_stream_endpoint_add_new_candidate (TpCallStreamEndpoint *self,
     TpStreamComponent component,
     const gchar *address,
     guint port,
     const GHashTable *info_hash);
 
+_TP_AVAILABLE_IN_0_18
 void tp_call_stream_endpoint_set_remote_credentials (
     TpCallStreamEndpoint *self,
     const gchar *username,

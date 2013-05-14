@@ -18,12 +18,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_BASE_PROTOCOL_H
 #define TP_BASE_PROTOCOL_H
 
 #include <glib-object.h>
 
 #include <telepathy-glib/base-connection.h>
+#include <telepathy-glib/defs.h>
 #include <telepathy-glib/presence-mixin.h>
 
 G_BEGIN_DECLS
@@ -134,6 +139,8 @@ typedef void (*TpBaseProtocolGetAvatarDetailsFunc) (TpBaseProtocol *self,
     guint *max_width,
     guint *max_bytes);
 
+typedef GPtrArray * (*TpBaseProtocolGetInterfacesArrayFunc) (TpBaseProtocol *self);
+
 struct _TpBaseProtocolClass
 {
   GObjectClass parent_class;
@@ -152,7 +159,9 @@ struct _TpBaseProtocolClass
       GHashTable *asv,
       GError **error);
 
-  GStrv (*get_interfaces) (TpBaseProtocol *self);
+  /*<private>*/
+  GStrv (*_TP_SEAL (get_interfaces)) (TpBaseProtocol *self);
+  /*<public>*/
 
   void (*get_connection_details) (TpBaseProtocol *self,
       GStrv *connection_interfaces,
@@ -167,8 +176,10 @@ struct _TpBaseProtocolClass
 
   GStrv (*dup_authentication_types) (TpBaseProtocol *self);
 
+  TpBaseProtocolGetInterfacesArrayFunc get_interfaces_array;
+
   /*<private>*/
-  GCallback padding[5];
+  GCallback padding[4];
   TpBaseProtocolClassPrivate *priv;
 };
 
@@ -224,6 +235,7 @@ struct _TpProtocolAddressingInterface {
   TpBaseProtocolNormalizeURIFunc normalize_contact_uri;
 };
 
+_TP_AVAILABLE_IN_0_18
 GType tp_protocol_addressing_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS

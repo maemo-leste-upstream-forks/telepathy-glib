@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef TP_CHANNEL_REQUEST_H
 #define TP_CHANNEL_REQUEST_H
 
@@ -66,17 +70,26 @@ GType tp_channel_request_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), TP_TYPE_CHANNEL_REQUEST, \
                               TpChannelRequestClass))
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_20
 TpChannelRequest *tp_channel_request_new (TpDBusDaemon *bus_daemon,
     const gchar *object_path, GHashTable *immutable_properties,
     GError **error) G_GNUC_WARN_UNUSED_RESULT;
+#endif
 
 void tp_channel_request_init_known_interfaces (void);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_16
 void tp_channel_request_set_channel_factory (TpChannelRequest *self,
-    TpClientChannelFactory *factory) _TP_GNUC_DEPRECATED;
+    TpClientChannelFactory *factory);
+#endif
 
 const GHashTable * tp_channel_request_get_immutable_properties (
     TpChannelRequest *self);
+
+_TP_AVAILABLE_IN_0_20
+GVariant *tp_channel_request_dup_immutable_properties (TpChannelRequest *self);
 
 TpAccount * tp_channel_request_get_account (TpChannelRequest *self);
 
@@ -85,6 +98,9 @@ gint64 tp_channel_request_get_user_action_time (TpChannelRequest *self);
 const gchar * tp_channel_request_get_preferred_handler (TpChannelRequest *self);
 
 const GHashTable * tp_channel_request_get_hints (TpChannelRequest *self);
+
+_TP_AVAILABLE_IN_0_20
+GVariant *tp_channel_request_dup_hints (TpChannelRequest *self);
 
 G_END_DECLS
 

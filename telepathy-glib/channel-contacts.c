@@ -73,7 +73,7 @@ dup_contact_array (TpChannel *self,
   GPtrArray *array;
   guint i;
 
-  array = _tp_g_ptr_array_new_full (handles->len, g_object_unref);
+  array = g_ptr_array_new_full (handles->len, g_object_unref);
 
   for (i = 0; i < handles->len; i++)
     {
@@ -175,6 +175,7 @@ _tp_channel_contacts_init (TpChannel *self)
           self->priv->handle, self->priv->identifier);
     }
 
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   if (tp_channel_get_initiator_handle (self) != 0 &&
       !tp_str_empty (tp_channel_get_initiator_identifier (self)))
     {
@@ -183,6 +184,7 @@ _tp_channel_contacts_init (TpChannel *self)
           tp_channel_get_initiator_handle (self),
           tp_channel_get_initiator_identifier (self));
     }
+  G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
 void
@@ -236,27 +238,10 @@ _tp_channel_contacts_group_init (TpChannel *self,
 
 struct _ContactsQueueItem
 {
-  GSimpleAsyncResult *result;
   GPtrArray *contacts;
   GPtrArray *ids;
   GArray *handles;
 };
-
-static ContactsQueueItem *
-contacts_queue_item_new (GPtrArray *contacts,
-    GPtrArray *ids,
-    GArray *handles)
-{
-  ContactsQueueItem *item;
-
-  item = g_slice_new (ContactsQueueItem);
-  item->contacts = contacts != NULL ? g_ptr_array_ref (contacts) : NULL;
-  item->ids = ids != NULL ? g_ptr_array_ref (ids) : NULL;
-  item->handles = handles != NULL ? g_array_ref (handles) : NULL;
-  item->result = NULL;
-
-  return item;
-}
 
 static void
 contacts_queue_item_free (ContactsQueueItem *item)
@@ -264,8 +249,6 @@ contacts_queue_item_free (ContactsQueueItem *item)
   tp_clear_pointer (&item->contacts, g_ptr_array_unref);
   tp_clear_pointer (&item->ids, g_ptr_array_unref);
   tp_clear_pointer (&item->handles, g_array_unref);
-  g_clear_object (&item->result);
-
   g_slice_free (ContactsQueueItem, item);
 }
 
@@ -275,19 +258,19 @@ static void
 contacts_queue_head_ready (TpChannel *self,
     const GError *error)
 {
-  ContactsQueueItem *item = self->priv->current_item;
+  GSimpleAsyncResult *result = self->priv->current_contacts_queue_result;
 
   if (error != NULL)
     {
       DEBUG ("Error preparing channel contacts queue item: %s", error->message);
-      g_simple_async_result_set_from_error (item->result, error);
+      g_simple_async_result_set_from_error (result, error);
     }
-  g_simple_async_result_complete (item->result);
+  g_simple_async_result_complete (result);
 
-  self->priv->current_item = NULL;
+  self->priv->current_contacts_queue_result = NULL;
   process_contacts_queue (self);
 
-  contacts_queue_item_free (item);
+  g_object_unref (result);
 }
 
 static void
@@ -311,7 +294,7 @@ contacts_queue_item_set_contacts (ContactsQueueItem *item,
   guint i;
 
   g_assert (item->contacts == NULL);
-  item->contacts = _tp_g_ptr_array_new_full (n_contacts, g_object_unref);
+  item->contacts = g_ptr_array_new_full (n_contacts, g_object_unref);
   for (i = 0; i < n_contacts; i++)
     g_ptr_array_add (item->contacts, g_object_ref (contacts[i]));
 }
@@ -363,11 +346,12 @@ contacts_queue_item_idle_cb (gpointer user_data)
 static void
 process_contacts_queue (TpChannel *self)
 {
+  GSimpleAsyncResult *result;
   ContactsQueueItem *item;
   GArray *features;
   const GError *error = NULL;
 
-  if (self->priv->current_item != NULL)
+  if (self->priv->current_contacts_queue_result != NULL)
     return;
 
   /* self can't die while there are queued items because item->result keeps a
@@ -376,25 +360,32 @@ process_contacts_queue (TpChannel *self)
   if (error != NULL)
     {
       g_object_ref (self);
-      while ((item = g_queue_pop_head (self->priv->contacts_queue)) != NULL)
+      while ((result = g_queue_pop_head (self->priv->contacts_queue)) != NULL)
         {
-          g_simple_async_result_set_from_error (item->result, error);
-          g_simple_async_result_complete (item->result);
-          contacts_queue_item_free (item);
+          g_simple_async_result_set_from_error (result, error);
+          g_simple_async_result_complete (result);
+          g_object_unref (result);
         }
       g_object_unref (self);
 
       return;
     }
 
-  item = g_queue_pop_head (self->priv->contacts_queue);
-  if (item == NULL)
+  result = g_queue_pop_head (self->priv->contacts_queue);
+
+  if (result == NULL)
     return;
-  self->priv->current_item = item;
+
+  self->priv->current_contacts_queue_result = result;
+  item = g_simple_async_result_get_op_res_gpointer (result);
 
   features = tp_simple_client_factory_dup_contact_features (
       tp_proxy_get_factory (self->priv->connection), self->priv->connection);
 
+  /* We can't use upgrade_contacts_async() because we need compat with older
+   * CMs. by_id and by_handle are used only by TpTextChannel and are needed for
+   * older CMs that does not give both message-sender and message-sender-id */
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   if (item->contacts != NULL && item->contacts->len > 0)
     {
       g_assert (item->ids == NULL);
@@ -439,22 +430,32 @@ process_contacts_queue (TpChannel *self)
        * without reentering mainloop first. */
       g_idle_add (contacts_queue_item_idle_cb, self);
     }
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   g_array_unref (features);
 }
 
 static void
 contacts_queue_item (TpChannel *self,
-    ContactsQueueItem *item,
+    GPtrArray *contacts,
+    GPtrArray *ids,
+    GArray *handles,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
-  item->result = g_simple_async_result_new ((GObject *) self,
+  ContactsQueueItem *item = g_slice_new (ContactsQueueItem);
+  GSimpleAsyncResult *result;
+
+  item->contacts = contacts != NULL ? g_ptr_array_ref (contacts) : NULL;
+  item->ids = ids != NULL ? g_ptr_array_ref (ids) : NULL;
+  item->handles = handles != NULL ? g_array_ref (handles) : NULL;
+  result = g_simple_async_result_new ((GObject *) self,
       callback, user_data, contacts_queue_item);
 
-  g_simple_async_result_set_op_res_gpointer (item->result, item, NULL);
+  g_simple_async_result_set_op_res_gpointer (result, item,
+      (GDestroyNotify) contacts_queue_item_free);
 
-  g_queue_push_tail (self->priv->contacts_queue, item);
+  g_queue_push_tail (self->priv->contacts_queue, result);
   process_contacts_queue (self);
 }
 
@@ -464,10 +465,7 @@ _tp_channel_contacts_queue_prepare_async (TpChannel *self,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
-  ContactsQueueItem *item;
-
-  item = contacts_queue_item_new (contacts, NULL, NULL);
-  contacts_queue_item (self, item, callback, user_data);
+  contacts_queue_item (self, contacts, NULL, NULL, callback, user_data);
 }
 
 void
@@ -476,10 +474,7 @@ _tp_channel_contacts_queue_prepare_by_id_async (TpChannel *self,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
-  ContactsQueueItem *item;
-
-  item = contacts_queue_item_new (NULL, ids, NULL);
-  contacts_queue_item (self, item, callback, user_data);
+  contacts_queue_item (self, NULL, ids, NULL, callback, user_data);
 }
 
 void
@@ -488,10 +483,7 @@ _tp_channel_contacts_queue_prepare_by_handle_async (TpChannel *self,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
-  ContactsQueueItem *item;
-
-  item = contacts_queue_item_new (NULL, NULL, handles);
-  contacts_queue_item (self, item, callback, user_data);
+  contacts_queue_item (self, NULL, NULL, handles, callback, user_data);
 }
 
 gboolean
@@ -560,7 +552,7 @@ members_changed_prepared_cb (GObject *object,
   /* For removed contacts, we have only handles because we are supposed to
    * already know them. So we have to search them in our tables, construct an
    * array of removed contacts and then remove them from our tables */
-  removed = _tp_g_ptr_array_new_full (data->removed->len, g_object_unref);
+  removed = g_ptr_array_new_full (data->removed->len, g_object_unref);
   for (i = 0; i < data->removed->len; i++)
     {
       TpHandle handle = g_array_index (data->removed, TpHandle, i);
@@ -657,7 +649,8 @@ _tp_channel_contacts_members_changed (TpChannel *self,
 
   ids = tp_asv_get_boxed (details, "contact-ids",
       TP_HASH_TYPE_HANDLE_IDENTIFIER_MAP);
-  if (ids == NULL)
+  if (ids == NULL && (added->len > 0 || local_pending->len > 0 ||
+      remote_pending->len > 0 || actor != 0 ))
     {
       DEBUG ("CM did not give identifiers, can't create TpContact");
       return;
@@ -1090,6 +1083,7 @@ contacts_prepared_cb (GObject *object,
     g_simple_async_result_take_error (result, error);
 
   g_simple_async_result_complete (result);
+  g_object_unref (result);
 }
 
 static void
@@ -1127,7 +1121,7 @@ _tp_channel_contacts_prepare_async (TpProxy *proxy,
   if (self->priv->cm_too_old_for_contacts)
     {
       g_simple_async_report_error_in_idle ((GObject *) self, callback,
-          user_data, TP_ERRORS, TP_ERROR_SOFTWARE_UPGRADE_REQUIRED,
+          user_data, TP_ERROR, TP_ERROR_SOFTWARE_UPGRADE_REQUIRED,
           "The Connection Manager does not implement the required telepathy "
           "specification (>= 0.23.4) to prepare TP_CHANNEL_FEATURE_CONTACTS.");
       return;

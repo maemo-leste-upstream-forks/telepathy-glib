@@ -19,6 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_BASE_CHANNEL_H__
 #define __TP_BASE_CHANNEL_H__
 
@@ -26,6 +30,7 @@
 
 #include <telepathy-glib/dbus-properties-mixin.h>
 #include <telepathy-glib/base-connection.h>
+#include <telepathy-glib/defs.h>
 
 #include "connection.h"
 
@@ -51,7 +56,9 @@ struct _TpBaseChannelClass
 
   const gchar *channel_type;
   TpHandleType target_handle_type;
-  const gchar **interfaces;
+  /*< private >*/
+  const gchar **_TP_SEAL (interfaces);
+  /*< public >*/
 
   TpBaseChannelCloseFunc close;
   TpBaseChannelFillPropertiesFunc fill_immutable_properties;
@@ -74,15 +81,23 @@ void tp_base_channel_register (TpBaseChannel *chan);
 void tp_base_channel_close (TpBaseChannel *chan);
 void tp_base_channel_destroyed (TpBaseChannel *chan);
 void tp_base_channel_reopened (TpBaseChannel *chan, TpHandle initiator);
+_TP_AVAILABLE_IN_0_20
+void tp_base_channel_disappear (TpBaseChannel *chan);
+_TP_AVAILABLE_IN_0_20
+void tp_base_channel_reopened_with_requested (TpBaseChannel *chan,
+    gboolean requested, TpHandle initiator);
 
 const gchar *tp_base_channel_get_object_path (TpBaseChannel *chan);
 TpBaseConnection *tp_base_channel_get_connection (TpBaseChannel *chan);
+_TP_AVAILABLE_IN_0_18
 TpHandle tp_base_channel_get_self_handle (TpBaseChannel *chan);
 TpHandle tp_base_channel_get_target_handle (TpBaseChannel *chan);
 TpHandle tp_base_channel_get_initiator (TpBaseChannel *chan);
 gboolean tp_base_channel_is_requested (TpBaseChannel *chan);
 gboolean tp_base_channel_is_registered (TpBaseChannel *chan);
 gboolean tp_base_channel_is_destroyed (TpBaseChannel *chan);
+_TP_AVAILABLE_IN_0_20
+gboolean tp_base_channel_is_respawning (TpBaseChannel *chan);
 
 GType tp_base_channel_get_type (void);
 

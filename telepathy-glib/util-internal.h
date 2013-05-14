@@ -1,3 +1,4 @@
+/*<private_header>*/
 /*
  * util-internal.h - Headers for non-public telepathy-glib utility functions
  *
@@ -85,10 +86,6 @@ const gchar *_tp_enum_to_nick (GType enum_type, gint value);
 gboolean _tp_bind_connection_status_to_boolean (GBinding *binding,
     const GValue *src_value, GValue *dest_value, gpointer user_data);
 
-/* Included in GLib >=2.29.15: bug #654450 */
-GPtrArray *_tp_g_ptr_array_new_full (guint reserved_size,
-    GDestroyNotify element_free_func);
-
 gboolean _tp_set_socket_address_type_and_access_control_type (
     GHashTable *supported_sockets,
     TpSocketAddressType *address_type,
@@ -107,5 +104,10 @@ GPtrArray *_tp_contacts_from_values (GHashTable *table);
 
 GList *_tp_object_list_copy (GList *l);
 void _tp_object_list_free (GList *l);
+
+/* This can be removed once we depend on GLib 2.34 */
+GList *_tp_g_list_copy_deep (GList *list,
+    GCopyFunc func,
+    gpointer user_data);
 
 #endif /* __TP_UTIL_INTERNAL_H__ */

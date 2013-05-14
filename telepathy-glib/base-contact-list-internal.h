@@ -1,3 +1,4 @@
+/*<private_header>*/
 /* ContactList channel manager - internals (for use by our channels)
  *
  * Copyright © 2010 Collabora Ltd.
@@ -35,7 +36,7 @@ typedef enum {
     TP_LIST_HANDLE_PUBLISH,
     TP_LIST_HANDLE_STORED,
     TP_LIST_HANDLE_DENY,
-    NUM_TP_LIST_HANDLES
+    TP_NUM_LIST_HANDLES
 } TpListHandle;
 
 TpChannelGroupFlags _tp_base_contact_list_get_list_flags (

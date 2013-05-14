@@ -2,6 +2,7 @@ tests_list = \
     test-account \
     test-account-channel-request \
     test-account-manager \
+    test-account-request \
     test-base-client \
     test-call-cancellation \
     test-call-channel \
@@ -33,6 +34,7 @@ tests_list = \
     test-contacts-slow-path \
     test-dbus \
     test-dbus-tube \
+    test-debug-client \
     test-disconnection \
     test-error-enum \
     test-example-no-protocols \
@@ -49,6 +51,7 @@ tests_list = \
     test-properties \
     test-protocol-objects \
     test-proxy-preparation \
+    test-room-list \
     test-self-handle \
     test-self-presence \
     test-simple-approver \
@@ -58,6 +61,7 @@ tests_list = \
     test-text-channel \
     test-text-mixin \
     test-text-respawn \
+    test-tls-certificate \
     test-unsupported-interface
 
 if ENABLE_INSTALLED_TESTS
@@ -96,6 +100,8 @@ test_account_channel_request_LDADD = \
     $(top_builddir)/tests/lib/libtp-glib-tests-internal.la \
     $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
     $(GLIB_LIBS)
+
+test_account_request_SOURCES = account-request.c
 
 test_account_manager_SOURCES = account-manager.c
 
@@ -209,6 +215,11 @@ test_protocol_objects_LDADD = \
 test_protocol_objects_SOURCES = protocol-objects.c
 
 test_self_handle_SOURCES = self-handle.c
+test_self_handle_LDADD = \
+    $(top_builddir)/tests/lib/libtp-glib-tests-internal.la \
+    $(top_builddir)/telepathy-glib/libtelepathy-glib-internal.la \
+    $(GLIB_LIBS) \
+    $(NULL)
 
 test_self_presence_SOURCES = self-presence.c
 
@@ -251,12 +262,19 @@ test_text_channel_LDADD = \
     $(LDADD) \
     $(top_builddir)/examples/cm/echo-message-parts/libexample-cm-echo-2.la
 
+test_debug_client_SOURCES = debug-client.c
+
+test_room_list_SOURCES = room-list.c
+
+test_tls_certificate_SOURCES = tls-certificate.c
+
 check_c_sources = *.c
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
 
 AM_CPPFLAGS = \
     -I${top_srcdir} -I${top_builddir} \
+    -D_TP_COMPILATION \
     -D_TP_IGNORE_DEPRECATIONS \
     $(GLIB_CFLAGS) \
     $(DBUS_CFLAGS) \
@@ -273,6 +291,7 @@ TESTS_ENVIRONMENT = \
     XDG_DATA_DIRS=@abs_srcdir@:$${XDG_DATA_DIRS:=/usr/local/share:/usr/share} \
     G_SLICE=debug-blocks \
     G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
+    G_MESSAGES_DEBUG=all \
     $(top_srcdir)/tools/test-wrapper.sh \
     sh $(top_srcdir)/tools/with-session-bus.sh \
         --config-file=dbus-uninstalled/session.conf -- \
@@ -361,6 +380,7 @@ _gen/svc.c: with-properties.xml \
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
+		--include='<telepathy-glib/dbus-properties-mixin.h>' \
 		$< Test_Svc_
 
 _gen/errors-check.h: $(top_srcdir)/spec/errors.xml \

@@ -44,83 +44,62 @@ display_contact (TpContact *contact)
 }
 
 static void
-got_contacts_by_handle (TpConnection *connection,
-                        guint n_contacts,
-                        TpContact * const *contacts,
-                        guint n_invalid,
-                        const TpHandle *invalid,
-                        const GError *error,
-                        gpointer user_data,
-                        GObject *weak_object)
+contacts_upgraded_cb (GObject *object,
+    GAsyncResult *result,
+    gpointer user_data)
 {
+  TpConnection *connection = (TpConnection *) object;
   InspectContactData *data = user_data;
+  GPtrArray *contacts;
+  GError *error = NULL;
 
-  if (error == NULL)
+  if (!tp_connection_upgrade_contacts_finish (connection, result,
+          &contacts, &error))
+    {
+      g_warning ("Error getting contacts: %s", error->message);
+      data->exit_status = 1;
+      g_clear_error (&error);
+    }
+  else
     {
       guint i;
 
       data->exit_status = 0;
 
-      for (i = 0; i < n_contacts; i++)
+      for (i = 0; i < contacts->len; i++)
         {
-          display_contact (contacts[i]);
+          display_contact (g_ptr_array_index (contacts, i));
         }
-
-      for (i = 0; i < n_invalid; i++)
-        {
-          g_warning ("Invalid handle %u", invalid[i]);
-          data->exit_status = 1;
-        }
-    }
-  else
-    {
-      g_warning ("Error getting contacts: %s", error->message);
-      data->exit_status = 1;
+      g_ptr_array_unref (contacts);
     }
 
   g_main_loop_quit (data->main_loop);
 }
 
 static void
-got_contacts_by_id (TpConnection *connection,
-                    guint n_contacts,
-                    TpContact * const *contacts,
-                    const gchar * const *good_ids,
-                    GHashTable *bad_ids,
-                    const GError *error,
-                    gpointer user_data,
-                    GObject *weak_object)
+got_contacts_by_id (GObject *object,
+    GAsyncResult *result,
+    gpointer user_data)
 {
+  TpConnection *connection = (TpConnection *) object;
   InspectContactData *data = user_data;
+  TpContact *contact;
+  GError *error = NULL;
 
-  if (error == NULL)
-    {
-      guint i;
-      GHashTableIter hash_iter;
-      gpointer key, value;
+  contact = tp_connection_dup_contact_by_id_finish (connection, result, &error);
 
-      data->exit_status = 0;
-
-      for (i = 0; i < n_contacts; i++)
-        {
-          display_contact (contacts[i]);
-        }
-
-      g_hash_table_iter_init (&hash_iter, bad_ids);
-
-      while (g_hash_table_iter_next (&hash_iter, &key, &value))
-        {
-          gchar *id = key;
-          GError *e = value;
-
-          g_warning ("Invalid ID \"%s\": %s", id, e->message);
-          data->exit_status = 1;
-        }
-    }
-  else
+  if (contact == NULL)
     {
       g_warning ("Error getting contacts: %s", error->message);
       data->exit_status = 1;
+      g_clear_error (&error);
+    }
+  else
+    {
+      data->exit_status = 0;
+
+      display_contact (contact);
+      g_object_unref (contact);
     }
 
   g_main_loop_quit (data->main_loop);
@@ -151,23 +130,21 @@ connection_ready_cb (GObject *source,
 
   if (data->to_inspect == NULL)
     {
-      TpHandle self_handle = tp_connection_get_self_handle (connection);
+      TpContact *self_contact = tp_connection_get_self_contact (connection);
 
-      tp_connection_get_contacts_by_handle (connection,
-          1, &self_handle,
+      tp_connection_upgrade_contacts_async (connection,
+          1, &self_contact,
           G_N_ELEMENTS (features), features,
-          got_contacts_by_handle,
-          data, NULL, NULL);
+          contacts_upgraded_cb,
+          data);
     }
   else
     {
-      const gchar *contacts[] = { data->to_inspect, NULL };
-
-      tp_connection_get_contacts_by_id (connection,
-          1, contacts,
+      tp_connection_dup_contact_by_id_async (connection,
+          data->to_inspect,
           G_N_ELEMENTS (features), features,
           got_contacts_by_id,
-          data, NULL, NULL);
+          data);
     }
 }
 
@@ -175,10 +152,9 @@ int
 main (int argc,
       char **argv)
 {
-  const gchar *bus_name, *object_path;
   TpConnection *connection = NULL;
   InspectContactData data = { NULL, 1, NULL };
-  TpDBusDaemon *dbus = NULL;
+  TpSimpleClientFactory *factory;
   GError *error = NULL;
 
   g_type_init ();
@@ -187,36 +163,16 @@ main (int argc,
   if (argc < 2)
     {
       fputs ("Usage:\n"
-          "    telepathy-example-inspect-connection OBJECT_PATH [CONTACT_ID]\n"
-          "or\n"
-          "    telepathy-example-inspect-connection BUS_NAME [CONTACT_ID]\n",
+          "    telepathy-example-inspect-connection OBJECT_PATH [CONTACT_ID]\n",
           stderr);
       return 2;
     }
 
-  /* Cope with the first argument being a bus name or an object path */
-  if (argv[1][0] == '/')
-    {
-      object_path = argv[1];
-      bus_name = NULL;
-    }
-  else
-    {
-      object_path = NULL;
-      bus_name = argv[1];
-    }
-
   data.to_inspect = argv[2];
 
-  dbus = tp_dbus_daemon_dup (&error);
-
-  if (dbus == NULL)
-    {
-      g_warning ("%s", error->message);
-      goto out;
-    }
-
-  connection = tp_connection_new (dbus, bus_name, object_path, &error);
+  factory = tp_simple_client_factory_new (NULL);
+  connection = tp_simple_client_factory_ensure_connection (factory,
+      argv[1], NULL, &error);
 
   if (connection == NULL)
     {
@@ -244,8 +200,7 @@ out:
   if (connection != NULL)
     g_object_unref (connection);
 
-  if (dbus != NULL)
-    g_object_unref (dbus);
+  g_object_unref (factory);
 
   return data.exit_status;
 }

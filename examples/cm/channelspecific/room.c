@@ -12,8 +12,7 @@
 #include "room.h"
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/channel-iface.h>
-#include <telepathy-glib/svc-channel.h>
+#include <telepathy-glib/telepathy-glib-dbus.h>
 
 G_DEFINE_TYPE_WITH_CODE (ExampleCSHRoomChannel,
     example_csh_room_channel,
@@ -38,13 +37,18 @@ struct _ExampleCSHRoomChannelPrivate
   guint simulation_delay;
 };
 
+static GPtrArray *
+example_csh_room_channel_get_interfaces (TpBaseChannel *self)
+{
+  GPtrArray *interfaces;
 
-static const char * example_csh_room_channel_interfaces[] = {
-    TP_IFACE_CHANNEL_INTERFACE_GROUP,
-    TP_IFACE_CHANNEL_INTERFACE_MESSAGES,
-    NULL
+  interfaces = TP_BASE_CHANNEL_CLASS (example_csh_room_channel_parent_class)->
+    get_interfaces (self);
+
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_GROUP);
+  g_ptr_array_add (interfaces, TP_IFACE_CHANNEL_INTERFACE_MESSAGES);
+  return interfaces;
 };
-
 
 static void
 example_csh_room_channel_init (ExampleCSHRoomChannel *self)
@@ -65,7 +69,8 @@ suggest_room_identity (ExampleCSHRoomChannel *self)
   gchar *nick, *id;
   TpHandle ret;
 
-  nick = g_strdup (tp_handle_inspect (contact_repo, connection->self_handle));
+  nick = g_strdup (tp_handle_inspect (contact_repo,
+          tp_base_connection_get_self_handle (connection)));
   g_strdelimit (nick, "@", '\0');
   id = g_strdup_printf ("%s@%s", nick, tp_handle_inspect (room_repo,
         tp_base_channel_get_target_handle (TP_BASE_CHANNEL (self))));
@@ -139,13 +144,12 @@ complete_join (ExampleCSHRoomChannel *self)
       tp_intset_add (removed, mixin->self_handle);
 
       tp_group_mixin_add_handle_owner ((GObject *) self, new_self,
-          conn->self_handle);
+          tp_base_connection_get_self_handle (conn));
       tp_group_mixin_change_self_handle ((GObject *) self, new_self);
 
       tp_group_mixin_change_members ((GObject *) self, "", NULL, removed, NULL,
           rp, 0, TP_CHANNEL_GROUP_CHANGE_REASON_RENAMED);
 
-      tp_handle_unref (contact_repo, new_self);
       tp_intset_destroy (removed);
       tp_intset_destroy (rp);
     }
@@ -170,15 +174,6 @@ complete_join (ExampleCSHRoomChannel *self)
 
   tp_group_mixin_change_members ((GObject *) self, "", added, NULL, NULL,
       NULL, 0, TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
-
-  tp_handle_unref (contact_repo, alice_local);
-  tp_handle_unref (contact_repo, bob_local);
-  tp_handle_unref (contact_repo, chris_local);
-  tp_handle_unref (contact_repo, anon_local);
-
-  tp_handle_unref (contact_repo, alice_global);
-  tp_handle_unref (contact_repo, bob_global);
-  tp_handle_unref (contact_repo, chris_global);
 
   /* now that the dust has settled, we can also invite people */
   tp_group_mixin_change_flags ((GObject *) self,
@@ -205,9 +200,9 @@ join_room (ExampleCSHRoomChannel *self)
   tp_intset_add (add_remote_pending, mixin->self_handle);
 
   tp_group_mixin_add_handle_owner (object, mixin->self_handle,
-      conn->self_handle);
+      tp_base_connection_get_self_handle (conn));
   tp_group_mixin_change_members (object, "", NULL, NULL, NULL,
-      add_remote_pending, conn->self_handle,
+      add_remote_pending, tp_base_connection_get_self_handle (conn),
       TP_CHANNEL_GROUP_CHANGE_REASON_NONE);
 
   tp_intset_destroy (add_remote_pending);
@@ -370,7 +365,7 @@ remove_member_with_reason (GObject *object,
     {
       /* TODO: also simulate some channels where the user is an operator and
        * can kick people */
-      g_set_error (error, TP_ERRORS, TP_ERROR_PERMISSION_DENIED,
+      g_set_error (error, TP_ERROR, TP_ERROR_PERMISSION_DENIED,
           "You can't eject other users from this channel");
       return FALSE;
     }
@@ -392,7 +387,7 @@ example_csh_room_channel_class_init (ExampleCSHRoomChannelClass *klass)
 
   base_class->channel_type = TP_IFACE_CHANNEL_TYPE_TEXT;
   base_class->target_handle_type = TP_HANDLE_TYPE_ROOM;
-  base_class->interfaces = example_csh_room_channel_interfaces;
+  base_class->get_interfaces = example_csh_room_channel_get_interfaces;
 
   base_class->close = example_csh_room_channel_close;
 

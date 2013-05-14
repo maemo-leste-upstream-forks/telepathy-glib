@@ -107,9 +107,18 @@ tp_dbus_errors_quark (void)
 /**
  * NUM_TP_DBUS_ERRORS: (skip)
  *
- * 1 more than the highest valid #TpDBusError at the time of compilation
+ * 1 more than the highest valid #TpDBusError at the time of compilation.
+ * In new code, use %TP_NUM_DBUS_ERRORS instead.
  *
  * Since: 0.7.1
+ */
+
+/**
+ * TP_NUM_DBUS_ERRORS:
+ *
+ * 1 more than the highest valid #TpDBusError at the time of compilation
+ *
+ * Since: 0.19.0
  */
 
 /**
@@ -437,11 +446,38 @@ static void tp_proxy_iface_destroyed_cb (DBusGProxy *dgproxy, TpProxy *self);
  * The reference is only valid as long as @self is.
  *
  * Since: 0.7.1
+ * Deprecated: Since 0.19.9. New code should use
+ *  tp_proxy_get_interface_by_id() instead.
  */
 DBusGProxy *
 tp_proxy_borrow_interface_by_id (TpProxy *self,
                                  GQuark iface,
                                  GError **error)
+{
+  return tp_proxy_get_interface_by_id (self, iface, error);
+}
+
+/**
+ * tp_proxy_get_interface_by_id: (skip)
+ * @self: the TpProxy
+ * @iface: quark representing the interface required
+ * @error: used to raise an error in the #TP_DBUS_ERRORS domain if @iface
+ *         is invalid, @self has been invalidated or @self does not implement
+ *         @iface
+ *
+ * <!-- -->
+ *
+ * Returns: a borrowed reference to a #DBusGProxy
+ * for which the bus name and object path are the same as for @self, but the
+ * interface is as given (or %NULL if an @error is raised).
+ * The reference is only valid as long as @self is.
+ *
+ * Since: 0.19.9
+ */
+DBusGProxy *
+tp_proxy_get_interface_by_id (TpProxy *self,
+                              GQuark iface,
+                              GError **error)
 {
   gpointer dgproxy;
 
@@ -654,7 +690,7 @@ tp_proxy_iface_destroyed_cb (DBusGProxy *dgproxy,
  * Declare that this proxy supports a given interface.
  *
  * To use methods and signals of that interface, either call
- * tp_proxy_borrow_interface_by_id() to get the #DBusGProxy, or use the
+ * tp_proxy_get_interface_by_id() to get the #DBusGProxy, or use the
  * tp_cli_* wrapper functions (strongly recommended).
  *
  * If the interface is the proxy's "main interface", or has already been
@@ -662,7 +698,7 @@ tp_proxy_iface_destroyed_cb (DBusGProxy *dgproxy,
  *
  * Returns: either %NULL or a borrowed #DBusGProxy corresponding to @iface,
  * depending on implementation details. To reliably borrow the #DBusGProxy, use
- * tp_proxy_borrow_interface_by_id(). (This method should probably have
+ * tp_proxy_get_interface_by_id(). (This method should probably have
  * returned void; sorry.)
  *
  * Since: 0.7.1
@@ -686,7 +722,7 @@ tp_proxy_add_interface_by_id (TpProxy *self,
       /* we don't want to actually create it just yet - dbus-glib will
        * helpfully wake us up on every signal, if we do. So we set a
        * dummy value (self), and replace it with the real value in
-       * tp_proxy_borrow_interface_by_id */
+       * tp_proxy_get_interface_by_id */
       g_datalist_id_set_data_full (&self->priv->interfaces, iface,
           self, NULL);
     }
@@ -1359,7 +1395,7 @@ tp_proxy_class_init (TpProxyClass *klass)
    * Emitted when this proxy has gained an interface. It is not guaranteed
    * to be emitted immediately, but will be emitted before the interface is
    * first used (at the latest: before it's returned from
-   * tp_proxy_borrow_interface_by_id(), any signal is connected, or any
+   * tp_proxy_get_interface_by_id(), any signal is connected, or any
    * method is called).
    *
    * The intended use is to call dbus_g_proxy_add_signals(). This signal
@@ -2040,6 +2076,9 @@ static void
 prepare_feature (TpProxy *self,
     const TpProxyFeature *feature)
 {
+  /* If no function is set, then subclass is supposed to call
+   * _tp_proxy_set_feature_prepared() itself. This is used by features prepared
+   * from constructed. */
   if (feature->prepare_async == NULL)
     return;
 

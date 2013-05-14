@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if defined (TP_DISABLE_SINGLE_INCLUDE) && !defined (_TP_IN_META_HEADER) && !defined (_TP_COMPILATION)
+#error "Only <telepathy-glib/telepathy-glib.h> and <telepathy-glib/telepathy-glib-dbus.h> can be included directly."
+#endif
+
 #ifndef __TP_SIMPLE_HANDLER_H__
 #define __TP_SIMPLE_HANDLER_H__
 
@@ -73,6 +77,8 @@ typedef void (*TpSimpleHandlerHandleChannelsImpl) (
     TpHandleChannelsContext *context,
     gpointer user_data);
 
+#ifndef TP_DISABLE_DEPRECATED
+_TP_DEPRECATED_IN_0_16_FOR (tp_simple_handler_new_with_factory)
 TpBaseClient * tp_simple_handler_new (TpDBusDaemon *dbus,
     gboolean bypass_approval,
     gboolean requests,
@@ -80,9 +86,8 @@ TpBaseClient * tp_simple_handler_new (TpDBusDaemon *dbus,
     gboolean uniquify,
     TpSimpleHandlerHandleChannelsImpl callback,
     gpointer user_data,
-    GDestroyNotify destroy)
-    _TP_GNUC_DEPRECATED_FOR (tp_simple_handler_new_with_factory);
-
+    GDestroyNotify destroy);
+#endif
 
 TpBaseClient *tp_simple_handler_new_with_am (TpAccountManager *account_manager,
     gboolean bypass_approval,
@@ -93,6 +98,7 @@ TpBaseClient *tp_simple_handler_new_with_am (TpAccountManager *account_manager,
     gpointer user_data,
     GDestroyNotify destroy);
 
+_TP_AVAILABLE_IN_0_16
 TpBaseClient *tp_simple_handler_new_with_factory (
     TpSimpleClientFactory *factory,
     gboolean bypass_approval,

@@ -1,3 +1,5 @@
+/*<private_header>*/
+
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
@@ -31,7 +33,10 @@ typedef enum
   TP_DEBUG_CONTACT_LISTS = 1 << 15,
   TP_DEBUG_SASL          = 1 << 16,
   TP_DEBUG_ROOM_CONFIG   = 1 << 17,
-  TP_DEBUG_CALL          = 1 << 18
+  TP_DEBUG_CALL          = 1 << 18,
+  /* Quis custodiet ipsos custodes? */
+  TP_DEBUG_DEBUGGER      = 1 << 19,
+  TP_DEBUG_TLS           = 1 << 20
 } TpDebugFlags;
 
 gboolean _tp_debug_flag_is_set (TpDebugFlags flag);
