@@ -1310,6 +1310,8 @@ tp_connection_invalidated (TpConnection *self)
    * refcycle completely. */
   if (self->priv->roster != NULL)
     g_hash_table_remove_all (self->priv->roster);
+  g_clear_object (&self->priv->self_contact);
+  tp_clear_pointer (&self->priv->blocked_contacts, g_ptr_array_unref);
 }
 
 static gboolean
@@ -1631,6 +1633,7 @@ tp_connection_dispose (GObject *object)
     }
 
   tp_clear_pointer (&self->priv->blocked_contacts, g_ptr_array_unref);
+  g_clear_object (&self->priv->self_contact);
 
   ((GObjectClass *) tp_connection_parent_class)->dispose (object);
 }
