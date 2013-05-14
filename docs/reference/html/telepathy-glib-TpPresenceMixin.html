@@ -108,7 +108,7 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
 </p>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp110465584"></a>Implementing SimplePresence</h2></div></div></div>
+<a name="idp107846592"></a>Implementing SimplePresence</h2></div></div></div>
 <p>
   Since 0.7.13 this mixin supports the entire SimplePresence interface.
   You can implement <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceSimplePresence"><span class="type">TpSvcConnectionInterfaceSimplePresence</span></a> as follows:
@@ -120,29 +120,15 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
 <p>pass <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-simple-presence-iface-init" title="tp_presence_mixin_simple_presence_iface_init ()"><code class="function">tp_presence_mixin_simple_presence_iface_init()</code></a> as an
         argument to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a>, like so:
       </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="gtkdoc opt">(</span>MyConnection<span class="gtkdoc opt">,</span> my_connection<span class="gtkdoc opt">,</span>
-    TP_TYPE_BASE_CONNECTION<span class="gtkdoc opt">,</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="gtkdoc opt">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_SIMPLE_PRESENCE<span class="gtkdoc opt">,</span>
-        tp_presence_mixin_simple_presence_iface_init<span class="gtkdoc opt">);</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="gtkdoc opt">)</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+      G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
+          TP_TYPE_BASE_CONNECTION,
+          // ...
+          G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_SIMPLE_PRESENCE,
+              tp_presence_mixin_simple_presence_iface_init);
+          // ...
+          )
+      </pre></div>
 </li>
 <li class="listitem"><p>
         call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-simple-presence-init-dbus-properties" title="tp_presence_mixin_simple_presence_init_dbus_properties ()"><code class="function">tp_presence_mixin_simple_presence_init_dbus_properties()</code></a> in the
@@ -160,7 +146,7 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
 </p>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp110481008"></a>Implementing old-style Presence</h2></div></div></div>
+<a name="idp107862016"></a>Implementing old-style Presence</h2></div></div></div>
 <p>
   This mixin also supports a large subset of the deprecated Presence
   interface. It does not support protocols where it is possible to set
@@ -174,29 +160,15 @@ and call <a class="link" href="telepathy-glib-TpPresenceMixin.html#tp-presence-m
   example.  The presence mixin implements all of the D-Bus methods in the
   Presence interface.
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="gtkdoc opt">(</span>MyConnection<span class="gtkdoc opt">,</span> my_connection<span class="gtkdoc opt">,</span>
-    TP_TYPE_BASE_CONNECTION<span class="gtkdoc opt">,</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="gtkdoc opt">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE<span class="gtkdoc opt">,</span>
-        tp_presence_mixin_iface_init<span class="gtkdoc opt">);</span>
-    <span class="gtkdoc slc">// ...</span>
-    <span class="gtkdoc opt">)</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
+    TP_TYPE_BASE_CONNECTION,
+    // ...
+    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_PRESENCE,
+        tp_presence_mixin_iface_init);
+    // ...
+    )
+</pre></div>
 <p>
   In telepathy-glib versions older than 0.11.13, every connection
   that used the <a class="link" href="telepathy-glib-TpPresenceMixin.html#TpPresenceMixin" title="TpPresenceMixin"><span class="type">TpPresenceMixin</span></a> was required to implement
@@ -557,29 +529,15 @@ should be set after calling <a class="link" href="telepathy-glib-TpPresenceMixin
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7</pre></td>
-        <td class="listing_code"><pre class="programlisting">TpPresenceMixinClass <span class="gtkdoc opt">*</span>mixin_class<span class="gtkdoc opt">;</span>
+<div class="informalexample"><pre class="programlisting">
+TpPresenceMixinClass *mixin_class;
 
-<span class="function"><a href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-class-init">tp_presence_mixin_class_init</a></span> <span class="gtkdoc opt">((</span>GObjectClass <span class="gtkdoc opt">*)</span> klass<span class="gtkdoc opt">,</span>
-    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="gtkdoc opt">(</span>SomeObjectClass<span class="gtkdoc opt">,</span> presence_mixin<span class="gtkdoc opt">));</span>
-mixin_class <span class="gtkdoc opt">=</span> <span class="function">TP_PRESENCE_MIXIN_CLASS</span> <span class="gtkdoc opt">(</span>klass<span class="gtkdoc opt">);</span>
-mixin_class<span class="gtkdoc opt">-&gt;</span>get_maximum_status_message_length <span class="gtkdoc opt">=</span>
-    some_object_get_maximum_status_message_length<span class="gtkdoc opt">;</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_presence_mixin_class_init ((GObjectClass *) klass,
+    G_STRUCT_OFFSET (SomeObjectClass, presence_mixin));
+mixin_class = TP_PRESENCE_MIXIN_CLASS (klass);
+mixin_class-&gt;get_maximum_status_message_length =
+    some_object_get_maximum_status_message_length;
+</pre></div>
 <p>
 </p>
 <p>
@@ -635,21 +593,11 @@ class_init function like so:
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-class-init">tp_presence_mixin_class_init</a></span> <span class="gtkdoc opt">((</span>GObjectClass <span class="gtkdoc opt">*)</span> klass<span class="gtkdoc opt">,</span>
-                              <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="gtkdoc opt">(</span>SomeObjectClass<span class="gtkdoc opt">,</span>
-                                               presence_mixin<span class="gtkdoc opt">));</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+tp_presence_mixin_class_init ((GObjectClass *) klass,
+                              G_STRUCT_OFFSET (SomeObjectClass,
+                                               presence_mixin));
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">
@@ -702,19 +650,10 @@ instance init function like so:
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="telepathy-glib-TpPresenceMixin.html#tp-presence-mixin-init">tp_presence_mixin_init</a></span> <span class="gtkdoc opt">((</span>GObject <span class="gtkdoc opt">*)</span> self<span class="gtkdoc opt">,</span>
-                        <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="gtkdoc opt">(</span>SomeObject<span class="gtkdoc opt">,</span> presence_mixin<span class="gtkdoc opt">));</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+tp_presence_mixin_init ((GObject *) self,
+                        G_STRUCT_OFFSET (SomeObject, presence_mixin));
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">

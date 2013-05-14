@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [20])
-m4_define([tp_glib_micro_version], [1])
+m4_define([tp_glib_micro_version], [2])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -27,7 +27,7 @@ m4_define([tp_glib_nano_version], [0])
 # never seen in a release).
 
 m4_define([tp_glib_lt_current], [78])
-m4_define([tp_glib_lt_revision], [1])
+m4_define([tp_glib_lt_revision], [2])
 m4_define([tp_glib_lt_age], [78])
 
 # Some magic
@@ -43,7 +43,7 @@ AC_INIT([Telepathy-GLib], [tp_glib_version],
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.11 -Wno-portability])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AM_SILENT_RULES
 

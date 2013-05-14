@@ -319,43 +319,22 @@ interface.
 <p>
 An example of its usage, taking in mind the notes above, follows:
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="comment">/* Create a main loop and debug sender */</span>
-GMainLoop <span class="gtkdoc opt">*</span>loop <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-new">g_main_loop_new</a></span> <span class="gtkdoc opt">(</span>NULL<span class="gtkdoc opt">,</span> FALSE<span class="gtkdoc opt">);</span>
-TpDebugSender <span class="gtkdoc opt">*</span>sender <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-debug-sender.html#tp-debug-sender-dup">tp_debug_sender_dup</a></span> <span class="gtkdoc opt">();</span>
+<div class="informalexample"><pre class="programlisting">
+/* Create a main loop and debug sender */
+GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+TpDebugSender *sender = tp_debug_sender_dup ();
 
-<span class="comment">/* Set the default handler */</span>
-<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Message-Logging.html#g-log-set-default-handler">g_log_set_default_handler</a></span> <span class="gtkdoc opt">(</span>tp_debug_sender_log_handler<span class="gtkdoc opt">,</span> G_LOG_DOMAIN<span class="gtkdoc opt">);</span>
+/* Set the default handler */
+g_log_set_default_handler (tp_debug_sender_log_handler, G_LOG_DOMAIN);
 
-<span class="comment">/* Run the main loop, but keeping a ref on the TpDebugSender from</span>
-<span class="comment"> * the beginning of this code sample. */</span>
-<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-run">g_main_loop_run</a></span> <span class="gtkdoc opt">(</span>loop<span class="gtkdoc opt">);</span>
+/* Run the main loop, but keeping a ref on the TpDebugSender from
+ * the beginning of this code sample. */
+g_main_loop_run (loop);
 
-<span class="comment">/* g_main_loop_quit was called, so only now can we clean up the</span>
-<span class="comment"> * TpDebugSender. */</span>
-<span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref">g_object_unref</a></span> <span class="gtkdoc opt">(</span>sender<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+/* g_main_loop_quit was called, so only now can we clean up the
+ * TpDebugSender. */
+g_object_unref (sender);
+</pre></div>
 <p>
 </p>
 <p>

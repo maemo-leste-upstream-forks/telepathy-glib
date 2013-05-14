@@ -103,7 +103,7 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnection"><span class="type">TpSvcConnection</span></a> *iface</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> handle_type</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **names</code></em>,
-                                                         <em class="parameter"><code><span class="type">DBusGMethodInvocation</span> *context</code></em>);
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);
 #define             <a class="link" href="TpBaseConnection.html#TP-BASE-CONNECTION-ERROR-IF-NOT-CONNECTED:CAPS" title="TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED()">TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED</a>(conn,
                                                          context)
 <span class="returnvalue">void</span>                <a class="link" href="TpBaseConnection.html#tp-base-connection-register-with-contacts-mixin" title="tp_base_connection_register_with_contacts_mixin ()">tp_base_connection_register_with_contacts_mixin</a>
@@ -430,39 +430,20 @@ add extra interfaces into the <a href="http://library.gnome.org/devel/glib/unsta
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static</span> GPtrArray <span class="gtkdoc opt">*</span>
-<span class="function">my_connection_get_interfaces_always_present</span> <span class="gtkdoc opt">(</span>TpBaseConnection <span class="gtkdoc opt">*</span>self<span class="gtkdoc opt">)</span>
-<span class="gtkdoc opt">{</span>
-  GPtrArray <span class="gtkdoc opt">*</span>interfaces<span class="gtkdoc opt">;</span>
+<div class="informalexample"><pre class="programlisting">
+static GPtrArray *
+my_connection_get_interfaces_always_present (TpBaseConnection *self)
+{
+  GPtrArray *interfaces;
 
-  interfaces <span class="gtkdoc opt">=</span> <span class="function">TP_BASE_CONNECTION_CLASS</span> <span class="gtkdoc opt">(</span>
-      my_connection_parent_class<span class="gtkdoc opt">)-&gt;</span><span class="function">get_interfaces_always_present</span> <span class="gtkdoc opt">(</span>self<span class="gtkdoc opt">);</span>
+  interfaces = TP_BASE_CONNECTION_CLASS (
+      my_connection_parent_class)-&gt;get_interfaces_always_present (self);
 
-  <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#g-ptr-array-add">g_ptr_array_add</a></span> <span class="gtkdoc opt">(</span>interfaces<span class="gtkdoc opt">,</span> TP_IFACE_BADGERS<span class="gtkdoc opt">);</span>
+  g_ptr_array_add (interfaces, TP_IFACE_BADGERS);
 
-  <span class="keyword">return</span> interfaces<span class="gtkdoc opt">;</span>
-<span class="gtkdoc opt">}</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+  return interfaces;
+}
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">
@@ -1145,7 +1126,7 @@ callback).</td>
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnection"><span class="type">TpSvcConnection</span></a> *iface</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> handle_type</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **names</code></em>,
-                                                         <em class="parameter"><code><span class="type">DBusGMethodInvocation</span> *context</code></em>);</pre>
+                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/dbus-glib/dbus-glib-DBusGMethod.html#DBusGMethodInvocation"><span class="type">DBusGMethodInvocation</span></a> *context</code></em>);</pre>
 <div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
 <h3 class="title">Warning</h3>
 <p><code class="literal">tp_base_connection_dbus_request_handles</code> is deprecated and should not be used in newly-written code. 0.19.0</p>
@@ -1326,31 +1307,16 @@ Initializes an iterator over the <a class="link" href="TpChannelManager.html" ti
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8</pre></td>
-        <td class="listing_code"><pre class="programlisting">TpChannelManagerIter iter<span class="gtkdoc opt">;</span>
-TpChannelManager <span class="gtkdoc opt">*</span>manager<span class="gtkdoc opt">;</span>
+<div class="informalexample"><pre class="programlisting">
+TpChannelManagerIter iter;
+TpChannelManager *manager;
 
-<span class="function"><a href="TpBaseConnection.html#tp-base-connection-channel-manager-iter-init">tp_base_connection_channel_manager_iter_init</a></span> <span class="gtkdoc opt">(&amp;</span>iter<span class="gtkdoc opt">,</span> base_conn<span class="gtkdoc opt">);</span>
-<span class="keyword">while</span> <span class="gtkdoc opt">(</span><span class="function"><a href="TpBaseConnection.html#tp-base-connection-channel-manager-iter-next">tp_base_connection_channel_manager_iter_next</a></span> <span class="gtkdoc opt">(&amp;</span>iter<span class="gtkdoc opt">, &amp;</span>manager<span class="gtkdoc opt">))</span>
-  <span class="gtkdoc opt">{</span>
-    <span class="gtkdoc opt">...</span><span class="keyword">do</span> something with manager<span class="gtkdoc opt">...</span>
-  <span class="gtkdoc opt">}</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+tp_base_connection_channel_manager_iter_init (&amp;iter, base_conn);
+while (tp_base_connection_channel_manager_iter_next (&amp;iter, &amp;manager))
+  {
+    ...do something with manager...
+  }
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">

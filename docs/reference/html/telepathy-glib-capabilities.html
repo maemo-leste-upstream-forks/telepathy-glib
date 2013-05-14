@@ -132,8 +132,8 @@ An object representing capabilities a <a class="link" href="telepathy-glib-conne
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>the same <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> as the
-<a class="link" href="telepathy-glib-capabilities.html#TpCapabilities--channel-classes" title='The "channel-classes" property'><span class="type">"channel-classes"</span></a> property. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+<td>the same <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> as
+the <a class="link" href="telepathy-glib-capabilities.html#TpCapabilities--channel-classes" title='The "channel-classes" property'><span class="type">"channel-classes"</span></a> property. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> GHashTable]</span>
 </td>
 </tr>
 </tbody>
@@ -654,80 +654,41 @@ Discovers whether this protocol or connection supports listing rooms.
 Specifically, if this function returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, a room list channel can be
 requested as follows:
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17</pre></td>
-        <td class="listing_code"><pre class="programlisting">GHashTable <span class="gtkdoc opt">*</span>request<span class="gtkdoc opt">;</span>
-TpAccountChannelRequest <span class="gtkdoc opt">*</span>req<span class="gtkdoc opt">;</span>
+<div class="informalexample"><pre class="programlisting">
+GHashTable *request;
+TpAccountChannelRequest *req;
 
-request <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-asv.html#tp-asv-new">tp_asv_new</a></span> <span class="gtkdoc opt">(</span>
-    TP_PROP_CHANNEL_CHANNEL_TYPE<span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span>
-      TP_IFACE_CHANNEL_TYPE_ROOM_LIST<span class="gtkdoc opt">,</span>
-    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE<span class="gtkdoc opt">,</span> G_TYPE_UINT<span class="gtkdoc opt">,</span> TP_HANDLE_TYPE_NONE<span class="gtkdoc opt">,</span>
-    NULL<span class="gtkdoc opt">);</span>
+request = tp_asv_new (
+    TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+      TP_IFACE_CHANNEL_TYPE_ROOM_LIST,
+    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_NONE,
+    NULL);
 
-req <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-account-channel-request.html#tp-account-channel-request-new">tp_account_channel_request_new</a></span> <span class="gtkdoc opt">(</span>account<span class="gtkdoc opt">,</span> request<span class="gtkdoc opt">,</span>
-   TP_USER_ACTION_TIME_CURRENT_TIME<span class="gtkdoc opt">);</span>
+req = tp_account_channel_request_new (account, request,
+   TP_USER_ACTION_TIME_CURRENT_TIME);
 
-<span class="function"><a href="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-and-handle-channel-async">tp_account_channel_request_create_and_handle_channel_async</a></span> <span class="gtkdoc opt">(</span>req<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">,</span>
-    create_channel_cb<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">);</span>
+tp_account_channel_request_create_and_handle_channel_async (req, NULL,
+    create_channel_cb, NULL);
 
-<span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref">g_object_unref</a></span> <span class="gtkdoc opt">(</span>req<span class="gtkdoc opt">);</span>
-<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#g-hash-table-unref">g_hash_table_unref</a></span> <span class="gtkdoc opt">(</span>request<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+g_object_unref (req);
+g_hash_table_unref (request);
+</pre></div>
 <p>
 </p>
 <p>
 If <em class="parameter"><code>with_server</code></em> is set to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, a list of rooms on a particular server can
 be requested as follows:
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc opt">/</span>\<span class="gtkdoc opt">*</span> Same code as above but with request defined <span class="keyword">using</span><span class="gtkdoc opt">: *</span>\<span class="gtkdoc opt">/</span>
-request <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-asv.html#tp-asv-new">tp_asv_new</a></span> <span class="gtkdoc opt">(</span>
-    TP_PROP_CHANNEL_CHANNEL_TYPE<span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span>
-      TP_IFACE_CHANNEL_TYPE_ROOM_LIST<span class="gtkdoc opt">,</span>
-    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE<span class="gtkdoc opt">,</span> G_TYPE_UINT<span class="gtkdoc opt">,</span> TP_HANDLE_TYPE_NONE<span class="gtkdoc opt">,</span>
-    TP_PROP_CHANNEL_TYPE_ROOM_LIST_SERVER<span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span>
-      <span class="string">&quot;characters.shakespeare.lit&quot;</span><span class="gtkdoc opt">,</span>
-    NULL<span class="gtkdoc opt">);</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+<div class="informalexample"><pre class="programlisting">
+/\* Same code as above but with request defined using: *\/
+request = tp_asv_new (
+    TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+      TP_IFACE_CHANNEL_TYPE_ROOM_LIST,
+    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_NONE,
+    TP_PROP_CHANNEL_TYPE_ROOM_LIST_SERVER, G_TYPE_STRING,
+      "characters.shakespeare.lit",
+    NULL);
+</pre></div>
 <p>
 </p>
 <div class="variablelist"><table border="0">

@@ -103,65 +103,33 @@ To create a new outgoing D-Bus tube channel, do something like:
 </p>
 <p>
 </p>
-<div class="informalexample">
-  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
-    <tbody>
-      <tr>
-        <td class="listing_lines" align="right"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25</pre></td>
-        <td class="listing_code"><pre class="programlisting">GHashTable <span class="gtkdoc opt">*</span>request_properties <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-asv.html#tp-asv-new">tp_asv_new</a></span> <span class="gtkdoc opt">(</span>
-    TP_PROP_CHANNEL_CHANNEL_TYPE<span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span> TP_IFACE_CHANNEL_TYPE_DBUS_TUBE<span class="gtkdoc opt">,</span>
-    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE<span class="gtkdoc opt">,</span> G_TYPE_UINT<span class="gtkdoc opt">,</span> TP_HANDLE_TYPE_CONTACT<span class="gtkdoc opt">,</span>
-    TP_PROP_CHANNEL_TARGET_ID<span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span> <span class="function"><a href="telepathy-glib-contact.html#tp-contact-get-identifier">tp_contact_get_identifier</a></span> <span class="gtkdoc opt">(</span>contact<span class="gtkdoc opt">),</span>
-    TP_PROP_CHANNEL_TYPE_DBUS_TUBE_SERVICE_NAME<span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span> <span class="string">&quot;com.example.walrus&quot;</span><span class="gtkdoc opt">,</span>
-    NULL<span class="gtkdoc opt">);</span>
-TpAccountChannelRequest <span class="gtkdoc opt">*</span>req <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-account-channel-request.html#tp-account-channel-request-new">tp_account_channel_request_new</a></span> <span class="gtkdoc opt">(</span>account<span class="gtkdoc opt">,</span>
-    request_properties<span class="gtkdoc opt">,</span> TP_USER_ACTION_TIME_NOT_USER_ACTION<span class="gtkdoc opt">);</span>
-<span class="function"><a href="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-and-handle-channel-async">tp_account_channel_request_create_and_handle_channel_async</a></span> <span class="gtkdoc opt">(</span>req<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">,</span> callback<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">);</span>
+<div class="informalexample"><pre class="programlisting">
+GHashTable *request_properties = tp_asv_new (
+    TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_DBUS_TUBE,
+    TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+    TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING, tp_contact_get_identifier (contact),
+    TP_PROP_CHANNEL_TYPE_DBUS_TUBE_SERVICE_NAME, G_TYPE_STRING, "com.example.walrus",
+    NULL);
+TpAccountChannelRequest *req = tp_account_channel_request_new (account,
+    request_properties, TP_USER_ACTION_TIME_NOT_USER_ACTION);
+tp_account_channel_request_create_and_handle_channel_async (req, NULL, callback, NULL);
 
-<span class="gtkdoc slc">// ...</span>
+// ...
 
-<span class="gtkdoc kwb">static void</span>
-<span class="function">callback</span> <span class="gtkdoc opt">(</span>
-    GObject <span class="gtkdoc opt">*</span>source<span class="gtkdoc opt">,</span>
-    GAsyncResult <span class="gtkdoc opt">*</span>result<span class="gtkdoc opt">,</span>
-    gpointer user_data<span class="gtkdoc opt">)</span>
-<span class="gtkdoc opt">{</span>
-  TpAccountChannelRequest <span class="gtkdoc opt">*</span>req <span class="gtkdoc opt">=</span> <span class="function">TP_ACCOUNT_CHANNEL_REQUEST</span> <span class="gtkdoc opt">(</span>source<span class="gtkdoc opt">);</span>
-  TpChannel <span class="gtkdoc opt">*</span>channel<span class="gtkdoc opt">;</span>
-  GError <span class="gtkdoc opt">*</span>error <span class="gtkdoc opt">=</span> NULL<span class="gtkdoc opt">;</span>
+static void
+callback (
+    GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpAccountChannelRequest *req = TP_ACCOUNT_CHANNEL_REQUEST (source);
+  TpChannel *channel;
+  GError *error = NULL;
 
-  channel <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-account-channel-request.html#tp-account-channel-request-create-and-handle-channel-finish">tp_account_channel_request_create_and_handle_channel_finish</a></span> <span class="gtkdoc opt">(</span>req<span class="gtkdoc opt">,</span> result<span class="gtkdoc opt">, &amp;</span>error<span class="gtkdoc opt">);</span>
-  <span class="function"><a href="telepathy-glib-dbus-tube-channel.html#tp-dbus-tube-channel-offer-async">tp_dbus_tube_channel_offer_async</a></span> <span class="gtkdoc opt">(</span><span class="function">TP_DBUS_TUBE_CHANNEL</span> <span class="gtkdoc opt">(</span>channel<span class="gtkdoc opt">),</span> NULL<span class="gtkdoc opt">,</span> offer_callback<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">);</span>
-<span class="gtkdoc opt">}</span></pre></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+  channel = tp_account_channel_request_create_and_handle_channel_finish (req, result, &amp;error);
+  tp_dbus_tube_channel_offer_async (TP_DBUS_TUBE_CHANNEL (channel), NULL, offer_callback, NULL);
+}
+</pre></div>
 <p>
 </p>
 <p>
