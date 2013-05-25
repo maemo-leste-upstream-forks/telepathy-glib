@@ -1,0 +1,46 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sat, 25 May 2013 13:21:48 +0100
+Subject: Do not assert about debug messages' dates/times on sparc
+
+Workaround for <http://bugs.debian.org/709781>.
+
+Bug-Debian: http://bugs.debian.org/709776
+Forwarded: no
+---
+ tests/dbus/debug-client.c |    7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/tests/dbus/debug-client.c b/tests/dbus/debug-client.c
+index 50d07fa..a62d2b0 100644
+--- a/tests/dbus/debug-client.c
++++ b/tests/dbus/debug-client.c
+@@ -228,12 +228,17 @@ test_get_messages (Test *test,
+   msg = g_ptr_array_index (test->messages, 0);
+   g_assert (TP_IS_DEBUG_MESSAGE (msg));
+ 
++#ifdef __sparc__
++  g_message ("FIXME: GDateTime doesn't seem to work on sparc");
++  g_message ("Debian #706776, #709781");
++#else
+   t = tp_debug_message_get_time (msg);
+   g_assert (t != NULL);
+   /* Don't use g_date_time_equal() as the gouble -> GDateTime conversion in
+    * _tp_debug_message_new() may result in a difference of one (!)
+    * millisecond */
+   g_assert_cmpuint (g_date_time_to_unix (t), ==, g_date_time_to_unix (time1));
++#endif
+ 
+   g_assert_cmpstr (tp_debug_message_get_domain (msg), ==, "domain1");
+   g_assert (tp_debug_message_get_category (msg) == NULL);
+@@ -244,9 +249,11 @@ test_get_messages (Test *test,
+   msg = g_ptr_array_index (test->messages, 1);
+   g_assert (TP_IS_DEBUG_MESSAGE (msg));
+ 
++#ifndef __sparc__
+   t = tp_debug_message_get_time (msg);
+   g_assert (t != NULL);
+   g_assert_cmpuint (g_date_time_to_unix (t), ==, g_date_time_to_unix (time2));
++#endif
+ 
+   g_assert_cmpstr (tp_debug_message_get_domain (msg), ==, "domain2");
+   g_assert_cmpstr (tp_debug_message_get_category (msg), ==, "category");
