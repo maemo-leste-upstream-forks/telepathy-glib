@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpBaseRoomConfig</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="telepathy-glib-TpPropertiesMixin.html" title="TpPropertiesMixin">
@@ -115,33 +115,61 @@ chats:
 </p>
 <p>
 </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
 <p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
   <span class="type">TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG</span> using
   <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-iface-init" title="tp_base_room_config_iface_init ()"><code class="function">tp_base_room_config_iface_init()</code></a>:</p>
-<div class="informalexample"><pre class="programlisting">
-G_DEFINE_TYPE_WITH_CODE (MyMucChannel, my_muc_channel,
-    TP_TYPE_BASE_CHANNEL,
-    // ...
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG,
-        tp_base_room_config_iface_init)
-    // ...
-    )
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="gtkdoc opt">(</span>MyMucChannel<span class="gtkdoc opt">,</span> my_muc_channel<span class="gtkdoc opt">,</span>
+    TP_TYPE_BASE_CHANNEL<span class="gtkdoc opt">,</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="gtkdoc opt">(</span>TP_TYPE_SVC_CHANNEL_INTERFACE_ROOM_CONFIG<span class="gtkdoc opt">,</span>
+        tp_base_room_config_iface_init<span class="gtkdoc opt">)</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="gtkdoc opt">)</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 </li>
 <li class="listitem">
 <p>in the <code class="function">class_init</code> method, call
    <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-register-class" title="tp_base_room_config_register_class ()"><code class="function">tp_base_room_config_register_class()</code></a>:</p>
-<div class="informalexample"><pre class="programlisting">
-static void
-my_muc_channel_class_init (MyMucChannelClass *klass)
-{
-  // ...
-  tp_base_room_config_register_class (TP_BASE_CHANNEL_CLASS (klass));
-  // ...
-}
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static void</span>
+<span class="function">my_muc_channel_class_init</span> <span class="gtkdoc opt">(</span>MyMucChannelClass <span class="gtkdoc opt">*</span>klass<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+  <span class="gtkdoc slc">// ...</span>
+  <span class="function"><a href="TpBaseRoomConfig.html#tp-base-room-config-register-class">tp_base_room_config_register_class</a></span> <span class="gtkdoc opt">(</span><span class="function">TP_BASE_CHANNEL_CLASS</span> <span class="gtkdoc opt">(</span>klass<span class="gtkdoc opt">));</span>
+  <span class="gtkdoc slc">// ...</span>
+<span class="gtkdoc opt">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 </li>
 <li class="listitem"><p>include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CHANNEL-INTERFACE-ROOM-CONFIG:CAPS" title="TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG"><code class="literal">TP_IFACE_CHANNEL_INTERFACE_ROOM_CONFIG</code></a> in the return of
    <a class="link" href="TpBaseChannel.html#TpBaseChannelClass.get-interfaces"><span class="type">TpBaseChannelClass.get_interfaces</span></a>.</p></li>
@@ -161,13 +189,25 @@ are received from the network, they should be updated on this object using
 </p>
 <p>
 </p>
-<div class="informalexample"><pre class="programlisting">
-  g_object_self (room_config,
-     "description", "A place to bury strangers",
-     "private", TRUE,
-     NULL);
-  tp_base_room_config_emit_properties_changed (room_config);
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function">g_object_self</span> <span class="gtkdoc opt">(</span>room_config<span class="gtkdoc opt">,</span>
+   <span class="string">&quot;description&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;A place to bury strangers&quot;</span><span class="gtkdoc opt">,</span>
+   <span class="string">&quot;private&quot;</span><span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">,</span>
+   NULL<span class="gtkdoc opt">);</span>
+<span class="function"><a href="TpBaseRoomConfig.html#tp-base-room-config-emit-properties-changed">tp_base_room_config_emit_properties_changed</a></span> <span class="gtkdoc opt">(</span>room_config<span class="gtkdoc opt">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
 </p>
 <p>
@@ -200,8 +240,11 @@ Class structure for <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRo
 indicating that updating room configuration is not implemented; subclasses
 should override it if they wish to support updating room configuration.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><a class="link" href="TpBaseRoomConfig.html#TpBaseRoomConfigUpdateAsync" title="TpBaseRoomConfigUpdateAsync ()"><span class="type">TpBaseRoomConfigUpdateAsync</span></a> <em class="structfield"><code><a name="TpBaseRoomConfigClass.update-async"></a>update_async</code></em>;</span></p></td>
@@ -233,8 +276,11 @@ arrived.
 Note that <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a> will take care of applying the property updates
 to itself if the operation succeeds.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -268,8 +314,11 @@ this hash table.</td>
 Signature for a function to complete a call to a corresponding
 implementation of <a class="link" href="TpBaseRoomConfig.html#TpBaseRoomConfigUpdateAsync" title="TpBaseRoomConfigUpdateAsync ()"><span class="type">TpBaseRoomConfigUpdateAsync</span></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -308,8 +357,11 @@ using <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-iface-init
 must construct an instance of <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a>, passing themself as
 <a class="link" href="TpBaseRoomConfig.html#TpBaseRoomConfig--channel" title='The "channel" property'><span class="type">"channel"</span></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>base_channel_class</code></em> :</span></p></td>
 <td>the class structure for a subclass of <a class="link" href="TpBaseChannel.html" title="TpBaseChannel"><span class="type">TpBaseChannel</span></a>
@@ -330,8 +382,11 @@ is implemented using this class. The <a class="link" href="TpBaseChannel.html" t
 <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-register-class" title="tp_base_room_config_register_class ()"><code class="function">tp_base_room_config_register_class()</code></a> in its class_init function, and
 construct a <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a> object for each instance.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>g_iface</code></em> :</span></p></td>
@@ -367,8 +422,11 @@ construct a <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig
 An enumeration of room configuration fields, corresponding to GObject
 properties and, in turn, to D-Bus properties.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><a name="TP-BASE-ROOM-CONFIG-ANONYMOUS:CAPS"></a><span class="term"><code class="literal">TP_BASE_ROOM_CONFIG_ANONYMOUS</code></span></p></td>
@@ -451,8 +509,11 @@ to correspond to unqualified D-Bus property names.)
 <p>
 Returns the channel to which <em class="parameter"><code>self</code></em> is attached.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -481,8 +542,11 @@ room configuration.
 Changes made by calling this function are not signalled over D-Bus until
 <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-emit-properties-changed" title="tp_base_room_config_emit_properties_changed ()"><code class="function">tp_base_room_config_emit_properties_changed()</code></a> is next called.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -528,8 +592,11 @@ as mutable.
 Changes made by calling this function are not signalled over D-Bus until
 <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-emit-properties-changed" title="tp_base_room_config_emit_properties_changed ()"><code class="function">tp_base_room_config_emit_properties_changed()</code></a> is next called.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -561,8 +628,11 @@ call to this method, if any. This includes changes made by calling
 <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-set-property-mutable" title="tp_base_room_config_set_property_mutable ()"><code class="function">tp_base_room_config_set_property_mutable()</code></a>, as well as changes to any of the
 (writeable) GObject properties on this object.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
 <td>a <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a> object.</td>
@@ -582,8 +652,11 @@ all properties have been set to meaningful values.
 It is safe to call this function more than once; second and subsequent calls
 are equivalent to calling <a class="link" href="TpBaseRoomConfig.html#tp-base-room-config-emit-properties-changed" title="tp_base_room_config_emit_properties_changed ()"><code class="function">tp_base_room_config_emit_properties_changed()</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
 <td>a <a class="link" href="TpBaseRoomConfig.html" title="TpBaseRoomConfig"><span class="type">TpBaseRoomConfig</span></a> object</td>

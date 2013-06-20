@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpAccountManager</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="telepathy-glib-media-interfaces.html" title="TpMediaSessionHandler, TpMediaStreamHandler">
@@ -209,110 +209,17 @@ set on that factory will be prepared on all those objects.
 </p>
 <div class="example">
 <a name="account-manager"></a><p class="title"><b>Example 2. TpAccountManager example</b></p>
-<div class="example-contents"><pre class="programlisting">/*
- * contact-list
- *
- * Copyright © 2011 Collabora Ltd. &lt;http://www.collabora.co.uk/&gt;
- *
- * Copying and distribution of this file, with or without modification,
- * are permitted in any medium without royalty provided the copyright
- * notice and this notice are preserved.
- */
+<div class="example-contents">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1</pre></td>
+        <td class="listing_code"><pre class="programlisting">FIXME<span class="gtkdoc opt">:</span> MISSING XINCLUDE CONTENT</pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-#include "config.h"
-
-#include &lt;telepathy-glib/telepathy-glib.h&gt;
-
-static void
-account_manager_prepared_cb (GObject *object,
-    GAsyncResult *res,
-    gpointer user_data)
-{
-  TpAccountManager *manager = (TpAccountManager *) object;
-  GMainLoop *loop = user_data;
-  GList *accounts, *l;
-  GError *error = NULL;
-
-  if (!tp_proxy_prepare_finish (object, res, &amp;error))
-    {
-      g_print ("Error preparing AM: %s\n", error-&gt;message);
-      goto OUT;
-    }
-
-  accounts = tp_account_manager_dup_valid_accounts (manager);
-  for (l = accounts; l != NULL; l = l-&gt;next)
-    {
-      TpAccount *account = l-&gt;data;
-      TpConnection *connection = tp_account_get_connection (account);
-      GPtrArray *contacts;
-      guint i;
-
-      /* Verify account is online and received its contact list. If state is not
-       * SUCCESS this means we didn't received the roster from server yet and
-       * we would have to wait for the "notify:contact-list-state" signal. */
-      if (connection == NULL ||
-          tp_connection_get_contact_list_state (connection) !=
-              TP_CONTACT_LIST_STATE_SUCCESS)
-        continue;
-
-      contacts = tp_connection_dup_contact_list (connection);
-      for (i = 0; i &lt; contacts-&gt;len; i++)
-        {
-          TpContact *contact = g_ptr_array_index (contacts, i);
-          const gchar * const *groups;
-
-          g_print ("contact %s (%s) in groups:\n",
-              tp_contact_get_identifier (contact),
-              tp_contact_get_alias (contact));
-
-          for (groups = tp_contact_get_contact_groups (contact);
-               *groups != NULL; groups++)
-            g_print ("  %s\n", *groups);
-        }
-      g_ptr_array_unref (contacts);
-    }
-  g_list_free_full (accounts, g_object_unref);
-
-OUT:
-  g_main_loop_quit (loop);
-}
-
-int
-main (int argc,
-      char **argv)
-{
-  TpAccountManager *manager;
-  TpSimpleClientFactory *factory;
-  GMainLoop *loop;
-
-  g_type_init ();
-  tp_debug_set_flags (g_getenv ("EXAMPLE_DEBUG"));
-
-  loop = g_main_loop_new (NULL, FALSE);
-
-  manager = tp_account_manager_dup ();
-  factory = tp_proxy_get_factory (manager);
-  tp_simple_client_factory_add_account_features_varargs (factory,
-      TP_ACCOUNT_FEATURE_CONNECTION,
-      0);
-  tp_simple_client_factory_add_connection_features_varargs (factory,
-      TP_CONNECTION_FEATURE_CONTACT_LIST,
-      0);
-  tp_simple_client_factory_add_contact_features_varargs (factory,
-      TP_CONTACT_FEATURE_ALIAS,
-      TP_CONTACT_FEATURE_CONTACT_GROUPS,
-      TP_CONTACT_FEATURE_INVALID);
-
-  tp_proxy_prepare_async (manager, NULL, account_manager_prepared_cb, loop);
-
-  g_main_loop_run (loop);
-
-  g_object_unref (manager);
-  g_main_loop_unref (loop);
-
-  return 0;
-}
-</pre></div>
 </div>
 <p><br class="example-break">
 </p>
@@ -341,8 +248,11 @@ Use <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager
 on the starter or session bus (which is almost always the right thing for
 Telepathy).
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>bus_daemon</code></em> :</span></p></td>
@@ -369,8 +279,11 @@ subclass. Usually this should be done at application startup and followed by
 a call to <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-set-default" title="tp_account_manager_set_default ()"><code class="function">tp_account_manager_set_default()</code></a> to ensure other libraries/plugins
 will use this custom factory as well.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>factory</code></em> :</span></p></td>
@@ -422,8 +335,11 @@ reference to <em class="parameter"><code>manager</code></em>, so it will never b
 Note that <em class="parameter"><code>manager</code></em> must use the default <a class="link" href="telepathy-glib-dbus.html#TpDBusDaemon"><span class="type">TpDBusDaemon</span></a> as returned by
 <a class="link" href="telepathy-glib-dbus.html#tp-dbus-daemon-dup" title="tp_dbus_daemon_dup ()"><code class="function">tp_dbus_daemon_dup()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
 <td>a <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a>
@@ -440,8 +356,11 @@ Note that <em class="parameter"><code>manager</code></em> must use the default <
 Check if <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-set-default" title="tp_account_manager_set_default ()"><code class="function">tp_account_manager_set_default()</code></a> has already successfully been
 called.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>
@@ -466,8 +385,11 @@ will be returned by this function repeatedly, as long as at least one
 reference exists. Note that the returned <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a> is not guaranteed
 to be ready on return.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>an account manager proxy on the starter or session
@@ -506,8 +428,11 @@ will be ready.
 It is usually better to use <a class="link" href="telepathy-glib-account-request.html#TpAccountRequest"><span class="type">TpAccountRequest</span></a> instead, particularly when
 using high-level language bindings.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -566,8 +491,11 @@ object, with the <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FE
 The caller must keep a ref to the returned object using <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-ref"><code class="function">g_object_ref()</code></a> if
 it is to be kept beyond the lifetime of <em class="parameter"><code>result</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -615,8 +543,11 @@ to be ready on return.
 The caller must keep a ref to the returned object using <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-ref"><code class="function">g_object_ref()</code></a> if
 it is to be kept.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -657,11 +588,21 @@ Note that the <a class="link" href="telepathy-glib-account.html#TpAccount"><span
 before returning from this function. One could ref every item in the list
 like the following example:
 </p>
-<div class="informalexample"><pre class="programlisting">
-GList *accounts;
-account = tp_account_manager_get_valid_accounts (manager);
-g_list_foreach (accounts, (GFunc) g_object_ref, NULL);
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3</pre></td>
+        <td class="listing_code"><pre class="programlisting">GList <span class="gtkdoc opt">*</span>accounts<span class="gtkdoc opt">;</span>
+account <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-account-manager.html#tp-account-manager-get-valid-accounts">tp_account_manager_get_valid_accounts</a></span> <span class="gtkdoc opt">(</span>manager<span class="gtkdoc opt">);</span>
+<span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#g-list-foreach">g_list_foreach</a></span> <span class="gtkdoc opt">(</span>accounts<span class="gtkdoc opt">, (</span>GFunc<span class="gtkdoc opt">)</span> g_object_ref<span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
 </p>
 <p>
@@ -675,8 +616,11 @@ until <a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAG
 (<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has returned). Until this feature has
 been prepared, an empty list (<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>) will be returned.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -713,8 +657,11 @@ until <a class="link" href="telepathy-glib-account-manager.html#TP-ACCOUNT-MANAG
 (<a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has returned). Until this feature has
 been prepared, an empty list (<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>) will be returned.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -759,8 +706,11 @@ The return value of this function is not guaranteed to have been retrieved
 until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> has finished; until then, the
 value will be the same as if no accounts are enabled or valid.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -808,8 +758,11 @@ Setting a requested presence on all accounts will have no effect
 until <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a>
 (or the older <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-prepare-async" title="tp_account_manager_prepare_async ()"><code class="function">tp_account_manager_prepare_async()</code></a>) has finished.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -841,8 +794,11 @@ Enable autostarting the account manager D-Bus service. This means
 that the account manager will be restarted if it disappears from
 the bus.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
 <td>a <a class="link" href="telepathy-glib-account-manager.html#TpAccountManager"><span class="type">TpAccountManager</span></a>
@@ -885,8 +841,11 @@ One can ask for a feature to be prepared using the
 <p>
 
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -933,8 +892,11 @@ Note that if <em class="parameter"><code>callback</code></em> is <a href="http:/
 In version 0.11.3 or later, this is equivalent to calling
 <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> with the same arguments.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -972,8 +934,11 @@ In version 0.11.3 or later, this is equivalent to calling
 <p>
 Finishes an async preparation of the account manager <em class="parameter"><code>manager</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -1012,8 +977,11 @@ Finishes an async preparation of the account manager <em class="parameter"><code
 Signature of the callback called when a CreateAccount method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1060,8 +1028,11 @@ Start a CreateAccount method call.
 <p>
 Request the creation of a new &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Account&lt;/tp:dbus-ref&gt;. The         account manager SHOULD NOT allow invalid accounts to be created.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1141,8 +1112,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 <p>
 Represents the signature of a callback for the signal AccountRemoved.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1180,8 +1154,11 @@ Connect a handler to the signal AccountRemoved.
 <p>
 The given account has been removed.          &lt;tp:rationale&gt;           This is effectively change notification for the valid and invalid           accounts lists. On emission of this signal, the Account indicated           will no longer be present in either of the lists.         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1236,8 +1213,11 @@ or has become invalid.</td>
 <p>
 Represents the signature of a callback for the signal AccountValidityChanged.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1279,8 +1259,11 @@ Connect a handler to the signal AccountValidityChanged.
 <p>
 The validity of the given account has changed. New accounts are         also indicated by this signal, as an account validity change         (usually to True) on an account that did not previously exist.          &lt;tp:rationale&gt;           This is effectively change notification for the valid and invalid           accounts lists.         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1334,8 +1317,11 @@ or has become invalid.</td>
 <p>
 Emitted when an account from <em class="parameter"><code>manager</code></em> is disabled.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -1369,8 +1355,11 @@ Emitted when an account from <em class="parameter"><code>manager</code></em> is 
 with all features previously passed to
 <a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features" title="tp_simple_client_factory_add_account_features ()"><code class="function">tp_simple_client_factory_add_account_features()</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -1399,8 +1388,11 @@ with all features previously passed to
 <p>
 Emitted when an account is removed from <em class="parameter"><code>manager</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -1439,8 +1431,11 @@ previously exist has been added (with <em class="parameter"><code>valid</code></
 with all features previously passed to
 <a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-add-account-features" title="tp_simple_client_factory_add_account_features ()"><code class="function">tp_simple_client_factory_add_account_features()</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>
@@ -1476,8 +1471,11 @@ with all features previously passed to
 <p>
 Emitted when the most available presence on <em class="parameter"><code>manager</code></em> changes.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>manager</code></em> :</span></p></td>

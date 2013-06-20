@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Manipulating a{sv} mappings</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-dbus.html" title="General D-Bus support">
 <link rel="prev" href="telepathy-glib-dbus.html" title="D-Bus utilities">
@@ -171,8 +171,11 @@ Return the size of <em class="parameter"><code>asv</code></em> as if via <a href
 The only difference is that this version takes a const <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> and
 casts it.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
 <td>a GHashTable</td>
@@ -192,10 +195,19 @@ passed in as parameters.
 <p>
 The <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> is synonymous with:
 </p>
-<div class="informalexample"><pre class="programlisting">
-GHashTable *asv = g_hash_table_new_full (g_str_hash, g_str_equal,
-   NULL, (GDestroyNotify) tp_g_value_slice_free);
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2</pre></td>
+        <td class="listing_code"><pre class="programlisting">GHashTable <span class="gtkdoc opt">*</span>asv <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#g-hash-table-new-full">g_hash_table_new_full</a></span> <span class="gtkdoc opt">(</span>g_str_hash<span class="gtkdoc opt">,</span> g_str_equal<span class="gtkdoc opt">,</span>
+   NULL<span class="gtkdoc opt">, (</span>GDestroyNotify<span class="gtkdoc opt">)</span> tp_g_value_slice_free<span class="gtkdoc opt">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
 Followed by manual insertion of each of the parameters.
 </p>
@@ -207,21 +219,42 @@ tp_asv_set_*() and retrieved using tp_asv_get_*().
 <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new" title="tp_g_value_slice_new ()"><code class="function">tp_g_value_slice_new()</code></a> and <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-dup" title="tp_g_value_slice_dup ()"><code class="function">tp_g_value_slice_dup()</code></a> may also be used to insert
 into the map if required.
 </p>
-<div class="informalexample"><pre class="programlisting">
-g_hash_table_insert (parameters, "account",
-   tp_g_value_slice_new_string ("bob@mcbadgers.com"));
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#g-hash-table-insert">g_hash_table_insert</a></span> <span class="gtkdoc opt">(</span>parameters<span class="gtkdoc opt">,</span> <span class="string">&quot;account&quot;</span><span class="gtkdoc opt">,</span>
+   <span class="function"><a href="telepathy-glib-util.html#tp-g-value-slice-new-string">tp_g_value_slice_new_string</a></span> <span class="gtkdoc opt">(</span><span class="string">&quot;bob&#64;mcbadgers.com&quot;</span><span class="gtkdoc opt">));</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>
 </p>
 <p>
 </p>
 <div class="example">
-<a name="idp14692896"></a><p class="title"><b>Example 1. Using <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a></b></p>
-<div class="example-contents"><pre class="programlisting">
-GHashTable *parameters = tp_asv_new (
-   "answer", G_TYPE_INT, 42,
-   "question", G_TYPE_STRING, "We just don't know",
-   NULL);</pre></div>
+<a name="idp12876512"></a><p class="title"><b>Example 1. Using <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a></b></p>
+<div class="example-contents">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4</pre></td>
+        <td class="listing_code"><pre class="programlisting">GHashTable <span class="gtkdoc opt">*</span>parameters <span class="gtkdoc opt">=</span> <span class="function"><a href="telepathy-glib-asv.html#tp-asv-new">tp_asv_new</a></span> <span class="gtkdoc opt">(</span>
+   <span class="string">&quot;answer&quot;</span><span class="gtkdoc opt">,</span> G_TYPE_INT<span class="gtkdoc opt">,</span> <span class="number">42</span><span class="gtkdoc opt">,</span>
+   <span class="string">&quot;question&quot;</span><span class="gtkdoc opt">,</span> G_TYPE_STRING<span class="gtkdoc opt">,</span> <span class="string">&quot;We just don't know&quot;</span><span class="gtkdoc opt">,</span>
+   NULL<span class="gtkdoc opt">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 </div>
 <p><br class="example-break">
 </p>
@@ -229,8 +262,11 @@ GHashTable *parameters = tp_asv_new (
 Allocated values will be automatically free'd when overwritten, removed or
 the hash table destroyed with <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#g-hash-table-unref"><code class="function">g_hash_table_unref()</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>first_key</code></em> :</span></p></td>
@@ -263,8 +299,11 @@ and set *<em class="parameter"><code>valid</code></em> to <a href="http://librar
 <p>
 Otherwise return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>, and set *<em class="parameter"><code>valid</code></em> to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> if <em class="parameter"><code>valid</code></em> is not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -306,8 +345,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-boolean" title="tp_asv_get_boolean ()"><code class="function">tp_asv_get_boolean()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-boolean" title="tp_g_value_slice_new_boolean ()"><code class="function">tp_g_value_slice_new_boolean()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -344,8 +386,11 @@ The returned value is not copied, and is only valid as long as the value
 for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it, for instance with
 <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#g-boxed-copy"><code class="function">g_boxed_copy()</code></a>, if you need to keep it for longer.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -388,8 +433,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-boxed" title="tp_asv_get_boxed ()"><code class="function">tp_asv_get_boxed()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-boxed" title="tp_g_value_slice_new_boxed ()"><code class="function">tp_g_value_slice_new_boxed()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -429,8 +477,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-boxed" title="tp_asv_get_boxed ()"><code class="function">tp_asv_get_boxed()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-take-boxed" title="tp_g_value_slice_new_take_boxed ()"><code class="function">tp_g_value_slice_new_take_boxed()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -471,8 +522,11 @@ The value is stored as a slice-allocated GValue.
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-boxed" title="tp_asv_get_boxed ()"><code class="function">tp_asv_get_boxed()</code></a>,
 <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-static-boxed" title="tp_g_value_slice_new_static_boxed ()"><code class="function">tp_g_value_slice_new_static_boxed()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -514,8 +568,11 @@ for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>a
 g_boxed_copy (DBUS_TYPE_G_UCHAR_ARRAY, ...) if you need to keep
 it for longer.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -553,8 +610,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-bytes" title="tp_asv_get_bytes ()"><code class="function">tp_asv_get_bytes()</code></a>, <a class="link" href="telepathy-glib-dbus.html#tp-g-value-slice-new-bytes" title="tp_g_value_slice_new_bytes ()"><code class="function">tp_g_value_slice_new_bytes()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -593,8 +653,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-bytes" title="tp_asv_get_bytes ()"><code class="function">tp_asv_get_bytes()</code></a>, <a class="link" href="telepathy-glib-dbus.html#tp-g-value-slice-new-take-bytes" title="tp_g_value_slice_new_take_bytes ()"><code class="function">tp_g_value_slice_new_take_bytes()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -629,8 +692,11 @@ return it as a double, and if <em class="parameter"><code>valid</code></em> is n
 <p>
 Otherwise, return 0.0, and if <em class="parameter"><code>valid</code></em> is not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -671,8 +737,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-double" title="tp_asv_get_double ()"><code class="function">tp_asv_get_double()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-double" title="tp_g_value_slice_new_double ()"><code class="function">tp_g_value_slice_new_double()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -706,8 +775,11 @@ range of a gint32, return it, and if <em class="parameter"><code>valid</code></e
 <p>
 Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -748,8 +820,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-int32" title="tp_asv_get_int32 ()"><code class="function">tp_asv_get_int32()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-int" title="tp_g_value_slice_new_int ()"><code class="function">tp_g_value_slice_new_int()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -783,8 +858,11 @@ range of a gint64, return it, and if <em class="parameter"><code>valid</code></e
 <p>
 Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -825,8 +903,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-int64" title="tp_asv_get_int64 ()"><code class="function">tp_asv_get_int64()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-int64" title="tp_g_value_slice_new_int64 ()"><code class="function">tp_g_value_slice_new_int64()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -861,8 +942,11 @@ The returned value is not copied, and is only valid as long as the value
 for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with <a href="http://library.gnome.org/devel/glib/unstable/glib-String-Utility-Functions.html#g-strdup"><code class="function">g_strdup()</code></a> if you
 need to keep it for longer.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -900,8 +984,11 @@ The value is stored as a slice-allocated GValue.
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-object-path" title="tp_asv_get_object_path ()"><code class="function">tp_asv_get_object_path()</code></a>,
 <a class="link" href="telepathy-glib-dbus.html#tp-g-value-slice-new-object-path" title="tp_g_value_slice_new_object_path ()"><code class="function">tp_g_value_slice_new_object_path()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -936,8 +1023,11 @@ The value is stored as a slice-allocated GValue.
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-object-path" title="tp_asv_get_object_path ()"><code class="function">tp_asv_get_object_path()</code></a>,
 <a class="link" href="telepathy-glib-dbus.html#tp-g-value-slice-new-take-object-path" title="tp_g_value_slice_new_take_object_path ()"><code class="function">tp_g_value_slice_new_take_object_path()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -972,8 +1062,11 @@ The value is stored as a slice-allocated GValue.
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-object-path" title="tp_asv_get_object_path ()"><code class="function">tp_asv_get_object_path()</code></a>,
 <a class="link" href="telepathy-glib-dbus.html#tp-g-value-slice-new-static-object-path" title="tp_g_value_slice_new_static_object_path ()"><code class="function">tp_g_value_slice_new_static_object_path()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1008,8 +1101,11 @@ The returned value is not copied, and is only valid as long as the value
 for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with <a href="http://library.gnome.org/devel/glib/unstable/glib-String-Utility-Functions.html#g-strdup"><code class="function">g_strdup()</code></a> if you
 need to keep it for longer.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1045,8 +1141,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-string" title="tp_asv_get_string ()"><code class="function">tp_asv_get_string()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-string" title="tp_g_value_slice_new_string ()"><code class="function">tp_g_value_slice_new_string()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1081,8 +1180,11 @@ The value is stored as a slice-allocated GValue.
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-string" title="tp_asv_get_string ()"><code class="function">tp_asv_get_string()</code></a>,
 <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-take-string" title="tp_g_value_slice_new_take_string ()"><code class="function">tp_g_value_slice_new_take_string()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1117,8 +1219,11 @@ The value is stored as a slice-allocated GValue.
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-string" title="tp_asv_get_string ()"><code class="function">tp_asv_get_string()</code></a>,
 <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-static-string" title="tp_g_value_slice_new_static_string ()"><code class="function">tp_g_value_slice_new_static_string()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1154,8 +1259,11 @@ The returned value is not copied, and is only valid as long as the value
 for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with <a href="http://library.gnome.org/devel/glib/unstable/glib-String-Utility-Functions.html#g-strdupv"><code class="function">g_strdupv()</code></a> if you
 need to keep it for longer.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1192,8 +1300,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-strv" title="tp_asv_get_strv ()"><code class="function">tp_asv_get_strv()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1227,8 +1338,11 @@ range of a guint32, return it, and if <em class="parameter"><code>valid</code></
 <p>
 Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1269,8 +1383,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-uint32" title="tp_asv_get_uint32 ()"><code class="function">tp_asv_get_uint32()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-uint" title="tp_g_value_slice_new_uint ()"><code class="function">tp_g_value_slice_new_uint()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1303,8 +1420,11 @@ return it, and if <em class="parameter"><code>valid</code></em> is not <a href="
 <p>
 Otherwise, return 0, and if <em class="parameter"><code>valid</code></em> is not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, set *<em class="parameter"><code>valid</code></em> to <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1345,8 +1465,11 @@ The value is stored as a slice-allocated GValue.
 <p>
 See Also: <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>, <a class="link" href="telepathy-glib-asv.html#tp-asv-get-uint64" title="tp_asv_get_uint64 ()"><code class="function">tp_asv_get_uint64()</code></a>, <a class="link" href="telepathy-glib-util.html#tp-g-value-slice-new-uint64" title="tp_g_value_slice_new_uint64 ()"><code class="function">tp_g_value_slice_new_uint64()</code></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1378,8 +1501,11 @@ The returned value is not copied, and is only valid as long as the value
 for <em class="parameter"><code>key</code></em> in <em class="parameter"><code>asv</code></em> is not removed or altered. Copy it with (for instance)
 <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#g-value-copy"><code class="function">g_value_copy()</code></a> if you need to keep it for longer.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
@@ -1409,8 +1535,11 @@ Dumps the a{sv} map to the debugging console.
 The purpose of this function is give the programmer the ability to easily
 inspect the contents of an a{sv} map for debugging purposes.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>asv</code></em> :</span></p></td>
 <td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> created with <a class="link" href="telepathy-glib-asv.html#tp-asv-new" title="tp_asv_new ()"><code class="function">tp_asv_new()</code></a>
