@@ -1,3 +1,163 @@
+commit 627c7217f21ec9b89e542983591ac54fca3c6281
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-06-20 15:40:45 +0100
+
+    Prepare 0.20.3
+
+commit a95947e2e2ad6724c6b1e74910354fb0fa4897e1
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-06-11 15:47:11 +0100
+
+    NEWS
+
+commit a9ea7a2170d5f0cd4a9aef4bb85655b5e4e181ee
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-06-07 17:14:11 +0100
+
+    Make tool tests executable rather than putting sh in TESTS_ENVIRONMENT
+    
+    This makes it possible to run the tool tests under the Automake 1.12+
+    parallel test harness, which is the default from 1.13 onwards.
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=65517
+
+commit ba0b31b425d5871c4141ff0a7f477ec4e296e926
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-06-10 15:14:45 +0100
+
+    NEWS for 0.20
+
+commit 02b70ab2cffc399846fba5f94aff937963d170a4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2013-03-12 11:11:02 +0100
+
+    tls-certificate: invalidate the proxy if CertificateChainData is missing
+    
+    We shouldn't assert if the CM is broken.
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=61616
+    Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+
+commit ccbcb74e39d92ddc44fe2e86816ba8dfa7a27daa
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-01-03 11:40:46 +0000
+
+    contact-lists test: add a regression test for fd.o #52011
+    
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=52011
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+
+commit 0b88229dc8439a37c69fc3e6544119201d7d4c48
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-01-03 11:02:52 +0000
+
+    tp_base_contact_list_set_list_received: don't re-announce groups
+    
+    We already announced each group from tp_base_contact_list_groups_created
+    a few lines ago; we don't need to do it again.
+    
+    Ideally we'd add each channel's members before announcing the
+    channel itself, so that the channel is created "fully-formed"; but
+    we've never actually done that, and keeping the first NewChannels
+    instead of the second seems less likely to break applications.
+    These channels are only for legacy code anyway: any modern client
+    should be using the ContactGroups interface.
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=52011
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+
+commit 65cfeebe29bdd85fa7b72856ce93b900f7af1539
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-06-10 14:49:31 +0100
+
+    NEWS for 0.20
+
+commit b47a9af03b3154401cdd863f6b76c2393e2e7e39
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-06-07 17:42:15 +0100
+
+    tp_debug_client_get_messages_finish: fix annotation
+    
+    Returning a GPtrArray with (transfer full) means the caller is expected
+    to do the equivalent of:
+    
+        g_ptr_array_foreach (pa, (GFunc) g_free, NULL);
+        g_ptr_array_unref (pa);
+    
+    whereas we just want them to unref it. This crashed my g-i-based
+    debug-client.
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=65518
+    Reviewed-by: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+
+commit 8e6b3438e6ec8f94ad83786ea60d183f23c2a8fe
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2013-05-22 10:51:06 +0200
+
+    TpCallStream: Fix local-sending-state-changed signal signature.
+    
+    Fixes fdo#64837
+
+commit 5cb65fa971d4461b1f6fc6fd79a4f5b6fff3a8cc
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2013-04-14 11:51:32 +0100
+
+    Update NEWS
+
+commit eb6aea91d8e88c573652a9f03709928969a64498
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2013-02-22 00:09:04 +0000
+
+    Always flag delivery reports with Non_Text_Content
+    
+    Fixes: https://bugs.freedesktop.org/show_bug.cgi?id=61254
+
+commit 66982e6c17691869aa17c00416d61674b5b3e34f
+Author: Will Thompson <will.thompson@collabora.co.uk>
+Date:   2013-01-23 11:34:20 +0000
+
+    Annotate tp_account_update_parameters_finish properly.
+    
+    kuuko discovered that unset_parameters is wrongly inferred to be a
+    string argument, not a string array argument. At runtime, passing a
+    string crashes. I think this is a bug in gobject-introspection but we
+    can annotate it as an array to fix this particular function.
+
+commit 0b008a263cfe39d5fcb128d9076c22dfec8905a7
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-04-04 15:50:34 +0100
+
+    NEWS for 0.20 (and add the release name)
+
+commit c768a891d6cd9012c3072b1a8307146e3d41be35
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2013-04-04 14:28:58 +0100
+
+    with-session-bus.sh: clear DBUS_STARTER_*
+    
+    telepathy-glib prefers to use DBUS_BUS_STARTER, for the benefit of
+    Telepathy components that are (or might be) service-activatable.
+    The actual terminal part of gnome-terminal 3.8 is an activatable service,
+    so when run from there, we pick up the real session bus' address via
+    DBUS_STARTER_ADDRESS. We don't want that.
+    
+    (Yes, it's DBUS_STARTER_ADDRESS, not DBUS_STARTER_BUS_ADDRESS. The
+    reference implementation and the D-Bus Specification both say so.)
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=63119
+    Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+    Reviewed-by: Xavier Claessens <xavier.claessens@collabora.co.uk>
+
+commit b76abbb76f13fa4aef45c258994b26a51c584c96
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2013-04-03 12:47:28 +0200
+
+    bump nano version
+
 commit 0d60501986e382851570f3e927cde7842d4f5724
 Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
 Date:   2013-04-03 12:34:27 +0200
