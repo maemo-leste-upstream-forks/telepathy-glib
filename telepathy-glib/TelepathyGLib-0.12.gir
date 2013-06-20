@@ -1923,7 +1923,9 @@ directly to this function without additional reference-count management.</doc>
           </parameter>
           <parameter name="unset_parameters" transfer-ownership="none">
             <doc xml:whitespace="preserve">list of parameters to unset on @account</doc>
-            <type name="utf8" c:type="const gchar**"/>
+            <array c:type="gchar**">
+              <type name="utf8" c:type="gchar*"/>
+            </array>
           </parameter>
           <parameter name="callback"
                      transfer-ownership="none"
@@ -9573,20 +9575,13 @@ stream sending state changes.</doc>
           <type name="none" c:type="void"/>
         </return-value>
         <parameters>
-          <parameter name="object" transfer-ownership="none">
+          <parameter name="state" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the new #TpSendingState</doc>
             <type name="guint" c:type="guint"/>
           </parameter>
-          <parameter name="p0" transfer-ownership="none">
-            <type name="guint" c:type="guint"/>
-          </parameter>
-          <parameter name="p1" transfer-ownership="none">
+          <parameter name="reason" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the #TpCallStateReason for the change</doc>
             <type name="CallStateReason"/>
-          </parameter>
-          <parameter name="p2" transfer-ownership="none">
-            <type name="GLib.HashTable">
-              <type name="gpointer" c:type="gpointer"/>
-              <type name="gpointer" c:type="gpointer"/>
-            </type>
           </parameter>
         </parameters>
       </glib:signal>
@@ -21645,8 +21640,8 @@ objects.</doc>
               version="0.19.0"
               throws="1">
         <doc xml:whitespace="preserve">Finishes tp_debug_client_set_enabled_async().</doc>
-        <return-value transfer-ownership="full">
-          <doc xml:whitespace="preserve">a #GPtrArray of #TpDebugMessage</doc>
+        <return-value transfer-ownership="container">
+          <doc xml:whitespace="preserve">a #GPtrArray of #TpDebugMessage, free with g_ptr_array_unref()</doc>
           <array name="GLib.PtrArray" c:type="GPtrArray*">
             <type name="DebugMessage"/>
           </array>

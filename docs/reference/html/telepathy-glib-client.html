@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpClient</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="telepathy-glib-channel-request.html" title="TpChannelRequest">
@@ -205,8 +205,11 @@ call this function before calling
 Signature of the callback called when a ObserveChannels method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -250,8 +253,11 @@ Start a ObserveChannels method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Called by the channel dispatcher when channels in which the           observer has registered an interest are announced in a &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Connection.Interface.Requests"&gt;NewChannels&lt;/tp:dbus-ref&gt;           signal.&lt;/p&gt;          &lt;p&gt;If the same NewChannels signal announces some channels that match           the filter, and some that do not, then only a subset of the channels           (those that do match the filter) are passed to this method.&lt;/p&gt;          &lt;p&gt;If the channel dispatcher will split up the channels from a single           NewChannels signal and dispatch them separately (for instance           because no installed Handler can handle all of them), it will call           ObserveChannels several times.&lt;/p&gt;          &lt;p&gt;The observer MUST NOT return from this method call until it is ready           for a handler for the channel to run (which may change the channel's           state).&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The channel dispatcher must wait for observers to start up,             to avoid the following race: text channel logger (observer) gets             ObserveChannels, text channel handler gets             &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Client.Handler"&gt;HandleChannels&lt;/tp:dbus-ref&gt;             channel handler starts up faster and acknowledges messages,             logger never sees those messages.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;The channel dispatcher SHOULD NOT change its behaviour based on           whether this method succeeds or fails: there are no defined D-Bus           errors for this method, and if it fails, this only indicates that           an Observer is somehow broken.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;The expected error response in the channel dispatcher is to             log a warning, and otherwise continue as though this method             had succeeded.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -336,8 +342,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 Signature of the callback called when a HandleChannels method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -381,8 +390,11 @@ Start a HandleChannels method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Called by the channel dispatcher when this client should handle these           channels, or when this client should present channels that it is already           handling to the user (e.g. bring them into the foreground).&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Clients are expected to know what channels they're already handling,             and which channel object path corresponds to which window or tab.             This can easily be done using a hash table keyed by channels' object             paths.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;This method can raise any D-Bus error. If it does, the           handler is assumed to have failed or crashed, and the channel           dispatcher MUST recover in an implementation-specific way; it MAY           attempt to dispatch the channels to another handler, or close the           channels.&lt;/p&gt;          &lt;p&gt;If closing the channels, it is RECOMMENDED that the channel           dispatcher attempts to close the channels using           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Channel.Close&lt;/tp:dbus-ref&gt;,           but resorts to calling           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Channel.Interface.Destroyable.Destroy&lt;/tp:dbus-ref&gt;           (if available) or ignoring the channel (if not) if the same handler           repeatedly fails to handle channels.&lt;/p&gt;          &lt;p&gt;After HandleChannels returns successfully, the client process is           considered to be responsible for the channel until it its unique           name disappears from the bus.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;If a process has multiple Client bus names - some temporary and             some long-lived - and drops one of the temporary bus names in order             to reduce the set of channels that it will handle, any channels             that it is already handling should remain unaffected.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -467,8 +479,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 Signature of the callback called when a AddRequest method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -508,8 +523,11 @@ Start a AddRequest method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Called by the ChannelDispatcher to indicate that channels have been           requested, and that if the request is successful, they will probably           be handled by this Handler. The ChannelDispatcher SHOULD only           call this method on one handler per request.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This allows the UI to start preparing to handle the channels             in advance (e.g. render a window with an &amp;quot;in progress&amp;quot; message),             improving perceived responsiveness.&lt;/p&gt;            &lt;p&gt;The use of &amp;quot;probably&amp;quot; is because you can't necessarily tell from             a channel request which handler will handle particular channels.             A reasonable heuristic would be to match the request against the             &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Client.Handler"&gt;HandlerChannelFilter&lt;/tp:dbus-ref&gt;,             and respect the preferred handler (if any).&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;If the request succeeds and is given to the expected Handler,           the Requests_Satisfied parameter to           &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Client.Handler"&gt;HandleChannels&lt;/tp:dbus-ref&gt;           can be used to match the channel to a previous AddRequest call.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This lets the UI direct the channels to the window that it             already opened.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;If the request fails, the expected handler is notified by the           channel dispatcher calling its           &lt;tp:member-ref&gt;RemoveRequest&lt;/tp:member-ref&gt; method.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This lets the UI close the window or display the error.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;The channel dispatcher SHOULD remember which handler was notified,           and if the channel request succeeds, it SHOULD dispatch the channels           to the expected handler, unless the channels do not match that           handler's &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy.Client.Handler"&gt;HandlerChannelFilter&lt;/tp:dbus-ref&gt;.           If the channels are not dispatched to the expected handler, the           handler that was expected is notified by the channel dispatcher           calling its &lt;tp:member-ref&gt;RemoveRequest&lt;/tp:member-ref&gt; method           with the NotYours error.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Expected handling is for the UI to close the window it             previously opened.&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;Handlers SHOULD NOT return an error from this method; errors           returned from this method SHOULD NOT alter the channel dispatcher's           behaviour.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Calls to this method are merely a notification.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -578,8 +596,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 Signature of the callback called when a RemoveRequest method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -620,8 +641,11 @@ Start a RemoveRequest method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Called by the ChannelDispatcher to indicate that a request           previously passed to &lt;tp:member-ref&gt;AddRequest&lt;/tp:member-ref&gt;           has failed and should be disregarded.&lt;/p&gt;          &lt;p&gt;Handlers SHOULD NOT return an error from this method; errors           returned from this method SHOULD NOT alter the channel dispatcher's           behaviour.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;Calls to this method are merely a notification.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -694,8 +718,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 Signature of the callback called when a AddDispatchOperation method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -736,8 +763,11 @@ Start a AddDispatchOperation method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Called by the channel dispatcher when a ChannelDispatchOperation           in which the approver has registered an interest is created,           or when the approver starts up while such channel dispatch           operations already exist.&lt;/p&gt;          &lt;p&gt;The channel dispatcher SHOULD call this method on all approvers           at the same time. If an approver returns an error from this method,           the approver is assumed to be faulty.&lt;/p&gt;          &lt;p&gt;If no approvers return from this method           successfully (including situations where there are no matching           approvers at all), the channel dispatcher SHOULD consider this           to be an error, and recover by dispatching the channel to the           most preferred handler.&lt;/p&gt;          &lt;tp:rationale&gt;           Processes that aren't approvers (or don't at least ensure that there           is some approver) probably shouldn't be making connections           anyway, so there should always be at least one approver running.         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>

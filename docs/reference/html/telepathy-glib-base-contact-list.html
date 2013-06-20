@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>TpBaseContactList</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="TpChannelManager.html" title="TpChannelManager">
@@ -402,32 +402,58 @@ Then, in the connection manager's <a class="link" href="TpBaseConnection.html" t
 </p>
 <p>
 </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
 <p>in <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS"><span class="type">G_DEFINE_TYPE_WITH_CODE</span></a>, implement
   <span class="type">TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST</span> using
   <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-list-iface-init" title="tp_base_contact_list_mixin_list_iface_init ()"><code class="function">tp_base_contact_list_mixin_list_iface_init()</code></a>:</p>
-<div class="informalexample"><pre class="programlisting">
-G_DEFINE_TYPE_WITH_CODE (MyConnection, my_connection,
-    TP_TYPE_BASE_CONNECTION,
-    // ...
-    G_IMPLEMENT_INTERFACE (TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST,
-        tp_base_contact_list_mixin_list_iface_init);
-    // ...
-    )
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE-WITH-CODE:CAPS">G_DEFINE_TYPE_WITH_CODE</a></span> <span class="gtkdoc opt">(</span>MyConnection<span class="gtkdoc opt">,</span> my_connection<span class="gtkdoc opt">,</span>
+    TP_TYPE_BASE_CONNECTION<span class="gtkdoc opt">,</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS">G_IMPLEMENT_INTERFACE</a></span> <span class="gtkdoc opt">(</span>TP_TYPE_SVC_CONNECTION_INTERFACE_CONTACT_LIST<span class="gtkdoc opt">,</span>
+        tp_base_contact_list_mixin_list_iface_init<span class="gtkdoc opt">);</span>
+    <span class="gtkdoc slc">// ...</span>
+    <span class="gtkdoc opt">)</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 </li>
 <li class="listitem">
 <p>in the <code class="function">class_init</code> method, call
    <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init" title="tp_base_contact_list_mixin_class_init ()"><code class="function">tp_base_contact_list_mixin_class_init()</code></a> after
    <a class="link" href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init" title="tp_contacts_mixin_class_init ()"><code class="function">tp_contacts_mixin_class_init()</code></a>:</p>
-<div class="informalexample"><pre class="programlisting">
-// ...
-tp_contacts_mixin_class_init (object_class,
-    G_STRUCT_OFFSET (MyConnectionClass, contacts_mixin));
-tp_base_contact_list_mixin_class_init (base_connection_class);
-// ...
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc slc">// ...</span>
+<span class="function"><a href="telepathy-glib-TpContactsMixin.html#tp-contacts-mixin-class-init">tp_contacts_mixin_class_init</a></span> <span class="gtkdoc opt">(</span>object_class<span class="gtkdoc opt">,</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#G-STRUCT-OFFSET:CAPS">G_STRUCT_OFFSET</a></span> <span class="gtkdoc opt">(</span>MyConnectionClass<span class="gtkdoc opt">,</span> contacts_mixin<span class="gtkdoc opt">));</span>
+<span class="function"><a href="telepathy-glib-base-contact-list.html#tp-base-contact-list-mixin-class-init">tp_base_contact_list_mixin_class_init</a></span> <span class="gtkdoc opt">(</span>base_connection_class<span class="gtkdoc opt">);</span>
+<span class="gtkdoc slc">// ...</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p>and include <a class="link" href="telepathy-glib-interfaces.html#TP-IFACE-CONNECTION-INTERFACE-CONTACT-LIST:CAPS" title="TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST"><code class="literal">TP_IFACE_CONNECTION_INTERFACE_CONTACT_LIST</code></a> in
    the output of
    <a class="link" href="TpBaseConnection.html#TpBaseConnectionClass.get-interfaces-always-present"><span class="type">TpBaseConnectionClass.get_interfaces_always_present</span></a>;</p>
@@ -511,8 +537,11 @@ the contact list to be altered.
 Subclasses may implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-BLOCKABLE-CONTACT-LIST:CAPS" title="TP_TYPE_BLOCKABLE_CONTACT_LIST"><code class="literal">TP_TYPE_BLOCKABLE_CONTACT_LIST</code></a> if contacts can
 be blocked from communicating with the user.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObjectClass"><span class="type">GObjectClass</span></a> <em class="structfield"><code><a name="TpBaseContactListClass.parent-class"></a>parent_class</code></em>;</span></p></td>
@@ -568,8 +597,11 @@ function automatically sets up that interface as well as ContactList.
 In this case, when the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a> is created later, it must
 implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>cls</code></em> :</span></p></td>
 <td>A subclass of <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> that has a <a class="link" href="telepathy-glib-TpContactsMixin.html#TpContactsMixinClass" title="struct TpContactsMixinClass"><span class="type">TpContactsMixinClass</span></a>,
@@ -598,8 +630,11 @@ the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactLis
 this function automatically also registers the ContactGroups interface
 with the contacts mixin.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>conn</code></em> :</span></p></td>
 <td>An instance of <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> that uses a <a class="link" href="telepathy-glib-TpContactsMixin.html#TpContactsMixin" title="TpContactsMixin"><span class="type">TpContactsMixin</span></a>,
@@ -623,8 +658,11 @@ D-Bus interface.
 This function should be passed to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a> for
 <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceContactList"><span class="type">TpSvcConnectionInterfaceContactList</span></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>klass</code></em> :</span></p></td>
 <td>the service-side D-Bus interface</td>
@@ -645,8 +683,11 @@ D-Bus interface.
 This function should be passed to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a> for
 <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceContactGroups"><span class="type">TpSvcConnectionInterfaceContactGroups</span></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>klass</code></em> :</span></p></td>
 <td>the service-side D-Bus interface</td>
@@ -667,8 +708,11 @@ D-Bus interface.
 This function should be passed to <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-IMPLEMENT-INTERFACE:CAPS"><code class="function">G_IMPLEMENT_INTERFACE()</code></a> for
 <a class="link" href="telepathy-glib-svc-connection.html#TpSvcConnectionInterfaceContactBlocking"><span class="type">TpSvcConnectionInterfaceContactBlocking</span></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>klass</code></em> :</span></p></td>
 <td>the service-side D-Bus interface</td>
@@ -689,8 +733,11 @@ contact list.
 If this contact list's connection has disconnected, or retrieving the
 contact list has failed, return <a class="link" href="telepathy-glib-enums.html#TP-CONTACT-LIST-STATE-FAILURE:CAPS"><code class="literal">TP_CONTACT_LIST_STATE_FAILURE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -718,8 +765,11 @@ contact list has failed, return <a class="link" href="telepathy-glib-enums.html#
 Return the Connection this contact list uses. If this contact list's
 connection has already disconnected, return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> instead.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -746,8 +796,11 @@ connection has already disconnected, return <a href="http://library.gnome.org/de
 <p>
 Record that receiving the initial contact list is in progress.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
 <td>the contact list manager</td>
@@ -770,8 +823,11 @@ Record that receiving the initial contact list has failed.
 This method cannot be called after <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-set-list-received" title="tp_base_contact_list_set_list_received ()"><code class="function">tp_base_contact_list_set_list_received()</code></a>
 is called.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -820,8 +876,11 @@ results when entering this method.
 If implemented, <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-dup-blocked-contacts" title="tp_base_contact_list_dup_blocked_contacts ()"><code class="function">tp_base_contact_list_dup_blocked_contacts()</code></a> must also
 give correct results when entering this method.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
 <td>the contact list manager</td>
@@ -846,8 +905,11 @@ the contacts' new statuses when entering this method (in practice, this
 means that implementations must update their own cache of contacts
 before calling this method).
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -878,8 +940,11 @@ a changed status. <span class="annotation">[<acronym title="NULL is ok, both for
 Convenience wrapper around <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a> for a
 single handle in the 'changed' set and no 'removed' set.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -903,8 +968,11 @@ single handle in the 'changed' set and no 'removed' set.
 Convenience wrapper around <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a> for a
 single handle in the 'removed' set and no 'changed' set.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -930,8 +998,11 @@ for feature-discovery.
 For the simple cases of a constant result, use
 <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-true-func" title="tp_base_contact_list_true_func ()"><code class="function">tp_base_contact_list_true_func()</code></a> or <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-false-func" title="tp_base_contact_list_false_func ()"><code class="function">tp_base_contact_list_false_func()</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -953,8 +1024,11 @@ For the simple cases of a constant result, use
 An implementation of <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactListBooleanFunc" title="TpBaseContactListBooleanFunc ()"><span class="type">TpBaseContactListBooleanFunc</span></a> that returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>,
 for use in simple cases.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -976,8 +1050,11 @@ for use in simple cases.
 An implementation of <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactListBooleanFunc" title="TpBaseContactListBooleanFunc ()"><span class="type">TpBaseContactListBooleanFunc</span></a> that returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>,
 for use in simple cases.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1016,8 +1093,11 @@ and this is detected while connecting, the subclass can implement another
 after the <a class="link" href="TpBaseConnection.html" title="TpBaseConnection"><span class="type">TpBaseConnection</span></a> has moved to state
 <a class="link" href="telepathy-glib-enums.html#TP-CONNECTION-STATUS-CONNECTED:CAPS"><code class="literal">TP_CONNECTION_STATUS_CONNECTED</code></a>), and use that as the implementation.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1045,8 +1125,11 @@ implemented.
 The implementation is expected to have a cache of contacts on the contact
 list, which is updated based on protocol events.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1080,8 +1163,11 @@ If the contact list implements <a class="link" href="telepathy-glib-base-contact
 contacts should not appear in the result of this method unless they are
 considered to be on the contact list for some other reason.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1110,8 +1196,11 @@ Signature of a virtual method to get contacts' presences. It should return
 and <em class="parameter"><code>publish_request</code></em> = "", without error, for any contact not on the
 contact list.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1163,8 +1252,11 @@ This is a virtual method, implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactListClass.dup-states"><span class="type">TpBaseContactListClass.dup_states</span></a>. Every subclass of <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList"><span class="type">TpBaseContactList</span></a>
 must implement this method.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1206,8 +1298,11 @@ otherwise, used to return an empty string. <span class="annotation">[<acronym ti
 Signature of a virtual method that returns an unsigned integer result.
 These are used for feature-discovery.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1230,8 +1325,11 @@ These are used for feature-discovery.
 <p>
 Signature of a virtual method that needs no additional information.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1258,8 +1356,11 @@ Signature of a virtual method that needs no additional information.
 <p>
 Signature of a virtual method to finish an async operation.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1297,8 +1398,11 @@ If the <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContact
 download_async, the default implementation will raise
 TP_ERROR_NOT_IMPLEMENTED asynchronously.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1333,8 +1437,11 @@ This is a virtual method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactListClass.download-finish"><span class="type">TpBaseContactListClass.download_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1368,8 +1475,11 @@ will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResul
 This function returns the
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBaseContactList--download-at-connection" title='The "download-at-connection" property'><span class="type">"download-at-connection"</span></a> property.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1429,8 +1539,11 @@ potentially be changed.
 <p>
 The interface vtable for a <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-MUTABLE-CONTACT-LIST:CAPS" title="TP_TYPE_MUTABLE_CONTACT_LIST"><code class="literal">TP_TYPE_MUTABLE_CONTACT_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GTypeInterface"><span class="type">GTypeInterface</span></a> <em class="structfield"><code><a name="TpMutableContactListInterface.parent"></a>parent</code></em>;</span></p></td>
@@ -1558,8 +1671,11 @@ implementation, whose result must remain constant after the
 normally be altered, but on connections to Facebook Chat servers this is
 not actually supported.)
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1596,8 +1712,11 @@ The default implementation always returns <a href="http://library.gnome.org/deve
 protocols; subclasses may reimplement this method with
 <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-false-func" title="tp_base_contact_list_false_func ()"><code class="function">tp_base_contact_list_false_func()</code></a> or a custom implementation if desired.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1630,8 +1749,11 @@ presence.
 The virtual method should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a>
 for any contacts it has changed, before it calls <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1685,8 +1807,11 @@ If <em class="parameter"><code>message</code></em> will be ignored,
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.get-request-uses-message"><span class="type">TpMutableContactListInterface.get_request_uses_message</span></a> should also be
 reimplemented to return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1735,8 +1860,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.request-subscription-finish"><span class="type">TpMutableContactListInterface.request_subscription_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1779,8 +1907,11 @@ contacts.
 The virtual method should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a>
 for any contacts it has changed, before returning.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1824,8 +1955,11 @@ method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a>
 for any contacts it has changed, before it calls <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1869,8 +2003,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.authorize-publication-finish"><span class="type">TpMutableContactListInterface.authorize_publication_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1924,8 +2061,11 @@ If the implementation of
 the default), this method calls <em class="parameter"><code>callback</code></em> to signal success, but does
 nothing in the underlying protocol.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -1969,8 +2109,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.store-contacts-finish"><span class="type">TpMutableContactListInterface.store_contacts_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2020,8 +2163,11 @@ method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a>
 for any contacts it has changed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2065,8 +2211,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.remove-contacts-finish"><span class="type">TpMutableContactListInterface.remove_contacts_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2114,8 +2263,11 @@ method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a>
 for any contacts it has changed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2159,8 +2311,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.unsubscribe-finish"><span class="type">TpMutableContactListInterface.unsubscribe_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2208,8 +2363,11 @@ method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contacts-changed" title="tp_base_contact_list_contacts_changed ()"><code class="function">tp_base_contact_list_contacts_changed()</code></a>
 for any contacts it has changed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2253,8 +2411,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactListInterface.unpublish-finish"><span class="type">TpMutableContactListInterface.unpublish_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2308,8 +2469,11 @@ groups exist and can also be edited).
 <p>
 The interface vtable for a <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GTypeInterface"><span class="type">GTypeInterface</span></a> <em class="structfield"><code><a name="TpContactGroupListInterface.parent"></a>parent</code></em>;</span></p></td>
@@ -2358,8 +2522,11 @@ group names can coexist</td>
 Signature of a virtual method to normalize strings in a contact list
 manager.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2403,8 +2570,11 @@ cannot be the empty string, or can only contain XML character data, or can
 only contain a particular Unicode normal form like NFKC) should reimplement
 this virtual method.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2436,8 +2606,11 @@ belongs.
 If <em class="parameter"><code>contact</code></em> is not on the contact list, this method must return either
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> or an empty array, without error.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2478,8 +2651,11 @@ For implementations of <a class="link" href="telepathy-glib-base-contact-list.ht
 method, implemented using <a class="link" href="telepathy-glib-base-contact-list.html#TpContactGroupListInterface.dup-contact-groups"><span class="type">TpContactGroupListInterface.dup_contact_groups</span></a>.
 It must always be implemented.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2507,8 +2683,11 @@ array of groups. <span class="annotation">[<acronym title="Parameter points to a
 Signature of a virtual method that lists every group that exists on a
 connection.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2539,8 +2718,11 @@ For implementations of <a class="link" href="telepathy-glib-base-contact-list.ht
 method, implemented using <a class="link" href="telepathy-glib-base-contact-list.html#TpContactGroupListInterface.dup-groups"><span class="type">TpContactGroupListInterface.dup_groups</span></a>.
 It must always be implemented.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2565,8 +2747,11 @@ array of groups. <span class="annotation">[<acronym title="Parameter points to a
 <p>
 Signature of a virtual method that lists the members of a group.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2606,8 +2791,11 @@ For implementations of <a class="link" href="telepathy-glib-base-contact-list.ht
 method, implemented using <a class="link" href="telepathy-glib-base-contact-list.html#TpContactGroupListInterface.dup-group-members"><span class="type">TpContactGroupListInterface.dup_group_members</span></a>.
 It must always be implemented.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2644,8 +2832,11 @@ be emitted for the members, and the subclass does not need to do so.
 It is an error to call this method on a contact list that
 does not implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2684,8 +2875,11 @@ this method also signals that they were created, as if
 It is an error to call this method on a contact list that
 does not implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2741,8 +2935,11 @@ single handle in the 'contacts' set.
 contents, because you can already use <code class="code">NULL, 0</code> for an empty
 list or <code class="code">&amp;group_name, 1</code> for a single group.)
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2792,8 +2989,11 @@ some members to those groups.
 It is an error to call this method on a contact list that
 does not implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2833,8 +3033,11 @@ for the old members, and the subclass does not need to do so.
 It is an error to call this method on a contact list that
 does not implement <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2882,8 +3085,11 @@ subclasses where groups are disjoint should use
 In the unlikely event that a protocol can have disjoint groups, or not,
 determined at runtime, it can use a custom implementation.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -2943,8 +3149,11 @@ prerequisite for this interface.
 <p>
 The interface vtable for a <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-MUTABLE-CONTACT-GROUP-LIST:CAPS" title="TP_TYPE_MUTABLE_CONTACT_GROUP_LIST"><code class="literal">TP_TYPE_MUTABLE_CONTACT_GROUP_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GTypeInterface"><span class="type">GTypeInterface</span></a> <em class="structfield"><code><a name="TpMutableContactGroupListInterface.parent"></a>parent</code></em>;</span></p></td>
@@ -3050,8 +3259,11 @@ advertised</td>
 Signature of an implementation of
 <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-set-contact-groups-async" title="tp_base_contact_list_set_contact_groups_async ()"><code class="function">tp_base_contact_list_set_contact_groups_async()</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3108,8 +3320,11 @@ virtual method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-groups-changed" title="tp_base_contact_list_groups_changed ()"><code class="function">tp_base_contact_list_groups_changed()</code></a>
 for any changes it successfully made, before returning.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3163,8 +3378,11 @@ virtual method which may be implemented using
 <em class="parameter"><code>result</code></em> will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be
 used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3201,8 +3419,11 @@ used.
 <p>
 Signature of a virtual method that alters a group's members.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3255,8 +3476,11 @@ virtual method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-groups-changed" title="tp_base_contact_list_groups_changed ()"><code class="function">tp_base_contact_list_groups_changed()</code></a>
 for any changes it successfully made, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3303,8 +3527,11 @@ virtual method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactGroupListInterface.add-to-group-finish"><span class="type">TpMutableContactGroupListInterface.add_to_group_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3352,8 +3579,11 @@ virtual method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-groups-changed" title="tp_base_contact_list_groups_changed ()"><code class="function">tp_base_contact_list_groups_changed()</code></a>
 for any changes it successfully made, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3400,8 +3630,11 @@ virtual method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactGroupListInterface.remove-from-group-finish"><span class="type">TpMutableContactGroupListInterface.remove_from_group_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3454,8 +3687,11 @@ virtual method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-groups-changed" title="tp_base_contact_list_groups_changed ()"><code class="function">tp_base_contact_list_groups_changed()</code></a>
 for any changes it successfully made, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3502,8 +3738,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactGroupListInterface.set-group-members-finish"><span class="type">TpMutableContactGroupListInterface.set_group_members_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3538,8 +3777,11 @@ will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResul
 <p>
 Signature of a method that deletes groups.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3583,8 +3825,11 @@ virtual method which must be implemented, using
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-groups-removed" title="tp_base_contact_list_groups_removed ()"><code class="function">tp_base_contact_list_groups_removed()</code></a>
 for any groups it successfully removed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3627,8 +3872,11 @@ virtual method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactGroupListInterface.remove-group-finish"><span class="type">TpMutableContactGroupListInterface.remove_group_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3664,8 +3912,11 @@ will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResul
 <p>
 Signature of a method that renames groups.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3723,8 +3974,11 @@ like XMPP, in which groups behave more like tags.
 The implementation should call <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-group-renamed" title="tp_base_contact_list_group_renamed ()"><code class="function">tp_base_contact_list_group_renamed()</code></a> before
 calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3771,8 +4025,11 @@ virtual method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpMutableContactGroupListInterface.rename-group-finish"><span class="type">TpMutableContactGroupListInterface.rename_group_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3822,8 +4079,11 @@ The default implementation is <a href="http://library.gnome.org/devel/glib/unsta
 implementation that always returns <a class="link" href="telepathy-glib-enums.html#TP-CONTACT-METADATA-STORAGE-TYPE-ANYONE:CAPS"><code class="literal">TP_CONTACT_METADATA_STORAGE_TYPE_ANYONE</code></a>.
 A custom implementation can also be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -3879,8 +4139,11 @@ be blocked from communicating with the user.
 <p>
 The interface vtable for a <a class="link" href="telepathy-glib-base-contact-list.html#TP-TYPE-BLOCKABLE-CONTACT-LIST:CAPS" title="TP_TYPE_BLOCKABLE_CONTACT_LIST"><code class="literal">TP_TYPE_BLOCKABLE_CONTACT_LIST</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#GTypeInterface"><span class="type">GTypeInterface</span></a> <em class="structfield"><code><a name="TpBlockableContactListInterface.parent"></a>parent</code></em>;</span></p></td>
@@ -3948,8 +4211,11 @@ does not support reporting contacts as abusive, implement
 Signature of a virtual method that blocks a set of contacts, optionally
 reporting them to the server operator as abusive.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4005,8 +4271,11 @@ after the <a class="link" href="TpBaseConnection.html" title="TpBaseConnection">
 blocking is server-dependent: telepathy-gabble 0.8.x implements it for
 connections to Google Talk servers, but not for any other server.)
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4038,8 +4307,11 @@ method, implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBlockableContactListInterface.dup-blocked-contacts"><span class="type">TpBlockableContactListInterface.dup_blocked_contacts</span></a>.
 It must always be implemented.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4082,8 +4354,11 @@ The implementation should call
 <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contact-blocking-changed" title="tp_base_contact_list_contact_blocking_changed ()"><code class="function">tp_base_contact_list_contact_blocking_changed()</code></a>
 for any contacts it has changed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4127,8 +4402,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBlockableContactListInterface.block-contacts-finish"><span class="type">TpBlockableContactListInterface.block_contacts_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4183,8 +4461,11 @@ The implementation should call
 <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contact-blocking-changed" title="tp_base_contact_list_contact_blocking_changed ()"><code class="function">tp_base_contact_list_contact_blocking_changed()</code></a>
 for any contacts it has changed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4233,8 +4514,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBlockableContactListInterface.block-contacts-finish"><span class="type">TpBlockableContactListInterface.block_contacts_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4282,8 +4566,11 @@ The implementation should call
 <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-contact-blocking-changed" title="tp_base_contact_list_contact_blocking_changed ()"><code class="function">tp_base_contact_list_contact_blocking_changed()</code></a>
 for any contacts it has changed, before calling <em class="parameter"><code>callback</code></em>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4327,8 +4614,11 @@ method which may be implemented using
 <a class="link" href="telepathy-glib-base-contact-list.html#TpBlockableContactListInterface.unblock-contacts-finish"><span class="type">TpBlockableContactListInterface.unblock_contacts_finish</span></a>. If the <em class="parameter"><code>result</code></em>
 will be a <a href="http://library.gnome.org/devel/gio/unstable/GSimpleAsyncResult.html"><span class="type">GSimpleAsyncResult</span></a>, the default implementation may be used.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
@@ -4372,8 +4662,11 @@ of contacts before calling this method).
 It is an error to call this method if <a class="link" href="telepathy-glib-base-contact-list.html#tp-base-contact-list-can-block" title="tp_base_contact_list_can_block ()"><code class="function">tp_base_contact_list_can_block()</code></a>
 would return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>

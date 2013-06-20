@@ -1,4 +1,4 @@
-AC_PREREQ([2.59])
+AC_PREREQ([2.60])
 
 # Making releases:
 #   set the new version number:
@@ -11,7 +11,7 @@ AC_PREREQ([2.59])
 
 m4_define([tp_glib_major_version], [0])
 m4_define([tp_glib_minor_version], [21])
-m4_define([tp_glib_micro_version], [0])
+m4_define([tp_glib_micro_version], [1])
 m4_define([tp_glib_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -26,9 +26,9 @@ m4_define([tp_glib_nano_version], [0])
 # (we don't guarantee that we won't add ABI then remove it again, if it was
 # never seen in a release).
 
-m4_define([tp_glib_lt_current], [78])
-m4_define([tp_glib_lt_revision], [2])
-m4_define([tp_glib_lt_age], [78])
+m4_define([tp_glib_lt_current], [79])
+m4_define([tp_glib_lt_revision], [0])
+m4_define([tp_glib_lt_age], [79])
 
 # Some magic
 m4_define([tp_glib_base_version],
@@ -53,7 +53,7 @@ AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
-AM_PROG_MKDIR_P
+AC_PROG_MKDIR_P
 # pkg-config 0.21 adds CFLAGS from Requires.private, which we need
 PKG_PROG_PKG_CONFIG([0.21])
 
