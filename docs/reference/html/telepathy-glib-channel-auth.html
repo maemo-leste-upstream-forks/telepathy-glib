@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Channel Authentication interfaces</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="telepathy-glib-channel-contactsearch.html" title="Contact Search channels">
@@ -209,8 +209,11 @@ Start a AbortSASL method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Abort the current authentication try.&lt;/p&gt;          &lt;p&gt;If the current status is SASL_Status_Server_Failed or           SASL_Status_Client_Failed, this method returns successfully, but has           no further effect. If the current status is SASL_Status_Succeeded           or SASL_Status_Client_Accepted then NotAvailable is raised.           Otherwise, it changes the channel's state to           SASL_Status_Client_Failed, with an appropriate error name and           reason code.&lt;/p&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -283,8 +286,11 @@ Start a AcceptSASL method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;If the channel's status is SASL_Status_Server_Succeeded,           this method confirms successful authentication and advances           the status of the channel to SASL_Status_Succeeded.&lt;/p&gt;          &lt;p&gt;If the channel's status is SASL_Status_In_Progress, calling this           method indicates that the last           &lt;tp:member-ref&gt;NewChallenge&lt;/tp:member-ref&gt; signal was in fact           additional data sent after a successful SASL negotiation, and           declares that from the client's point of view, authentication           was successful. This advances the state of the channel to           SASL_Status_Client_Accepted.&lt;/p&gt;          &lt;p&gt;In mechanisms where the server authenticates itself to the client,           calling this method indicates that the client considers this to have           been successful. In the case of &lt;tp:dbus-ref namespace="ofdT.Channel.Type"&gt;ServerAuthentication&lt;/tp:dbus-ref&gt;           channels, this means that the connection manager MAY continue to           connect, and MAY advance the &lt;tp:dbus-ref namespace="ofdT"&gt;Connection.Status&lt;/tp:dbus-ref&gt; to Connected.&lt;/p&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -350,8 +356,11 @@ Start a Respond method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Send a response to the the last challenge received via           &lt;tp:member-ref&gt;NewChallenge&lt;/tp:member-ref&gt;.&lt;/p&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -421,8 +430,11 @@ Start a StartMechanism method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Start an authentication try using &lt;var&gt;Mechanism&lt;/var&gt;, without           sending initial data (an &amp;quot;initial response&amp;quot; as defined in RFC           4422).&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This method is appropriate for mechanisms where the client             cannot send anything until it receives a challenge from the             server, such as             &lt;code&gt;&lt;a href="http://tools.ietf.org/html/rfc2831"&gt;DIGEST-MD5&lt;/a&gt;&lt;/code&gt;             in &amp;quot;initial authentication&amp;quot; mode.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -493,8 +505,11 @@ Start a StartMechanismWithData method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Start an authentication try using &lt;var&gt;Mechanism&lt;/var&gt;, and send           &lt;var&gt;Initial_Data&lt;/var&gt; as the &amp;quot;initial response&amp;quot; defined in           &lt;a href="http://tools.ietf.org/html/rfc4422<span class="type">section-3.3</span>"&gt;RFC 4422             §3.3&lt;/a&gt;.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;This method is appropriate for mechanisms where the client may             send data first, such as &lt;code&gt;PLAIN&lt;/code&gt;, or must send data             first, such as             &lt;code&gt;&lt;a href="http://tools.ietf.org/html/rfc2831"&gt;DIGEST-MD5&lt;/a&gt;&lt;/code&gt;             in &amp;quot;subsequent authentication&amp;quot; mode.&lt;/p&gt;            &lt;p&gt;Having two methods allows any mechanism where it makes a difference             to distinguish between the absence of an initial response             (&lt;tp:member-ref&gt;StartMechanism&lt;/tp:member-ref&gt;) and a zero-byte             initial response (StartMechanismWithData, with Initial_Data             empty).&lt;/p&gt;         &lt;/tp:rationale&gt;          &lt;p&gt;If the &lt;tp:member-ref&gt;HasInitialData&lt;/tp:member-ref&gt;           property is false, this indicates that the underlying protocol           does not make it possible to send initial data. In such protocols,           this method may only be used for the &lt;code&gt;X-TELEPATHY-&lt;/code&gt;           pseudo-mechanisms (such as &lt;code&gt;X-TELEPATHY-PASSWORD&lt;/code&gt;),           and will fail if used with an ordinary SASL mechanism.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;For instance, the IRC SASL extension implemented in Charybdis and             Atheme does not support initial data - the first message in the             exchange only carries the mechanism. This is significant if using             &lt;code&gt;&lt;a href="http://tools.ietf.org/html/rfc2831"&gt;DIGEST-MD5&lt;/a&gt;&lt;/code&gt;,             which cannot be used in the faster &amp;quot;subsequent authentication&amp;quot;             mode on a protocol not supporting initial data.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -563,8 +578,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 Signature of the callback called when a AbortSASL method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -598,8 +616,11 @@ succeeds or fails.
 Signature of the callback called when a AcceptSASL method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -633,8 +654,11 @@ succeeds or fails.
 Signature of the callback called when a Respond method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -668,8 +692,11 @@ succeeds or fails.
 Signature of the callback called when a StartMechanism method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -703,8 +730,11 @@ succeeds or fails.
 Signature of the callback called when a StartMechanismWithData method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -742,8 +772,11 @@ Connect a handler to the signal NewChallenge.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Emitted when a new challenge is received from the server, or when           a message indicating successful authentication and containing           additional data is received from the server.&lt;/p&gt;          &lt;p&gt;When the channel's handler is ready to proceed, it should respond           to the challenge by calling &lt;tp:member-ref&gt;Respond&lt;/tp:member-ref&gt;,           or respond to the additional data by calling           &lt;tp:member-ref&gt;AcceptSASL&lt;/tp:member-ref&gt;. Alternatively, it may call           &lt;tp:member-ref&gt;AbortSASL&lt;/tp:member-ref&gt; to abort authentication.&lt;/p&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -802,8 +835,11 @@ Connect a handler to the signal SASLStatusChanged.
 <p>
 Emitted when the status of the channel changes.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -863,8 +899,11 @@ Start a AnswerCaptchas method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Answer as many captchas as desired and/or required.&lt;/p&gt;         &lt;p&gt;Callable in state Local_Pending only. State changes to           Remote_Pending.&lt;/p&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -935,8 +974,11 @@ Start a CancelCaptcha method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Cancel. State changes to Failed with error NotAvailable or           Cancelled if it isn't already Failed. All you can do now is           to close the channel.&lt;/p&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1011,8 +1053,11 @@ Start a GetCaptchaData method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Fetch and return the captcha data. In protocols           where captchas are downloaded out-of-band (for instance via HTTP),           the connection manager is expected to do so.&lt;/p&gt;         &lt;p&gt;Returns an empty array if the type was &amp;quot;qa&amp;quot;&lt;/p&gt;         &lt;tp:rationale&gt;           &lt;p&gt;If audio-based and image-based captchas are both available,             we don't want to waste time downloading the audio until/unless             the user asks to hear it. The extra D-Bus round-trips are not             a problem, since they are expected to be quick compared with             the time taken for the user to solve the captcha.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1085,8 +1130,11 @@ Start a GetCaptchas method call.
 <p>
 &lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Gets information regarding each of the captcha methods           available and which and how many need to be successfully answered&lt;/p&gt;          &lt;p&gt;To call this method successfully, the state must be Local_Pending           or Try_Again. If it is Local_Pending, it remains Local_Pending. If           called more than once while in Local_Pending state, or if the state           is Try_Again, this method fetches a new set of captcha challenges,           if possible, and the state returns to Local_Pending.&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;For instance, you could call GetCaptchas again from Local_Pending             state if the user indicates that they can't understand the             initially-offered captcha.&lt;/p&gt;            &lt;p&gt;This is a method, not a property, so that it can be used to             fetch more than one set of captcha challenges, and so that             change notification is not required. Only the Handler should             call this method and calling GetAll would not reduce round-trips,             so the usual reasons to prefer a property do not apply here.&lt;/p&gt;         &lt;/tp:rationale&gt;
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1147,8 +1195,11 @@ cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span 
 Signature of the callback called when a AnswerCaptchas method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1182,8 +1233,11 @@ succeeds or fails.
 Signature of the callback called when a CancelCaptcha method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1218,8 +1272,11 @@ succeeds or fails.
 Signature of the callback called when a GetCaptchaData method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
@@ -1260,8 +1317,11 @@ succeeds or fails.
 Signature of the callback called when a GetCaptchas method call
 succeeds or fails.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
