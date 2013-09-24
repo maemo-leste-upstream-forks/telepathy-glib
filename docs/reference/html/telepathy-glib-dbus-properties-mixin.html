@@ -8,7 +8,7 @@
 <link rel="up" href="ch-service-base.html" title="Service-side implementation">
 <link rel="prev" href="telepathy-glib-TpContactsMixin.html" title="TpContactsMixin">
 <link rel="next" href="TpExportableChannel.html" title="TpExportableChannel">
-<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -94,6 +94,8 @@ enum                <a class="link" href="telepathy-glib-dbus-properties-mixin.h
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *property_name</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> *value</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-dup-all" title="tp_dbus_properties_mixin_dup_all ()">tp_dbus_properties_mixin_dup_all</a>    (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *interface_name</code></em>);
 <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="telepathy-glib-dbus-properties-mixin.html#tp-dbus-properties-mixin-set" title="tp_dbus_properties_mixin_set ()">tp_dbus_properties_mixin_set</a>        (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *interface_name</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *property_name</code></em>,
@@ -213,7 +215,8 @@ Since 0.11.5, there is a corresponding <a href="http://library.gnome.org/devel/g
 <hr>
 <div class="refsect2">
 <a name="TP-TYPE-DBUS-PROPERTIES-MIXIN-FLAGS:CAPS"></a><h3>TP_TYPE_DBUS_PROPERTIES_MIXIN_FLAGS</h3>
-<pre class="programlisting">#define             TP_TYPE_DBUS_PROPERTIES_MIXIN_FLAGS</pre>
+<pre class="programlisting">#define TP_TYPE_DBUS_PROPERTIES_MIXIN_FLAGS (tp_dbus_properties_mixin_flags_get_type ())
+</pre>
 <p>
 The <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Enumeration-and-Flag-Types.html#GFlagsClass"><span class="type">GFlagsClass</span></a> type of <a class="link" href="telepathy-glib-dbus-properties-mixin.html#TpDBusPropertiesMixinFlags"><span class="type">TpDBusPropertiesMixinFlags</span></a>.
 </p>
@@ -894,6 +897,40 @@ on failure</td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="tp-dbus-properties-mixin-dup-all"></a><h3>tp_dbus_properties_mixin_dup_all ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        tp_dbus_properties_mixin_dup_all    (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *self</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *interface_name</code></em>);</pre>
+<p>
+Get all the properties of a particular interface. This implementation
+never returns an error: it will return an empty map if the interface
+is unknown.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>an object with this mixin</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>interface_name</code></em> :</span></p></td>
+<td>a D-Bus interface name</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a map
+from property name (without the interface name) to value. <span class="annotation">[<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 GObject.Value]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.21.2</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="tp-dbus-properties-mixin-set"></a><h3>tp_dbus_properties_mixin_set ()</h3>
 <pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            tp_dbus_properties_mixin_set        (<em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *self</code></em>,
                                                          <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *interface_name</code></em>,
@@ -1165,6 +1202,6 @@ A shortcut for calling <a class="link" href="telepathy-glib-dbus-properties-mixi
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.18</div>
+          Generated by GTK-Doc V1.19</div>
 </body>
 </html>

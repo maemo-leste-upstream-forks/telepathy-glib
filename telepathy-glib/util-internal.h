@@ -39,6 +39,7 @@ void _tp_quark_array_merge_valist (GArray *array,
 
 #ifdef HAVE_GIO_UNIX
 GSocketAddress * _tp_create_temp_unix_socket (GSocketService *service,
+    gchar **tmpdir,
     GError **error);
 #endif /* HAVE_GIO_UNIX */
 
@@ -49,6 +50,7 @@ GList * _tp_create_channel_request_list (TpSimpleClientFactory *factory,
 
 gboolean _tp_enum_from_nick (GType enum_type, const gchar *nick, gint *value);
 const gchar *_tp_enum_to_nick (GType enum_type, gint value);
+const gchar *_tp_enum_to_nick_nonnull (GType enum_type, gint value);
 
 #define _tp_implement_finish_void(source, tag) \
     if (g_simple_async_result_propagate_error (\
