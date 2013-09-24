@@ -8,7 +8,7 @@
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="telepathy-glib-automatic-proxy-factory.html" title="TpAutomaticProxyFactory">
 <link rel="next" href="telepathy-glib-automatic-client-factory.html" title="TpAutomaticClientFactory">
-<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -170,7 +170,8 @@ requested.
 <p>
 Currently supported classes are <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>, <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>,
 <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> and <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>. Those objects should always be acquired through a
-factory, rather than being constructed directly.
+factory or a "larger" object (e.g. getting the <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> from
+a <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>), rather than being constructed directly.
 </p>
 <p>
 One can subclass <a class="link" href="telepathy-glib-simple-client-factory.html#TpSimpleClientFactory"><span class="type">TpSimpleClientFactory</span></a> and override some of its virtual
@@ -431,6 +432,11 @@ Note that the returned <a class="link" href="telepathy-glib-account.html#TpAccou
 is responsible for calling <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> with the desired
 features (as given by <a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-account-features" title="tp_simple_client_factory_dup_account_features ()"><code class="function">tp_simple_client_factory_dup_account_features()</code></a>).
 </p>
+<p>
+This function is rather low-level. <a class="link" href="telepathy-glib-account-manager.html#tp-account-manager-dup-valid-accounts" title="tp_account_manager_dup_valid_accounts ()"><code class="function">tp_account_manager_dup_valid_accounts()</code></a>
+and <span class="type">"validity-changed"</span> are more appropriate for most
+applications.
+</p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
 <col align="left" valign="top">
@@ -591,6 +597,10 @@ reference exists.
 Note that the returned <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> is not guaranteed to be ready; the
 caller is responsible for calling <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> with the desired
 features (as given by <a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-connection-features" title="tp_simple_client_factory_dup_connection_features ()"><code class="function">tp_simple_client_factory_dup_connection_features()</code></a>).
+</p>
+<p>
+This function is rather low-level. <a class="link" href="telepathy-glib-account.html#TpAccount--connection" title='The "connection" property'><span class="type">"connection"</span></a> is more
+appropriate for most applications.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -754,6 +764,11 @@ Note that the returned <a class="link" href="telepathy-glib-channel.html#TpChann
 caller is responsible for calling <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> with the desired
 features (as given by <a class="link" href="telepathy-glib-simple-client-factory.html#tp-simple-client-factory-dup-channel-features" title="tp_simple_client_factory_dup_channel_features ()"><code class="function">tp_simple_client_factory_dup_channel_features()</code></a>).
 </p>
+<p>
+This function is rather low-level.
+<a class="link" href="telepathy-glib-account-channel-request.html#TpAccountChannelRequest"><span class="type">TpAccountChannelRequest</span></a> and <a class="link" href="telepathy-glib-base-client.html#TpBaseClient"><span class="type">TpBaseClient</span></a> are more appropriate ways
+to obtain channels for most applications.
+</p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
 <col align="left" valign="top">
@@ -766,8 +781,7 @@ features (as given by <a class="link" href="telepathy-glib-simple-client-factory
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>connection</code></em> :</span></p></td>
-<td>a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>
-</td>
+<td>a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> whose <a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a> is this object</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>object_path</code></em> :</span></p></td>
@@ -937,8 +951,7 @@ must return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>connection</code></em> :</span></p></td>
-<td>a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>
-</td>
+<td>a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> whose <a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a> is this object</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>handle</code></em> :</span></p></td>
@@ -985,8 +998,7 @@ features previously passed to
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>connection</code></em> :</span></p></td>
-<td>a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>
-</td>
+<td>a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> whose <a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a> is this object</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>n_contacts</code></em> :</span></p></td>
@@ -1270,6 +1282,6 @@ The D-Bus daemon for this object.
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.18</div>
+          Generated by GTK-Doc V1.19</div>
 </body>
 </html>

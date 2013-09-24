@@ -8,7 +8,7 @@
 <link rel="up" href="ch-client.html" title="Client-side proxies">
 <link rel="prev" href="telepathy-glib-protocol.html" title="TpProtocol">
 <link rel="next" href="telepathy-glib-contact.html" title="TpContact">
-<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -634,6 +634,19 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-self-contact-changed" title="tp_cli_connection_signal_callback_self_contact_changed ()">*tp_cli_connection_signal_callback_self_contact_changed</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> arg_Self_Handle</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Self_ID</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);
+<a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="returnvalue">TpProxySignalConnection</span></a> * <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-connect-to-self-contact-changed" title="tp_cli_connection_connect_to_self_contact_changed ()">tp_cli_connection_connect_to_self_contact_changed</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-self-contact-changed" title="tp_cli_connection_signal_callback_self_contact_changed ()"><span class="type">tp_cli_connection_signal_callback_self_contact_changed</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
 <span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-status-changed" title="tp_cli_connection_signal_callback_status_changed ()">*tp_cli_connection_signal_callback_status_changed</a>)
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
                                                          <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> arg_Status</code></em>,
@@ -753,16 +766,18 @@ const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.htm
 accessed via D-Bus.
 </p>
 <p>
-Compared with a simple proxy for method calls, they add the following
-features:
+<a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> objects should be obtained from a <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>, unless you
+are implementing a lower-level Telepathy component (such as the account
+manager service itself).
 </p>
 <p>
-</p>
-<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
-<li class="listitem">connection status tracking</li>
-<li class="listitem">calling <code class="function">GetInterfaces()</code> automatically</li>
-</ul></div>
-<p>
+Since 0.16, <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> always has a non-<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> <a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a>, and its
+<a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a> will be propagated to its <a class="link" href="telepathy-glib-channel.html#TpChannel"><span class="type">TpChannel</span></a> objects
+(if any). Similarly, the <a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a>'s features
+will be used for <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> objects.
+If a <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> is created without going via the
+<a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> or specifying a <a class="link" href="telepathy-glib-proxy.html#TpProxy--factory" title='The "factory" property'><span class="type">"factory"</span></a>, the default
+is to use a new <a class="link" href="telepathy-glib-automatic-client-factory.html#TpAutomaticClientFactory"><span class="type">TpAutomaticClientFactory</span></a>.
 </p>
 </div>
 <div class="refsect1">
@@ -1063,8 +1078,12 @@ will be up to date:
 </h3>
 <p>Requesting this feature via <a class="link" href="telepathy-glib-proxy.html#tp-proxy-prepare-async" title="tp_proxy_prepare_async ()"><code class="function">tp_proxy_prepare_async()</code></a> means that
     you want to wait for the connection to connect, but it doesn't actually
-    start the process of connecting: to do that, call
-    <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-connect" title="tp_cli_connection_call_connect ()"><code class="function">tp_cli_connection_call_connect()</code></a> separately.</p>
+    start the process of connecting. For connections associated with
+    a <a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a>, the account manager service is responsible for
+    doing that, but if you are constructing connections directly
+    (e.g. if you are implementing an account manager), you must
+    <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-call-connect" title="tp_cli_connection_call_connect ()"><code class="function">tp_cli_connection_call_connect()</code></a> separately.
+    </p>
 </div>
 <p>
 </p>
@@ -1697,7 +1716,7 @@ property, which may be <a href="http://library.gnome.org/devel/glib/unstable/gli
 <pre class="programlisting"><a class="link" href="telepathy-glib-handle.html#TpHandle" title="TpHandle"><span class="returnvalue">TpHandle</span></a>            tp_connection_get_self_handle       (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *self</code></em>);</pre>
 <div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
 <h3 class="title">Warning</h3>
-<p><code class="literal">tp_connection_get_self_handle</code> is deprecated and should not be used in newly-written code. Use <a class="link" href="telepathy-glib-connection.html#tp-connection-get-self-handle" title="tp_connection_get_self_handle ()"><code class="function">tp_connection_get_self_handle()</code></a> instead.</p>
+<p><code class="literal">tp_connection_get_self_handle</code> is deprecated and should not be used in newly-written code. Use <a class="link" href="telepathy-glib-connection.html#tp-connection-get-self-contact" title="tp_connection_get_self_contact ()"><code class="function">tp_connection_get_self_contact()</code></a> instead.</p>
 </div>
 <p>
 Return the <a class="link" href="telepathy-glib-enums.html#TP-HANDLE-TYPE-CONTACT:CAPS"><code class="literal">TP_HANDLE_TYPE_CONTACT</code></a> handle of the local user on this
@@ -2079,7 +2098,7 @@ that appears as a key in the callback's <em class="parameter"><code>attributes</
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td>called on success or
-failure (unless <em class="parameter"><code>weak_object</code></em> has become unreferenced). <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GObject.Callback]</span>
+failure (unless <em class="parameter"><code>weak_object</code></em> has become unreferenced). <span class="annotation">[<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GObject.Callback]</span>
 </td>
 </tr>
 <tr>
@@ -2166,7 +2185,7 @@ receives</td>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
 <td>called on success or
-failure (unless <em class="parameter"><code>weak_object</code></em> has become unreferenced). <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GObject.Callback]</span>
+failure (unless <em class="parameter"><code>weak_object</code></em> has become unreferenced). <span class="annotation">[<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GObject.Callback]</span>
 </td>
 </tr>
 <tr>
@@ -3690,7 +3709,7 @@ the <a class="link" href="telepathy-glib-connection.html#TP-CONNECTION-FEATURE-C
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a new <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>. Use <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#g-ptr-array-unref"><code class="function">g_ptr_array_unref()</code></a> when done. <span class="annotation">[<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>][<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
+<td>a new <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a>. Use <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#g-ptr-array-unref"><code class="function">g_ptr_array_unref()</code></a> when done. <span class="annotation">[<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>][<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
 </td>
 </tr>
 </tbody>
@@ -7353,6 +7372,111 @@ or has become invalid.</td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="tp-cli-connection-signal-callback-self-contact-changed"></a><h3>tp_cli_connection_signal_callback_self_contact_changed ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*tp_cli_connection_signal_callback_self_contact_changed)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> arg_Self_Handle</code></em>,
+                                                         <em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *arg_Self_ID</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>);</pre>
+<p>
+Represents the signature of a callback for the signal SelfContactChanged.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>The proxy on which <a class="link" href="telepathy-glib-connection.html#tp-cli-connection-connect-to-self-contact-changed" title="tp_cli_connection_connect_to_self_contact_changed ()"><code class="function">tp_cli_connection_connect_to_self_contact_changed()</code></a>
+was called</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Self_Handle</code></em> :</span></p></td>
+<td>The new value of the SelfHandle property. (<span class="type">TpContactHandle</span>)</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>arg_Self_ID</code></em> :</span></p></td>
+<td>The new value of the SelfID property.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>User-supplied data</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>User-supplied weakly referenced object</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tp-cli-connection-connect-to-self-contact-changed"></a><h3>tp_cli_connection_connect_to_self_contact_changed ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="returnvalue">TpProxySignalConnection</span></a> * tp_cli_connection_connect_to_self_contact_changed
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#tp-cli-connection-signal-callback-self-contact-changed" title="tp_cli_connection_signal_callback_self_contact_changed ()"><span class="type">tp_cli_connection_signal_callback_self_contact_changed</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> destroy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> *weak_object</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>
+Connect a handler to the signal SelfContactChanged.
+</p>
+<p>
+Emitted whenever the &lt;tp:member-ref&gt;SelfHandle&lt;/tp:member-ref&gt; and         &lt;tp:member-ref&gt;SelfID&lt;/tp:member-ref&gt; property         changes. If the connection         is not yet in the CONNECTED state, this signal is not guaranteed         to be emitted.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>A <a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> or subclass</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>Callback to be called when the signal is
+received</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>User-supplied data for the callback</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>Destructor for the user-supplied data, which
+will be called when this signal is disconnected, or
+before this function returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>A <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> which will be weakly referenced;
+if it is destroyed, this callback will automatically be
+disconnected</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>If not <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, used to raise an error if <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is
+returned</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-proxy.html#TpProxySignalConnection" title="TpProxySignalConnection"><span class="type">TpProxySignalConnection</span></a> containing all of the
+above, which can be used to disconnect the signal; or
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the proxy does not have the desired interface
+or has become invalid.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="tp-cli-connection-signal-callback-status-changed"></a><h3>tp_cli_connection_signal_callback_status_changed ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                (*tp_cli_connection_signal_callback_status_changed)
                                                         (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
@@ -8265,12 +8389,12 @@ For this signal to be emitted, you must first call
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>added</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> which have been blocked. <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> which have been blocked. <span class="annotation">[<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>removed</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> which are no longer blocked. <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> which are no longer blocked. <span class="annotation">[<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
 </td>
 </tr>
 <tr>
@@ -8316,12 +8440,12 @@ For this signal to be emitted, you must first call
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>added</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> added to contacts list. <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> added to contacts list. <span class="annotation">[<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>removed</code></em> :</span></p></td>
-<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> removed from contacts list. <span class="annotation">[<acronym title="Override the parsed C type with given type"><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Pointer-Arrays.html#GPtrArray"><span class="type">GPtrArray</span></a> of <a class="link" href="telepathy-glib-contact.html#TpContact"><span class="type">TpContact</span></a> removed from contacts list. <span class="annotation">[<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GLib.PtrArray][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> TelepathyGLib.Contact]</span>
 </td>
 </tr>
 <tr>
@@ -8477,6 +8601,6 @@ For this signal to be emited, you must first call
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.18</div>
+          Generated by GTK-Doc V1.19</div>
 </body>
 </html>
