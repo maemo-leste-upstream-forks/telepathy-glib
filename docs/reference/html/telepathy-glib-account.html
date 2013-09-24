@@ -401,6 +401,7 @@ const <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Generic-v
   "<a class="link" href="telepathy-glib-account.html#TpAccount--storage-provider" title='The "storage-provider" property'>storage-provider</a>"         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
   "<a class="link" href="telepathy-glib-account.html#TpAccount--storage-restrictions" title='The "storage-restrictions" property'>storage-restrictions</a>"     <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a>                 : Read
   "<a class="link" href="telepathy-glib-account.html#TpAccount--supersedes" title='The "supersedes" property'>supersedes</a>"               <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>                 : Read
+  "<a class="link" href="telepathy-glib-account.html#TpAccount--uri-schemes" title='The "uri-schemes" property'>uri-schemes</a>"              <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>                 : Read
   "<a class="link" href="telepathy-glib-account.html#TpAccount--valid" title='The "valid" property'>valid</a>"                    <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>              : Read
 </pre>
 </div>
@@ -2866,18 +2867,7 @@ One can ask for a feature to be prepared using the
 <a name="tp-account-get-uri-schemes"></a><h3>tp_account_get_uri_schemes ()</h3>
 <pre class="programlisting">const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> * const * tp_account_get_uri_schemes        (<em class="parameter"><code><a class="link" href="telepathy-glib-account.html#TpAccount"><span class="type">TpAccount</span></a> *self</code></em>);</pre>
 <p>
-If the <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-ADDRESSING:CAPS" title="TP_ACCOUNT_FEATURE_ADDRESSING"><code class="literal">TP_ACCOUNT_FEATURE_ADDRESSING</code></a> feature has been prepared
-successfully, return a list of additional URI schemes for which this
-account should be used if possible. Otherwise return <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
-</p>
-<p>
-For instance, a SIP or Skype account might have "tel" in this list if the
-user would like to use that account to call phone numbers.
-</p>
-<p>
-This list should not contain the primary URI scheme(s) for the account's
-protocol (for instance, "xmpp" for XMPP, or "sip" or "sips" for SIP),
-since it should be assumed to be useful for those schemes in any case.
+Return the <a class="link" href="telepathy-glib-account.html#TpAccount--uri-schemes" title='The "uri-schemes" property'><span class="type">"uri-schemes"</span></a> property
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -2892,7 +2882,7 @@ since it should be assumed to be useful for those schemes in any case.
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a list of URI schemes, or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
+<td>the value of <a class="link" href="telepathy-glib-account.html#TpAccount--uri-schemes" title='The "uri-schemes" property'><span class="type">"uri_schemes"</span></a> property. <span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -4757,6 +4747,30 @@ This is not guaranteed to have been retrieved until the
 the value is NULL.
 </p>
 <p class="since">Since 0.17.5</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TpAccount--uri-schemes"></a><h3>The <code class="literal">"uri-schemes"</code> property</h3>
+<pre class="programlisting">  "uri-schemes"              <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Boxed-Types.html#GStrv"><span class="type">GStrv</span></a>                 : Read</pre>
+<p>
+If the <a class="link" href="telepathy-glib-account.html#TP-ACCOUNT-FEATURE-ADDRESSING:CAPS" title="TP_ACCOUNT_FEATURE_ADDRESSING"><code class="literal">TP_ACCOUNT_FEATURE_ADDRESSING</code></a> feature has been prepared
+successfully, a list of additional URI schemes for which this
+account should be used if possible. Otherwise <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+</p>
+<p>
+For instance, a SIP or Skype account might have "tel" in this list if the
+user would like to use that account to call phone numbers.
+</p>
+<p>
+This list should not contain the primary URI scheme(s) for the account's
+protocol (for instance, "xmpp" for XMPP, or "sip" or "sips" for SIP),
+since it should be assumed to be useful for those schemes in any case.
+</p>
+<p>
+The notify::uri-schemes signal cannot be relied on if the Account Manager
+is Mission Control version 5.14.0 or older.
+</p>
+<p class="since">Since 0.21.0</p>
 </div>
 <hr>
 <div class="refsect2">
