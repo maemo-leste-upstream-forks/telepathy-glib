@@ -1077,7 +1077,8 @@ main loop has been re-entered.</doc>
       <method name="is_prepared"
               c:identifier="tp_account_is_prepared"
               version="0.9.0"
-              introspectable="0">
+              introspectable="0"
+              deprecated="since 0.23.0, use tp_proxy_is_prepared() instead.">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the same thing as tp_proxy_is_prepared()</doc>
@@ -2492,6 +2493,13 @@ tp_proxy_prepare_async() has finished; until then, the value is
       <field name="priv" readable="0" private="1">
         <type name="AccountPrivate" c:type="TpAccountPrivate*"/>
       </field>
+      <glib:signal name="avatar-changed" when="last" version="0.23.0">
+        <doc xml:whitespace="preserve">Emitted when the avatar changes. Call tp_account_get_avatar_async()
+to get the new avatar data.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </glib:signal>
       <glib:signal name="presence-changed" when="last" version="0.9.0">
         <doc xml:whitespace="preserve">Emitted when the presence of the account changes.</doc>
         <return-value transfer-ownership="none">
@@ -4240,7 +4248,8 @@ been prepared, an empty list (%NULL) will be returned.</doc>
       <method name="is_prepared"
               c:identifier="tp_account_manager_is_prepared"
               version="0.9.0"
-              introspectable="0">
+              introspectable="0"
+              deprecated="since 0.23.0, use tp_proxy_is_prepared() instead.">
         <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the same thing as tp_proxy_is_prepared()</doc>
@@ -17614,6 +17623,22 @@ For instance, a string parameter should have type
           </instance-parameter>
         </parameters>
       </method>
+      <method name="dup_variant_type"
+              c:identifier="tp_connection_manager_param_dup_variant_type"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the #GVariantType of the parameter</doc>
+          <type name="GLib.VariantType" c:type="GVariantType*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="param" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a parameter supported by a #TpConnectionManager</doc>
+            <type name="ConnectionManagerParam"
+                  c:type="const TpConnectionManagerParam*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
       <method name="free"
               c:identifier="tp_connection_manager_param_free"
               version="0.11.3">
@@ -24477,6 +24502,11 @@ tp_handle_set_foreach().</doc>
               c:type="TP_IFACE_CHANNEL_DISPATCHER">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="IFACE_CHANNEL_DISPATCHER_INTERFACE_MESSAGES1"
+              value="org.freedesktop.Telepathy.ChannelDispatcher.Interface.Messages1"
+              c:type="TP_IFACE_CHANNEL_DISPATCHER_INTERFACE_MESSAGES1">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="IFACE_CHANNEL_DISPATCHER_INTERFACE_OPERATION_LIST"
               value="org.freedesktop.Telepathy.ChannelDispatcher.Interface.OperationList"
               c:type="TP_IFACE_CHANNEL_DISPATCHER_INTERFACE_OPERATION_LIST">
@@ -24777,6 +24807,11 @@ tp_handle_set_foreach().</doc>
               c:type="TP_IFACE_CONNECTION_INTERFACE_PRESENCE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="IFACE_CONNECTION_INTERFACE_RENAMING"
+              value="org.freedesktop.Telepathy.Connection.Interface.Renaming"
+              c:type="TP_IFACE_CONNECTION_INTERFACE_RENAMING">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="IFACE_CONNECTION_INTERFACE_REQUESTS"
               value="org.freedesktop.Telepathy.Connection.Interface.Requests"
               c:type="TP_IFACE_CONNECTION_INTERFACE_REQUESTS">
@@ -24785,6 +24820,11 @@ tp_handle_set_foreach().</doc>
     <constant name="IFACE_CONNECTION_INTERFACE_SERVICE_POINT"
               value="org.freedesktop.Telepathy.Connection.Interface.ServicePoint"
               c:type="TP_IFACE_CONNECTION_INTERFACE_SERVICE_POINT">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
+    <constant name="IFACE_CONNECTION_INTERFACE_SIDECARS1"
+              value="org.freedesktop.Telepathy.Connection.Interface.Sidecars1"
+              c:type="TP_IFACE_CONNECTION_INTERFACE_SIDECARS1">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <constant name="IFACE_CONNECTION_INTERFACE_SIMPLE_PRESENCE"
@@ -27981,6 +28021,11 @@ This property can't be %NULL.</doc>
               c:type="TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_FILENAME">
       <type name="utf8" c:type="gchar*"/>
     </constant>
+    <constant name="PROP_CHANNEL_TYPE_FILE_TRANSFER_FILE_COLLECTION"
+              value="org.freedesktop.Telepathy.Channel.Type.FileTransfer.FileCollection"
+              c:type="TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_FILE_COLLECTION">
+      <type name="utf8" c:type="gchar*"/>
+    </constant>
     <constant name="PROP_CHANNEL_TYPE_FILE_TRANSFER_INITIAL_OFFSET"
               value="org.freedesktop.Telepathy.Channel.Type.FileTransfer.InitialOffset"
               c:type="TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_INITIAL_OFFSET">
@@ -28884,7 +28929,12 @@ sign in as invisible.</doc>
 
 In addition to the fields documented here, there are two gpointer fields
 which must currently be %NULL. A meaning may be defined for these in a
-future version of telepathy-glib.</doc>
+future version of telepathy-glib.
+
+In modern Telepathy connection managers, the only optional
+argument should be a %G_TYPE_STRING named "message", on statuses
+that have an optional human-readable message. All other optional arguments
+are deprecated.</doc>
       <field name="index" writable="1">
         <type name="guint" c:type="guint"/>
       </field>
@@ -28918,7 +28968,12 @@ future version of telepathy-glib.</doc>
                 c:identifier="tp_presence_status_new"
                 introspectable="0">
         <doc xml:whitespace="preserve">Construct a presence status structure. You should free the returned
-structure with #tp_presence_status_free.</doc>
+structure with #tp_presence_status_free.
+
+In modern Telepathy connection managers, the only optional
+argument should be a %G_TYPE_STRING named "message", on statuses
+that have an optional human-readable message. All other optional arguments
+are deprecated.</doc>
         <return-value>
           <doc xml:whitespace="preserve">A pointer to the newly allocated presence status structure.</doc>
           <type name="PresenceStatus" c:type="TpPresenceStatus*"/>
@@ -28958,7 +29013,11 @@ future version of telepathy-glib.</doc>
         <type name="gpointer" c:type="gpointer"/>
       </field>
     </record>
-    <record name="PresenceStatusSpec" c:type="TpPresenceStatusSpec">
+    <record name="PresenceStatusSpec"
+            c:type="TpPresenceStatusSpec"
+            glib:type-name="TpPresenceStatusSpec"
+            glib:get-type="tp_presence_status_spec_get_type"
+            c:symbol-prefix="presence_status_spec">
       <doc xml:whitespace="preserve">Structure specifying a supported presence status.
 
 In addition to the fields documented here, there are two gpointer fields
@@ -28980,9 +29039,144 @@ future version of telepathy-glib.</doc>
       <field name="_future1" readable="0" private="1">
         <type name="gpointer" c:type="gpointer"/>
       </field>
-      <field name="_future2" readable="0" private="1">
-        <type name="gpointer" c:type="gpointer"/>
+      <field name="priv" readable="0" private="1">
+        <type name="PresenceStatusSpecPrivate"
+              c:type="TpPresenceStatusSpecPrivate*"/>
       </field>
+      <constructor name="new"
+                   c:identifier="tp_presence_status_spec_new"
+                   version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpPresenceStatusSpec</doc>
+          <type name="PresenceStatusSpec" c:type="TpPresenceStatusSpec*"/>
+        </return-value>
+        <parameters>
+          <parameter name="name" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the name of the new presence status</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="type" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the category into which this presence status falls</doc>
+            <type name="ConnectionPresenceType"
+                  c:type="TpConnectionPresenceType"/>
+          </parameter>
+          <parameter name="can_set_on_self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">%TRUE if the user can set this presence status on themselves</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+          <parameter name="has_message" transfer-ownership="none">
+            <doc xml:whitespace="preserve">%TRUE if this presence status is accompanied by an optional human-readable message</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+        </parameters>
+      </constructor>
+      <method name="can_set_on_self"
+              c:identifier="tp_presence_status_spec_can_set_on_self"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if the user can set this presence status on themselves (most statuses), or %FALSE if they cannot directly set it on themselves (typically used for %TP_CONNECTION_PRESENCE_TYPE_OFFLINE and %TP_CONNECTION_PRESENCE_TYPE_ERROR)</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a presence status specification</doc>
+            <type name="PresenceStatusSpec"
+                  c:type="const TpPresenceStatusSpec*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="copy"
+              c:identifier="tp_presence_status_spec_copy"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Copy a presence status specification.
+
+If @self has optional arguments other than a string named "message",
+they are not copied. Optional arguments with other names or types
+are deprecated.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #TpPresenceStatusSpec resembling @self</doc>
+          <type name="PresenceStatusSpec" c:type="TpPresenceStatusSpec*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a presence status specification</doc>
+            <type name="PresenceStatusSpec"
+                  c:type="const TpPresenceStatusSpec*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="free"
+              c:identifier="tp_presence_status_spec_free"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Free a presence status specification produced by
+tp_presence_status_spec_new() or tp_presence_status_spec_copy().</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="full">
+            <doc xml:whitespace="preserve">a presence status specification</doc>
+            <type name="PresenceStatusSpec" c:type="TpPresenceStatusSpec*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="get_name"
+              c:identifier="tp_presence_status_spec_get_name"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the name of this presence status, such as "available" or "out-to-lunch".</doc>
+          <type name="utf8" c:type="const gchar*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a presence status specification</doc>
+            <type name="PresenceStatusSpec"
+                  c:type="const TpPresenceStatusSpec*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="get_presence_type"
+              c:identifier="tp_presence_status_spec_get_presence_type"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Return the category into which this presence type falls. For instance,
+for XMPP's "" (do not disturb) status, this would return
+%TP_CONNECTION_PRESENCE_TYPE_BUSY.</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #TpConnectionPresenceType</doc>
+          <type name="ConnectionPresenceType"
+                c:type="TpConnectionPresenceType"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a presence status specification</doc>
+            <type name="PresenceStatusSpec"
+                  c:type="const TpPresenceStatusSpec*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="has_message"
+              c:identifier="tp_presence_status_spec_has_message"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if this presence status is accompanied by an optional human-readable message</doc>
+          <type name="gboolean" c:type="gboolean"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a presence status specification</doc>
+            <type name="PresenceStatusSpec"
+                  c:type="const TpPresenceStatusSpec*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+    </record>
+    <record name="PresenceStatusSpecPrivate"
+            c:type="TpPresenceStatusSpecPrivate"
+            disguised="1">
     </record>
     <bitfield name="PropertyFlags" c:type="TpPropertyFlags">
       <doc xml:whitespace="preserve">Bitfield/set of flags generated from the Telepathy specification.</doc>
@@ -29155,6 +29349,62 @@ The returned list must be freed by the caller, for instance with
           </instance-parameter>
         </parameters>
       </method>
+      <method name="dup_presence_statuses"
+              c:identifier="tp_protocol_dup_presence_statuses">
+        <doc xml:whitespace="preserve">Return the presence statuses that might be supported by connections
+to this protocol.
+
+It is possible that some of these statuses will not actually be supported
+by a connection: for instance, an XMPP connection manager would
+include "hidden" in this list, even though not all XMPP servers allow
+users to be online-but-hidden.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a list of statuses, or %NULL if unknown</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="PresenceStatusSpec"/>
+          </type>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol object</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="get_addressable_uri_schemes"
+              c:identifier="tp_protocol_get_addressable_uri_schemes"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpProtocol:addressable-uri-schemes</doc>
+          <array c:type="const gchar* const*">
+            <type name="utf8"/>
+          </array>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol object</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="get_addressable_vcard_fields"
+              c:identifier="tp_protocol_get_addressable_vcard_fields"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">&lt;!-- --&gt;</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the value of #TpProtocol:addressable-vcard-fields</doc>
+          <array c:type="const gchar* const*">
+            <type name="utf8"/>
+          </array>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol object</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+        </parameters>
+      </method>
       <method name="get_authentication_types"
               c:identifier="tp_protocol_get_authentication_types"
               version="0.13.9">
@@ -29317,6 +29567,273 @@ in C code. The returned string is valid for as long as @self exists.</doc>
           </parameter>
         </parameters>
       </method>
+      <method name="identify_account_async"
+              c:identifier="tp_protocol_identify_account_async"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Return a string that could identify the account with the given
+parameters. In most protocols that string is a normalized 'account'
+parameter, but some protocols have more complex requirements;
+for instance, on IRC, the 'account' (nickname) is insufficient,
+and must be combined with a server or network name.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="vardict" transfer-ownership="none">
+            <doc xml:whitespace="preserve">the account parameters as a #GVariant of type %G_VARIANT_TYPE_VARDICT. If it is floating, ownership will be taken, as if via g_variant_ref_sink().</doc>
+            <type name="GLib.Variant" c:type="GVariant*"/>
+          </parameter>
+          <parameter name="cancellable"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">may be used to cancel the async request</doc>
+            <type name="Gio.Cancellable" c:type="GCancellable*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="identify_account_finish"
+              c:identifier="tp_protocol_identify_account_finish"
+              version="0.23.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Interpret the result of tp_protocol_identify_account_async().</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a string identifying the account, or %NULL on error</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="normalize_contact_async"
+              c:identifier="tp_protocol_normalize_contact_async"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Perform best-effort offline contact normalization. This does syntactic
+normalization (e.g. transforming case-insensitive text to lower-case),
+but does not query servers or anything similar.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="contact" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a contact identifier, possibly invalid</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="cancellable"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">may be used to cancel the async request</doc>
+            <type name="Gio.Cancellable" c:type="GCancellable*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="normalize_contact_finish"
+              c:identifier="tp_protocol_normalize_contact_finish"
+              version="0.23.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Interpret the result of tp_protocol_normalize_contact_async().</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the normalized form of @contact, or %NULL on error</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="normalize_contact_uri_async"
+              c:identifier="tp_protocol_normalize_contact_uri_async"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Perform best-effort offline contact normalization, for a contact in
+the form of a URI. This method will fail if the URI is not in a
+scheme supported by this protocol or connection manager.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="uri" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a contact URI, possibly invalid</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="cancellable"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">may be used to cancel the async request</doc>
+            <type name="Gio.Cancellable" c:type="GCancellable*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="3">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="normalize_contact_uri_finish"
+              c:identifier="tp_protocol_normalize_contact_uri_finish"
+              version="0.23.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Interpret the result of tp_protocol_normalize_contact_uri_async().</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the normalized form of @uri, or %NULL on error</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="normalize_vcard_address_async"
+              c:identifier="tp_protocol_normalize_vcard_address_async"
+              version="0.23.1">
+        <doc xml:whitespace="preserve">Perform best-effort offline contact normalization, for a contact in
+the form of a vCard field. This method will fail if the vCard field
+is not supported by this protocol or connection manager.</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="field" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a vCard field</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="value" transfer-ownership="none">
+            <doc xml:whitespace="preserve">an address that is a value of @field</doc>
+            <type name="utf8" c:type="const gchar*"/>
+          </parameter>
+          <parameter name="cancellable"
+                     transfer-ownership="none"
+                     allow-none="1">
+            <doc xml:whitespace="preserve">may be used to cancel the async request</doc>
+            <type name="Gio.Cancellable" c:type="GCancellable*"/>
+          </parameter>
+          <parameter name="callback"
+                     transfer-ownership="none"
+                     allow-none="1"
+                     scope="async"
+                     closure="4">
+            <doc xml:whitespace="preserve">a callback to call when the request is satisfied</doc>
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback"/>
+          </parameter>
+          <parameter name="user_data" transfer-ownership="none" allow-none="1">
+            <doc xml:whitespace="preserve">data to pass to @callback</doc>
+            <type name="gpointer" c:type="gpointer"/>
+          </parameter>
+        </parameters>
+      </method>
+      <method name="normalize_vcard_address_finish"
+              c:identifier="tp_protocol_normalize_vcard_address_finish"
+              version="0.23.1"
+              throws="1">
+        <doc xml:whitespace="preserve">Interpret the result of tp_protocol_normalize_vcard_address_async().</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">the normalized form of @value, or %NULL on error</doc>
+          <type name="utf8" c:type="gchar*"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a protocol</doc>
+            <type name="Protocol" c:type="TpProtocol*"/>
+          </instance-parameter>
+          <parameter name="result" transfer-ownership="none">
+            <doc xml:whitespace="preserve">a #GAsyncResult</doc>
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*"/>
+          </parameter>
+        </parameters>
+      </method>
+      <property name="addressable-uri-schemes"
+                version="0.23.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A non-%NULL #GStrv of URI schemes supported by this protocol.
+If this protocol does not support addressing contacts by URI,
+the list is empty.
+
+For instance, a SIP connection manager that supports calling contacts
+by SIP URI (sip:alice&amp;commat;example.com, sips:bob&amp;commat;example.com)
+or telephone number (tel:+1-555-0123) might have
+{ "sip", "sips", "tel", NULL }.</doc>
+        <array>
+          <type name="utf8"/>
+        </array>
+      </property>
+      <property name="addressable-vcard-fields"
+                version="0.23.1"
+                transfer-ownership="none">
+        <doc xml:whitespace="preserve">A non-%NULL #GStrv of vCard fields supported by this protocol.
+If this protocol does not support addressing contacts by a vCard field,
+the list is empty.
+
+For instance, a SIP connection manager that supports calling contacts
+by SIP URI (vCard field SIP) or telephone number (vCard field TEL)
+might have { "sip", "tel", NULL }.</doc>
+        <array>
+          <type name="utf8"/>
+        </array>
+      </property>
       <property name="authentication-types"
                 version="0.13.9"
                 transfer-ownership="none">
@@ -38467,6 +38984,12 @@ the connection; previously, this function provided refcounting for handles.</doc
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
     </function>
+    <function name="iface_quark_channel_dispatcher_interface_messages1"
+              c:identifier="tp_iface_quark_channel_dispatcher_interface_messages1">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
     <function name="iface_quark_channel_dispatcher_interface_operation_list"
               c:identifier="tp_iface_quark_channel_dispatcher_interface_operation_list">
       <return-value transfer-ownership="none">
@@ -38820,6 +39343,12 @@ the connection; previously, this function provided refcounting for handles.</doc
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
     </function>
+    <function name="iface_quark_connection_interface_renaming"
+              c:identifier="tp_iface_quark_connection_interface_renaming">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
     <function name="iface_quark_connection_interface_requests"
               c:identifier="tp_iface_quark_connection_interface_requests">
       <return-value transfer-ownership="none">
@@ -38828,6 +39357,12 @@ the connection; previously, this function provided refcounting for handles.</doc
     </function>
     <function name="iface_quark_connection_interface_service_point"
               c:identifier="tp_iface_quark_connection_interface_service_point">
+      <return-value transfer-ownership="none">
+        <type name="GLib.Quark" c:type="GQuark"/>
+      </return-value>
+    </function>
+    <function name="iface_quark_connection_interface_sidecars1"
+              c:identifier="tp_iface_quark_connection_interface_sidecars1">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>
@@ -39375,7 +39910,12 @@ is called</doc>
               moved-to="PresenceStatus.new"
               introspectable="0">
       <doc xml:whitespace="preserve">Construct a presence status structure. You should free the returned
-structure with #tp_presence_status_free.</doc>
+structure with #tp_presence_status_free.
+
+In modern Telepathy connection managers, the only optional
+argument should be a %G_TYPE_STRING named "message", on statuses
+that have an optional human-readable message. All other optional arguments
+are deprecated.</doc>
       <return-value>
         <doc xml:whitespace="preserve">A pointer to the newly allocated presence status structure.</doc>
         <type name="PresenceStatus" c:type="TpPresenceStatus*"/>
@@ -39601,7 +40141,7 @@ GValueArray *array = tp_value_array_build (2,
    &lt;/programlisting&gt;
 &lt;/example&gt;</doc>
       <return-value transfer-ownership="full">
-        <doc xml:whitespace="preserve">a newly created #GValueArray, free with g_value_array_free.</doc>
+        <doc xml:whitespace="preserve">a newly created #GValueArray, free with tp_value_array_free()</doc>
         <type name="GObject.ValueArray" c:type="GValueArray*"/>
       </return-value>
       <parameters>
@@ -39616,6 +40156,22 @@ GValueArray *array = tp_value_array_build (2,
         <parameter name="arg2" transfer-ownership="none">
           <varargs>
           </varargs>
+        </parameter>
+      </parameters>
+    </function>
+    <function name="value_array_free"
+              c:identifier="tp_value_array_free"
+              version="0.23.0">
+      <doc xml:whitespace="preserve">Free @va. This is exactly the same as g_value_array_free(), but does not
+provoke deprecation warnings from GLib when used in conjunction with
+tp_value_array_build() and tp_value_array_unpack().</doc>
+      <return-value transfer-ownership="none">
+        <type name="none" c:type="void"/>
+      </return-value>
+      <parameters>
+        <parameter name="va" transfer-ownership="none">
+          <doc xml:whitespace="preserve">a #GValueArray</doc>
+          <type name="GObject.ValueArray" c:type="GValueArray*"/>
         </parameter>
       </parameters>
     </function>

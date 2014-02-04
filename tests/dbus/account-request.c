@@ -547,7 +547,6 @@ int
 main (int argc,
     char **argv)
 {
-  g_type_init ();
   tp_tests_abort_after (10);
   tp_debug_set_flags ("all");
 
@@ -566,5 +565,5 @@ main (int argc,
   g_test_add ("/account-request/create-fail", Test, NULL, setup,
       test_create_fail, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

@@ -131,7 +131,10 @@
  * @optional_arguments: An array of #TpPresenceStatusOptionalArgumentSpec
  *  structures representing the optional arguments for this status, terminated
  *  by a NULL name. If there are no optional arguments for a status, this can
- *  be NULL.
+ *  be NULL. In modern Telepathy connection managers, the only optional
+ *  argument should be a string (type "s") named "message" on statuses
+ *  that have an optional human-readable message. All other optional arguments
+ *  are deprecated.
  *
  * Structure specifying a supported presence status.
  *
@@ -153,8 +156,12 @@
  * In addition to the fields documented here, there are two gpointer fields
  * which must currently be %NULL. A meaning may be defined for these in a
  * future version of telepathy-glib.
+ *
+ * In modern Telepathy connection managers, the only optional
+ * argument should be a %G_TYPE_STRING named "message", on statuses
+ * that have an optional human-readable message. All other optional arguments
+ * are deprecated.
  */
-
 
 /**
  * TpPresenceMixinStatusAvailableFunc:
@@ -332,6 +339,11 @@ deep_copy_hashtable (GHashTable *hash_table)
  *
  * Construct a presence status structure. You should free the returned
  * structure with #tp_presence_status_free.
+ *
+ * In modern Telepathy connection managers, the only optional
+ * argument should be a %G_TYPE_STRING named "message", on statuses
+ * that have an optional human-readable message. All other optional arguments
+ * are deprecated.
  *
  * Returns: A pointer to the newly allocated presence status structure.
  */
@@ -541,17 +553,11 @@ construct_presence_hash_foreach (
   g_hash_table_insert (contact_status,
       (gpointer) supported_statuses[status->index].name, parameters);
 
-  vals = g_value_array_new (2);
-
-  /* last-activity sucks and will probably be removed soon */
-  g_value_array_append (vals, NULL);
-  g_value_init (g_value_array_get_nth (vals, 0), G_TYPE_UINT);
-  g_value_set_uint (g_value_array_get_nth (vals, 0), 0);
-
-  g_value_array_append (vals, NULL);
-  g_value_init (g_value_array_get_nth (vals, 1),
-      TP_HASH_TYPE_MULTIPLE_STATUS_MAP);
-  g_value_take_boxed (g_value_array_get_nth (vals, 1), contact_status);
+  vals = tp_value_array_build (2,
+      G_TYPE_UINT, 0,
+      TP_HASH_TYPE_MULTIPLE_STATUS_MAP, contact_status,
+      G_TYPE_INVALID);
+  g_hash_table_unref (contact_status);
 
   g_hash_table_insert (presence_hash, GUINT_TO_POINTER (handle), vals);
 }
@@ -562,7 +568,7 @@ construct_presence_hash (const TpPresenceStatusSpec *supported_statuses,
                          GHashTable *contact_statuses)
 {
   GHashTable *presence_hash = g_hash_table_new_full (NULL, NULL, NULL,
-      (GDestroyNotify) g_value_array_free);
+      (GDestroyNotify) tp_value_array_free);
   GHashTableIter iter;
   gpointer key, value;
 
@@ -846,38 +852,25 @@ tp_presence_mixin_get_statuses (TpSvcConnectionInterfacePresence *iface,
   TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (conn, context);
 
   ret = g_hash_table_new_full (g_str_hash, g_str_equal,
-                               NULL, (GDestroyNotify) g_value_array_free);
+                               NULL, (GDestroyNotify) tp_value_array_free);
 
   for (i=0; mixin_cls->statuses[i].name != NULL; i++)
     {
+      GHashTable *args;
+
       /* the spec says we include statuses here even if they're not available
        * to set on yourself */
       if (!check_status_available (obj, mixin_cls, i, NULL, FALSE))
         continue;
 
-      status = g_value_array_new (5);
-
-      g_value_array_append (status, NULL);
-      g_value_init (g_value_array_get_nth (status, 0), G_TYPE_UINT);
-      g_value_set_uint (g_value_array_get_nth (status, 0),
-          mixin_cls->statuses[i].presence_type);
-
-      g_value_array_append (status, NULL);
-      g_value_init (g_value_array_get_nth (status, 1), G_TYPE_BOOLEAN);
-      g_value_set_boolean (g_value_array_get_nth (status, 1),
-          mixin_cls->statuses[i].self);
-
-      /* everything is exclusive */
-      g_value_array_append (status, NULL);
-      g_value_init (g_value_array_get_nth (status, 2), G_TYPE_BOOLEAN);
-      g_value_set_boolean (g_value_array_get_nth (status, 2),
-          TRUE);
-
-      g_value_array_append (status, NULL);
-      g_value_init (g_value_array_get_nth (status, 3),
-          DBUS_TYPE_G_STRING_STRING_HASHTABLE);
-      g_value_take_boxed (g_value_array_get_nth (status, 3),
-          get_statuses_arguments (mixin_cls->statuses[i].optional_arguments));
+      args = get_statuses_arguments (mixin_cls->statuses[i].optional_arguments);
+      status = tp_value_array_build (4,
+          G_TYPE_UINT, (guint) mixin_cls->statuses[i].presence_type,
+          G_TYPE_BOOLEAN, mixin_cls->statuses[i].self,
+          G_TYPE_BOOLEAN, TRUE, /* exclusive */
+          DBUS_TYPE_G_STRING_STRING_HASHTABLE, args,
+          G_TYPE_INVALID);
+      g_hash_table_unref (args);
 
       g_hash_table_insert (ret, (gchar *) mixin_cls->statuses[i].name,
           status);
@@ -1260,45 +1253,25 @@ tp_presence_mixin_get_simple_presence_dbus_property (GObject *object,
       g_return_if_fail (G_VALUE_HOLDS_BOXED (value));
 
       ret = g_hash_table_new_full (g_str_hash, g_str_equal,
-                               NULL, (GDestroyNotify) g_value_array_free);
+                               NULL, (GDestroyNotify) tp_value_array_free);
 
       for (i=0; mixin_cls->statuses[i].name != NULL; i++)
         {
-          const TpPresenceStatusOptionalArgumentSpec *specs;
-          int j;
-          gboolean message = FALSE;
+          gboolean message;
 
           /* we include statuses here even if they're not available
            * to set on yourself */
           if (!check_status_available (object, mixin_cls, i, NULL, FALSE))
             continue;
 
-          specs = mixin_cls->statuses[i].optional_arguments;
+          message = tp_presence_status_spec_has_message (
+              &mixin_cls->statuses[i]);
 
-          for (j = 0; specs != NULL && specs[j].name != NULL; j++)
-            {
-              if (!tp_strdiff (specs[j].name, "message"))
-                {
-                  message = TRUE;
-                  break;
-                }
-            }
-
-         status = g_value_array_new (3);
-
-         g_value_array_append (status, NULL);
-         g_value_init (g_value_array_get_nth (status, 0), G_TYPE_UINT);
-         g_value_set_uint (g_value_array_get_nth (status, 0),
-             mixin_cls->statuses[i].presence_type);
-
-         g_value_array_append (status, NULL);
-         g_value_init (g_value_array_get_nth (status, 1), G_TYPE_BOOLEAN);
-         g_value_set_boolean (g_value_array_get_nth (status, 1),
-             mixin_cls->statuses[i].self);
-
-         g_value_array_append (status, NULL);
-         g_value_init (g_value_array_get_nth (status, 2), G_TYPE_BOOLEAN);
-         g_value_set_boolean (g_value_array_get_nth (status, 2), message);
+          status = tp_value_array_build (3,
+             G_TYPE_UINT, (guint) mixin_cls->statuses[i].presence_type,
+             G_TYPE_BOOLEAN, mixin_cls->statuses[i].self,
+             G_TYPE_BOOLEAN, message,
+             G_TYPE_INVALID);
 
          g_hash_table_insert (ret, (gchar *) mixin_cls->statuses[i].name,
              status);
@@ -1425,19 +1398,11 @@ construct_simple_presence_value_array (TpPresenceStatus *status,
   if (message == NULL)
     message = "";
 
-  presence = g_value_array_new (3);
-
-  g_value_array_append (presence, NULL);
-  g_value_init (g_value_array_get_nth (presence, 0), G_TYPE_UINT);
-  g_value_set_uint (g_value_array_get_nth (presence, 0), status_type);
-
-  g_value_array_append (presence, NULL);
-  g_value_init (g_value_array_get_nth (presence, 1), G_TYPE_STRING);
-  g_value_set_string (g_value_array_get_nth (presence, 1), status_name);
-
-  g_value_array_append (presence, NULL);
-  g_value_init (g_value_array_get_nth (presence, 2), G_TYPE_STRING);
-  g_value_set_string (g_value_array_get_nth (presence, 2), message);
+  presence = tp_value_array_build (3,
+      G_TYPE_UINT, status_type,
+      G_TYPE_STRING, status_name,
+      G_TYPE_STRING, message,
+      G_TYPE_INVALID);
 
   return presence;
 }
@@ -1460,7 +1425,7 @@ construct_simple_presence_hash (const TpPresenceStatusSpec *supported_statuses,
                          GHashTable *contact_statuses)
 {
   GHashTable *presence_hash = g_hash_table_new_full (NULL, NULL, NULL,
-      (GDestroyNotify) g_value_array_free);
+      (GDestroyNotify) tp_value_array_free);
   GHashTableIter iter;
   gpointer key, value;
 
@@ -1578,6 +1543,9 @@ tp_presence_mixin_simple_presence_fill_contact_attributes (GObject *obj,
     {
       GHashTableIter iter;
       gpointer key, value;
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+      GType type = G_TYPE_VALUE_ARRAY;
+      G_GNUC_END_IGNORE_DEPRECATIONS
 
       g_hash_table_iter_init (&iter, contact_statuses);
       while (g_hash_table_iter_next (&iter, &key, &value))
@@ -1589,7 +1557,7 @@ tp_presence_mixin_simple_presence_fill_contact_attributes (GObject *obj,
 
           tp_contacts_mixin_set_contact_attribute (attributes_hash, handle,
               TP_TOKEN_CONNECTION_INTERFACE_SIMPLE_PRESENCE_PRESENCE,
-              tp_g_value_slice_new_take_boxed (G_TYPE_VALUE_ARRAY, presence));
+              tp_g_value_slice_new_take_boxed (type, presence));
         }
 
       g_hash_table_unref (contact_statuses);
@@ -1613,3 +1581,188 @@ tp_presence_mixin_simple_presence_register_with_contacts_mixin (GObject *obj)
       tp_presence_mixin_simple_presence_fill_contact_attributes);
 }
 
+/* For now, self->priv is just self if heap-allocated, NULL if not. */
+static gboolean
+_tp_presence_status_spec_is_heap_allocated (const TpPresenceStatusSpec *self)
+{
+  return (self->priv == (TpPresenceStatusSpecPrivate *) self);
+}
+
+/**
+ * tp_presence_status_spec_get_presence_type:
+ * @self: a presence status specification
+ *
+ * Return the category into which this presence type falls. For instance,
+ * for XMPP's "" (do not disturb) status, this would return
+ * %TP_CONNECTION_PRESENCE_TYPE_BUSY.
+ *
+ * Returns: a #TpConnectionPresenceType
+ * Since: 0.23.1
+ */
+TpConnectionPresenceType
+tp_presence_status_spec_get_presence_type (const TpPresenceStatusSpec *self)
+{
+  g_return_val_if_fail (self != NULL, TP_CONNECTION_PRESENCE_TYPE_UNSET);
+
+  return self->presence_type;
+}
+
+/**
+ * tp_presence_status_spec_get_name:
+ * @self: a presence status specification
+ *
+ * <!-- -->
+ *
+ * Returns: (transfer none): the name of this presence status,
+ *  such as "available" or "out-to-lunch".
+ * Since: 0.23.1
+ */
+const gchar *
+tp_presence_status_spec_get_name (const TpPresenceStatusSpec *self)
+{
+  g_return_val_if_fail (self != NULL, NULL);
+
+  return self->name;
+}
+
+/**
+ * tp_presence_status_spec_can_set_on_self:
+ * @self: a presence status specification
+ *
+ * <!-- -->
+ *
+ * Returns: %TRUE if the user can set this presence status on themselves (most
+ *  statuses), or %FALSE if they cannot directly set it on
+ *  themselves (typically used for %TP_CONNECTION_PRESENCE_TYPE_OFFLINE
+ *  and %TP_CONNECTION_PRESENCE_TYPE_ERROR)
+ * Since: 0.23.1
+ */
+gboolean
+tp_presence_status_spec_can_set_on_self (const TpPresenceStatusSpec *self)
+{
+  g_return_val_if_fail (self != NULL, FALSE);
+
+  return self->self;
+}
+
+/**
+ * tp_presence_status_spec_has_message:
+ * @self: a presence status specification
+ *
+ * <!-- -->
+ *
+ * Returns: %TRUE if this presence status is accompanied by an optional
+ *  human-readable message
+ * Since: 0.23.1
+ */
+gboolean
+tp_presence_status_spec_has_message (const TpPresenceStatusSpec *self)
+{
+  const TpPresenceStatusOptionalArgumentSpec *arg;
+
+  g_return_val_if_fail (self != NULL, FALSE);
+
+  if (self->optional_arguments == NULL)
+    return FALSE;
+
+  for (arg = self->optional_arguments; arg->name != NULL; arg++)
+    {
+      if (!tp_strdiff (arg->name, "message") && !tp_strdiff (arg->dtype, "s"))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+/**
+ * tp_presence_status_spec_new:
+ * @name: the name of the new presence status
+ * @type: the category into which this presence status falls
+ * @can_set_on_self: %TRUE if the user can set this presence status
+ *  on themselves
+ * @has_message: %TRUE if this presence status is accompanied by an
+ *  optional human-readable message
+ *
+ * <!-- -->
+ *
+ * Returns: (transfer full): a new #TpPresenceStatusSpec
+ * Since: 0.23.1
+ */
+TpPresenceStatusSpec *
+tp_presence_status_spec_new (const gchar *name,
+    TpConnectionPresenceType type,
+    gboolean can_set_on_self,
+    gboolean has_message)
+{
+  TpPresenceStatusSpec *ret;
+  static const TpPresenceStatusOptionalArgumentSpec yes_it_has_a_message[] = {
+        { "message", "s" },
+        { NULL }
+  };
+
+  g_return_val_if_fail (!tp_str_empty (name), NULL);
+  g_return_val_if_fail (type >= 0 && type < TP_NUM_CONNECTION_PRESENCE_TYPES,
+      NULL);
+
+  ret = g_slice_new0 (TpPresenceStatusSpec);
+
+  ret->name = g_strdup (name);
+  ret->presence_type = type;
+  ret->self = can_set_on_self;
+
+  if (has_message)
+    ret->optional_arguments = yes_it_has_a_message;
+  else
+    ret->optional_arguments = NULL;
+
+  /* dummy marker for "this is on the heap" rather than a real struct */
+  ret->priv = (TpPresenceStatusSpecPrivate *) ret;
+
+  return ret;
+}
+
+/**
+ * tp_presence_status_spec_copy:
+ * @self: a presence status specification
+ *
+ * Copy a presence status specification.
+ *
+ * If @self has optional arguments other than a string named "message",
+ * they are not copied. Optional arguments with other names or types
+ * are deprecated.
+ *
+ * Returns: (transfer full): a new #TpPresenceStatusSpec resembling @self
+ * Since: 0.23.1
+ */
+TpPresenceStatusSpec *
+tp_presence_status_spec_copy (const TpPresenceStatusSpec *self)
+{
+  g_return_val_if_fail (self != NULL, NULL);
+
+  return tp_presence_status_spec_new (self->name, self->presence_type,
+      self->self, tp_presence_status_spec_has_message (self));
+}
+
+/**
+ * tp_presence_status_spec_free:
+ * @self: (transfer full): a presence status specification
+ *
+ * Free a presence status specification produced by
+ * tp_presence_status_spec_new() or tp_presence_status_spec_copy().
+ *
+ * Since: 0.23.1
+ */
+void
+tp_presence_status_spec_free (TpPresenceStatusSpec *self)
+{
+  g_return_if_fail (_tp_presence_status_spec_is_heap_allocated (self));
+
+  /* This struct was designed to always be on the stack, so freeing this
+   * needs a non-const-correct cast */
+  g_free ((gchar *) self->name);
+
+  g_slice_free (TpPresenceStatusSpec, self);
+}
+
+G_DEFINE_BOXED_TYPE (TpPresenceStatusSpec, tp_presence_status_spec,
+    tp_presence_status_spec_copy, tp_presence_status_spec_free)

@@ -27,7 +27,6 @@ static void
 setup (Test *test,
        gconstpointer data)
 {
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -74,5 +73,5 @@ main (int argc,
   /* tp_channel_dispatcher_present_channel_async() is tested in
    * test-base-client */
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

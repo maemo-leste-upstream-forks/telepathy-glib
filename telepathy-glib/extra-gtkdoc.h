@@ -471,6 +471,13 @@
  */
 
 /**
+ * TP_VERSION_0_24: (skip)
+ *
+ * A constant representing the telepathy-glib 0.24 stable branch,
+ * and the 0.23 development branch that led to it.
+ */
+
+/**
  * TP_VERSION_1_0: (skip)
  *
  * A constant representing the telepathy-glib 1.0 stable branch,
@@ -1190,4 +1197,27 @@
  * Misc interfaces for calls.
  *
  * Since: 0.17.5
+ */
+
+/**
+ * SECTION:connection-renaming
+ * @title: Connection Renaming interface
+ * @short_description: client-side wrappers for the Renaming interface
+ * @see_also: #TpConnection
+ *
+ * In IRC, and perhaps other protocols, users' unique identifiers can change.
+ * The Renaming interface models this.
+ */
+
+/**
+ * SECTION:connection-sidecars
+ * @title: Connection Sidecars interface
+ * @short_description: client-side wrappers for the Sidecars interface
+ * @see_also: #TpConnection
+ *
+ * Some Telepathy connection managers have a plugin API, with plugins
+ * providing plugin-specific channel types and other D-Bus APIs. It is
+ * technically difficult for plugins to add interfaces analogous to Aliasing,
+ * Avatars etc. to a Connection. The Sidecars1 interface provides an
+ * alternative, by attaching plugin-provided interfaces to a secondary object.
  */

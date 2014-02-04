@@ -81,8 +81,16 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/tools/lcov.am $(srcdir)/tools/telepathy.am \
 	INSTALL NEWS README AUTHORS ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps) $(srcdir)/config.h.in COPYING compile \
-	config.guess config.sub depcomp install-sh missing ltmain.sh
+	$(am__configure_deps) $(srcdir)/config.h.in COPYING \
+	build-aux/compile config.guess build-aux/config.guess \
+	config.sub build-aux/config.sub depcomp build-aux/depcomp \
+	install-sh build-aux/install-sh missing build-aux/missing \
+	ltmain.sh build-aux/ltmain.sh $(top_srcdir)/build-aux/compile \
+	$(top_srcdir)/build-aux/config.guess \
+	$(top_srcdir)/build-aux/config.sub \
+	$(top_srcdir)/build-aux/install-sh \
+	$(top_srcdir)/build-aux/ltmain.sh \
+	$(top_srcdir)/build-aux/missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler.m4 \
@@ -887,7 +895,7 @@ check-valgrind:
 maintainer-upload-release: _maintainer-upload-release-local
 _maintainer-upload-release-local: _maintainer-upload-release-check
 	rsync -rvzPp --chmod=Dg+s,ug+rwX,o=rX $(builddir)/docs/reference/html/ \
-	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib-0.22.x/
+	telepathy.freedesktop.org:/srv/telepathy.freedesktop.org/www/doc/telepathy-glib/
 
 upload-branch-docs: all
 	rsync -rtzvPp --chmod=a+rX docs/reference/html/ \
@@ -968,7 +976,7 @@ maintainer-prepare-release:
 	$(MAKE) all
 	$(MAKE) distcheck
 	$(MAKE) release-mail
-	git tag -s @PACKAGE@-@VERSION@ -m @PACKAGE@' '@VERSION@
+	cd $(srcdir) && git tag -s @PACKAGE@-@VERSION@ -m @PACKAGE@' '@VERSION@
 	gpg --detach-sign --armor @PACKAGE@-@VERSION@.tar.gz
 
 release-mail: NEWS
