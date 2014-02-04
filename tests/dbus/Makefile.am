@@ -287,9 +287,11 @@ TESTS_ENVIRONMENT = \
     G_SLICE=debug-blocks \
     G_DEBUG=fatal_warnings,fatal_criticals$(maybe_gc_friendly) \
     G_MESSAGES_DEBUG=all \
+    GIO_USE_VFS=local \
+    GSETTINGS_BACKEND=memory \
+    TP_TESTS_SERVICES_DIR=@abs_srcdir@/dbus-1/services \
+    DBUS_SESSION_BUS_ADDRESS=this-is-clearly-not-valid \
     $(top_srcdir)/tools/test-wrapper.sh \
-    sh $(top_srcdir)/tools/with-session-bus.sh \
-        --config-file=dbus-uninstalled/session.conf -- \
     $(EXTRA_TESTS_ENVIRONMENT)
 
 EXTRA_TESTS_ENVIRONMENT =
@@ -308,8 +310,6 @@ VALGRIND_TESTS_ENVIRONMENT = \
     $(VALGRIND) --suppressions=$(top_srcdir)/tests/tests.supp $(VALGRIND_FLAGS)
 
 BUILT_SOURCES = \
-	dbus-installed/session.conf \
-	dbus-uninstalled/session.conf \
 	_gen/errors-check.h \
 	_gen/svc.h \
 	_gen/svc.c \
@@ -324,10 +324,7 @@ distclean-local:
 	rm -rf _gen
 
 EXTRA_DIST = \
-    dbus-installed/session.conf.in \
-    dbus-installed/services/spurious.service \
-    dbus-uninstalled/session.conf.in \
-    dbus-uninstalled/services/spurious.service \
+    dbus-1/services/spurious.service \
     telepathy/managers/spurious.manager \
     telepathy/managers/test_manager_file.manager \
     telepathy/managers/test_manager_file_invalid.manager \
@@ -342,27 +339,11 @@ run-test.sh: run-test.sh.in
 		$< > $@
 	@chmod +x $@
 
-dbus-uninstalled/%.conf: $(srcdir)/dbus-uninstalled/%.conf.in
-	$(AM_V_at)$(MKDIR_P) dbus-uninstalled
-	$(AM_V_GEN)sed \
-		-e "s|[@]abs_top_builddir[@]|@abs_top_builddir@|g" \
-		-e "s|[@]abs_top_srcdir[@]|@abs_top_srcdir@|g" \
-		$< > $@
-
-dbus-installed/%.conf: $(srcdir)/dbus-installed/%.conf.in
-	$(AM_V_at)$(MKDIR_P) dbus-installed
-	$(AM_V_GEN)sed -e "s|[@]tpglibtestsdir[@]|@tpglibtestsdir@|g" $< > $@
-
-service_files = dbus-installed/services/spurious.service
-conf_in_files = dbus-installed/session.conf.in
-conf_files = $(conf_in_files:.conf.in=.conf)
+service_files = services/dbus-1/spurious.service
 
 if ENABLE_INSTALLED_TESTS
-dbusservicedir = @tpglibtestsdir@/dbus-installed/services
+dbusservicedir = @tpglibtestsdir@/dbus-1/services
 dbusservice_DATA = $(service_files)
-
-dbusconfigdir = @tpglibtestsdir@/dbus-installed
-dbusconfig_DATA = $(conf_files)
 endif
 
 _gen/svc.h: _gen/svc.c
@@ -371,7 +352,7 @@ _gen/svc.h: _gen/svc.c
 _gen/svc.c: with-properties.xml \
 	$(top_srcdir)/tools/glib-ginterface-gen.py \
 	Makefile.am
-	$(AM_V_at)$(mkdir_p) _gen
+	$(AM_V_at)$(MKDIR_P) _gen
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-ginterface-gen.py \
 		--filename=_gen/svc \
 		--signal-marshal-prefix=NOT_NEEDED \
@@ -380,5 +361,5 @@ _gen/svc.c: with-properties.xml \
 
 _gen/errors-check.h: $(top_srcdir)/spec/errors.xml \
 	$(top_srcdir)/tools/glib-errors-check-gen.py
-	$(AM_V_at)$(mkdir_p) _gen
+	$(AM_V_at)$(MKDIR_P) _gen
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/tools/glib-errors-check-gen.py $< > $@

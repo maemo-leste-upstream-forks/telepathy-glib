@@ -15,12 +15,8 @@
 
 #include <dbus/dbus-glib.h>
 
-#include <telepathy-glib/interfaces.h>
-#include <telepathy-glib/dbus.h>
-#include <telepathy-glib/errors.h>
-#include <telepathy-glib/gtypes.h>
-#include <telepathy-glib/handle-repo-dynamic.h>
-#include <telepathy-glib/util.h>
+#include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/telepathy-glib-dbus.h>
 
 #include "debug.h"
 
@@ -642,28 +638,22 @@ tp_tests_contacts_connection_change_aliases (TpTestsContactsConnection *self,
 
   for (i = 0; i < n; i++)
     {
-      GValueArray *pair = g_value_array_new (2);
+      GValueArray *pair = tp_value_array_build (2,
+          G_TYPE_UINT, handles[i],
+          G_TYPE_STRING, aliases[i],
+          G_TYPE_INVALID);
 
       DEBUG ("contact#%u -> %s", handles[i], aliases[i]);
 
       g_hash_table_insert (self->priv->aliases,
           GUINT_TO_POINTER (handles[i]), g_strdup (aliases[i]));
-
-      g_value_array_append (pair, NULL);
-      g_value_init (pair->values + 0, G_TYPE_UINT);
-      g_value_set_uint (pair->values + 0, handles[i]);
-
-      g_value_array_append (pair, NULL);
-      g_value_init (pair->values + 1, G_TYPE_STRING);
-      g_value_set_string (pair->values + 1, aliases[i]);
-
       g_ptr_array_add (structs, pair);
     }
 
   tp_svc_connection_interface_aliasing_emit_aliases_changed (self,
       structs);
 
-  g_ptr_array_foreach (structs, (GFunc) g_value_array_free, NULL);
+  g_ptr_array_foreach (structs, (GFunc) tp_value_array_free, NULL);
   g_ptr_array_unref (structs);
 }
 
@@ -1340,9 +1330,11 @@ my_set_contact_info (TpSvcConnectionInterfaceContactInfo *obj,
   TP_BASE_CONNECTION_ERROR_IF_NOT_CONNECTED (base, context);
 
   /* Deep copy info */
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   copy = g_ptr_array_new_with_free_func ((GDestroyNotify) g_value_array_free);
   for (i = 0; i < info->len; i++)
     g_ptr_array_add (copy, g_value_array_copy (g_ptr_array_index (info, i)));
+  G_GNUC_END_IGNORE_DEPRECATIONS
 
   self_handle = tp_base_connection_get_self_handle (base);
   tp_tests_contacts_connection_change_contact_info (self, self_handle, copy);

@@ -57,7 +57,6 @@ setup (Test *test,
 
   invalidated_for_test.domain = TP_ERROR;
 
-  g_type_init ();
   tp_debug_set_flags ("all");
   test->dbus = tp_tests_dbus_daemon_dup_or_die ();
 
@@ -446,5 +445,5 @@ main (int argc,
   g_test_add ("/conn/object_path", Test, NULL, setup,
       test_object_path, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

@@ -55,7 +55,6 @@ setup (Test *test,
 {
   DBusConnection *libdbus;
 
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -945,5 +944,5 @@ main (int argc,
   g_test_add ("/cdo/destroy-channels", Test, NULL, setup_services,
       test_destroy_channels, teardown_services);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

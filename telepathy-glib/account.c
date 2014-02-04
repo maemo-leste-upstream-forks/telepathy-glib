@@ -149,6 +149,7 @@ G_DEFINE_TYPE (TpAccount, tp_account, TP_TYPE_PROXY)
 enum {
   STATUS_CHANGED,
   PRESENCE_CHANGED,
+  AVATAR_CHANGED,
   LAST_SIGNAL
 };
 
@@ -631,6 +632,8 @@ _tp_account_update (TpAccount *account,
   TpConnectionStatus old_s = priv->connection_status;
   gboolean status_changed = FALSE;
   gboolean presence_changed = FALSE;
+  const gchar *status;
+  const gchar *message;
 
   tp_proxy_add_interfaces (proxy, tp_asv_get_strv (properties, "Interfaces"));
 
@@ -721,29 +724,30 @@ _tp_account_update (TpAccount *account,
       presence_changed = TRUE;
       arr = tp_asv_get_boxed (properties, "CurrentPresence",
           TP_STRUCT_TYPE_SIMPLE_PRESENCE);
-      priv->cur_presence = g_value_get_uint (g_value_array_get_nth (arr, 0));
 
+      tp_value_array_unpack (arr, 3,
+          &priv->cur_presence,
+          &status,
+          &message);
       g_free (priv->cur_status);
-      priv->cur_status = g_value_dup_string (g_value_array_get_nth (arr, 1));
-
+      priv->cur_status = g_strdup (status);
       g_free (priv->cur_message);
-      priv->cur_message = g_value_dup_string (g_value_array_get_nth (arr, 2));
+      priv->cur_message = g_strdup (message);
     }
 
   if (g_hash_table_lookup (properties, "RequestedPresence") != NULL)
     {
       arr = tp_asv_get_boxed (properties, "RequestedPresence",
           TP_STRUCT_TYPE_SIMPLE_PRESENCE);
-      priv->requested_presence =
-        g_value_get_uint (g_value_array_get_nth (arr, 0));
 
+      tp_value_array_unpack (arr, 3,
+          &priv->requested_presence,
+          &status,
+          &message);
       g_free (priv->requested_status);
-      priv->requested_status =
-        g_value_dup_string (g_value_array_get_nth (arr, 1));
-
+      priv->requested_status = g_strdup (status);
       g_free (priv->requested_message);
-      priv->requested_message =
-        g_value_dup_string (g_value_array_get_nth (arr, 2));
+      priv->requested_message = g_strdup (message);
 
       g_object_notify (G_OBJECT (account), "requested-presence-type");
       g_object_notify (G_OBJECT (account), "requested-status");
@@ -754,16 +758,15 @@ _tp_account_update (TpAccount *account,
     {
       arr = tp_asv_get_boxed (properties, "AutomaticPresence",
           TP_STRUCT_TYPE_SIMPLE_PRESENCE);
-      priv->auto_presence =
-        g_value_get_uint (g_value_array_get_nth (arr, 0));
 
+      tp_value_array_unpack (arr, 3,
+          &priv->auto_presence,
+          &status,
+          &message);
       g_free (priv->auto_status);
-      priv->auto_status =
-        g_value_dup_string (g_value_array_get_nth (arr, 1));
-
+      priv->auto_status = g_strdup (status);
       g_free (priv->auto_message);
-      priv->auto_message =
-        g_value_dup_string (g_value_array_get_nth (arr, 2));
+      priv->auto_message = g_strdup (message);
 
       g_object_notify (G_OBJECT (account), "automatic-presence-type");
       g_object_notify (G_OBJECT (account), "automatic-status");
@@ -1005,6 +1008,14 @@ _tp_account_properties_changed (TpAccount *proxy,
 }
 
 static void
+avatar_changed_cb (TpAccount *self,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  g_signal_emit (self, signals[AVATAR_CHANGED], 0);
+}
+
+static void
 _tp_account_got_all_cb (TpProxy *proxy,
     GHashTable *properties,
     const GError *error,
@@ -1025,6 +1036,11 @@ _tp_account_got_all_cb (TpProxy *proxy,
     }
 
   _tp_account_update (self, properties);
+
+  /* We can't try connecting this signal earlier as tp_proxy_add_interfaces()
+   * has to be called first if we support the Avatar interface. */
+  tp_cli_account_interface_avatar_connect_to_avatar_changed (self,
+      avatar_changed_cb, NULL, NULL, G_OBJECT (self), NULL);
 }
 
 static void
@@ -2147,6 +2163,22 @@ tp_account_class_init (TpAccountClass *klass)
       G_SIGNAL_RUN_LAST,
       0, NULL, NULL, NULL,
       G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
+
+  /**
+   * TpAccount::avatar-changed:
+   * @self: a #TpAccount
+   *
+   * Emitted when the avatar changes. Call tp_account_get_avatar_async()
+   * to get the new avatar data.
+   *
+   * Since: 0.23.0
+   */
+  signals[AVATAR_CHANGED] = g_signal_new ("avatar-changed",
+      G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST,
+      0, NULL, NULL, NULL,
+      G_TYPE_NONE,
+      0);
 
   proxy_class->interface = TP_IFACE_QUARK_ACCOUNT;
   proxy_class->list_features = _tp_account_list_features;
@@ -3551,8 +3583,6 @@ _tp_account_got_avatar_cb (TpProxy *proxy,
     GObject *weak_object)
 {
   GSimpleAsyncResult *result = G_SIMPLE_ASYNC_RESULT (user_data);
-  GValueArray *avatar;
-  GArray *res;
 
   if (error != NULL)
     {
@@ -3567,8 +3597,18 @@ _tp_account_got_avatar_cb (TpProxy *proxy,
     }
   else
     {
+      GValueArray *avatar;
+      GArray *res;
+      const GArray *tmp;
+      const gchar *mime_type;
+
       avatar = g_value_get_boxed (out_Value);
-      res = g_value_dup_boxed (g_value_array_get_nth (avatar, 0));
+      tp_value_array_unpack (avatar, 2,
+          &tmp,
+          &mime_type);
+
+      res = g_array_sized_new (FALSE, FALSE, 1, tmp->len);
+      g_array_append_vals (res, tmp->data, tmp->len);
       g_simple_async_result_set_op_res_gpointer (result, res,
           (GDestroyNotify) g_array_unref);
     }
@@ -3641,6 +3681,7 @@ tp_account_get_avatar_finish (TpAccount *account,
  * Returns: the same thing as tp_proxy_is_prepared()
  *
  * Since: 0.9.0
+ * Deprecated: since 0.23.0, use tp_proxy_is_prepared() instead.
  */
 gboolean
 tp_account_is_prepared (TpAccount *account,

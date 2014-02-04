@@ -22,7 +22,6 @@ static void
 setup (Test *test,
     gconstpointer data)
 {
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   tp_tests_create_and_connect_conn (TP_TESTS_TYPE_SIMPLE_CONNECTION,
@@ -341,5 +340,5 @@ main (int argc,
   g_test_add (TEST_PREFIX "take_message", Test, NULL, setup,
       test_take_message, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

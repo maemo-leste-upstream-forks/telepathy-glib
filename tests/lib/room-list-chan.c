@@ -4,8 +4,6 @@
 #include "room-list-chan.h"
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <telepathy-glib/channel-iface.h>
-#include <telepathy-glib/svc-channel.h>
 
 static void room_list_iface_init (gpointer iface,
     gpointer data);
@@ -192,7 +190,7 @@ find_rooms (gpointer data)
   TpTestsRoomListChan *self = TP_TESTS_ROOM_LIST_CHAN (data);
   GPtrArray *rooms;
 
-  rooms = g_ptr_array_new_with_free_func ((GDestroyNotify) g_value_array_free);
+  rooms = g_ptr_array_new_with_free_func ((GDestroyNotify) tp_value_array_free);
 
   /* Find 2 rooms */
   add_room (rooms);

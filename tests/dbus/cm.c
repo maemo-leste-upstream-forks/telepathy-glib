@@ -131,7 +131,6 @@ setup (Test *test,
   TpBaseConnectionManager *service_cm_as_base;
   gboolean ok;
 
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -1191,5 +1190,5 @@ main (int argc,
   g_test_add ("/cm/list", Test, GINT_TO_POINTER (USE_OLD_LIST),
       setup, test_list, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }
