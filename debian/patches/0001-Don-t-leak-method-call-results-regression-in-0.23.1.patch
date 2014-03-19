@@ -1,0 +1,74 @@
+From: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date: Tue, 18 Mar 2014 13:51:16 +0000
+Subject: Don't leak method call results (regression in 0.23.1)
+
+Commit 7ffbde3f used common code for two blocks that were not actually
+the same. dbus-glib method calls give the caller a new reference
+to the results, whereas dbus-glib signals do not. As a result,
+the method-call case needs to either free the results, or get them
+freed by giving ownership to the GValueArray. I chose to give
+ownership.
+
+Reviewed-by: Guillaume Desmottes
+Origin: upstream, 0.23.4, commit:164cf33347e03e3d04f013ec7f710d991825cd66
+---
+ tools/glib-client-gen.py |  6 +++---
+ tools/libglibcodegen.py  | 21 +++++++++++++++++++++
+ 2 files changed, 24 insertions(+), 3 deletions(-)
+
+diff --git a/tools/glib-client-gen.py b/tools/glib-client-gen.py
+index a0fecf0..b7edbc0 100644
+--- a/tools/glib-client-gen.py
++++ b/tools/glib-client-gen.py
+@@ -29,8 +29,8 @@ from getopt import gnu_getopt
+ 
+ from libtpcodegen import file_set_contents, key_by_name, u
+ from libglibcodegen import (Signature, type_to_gtype,
+-        get_docstring, xml_escape, get_deprecated, copy_into_gvalue)
+-
++        get_docstring, xml_escape, get_deprecated, copy_into_gvalue,
++        move_into_gvalue)
+ 
+ NS_TP = "http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+ 
+@@ -545,7 +545,7 @@ class Generator(object):
+                 self.b('  g_value_unset (args->values + %d);' % i)
+                 self.b('  g_value_init (args->values + %d, %s);' % (i, gtype))
+ 
+-                self.b('  ' + copy_into_gvalue('args->values + %d' % i,
++                self.b('  ' + move_into_gvalue('args->values + %d' % i,
+                     gtype, marshaller, name))
+ 
+             self.b('  tp_proxy_pending_call_v0_take_results (user_data, '
+diff --git a/tools/libglibcodegen.py b/tools/libglibcodegen.py
+index 0b703a5..5c76f07 100644
+--- a/tools/libglibcodegen.py
++++ b/tools/libglibcodegen.py
+@@ -171,6 +171,27 @@ def type_to_gtype(s):
+     # we just don't know ..
+     raise Exception("don't know the GType for " + s)
+ 
++def move_into_gvalue(gvaluep, gtype, marshaller, name):
++    if gtype == 'G_TYPE_STRING':
++        return 'g_value_take_string (%s, %s);' % (gvaluep, name)
++    elif marshaller == 'BOXED':
++        return 'g_value_take_boxed (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_UCHAR':
++        return 'g_value_set_uchar (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_BOOLEAN':
++        return 'g_value_set_boolean (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_INT':
++        return 'g_value_set_int (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_UINT':
++        return 'g_value_set_uint (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_INT64':
++        return 'g_value_set_int (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_UINT64':
++        return 'g_value_set_uint64 (%s, %s);' % (gvaluep, name)
++    elif gtype == 'G_TYPE_DOUBLE':
++        return 'g_value_set_double (%s, %s);' % (gvaluep, name)
++    else:
++        raise AssertionError("Don't know how to put %s in a GValue" % gtype)
+ 
+ def copy_into_gvalue(gvaluep, gtype, marshaller, name):
+     if gtype == 'G_TYPE_STRING':
