@@ -10,16 +10,12 @@
 
 #include "config.h"
 
+#include <string.h>
+
 #include "simple-account.h"
 
-#include <telepathy-glib/dbus.h>
-#include <telepathy-glib/defs.h>
-#include <telepathy-glib/enums.h>
-#include <telepathy-glib/gtypes.h>
-#include <telepathy-glib/interfaces.h>
-#include <telepathy-glib/util.h>
-#include <telepathy-glib/svc-generic.h>
-#include <telepathy-glib/svc-account.h>
+#include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/telepathy-glib-dbus.h>
 
 static void account_iface_init (gpointer, gpointer);
 
@@ -42,6 +38,7 @@ G_DEFINE_TYPE_WITH_CODE (TpTestsSimpleAccount,
 static const char *ACCOUNT_INTERFACES[] = {
     TP_IFACE_ACCOUNT_INTERFACE_ADDRESSING,
     TP_IFACE_ACCOUNT_INTERFACE_STORAGE,
+    TP_IFACE_ACCOUNT_INTERFACE_AVATAR,
     NULL };
 
 enum
@@ -81,6 +78,8 @@ struct _TpTestsSimpleAccountPrivate
   gchar *connection_path;
   gboolean enabled;
   GPtrArray *uri_schemes;
+  GHashTable *parameters;
+  GArray *avatar;
 };
 
 static void
@@ -143,6 +142,12 @@ tp_tests_simple_account_init (TpTestsSimpleAccount *self)
   self->priv->uri_schemes = g_ptr_array_new_with_free_func (g_free);
   for (i = 0; uri_schemes[i] != NULL; i++)
     g_ptr_array_add (self->priv->uri_schemes, g_strdup (uri_schemes[i]));
+
+  self->priv->parameters = g_hash_table_new (NULL, NULL);
+
+  self->priv->avatar = g_array_new (FALSE, FALSE, sizeof (char));
+
+  tp_tests_simple_account_set_avatar (self, ":-)");
 }
 
 static void
@@ -177,7 +182,7 @@ tp_tests_simple_account_get_property (GObject *object,
       g_value_set_string (value, "badger");
       break;
     case PROP_PARAMETERS:
-      g_value_take_boxed (value, g_hash_table_new (NULL, NULL));
+      g_value_set_boxed (value, self->priv->parameters);
       break;
     case PROP_AUTOMATIC_PRESENCE:
       g_value_take_boxed (value, tp_value_array_build (3,
@@ -253,17 +258,11 @@ tp_tests_simple_account_get_property (GObject *object,
       break;
     case PROP_AVATAR:
         {
-          GArray *arr = g_array_new (FALSE, FALSE, sizeof (char));
-
-          /* includes NUL for simplicity */
-          g_array_append_vals (arr, ":-)", 4);
-
           g_value_take_boxed (value,
               tp_value_array_build (2,
-                TP_TYPE_UCHAR_ARRAY, arr,
+                TP_TYPE_UCHAR_ARRAY, self->priv->avatar,
                 G_TYPE_STRING, "text/plain",
                 G_TYPE_INVALID));
-          g_array_unref (arr);
         }
       break;
     case PROP_SUPERSEDES:
@@ -284,6 +283,26 @@ tp_tests_simple_account_get_property (GObject *object,
 }
 
 static void
+tp_tests_simple_account_set_property (GObject *object,
+    guint property_id,
+    const GValue *value,
+    GParamSpec *spec)
+{
+  TpTestsSimpleAccount *self = TP_TESTS_SIMPLE_ACCOUNT (object);
+
+  switch (property_id)
+    {
+      case PROP_PARAMETERS:
+        self->priv->parameters = g_value_dup_boxed (value);
+        /* In principle we should be emitting AccountPropertyChanged here */
+        break;
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, spec);
+        break;
+    }
+}
+
+static void
 tp_tests_simple_account_finalize (GObject *object)
 {
   TpTestsSimpleAccount *self = TP_TESTS_SIMPLE_ACCOUNT (object);
@@ -293,6 +312,8 @@ tp_tests_simple_account_finalize (GObject *object)
   g_free (self->priv->connection_path);
 
   g_ptr_array_unref (self->priv->uri_schemes);
+  g_hash_table_unref (self->priv->parameters);
+  g_array_unref (self->priv->avatar);
 
   G_OBJECT_CLASS (tp_tests_simple_account_parent_class)->finalize (object);
 }
@@ -375,6 +396,7 @@ tp_tests_simple_account_class_init (TpTestsSimpleAccountClass *klass)
 
   g_type_class_add_private (klass, sizeof (TpTestsSimpleAccountPrivate));
   object_class->get_property = tp_tests_simple_account_get_property;
+  object_class->set_property = tp_tests_simple_account_set_property;
   object_class->finalize = tp_tests_simple_account_finalize;
 
   param_spec = g_param_spec_boxed ("interfaces", "Extra D-Bus interfaces",
@@ -416,7 +438,7 @@ tp_tests_simple_account_class_init (TpTestsSimpleAccountClass *klass)
   param_spec = g_param_spec_boxed ("parameters", "parameters",
       "Parameters property",
       TP_HASH_TYPE_STRING_VARIANT_MAP,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_PARAMETERS, param_spec);
 
   param_spec = g_param_spec_boxed ("automatic-presence", "automatic presence",
@@ -619,4 +641,17 @@ tp_tests_simple_account_add_uri_scheme (TpTestsSimpleAccount *self,
 
   g_strfreev (schemes);
   g_hash_table_unref (changed);
+}
+
+void
+tp_tests_simple_account_set_avatar (TpTestsSimpleAccount *self,
+    const gchar *avatar)
+{
+  g_return_if_fail (avatar != NULL);
+
+  g_array_set_size (self->priv->avatar, 0);
+  /* includes NULL for simplicity */
+  g_array_append_vals (self->priv->avatar, avatar, strlen (avatar) +1);
+
+  tp_svc_account_interface_avatar_emit_avatar_changed (self);
 }

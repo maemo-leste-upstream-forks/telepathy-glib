@@ -42,7 +42,6 @@ setup (Test *test,
   gboolean ok;
   gchar *name, *conn_path;
 
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -221,5 +220,5 @@ main (int argc,
   g_test_add ("/channel-manager-request-properties/target-id", Test, NULL, setup,
       test_target_id, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

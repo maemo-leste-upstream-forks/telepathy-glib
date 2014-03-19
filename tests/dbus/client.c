@@ -27,7 +27,6 @@ static void
 setup (Test *test,
        gconstpointer data)
 {
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -73,5 +72,5 @@ main (int argc,
 
   g_test_add ("/client/new", Test, NULL, setup, test_new, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

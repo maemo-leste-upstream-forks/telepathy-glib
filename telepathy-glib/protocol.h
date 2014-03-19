@@ -81,6 +81,13 @@ TpProtocol *tp_protocol_new (TpDBusDaemon *dbus, const gchar *cm_name,
     const gchar *protocol_name, const GHashTable *immutable_properties,
     GError **error);
 
+_TP_AVAILABLE_IN_0_24
+TpProtocol * tp_protocol_new_vardict (TpDBusDaemon *dbus,
+    const gchar *cm_name,
+    const gchar *protocol_name,
+    GVariant *immutable_properties,
+    GError **error);
+
 const gchar *tp_protocol_get_name (TpProtocol *self);
 
 _TP_AVAILABLE_IN_0_20
@@ -102,6 +109,9 @@ GStrv tp_protocol_dup_param_names (TpProtocol *self) G_GNUC_WARN_UNUSED_RESULT;
 _TP_AVAILABLE_IN_0_18
 GList *tp_protocol_dup_params (TpProtocol *self) G_GNUC_WARN_UNUSED_RESULT;
 
+_TP_AVAILABLE_IN_0_24
+GVariant * tp_protocol_dup_immutable_properties (TpProtocol *self);
+
 #ifndef TP_DISABLE_DEPRECATED
 _TP_DEPRECATED_IN_0_20_FOR(tp_protocol_dup_params)
 _TP_AVAILABLE_IN_0_18
@@ -112,6 +122,20 @@ const TpConnectionManagerParam *tp_protocol_borrow_params (TpProtocol *self)
 const gchar * const *
 /* gtk-doc sucks */
 tp_protocol_get_authentication_types (TpProtocol *self);
+
+_TP_AVAILABLE_IN_0_24
+const gchar * const *
+/* ... */
+tp_protocol_get_addressable_vcard_fields (TpProtocol *self);
+
+_TP_AVAILABLE_IN_0_24
+const gchar * const *
+/* ... */
+tp_protocol_get_addressable_uri_schemes (TpProtocol *self);
+
+_TP_AVAILABLE_IN_0_24
+GList *tp_protocol_dup_presence_statuses (TpProtocol *self)
+  G_GNUC_WARN_UNUSED_RESULT;
 
 #define TP_PROTOCOL_FEATURE_CORE \
   (tp_protocol_get_feature_quark_core ())
@@ -124,6 +148,55 @@ TpCapabilities *tp_protocol_get_capabilities (TpProtocol *self);
 
 _TP_AVAILABLE_IN_0_16
 TpAvatarRequirements * tp_protocol_get_avatar_requirements (TpProtocol *self);
+
+_TP_AVAILABLE_IN_0_24
+void tp_protocol_normalize_contact_async (TpProtocol *self,
+    const gchar *contact,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+_TP_AVAILABLE_IN_0_24
+gchar *tp_protocol_normalize_contact_finish (TpProtocol *self,
+    GAsyncResult *result,
+    GError **error);
+
+_TP_AVAILABLE_IN_0_24
+void tp_protocol_identify_account_async (TpProtocol *self,
+    GVariant *vardict,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+_TP_AVAILABLE_IN_0_24
+gchar *tp_protocol_identify_account_finish (TpProtocol *self,
+    GAsyncResult *result,
+    GError **error);
+
+_TP_AVAILABLE_IN_0_24
+void tp_protocol_normalize_contact_uri_async (TpProtocol *self,
+    const gchar *uri,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+_TP_AVAILABLE_IN_0_24
+gchar *tp_protocol_normalize_contact_uri_finish (TpProtocol *self,
+    GAsyncResult *result,
+    GError **error);
+
+_TP_AVAILABLE_IN_0_24
+void tp_protocol_normalize_vcard_address_async (TpProtocol *self,
+    const gchar *field,
+    const gchar *value,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data);
+
+_TP_AVAILABLE_IN_0_24
+gchar *tp_protocol_normalize_vcard_address_finish (TpProtocol *self,
+    GAsyncResult *result,
+    GError **error);
 
 G_END_DECLS
 

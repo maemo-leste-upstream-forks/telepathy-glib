@@ -37,7 +37,6 @@ static void
 setup (Fixture *f,
     gconstpointer data)
 {
-  g_type_init ();
   tp_debug_set_flags ("all");
   f->dbus = tp_tests_dbus_daemon_dup_or_die ();
 
@@ -266,5 +265,5 @@ main (int argc,
   g_test_add ("/unsupported/signal", Fixture, NULL,
       setup, test_unsupported_signal, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

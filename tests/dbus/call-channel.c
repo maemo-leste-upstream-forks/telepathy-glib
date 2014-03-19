@@ -71,7 +71,6 @@ setup (Test *test,
   guint not_a_media_type = 31337;
   GQuark conn_features[] = { TP_CONNECTION_FEATURE_CONNECTED, 0 };
 
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -578,6 +577,8 @@ test_basics (Test *test,
       tp_channel_get_target_contact (test->chan));
   g_assert_cmpuint (GPOINTER_TO_UINT (v), ==,
       TP_SENDING_STATE_PENDING_SEND);
+  g_assert (tp_proxy_get_factory (audio_stream) ==
+      tp_proxy_get_factory (test->call_chan));
 
   g_assert_cmpuint (tp_call_stream_get_local_sending_state (audio_stream),
       ==, TP_SENDING_STATE_SENDING);
@@ -659,7 +660,9 @@ test_basics (Test *test,
   g_main_loop_run (test->mainloop);
   g_assert_no_error (test->error);
 
-  g_assert (test->added_content != NULL);
+  g_assert (TP_IS_CALL_CONTENT (test->added_content));
+  g_assert (tp_proxy_get_factory (test->added_content) ==
+      tp_proxy_get_factory (test->call_chan));
   video_content = test->added_content;
   tp_tests_proxy_run_until_prepared (video_content, NULL);
 
@@ -696,6 +699,8 @@ test_basics (Test *test,
   g_assert_cmpuint (g_hash_table_size (remote_members), ==, 1);
   v = g_hash_table_lookup (remote_members,
       tp_channel_get_target_contact (test->chan));
+  g_assert (tp_proxy_get_factory (video_stream) ==
+      tp_proxy_get_factory (test->call_chan));
 
   /* After a moment, the video stream becomes connected, and the remote user
    * accepts our proposed direction change. These might happen in either
@@ -1086,5 +1091,5 @@ main (int argc,
   g_test_add ("/call/dtmf", Test, NULL, setup, test_dtmf,
       teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }

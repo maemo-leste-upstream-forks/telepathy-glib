@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Connection Sidecars interface</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="telepathy-glib API Reference Manual">
+<link rel="up" href="ch-client.html" title="Client-side proxies">
+<link rel="prev" href="telepathy-glib-connection-renaming.html" title="Connection Renaming interface">
+<link rel="next" href="telepathy-glib-contact-search.html" title="TpContactSearch">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="telepathy-glib-connection-renaming.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch-client.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">telepathy-glib API Reference Manual</th>
+<td><a accesskey="n" href="telepathy-glib-contact-search.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#telepathy-glib-connection-sidecars.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#telepathy-glib-connection-sidecars.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="telepathy-glib-connection-sidecars"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="telepathy-glib-connection-sidecars.top_of_page"></a>Connection Sidecars interface</span></h2>
+<p>Connection Sidecars interface — client-side wrappers for the Sidecars interface</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="telepathy-glib-connection-sidecars.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+#include &lt;telepathy-glib/telepathy-glib-dbus.h&gt;
+
+<a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall" title="TpProxyPendingCall"><span class="returnvalue">TpProxyPendingCall</span></a> * <a class="link" href="telepathy-glib-connection-sidecars.html#tp-cli-connection-interface-sidecars1-call-ensure-sidecar" title="tp_cli_connection_interface_sidecars1_call_ensure_sidecar ()">tp_cli_connection_interface_sidecars1_call_ensure_sidecar</a>
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><span class="type">gint</span> timeout_ms</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">gchar</span> *in_Main_Interface</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-connection-sidecars.html#tp-cli-connection-interface-sidecars1-callback-for-ensure-sidecar" title="tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar ()"><span class="type">tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>,
+                                                         <em class="parameter"><code><span class="type">GObject</span> *weak_object</code></em>);
+<span class="returnvalue">void</span>                (<a class="link" href="telepathy-glib-connection-sidecars.html#tp-cli-connection-interface-sidecars1-callback-for-ensure-sidecar" title="tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar ()">*tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar</a>)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">gchar</span> *out_Path</code></em>,
+                                                         <em class="parameter"><code><span class="type">GHashTable</span> *out_Properties</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">GError</span> *error</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GObject</span> *weak_object</code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="telepathy-glib-connection-sidecars.description"></a><h2>Description</h2>
+<p>
+Some Telepathy connection managers have a plugin API, with plugins
+providing plugin-specific channel types and other D-Bus APIs. It is
+technically difficult for plugins to add interfaces analogous to Aliasing,
+Avatars etc. to a Connection. The Sidecars1 interface provides an
+alternative, by attaching plugin-provided interfaces to a secondary object.
+</p>
+</div>
+<div class="refsect1">
+<a name="telepathy-glib-connection-sidecars.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="tp-cli-connection-interface-sidecars1-call-ensure-sidecar"></a><h3>tp_cli_connection_interface_sidecars1_call_ensure_sidecar ()</h3>
+<pre class="programlisting"><a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall" title="TpProxyPendingCall"><span class="returnvalue">TpProxyPendingCall</span></a> * tp_cli_connection_interface_sidecars1_call_ensure_sidecar
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code><span class="type">gint</span> timeout_ms</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">gchar</span> *in_Main_Interface</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="telepathy-glib-connection-sidecars.html#tp-cli-connection-interface-sidecars1-callback-for-ensure-sidecar" title="tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar ()"><span class="type">tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>,
+                                                         <em class="parameter"><code><span class="type">GObject</span> *weak_object</code></em>);</pre>
+<p>
+Start a EnsureSidecar method call.
+</p>
+<p>
+&lt;tp:docstring xmlns="http://www.w3.org/1999/xhtml"&gt;         &lt;p&gt;Request an object with a particular interface providing additional           connection-specific functionality, together with its immutable           properties. These will often be implemented by plug-ins to the           connection managers; for example, support for an XMPP XEP for which           no generic Telepathy interface exists might be implemented by a           Gabble plugin exposing a sidecar with a particular interface.&lt;/p&gt;          &lt;p&gt;This method may be called at any point during the lifetime of a           connection, even before its &lt;tp:type&gt;Connection_Status&lt;/tp:type&gt;           changes to Connected. It MAY take a long time to           return—perhaps it needs to wait for a connection to be established           and for all the services supported by the server to be discovered           before determining whether necessary server-side support is           available—so callers SHOULD override the default method timeout (25           seconds) with a much higher value (perhaps even MAX_INT32, meaning           “no timeout” in recent versions of libdbus).&lt;/p&gt;          &lt;tp:rationale&gt;           &lt;p&gt;There is an implicit assumption that any connection             manager plugin will only want to export one “primary” object per             feature it implements, since there is a one-to-one mapping between             interface and object. This is reasonable since Sidecars are             (intended to be) analogous to extra interfaces on the connection,             providing once-per-connection shared functionality; it also makes             client code straightforward (look up the interface you care about             in a dictionary, build a proxy object from the value). More             “plural” plugins are likely to want to implement new types of             &lt;tp:dbus-ref namespace="org.freedesktop.Telepathy"&gt;Channel&lt;/tp:dbus-ref&gt;             instead.&lt;/p&gt;         &lt;/tp:rationale&gt;
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timeout_ms</code></em> :</span></p></td>
+<td>the timeout in milliseconds, or -1 to use the
+default</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in_Main_Interface</code></em> :</span></p></td>
+<td>Used to pass an 'in' argument: The &amp;quot;primary&amp;quot; interface implemented by an object attached           to a connection. For example, a Gabble plugin implementing           fine-grained control of XEP-0016 privacy lists might expose an object           implementing &lt;tt&gt;com.example.PrivacyLists&lt;/tt&gt;.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>called when the method call succeeds or fails;
+may be <code class="literal">NULL</code> to make a "fire and forget" call with no
+reply tracking</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user-supplied data passed to the callback;
+must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>called with the user_data as argument, after the
+call has succeeded, failed or been cancelled;
+must be <code class="literal">NULL</code> if <em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>If not <code class="literal">NULL</code>, a <span class="type">GObject</span> which will be
+weakly referenced; if it is destroyed, this call
+will automatically be cancelled. Must be <code class="literal">NULL</code> if
+<em class="parameter"><code>callback</code></em> is <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a class="link" href="telepathy-glib-proxy.html#TpProxyPendingCall" title="TpProxyPendingCall"><span class="type">TpProxyPendingCall</span></a> representing the call in
+progress. It is borrowed from the object, and will become
+invalid when the callback is called, the call is
+cancelled or the <a class="link" href="telepathy-glib-proxy.html#TpProxy"><span class="type">TpProxy</span></a> becomes invalid.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tp-cli-connection-interface-sidecars1-callback-for-ensure-sidecar"></a><h3>tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*tp_cli_connection_interface_sidecars1_callback_for_ensure_sidecar)
+                                                        (<em class="parameter"><code><a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a> *proxy</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">gchar</span> *out_Path</code></em>,
+                                                         <em class="parameter"><code><span class="type">GHashTable</span> *out_Properties</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">GError</span> *error</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GObject</span> *weak_object</code></em>);</pre>
+<p>
+Signature of the callback called when a EnsureSidecar method call
+succeeds or fails.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>proxy</code></em> :</span></p></td>
+<td>the proxy on which the call was made</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out_Path</code></em> :</span></p></td>
+<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: The object path of the sidecar, exported by the same bus           name as the Connection to which it is attached.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out_Properties</code></em> :</span></p></td>
+<td>Used to return an 'out' argument if <em class="parameter"><code>error</code></em> is <code class="literal">NULL</code>: Immutable properties of the sidecar.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>
+<code class="literal">NULL</code> on success, or an error on failure</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user-supplied data</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>weak_object</code></em> :</span></p></td>
+<td>user-supplied object</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="telepathy-glib-connection-sidecars.see-also"></a><h2>See Also</h2>
+<a class="link" href="telepathy-glib-connection.html#TpConnection"><span class="type">TpConnection</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.19</div>
+</body>
+</html>

@@ -11,6 +11,7 @@
 
 #include <telepathy-glib/protocol.h>
 #include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/variant-util-internal.h>
 
 #include "tests/lib/echo-cm.h"
 
@@ -46,7 +47,6 @@ setup (Test *test,
   TpBaseConnectionManager *service_cm_as_base;
   gboolean ok;
 
-  g_type_init ();
   tp_debug_set_flags ("all");
 
   test->mainloop = g_main_loop_new (NULL, FALSE);
@@ -388,12 +388,73 @@ check_avatar_requirements (TpAvatarRequirements *req)
 }
 
 static void
-test_protocol_object (Test *test,
-    gconstpointer data G_GNUC_UNUSED)
+check_tp_protocol (TpProtocol *protocol)
 {
   TpAvatarRequirements *req;
   GList *l;
   TpConnectionManagerParam *param;
+
+  g_assert_cmpstr (tp_protocol_get_name (protocol), ==, "example");
+
+  g_assert_cmpstr (tp_protocol_get_cm_name (protocol),
+      ==, "example_echo_2");
+
+  g_assert (tp_proxy_has_interface_by_id (protocol,
+      TP_IFACE_QUARK_PROTOCOL));
+  g_assert (tp_proxy_has_interface_by_id (protocol,
+      TP_IFACE_QUARK_PROTOCOL_INTERFACE_AVATARS));
+
+  g_assert (tp_proxy_is_prepared (protocol,
+        TP_PROTOCOL_FEATURE_PARAMETERS));
+
+  g_assert (tp_protocol_has_param (protocol, "account"));
+  g_assert (!tp_protocol_has_param (protocol, "no-way"));
+
+  g_assert (tp_proxy_is_prepared (protocol, TP_PROTOCOL_FEATURE_CORE));
+
+  g_assert_cmpstr (tp_protocol_get_icon_name (protocol), ==,
+      "im-icq");
+  g_assert_cmpstr (tp_protocol_get_english_name (protocol), ==,
+      "Echo II example");
+  g_assert_cmpstr (tp_protocol_get_vcard_field (protocol), ==,
+      "x-telepathy-example");
+  g_assert (TP_IS_CAPABILITIES (tp_protocol_get_capabilities (
+          protocol)));
+
+  req = tp_protocol_get_avatar_requirements (protocol);
+  check_avatar_requirements (req);
+
+  g_object_get (protocol, "avatar-requirements", &req, NULL);
+  check_avatar_requirements (req);
+
+  l = tp_protocol_dup_params (protocol);
+  g_assert_cmpuint (g_list_length (l), ==, 1);
+  param = l->data;
+  g_assert_cmpstr (param->name, ==, "account");
+  g_list_free_full (l, (GDestroyNotify) tp_connection_manager_param_free);
+
+  g_assert_cmpstr (tp_protocol_get_param (protocol, "account")->name, ==,
+      "account");
+
+  param = tp_protocol_dup_param (protocol, "account");
+  /* it's a copy */
+  g_assert (param != tp_protocol_get_param (protocol, "account"));
+  g_assert_cmpstr (param->name, ==, "account");
+  tp_connection_manager_param_free (param);
+
+  g_assert_cmpstr (tp_protocol_borrow_params (protocol)[0].name, ==,
+      "account");
+  g_assert_cmpstr (tp_protocol_borrow_params (protocol)[1].name, ==,
+      NULL);
+}
+
+static void
+test_protocol_object (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GHashTable *props;
+  TpProtocol *protocol;
+  GVariant *vardict;
 
   g_assert_cmpstr (tp_connection_manager_get_name (test->cm), ==,
       "example_echo_2");
@@ -401,58 +462,39 @@ test_protocol_object (Test *test,
   test->protocol = g_object_ref (
       tp_connection_manager_get_protocol_object (test->cm, "example"));
 
-  g_assert_cmpstr (tp_protocol_get_name (test->protocol), ==, "example");
+  check_tp_protocol (test->protocol);
 
-  g_assert_cmpstr (tp_protocol_get_cm_name (test->protocol),
-      ==, "example_echo_2");
-
-  g_assert (tp_proxy_has_interface_by_id (test->protocol,
-      TP_IFACE_QUARK_PROTOCOL));
-  g_assert (tp_proxy_has_interface_by_id (test->protocol,
-      TP_IFACE_QUARK_PROTOCOL_INTERFACE_AVATARS));
-
-  g_assert (tp_proxy_is_prepared (test->protocol,
-        TP_PROTOCOL_FEATURE_PARAMETERS));
-
-  g_assert (tp_protocol_has_param (test->protocol, "account"));
-  g_assert (!tp_protocol_has_param (test->protocol, "no-way"));
-
-  g_assert (tp_proxy_is_prepared (test->protocol, TP_PROTOCOL_FEATURE_CORE));
-
-  g_assert_cmpstr (tp_protocol_get_icon_name (test->protocol), ==,
-      "im-icq");
-  g_assert_cmpstr (tp_protocol_get_english_name (test->protocol), ==,
-      "Echo II example");
-  g_assert_cmpstr (tp_protocol_get_vcard_field (test->protocol), ==,
-      "x-telepathy-example");
-  g_assert (TP_IS_CAPABILITIES (tp_protocol_get_capabilities (
-          test->protocol)));
-
-  req = tp_protocol_get_avatar_requirements (test->protocol);
-  check_avatar_requirements (req);
-
-  g_object_get (test->protocol, "avatar-requirements", &req, NULL);
-  check_avatar_requirements (req);
-
-  l = tp_protocol_dup_params (test->protocol);
-  g_assert_cmpuint (g_list_length (l), ==, 1);
-  param = l->data;
-  g_assert_cmpstr (param->name, ==, "account");
-  g_list_free_full (l, (GDestroyNotify) tp_connection_manager_param_free);
-
-  g_assert_cmpstr (tp_protocol_get_param (test->protocol, "account")->name, ==,
-      "account");
-
-  param = tp_protocol_dup_param (test->protocol, "account");
-  /* it's a copy */
-  g_assert (param != tp_protocol_get_param (test->protocol, "account"));
-  g_assert_cmpstr (param->name, ==, "account");
-  tp_connection_manager_param_free (param);
-
-  g_assert_cmpstr (tp_protocol_borrow_params (test->protocol)[0].name, ==,
-      "account");
-  g_assert_cmpstr (tp_protocol_borrow_params (test->protocol)[1].name, ==,
+  /* Create a new TpProtocol for the same protocol but by passing it all its
+   * immutable properities */
+  g_object_get (test->protocol,
+      "protocol-properties", &props,
       NULL);
+
+  protocol = tp_protocol_new (test->dbus, "example_echo_2",
+      "example", props, &test->error);
+  g_assert_no_error (test->error);
+  g_assert (TP_IS_PROTOCOL (protocol));
+
+  check_tp_protocol (protocol);
+
+  vardict = tp_protocol_dup_immutable_properties (test->protocol);
+  g_assert (vardict != NULL);
+  g_assert (g_variant_is_of_type (vardict, G_VARIANT_TYPE_VARDICT));
+
+  g_object_unref (protocol);
+
+  /* Same but using tp_protocol_new_vardict */
+  protocol = tp_protocol_new_vardict (test->dbus, "example_echo_2",
+      "example", vardict, &test->error);
+  g_assert_no_error (test->error);
+  g_assert (TP_IS_PROTOCOL (protocol));
+
+  check_tp_protocol (protocol);
+
+  g_object_unref (protocol);
+
+  g_variant_unref (vardict);
+  g_hash_table_unref (props);
 }
 
 static void
@@ -535,6 +577,154 @@ test_protocol_object_from_file (Test *test,
   check_avatar_requirements (req);
 }
 
+static void
+test_normalize (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GAsyncResult *result = NULL;
+  gchar *s;
+
+  tp_tests_proxy_run_until_prepared (test->cm, NULL);
+  test->protocol = g_object_ref (
+      tp_connection_manager_get_protocol_object (test->cm, "example"));
+
+  tp_protocol_normalize_contact_async (test->protocol,
+      "MiXeDcAsE", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_contact_finish (test->protocol, result,
+      &test->error);
+  g_assert_no_error (test->error);
+  g_assert_cmpstr (s, ==, "mixedcase");
+  g_clear_object (&result);
+  g_free (s);
+
+  tp_protocol_normalize_contact_async (test->protocol,
+      "", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_contact_finish (test->protocol, result,
+      &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_INVALID_HANDLE);
+  g_assert_cmpstr (s, ==, NULL);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+
+  tp_protocol_normalize_contact_uri_async (test->protocol,
+      "xmpp:MiXeDcAsE", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_contact_uri_finish (test->protocol, result,
+      &test->error);
+  g_assert_no_error (test->error);
+  g_assert_cmpstr (s, ==, "xmpp:mixedcase");
+  g_clear_object (&result);
+  g_free (s);
+
+  tp_protocol_normalize_contact_uri_async (test->protocol,
+      "xmpp:", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_contact_uri_finish (test->protocol, result,
+      &test->error);
+  g_assert_cmpstr (s, ==, NULL);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+
+  tp_protocol_normalize_contact_uri_async (test->protocol,
+      "http://example.com", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_contact_uri_finish (test->protocol, result,
+      &test->error);
+  g_assert_cmpstr (s, ==, NULL);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+
+  tp_protocol_normalize_vcard_address_async (test->protocol,
+      "x-jabber", "MiXeDcAsE", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_vcard_address_finish (test->protocol, result,
+      &test->error);
+  g_assert_no_error (test->error);
+  g_assert_cmpstr (s, ==, "mixedcase");
+  g_clear_object (&result);
+  g_free (s);
+
+  tp_protocol_normalize_vcard_address_async (test->protocol,
+      "x-jabber", "", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_vcard_address_finish (test->protocol, result,
+      &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT);
+  g_assert_cmpstr (s, ==, NULL);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+
+  tp_protocol_normalize_vcard_address_async (test->protocol,
+      "x-skype", "", NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_normalize_vcard_address_finish (test->protocol, result,
+      &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_NOT_IMPLEMENTED);
+  g_assert_cmpstr (s, ==, NULL);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+}
+
+static void
+test_id (Test *test,
+    gconstpointer data G_GNUC_UNUSED)
+{
+  GAsyncResult *result = NULL;
+  gchar *s;
+
+  tp_tests_proxy_run_until_prepared (test->cm, NULL);
+  test->protocol = g_object_ref (
+      tp_connection_manager_get_protocol_object (test->cm, "example"));
+
+  tp_protocol_identify_account_async (test->protocol,
+      g_variant_new_parsed ("{ 'account': <'Hello'> }"),
+      NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_identify_account_finish (test->protocol, result,
+      &test->error);
+  g_assert_no_error (test->error);
+  g_assert_cmpstr (s, ==, "hello");
+  g_clear_object (&result);
+  g_free (s);
+
+  tp_protocol_identify_account_async (test->protocol,
+      g_variant_new_parsed ("{ 'account': <'Hello'>, 'unknown-param': <42> }"),
+      NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_identify_account_finish (test->protocol, result,
+      &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT);
+  g_assert_cmpstr (s, ==, NULL);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+
+  tp_protocol_identify_account_async (test->protocol,
+      g_variant_new_parsed ("@a{sv} {}"),
+      NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_identify_account_finish (test->protocol, result,
+      &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT);
+  g_assert_cmpstr (s, ==, NULL);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+
+  tp_protocol_identify_account_async (test->protocol,
+      g_variant_new_parsed ("@a{sv} { 'account': <''> }"),
+      NULL, tp_tests_result_ready_cb, &result);
+  tp_tests_run_until_result (&result);
+  s = tp_protocol_identify_account_finish (test->protocol, result,
+      &test->error);
+  g_assert_error (test->error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT);
+  g_assert_cmpstr (s, ==, NULL);
+  g_clear_object (&result);
+  g_clear_error (&test->error);
+}
+
 int
 main (int argc,
       char **argv)
@@ -558,6 +748,10 @@ main (int argc,
       test_protocol_object_old, teardown);
   g_test_add ("/protocol-objects/object-from-file", Test, NULL, setup,
       test_protocol_object_from_file, teardown);
+  g_test_add ("/protocol-objects/normalize", Test, NULL, setup,
+      test_normalize, teardown);
+  g_test_add ("/protocol-objects/id", Test, NULL, setup,
+      test_id, teardown);
 
-  return g_test_run ();
+  return tp_tests_run_with_bus ();
 }
