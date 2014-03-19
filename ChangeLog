@@ -1,3 +1,222 @@
+commit 3f02fdc0fd182e5f058507f966658ac89c1cdd85
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-18 11:01:57 +0100
+
+    0.23.3
+
+commit bee5b30275907199e284625311bcd4fa6fc3097f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-17 16:45:07 +0100
+
+    tp_list_connection_managers_async: terminate properly if there is no CM
+    
+    Fix fdo#68892.
+
+commit e8b9fc31f0f4fee539dd6248bde70c2c505a6df4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-17 16:46:44 +0100
+
+    connection-manager: factor out all_cms_prepared()
+
+commit 9415b529a87ed63faa770799655c9506c86ea6b4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-14 12:56:45 +0100
+
+    call-channel: pass our factory to TpCallStream objects
+    
+    Partially fix fdo#76168.
+
+commit db4715246a5ccb28dd427f467cfdd4a34b4e65ff
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-14 12:56:45 +0100
+
+    call-channel: pass our factory to TpCallContent objects
+    
+    Partially fix fdo#76168.
+
+commit 10259fa5d3b5dddc3b2202a36e4b6b621890fab1
+Merge: 087e104 86db955
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-13 15:41:20 +0100
+
+    Merge branch 'telepathy-glib-0.22'
+    
+    Conflicts:
+    	telepathy-glib/contact.c
+
+commit 86db955eede16bf794c3ba7b3355183ca11a5a17
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-03-13 15:27:00 +0100
+
+    fix file path leaks
+    
+    g_file_get_path() returns (transfer full).
+    
+    Fix fdo#76119
+
+commit 087e1043269d361b1f349b1cf123ac10506e4bbc
+Merge: e8c6823 3d96ce6
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2014-03-13 13:54:16 +0000
+
+    Merge branch 'telepathy-glib-0.22'
+    
+    Conflicts:
+    	NEWS
+
+commit 3d96ce6954390613bf19bf8e5cf28ab1957717f2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2014-03-13 13:49:01 +0000
+
+    0.22 NEWS
+
+commit b80309ee68dc9003d6384d6932d89c1443cdc8a1
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2013-12-04 14:09:18 -0500
+
+    TpFileTransferChannel: Fix possible crashes, particularly with GLib 2.39
+    
+    tp_file_transfer_channel_accept_file_async() and
+    tp_file_transfer_channel_provide_file_async() operations are supposed
+    to complete as soon as the CM returns from AcceptFile or ProvideFile.
+    That means that we cannot call operation_failed() for streaming errors.
+    
+    We also have to keep a ref on self while streaming the file to
+    avoid a crash in the callback when we dereference self.
+    
+    This means that the client app cannot cancel the ongoing streaming
+    by unreffing the channel, replying on dispose calling g_cancellable_cancel().
+    It can still be doing using g_object_run_dispose() though. To make it cleaner
+    we should probably add tp_file_transfer_channel_cancel().
+    
+    The spec does not provide any way for the streaming client to inform
+    the CM and other clients about the error occured while streaming.
+    TpFileTransferChannel API does not even have a way to propagate that
+    error to the user.
+    
+    [slightly more informative commit message for the 0.22 cherry-pick -smcv]
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=72319
+
+commit d1b1f0bf72a2820ae5a51b25c7817c3005b687ab
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2014-03-10 17:30:44 +0000
+
+    TpProxy: finish_all_requests: don't leak copied GQueue
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=76000
+    Reviewed-by: Guillaume Desmottes
+
+commit 362dc49e04dfef23a2aaf4c2db04252a859dadde
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2014-03-10 16:57:50 +0000
+
+    TpContact: mime_file_written: don't leak the file's path
+    
+    Bug: https://bugs.freedesktop.org/show_bug.cgi?id=76000
+    Reviewed-by: Guillaume Desmottes
+
+commit e8c68230750766d6dc1d5594cc898f2d914c91fb
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-28 17:01:02 +0100
+
+    add tp_protocol_new_vardict()
+
+commit de7f581297e8cc50d5fe9694bbccfb7e131ee009
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-28 16:57:35 +0100
+
+    protocol: add TpProtocol:protocol-properties-vardict
+
+commit 2d8217676a5765fa580d48f37310ecc0b2c8a5f1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-28 16:26:12 +0100
+
+    test creating a TpProtocol by passing its immutable props
+
+commit a4d1165fcd95eaadbc662c89497386545c90ca56
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-28 16:24:39 +0100
+
+    test-protocol-objects: factor out check_tp_protocol()
+
+commit 7f475bb73bb54fb635092b92343556bc4d37ed44
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-26 13:22:30 +0100
+
+    set nano version
+
+commit 0b1a67b0ce875f5a59a5f59ae8d483cfad91f9ef
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-26 11:07:15 +0100
+
+    0.23.2
+
+commit 747174e71576e91f756a3dc56dd5a4f5d59042c1
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 16:10:28 +0100
+
+    add tp_account_channel_request_set_initial_invitees
+
+commit bf0b1ee111621247fdd83025d02cf42ab67aba5e
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 15:57:33 +0100
+
+    add tp_account_channel_request_set_initial_invitee_ids()
+
+commit aa643f1836a732d0b849d465b7777ac3265ef9a4
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 15:45:33 +0100
+
+    add tp_account_channel_request_set_conference_initial_channels()
+
+commit 5ecb253be2a30f7bbde601aeed65f75acb7476ae
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 15:20:13 +0100
+
+    account-channel-request: set TargetHandleType: TP_HANDLE_TYPE_NONE if needed
+
+commit c3beedcc25d4db5eb8d70581ddf6a06eb05bb951
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 14:56:57 +0100
+
+    account-channel-request: factor out going_to_request()
+
+commit bc7cdedbf761fc78ab176f77c8e31376527cc9fe
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 14:35:42 +0100
+
+    add tp_account_channel_request_set_sms_channel()
+
+commit 6d1aed685b8860d2e0cc4d12b251d19616617819
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 14:20:50 +0100
+
+    add tp_account_channel_request_new_dbus_tube()
+
+commit b99443c02d20923988dc97318e6cf572e9b5e66f
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 12:47:18 +0100
+
+    add tp_account_channel_request_new_stream_tube()
+
+commit 410e44a648eb3bd2eb5db31a39326b01ac953eac
+Author: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Date:   2014-02-25 12:39:59 +0100
+
+    add tp_account_channel_request_set_file_transfer_hash()
+
+commit 8cc41d121d1579893c2c7f7cc7bc90670170380f
+Author: Xavier Claessens <xavier.claessens@collabora.co.uk>
+Date:   2014-01-24 16:31:53 -0500
+
+    TpBaseConnection: add "account-path-suffix" property
+
+commit 5bb624f0cc23d24d13ac9dd4ff0ef9ece0abe9c2
+Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date:   2014-02-04 14:12:32 +0000
+
+    nano version
+
 commit c7673566b0a789d5717ada3b282658fc57bcbff6
 Author: Simon McVittie <simon.mcvittie@collabora.co.uk>
 Date:   2014-02-04 13:43:33 +0000
