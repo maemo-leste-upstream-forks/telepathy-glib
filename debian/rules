@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with autoreconf,gir --parallel
+	dh $@ --with gir
 
 override_dh_strip:
 	dh_strip --dbgsym-migration='libtelepathy-glib0-dbg (<< 0.24.1-2~)'
@@ -39,10 +39,16 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 # so the individual tests don't need to worry about it.
 export TP_TESTS_NO_TIMEOUT = 1
 
-override_dh_install:
-	dh_install --list-missing
+override_dh_missing:
+	dh_missing --list-missing
 
 # the doc package doesn't depend on the shared library, so can't symlink
+# Also, force the "doc-main-package" option to the -doc package so the
+# documentation files stay at the same location as before otherwise that
+# doesn't play well with the "--link-doc" option after debhelper compat update
 override_dh_installdocs:
 	dh_installdocs -a --link-doc=libtelepathy-glib0
-	dh_installdocs -i
+	dh_installdocs -p libtelepathy-glib-doc --doc-main-package=libtelepathy-glib-doc
+
+override_dh_installexamples:
+	dh_installexamples -p libtelepathy-glib-doc --doc-main-package=libtelepathy-glib-doc
