@@ -1,0 +1,32 @@
+From 9c6c6fb5203d8cb73064a02cc6b147aa91908952 Mon Sep 17 00:00:00 2001
+From: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+Date: Thu, 27 Aug 2020 13:31:03 +0300
+Subject: [PATCH] protocol: fix a memory leak
+
+Signed-off-by: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+---
+ telepathy-glib/protocol.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/telepathy-glib/protocol.c b/telepathy-glib/protocol.c
+index b63730cd1..88fdff382 100644
+--- a/telepathy-glib/protocol.c
++++ b/telepathy-glib/protocol.c
+@@ -1791,7 +1791,7 @@ _tp_protocol_parse_manager_file (GKeyFile *file,
+         i++;
+     }
+ 
+-  param_specs = g_ptr_array_sized_new (i);
++  param_specs = g_ptr_array_new_full (i, tp_value_array_free);
+ 
+   for (key = keys; key != NULL && *key != NULL; key++)
+     {
+@@ -1886,6 +1886,8 @@ _tp_protocol_parse_manager_file (GKeyFile *file,
+       TP_PROP_PROTOCOL_PARAMETERS, TP_ARRAY_TYPE_PARAM_SPEC_LIST, param_specs,
+       NULL);
+ 
++  g_ptr_array_unref(param_specs);
++
+   tp_asv_take_boxed (immutables, TP_PROP_PROTOCOL_INTERFACES, G_TYPE_STRV,
+       g_key_file_get_string_list (file, group, "Interfaces", NULL, NULL));
+   tp_asv_take_boxed (immutables, TP_PROP_PROTOCOL_CONNECTION_INTERFACES,
